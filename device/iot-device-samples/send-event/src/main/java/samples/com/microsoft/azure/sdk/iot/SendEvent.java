@@ -8,31 +8,13 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 
 /** Sends a number of event messages to an IoT Hub. */
 public class SendEvent
 {
-    private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private  static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
-
-    protected static class EventCallback implements IotHubEventCallback
-    {
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            Message msg = (Message) context;
-
-            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
-
-            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-            {
-                failedMessageListOnClose.add(msg.getMessageId());
-            }
-        }
-    }
-
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
@@ -67,176 +49,143 @@ public class SendEvent
         }
     }
 
-    /**
-     * Sends a number of messages to an IoT or Edge Hub. Default protocol is to
-     * use MQTT transport.
-     *
-     * @param args
-     * args[0] = IoT Hub or Edge Hub connection string
-     * args[1] = number of messages to send
-     * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
-     * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
-     */
-    public static void main(String[] args)
-            throws IOException, URISyntaxException
+    final static int numberOfMessagesToSend = 1000000;
+
+    //static int messageSizeInBytes = 1; // 1 byte
+    static int messageSizeInBytes = 1024; //1 kilobyte
+    //static int messageSizeInBytes = 1024 * 32; //32 kilobytes
+    //static int messageSizeInBytes = 1024 * 64; //64 kilobytes
+    //static int messageSizeInBytes = 1024 * 128; //128 kilobytes
+    //static int messageSizeInBytes = 1024 * 255; //255 kilobytes (Max message size allowed for d2c telemetry)
+
+    static long clientSendInterval = 10; //Lower number here spawns send threads more frequently, can send more quickly. By default, value is 10
+
+    static CountDownLatch ackedMessagesCountDownLatch;
+    static CountDownLatch sentButNotAckedMessagesCountDownLatch;
+    static int sentMessageCount = 0;
+    static int ackedMessageCount = 0;
+
+    static DeviceClient client;
+
+    static double[] startTimes = new double[numberOfMessagesToSend];
+    static double[] stopTimes = new double[numberOfMessagesToSend];
+
+    private static class SendEventRunnable implements java.lang.Runnable
     {
-        System.out.println("Starting...");
-        System.out.println("Beginning setup.");
+        private Message messageToSend;
+        private EventCallback eventCallback;
+        private int messageIndex;
 
-        if (args.length <= 1 || args.length >= 5)
+        public SendEventRunnable(Message messageToSend, EventCallback eventCallback, int messageIndex)
         {
-            System.out.format(
-                    "Expected 2 or 3 arguments but received: %d.\n"
-                            + "The program should be called with the following args: \n"
-                            + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
-                            + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl \n",
-                    args.length);
-            return;
+            this.messageToSend = messageToSend;
+            this.eventCallback = eventCallback;
+            this.messageIndex = messageIndex;
         }
 
-        String connString = args[0];
-        int numRequests;
-        String pathToCertificate = null;
-        try
+        @Override
+        public void run()
         {
-            numRequests = Integer.parseInt(args[1]);
+            startTimes[messageIndex] = System.currentTimeMillis();
+            client.sendEventAsync(this.messageToSend, this.eventCallback, this.messageIndex);
+            sentButNotAckedMessagesCountDownLatch.countDown();
         }
-        catch (NumberFormatException e)
+    }
+
+    protected static class EventCallback implements IotHubEventCallback
+    {
+        public void execute(IotHubStatusCode status, Object context)
         {
-            System.out.format(
-                    "Could not parse the number of requests to send. "
-                            + "Expected an int but received:\n%s.\n", args[1]);
-            return;
+            //stop time
+            long currentTime = System.currentTimeMillis();
+            int messageIndex = (int) context;
+            stopTimes[messageIndex] = currentTime;
+
+            ackedMessageCount++;
+            ackedMessagesCountDownLatch.countDown();
         }
-        IotHubClientProtocol protocol;
-        if (args.length == 2)
-        {
-            protocol = IotHubClientProtocol.MQTT;
-        }
-        else
-        {
-            String protocolStr = args[2];
-            if (protocolStr.equals("https"))
-            {
-                protocol = IotHubClientProtocol.HTTPS;
-            }
-            else if (protocolStr.equals("amqps"))
-            {
-                protocol = IotHubClientProtocol.AMQPS;
-            }
-            else if (protocolStr.equals("mqtt"))
-            {
-                protocol = IotHubClientProtocol.MQTT;
-            }
-            else if (protocolStr.equals("amqps_ws"))
-            {
-                protocol = IotHubClientProtocol.AMQPS_WS;
-            }
-            else if (protocolStr.equals("mqtt_ws"))
-            {
-                protocol = IotHubClientProtocol.MQTT_WS;
-            }
-            else
-            {
-                System.out.format(
-                        "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
-                                + "The program should be called with the following args: \n"
-                                + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                                + "2. [number of requests to send]\n"
-                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                                + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
-                        protocolStr);
-                return;
-            }
+    }
 
-            if (args.length == 3)
-            {
-                pathToCertificate = null;
-            }
-            else
-            {
-                pathToCertificate = args[3];
-            }
-        }
-
-
-        System.out.println("Successfully read input parameters.");
-        System.out.format("Using communication protocol %s.\n", protocol.name());
-
-        DeviceClient client = new DeviceClient(connString, protocol);
-        if (pathToCertificate != null )
-        {
-            client.setOption("SetCertificatePath", pathToCertificate );
-        }
-
-        System.out.println("Successfully created an IoT Hub client.");
-
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-        System.out.println("Updated token expiry time to " + time);
+    public static void main(String[] args) throws Exception
+    {
+        String connString = "";
+        client = new DeviceClient(connString, IotHubClientProtocol.AMQPS);
 
         client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
+        client.setOption("SetSendInterval", clientSendInterval);
+        ackedMessagesCountDownLatch = new CountDownLatch(numberOfMessagesToSend);
+        sentButNotAckedMessagesCountDownLatch = new CountDownLatch(numberOfMessagesToSend);
+
+        System.out.println("Message size in bytes per send: " + messageSizeInBytes);
+
+        System.out.println("Sending " + numberOfMessagesToSend + " messages");
+
+        byte[] body = new byte[messageSizeInBytes];
+        for (int i = 0; i < messageSizeInBytes; i++)
+        {
+            body[i] = 1;
+        }
+
+        final SendEventRunnable[] sendEventRunnables = new SendEventRunnable[numberOfMessagesToSend];
+        for (int messageIndex = 0; messageIndex < numberOfMessagesToSend; messageIndex++)
+        {
+            Message msg = new Message(new String(body.clone()));
+            sendEventRunnables[messageIndex] = new SendEventRunnable(msg, new EventCallback(), messageIndex);
+        }
+
         client.open();
 
-        System.out.println("Opened connection to IoT Hub.");
-        System.out.println("Sending the following event messages:");
-
-        String deviceId = "MyJavaDevice";
-        double temperature = 0.0;
-        double humidity = 0.0;
-
-        for (int i = 0; i < numRequests; ++i)
+        //start up all sender threads
+        final long overallStartTime = System.currentTimeMillis();
+        for (int sentMessageCount = 0; sentMessageCount < numberOfMessagesToSend; sentMessageCount++)
         {
-            temperature = 20 + Math.random() * 10;
-            humidity = 30 + Math.random() * 20;
-
-            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
-
-            try
-            {
-                Message msg = new Message(msgStr);
-                msg.setContentType("application/json");
-                msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
-                msg.setMessageId(java.util.UUID.randomUUID().toString());
-                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
-                System.out.println(msgStr);
-
-                EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
-            }
-
-            catch (Exception e)
-            {
-                e.printStackTrace(); // Trace the exception
-            }
+            new Thread(sendEventRunnables[sentMessageCount]).start();
         }
 
-        System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
-
-        // Wait for IoT Hub to respond.
-        try
+        if (!sentButNotAckedMessagesCountDownLatch.await(10, TimeUnit.MINUTES))
         {
-            Thread.sleep(D2C_MESSAGE_TIMEOUT);
+            throw new Exception("Timed out waiting for all messages to be queued");
         }
 
-        catch (InterruptedException e)
+        long timestampWhenAllMessagesQueuedButNotNecessarilyAcked = System.currentTimeMillis();
+
+        //wait until all sent messages have been acknowledged by the iot hub, or until 90 minutes have passed
+        if (!ackedMessagesCountDownLatch.await(50, TimeUnit.MINUTES))
         {
-            e.printStackTrace();
+            throw new Exception("Timed out waiting for all messages to be acknowledged");
         }
 
-        // close the connection
-        System.out.println("Closing");
+
+        System.out.println();
+        System.out.println();
+        System.out.println();
+
+        final long overallStopTime = System.currentTimeMillis();
+
         client.closeNow();
 
-        if (!failedMessageListOnClose.isEmpty())
+        System.out.println("Seconds taken to queue all messages (disregarding acks): " + ((timestampWhenAllMessagesQueuedButNotNecessarilyAcked - overallStartTime)/1000.0));
+
+        double secondsTaken = ((overallStopTime - overallStartTime) / 1000.0);
+        System.out.println("Overall seconds taken: " + secondsTaken + " seconds");
+
+        System.out.println("Average seconds between send and ack per message: " + calculateAverageSecondsBetweenSendAndAck());
+
+        double messagesPerSecond = ackedMessageCount / secondsTaken;
+        System.out.println("Messages per second: " + messagesPerSecond);
+        System.out.println("Sent messages: " + numberOfMessagesToSend);
+    }
+
+    private static double calculateAverageSecondsBetweenSendAndAck()
+    {
+        double averageTimeTakenPerMessage = 0;
+        for (int messageIndex = 0; messageIndex < numberOfMessagesToSend; messageIndex++)
         {
-            System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString());
+            double secondsTakenOnMessage = (stopTimes[messageIndex] - startTimes[messageIndex]) / 1000;
+            averageTimeTakenPerMessage += secondsTakenOnMessage;
         }
 
-        System.out.println("Shutting down...");
+        return averageTimeTakenPerMessage / numberOfMessagesToSend;
     }
 }
