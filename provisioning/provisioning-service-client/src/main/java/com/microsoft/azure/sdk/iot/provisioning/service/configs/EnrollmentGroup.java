@@ -11,6 +11,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
@@ -165,6 +166,11 @@ public class EnrollmentGroup extends Serializable
     @Expose(serialize = true, deserialize = true)
     @SerializedName(IOT_HUBS_TAG)
     private Collection<String> iotHubs;
+
+    private static final String DEVICE_CAPABILITIES_TAG = "capabilities";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(DEVICE_CAPABILITIES_TAG)
+    private DeviceCapabilities capabilities;
 
     /**
      * CONSTRUCTOR
@@ -732,6 +738,22 @@ public class EnrollmentGroup extends Serializable
         /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
+
+    public DeviceCapabilities getCapabilities()
+    {
+        /* SRS_ENROLLMENT_GROUP_34_074: [This function shall return the saved capabilities.] */
+        return this.capabilities;
+    }
+
+    /**
+     * @param capabilities the device capabilities to set
+     */
+    public final void setCapabilities(DeviceCapabilities capabilities)
+    {
+        /* SRS_ENROLLMENT_GROUP_34_073: [This function shall save the provided capabilities.] */
+        this.capabilities = capabilities;
+    }
+
 
     /**
      * Getter for the reprovision policy.

@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAsser
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.X509CertificateGenerator;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
@@ -23,6 +24,10 @@ import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClien
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.AssertionFailedError;
 import org.junit.After;
 import org.junit.Before;
@@ -353,6 +358,22 @@ public class ProvisioningCommon extends IntegrationTest
         }
     }
 
+    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities) throws IOException, IotHubException
+    {
+        DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        Query query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
+        assertTrue(deviceTwin.hasNextDeviceTwin(query));
+        DeviceTwinDevice provisionedDevice = deviceTwin.getNextDeviceTwin(query);
+        if (expectedDeviceCapabilities.isIotEdge())
+        {
+            assertTrue(provisionedDevice.getCapabilities().isIotEdge());
+        }
+        else
+        {
+            assertTrue(provisionedDevice.getCapabilities() == null || !provisionedDevice.getCapabilities().isIotEdge());
+        }
+    }
+
     //Parses connection String to retrieve iothub hostname
     public String getHostName(String connectionString)
     {
@@ -375,6 +396,11 @@ public class ProvisioningCommon extends IntegrationTest
     }
 
     public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
+    {
+        return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, null);
+    }
+
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
     {
         SecurityProvider securityProvider = null;
         TwinCollection tags = new TwinCollection();
@@ -409,6 +435,7 @@ public class ProvisioningCommon extends IntegrationTest
                 testInstance.enrollmentGroup.setReprovisionPolicy(reprovisionPolicy);
                 testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
                 testInstance.enrollmentGroup.setIotHubs(iothubs);
+                testInstance.enrollmentGroup.setCapabilities(deviceCapabilities);
                 testInstance.enrollmentGroup = provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
                 Attestation attestation = testInstance.enrollmentGroup.getAttestation();
                 assertTrue(attestation instanceof SymmetricKeyAttestation);
@@ -429,7 +456,7 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId);
                 Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
             }
             else if (testInstance.attestationType == AttestationType.X509)
             {
@@ -439,13 +466,13 @@ public class ProvisioningCommon extends IntegrationTest
 
                 Collection<String> signerCertificates = new LinkedList<>();
                 Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
                 securityProvider = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
             }
             else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
             {
                 Attestation attestation = new SymmetricKeyAttestation(null, null);
-                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState);
+                createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
                 assertTrue(testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
                 securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(), testInstance.registrationId);
@@ -460,10 +487,11 @@ public class ProvisioningCommon extends IntegrationTest
         return securityProvider;
     }
 
-    private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, TwinState twinState) throws ProvisioningServiceClientException
+    private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, TwinState twinState, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
     {
         testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
         testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
+        testInstance.individualEnrollment.setCapabilitiesFinal(deviceCapabilities);
         testInstance.individualEnrollment.setAllocationPolicy(allocationPolicy);
         testInstance.individualEnrollment.setReprovisionPolicy(reprovisionPolicy);
         testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);
