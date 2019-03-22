@@ -230,6 +230,7 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveMessagesOverAmqpsIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -258,6 +259,7 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveMessagesOverAmqpWSIncludingProperties() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -498,6 +500,7 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodAMQPSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -529,6 +532,7 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodAMQPSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS);
@@ -570,6 +574,7 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodAMQPSWSSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -601,6 +606,7 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodAMQPSWSInvokeParallelSucceed() throws Exception
     {
         TransportClient transportClient = new TransportClient(AMQPS_WS);
@@ -643,6 +649,7 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         TransportClient transportClient = null;

@@ -252,7 +252,7 @@ public class DeviceMethodCommon extends IntegrationTest
 
         try
         {
-            this.testInstance.deviceTestManager.start();
+            this.testInstance.deviceTestManager.start(true, false);
             IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000, this.testInstance.deviceTestManager.client);
         }
         catch (IOException | InterruptedException e)
@@ -347,11 +347,14 @@ public class DeviceMethodCommon extends IntegrationTest
     {
         try
         {
-            for (DeviceTestManager deviceTestManager : deviceTestManagers)
+            if (identitiesToDispose != null && !identitiesToDispose.isEmpty())
             {
-                if (deviceTestManager != null)
+                for (DeviceTestManager deviceTestManager : deviceTestManagers)
                 {
-                    deviceTestManager.stop();
+                    if (deviceTestManager != null)
+                    {
+                        deviceTestManager.stop();
+                    }
                 }
             }
         }
@@ -361,9 +364,12 @@ public class DeviceMethodCommon extends IntegrationTest
             fail("Failed to stop device test managers");
         }
 
-        Tools.removeDevicesAndModules(registryManager, identitiesToDispose);
-
-        registryManager.close();
+        if (registryManager != null)
+        {
+            Tools.removeDevicesAndModules(registryManager, identitiesToDispose);
+            registryManager.close();
+            registryManager = null;
+        }
     }
 
     protected void setConnectionStatusCallBack(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)

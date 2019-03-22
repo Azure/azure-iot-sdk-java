@@ -6,6 +6,8 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
+import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
+import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -39,12 +41,14 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException
     {
         subscribeToDesiredPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -79,6 +83,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -143,6 +148,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -176,6 +182,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void setDesiredPropertiesAtMaxDepthAllowed() throws IOException, IotHubException
     {
         deviceUnderTest.sCDeviceForTwin.clearTwin();
@@ -205,6 +212,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateDesiredProperties() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @RunWith(Parameterized.class)
 public class DesiredPropertiesModuleJVMRunner extends DesiredPropertiesTests
@@ -34,9 +35,17 @@ public class DesiredPropertiesModuleJVMRunner extends DesiredPropertiesTests
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        Collection inputs = DeviceTwinCommon.inputsCommon(ClientType.MODULE_CLIENT);
-        identities = getIdentities(inputs);
-        return inputs;
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        if (!isBasicTierHub)
+        {
+            Collection inputs = DeviceTwinCommon.inputsCommon(ClientType.MODULE_CLIENT);
+            identities = getIdentities(inputs);
+            return inputs;
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     @AfterClass

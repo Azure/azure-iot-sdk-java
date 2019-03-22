@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.telemetry;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.Success;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.ReceiveMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
@@ -41,6 +39,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveMessagesOverIncludingProperties() throws Exception
     {
         if (testInstance.protocol == HTTPS)
@@ -84,9 +83,9 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveBackToBackUniqueC2DCommandsOverAmqpsUsingSendAsync() throws Exception
     {
-
         if (this.testInstance.protocol != AMQPS)
         {
             //only want to test for AMQPS

@@ -41,6 +41,7 @@ public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         provisioningServiceConnectionString = BuildConfig.DeviceProvisioningServiceConnectionString;
         provisioningServiceGlobalEndpoint = BuildConfig.DeviceProvisioningServiceGlobalEndpoint;
         provisioningServiceIdScope = BuildConfig.DeviceProvisioningServiceIdScope;

@@ -41,6 +41,7 @@ public class ExportImportTests
     private static final long EXPORT_JOB_TIMEOUT = 6 * 60 * 1000;
 
     protected static String iotHubConnectionString = "";
+    public static boolean isBasicTierHub;
     protected static String storageAccountConnectionString = "";
     private static String deviceId = "java-crud-e2e-test";
 

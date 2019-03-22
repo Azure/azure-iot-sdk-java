@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.provisioning;
 
-import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -81,6 +79,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void individualEnrollmentProvisioningFlowWithEdgeDevice() throws Exception
     {
         DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
@@ -96,6 +95,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void enrollmentGroupProvisioningFlowWithEdgeDevice() throws Exception
     {
         if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
@@ -169,6 +169,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void groupEnrollmentProvisioningReprovisioningKeepTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -179,6 +180,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void groupEnrollmentProvisioningReprovisioningResetTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -204,6 +206,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void individualEnrollmentProvisioningReprovisioningKeepTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -214,6 +217,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void individualEnrollmentProvisioningReprovisioningResetTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();

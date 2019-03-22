@@ -19,6 +19,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 @RunWith(Parameterized.class)
 public class DeviceMethodErrInjModuleJVMRunner extends DeviceMethodErrInjTests
@@ -35,20 +36,28 @@ public class DeviceMethodErrInjModuleJVMRunner extends DeviceMethodErrInjTests
     @Parameterized.Parameters(name = "{1} with {2} auth using {3}")
     public static Collection inputs() throws Exception
     {
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        Collection inputs = inputsCommon(ClientType.MODULE_CLIENT);
-        Object[] inputsArray = inputs.toArray();
-
-        testManagers = new ArrayList<>();
-        for (int i = 0; i < inputsArray.length; i++)
+        if (!isBasicTierHub)
         {
-            Object[] inputCollection = (Object[])inputsArray[i];
-            testManagers.add((DeviceTestManager) inputCollection[0]);
+            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT);
+            Object[] inputsArray = inputs.toArray();
+
+            testManagers = new ArrayList<>();
+            for (int i = 0; i < inputsArray.length; i++)
+            {
+                Object[] inputCollection = (Object[]) inputsArray[i];
+                testManagers.add((DeviceTestManager) inputCollection[0]);
+            }
+
+            identities = getIdentities(inputs);
+
+            return inputs;
         }
-
-        identities = getIdentities(inputs);
-
-        return inputs;
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     @AfterClass

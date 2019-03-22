@@ -55,6 +55,7 @@ public class ReceiveMessagesDeviceAndroidRunner extends ReceiveMessagesTests
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
         String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         String x509Thumbprint = BuildConfig.IotHubThumbprint;
         String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));

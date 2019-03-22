@@ -11,14 +11,12 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -45,6 +43,7 @@ public class FileUploadTests extends IntegrationTest
 {
     // Max time to wait to see it on Hub
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 20000; // 20 sec
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK = 5000; // 20 sec
 
     //Max time to wait before timing out test
     private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
@@ -274,11 +273,13 @@ public class FileUploadTests extends IntegrationTest
         // act
         deviceClient.uploadToBlobAsync(fileUploadState[0].blobName, fileUploadState[0].fileInputStream, fileUploadState[0].fileLength, new FileUploadCallback(), fileUploadState[0]);
 
-        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
         // assert
-        verifyNotification(fileUploadNotification, fileUploadState[0]);
-        assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[0].isCallBackTriggered);
+        if (!isBasicTierHub)
+        {
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+            verifyNotification(fileUploadNotification, fileUploadState[0]);
+        }
+        waitForFileUploadStatusCallbackTriggered(0);
         assertEquals(buildExceptionMessage("File upload status expected SUCCESS but was " + fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[0].fileUploadStatus);
         tearDownDeviceClient();
     }
@@ -291,12 +292,15 @@ public class FileUploadTests extends IntegrationTest
 
         // act
         deviceClient.uploadToBlobAsync(fileUploadState[MAX_FILES_TO_UPLOAD - 1].blobName, fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileInputStream, fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileLength, new FileUploadCallback(), fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
-        FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
 
         // assert
-        assertNotNull(buildExceptionMessage("file upload notification was null", deviceClient), fileUploadNotification);
-        verifyNotification(fileUploadNotification, fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
-        assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[MAX_FILES_TO_UPLOAD - 1].isCallBackTriggered);
+        if (!isBasicTierHub)
+        {
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+            assertNotNull(buildExceptionMessage("file upload notification was null", deviceClient), fileUploadNotification);
+            verifyNotification(fileUploadNotification, fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
+        }
+        waitForFileUploadStatusCallbackTriggered(MAX_FILES_TO_UPLOAD - 1);
         assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileUploadStatus);
 
         tearDownDeviceClient();
@@ -312,18 +316,23 @@ public class FileUploadTests extends IntegrationTest
         for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
             deviceClient.uploadToBlobAsync(fileUploadState[i].blobName, fileUploadState[i].fileInputStream, fileUploadState[i].fileLength, new FileUploadCallback(), fileUploadState[i]);
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
+            waitForFileUploadStatusCallbackTriggered(i);
             assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -356,12 +365,15 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
         executor.shutdown();
@@ -370,9 +382,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -414,13 +429,15 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
 
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
@@ -430,11 +447,13 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
-
         tearDownDeviceClient();
     }
 
@@ -474,15 +493,16 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
 
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
         executor.shutdown();
@@ -491,9 +511,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -535,13 +558,16 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
+            Thread.sleep(3000);
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
+
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
@@ -551,9 +577,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -595,12 +624,14 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
@@ -610,9 +641,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -654,12 +688,14 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevice);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
@@ -669,9 +705,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -713,12 +752,14 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
@@ -728,9 +769,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -772,13 +816,15 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
 
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
@@ -788,9 +834,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -832,12 +881,14 @@ public class FileUploadTests extends IntegrationTest
                 }
             });
 
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
-
             // assert
-            verifyNotification(fileUploadNotification, fileUploadState[i]);
-            assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[i].isCallBackTriggered);
-            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);            assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
+            if (!isBasicTierHub)
+            {
+                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(scDevicex509);
+                verifyNotification(fileUploadNotification, fileUploadState[i]);
+            }
+            waitForFileUploadStatusCallbackTriggered(i);
+            assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + messageStates[i].messageStatus, deviceClient), SUCCESS, messageStates[i].messageStatus);
         }
 
@@ -847,9 +898,12 @@ public class FileUploadTests extends IntegrationTest
             executor.shutdownNow();
         }
 
-        for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+        if (!isBasicTierHub)
         {
-            assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
+            {
+                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
+            }
         }
 
         tearDownDeviceClient();
@@ -867,5 +921,22 @@ public class FileUploadTests extends IntegrationTest
         } while (!fileUploadNotification.getDeviceId().equals(device.getDeviceId()));
 
         return fileUploadNotification;
+    }
+
+    private void waitForFileUploadStatusCallbackTriggered(int fileUploadStateIndex) throws InterruptedException
+    {
+        if (!fileUploadState[fileUploadStateIndex].isCallBackTriggered)
+        {
+            //wait until file upload callback is triggered
+            long startTime = System.currentTimeMillis();
+            while (!fileUploadState[fileUploadStateIndex].isCallBackTriggered)
+            {
+                Thread.sleep(300);
+                if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK)
+                {
+                    assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), fileUploadState[fileUploadStateIndex].isCallBackTriggered);
+                }
+            }
+        }
     }
 }

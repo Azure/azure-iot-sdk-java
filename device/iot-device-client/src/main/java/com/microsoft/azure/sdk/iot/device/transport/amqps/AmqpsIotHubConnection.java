@@ -17,8 +17,6 @@ import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.engine.impl.ReceiverImpl;
-import org.apache.qpid.proton.engine.impl.TransportImpl;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
@@ -31,6 +29,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.*;
+
+import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
+import static com.microsoft.azure.sdk.iot.device.MessageType.*;
 
 /**
  * An AMQPS IotHub connection between a device and an IoTHub. This class contains functionality for sending/receiving
@@ -82,6 +83,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public AmqpsSessionManager amqpsSessionManager;
     private final static String APPLICATION_PROPERTY_STATUS_CODE = "status-code";
     private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION = "status-description";
+
+    private boolean methodSubscribed;
+    private boolean twinSubscribed;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -311,7 +315,17 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         if (this.amqpsSessionManager.isAuthenticationOpened())
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_12_023: [The function shall call AmqpsSessionManager.openDeviceOperationLinks.]
-            this.amqpsSessionManager.openDeviceOperationLinks();
+            this.amqpsSessionManager.openDeviceOperationLinks(DEVICE_TELEMETRY);
+
+            if (methodSubscribed)
+            {
+                this.amqpsSessionManager.openDeviceOperationLinks(DEVICE_METHODS);
+            }
+
+            if (twinSubscribed)
+            {
+                this.amqpsSessionManager.openDeviceOperationLinks(DEVICE_TWIN);
+            }
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -975,30 +989,34 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public IotHubStatusCode sendMessage(com.microsoft.azure.sdk.iot.device.Message message) throws TransportException
     {
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = this.convertToProton(message);
-
-        if (amqpsConvertToProtonReturnValue == null)
+        if (!subscriptionChangeHandler(message))
         {
-            // Codes_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
-            throw new IllegalStateException("No handler found for message conversion!");
+            AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = this.convertToProton(message);
+
+            if (amqpsConvertToProtonReturnValue == null)
+            {
+                // Codes_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+                throw new IllegalStateException("No handler found for message conversion!");
+            }
+
+            // Codes_SRS_AMQPSTRANSPORT_34_077: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
+            Integer sendHash = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getConnectionDeviceId());
+
+            if (sendHash != -1)
+            {
+                // Codes_SRS_AMQPSTRANSPORT_34_078: [If the sent message hash is valid, it shall be added to the in progress map and this function shall return OK.]
+                this.inProgressMessages.put(sendHash, message);
+            }
+            else
+            {
+                // Codes_SRS_AMQPSTRANSPORT_34_079: [If the sent message hash is -1, this function shall throw a retriable ProtocolException.]
+                ProtocolException protocolException = new ProtocolException("Send failure");
+                protocolException.setRetryable(true);
+                throw protocolException;
+            }
         }
 
-        // Codes_SRS_AMQPSTRANSPORT_34_077: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-        Integer sendHash = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getConnectionDeviceId());
-
-        if (sendHash != -1)
-        {
-            // Codes_SRS_AMQPSTRANSPORT_34_078: [If the sent message hash is valid, it shall be added to the in progress map and this function shall return OK.]
-            this.inProgressMessages.put(sendHash, message);
-            return IotHubStatusCode.OK;
-        }
-        else
-        {
-            // Codes_SRS_AMQPSTRANSPORT_34_079: [If the sent message hash is -1, this function shall throw a retriable ProtocolException.]
-            ProtocolException protocolException = new ProtocolException("Send failure");
-            protocolException.setRetryable(true);
-            throw protocolException;
-        }
+        return IotHubStatusCode.OK;
     }
 
     /**
@@ -1182,5 +1200,46 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         return transportException;
+    }
+
+    private boolean subscriptionChangeHandler(com.microsoft.azure.sdk.iot.device.Message message) throws TransportException
+    {
+        boolean handled = false;
+        if (message.getMessageType() != null)
+        {
+            switch (message.getMessageType())
+            {
+                case DEVICE_METHODS:
+                    if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
+                    {
+                        this.amqpsSessionManager.openDeviceOperationLinks(DEVICE_METHODS);
+                        methodSubscribed = true;
+                        handled = true;
+                    }
+
+                    break;
+                case DEVICE_TWIN:
+                    if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+                {
+                    //TODO: unsubscribe desired property from application
+                    //this.amqpSessionManager to sever the connection
+                    //twinSubscribed = false;
+                }
+                    else
+                    {
+                        this.amqpsSessionManager.openDeviceOperationLinks(DEVICE_TWIN);
+                        twinSubscribed = true;
+                        if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+                        {
+                            handled = true;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return handled;
     }
 }

@@ -119,8 +119,10 @@ public class AmqpsDeviceOperations
      * @throws IllegalArgumentException if session argument is null
      * @throws TransportException if Proton throws
      */
-    protected synchronized void openLinks(Session session) throws TransportException
+    protected synchronized boolean openLinks(Session session) throws TransportException
     {
+        boolean waitForRemoteOpenCallback = false;
+
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_006: [The function shall throw IllegalArgumentException if the session argument is null.]
@@ -150,7 +152,7 @@ public class AmqpsDeviceOperations
 
                 // Codes_SRS_AMQPSDEVICEOPERATIONS_12_010: [The function^ shall onConnectionInit both receiver and sender link.]
                 this.senderLink.open();
-
+                waitForRemoteOpenCallback = true;
             }
             catch (Exception e)
             {
@@ -179,6 +181,7 @@ public class AmqpsDeviceOperations
 
                 // Codes_SRS_AMQPSDEVICEOPERATIONS_12_010: [The function shall onConnectionInit both receiver and sender link.]
                 this.receiverLink.open();
+                waitForRemoteOpenCallback = true;
             }
             catch (Exception e)
             {
@@ -187,6 +190,7 @@ public class AmqpsDeviceOperations
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+        return waitForRemoteOpenCallback;
     }
 
     /**
