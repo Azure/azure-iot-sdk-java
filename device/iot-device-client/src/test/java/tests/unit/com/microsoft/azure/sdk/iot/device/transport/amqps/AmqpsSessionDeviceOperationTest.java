@@ -596,6 +596,8 @@ public class AmqpsSessionDeviceOperationTest
                 result = mockAmqpsSendReturnValue;
                 Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = true;
+                mockAmqpsSendReturnValue.getDeliveryTag();
+                result = "12".getBytes();
 
                 mockDeviceClientConfig.getDeviceId();
                 result = "someDeviceId";
@@ -642,6 +644,9 @@ public class AmqpsSessionDeviceOperationTest
 
                 mockDeviceClientConfig.getDeviceId();
                 result = "someDeviceId";
+
+                mockAmqpsSendReturnValue.getDeliveryTag();
+                result = "12".getBytes();
             }
         };
 

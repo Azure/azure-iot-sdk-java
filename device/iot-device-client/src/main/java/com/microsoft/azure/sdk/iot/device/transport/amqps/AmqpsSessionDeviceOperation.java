@@ -22,7 +22,7 @@ public class AmqpsSessionDeviceOperation
 
     private Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
 
-    private long nextTag = 0;
+    private static long nextTag = 0;
 
     private Integer openLock = new Integer(1);
 
@@ -331,7 +331,17 @@ public class AmqpsSessionDeviceOperation
                     }
                 }
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_017: [The function shall set the delivery tag for the sender.]
-                byte[] deliveryTag = String.valueOf(this.nextTag++).getBytes();
+                byte[] deliveryTag = String.valueOf(this.nextTag).getBytes();
+
+                //want to avoid negative delivery tags since -1 is the designated failure value
+                if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
+                {
+                    this.nextTag = 0;
+                }
+                else
+                {
+                    this.nextTag++;
+                }
 
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
@@ -364,18 +374,16 @@ public class AmqpsSessionDeviceOperation
      */
     private Integer sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
-        Integer deliveryHash = -1;
-
         if (amqpsDeviceOperationsMap.get(messageType) != null)
         {
-            AmqpsSendReturnValue amqpsSendReturnValue = amqpsDeviceOperationsMap.get(messageType).sendMessageAndGetDeliveryHash(messageType, msgData, 0, length, deliveryTag);
+            AmqpsSendReturnValue amqpsSendReturnValue = amqpsDeviceOperationsMap.get(messageType).sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
             if (amqpsSendReturnValue.isDeliverySuccessful())
             {
-                return amqpsSendReturnValue.getDeliveryHash();
+                return Integer.parseInt(new String(amqpsSendReturnValue.getDeliveryTag()));
             }
         }
 
-        return deliveryHash;
+        return -1;
     }
 
     /**
