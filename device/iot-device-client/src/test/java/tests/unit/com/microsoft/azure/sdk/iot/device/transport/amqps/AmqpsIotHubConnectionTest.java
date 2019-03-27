@@ -1424,7 +1424,7 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
 
                 mockEvent.getLink();
-                result = mockLink;
+                result = mockSender;
 
                 mockLink.getSource();
                 result = mockSource;
@@ -1435,11 +1435,17 @@ public class AmqpsIotHubConnectionTest {
                 mockLink.getName();
                 result = receiverLinkName;
 
-                mockEvent.getType();
-                result = Event.Type.DELIVERY;
-
                 mockEvent.getDelivery();
                 result = mockDelivery;
+
+                mockDelivery.isSettled();
+                result = false;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.head();
+                result = null;
 
                 mockDelivery.getRemoteState();
                 result = Accepted.getInstance();
@@ -1461,16 +1467,104 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockEvent.getType();
-                times = 1;
                 mockEvent.getDelivery();
                 times = 1;
                 mockDelivery.getRemoteState();
-                times = 1;
+                times = 2;
                 mockedIotHubListener.onMessageSent(mockedTransportMessage, null);
                 times = 1;
                 mockDelivery.free();
                 times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void onDeliveryProcessesAllAvailableDeliveries(@Mocked final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> mockInProgressMessages) throws TransportException
+    {
+        baseExpectations();
+        final String receiverLinkName = "receiver";
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "inProgressMessages", mockInProgressMessages);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+
+        new StrictExpectations()
+        {
+            {
+                mockEvent.getLink();
+                result = mockSender;
+
+                mockEvent.getDelivery();
+                result = mockDelivery;
+
+                mockDelivery.isSettled();
+                result = false;
+
+                mockDelivery.getRemoteState();
+                result = Accepted.getInstance();
+                times = 2;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
+
+                mockDelivery.free();
+
+                mockSender.head();
+                result = mockDelivery;
+
+                mockDelivery.isSettled();
+                result = false;
+
+                mockDelivery.getRemoteState();
+                result = Accepted.getInstance();
+                times = 2;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.getSource();
+                result = mockSource;
+
+                mockSource.getAddress();
+                result = "notACBSLink";
+
+                mockInProgressMessages.containsKey(anyInt);
+                result = true;
+
+                mockInProgressMessages.remove(anyInt);
+                result = mockedTransportMessage;
+
+                mockDelivery.free();
+
+                mockSender.head();
+                result = null;
+            }
+        };
+
+        connection.setListener(mockedIotHubListener);
+
+        //act
+        connection.onDelivery(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedIotHubListener.onMessageSent((com.microsoft.azure.sdk.iot.device.Message) any, null);
+                times = 2;
             }
         };
     }
@@ -1504,8 +1598,14 @@ public class AmqpsIotHubConnectionTest {
                 mockLink.getName();
                 result = receiverLinkName;
 
-                mockEvent.getType();
-                result = Event.Type.DELIVERY;
+                mockEvent.getLink();
+                result = mockSender;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.head();
+                result = null;
 
                 mockEvent.getDelivery();
                 result = mockDelivery;
@@ -1542,12 +1642,10 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockEvent.getType();
-                times = 1;
                 mockEvent.getDelivery();
                 times = 1;
                 mockDelivery.getRemoteState();
-                times = 1;
+                times = 2;
                 mockedRejected.getError();
                 times = 1;
                 mockedErrorCondition.getCondition();
@@ -1578,7 +1676,13 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
 
                 mockEvent.getLink();
-                result = mockLink;
+                result = mockSender;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.head();
+                result = null;
 
                 mockLink.getSource();
                 result = mockSource;
@@ -1624,12 +1728,10 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockEvent.getType();
-                times = 1;
                 mockEvent.getDelivery();
                 times = 1;
                 mockDelivery.getRemoteState();
-                times = 1;
+                times = 2;
                 mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
                 times = 1;
                 mockDelivery.free();
@@ -1656,7 +1758,13 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
 
                 mockEvent.getLink();
-                result = mockLink;
+                result = mockSender;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.head();
+                result = null;
 
                 mockLink.getSource();
                 result = mockSource;
@@ -1672,6 +1780,9 @@ public class AmqpsIotHubConnectionTest {
 
                 mockEvent.getDelivery();
                 result = mockDelivery;
+
+                mockDelivery.isSettled();
+                result = false;
 
                 mockDelivery.getRemoteState();
                 result = mockedModified;
@@ -1699,12 +1810,10 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockEvent.getType();
-                times = 1;
                 mockEvent.getDelivery();
                 times = 1;
                 mockDelivery.getRemoteState();
-                times = 1;
+                times = 2;
                 mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
                 times = 1;
                 mockDelivery.free();
@@ -1731,7 +1840,13 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
 
                 mockEvent.getLink();
-                result = mockLink;
+                result = mockSender;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.head();
+                result = null;
 
                 mockLink.getSource();
                 result = mockSource;
@@ -1774,12 +1889,10 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockEvent.getType();
-                times = 1;
                 mockEvent.getDelivery();
                 times = 1;
                 mockDelivery.getRemoteState();
-                times = 1;
+                times = 2;
                 mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
                 times = 1;
                 mockDelivery.free();
@@ -1806,7 +1919,13 @@ public class AmqpsIotHubConnectionTest {
                 result = null;
 
                 mockEvent.getLink();
-                result = mockLink;
+                result = mockSender;
+
+                mockDelivery.getTag();
+                result = "12".getBytes();
+
+                mockSender.head();
+                result = null;
 
                 mockLink.getSource();
                 result = mockSource;
@@ -1849,12 +1968,10 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockEvent.getType();
-                times = 1;
                 mockEvent.getDelivery();
                 times = 1;
                 mockDelivery.getRemoteState();
-                times = 1;
+                times = 2;
                 mockedIotHubListener.onMessageSent(mockedTransportMessage, mockedTransportException);
                 times = 1;
                 mockDelivery.free();
@@ -2143,8 +2260,8 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                mockEvent.getLink().getName();
-                result = "";
+                mockEvent.getLink();
+                result = mockReceiver;
                 Deencapsulation.invoke(mockAmqpsSessionManager, "getMessageFromReceiverLink", "");
                 result = mockAmqpsMessage;
                 mockAmqpsMessage.getApplicationProperties();
