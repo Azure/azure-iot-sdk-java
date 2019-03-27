@@ -315,7 +315,17 @@ public class AmqpsSessionDeviceOperation
                     }
                 }
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_017: [The function shall set the delivery tag for the sender.]
-                byte[] deliveryTag = String.valueOf(this.nextTag++).getBytes();
+                byte[] deliveryTag = String.valueOf(this.nextTag).getBytes();
+
+                //want to avoid negative delivery tags since -1 is the designated failure value
+                if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
+                {
+                    this.nextTag = 0;
+                }
+                else
+                {
+                    this.nextTag++;
+                }
 
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
@@ -348,19 +358,17 @@ public class AmqpsSessionDeviceOperation
      */
     private Integer sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
-        Integer deliveryHash = -1;
-
         for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
         {
             AmqpsSendReturnValue amqpsSendReturnValue = null;
             amqpsSendReturnValue = this.amqpsDeviceOperationsList.get(i).sendMessageAndGetDeliveryHash(messageType, msgData, 0, length, deliveryTag);
             if (amqpsSendReturnValue.isDeliverySuccessful())
             {
-                return amqpsSendReturnValue.getDeliveryHash();
+                return Integer.parseInt(new String(amqpsSendReturnValue.getDeliveryTag()));
             }
         }
 
-        return deliveryHash;
+        return -1;
     }
 
     /**

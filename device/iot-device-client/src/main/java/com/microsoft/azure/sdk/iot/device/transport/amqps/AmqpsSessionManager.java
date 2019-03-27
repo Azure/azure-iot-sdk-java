@@ -360,22 +360,22 @@ public class AmqpsSessionManager
      */
     Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, String deviceId) throws TransportException
     {
-        Integer deliveryHash = -1;
+        Integer deliveryTag = -1;
 
         if (this.session != null)
         {
             for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
             {
                 // Codes_SRS_AMQPSESSIONMANAGER_12_032: [The function shall call sendMessage on all session list member and if there is a successful send return with the deliveryHash, otherwise return -1.]
-                deliveryHash = this.amqpsDeviceSessionList.get(i).sendMessage(message, messageType, deviceId);
-                if (deliveryHash != -1)
+                deliveryTag = this.amqpsDeviceSessionList.get(i).sendMessage(message, messageType, deviceId);
+                if (deliveryTag != -1)
                 {
                     break;
                 }
             }
         }
 
-        return deliveryHash;
+        return deliveryTag;
     }
 
     /**

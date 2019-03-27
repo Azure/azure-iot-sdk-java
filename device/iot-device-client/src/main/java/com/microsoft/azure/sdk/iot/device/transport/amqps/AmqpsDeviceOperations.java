@@ -313,7 +313,7 @@ public class AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_023: [The function shall advance the sender link.]
             this.senderLink.advance();
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_024: [The function shall set the delivery hash to the value returned by the sender link.]
-            return new AmqpsSendReturnValue(true, delivery.hashCode());
+            return new AmqpsSendReturnValue(true, delivery.hashCode(), deliveryTag);
         }
         catch (Exception e)
         {

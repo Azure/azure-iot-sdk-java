@@ -115,7 +115,17 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
                     }
                 }
                 // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_009: [The function shall set the delivery tag for the sender.]
-                byte[] deliveryTag = String.valueOf(this.nextTag++).getBytes();
+                byte[] deliveryTag = String.valueOf(this.nextTag).getBytes();
+
+                //want to avoid negative delivery tags since -1 is the designated failure value
+                if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
+                {
+                    this.nextTag = 0;
+                }
+                else
+                {
+                    this.nextTag++;
+                }
 
                 // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_010: [The function shall call the super class sendMessageAndGetDeliveryHash.]
                 this.sendMessageAndGetDeliveryHash(MessageType.CBS_AUTHENTICATION, msgData, 0, length, deliveryTag);

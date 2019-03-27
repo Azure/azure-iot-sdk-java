@@ -396,20 +396,17 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         if (this.amqpsSessionManager != null)
         {
             this.amqpsSessionManager.closeNow();
-            this.amqpsSessionManager = null;
         }
 
         if (this.connection != null)
         {
             this.connection.close();
-            this.connection = null;
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_34_014: [If this object's proton reactor is not null, this function shall stop the Proton reactor.]
         if (this.reactor != null)
         {
             this.reactor.stop();
-            this.reactor = null;
         }
 
         logger.LogInfo("Proton reactor has been stopped, method name is %s ", logger.getMethodName());
@@ -429,22 +426,22 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        Integer deliveryHash = -1;
+        Integer deliveryTag = -1;
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is DISCONNECTED or there is not enough
         // credit, the function shall return -1.]
         if (this.state == IotHubConnectionStatus.DISCONNECTED || this.linkCredit <= 0)
         {
-            deliveryHash = -1;
+            deliveryTag = -1;
         }
         else
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_12_024: [The function shall call AmqpsSessionManager.sendMessage with the given parameters.]
-            deliveryHash = this.amqpsSessionManager.sendMessage(message, messageType, deviceId);
+            deliveryTag = this.amqpsSessionManager.sendMessage(message, messageType, deviceId);
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
-        return deliveryHash;
+        return deliveryTag;
     }
 
     /**
@@ -578,58 +575,38 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        AmqpsMessage amqpsMessage = null;
+        Link link = event.getLink();
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_12_015: [The function shall call AmqpsSessionManager.getMessageFromReceiverLink.]
-        try
+        if (link instanceof Sender)
         {
-            String linkName = event.getLink().getName();
-            amqpsMessage = this.amqpsSessionManager.getMessageFromReceiverLink(linkName);
-        }
-        catch (TransportException e)
-        {
-            this.listener.onMessageReceived(null, e);
-        }
+            //ack received for a message that this SDK sent earlier
+            logger.LogInfo("Reading the delivery event in Sender link, method name is %s ", logger.getMethodName());
 
-        if (amqpsMessage != null)
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_050: [All the listeners shall be notified that a message was received from the server.]
-            try
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
+            Delivery delivery = event.getDelivery();
+            while (delivery != null && !delivery.isSettled() && delivery.getRemoteState() != null)
             {
-                this.messageReceivedFromServer(amqpsMessage);
-            }
-            catch (TransportException e)
-            {
-                this.listener.onMessageReceived(null, e);
-            }
-        }
-        else
-        {
-            //Sender specific section for dispositions it receives
-            if (event.getType() == Event.Type.DELIVERY)
-            {
-                logger.LogInfo("Reading the delivery event in Sender link, method name is %s ", logger.getMethodName());
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
-                Delivery d = event.getDelivery();
-                DeliveryState remoteState = d.getRemoteState();
+                DeliveryState remoteState = delivery.getRemoteState();
+
+                int deliveryTag = Integer.valueOf(new String(delivery.getTag()));
 
                 logger.LogInfo("Is state of remote Delivery COMPLETE ? %s, method name is %s ", state, logger.getMethodName());
                 logger.LogInfo("Inform listener that a message has been sent to IoT Hub along with remote state, method name is %s ", logger.getMethodName());
 
-                if (!event.getLink().getSource().getAddress().equalsIgnoreCase(AmqpsDeviceAuthenticationCBS.RECEIVER_LINK_ENDPOINT_PATH))
+                if (!link.getSource().getAddress().equalsIgnoreCase(AmqpsDeviceAuthenticationCBS.RECEIVER_LINK_ENDPOINT_PATH))
                 {
-                    if (this.inProgressMessages.containsKey(d.hashCode()))
+                    if (this.inProgressMessages.containsKey(deliveryTag))
                     {
                         if (remoteState instanceof Accepted)
                         {
                             // Codes_SRS_AMQPSIOTHUBCONNECTION_34_064: [If the acknowledgement sent from the service is "Accepted", this function shall notify its listener that the message was successfully sent.]
-                            this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), null);
+                            this.listener.onMessageSent(inProgressMessages.remove(deliveryTag), null);
                         }
                         else if (remoteState instanceof Rejected)
                         {
                             TransportException transportException;
                             ErrorCondition errorCondition = ((Rejected) remoteState).getError();
-                            if (errorCondition !=  null && errorCondition.getCondition() != null)
+                            if (errorCondition != null && errorCondition.getCondition() != null)
                             {
                                 // Codes_SRS_AMQPSIOTHUBCONNECTION_28_001: [If the acknowledgement sent from the service is "Rejected", this function shall map the error condition if it exists to amqp exceptions.]
                                 String errorCode = errorCondition.getCondition().toString();
@@ -647,16 +624,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                                 transportException = new TransportException("IotHub rejected the message");
                             }
 
-                            this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), transportException);
+                            this.listener.onMessageSent(inProgressMessages.remove(deliveryTag), transportException);
 
                         }
                         else if (remoteState instanceof Modified || remoteState instanceof Released || remoteState instanceof Received)
                         {
                             // Codes_SRS_AMQPSIOTHUBCONNECTION_34_066: [If the acknowledgement sent from the service is "Modified", "Released", or "Received", this function shall notify its listener that the sent message needs to be retried.]
-                            TransportException transportException = new TransportException("IotHub responded to message " +
-                                    "with Modified, Received or Released; message needs to be re-delivered");
+                            TransportException transportException = new TransportException("IotHub responded to message " + "with Modified, Received or Released; message needs to be re-delivered");
                             transportException.setRetryable(true);
-                            this.listener.onMessageSent(inProgressMessages.remove(d.hashCode()), transportException);
+                            this.listener.onMessageSent(inProgressMessages.remove(deliveryTag), transportException);
                         }
                     }
                     else
@@ -665,8 +641,38 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     }
                 }
 
-                // release the delivery object which created in sendMessage().
-                d.free();
+                delivery.free();
+
+                //get next delivery to handle, or null if there isn't one
+                delivery = link.head();
+            }
+        }
+        else if (link instanceof Receiver)
+        {
+            //receiver link has a message from iot hub to retrieve
+            AmqpsMessage amqpsMessage = null;
+
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_12_015: [The function shall call AmqpsSessionManager.getMessageFromReceiverLink.]
+            try
+            {
+                amqpsMessage = this.amqpsSessionManager.getMessageFromReceiverLink(link.getName());
+            }
+            catch (TransportException e)
+            {
+                this.listener.onMessageReceived(null, e);
+            }
+
+            if (amqpsMessage != null)
+            {
+                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_050: [All the listeners shall be notified that a message was received from the server.]
+                try
+                {
+                    this.messageReceivedFromServer(amqpsMessage);
+                }
+                catch (TransportException e)
+                {
+                    this.listener.onMessageReceived(null, e);
+                }
             }
         }
 
@@ -984,12 +990,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         // Codes_SRS_AMQPSTRANSPORT_34_077: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-        Integer sendHash = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getConnectionDeviceId());
+        Integer deliveryTag = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getConnectionDeviceId());
 
-        if (sendHash != -1)
+        if (deliveryTag != -1)
         {
             // Codes_SRS_AMQPSTRANSPORT_34_078: [If the sent message hash is valid, it shall be added to the in progress map and this function shall return OK.]
-            this.inProgressMessages.put(sendHash, message);
+            this.inProgressMessages.put(deliveryTag, message);
             return IotHubStatusCode.OK;
         }
         else
