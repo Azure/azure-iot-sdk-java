@@ -314,7 +314,18 @@ public class AmqpSendHandler extends BaseHandler
                     }
                 }
                 // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall set the delivery tag on the Sender (Proton) object]
-                byte[] tag = String.valueOf(nextTag++).getBytes();
+                byte[] tag = String.valueOf(nextTag).getBytes();
+
+                //want to avoid negative delivery tags since -1 is the designated failure value
+                if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
+                {
+                    this.nextTag = 0;
+                }
+                else
+                {
+                    this.nextTag++;
+                }
+
                 Delivery dlv = snd.delivery(tag);
                 // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall send the encoded bytes]
                 snd.send(msgData, 0, length);
