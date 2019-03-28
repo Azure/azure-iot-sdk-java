@@ -728,9 +728,9 @@ public class IotHubTransportTest
         assertEquals(EXPIRED_SAS_TOKEN, reason);
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, this function shall return BAD_CREDENTIAL.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, but the exception is an unauthorized exception, this function shall return BAD_CREDENTIAL]
     @Test
-    public void exceptionToStatusChangeReasonBadCredential()
+    public void exceptionToStatusChangeReasonBadCredentialForAmqpUnauthorizedException(@Mocked final AmqpUnauthorizedAccessException mockedUnauthorizedException)
     {
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
@@ -747,7 +747,58 @@ public class IotHubTransportTest
         };
 
         //act
-        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedTransportException);
+        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedUnauthorizedException);
+
+        //assert
+        assertEquals(BAD_CREDENTIAL, reason);
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, but the exception is an unauthorized exception, this function shall return BAD_CREDENTIAL]
+    @Test
+    public void exceptionToStatusChangeReasonBadCredentialForMqttUnauthorizedException(@Mocked final MqttUnauthorizedException mockedUnauthorizedException)
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedTransportException.isRetryable();
+                result = false;
+
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedUnauthorizedException);
+
+        //assert
+        assertEquals(BAD_CREDENTIAL, reason);
+    }
+
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, but the exception is an unauthorized exception, this function shall return BAD_CREDENTIAL]
+    @Test
+    public void exceptionToStatusChangeReasonBadCredentialForGenericUnauthorizedException(@Mocked final UnauthorizedException mockedUnauthorizedException)
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedTransportException.isRetryable();
+                result = false;
+
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedUnauthorizedException);
 
         //assert
         assertEquals(BAD_CREDENTIAL, reason);
