@@ -94,6 +94,8 @@ public class ProvisioningCommon extends IntegrationTest
 
     public static final String HMAC_SHA256 = "HmacSHA256";
 
+    public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
+
     protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2018-11-01";
 
     public ProvisioningServiceClient provisioningServiceClient = null;
@@ -454,7 +456,7 @@ public class ProvisioningCommon extends IntegrationTest
             testInstance.provisionedDeviceId = "Some-Provisioned-Device-" + testInstance.attestationType + "-" +UUID.randomUUID().toString();
             if (testInstance.attestationType == AttestationType.TPM)
             {
-                securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId);
+                securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
                 Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
             }
