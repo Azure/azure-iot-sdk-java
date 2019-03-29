@@ -1,0 +1,90 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+resources:
+- repo: self
+  clean: true
+phases:
+
+### SDL Tasks ###
+- phase: SDL
+  displayName: SDL Tasks
+
+  condition: succeeded()
+  queue:
+    name: sdl-java
+    timeoutInMinutes: 60
+  steps:
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+    displayName: CredScan
+    inputs:
+      debugMode: false
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
+    displayName: AutoApplicability
+    inputs:
+      ApplyRules: All
+      VerboseWriter: true
+      ExternalRelease: true
+      InternalRelease: true
+      UsesHSM: true
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-vulnerabilityassessment.VulnerabilityAssessment@0
+    displayName: 'Vulnerability Assessment'
+
+  - task: fortifyvsts.hpe-security-fortify-vsts.build-task-fortify-sca.FortifySCA@1
+    displayName: Fortify
+    inputs:
+      applicationType: java
+      buildClasspath: '$(Build.SourcesDirectory)'
+      buildSourceVersion: 1.8
+      buildSourcePath: '$(Build.SourcesDirectory)'
+      buildAnalyzerParams: '-exclude "$(Build.SourcesDirectory)\**\test\**\*" -exclude "$(Build.SourcesDirectory)\**\*sample*\**\*" -exclude "$(Build.SourcesDirectory)\edge-e2e\**\*" -exclude "$(Build.SourcesDirectory)\iot-e2e-tests\**\*" -exclude "$(Build.SourcesDirectory)\provisioning\provisioning-tools\**\*"'
+      fortifyBuildId: 12345
+      scaVerbose: true
+      scaDebug: true
+      additionalScanParams: '-filter "$(Build.SourcesDirectory)\vsts\fortify\filter.txt"'
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: PoliCheck
+    inputs:
+      targetType: F
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
+    displayName: 'AntiMalware Scanner'
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+    displayName: 'Publish Security Analysis Logs'
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'Post Analysis'
+    inputs:
+      CredScan: true
+      FortifySCA: true
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
+    displayName: 'TSA upload'
+    inputs:
+      tsaVersion: TsaV2
+      codebase: NewOrUpdate
+      tsaEnvironment: Production
+      codeBaseName: 'Azure-Iot-SDK-Java-Master'
+      notificationAlias: 'timtay@microsoft.com, prmathur@microsoft.com, jasminel@microsoft.com'
+      codeBaseAdmins: 'REDMOND\timtay;REDMOND\prmathur;REDMOND\jasminel'
+      instanceUrlForTsaV2: MSAZURE
+      projectNameMSAZURE: One
+      areaPath: 'One\IoT\Platform\Clients\java'
+      iterationPath: 'One\IoT\Backlog'
+      uploadAPIScan: false
+      uploadBinSkim: false
+      uploadFxCop: false
+      uploadModernCop: false
+      uploadPREfast: false
+      uploadRoslyn: false
+      uploadTSLint: false
