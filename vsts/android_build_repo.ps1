@@ -1,1 +1,1 @@
-﻿./jenkins/android_java.cmd
+﻿./vsts/android_java.cmd
