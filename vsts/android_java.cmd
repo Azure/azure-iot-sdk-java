@@ -13,7 +13,7 @@ call RD /S /Q "c:/users/%USERNAME%/.m2/repository/com/microsoft/azure/sdk/iot"
 
 @REM -- Android Test Build --
 cd %build-root%
-call mvn install -DskipTests=true
+call mvn clean install -DskipTests=true
 if errorlevel 1 goto :eof
 cd %build-root%\iot-e2e-tests\android
 call gradle wrapper
