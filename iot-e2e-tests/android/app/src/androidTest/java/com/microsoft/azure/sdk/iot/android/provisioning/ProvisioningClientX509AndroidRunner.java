@@ -8,11 +8,11 @@ package com.microsoft.azure.sdk.iot.android.provisioning;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroupB;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup9;
+import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.setup.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.common.tests.provisioning.ProvisioningTests;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
-import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 
 import org.junit.After;
 import org.junit.Rule;
@@ -21,7 +21,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 
-@TestGroupB
+@TestGroup9
 @RunWith(Parameterized.class)
 public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
 {

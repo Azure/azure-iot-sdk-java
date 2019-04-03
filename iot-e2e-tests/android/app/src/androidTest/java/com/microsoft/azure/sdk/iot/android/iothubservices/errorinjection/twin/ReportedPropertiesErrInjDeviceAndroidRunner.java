@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.errorinjection.twin;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroupC;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup11;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection.ReportedPropertiesErrInjTests;
@@ -17,8 +17,8 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
-import org.junit.AfterClass;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
-@TestGroupC
+@TestGroup11
 @RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjDeviceAndroidRunner extends ReportedPropertiesErrInjTests
 {
