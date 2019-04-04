@@ -79,7 +79,7 @@ jobs:
     name: Hosted Ubuntu 1604
   displayName: Linux
   condition: succeeded()
-    steps:
+  steps:
   - powershell: ./vsts/echo_inputs.ps1
     displayName: 'Echo Inputs'
     env:
