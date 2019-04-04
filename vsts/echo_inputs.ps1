@@ -1,4 +1,5 @@
-﻿$pr = $false
+﻿#Echo out to host what the provided input variables were
+$pr = $false
 if ($env:COMMIT_FROM -match "^[\d]+$") 
 {
     Write-Host -ForegroundColor Cyan "PR #$($env:COMMIT_FROM)"

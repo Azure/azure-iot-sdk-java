@@ -1,1 +1,0 @@
-﻿./vsts/android_java.cmd
