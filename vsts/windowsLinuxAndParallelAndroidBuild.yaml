@@ -1,9 +1,9 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
-### Android build Other ###
 
 jobs:
 ### Windows ###
 - job: Windows
+  timeoutInMinutes: 180
   pool:
     name: Hosted VS2017
   displayName: Windows
@@ -70,6 +70,7 @@ jobs:
     
 ### Linux ###
 - job: Linux
+  timeoutInMinutes: 180
   pool:
     name: Hosted Ubuntu 1604
   displayName: Linux
@@ -139,8 +140,9 @@ jobs:
     continueOnError: true
     condition: always()  
     
- ### Android ###
+ ### Android, Multi configuration build (12 different test groups to cover) ###
 - job: ANDROID
+  timeoutInMinutes: 180
   pool:
     name: Hosted VS2017
   strategy:
