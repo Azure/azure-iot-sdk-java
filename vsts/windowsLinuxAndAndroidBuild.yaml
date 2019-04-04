@@ -14,10 +14,6 @@ jobs:
     env:
       COMMIT_FROM: $(COMMIT_FROM)
     condition: always()
-
-  - powershell: ./vsts/echo_java_verions.ps1
-    displayName: 'Echo Java Versions'
-    condition: always()
     
   - powershell: ./vsts/manual_checkout.ps1
     displayName: 'GIT checkout'
@@ -85,11 +81,7 @@ jobs:
     env:
       COMMIT_FROM: $(COMMIT_FROM)
     condition: always()
-    
-  - powershell: ./vsts/echo_java_verions.ps1
-    displayName: 'Echo Java Versions'
-    condition: always()
-    
+
   - powershell: ./vsts/manual_checkout.ps1
     displayName: 'GIT checkout'
     env:
@@ -189,10 +181,6 @@ jobs:
     displayName: 'Echo Inputs'
     env:
       COMMIT_FROM: $(COMMIT_FROM)
-    condition: always()
-  
-  - powershell: ./vsts/echo_java_verions.ps1
-    displayName: 'Echo Java Versions'
     condition: always()
     
   - powershell: ./vsts/install_appcenter_cli.ps1
