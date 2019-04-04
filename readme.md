@@ -141,9 +141,9 @@ This folder contains application development guides and device setup instruction
 
 This folder contains end to end tests source code for running on jvm and android.
 
-### /jenkins
+### /vsts
 
-This folder contains scripts to build and run Java SDK provided proper environmental variables are set
+This folder contains scripts to build and run Java SDK provided proper environmental variables are set, as well as azure pipeline resources used for our gating process
 
 ### /service
 

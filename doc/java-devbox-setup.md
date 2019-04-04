@@ -138,9 +138,9 @@ Open a command prompt and use the following commands:
 ```
 The compiled JAR file with all dependencies bundled in can then be found at:
 ```
-{IoT SDK for Java root}/device/iot-device-client/target/iot-device-client-{version}-with-deps.jar
+{IoT SDK for Java root}/device/iot-device-client/target/iot-device-client-{version}.jar
 ```
-When you're ready to use the Java device SDK in your own project, include this JAR file in your project.
+When you're ready to use the Java device SDK in your own project, include this JAR file in your project, as well as any JAR files that the device sdk depends on.
 
 ### for the service SDK
 Open a command prompt and use the following commands:
@@ -148,11 +148,11 @@ Open a command prompt and use the following commands:
 	cd azure-iot-sdk-java/service
 	mvn install
 ```
-The compiled JAR file with all dependencies bundled in can then be found at:
+The compiled JAR file can then be found at:
 ```
-{IoT SDK for Java root}/service/iot-service-client/target/iot-service-client-{version}-with-deps.jar
+{IoT SDK for Java root}/service/iot-service-client/target/iot-service-client-{version}.jar
 ```
-When you're ready to use the Java service SDK in your own project, include this JAR file in your project.
+When you're ready to use the Java service SDK in your own project, include this JAR file in your project, as well as any JAR files that the service sdk depends on
 
 <a name="installiotandroid"></a> 
 ## Building for Android Device
