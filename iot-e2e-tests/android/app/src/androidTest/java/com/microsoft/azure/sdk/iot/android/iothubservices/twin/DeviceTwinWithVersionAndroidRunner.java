@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.twin;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup9;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.DeviceTwinWithVersionTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
@@ -19,6 +20,7 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.Collection;
 
+@TestGroup9
 @RunWith(Parameterized.class)
 public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTests
 {

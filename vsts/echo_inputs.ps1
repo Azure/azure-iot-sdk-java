@@ -9,3 +9,5 @@ else
 {
     Write-Host -ForegroundColor Cyan "BRANCH $($env:COMMIT_FROM)"
 }
+
+mvn -v
