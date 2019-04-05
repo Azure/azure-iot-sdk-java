@@ -1553,7 +1553,7 @@ public class EnrollmentGroupTest
     {
         // arrange
         String expectedWebhookUrl = "https://www.microsoft.com";
-        String expectedApiVersion = "2018-11-01";
+        String expectedApiVersion = "2019-03-31";
         final String json = "{\n" +
                 "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
                 "  \"customAllocationDefinition\": {\n" +
