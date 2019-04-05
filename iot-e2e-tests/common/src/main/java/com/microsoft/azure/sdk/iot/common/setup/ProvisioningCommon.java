@@ -96,7 +96,7 @@ public class ProvisioningCommon extends IntegrationTest
 
     public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
 
-    protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2018-11-01";
+    protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
 
     public ProvisioningServiceClient provisioningServiceClient = null;
     public RegistryManager registryManager = null;
