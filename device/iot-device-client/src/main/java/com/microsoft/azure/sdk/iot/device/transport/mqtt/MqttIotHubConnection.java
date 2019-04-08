@@ -124,7 +124,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 SSLContext sslContext = this.config.getAuthenticationProvider().getSSLContext();
                 if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
-                    this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false);
+                    this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
                 {
