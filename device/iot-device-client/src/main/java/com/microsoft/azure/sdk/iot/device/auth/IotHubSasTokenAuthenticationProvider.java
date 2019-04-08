@@ -35,7 +35,7 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
     protected IotHubSasToken sasToken;
 
     public abstract boolean canRefreshToken();
-    public abstract String getRenewedSasToken(boolean proactivelyRenew) throws IOException, TransportException;
+    public abstract String getRenewedSasToken(boolean proactivelyRenew, boolean forceRenewal) throws IOException, TransportException;
 
     public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
     {
