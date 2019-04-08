@@ -4,7 +4,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.tools</groupId>
     <artifactId>provisioning-x509-cert-generator</artifactId>
     <name>Provisioning X509 cert generator</name>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <description>The Microsoft Azure IoT Provisioning Cert Generator for Java</description>
     <developers>
         <developer>

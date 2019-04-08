@@ -7,7 +7,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.tools</groupId>
     <artifactId>provisioning-tools</artifactId>
     <name>Provisioning Tools</name>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <packaging>pom</packaging>
     <description>The Microsoft Azure IoT Provisioning Tools for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
