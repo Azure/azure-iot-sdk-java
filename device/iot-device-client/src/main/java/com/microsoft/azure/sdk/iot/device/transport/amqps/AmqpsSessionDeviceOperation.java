@@ -31,7 +31,7 @@ public class AmqpsSessionDeviceOperation
 
     private static final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
     private static final double PERCENTAGE_FACTOR = 0.75;
-    private static final int SEC_IN_MILLISEC = 1000;
+    private static final int MILLISECECONDS_PER_SECOND = 1000;
 
     private final CountDownLatch authenticationLatch = new CountDownLatch(1);
 
@@ -517,7 +517,7 @@ public class AmqpsSessionDeviceOperation
      */
     private void scheduleRenewalThread()
     {
-        long renewalPeriod = calculateRenewalTimeInMilliseconds(this.deviceClientConfig.getSasTokenAuthentication().getTokenValidSecs());
+        long renewalPeriod = calculateRenewalPeriodInMilliseconds(this.deviceClientConfig.getSasTokenAuthentication().getTokenValidSecs());
         if (renewalPeriod > 0)
         {
             this.tokenRenewalPeriodInMilliseconds = renewalPeriod;
@@ -568,13 +568,13 @@ public class AmqpsSessionDeviceOperation
      * @return 75% of the given time
      * @throws IllegalArgumentException if validInSecs is less than 0
      */
-    private long calculateRenewalTimeInMilliseconds(long validInSecs) throws IllegalArgumentException
+    private long calculateRenewalPeriodInMilliseconds(long validInSecs) throws IllegalArgumentException
     {
         if (validInSecs < 0)
         {
             throw new IllegalArgumentException("validInSecs cannot be less than 0.");
         }
 
-        return (long)(validInSecs * PERCENTAGE_FACTOR * SEC_IN_MILLISEC);
+        return (long)(validInSecs * PERCENTAGE_FACTOR * MILLISECECONDS_PER_SECOND);
     }
 }

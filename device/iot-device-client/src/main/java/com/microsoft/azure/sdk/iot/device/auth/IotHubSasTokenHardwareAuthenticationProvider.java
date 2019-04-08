@@ -72,9 +72,9 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
      * @throws IOException if generating the sas token from the TPM fails
      * @return The value of SasToken
      */
-    public String getRenewedSasToken(boolean proactivelyRenew) throws IOException
+    public String getRenewedSasToken(boolean proactivelyRenew, boolean forceRenewal) throws IOException
     {
-        if (this.shouldRefreshToken(proactivelyRenew))
+        if (this.shouldRefreshToken(proactivelyRenew) || forceRenewal)
         {
             //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_035: [If the saved sas token has expired and there is a security provider, the saved sas token shall be refreshed with a new token from the security provider.]
             //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_036: [If the saved sas token has not expired and there is a security provider, but the sas token should be proactively renewed, the saved sas token shall be refreshed with a new token from the security provider.]

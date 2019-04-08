@@ -104,9 +104,9 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @return The value of SasToken
      */
     @Override
-    public String getRenewedSasToken(boolean proactivelyRenew) throws IOException, TransportException
+    public String getRenewedSasToken(boolean proactivelyRenew, boolean forceRenewal) throws IOException, TransportException
     {
-        if (this.shouldRefreshToken(proactivelyRenew))
+        if (this.shouldRefreshToken(proactivelyRenew) || forceRenewal)
         {
             if (this.deviceKey != null)
             {

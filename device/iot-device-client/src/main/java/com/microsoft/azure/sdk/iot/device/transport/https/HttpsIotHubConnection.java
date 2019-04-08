@@ -452,7 +452,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     {
         try
         {
-            return this.config.getSasTokenAuthentication().getRenewedSasToken(false);
+            return this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
         }
         catch (IOException e)
         {
