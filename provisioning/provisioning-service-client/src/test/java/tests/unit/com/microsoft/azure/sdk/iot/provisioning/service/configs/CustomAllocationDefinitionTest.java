@@ -16,7 +16,7 @@ import static junit.framework.TestCase.assertEquals;
 public class CustomAllocationDefinitionTest
 {
     private static final String expectedWebhookUrl = "https://www.microsoft.com";
-    private static final String expectedApiVersion = "2018-11-01";
+    private static final String expectedApiVersion = "2019-03-31";
 
     //Tests_SRS_CUSTOM_ALLOCATION_DEFINITION_34_001: [This function shall return the saved webhook uri.]
     @Test

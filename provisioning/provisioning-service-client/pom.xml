@@ -7,7 +7,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
     <artifactId>provisioning-service-client</artifactId>
     <name>Provisioning Service Client</name>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
     <description>The Microsoft Azure IoT Provisioning Service Client SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
