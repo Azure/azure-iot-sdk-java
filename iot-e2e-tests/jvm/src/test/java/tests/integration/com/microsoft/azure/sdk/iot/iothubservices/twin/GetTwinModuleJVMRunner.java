@@ -36,7 +36,7 @@ public class GetTwinModuleJVMRunner extends GetTwinTests
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
-        if (!Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("IS_BASIC_TIER_HUB")))
+        if (isBasicTierHub)
         {
             Collection inputs = DeviceTwinCommon.inputsCommon(ClientType.MODULE_CLIENT);
             identities = getIdentities(inputs);

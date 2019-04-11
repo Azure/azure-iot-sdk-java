@@ -16,23 +16,26 @@ public class EventCallback implements IotHubEventCallback
 
     public void execute(IotHubStatusCode status, Object context)
     {
-        Success success = (Success) context;
-
-        //null case is for testing that the callback is fired, but not caring what the status code was.
-        // In some error injection scenarios, the status code reported cannot be predicted, but the callback
-        // still must have been fired.
-        if (this.expectedStatusCode == null || status.equals(expectedStatusCode))
+        if (context != null)
         {
-            success.setResult(true);
-        }
-        else
-        {
-            success.setResult(false);
-        }
+            Success success = (Success) context;
 
-        success.callbackWasFired();
+            //null case is for testing that the callback is fired, but not caring what the status code was.
+            // In some error injection scenarios, the status code reported cannot be predicted, but the callback
+            // still must have been fired.
+            if (this.expectedStatusCode == null || status.equals(expectedStatusCode))
+            {
+                success.setResult(true);
+            }
+            else
+            {
+                success.setResult(false);
+            }
 
-        success.setCallbackStatusCode(status);
+            success.callbackWasFired();
+
+            success.setCallbackStatusCode(status);
+        }
     }
 }
 

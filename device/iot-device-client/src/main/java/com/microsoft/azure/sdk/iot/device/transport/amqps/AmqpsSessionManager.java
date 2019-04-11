@@ -207,11 +207,13 @@ public class AmqpsSessionManager
      * Open the session and the links. 
      *
      * @param connection the Proton connection object to work with.
+     * @return Boolean true if connection is ready, otherwise false to indicate authentication links open in progress
      */
-    void onConnectionInit(Connection connection) throws TransportException
+    Boolean onConnectionInit(Connection connection) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
+        Boolean ret = false;
         if (connection != null)
         {
             if (this.session == null)
@@ -227,11 +229,7 @@ public class AmqpsSessionManager
         {
             if (this.isAuthenticationOpened())
             {
-                for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
-                {
-                    // Codes_SRS_AMQPSESSIONMANAGER_12_042: [The function shall call openLinks on all device sessions if the session is not null and the authentication is open.]
-                    this.amqpsDeviceSessionList.get(i).openLinks(this.session, MessageType.DEVICE_TELEMETRY);
-                }
+                ret = true;
             }
             else
             {
@@ -241,6 +239,7 @@ public class AmqpsSessionManager
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+        return ret;
     }
 
     /**

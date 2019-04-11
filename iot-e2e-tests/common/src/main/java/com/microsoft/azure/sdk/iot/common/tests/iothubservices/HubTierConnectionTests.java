@@ -2,17 +2,14 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
-import com.microsoft.azure.sdk.iot.common.setup.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.*;
 
 import java.io.IOException;
@@ -24,21 +21,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.CERTIFICATE_AUTHORITY;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertNotNull;
 
 public class HubTierConnectionTests extends IntegrationTest
 {
     protected static final long WAIT_FOR_DISCONNECT_TIMEOUT = 1 * 60 * 1000; // 1 minute
-
-    //How much devices the multithreaded test will create in parallel.
-    protected static final Integer MAX_DEVICE_PARALLEL = 3;
-
-    //How many keys each message will cary.
-    protected static final Integer NUM_KEYS_PER_MESSAGE = 3;
 
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 180000;
@@ -47,19 +36,10 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected static String iotHubConnectionString = "";
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     protected static String hostName;
 
-    //The messages to be sent in these tests. Some contain error injection messages surrounded by normal messages
-    protected static final List<MessageAndResult> NORMAL_MESSAGES_TO_SEND = new ArrayList<>();
-
     public HubTierConnectionTestInstance testInstance;
-
-    //How much messages each device will send to the hub for each connection.
-    protected static final Integer NUM_MESSAGES_PER_CONNECTION = 6;
-
-    protected static final AtomicBoolean succeed = new AtomicBoolean();
 
     protected static RegistryManager registryManager;
 
@@ -217,11 +197,11 @@ public class HubTierConnectionTests extends IntegrationTest
 
     public static void waitForDisconnect(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
     {
-        //Wait for DISCONNECTED_RETRYING
+        //Wait for DISCONNECTED
         long startTime = System.currentTimeMillis();
         while (!actualStatusUpdatesContainsStatus(actualStatusUpdates, IotHubConnectionStatus.DISCONNECTED))
         {
-            Thread.sleep(200);
+            Thread.sleep(2000);
             long timeElapsed = System.currentTimeMillis() - startTime;
             if (timeElapsed > timeout)
             {

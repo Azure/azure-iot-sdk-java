@@ -447,18 +447,10 @@ public class AmqpsSessionManagerTest
         };
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "onConnectionInit", mockConnection);
+        Boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onConnectionInit", mockConnection);
 
         // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
-                times = 1;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
-                times = 1;
-            }
-        };
+        assertTrue(returnValue);
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_026: [The function shall call setSslDomain on authentication if the session is not null.]

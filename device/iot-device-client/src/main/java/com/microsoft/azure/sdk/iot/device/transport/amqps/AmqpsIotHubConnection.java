@@ -521,7 +521,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         try
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_12_009: [The event handler shall call the amqpsSessionManager.onConnectionInit function with the connection.]
-            this.amqpsSessionManager.onConnectionInit(this.connection);
+            if (this.amqpsSessionManager.onConnectionInit(this.connection))
+            {
+                openLatch.countDown();
+            }
         }
         catch (TransportException e)
         {
