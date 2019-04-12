@@ -150,7 +150,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with status other than 300 or less
      */
-    public synchronized void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void requestNonceForTPM(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIHttp_25_003: [If either registrationId, sslcontext or responseCallback is null or if registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
         if (requestData.getRegistrationId() == null || requestData.getRegistrationId().isEmpty())
@@ -185,7 +185,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
             String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), customPayload, base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
             HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, null, SDKUtils.PROVISIONING_DEVICE_CLIENT_IDENTIFIER + SDKUtils.PROVISIONING_DEVICE_CLIENT_VERSION);
             //SRS_ContractAPIHttp_25_006: [This method shall set the SSLContext for the Http Request.]
@@ -231,7 +231,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with status other than 300 or less
      */
-    public synchronized void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void authenticateWithProvisioningService(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIHttp_25_011: [If either registrationId, sslcontext or responseCallback is null or if registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
         if (requestData.getRegistrationId() == null || requestData.getRegistrationId().isEmpty())
@@ -266,11 +266,11 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]
                 String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
                 String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
-                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), customPayload, base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             }
             else
             {
-                payload = new DeviceRegistrationParser(requestData.getRegistrationId()).toJson().getBytes();
+                payload = new DeviceRegistrationParser(requestData.getRegistrationId(), customPayload).toJson().getBytes();
             }
 
             //SRS_ContractAPIHttp_25_013: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]

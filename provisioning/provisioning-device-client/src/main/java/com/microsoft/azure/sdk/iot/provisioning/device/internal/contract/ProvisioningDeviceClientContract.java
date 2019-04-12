@@ -54,8 +54,8 @@ public abstract class ProvisioningDeviceClientContract
     }
 
     public abstract void open(RequestData requestData) throws ProvisioningDeviceConnectionException;
-    public abstract void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
-    public abstract void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
+    public abstract void requestNonceForTPM(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
+    public abstract void authenticateWithProvisioningService(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
     public abstract void getRegistrationStatus(RequestData requestData, ResponseCallback responseCallback, Object dpsAuthorizationCallbackContext) throws ProvisioningDeviceClientException;
     public abstract void close() throws ProvisioningDeviceConnectionException;
 }

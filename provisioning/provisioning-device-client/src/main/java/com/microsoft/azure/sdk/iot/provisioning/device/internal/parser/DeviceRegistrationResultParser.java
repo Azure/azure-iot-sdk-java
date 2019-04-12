@@ -7,6 +7,7 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.parser;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
@@ -60,6 +61,10 @@ public class DeviceRegistrationResultParser
     private static final String X509 = "x509";
     @SerializedName(X509)
     private X509RegistrationResultParser x509;
+
+    private static final String PAYLOAD = "payload";
+    @SerializedName(PAYLOAD)
+    private JsonObject jsonPayload;
 
     //empty constructor for Gson
     DeviceRegistrationResultParser()
@@ -176,5 +181,10 @@ public class DeviceRegistrationResultParser
     {
         //SRS_DeviceRegistrationResultParser_25_011: [ This method shall return the parsed errorMessage. ]
         return errorMessage;
+    }
+
+    public String getPayload()
+    {
+        return jsonPayload.toString();
     }
 }

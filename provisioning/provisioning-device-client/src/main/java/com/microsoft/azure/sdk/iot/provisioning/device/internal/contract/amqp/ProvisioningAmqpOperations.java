@@ -9,6 +9,9 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
+import org.apache.qpid.proton.amqp.Binary;
+import org.apache.qpid.proton.amqp.messaging.Data;
+import org.apache.qpid.proton.amqp.messaging.Section;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -62,7 +65,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         this.hostName = hostName;
     }
 
-    private synchronized void sendAmqpMessage(String msgType, String operationId) throws ProvisioningDeviceClientException
+    private synchronized void sendAmqpMessage(String msgType, String operationId, byte[] msgBody) throws ProvisioningDeviceClientException
     {
         try
         {
@@ -77,6 +80,12 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             }
             outgoingMessage.setApplicationProperty(userProperties);
 
+            if (msgBody != null && msgBody.length > 0)
+            {
+                Binary binary = new Binary(msgBody);
+                Data msgData = new Data(binary);
+                outgoingMessage.setBody(msgData);
+            }
             this.amqpConnection.sendAmqpMessage(outgoingMessage);
         }
         catch (Exception e)
@@ -207,7 +216,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         }
 
         // SRS_ProvisioningAmqpOperations_07_016: [This method shall send the Operation Status AMQP Provisioning message.]
-        this.sendAmqpMessage(AMQP_OPERATION_STATUS, operationId);
+        this.sendAmqpMessage(AMQP_OPERATION_STATUS, operationId, null);
 
         try
         {
@@ -231,7 +240,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param callbackContext Callback context for the response call.
      * @throws ProvisioningDeviceClientException If sending Register Message is unsuccessful for any reason.
      */
-    public void sendRegisterMessage(ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
+    public void sendRegisterMessage(ResponseCallback responseCallback, Object callbackContext, byte[] msgBody) throws ProvisioningDeviceClientException
     {
         // SRS_ProvisioningAmqpOperations_07_009: [sendRegisterMessage shall throw ProvisioningDeviceClientException if either responseCallback is null.]
         if (responseCallback == null)
@@ -261,7 +270,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         }
 
         // SRS_ProvisioningAmqpOperations_07_010: [This method shall send the Register AMQP Provisioning message.]
-        this.sendAmqpMessage(AMQP_REGISTER_DEVICE, null);
+        this.sendAmqpMessage(AMQP_REGISTER_DEVICE, null, msgBody);
 
         try
         {

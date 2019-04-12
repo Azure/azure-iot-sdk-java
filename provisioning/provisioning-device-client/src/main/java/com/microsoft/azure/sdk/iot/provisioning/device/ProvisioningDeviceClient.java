@@ -102,6 +102,15 @@ public class ProvisioningDeviceClient
     }
 
     /**
+     * Set the Custom Provisioning payload to send to DPS during the registration process
+     * @param jsonPayload The json payload that will be transferred to DPS
+     */
+    public void setProvisioningPayload(String jsonPayload)
+    {
+        this.provisioningDeviceClientConfig.setCustomPayload(jsonPayload);
+    }
+
+    /**
      * Closes all the executors opened by the client if they have not already closed.
      */
     public void closeNow()

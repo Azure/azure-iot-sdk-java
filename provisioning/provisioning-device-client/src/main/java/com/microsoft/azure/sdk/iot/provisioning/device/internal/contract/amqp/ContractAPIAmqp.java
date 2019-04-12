@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceTransportException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
@@ -102,7 +103,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with an invalid status
      */
-    public synchronized void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object authorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void requestNonceForTPM(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object authorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         if (requestData == null)
         {
@@ -146,7 +147,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with an invalid status
      */
-    public synchronized void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
+    public synchronized void authenticateWithProvisioningService(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIAmqp_07_003: [If responseCallback is null, this method shall throw ProvisioningDeviceClientException.]
         if (responseCallback == null)
@@ -168,8 +169,10 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             this.amqpSaslHandler.setSasToken(requestData.getSasToken());
         }
 
+        byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), customPayload).toJson().getBytes();
+
         // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
-        this.provisioningAmqpOperations.sendRegisterMessage(responseCallback, callbackContext);
+        this.provisioningAmqpOperations.sendRegisterMessage(responseCallback, callbackContext, payload);
     }
 
     /**

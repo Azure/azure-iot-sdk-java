@@ -20,6 +20,7 @@ public final class ProvisioningDeviceClientConfig
 
     private ProvisioningDeviceClientRegistrationCallback registrationCallback;
     private Object registrationCallbackContext;
+    private String jsonPayload;
 
     /**
      * Setter for the Registration Callback.
@@ -149,5 +150,23 @@ public final class ProvisioningDeviceClientConfig
     public boolean getUseWebSockets()
     {
         return this.useWebSockets;
+    }
+
+    /**
+     * Setter data for custom payload
+     * @param json payload data
+     */
+    public void setCustomPayload(String jsonPayload)
+    {
+        this.jsonPayload = jsonPayload;
+    }
+
+    /**
+     * Getter for retreiving Custom Payload
+     * @return value of the custom payload
+     */
+    public String getCustomPayload()
+    {
+        return this.jsonPayload;
     }
 }

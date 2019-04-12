@@ -185,7 +185,7 @@ public class RegisterTaskTest
             {
                 Deencapsulation.invoke(mockedAuthorization, "setSslContext", mockedSslContext);
                 times = 1;
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any, null,
                                                                                            (ResponseCallback)any, any);
                 times = 1;
             }
@@ -268,7 +268,7 @@ public class RegisterTaskTest
                 result = "testJson";
                 mockedDpsSecurityProviderX509.getSSLContext();
                 result = mockedSslContext;
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any, null,
                                                                                            (ResponseCallback)any, any);
                 result = new ProvisioningDeviceTransportException("test transport exception");
             }
@@ -396,12 +396,12 @@ public class RegisterTaskTest
                 times = 1;
                 Deencapsulation.invoke(mockedAuthorization, "setSasToken", anyString);
                 times = 1;
-                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any, anyString,
                         (ResponseCallback)any, any);
                 times = 1;
                 mockedSecurityProviderTpm.activateIdentityKey((byte[])any);
                 times = 1;
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any, null,
                                                                                            (ResponseCallback)any, any);
                 times = 1;
             }
@@ -448,12 +448,12 @@ public class RegisterTaskTest
                 times = 1;
                 Deencapsulation.invoke(mockedAuthorization, "setSasToken", anyString);
                 times = 1;
-                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any, anyString,
                                                                           (ResponseCallback)any, any);
                 times = 0;
                 mockedSecurityProviderTpm.activateIdentityKey((byte[])any);
                 times = 0;
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any, null,
                                                                                            (ResponseCallback)any, any);
                 times = 1;
             }
@@ -574,7 +574,7 @@ public class RegisterTaskTest
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
-                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any,
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any, anyString,
                         (ResponseCallback)any, any);
                 result = new ProvisioningDeviceHubException("test exception");
             }
@@ -1027,7 +1027,7 @@ public class RegisterTaskTest
                 result = "testUrl";
                 mockedSecurityProviderTpm.signWithIdentity((byte[])any);
                 result = "testToken".getBytes();
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any, null,
                                                                                            (ResponseCallback)any, any);
                 result = new ProvisioningDeviceTransportException("test transport exception");
             }
@@ -1058,7 +1058,7 @@ public class RegisterTaskTest
                 result = "testJson";
                 mockedSecurityProviderTpm.getSSLContext();
                 result = mockedSslContext;
-                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any, (ResponseCallback)any, any);
+                mockedProvisioningDeviceClientContract.requestNonceForTPM((RequestData) any, anyString, (ResponseCallback)any, any);
             }
         };
 
@@ -1083,7 +1083,7 @@ public class RegisterTaskTest
                 result = "testUrl";
                 mockedSecurityProviderTpm.signWithIdentity((byte[])any);
                 result = "testToken".getBytes();
-                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any,
+                mockedProvisioningDeviceClientContract.authenticateWithProvisioningService((RequestData) any, null,
                                                                                            (ResponseCallback)any, any);
             }
         };

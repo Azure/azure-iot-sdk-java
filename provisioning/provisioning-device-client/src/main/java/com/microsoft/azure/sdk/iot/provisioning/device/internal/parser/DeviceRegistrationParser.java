@@ -21,6 +21,10 @@ public class DeviceRegistrationParser
     @SerializedName(TPM)
     private TpmAttestation tpmAttestation;
 
+    private static final String CUSTOM_PAYLOAD = "payload";
+    @SerializedName(CUSTOM_PAYLOAD)
+    private String customPayload = null;
+
     /**
      * Inner class describing TPM Attestation i.e it holds EndorsementKey and StorageRootKey
      */
@@ -46,7 +50,7 @@ public class DeviceRegistrationParser
      * @param registrationId Registration Id to be sent to the service. Cannot be a {@code null} or empty value.
      * @throws IllegalArgumentException If the provided registration id was {@code null} or empty.
      */
-    public DeviceRegistrationParser(String registrationId) throws IllegalArgumentException
+    public DeviceRegistrationParser(String registrationId, String customPayload) throws IllegalArgumentException
     {
         //SRS_DeviceRegistration_25_001: [ The constructor shall throw IllegalArgumentException if Registration Id is null or empty. ]
         if (registrationId == null || registrationId.isEmpty())
@@ -56,6 +60,10 @@ public class DeviceRegistrationParser
 
         //SRS_DeviceRegistration_25_002: [ The constructor shall save the provided Registration Id. ]
         this.registrationId = registrationId;
+        if (!customPayload.isEmpty())
+        {
+            this.customPayload = customPayload;
+        }
     }
 
     /**
@@ -65,7 +73,7 @@ public class DeviceRegistrationParser
      * @param storageRootKey Storage Root Key to be sent to the service. Can be a {@code null} value.
      * @throws IllegalArgumentException is thrown if any of the input parameters are invalid.
      */
-    public DeviceRegistrationParser(String registrationId, String endorsementKey, String storageRootKey) throws IllegalArgumentException
+    public DeviceRegistrationParser(String registrationId, String customPayload, String endorsementKey, String storageRootKey) throws IllegalArgumentException
     {
         //SRS_DeviceRegistration_25_003: [ The constructor shall throw IllegalArgumentException if Registration Id is null or empty. ]
         if (registrationId == null || registrationId.isEmpty())
@@ -81,6 +89,10 @@ public class DeviceRegistrationParser
 
         //SRS_DeviceRegistration_25_006: [ The constructor shall save the provided Registration Id, EndorsementKey and StorageRootKey. ]
         this.registrationId = registrationId;
+        if (!customPayload.isEmpty())
+        {
+            this.customPayload = customPayload;
+        }
         this.tpmAttestation = new TpmAttestation(endorsementKey, storageRootKey);
     }
 
@@ -94,7 +106,9 @@ public class DeviceRegistrationParser
             "\"tpm\":{" +
             "\"endorsementKey\":\"[Endorsement Key value]\"," +
             "\"storageRootKey\":\"[Storage root key value]\"" +
-            "}}"
+            "}
+            "\"payload\":\"[Custom Data]\""
+            }"
      *     }
          * </pre>
      * For X509:

@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.deps.transport.mqtt.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
@@ -69,10 +70,10 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         this.packetId = 1;
     }
 
-    private void executeProvisioningMessage(String topic, ResponseCallback responseCallback, Object callbackContext) throws IOException, ProvisioningDeviceClientException
+    private void executeProvisioningMessage(String topic, byte[] body, ResponseCallback responseCallback, Object callbackContext) throws IOException, ProvisioningDeviceClientException
     {
         // Send the message
-        this.mqttConnection.publishMessage(topic, MqttQos.DELIVER_AT_MOST_ONCE, null);
+        this.mqttConnection.publishMessage(topic, MqttQos.DELIVER_AT_MOST_ONCE, body);
 
         try
         {
@@ -173,7 +174,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with an invalid status
      */
-    public synchronized void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
+    public synchronized void authenticateWithProvisioningService(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIAmqp_07_003: [If responseCallback is null, this method shall throw ProvisioningDeviceClientException.]
         if (responseCallback == null)
@@ -183,7 +184,8 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
         if (!requestData.isX509())
         {
-            if (requestData.getSasToken() == null || requestData.getSasToken().isEmpty())
+            String sasToken = requestData.getSasToken();
+            if (sasToken == null || sasToken.isEmpty())
             {
                 //SRS_ContractAPIAmqp_34_021: [If the requestData is not x509, but the provided requestData does not contain a sas token, this function shall
                 // throw a ProvisioningDeviceConnectionException.]
@@ -204,8 +206,11 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         {
             String topic = String.format(MQTT_REGISTER_MESSAGE_FMT, this.packetId++);
 
-            // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
-            this.executeProvisioningMessage(topic, responseCallback, callbackContext);
+            //SRS_ContractAPIMqtt_07_026: [ This method shall build the required Json input using parser. ]
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), customPayload).toJson().getBytes();
+
+            // SRS_ContractAPIMqtt_07_005: [This method shall send an MQTT message with the property of iotdps-register.]
+            this.executeProvisioningMessage(topic, payload, responseCallback, callbackContext);
         }
         catch (IOException ex)
         {
@@ -256,7 +261,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             String topic = String.format(MQTT_STATUS_MESSAGE_FMT, this.packetId++, operationId);
 
             // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
-            this.executeProvisioningMessage(topic, responseCallback, callbackContext);
+            this.executeProvisioningMessage(topic, null, responseCallback, callbackContext);
         }
         catch (IOException ex)
         {
@@ -273,7 +278,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with an invalid status
      */
-    public synchronized void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object authorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void requestNonceForTPM(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object authorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         if (requestData == null)
         {
