@@ -308,7 +308,7 @@ public class TransportClientTests extends IntegrationTest
                             deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl))
                     .start();
         }
-        cdl.await();
+        cdl.await(3, TimeUnit.MINUTES);
 
         if(!succeed.get())
         {
@@ -340,7 +340,7 @@ public class TransportClientTests extends IntegrationTest
                             deviceListAmqps[i], clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl))
                     .start();
         }
-        cdl.await();
+        cdl.await(3, TimeUnit.MINUTES);
 
         if(!succeed.get())
         {
@@ -520,7 +520,7 @@ public class TransportClientTests extends IntegrationTest
             CountDownLatch countDownLatch = new CountDownLatch(1);
             RunnableInvoke runnableInvoke = new RunnableInvoke(methodServiceClient, deviceListAmqps[i].getDeviceId(), METHOD_NAME, METHOD_PAYLOAD, countDownLatch);
             new Thread(runnableInvoke).start();
-            countDownLatch.await();
+            countDownLatch.await(3, TimeUnit.MINUTES);
 
             MethodResult result = runnableInvoke.getResult();
             Assert.assertNotNull(buildExceptionMessage(runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage(), clientArrayList.get(i)), result);
@@ -558,7 +558,7 @@ public class TransportClientTests extends IntegrationTest
             new Thread(runnableInvoke).start();
             runs.add(runnableInvoke);
         }
-        countDownLatch.await();
+        countDownLatch.await(3, TimeUnit.MINUTES);
 
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS * MAX_DEVICE_MULTIPLEX);
 
@@ -594,7 +594,7 @@ public class TransportClientTests extends IntegrationTest
             CountDownLatch countDownLatch = new CountDownLatch(1);
             RunnableInvoke runnableInvoke = new RunnableInvoke(methodServiceClient, deviceListAmqps[i].getDeviceId(), METHOD_NAME, METHOD_PAYLOAD, countDownLatch);
             new Thread(runnableInvoke).start();
-            countDownLatch.await();
+            countDownLatch.await(3, TimeUnit.MINUTES);
 
             MethodResult result = runnableInvoke.getResult();
             Assert.assertNotNull(buildExceptionMessage(runnableInvoke.getException() == null ? "Runnable returns null without exception information" : runnableInvoke.getException().getMessage(), clientArrayList.get(i)), result);
@@ -633,7 +633,7 @@ public class TransportClientTests extends IntegrationTest
             new Thread(runnableInvoke).start();
             runs.add(runnableInvoke);
         }
-        countDownLatch.await();
+        countDownLatch.await(3, TimeUnit.MINUTES);
 
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS * MAX_DEVICE_MULTIPLEX);
 
