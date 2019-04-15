@@ -21,6 +21,7 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.assertEquals;
@@ -69,7 +70,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
             runs.add(runnableInvoke);
         }
 
-        cdl.await();
+        cdl.await(3, TimeUnit.MINUTES);
 
         for (RunnableInvoke run:runs)
         {
