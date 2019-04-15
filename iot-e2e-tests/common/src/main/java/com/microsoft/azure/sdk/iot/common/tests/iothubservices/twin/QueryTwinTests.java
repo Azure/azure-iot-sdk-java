@@ -52,6 +52,8 @@ public class QueryTwinTests extends DeviceTwinCommon
 
         setDesiredProperties(queryProperty, queryPropertyValue, MAX_DEVICES);
 
+        Thread.sleep(DESIRED_PROPERTIES_PROPAGATION_TIME_MILLIS);
+
         // Raw Query for multiple devices having same property
         final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
         final String groupBy = "properties.desired." + queryProperty;
