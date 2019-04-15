@@ -20,7 +20,8 @@ import java.security.cert.CertificateException;
 public class SecurityProviderSymmetricKey extends SecurityProvider
 {
     private static final String HMAC_SHA_256 = "HmacSHA256";
-    private byte[] symmetricKey;
+    private byte[] primaryKey;
+    private byte[] secondaryKey;
     private String registrationId;
 
     /**
@@ -31,12 +32,39 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
     public SecurityProviderSymmetricKey(byte[] symmetricKey, String registrationId)
     {
         if (symmetricKey == null)
+        {
             throw new IllegalArgumentException("Symmetric key cannot be null");
+        }
 
         if (registrationId == null || registrationId.isEmpty())
+        {
             throw new IllegalArgumentException("Registration ID cannot be null");
+        }
 
-        this.symmetricKey = symmetricKey;
+        this.primaryKey = symmetricKey;
+        this.registrationId = registrationId;
+    }
+
+    /**
+     * Constructor for Symmetric key security provider that takes both keys
+     * @param primaryKey Primary key to be used
+     * @param secondaryKey Secondary key to be used
+     * @param registrationId Registration ID to be used
+     */
+    public SecurityProviderSymmetricKey(String primaryKey, String secondaryKey, String registrationId)
+    {
+        if (primaryKey == null || primaryKey.isEmpty() || secondaryKey == null || secondaryKey.isEmpty())
+        {
+            throw new IllegalArgumentException("Symmetric key cannot be null");
+        }
+
+        if (registrationId == null || registrationId.isEmpty())
+        {
+            throw new IllegalArgumentException("Registration ID cannot be null");
+        }
+
+        this.primaryKey = primaryKey.getBytes();
+        this.secondaryKey = secondaryKey.getBytes();
         this.registrationId = registrationId;
     }
 
@@ -46,7 +74,7 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
      */
     public byte[] getSymmetricKey()
     {
-        return symmetricKey;
+        return primaryKey;
     }
 
     /**
