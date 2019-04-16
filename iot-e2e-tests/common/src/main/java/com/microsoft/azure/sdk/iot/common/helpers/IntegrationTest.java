@@ -27,9 +27,14 @@ public class IntegrationTest
         }
     };
 
+    @Rule
+    public final ConditionalIgnoreRule mConditionalIgnore = new ConditionalIgnoreRule();
+
     public static final int E2E_TEST_TIMEOUT_MS = 15 * 60 * 1000;
 
     //This timeout applies to all individual tests in classes that inherit from this class
     @Rule
     public Timeout timeout = new Timeout(E2E_TEST_TIMEOUT_MS);
+
+    public static boolean isBasicTierHub;
 }

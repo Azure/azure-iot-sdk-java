@@ -5,11 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
-import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -21,10 +17,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -245,6 +238,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSendReportedPropertiesWithoutVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -289,6 +283,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateReportedPropertiesWithVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -376,6 +371,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateReportedPropertiesWithLowerVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -461,6 +457,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateReportedPropertiesWithHigherVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange

@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 @TestGroup6
 @RunWith(Parameterized.class)
@@ -57,23 +58,30 @@ public class DeviceMethodModuleAndroidRunner extends DeviceMethodTests
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
         String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         String x509Thumbprint = BuildConfig.IotHubThumbprint;
         String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
 
-        Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-        Object[] inputsArray = inputs.toArray();
-
-        testManagers = new ArrayList<>();
-        for (int i = 0; i < inputsArray.length; i++)
+        if (!isBasicTierHub)
         {
-            Object[] inputCollection = (Object[])inputsArray[i];
-            testManagers.add((DeviceTestManager) inputCollection[0]);
+            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
+            Object[] inputsArray = inputs.toArray();
+
+            testManagers = new ArrayList<>();
+            for (int i = 0; i < inputsArray.length; i++)
+            {
+                Object[] inputCollection = (Object[]) inputsArray[i];
+                testManagers.add((DeviceTestManager) inputCollection[0]);
+            }
+
+            identities = getIdentities(inputs);
+            return inputs;
         }
-
-        identities = getIdentities(inputs);
-
-        return inputs;
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     @AfterClass

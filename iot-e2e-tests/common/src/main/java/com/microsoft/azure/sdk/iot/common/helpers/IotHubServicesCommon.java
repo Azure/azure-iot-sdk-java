@@ -344,6 +344,14 @@ public class IotHubServicesCommon
             {
                 //ignore and try again
                 System.out.println("Encountered exception while opening device client, retrying...: " + Tools.getStackTraceFromThrowable(e));
+                try
+                {
+                    client.closeNow();
+                }
+                catch (IOException ioException)
+                {
+                    System.out.println("Failed to close client: " + Tools.getStackTraceFromThrowable(ioException));
+                }
                 Thread.sleep(400);
             }
         }

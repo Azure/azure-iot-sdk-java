@@ -21,6 +21,7 @@ public class ExportImportJVMRunner extends ExportImportTests
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         storageAccountConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.STORAGE_ACCOUNT_CONNECTION_STRING_ENV_VAR_NAME);
         ExportImportTests.setUp();
     }

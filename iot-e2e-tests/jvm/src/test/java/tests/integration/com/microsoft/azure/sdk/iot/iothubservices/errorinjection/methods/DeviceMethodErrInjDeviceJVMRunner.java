@@ -36,6 +36,7 @@ public class DeviceMethodErrInjDeviceJVMRunner extends DeviceMethodErrInjTests
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         Collection inputs = inputsCommon(ClientType.DEVICE_CLIENT);
         Object[] inputsArray = inputs.toArray();
 

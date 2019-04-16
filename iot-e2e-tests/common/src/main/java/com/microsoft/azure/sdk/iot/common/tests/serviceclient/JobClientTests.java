@@ -22,6 +22,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ import static org.junit.Assert.*;
 public class JobClientTests
 {
     protected static String iotHubConnectionString = "";
+    public static boolean isBasicTierHub;
     private static JobClient jobClient;
     private static RegistryManager registryManager;
 
@@ -124,7 +126,7 @@ public class JobClientTests
         {
             testDevice = Tools.addDeviceWithRetry(registryManager, Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
             DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
-            testManager.start();
+            testManager.start(true, true);
             devices.add(testManager);
         }
     }

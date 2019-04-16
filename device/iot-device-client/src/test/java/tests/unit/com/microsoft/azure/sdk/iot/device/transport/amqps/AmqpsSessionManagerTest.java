@@ -295,7 +295,7 @@ public class AmqpsSessionManagerTest
         Deencapsulation.setField(amqpsSessionManager, "session", null);
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks");
+        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw TransportException if the lock throws.]
@@ -316,13 +316,15 @@ public class AmqpsSessionManagerTest
         new NonStrictExpectations()
         {
             {
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
+                result = true;
                 mockObjectLock.waitLock(anyLong);
                 result = new InterruptedException();
             }
         };
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks");
+        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_019: [The function shall call openLinks on all session list members.]
@@ -346,20 +348,20 @@ public class AmqpsSessionManagerTest
             {
                 mockAmqpsDeviceAuthenticationCBS.operationLinksOpened();
                 result = true;
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
+                result = true;
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
+                result = true;
             }
         };
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks");
+        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
 
         // assert
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession);
-                times = 1;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession);
-                times = 1;
                 mockObjectLock.waitLock(anyLong);
                 times = 2;
             }
@@ -445,18 +447,10 @@ public class AmqpsSessionManagerTest
         };
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "onConnectionInit", mockConnection);
+        Boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onConnectionInit", mockConnection);
 
         // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession);
-                times = 1;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession);
-                times = 1;
-            }
-        };
+        assertTrue(returnValue);
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_026: [The function shall call setSslDomain on authentication if the session is not null.]
@@ -650,7 +644,7 @@ public class AmqpsSessionManagerTest
                 result = linkName;
                 Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "isLinkFound", linkName);
                 result = true;
-                mockAmqpsSessionDeviceOperation.operationLinksOpened();
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "operationLinksOpened");
                 result = true;
             }
         };

@@ -57,15 +57,21 @@ public class DeviceTestManager
         this.deviceEmulator.clearStatistics();
     }
 
-    public void start() throws IOException, InterruptedException
+    public void start(boolean enableMethod, boolean enableTwin) throws IOException, InterruptedException
     {
         this.deviceEmulator.start();
 
-        /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceMethod();
+        if (enableMethod)
+        {
+            /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
+            deviceEmulator.enableDeviceMethod();
+        }
 
-        /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceTwin();
+        if (enableTwin)
+        {
+            /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
+            deviceEmulator.enableDeviceTwin();
+        }
 
         /* Wait until the device complete the connection with the IoTHub. */
         //waitIotHub(1, OPEN_CONNECTION_TIMEOUT_IN_SECONDS);

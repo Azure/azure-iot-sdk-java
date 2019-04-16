@@ -29,6 +29,7 @@ public class TransportClientAndroidRunner extends TransportClientTests
     public static void setup() throws Exception
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         setUpCommon();
     }
 

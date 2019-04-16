@@ -33,6 +33,7 @@ public class ReportedPropertiesErrInjModuleJVMRunner extends ReportedPropertiesE
     public static Collection inputsCommons() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         Collection inputs = inputsCommon(ClientType.MODULE_CLIENT);
         identities = getIdentities(inputs);
         return inputs;

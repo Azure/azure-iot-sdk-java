@@ -8,6 +8,8 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
+import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
+import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -40,6 +42,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -76,6 +79,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -182,6 +186,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -217,6 +222,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(PAGE_SIZE + 1);
@@ -283,6 +289,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void queryCollectionCanReturnEmptyQueryResults() {
         try
         {
@@ -302,6 +309,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

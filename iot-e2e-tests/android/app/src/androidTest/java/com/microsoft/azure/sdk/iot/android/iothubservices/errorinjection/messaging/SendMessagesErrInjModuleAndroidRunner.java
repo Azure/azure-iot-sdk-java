@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
+import java.util.Collections;
 
 @TestGroup4
 @RunWith(Parameterized.class)
@@ -54,15 +55,21 @@ public class SendMessagesErrInjModuleAndroidRunner extends SendMessagesErrInjTes
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
         String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         String x509Thumbprint = BuildConfig.IotHubThumbprint;
         String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
 
-        Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-
-        identities = getIdentities(inputs);
-
-        return inputs;
+        if (!isBasicTierHub)
+        {
+            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
+            identities = getIdentities(inputs);
+            return inputs;
+        }
+        else
+        {
+            return Collections.EMPTY_LIST;
+        }
     }
 
     @AfterClass

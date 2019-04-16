@@ -58,29 +58,32 @@ public class Tools
      */
     public static void removeDevicesAndModules(RegistryManager registryManager, Collection<BaseDevice> identitiesToDispose)
     {
-        for (BaseDevice identityToDispose : identitiesToDispose)
+        if (identitiesToDispose != null && !identitiesToDispose.isEmpty())
         {
-            try
+            for (BaseDevice identityToDispose : identitiesToDispose)
             {
-                if (identityToDispose instanceof Module)
+                try
                 {
-                    registryManager.removeModule(identityToDispose.getDeviceId(), ((Module) identityToDispose).getId());
+                    if (identityToDispose instanceof Module)
+                    {
+                        registryManager.removeModule(identityToDispose.getDeviceId(), ((Module) identityToDispose).getId());
+                    }
                 }
-            }
-            catch (IOException | IotHubException e)
-            {
-                System.out.println("Failed to remove module " + ((Module) identityToDispose).getId() + " from device " + identityToDispose.getDeviceId());
-                e.printStackTrace();
-            }
+                catch (IOException | IotHubException e)
+                {
+                    System.out.println("Failed to remove module " + ((Module) identityToDispose).getId() + " from device " + identityToDispose.getDeviceId());
+                    e.printStackTrace();
+                }
 
-            try
-            {
-                registryManager.removeDevice(identityToDispose.getDeviceId());
-            }
-            catch (IOException | IotHubException e)
-            {
-                System.out.println("Failed to remove device " + identityToDispose.getDeviceId());
-                e.printStackTrace();
+                try
+                {
+                    registryManager.removeDevice(identityToDispose.getDeviceId());
+                }
+                catch (IOException | IotHubException e)
+                {
+                    System.out.println("Failed to remove device " + identityToDispose.getDeviceId());
+                    e.printStackTrace();
+                }
             }
         }
     }

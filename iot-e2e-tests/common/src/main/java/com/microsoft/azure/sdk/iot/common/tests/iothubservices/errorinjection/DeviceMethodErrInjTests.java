@@ -37,6 +37,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromTcpConnectionDrop() throws Exception
     {
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
@@ -45,6 +46,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -58,6 +60,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -71,6 +74,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -90,6 +94,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -109,6 +114,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -122,6 +128,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -142,6 +149,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -162,6 +170,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -182,46 +191,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    public void invokeMethodRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Twin Req is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
-
-        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    public void invokeMethodRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Twin Resp is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
-
-        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromGracefulShutdownAmqp() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -235,6 +205,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromGracefulShutdownMqtt() throws Exception
     {
         if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))

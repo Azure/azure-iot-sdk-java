@@ -5,10 +5,13 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
+import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 
@@ -74,6 +77,7 @@ public class ServiceClientTests extends IntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void cloudToDeviceTelemetry() throws Exception
     {
         // Arrange

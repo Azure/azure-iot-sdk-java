@@ -31,6 +31,7 @@ public class ServiceClientAndroidRunner extends ServiceClientTests
     public static Collection inputsCommon() throws IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         invalidCertificateServerConnectionString = BuildConfig.IotHubInvalidCertConnectionString;
         return ServiceClientTests.inputsCommon();
     }

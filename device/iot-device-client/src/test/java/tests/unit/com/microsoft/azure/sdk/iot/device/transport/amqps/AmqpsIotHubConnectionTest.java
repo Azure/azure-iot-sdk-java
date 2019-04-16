@@ -551,7 +551,7 @@ public class AmqpsIotHubConnectionTest {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
 
-                mockAmqpsSessionManager.openDeviceOperationLinks();
+                mockAmqpsSessionManager.openDeviceOperationLinks(MessageType.DEVICE_TELEMETRY);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
@@ -607,7 +607,7 @@ public class AmqpsIotHubConnectionTest {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
 
-                mockAmqpsSessionManager.openDeviceOperationLinks();
+                mockAmqpsSessionManager.openDeviceOperationLinks(MessageType.DEVICE_TELEMETRY);
 
                 Deencapsulation.getField(connection, "savedException");
                 result = new AmqpConnectionForcedException();
@@ -846,7 +846,7 @@ public class AmqpsIotHubConnectionTest {
             {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 times = 1;
-                Deencapsulation.invoke(mockAmqpsSessionManager, "openDeviceOperationLinks");
+                Deencapsulation.invoke(mockAmqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
                 times = 0;
             }
         };
@@ -880,7 +880,7 @@ public class AmqpsIotHubConnectionTest {
             {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 times = 1;
-                Deencapsulation.invoke(mockAmqpsSessionManager, "openDeviceOperationLinks");
+                Deencapsulation.invoke(mockAmqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
                 times = 1;
             }
         };
@@ -2345,7 +2345,7 @@ public class AmqpsIotHubConnectionTest {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
 
-                mockAmqpsSessionManager.openDeviceOperationLinks();
+                mockAmqpsSessionManager.openDeviceOperationLinks(MessageType.DEVICE_TELEMETRY);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
@@ -2391,7 +2391,7 @@ public class AmqpsIotHubConnectionTest {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;
 
-                mockAmqpsSessionManager.openDeviceOperationLinks();
+                mockAmqpsSessionManager.openDeviceOperationLinks(MessageType.DEVICE_TELEMETRY);
 
                 Deencapsulation.invoke(mockAmqpsSessionManager, "isAuthenticationOpened");
                 result = true;

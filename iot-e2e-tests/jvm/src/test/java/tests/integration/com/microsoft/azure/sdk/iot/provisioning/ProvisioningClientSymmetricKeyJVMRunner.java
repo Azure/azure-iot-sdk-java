@@ -7,6 +7,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
+import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.setup.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.common.tests.provisioning.ProvisioningTests;
@@ -29,6 +30,7 @@ public class ProvisioningClientSymmetricKeyJVMRunner extends ProvisioningTests
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
         provisioningServiceGlobalEndpoint = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME);
         provisioningServiceIdScope = Tools.retrieveEnvironmentVariableValue(DPS_ID_SCOPE_ENV_VAR_NAME);

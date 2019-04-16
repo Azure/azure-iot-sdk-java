@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.methods;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceMethodCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
@@ -42,12 +40,14 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodSucceed() throws Exception
     {
         super.invokeMethodSucceed();
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
         // Arrange
@@ -81,6 +81,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodStandardTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -107,6 +108,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodNullPayloadSucceed() throws Exception
     {
         // Arrange
@@ -132,6 +134,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodNumberSucceed() throws Exception
     {
         // Arrange
@@ -157,6 +160,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodThrowsNumberFormatExceptionFailed() throws Exception
     {
         // Arrange
@@ -182,6 +186,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodUnknownFailed() throws Exception
     {
         // Arrange
@@ -207,6 +212,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoverFromTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -249,6 +255,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodDefaultResponseTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -274,6 +281,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodDefaultConnectionTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -299,6 +307,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test (expected = IotHubGatewayTimeoutException.class)
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodResponseTimeoutFailed() throws Exception
     {
         // Arrange
@@ -314,6 +323,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test(expected = IotHubNotFoundException.class)
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodUnknownDeviceFailed() throws Exception
     {
         if (testInstance.identity instanceof Module)
@@ -327,6 +337,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodResetDeviceFailed() throws Exception
     {
         // Arrange

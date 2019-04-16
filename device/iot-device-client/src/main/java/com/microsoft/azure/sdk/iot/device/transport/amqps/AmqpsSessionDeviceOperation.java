@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.device.MessageType.*;
+
 public class AmqpsSessionDeviceOperation
 {
     private final DeviceClientConfig deviceClientConfig;
@@ -18,7 +20,7 @@ public class AmqpsSessionDeviceOperation
     private AmqpsDeviceAuthenticationState amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.UNKNOWN;
     private final AmqpsDeviceAuthentication amqpsDeviceAuthentication;
 
-    private ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<>();;
+    private Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
 
     private long nextTag = 0;
 
@@ -62,10 +64,8 @@ public class AmqpsSessionDeviceOperation
         this.deviceClientConfig = deviceClientConfig;
         this.amqpsDeviceAuthentication = amqpsDeviceAuthentication;
 
-        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_003: [The constructor shall create AmqpsDeviceTelemetry, AmqpsDeviceMethods and AmqpsDeviceTwin and add them to the device operations list. ]
-        this.amqpsDeviceOperationsList.add(new AmqpsDeviceTelemetry(this.deviceClientConfig));
-        this.amqpsDeviceOperationsList.add(new AmqpsDeviceMethods(this.deviceClientConfig));
-        this.amqpsDeviceOperationsList.add(new AmqpsDeviceTwin(this.deviceClientConfig));
+        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_003: [The constructor shall create AmqpsDeviceTelemetry and add it to the device operations map. ]
+        this.amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, new AmqpsDeviceTelemetry(this.deviceClientConfig));
 
         this.logger = new CustomLogger(this.getClass());
 
@@ -193,10 +193,10 @@ public class AmqpsSessionDeviceOperation
     {
         Boolean allLinksOpened = true;
 
-        for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+        for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_008: [The function shall return true if all operation links are opene, otherwise return false.]
-            if (!this.amqpsDeviceOperationsList.get(i).operationLinksOpened())
+            if (!entry.getValue().operationLinksOpened())
             {
                 allLinksOpened = false;
                 break;
@@ -211,8 +211,10 @@ public class AmqpsSessionDeviceOperation
      * @param session the Proton session to open the links on.
      * @throws TransportException throw if Proton operation throws.
      */
-    void openLinks(Session session) throws TransportException
+    boolean openLinks(Session session, MessageType msgType) throws TransportException
     {
+        boolean waitForRemoteOpenCallback = false;
+
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_042: [The function shall do nothing if the session parameter is null.]
@@ -220,18 +222,31 @@ public class AmqpsSessionDeviceOperation
         {
             if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
             {
-                for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+                if (this.amqpsDeviceOperationsMap.get(msgType) == null)
                 {
-                    synchronized (this.openLock)
+                    switch(msgType)
                     {
-                        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
-                        this.amqpsDeviceOperationsList.get(i).openLinks(session);
+                        case DEVICE_METHODS:
+                            this.amqpsDeviceOperationsMap.put(DEVICE_METHODS, new AmqpsDeviceMethods(this.deviceClientConfig));
+                            break;
+                        case DEVICE_TWIN:
+                            this.amqpsDeviceOperationsMap.put(DEVICE_TWIN, new AmqpsDeviceTwin(this.deviceClientConfig));
+                            break;
+                        default:
+                            break;
                     }
+                }
+
+                synchronized (this.openLock)
+                {
+                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
+                    waitForRemoteOpenCallback = this.amqpsDeviceOperationsMap.get(msgType).openLinks(session);
                 }
             }
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+        return waitForRemoteOpenCallback;
     }
 
     /**
@@ -241,10 +256,12 @@ public class AmqpsSessionDeviceOperation
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        for (int i = 0; i < amqpsDeviceOperationsList.size(); i++)
+        Iterator iterator = amqpsDeviceOperationsMap.entrySet().iterator();
+        while (iterator.hasNext())
         {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_010: [The function shall call closeLinks on all device operations.]
-            amqpsDeviceOperationsList.get(i).closeLinks();
+            Map.Entry<MessageType, AmqpsDeviceOperations> pair = (Map.Entry<MessageType, AmqpsDeviceOperations>)iterator.next();
+            pair.getValue().closeLinks();
+            //iterator.remove();
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -266,10 +283,9 @@ public class AmqpsSessionDeviceOperation
         {
             if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
             {
-                for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+                for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
                 {
-                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_011: [The function shall call initLink on all device operations.**]**]
-                    this.amqpsDeviceOperationsList.get(i).initLink(link);
+                    entry.getValue().initLink(link);
                 }
             }
         }
@@ -350,10 +366,9 @@ public class AmqpsSessionDeviceOperation
     {
         Integer deliveryHash = -1;
 
-        for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+        if (amqpsDeviceOperationsMap.get(messageType) != null)
         {
-            AmqpsSendReturnValue amqpsSendReturnValue = null;
-            amqpsSendReturnValue = this.amqpsDeviceOperationsList.get(i).sendMessageAndGetDeliveryHash(messageType, msgData, 0, length, deliveryTag);
+            AmqpsSendReturnValue amqpsSendReturnValue = amqpsDeviceOperationsMap.get(messageType).sendMessageAndGetDeliveryHash(messageType, msgData, 0, length, deliveryTag);
             if (amqpsSendReturnValue.isDeliverySuccessful())
             {
                 return amqpsSendReturnValue.getDeliveryHash();
@@ -414,9 +429,9 @@ public class AmqpsSessionDeviceOperation
         else
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_057: [If the state is other than authenticating the function shall try to read the message from the device operation objects.]
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+            for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
             {
-                amqpsMessage = this.amqpsDeviceOperationsList.get(i).getMessageFromReceiverLink(linkName);
+                amqpsMessage = entry.getValue().getMessageFromReceiverLink(linkName);
                 if (amqpsMessage != null)
                 {
                     break;
@@ -439,9 +454,9 @@ public class AmqpsSessionDeviceOperation
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_024: [The function shall return true if any of the operation's link name is a match and return false otherwise.]
         if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
         {
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+            for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
             {
-                if (this.amqpsDeviceOperationsList.get(i).isLinkFound(linkName))
+                if (entry.getValue().isLinkFound(linkName))
                 {
                     return true;
                 }
@@ -461,22 +476,25 @@ public class AmqpsSessionDeviceOperation
      */
     AmqpsConvertToProtonReturnValue convertToProton(Message message) throws TransportException
     {
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = null;
-
-        if (this.amqpsDeviceOperationsList != null)
+        MessageType msgType;
+        if (message.getMessageType() == null)
         {
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_040: [The function shall call all device operation's convertToProton, and if any of them not null return with the value.]
-                amqpsConvertToProtonReturnValue = this.amqpsDeviceOperationsList.get(i).convertToProton(message);
-                if (amqpsConvertToProtonReturnValue != null)
-                {
-                    break;
-                }
-            }
+            msgType = DEVICE_TELEMETRY;
+        }
+        else
+        {
+            msgType = message.getMessageType();
         }
 
-        return amqpsConvertToProtonReturnValue;
+        if (amqpsDeviceOperationsMap.get(msgType) != null)
+        {
+            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_040: [The function shall call all device operation's convertToProton, and if any of them not null return with the value.]
+            return this.amqpsDeviceOperationsMap.get(msgType).convertToProton(message);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -492,22 +510,13 @@ public class AmqpsSessionDeviceOperation
      */
     AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
-        AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = null;
-
-        if (this.amqpsDeviceOperationsList != null)
+        AmqpsConvertFromProtonReturnValue ret = null;
+        if (this.amqpsDeviceOperationsMap.get(amqpsMessage.getAmqpsMessageType()) != null)
         {
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_041: [The function shall call all device operation's convertFromProton, and if any of them not null return with the value.]
-                amqpsHandleMessageReturnValue = this.amqpsDeviceOperationsList.get(i).convertFromProton(amqpsMessage, deviceClientConfig);
-                if (amqpsHandleMessageReturnValue != null)
-                {
-                    break;
-                }
-            }
+            ret =  this.amqpsDeviceOperationsMap.get(amqpsMessage.getAmqpsMessageType()).convertFromProton(amqpsMessage, deviceClientConfig);
         }
 
-        return amqpsHandleMessageReturnValue;
+        return ret;
     }
 
     /**
