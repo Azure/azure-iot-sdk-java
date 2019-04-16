@@ -151,29 +151,29 @@ jobs:
     maxParallel: 12
     matrix:
       1:
-        ANDROID_TEST_GROUP_ID: 1
+        ANDROID_TEST_GROUP_ID: TestGroup1
       2:
-        ANDROID_TEST_GROUP_ID: 2
+        ANDROID_TEST_GROUP_ID: TestGroup2
       3:
-        ANDROID_TEST_GROUP_ID: 3
+        ANDROID_TEST_GROUP_ID: TestGroup3
       4:
-        ANDROID_TEST_GROUP_ID: 4
+        ANDROID_TEST_GROUP_ID: TestGroup4
       5:
-        ANDROID_TEST_GROUP_ID: 5
+        ANDROID_TEST_GROUP_ID: TestGroup5
       6:
-        ANDROID_TEST_GROUP_ID: 6
+        ANDROID_TEST_GROUP_ID: TestGroup6
       7:
-        ANDROID_TEST_GROUP_ID: 7
+        ANDROID_TEST_GROUP_ID: TestGroup7
       8:
-        ANDROID_TEST_GROUP_ID: 8
+        ANDROID_TEST_GROUP_ID: TestGroup8
       9:
-        ANDROID_TEST_GROUP_ID: 9
+        ANDROID_TEST_GROUP_ID: TestGroup9
       10:
-        ANDROID_TEST_GROUP_ID: 10
+        ANDROID_TEST_GROUP_ID: TestGroup10
       11:
-        ANDROID_TEST_GROUP_ID: 11
+        ANDROID_TEST_GROUP_ID: TestGroup11
       12:
-        ANDROID_TEST_GROUP_ID: 12
+        ANDROID_TEST_GROUP_ID: TestGroup12
         
       
   displayName: Android
@@ -224,5 +224,5 @@ jobs:
       serverEndpoint: 'AppCenter connection aziotclb'
       appSlug: 'Azure-Iot-Sdk/androide2e'
       devices: 'Azure-Iot-Sdk/api28_2'
-      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup$(ANDROID_TEST_GROUP_ID)'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.$(ANDROID_TEST_GROUP_ID)'
       showDebugOutput: true
