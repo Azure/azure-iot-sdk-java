@@ -398,12 +398,6 @@ public class IndividualEnrollment extends Serializable
     /**
      * Setter for the deviceId.
      *
-     * <p>
-     * A valid device Id shall follow this criteria.
-     * A case-sensitive string (up to 128 char long)
-     * of ASCII 7-bit alphanumeric chars
-     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     * </p>
      *
      * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setDeviceIdFinal(String)}
      *
@@ -413,30 +407,23 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setDeviceId(String deviceId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
-        ParserUtility.validateId(deviceId);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
-        this.deviceId = deviceId;
+        setDeviceIdFinal(deviceId);
     }
 
     /**
      * Setter for the deviceId.
      *
-     * <p>
-     * A valid device Id shall follow this criteria.
-     * A case-sensitive string (up to 128 char long)
-     * of ASCII 7-bit alphanumeric chars
-     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     * </p>
      *
      * @param deviceId the {@code String} with the new deviceID. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided deviceId is {@code null}, empty, or invalid.
      */
     public final void setDeviceIdFinal(String deviceId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is null, empty, or invalid.] */
-        ParserUtility.validateId(deviceId);
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            throw new IllegalArgumentException("Invalid deviceId parameter specified");
+        }
 
         /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
         this.deviceId = deviceId;

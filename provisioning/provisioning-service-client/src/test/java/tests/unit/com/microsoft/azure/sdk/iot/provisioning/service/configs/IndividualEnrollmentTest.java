@@ -865,32 +865,6 @@ public class IndividualEnrollmentTest
         // assert
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setDeviceIdThrowsOnNotUtf8()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setDeviceId", new Class[] {String.class}, "\u1234-invalid");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The getDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setDeviceIdThrowsOnInvalidChar()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setDeviceId", new Class[] {String.class}, "invalid&");
-
-        // assert
-    }
-
     /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
     @Test
     public void setDeviceIdSucceed()
