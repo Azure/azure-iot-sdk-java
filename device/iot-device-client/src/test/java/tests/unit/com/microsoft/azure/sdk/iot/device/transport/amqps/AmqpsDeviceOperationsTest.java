@@ -501,7 +501,7 @@ public class AmqpsDeviceOperationsTest
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", null);
 
         //act
-        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
     }
 
     // Tests_SRS_AMQPSDEVICEOPERATIONS_12_020: [The function shall throw IllegalArgumentException if the deliveryTag length is zero.]
@@ -517,7 +517,7 @@ public class AmqpsDeviceOperationsTest
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
 
         //act
-        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
     }
 
     /*
@@ -549,7 +549,7 @@ public class AmqpsDeviceOperationsTest
         };
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
@@ -596,7 +596,7 @@ public class AmqpsDeviceOperationsTest
         };
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");

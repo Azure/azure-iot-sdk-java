@@ -39,7 +39,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
      * Do nothing in SAS case.
      */
     @Override
-    protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag)
+    protected AmqpsSendReturnValue sendMessageAndGetDeliveryTag(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_004: [The function shall override the default behaviour and return null.]
         return null;

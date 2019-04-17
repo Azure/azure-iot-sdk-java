@@ -164,7 +164,7 @@ public class AmqpsDeviceAuthenticationX509Test
         AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
 
         //act
-        AmqpsSendReturnValue result = Deencapsulation.invoke(auth, "sendMessageAndGetDeliveryHash",
+        AmqpsSendReturnValue result = Deencapsulation.invoke(auth, "sendMessageAndGetDeliveryTag",
                 new Class[]{MessageType.class, byte[].class, int.class, int.class, byte[].class},
                 null, null, 0, 0, null);
 

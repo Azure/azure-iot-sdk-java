@@ -5,17 +5,13 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
-import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -117,12 +113,12 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @throws IllegalArgumentException if deliveryTag's length is 0
      */
     @Override
-    protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryTag(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         if (messageType == MessageType.DEVICE_TWIN)
         {
             // Codes_SRS_AMQPSDEVICETWIN_12_010: [The function shall call the super function if the MessageType is DEVICE_TWIN, and return with it's return value.]
-            return super.sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
+            return super.sendMessageAndGetDeliveryTag(messageType, msgData, offset, length, deliveryTag);
         }
         else
         {

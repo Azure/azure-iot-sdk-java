@@ -290,7 +290,7 @@ public class AmqpsDeviceMethodsTest
         Deencapsulation.invoke(amqpsDeviceMethods, "openLinks", mockSession);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 
@@ -311,7 +311,7 @@ public class AmqpsDeviceMethodsTest
         Deencapsulation.invoke(amqpsDeviceMethods, "openLinks", mockSession);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryHash",MessageType.DEVICE_TWIN, bytes, 0, 1, bytes);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryTag",MessageType.DEVICE_TWIN, bytes, 0, 1, bytes);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
 

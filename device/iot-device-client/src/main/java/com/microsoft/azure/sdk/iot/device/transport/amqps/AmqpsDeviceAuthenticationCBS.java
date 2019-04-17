@@ -127,8 +127,8 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
                     this.nextTag++;
                 }
 
-                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_010: [The function shall call the super class sendMessageAndGetDeliveryHash.]
-                this.sendMessageAndGetDeliveryHash(MessageType.CBS_AUTHENTICATION, msgData, 0, length, deliveryTag);
+                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_010: [The function shall call the super class sendMessageAndGetDeliveryTag.]
+                this.sendMessageAndGetDeliveryTag(MessageType.CBS_AUTHENTICATION, msgData, 0, length, deliveryTag);
             }
         }
     }

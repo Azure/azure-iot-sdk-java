@@ -343,9 +343,9 @@ public class AmqpsSessionDeviceOperation
                     this.nextTag++;
                 }
 
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
+                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryTag on all device operation objects.]
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
-                return this.sendMessageAndGetDeliveryHash(messageType, msgData, 0, length, deliveryTag);
+                return this.sendMessageAndGetDeliveryTag(messageType, msgData, 0, length, deliveryTag);
             }
             else
             {
@@ -372,11 +372,11 @@ public class AmqpsSessionDeviceOperation
      * @throws IllegalArgumentException if deliveryTag's length is 0
      * @return Integer
      */
-    private Integer sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    private Integer sendMessageAndGetDeliveryTag(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         if (amqpsDeviceOperationsMap.get(messageType) != null)
         {
-            AmqpsSendReturnValue amqpsSendReturnValue = amqpsDeviceOperationsMap.get(messageType).sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
+            AmqpsSendReturnValue amqpsSendReturnValue = amqpsDeviceOperationsMap.get(messageType).sendMessageAndGetDeliveryTag(messageType, msgData, offset, length, deliveryTag);
             if (amqpsSendReturnValue.isDeliverySuccessful())
             {
                 return Integer.parseInt(new String(amqpsSendReturnValue.getDeliveryTag()));

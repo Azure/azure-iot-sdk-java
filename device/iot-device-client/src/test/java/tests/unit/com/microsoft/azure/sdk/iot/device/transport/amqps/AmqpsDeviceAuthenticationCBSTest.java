@@ -195,7 +195,7 @@ public class AmqpsDeviceAuthenticationCBSTest
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_006: [The function shall read the message from the queue.]
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_007: [The function shall encode the message to a buffer.]
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_009: [The function shall set the delivery tag for the sender.]
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_010: [The function shall call the super class sendMessageAndGetDeliveryHash.]
+    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_010: [The function shall call the super class sendMessageAndGetDeliveryTag.]
     @Test
     public void sendAuthenticationMessagesSuccess()
     {

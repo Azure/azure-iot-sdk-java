@@ -294,7 +294,7 @@ public class AmqpsDeviceOperations
      * @throws IllegalStateException if sender link has not been initialized
      * @throws IllegalArgumentException if deliveryTag's length is 0
      */
-    protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryTag(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_019: [The function shall throw IllegalStateException if the sender link is not initialized.]
         if (this.senderLink == null)
