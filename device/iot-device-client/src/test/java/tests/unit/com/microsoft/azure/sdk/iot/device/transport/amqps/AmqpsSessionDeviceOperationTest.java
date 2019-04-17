@@ -528,7 +528,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_014: [The function shall encode the message and copy the contents to the byte buffer.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_017: [The function shall set the delivery tag for the sender.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
+    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryTag on all device operation objects.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
     @Test
     public void sendMessageNoDelivery() throws IllegalArgumentException, TransportException
@@ -547,7 +547,7 @@ public class AmqpsSessionDeviceOperationTest
 
                 mockProtonMessage.encode(bytes, anyInt, anyInt);
 
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
                 result = mockAmqpsSendReturnValue;
                 Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = false;
@@ -573,7 +573,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_014: [The function shall encode the message and copy the contents to the byte buffer.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_017: [The function shall set the delivery tag for the sender.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
+    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryTag on all device operation objects.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
     @Test
     public void sendMessageSuccess() throws IllegalArgumentException, TransportException
@@ -592,7 +592,7 @@ public class AmqpsSessionDeviceOperationTest
 
                 mockProtonMessage.encode(bytes, anyInt, anyInt);
 
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
                 result = mockAmqpsSendReturnValue;
                 Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = true;
@@ -637,7 +637,7 @@ public class AmqpsSessionDeviceOperationTest
                 mockProtonMessage.encode(bytes, anyInt, anyInt);
                 result = new BufferOverflowException();
 
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
                 result = mockAmqpsSendReturnValue;
                 Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = true;
