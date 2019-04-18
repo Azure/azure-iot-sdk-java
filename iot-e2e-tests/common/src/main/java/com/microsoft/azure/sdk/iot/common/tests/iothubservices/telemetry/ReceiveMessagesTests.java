@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -135,11 +136,13 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
             }
         }
 
+        int futureTimeout = 3;
+
         for (CompletableFuture<Void> future : futureList)
         {
             try
             {
-                future.get();
+                future.get(futureTimeout, TimeUnit.MINUTES);
             }
             catch (ExecutionException e)
             {
