@@ -52,6 +52,8 @@ public class AmqpsDeviceOperations
 
     private CustomLogger logger;
 
+    int linkCredit;
+
     /**
      * This constructor creates an instance of device operation class and initializes member variables
      *
@@ -86,6 +88,8 @@ public class AmqpsDeviceOperations
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.CLOSED;
 
         this.logger = new CustomLogger(this.getClass());
+
+        linkCredit = 0;
 
         String moduleId = deviceClientConfig.getModuleId();
         String deviceId = deviceClientConfig.getDeviceId();
@@ -308,6 +312,12 @@ public class AmqpsDeviceOperations
             throw new IllegalArgumentException("Trying deliveryTag cannot be null.");
         }
 
+        if (this.linkCredit <= 0)
+        {
+            //not enough credit to send this message
+            return new AmqpsSendReturnValue(false, -1);
+        }
+
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_021: [The function shall create a Delivery object using the sender link and the deliveryTag.]
         Delivery delivery = this.senderLink.delivery(deliveryTag);
         try
@@ -316,6 +326,9 @@ public class AmqpsDeviceOperations
             this.senderLink.send(msgData, offset, length);
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_023: [The function shall advance the sender link.]
             this.senderLink.advance();
+
+            this.linkCredit = this.senderLink.getCredit();
+
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_024: [The function shall set the delivery hash to the value returned by the sender link.]
             return new AmqpsSendReturnValue(true, delivery.hashCode(), deliveryTag);
         }
@@ -642,5 +655,10 @@ public class AmqpsDeviceOperations
     {
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_031: [The getter shall return with the value of the receiver link address.]
         return this.receiverLinkAddress;
+    }
+
+    public void onLinkFlow(int linkCredit)
+    {
+        this.linkCredit = linkCredit;
     }
 }

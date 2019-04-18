@@ -269,31 +269,31 @@ public class AmqpsDeviceTelemetryTest
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_006: [**The function shall return an AmqpsSendReturnValue object with false and -1 if the message type is not telemetry.**]**
     */
     @Test
-    public void sendMessageAndGetDeliveryHashReturnsFalseIfMessageTypeIsNotDeviceTelemetry() throws IOException
+    public void sendMessageAndGetDeliveryTagReturnsFalseIfMessageTypeIsNotDeviceTelemetry() throws IOException
     {
         //arrange
         AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
-        final byte[] deliveryTag = new byte[0];
+        byte[] deliveryTag = "0".getBytes();
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, msgData, offset, length, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
-        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
 
         //assert
         assertEquals(false, deliverySuccessful);
-        assertEquals(-1, deliveryHash);
+        assertEquals(-1, Integer.parseInt(new String(deliveryTag)));
     }
 
     /*
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_007: [**The function shall call the ssuper function with the arguments and return with it's return value.**]**
     */
     @Test
-    public void sendMessageAndGetDeliveryHashReturnsWithSuperResult() throws IOException
+    public void sendMessageAndGetDeliveryTagReturnsWithSuperResult() throws IOException
     {
         //arrange
         AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
@@ -301,16 +301,17 @@ public class AmqpsDeviceTelemetryTest
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
-        final byte[] deliveryTag = new byte[1];
+        byte[] deliveryTag = "0".getBytes();
+        amqpsDeviceTelemetry.onLinkFlow(100);
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
             boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
-            int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+            deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
         //assert
         assertTrue(deliverySuccessful);
-        assertTrue(deliveryHash > 0);
+        assertTrue(Integer.parseInt(new String(deliveryTag)) > -1);
     }
 
     /*

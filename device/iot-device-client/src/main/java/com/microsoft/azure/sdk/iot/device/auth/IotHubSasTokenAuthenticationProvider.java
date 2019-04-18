@@ -99,7 +99,7 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         {
             long expiryTimeSeconds = IotHubSasToken.getExpiryTimeFromToken(this.sasToken.toString());
             long tokenStartTime = expiryTimeSeconds - this.tokenValidSecs;
-            long bufferExpiryTime = this.tokenValidSecs * this.timeBufferPercentage / 100 + tokenStartTime;
+            long bufferExpiryTime = getMillisecondsBeforeProactiveRenewal() / 100 + tokenStartTime;
             long currentTimeSeconds = System.currentTimeMillis() / 1000;
             if (bufferExpiryTime < currentTimeSeconds)
             {
@@ -112,6 +112,11 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_020: [This function shall return false if the saved token has not lived for longer
         // than its buffered threshold.]
         return false;
+    }
+
+    public int getMillisecondsBeforeProactiveRenewal()
+    {
+        return (int) this.tokenValidSecs * this.timeBufferPercentage;
     }
 
     public long getTokenValidSecs()

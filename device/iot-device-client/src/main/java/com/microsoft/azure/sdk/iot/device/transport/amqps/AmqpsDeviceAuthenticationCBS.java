@@ -43,8 +43,6 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
 
     private long nextTag = 0;
 
-    private final Queue<MessageImpl> waitingMessages = new LinkedBlockingDeque<>();
-
     private Integer queueLock = new Integer(1);
 
     private final DeviceClientConfig deviceClientConfig;
@@ -82,55 +80,6 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         this.amqpProperties.put(Symbol.getSymbol(MessageProperty.CONNECTION_DEVICE_ID), deviceClientConfig.getDeviceId());
 
         this.logger = new CustomLogger(this.getClass());
-    }
-
-    /**
-     * Send message from the waiting queue
-     */
-    void sendAuthenticationMessages() throws TransportException
-    {
-        synchronized (queueLock)
-        {
-            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_005: [If there is no message in the queue to send the function shall do nothing.]
-            while (!this.waitingMessages.isEmpty())
-            {
-                byte[] msgData = new byte[1024];
-                int length;
-
-                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_006: [The function shall read the message from the queue.]
-                MessageImpl outgoingMessage = this.waitingMessages.remove();
-
-                while (true)
-                {
-                    try
-                    {
-                        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_007: [The function shall encode the message to a buffer.]
-                        length = outgoingMessage.encode(msgData, 0, msgData.length);
-                        break;
-                    }
-                    catch (BufferOverflowException e)
-                    {
-                        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_008: [The function shall double the buffer if encode throws BufferOverflowException.]
-                        msgData = new byte[msgData.length * 2];
-                    }
-                }
-                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_009: [The function shall set the delivery tag for the sender.]
-                byte[] deliveryTag = String.valueOf(this.nextTag).getBytes();
-
-                //want to avoid negative delivery tags since -1 is the designated failure value
-                if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
-                {
-                    this.nextTag = 0;
-                }
-                else
-                {
-                    this.nextTag++;
-                }
-
-                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_010: [The function shall call the super class sendMessageAndGetDeliveryTag.]
-                this.sendMessageAndGetDeliveryTag(MessageType.CBS_AUTHENTICATION, msgData, 0, length, deliveryTag);
-            }
-        }
     }
 
     /**
@@ -240,14 +189,34 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
     @Override
     protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_030: [The function shall create a CBS authentication message using the device configuration and the correlationID.]
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_031: [The function shall set the CBS related properties on the message.]
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_032: [The function shall set the CBS related application properties on the message.]
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_033: [The function shall set the the SAS token to the message body.]
         MessageImpl outgoingMessage = createCBSAuthenticationMessage(deviceClientConfig, correlationId);
+        byte[] msgData = new byte[1024];
+        int length;
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_034: [THe function shall put the message into the waiting queue.]
-        this.waitingMessages.add(outgoingMessage);
+        while (true)
+        {
+            try
+            {
+                length = outgoingMessage.encode(msgData, 0, msgData.length);
+                break;
+            }
+            catch (BufferOverflowException e)
+            {
+                msgData = new byte[msgData.length * 2];
+            }
+        }
+        byte[] deliveryTag = String.valueOf(this.nextTag).getBytes();
+
+        if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
+        {
+            this.nextTag = 0;
+        }
+        else
+        {
+            this.nextTag++;
+        }
+
+        this.sendMessageAndGetDeliveryTag(MessageType.CBS_AUTHENTICATION, msgData, 0, length, deliveryTag);
     }
 
     /**
@@ -312,7 +281,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         outgoingMessage.setApplicationProperties(applicationProperties);
 
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_018: [The function shall set the the SAS token to the message body.]
-        Section section = null;
+        Section section;
         try
         {
             section = new AmqpValue(deviceClientConfig.getSasTokenAuthentication().getRenewedSasToken(true, true));
