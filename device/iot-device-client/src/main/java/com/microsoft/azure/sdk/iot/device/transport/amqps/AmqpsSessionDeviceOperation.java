@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpDeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.qpid.proton.engine.*;
@@ -25,11 +26,6 @@ public class AmqpsSessionDeviceOperation
     private static long nextTag = 0;
 
     private Integer openLock = new Integer(1);
-
-    private long tokenRenewalPeriodInMilliseconds = 4000; //4 seconds;
-
-    private ScheduledExecutorService taskSchedulerTokenRenewal;
-    private AmqpsDeviceAuthenticationCBSTokenRenewalTask tokenRenewalTask = null;
 
     private static final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
     private static final double PERCENTAGE_FACTOR = 0.75;
@@ -73,14 +69,6 @@ public class AmqpsSessionDeviceOperation
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_004: [The constructor shall set the authentication state to not authenticated if the authentication type is CBS.]
             this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.NOT_AUTHENTICATED;
-
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_044: [The constructor shall calculate the token renewal period as the 75% of the expiration period.]
-            this.tokenRenewalTask = new AmqpsDeviceAuthenticationCBSTokenRenewalTask(this);
-
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_048: [The constructor saves the calculated renewal period if it is greater than zero.]
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_045: [The constructor shall create AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_046: [The constructor shall create and start a scheduler with the calculated renewal period for AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
-            this.scheduleRenewalThread();
         }
         else
         {
@@ -94,7 +82,6 @@ public class AmqpsSessionDeviceOperation
      */
     public void close()
     {
-        this.shutDownScheduler();
         this.closeLinks();
 
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
@@ -142,32 +129,6 @@ public class AmqpsSessionDeviceOperation
                 throw new TransportException("Waited too long for the authentication message reply.");
             }
 
-        }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
-    }
-
-    /**
-     * Start the token renewal process using CBS authentication.
-     *
-     * @throws TransportException throw if Proton operation throws.
-     */
-    public void renewToken() throws TransportException
-    {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
-        if ((this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) &&
-                (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED))
-        {
-            if (this.deviceClientConfig.getSasTokenAuthentication().isRenewalNecessary())
-            {
-                logger.LogDebug("Sas token cannot be renewed automatically, so amqp connection will be unauthorized soon, method: %s", logger.getMethodName());
-            }
-            else
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
-                authenticate();
-            }
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -528,57 +489,6 @@ public class AmqpsSessionDeviceOperation
     }
 
     /**
-     * Restart the renewal thread
-     *
-     * @return true is the renewal is successful
-     */
-    private void scheduleRenewalThread()
-    {
-        long renewalPeriod = calculateRenewalPeriodInMilliseconds(this.deviceClientConfig.getSasTokenAuthentication().getTokenValidSecs());
-        if (renewalPeriod > 0)
-        {
-            this.tokenRenewalPeriodInMilliseconds = renewalPeriod;
-
-
-            shutDownScheduler();
-            this.taskSchedulerTokenRenewal = Executors.newScheduledThreadPool(1);
-            this.taskSchedulerTokenRenewal.scheduleAtFixedRate(this.tokenRenewalTask, 0, this.tokenRenewalPeriodInMilliseconds, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    /**
-     * Shut down the renewal thread
-     */
-    private void shutDownScheduler()
-    {
-        if (this.taskSchedulerTokenRenewal  != null)
-        {
-            taskSchedulerTokenRenewal.shutdown(); // Disable new tasks from being submitted
-            try
-            {
-                // Wait a while for existing tasks to terminate
-                if (!taskSchedulerTokenRenewal.awaitTermination(10, TimeUnit.SECONDS))
-                {
-                    taskSchedulerTokenRenewal.shutdownNow(); // Cancel currently executing tasks
-
-                    // Wait a while for tasks to respond to being cancelled
-                    if (!taskSchedulerTokenRenewal.awaitTermination(10, TimeUnit.SECONDS))
-                    {
-                        System.err.println("taskSchedulerTokenRenewal did not terminate correctly");
-                    }
-                }
-            }
-            catch (InterruptedException ie)
-            {
-                // (Re-)Cancel if current thread also interrupted
-                taskSchedulerTokenRenewal.shutdownNow();
-                // Preserve interrupt status
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
-
-    /**
      * Calculate 75 percent of given time
      *
      * @param validInSecs the time
@@ -593,5 +503,26 @@ public class AmqpsSessionDeviceOperation
         }
 
         return (long)(validInSecs * PERCENTAGE_FACTOR * MILLISECECONDS_PER_SECOND);
+    }
+
+    public boolean onLinkFlow(Event event)
+    {
+        Link link = event.getLink();
+        for (AmqpsDeviceOperations deviceOperations : amqpsDeviceOperationsMap.values())
+        {
+            if (link.getName().startsWith(deviceOperations.getSenderLinkTag()))
+            {
+                deviceOperations.onLinkFlow(link.getCredit());
+                return true;
+            }
+        }
+
+        if (link.getName().startsWith(this.amqpsDeviceAuthentication.getSenderLinkTag()))
+        {
+            this.amqpsDeviceAuthentication.onLinkFlow(link.getCredit());
+            return true;
+        }
+
+        return false;
     }
 }

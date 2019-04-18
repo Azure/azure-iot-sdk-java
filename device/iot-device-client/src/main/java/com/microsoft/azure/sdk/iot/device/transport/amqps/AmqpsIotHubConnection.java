@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
@@ -41,9 +41,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 {
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 90*1000; // 90 second timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
+    private static final int SEND_MESSAGES_PERIOD_MILLIS = 50; //every 50 seconds, the method onTimerTask will fire to send queued messages
     private IotHubConnectionStatus state;
 
-    private int linkCredit = -1;
     /** The {@link Delivery} tag. */
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
@@ -68,6 +68,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
+
+    private SasTokenRenewalHandler sasTokenRenewalHandler;
 
     private CountDownLatch openLatch;
     private CountDownLatch closeLatch;
@@ -182,7 +184,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.openLatch = new CountDownLatch(1);
         this.savedException = null;
 
-        this.amqpsSessionManager = new AmqpsSessionManager(this.deviceClientConfig, Executors.newScheduledThreadPool(2));
+        this.amqpsSessionManager = new AmqpsSessionManager(this.deviceClientConfig);
+        this.sasTokenRenewalHandler = new SasTokenRenewalHandler(this.amqpsSessionManager, this.deviceClientConfig);
 
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -428,15 +431,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
-    /**
-     * Creates a binary message using the given content and messageId. Sends the created message using the sender link.
-     *
-     * @param message The message to be sent.
-     * @param messageType the type of the message being sent
-     * @throws TransportException if send message fails
-     * @return An {@link Integer} representing the hash of the message, or -1 if the connection is closed.
-     */
-    private synchronized Integer sendMessage(Message message, MessageType messageType, String deviceId) throws TransportException
+    private Integer sendMessage(AmqpsConvertToProtonReturnValue protonReturnValue, String deviceId) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -444,14 +439,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_015: [If the state of the connection is DISCONNECTED or there is not enough
         // credit, the function shall return -1.]
-        if (this.state == IotHubConnectionStatus.DISCONNECTED || this.linkCredit <= 0)
+        if (this.state == IotHubConnectionStatus.DISCONNECTED || protonReturnValue == null)
         {
             deliveryTag = -1;
         }
         else
         {
+            Message protonMessage = protonReturnValue.getMessageImpl();
+            MessageType messageType = protonReturnValue.getMessageType();
             // Codes_SRS_AMQPSIOTHUBCONNECTION_12_024: [The function shall call AmqpsSessionManager.sendMessage with the given parameters.]
-            deliveryTag = this.amqpsSessionManager.sendMessage(message, messageType, deviceId);
+            deliveryTag = this.amqpsSessionManager.sendMessage(protonMessage, messageType, deviceId);
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_021: [The function shall return the delivery hash.]
@@ -467,14 +464,24 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
+        Reactor reactor = event.getReactor();
+
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
         if(this.useWebSockets)
         {
-            event.getReactor().connectionToHost(this.chooseHostname(), AMQP_WEB_SOCKET_PORT, this);
+            reactor.connectionToHost(this.chooseHostname(), AMQP_WEB_SOCKET_PORT, this);
         }
         else
         {
-            event.getReactor().connectionToHost(this.chooseHostname(), AMQP_PORT, this);
+            reactor.connectionToHost(this.chooseHostname(), AMQP_PORT, this);
+        }
+
+        reactor.schedule(SEND_MESSAGES_PERIOD_MILLIS, this);
+
+        if (this.deviceClientConfig.getAuthenticationProvider() instanceof IotHubSasTokenAuthenticationProvider)
+        {
+            int sasTokenRenewalPeriod = this.deviceClientConfig.getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
+            reactor.schedule(sasTokenRenewalPeriod, sasTokenRenewalHandler);
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -732,10 +739,88 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_040: [The event handler shall save the remaining link credit.]
-        this.linkCredit = event.getLink().getCredit();
-        logger.LogDebug("The link credit value is %s, method name is %s", this.linkCredit, logger.getMethodName());
+        this.amqpsSessionManager.onLinkFlow(event);
+
+        processMessagesToSend();
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+    }
+
+    private void processMessagesToSend()
+    {
+        int messagesAttemptedToBeProcessed = 0;
+        int lastDeliveryTag = 0;
+        com.microsoft.azure.sdk.iot.device.Message message = messagesToSend.poll();
+        while (message != null && messagesAttemptedToBeProcessed < 1000 && lastDeliveryTag >= 0)
+        {
+            messagesAttemptedToBeProcessed++;
+            AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = null;
+            try
+            {
+                amqpsConvertToProtonReturnValue = this.convertToProton(message);
+            }
+            catch (TransportException e)
+            {
+                if (e.isRetryable())
+                {
+                    this.logger.LogError("Encountered exception while converting message to proton message, retrying", e);
+                    messagesToSend.add(message);
+                }
+                else
+                {
+                    this.logger.LogError("Encountered non-retryable exception while converting message to proton message, not retryable so discarding message", e);
+                }
+
+                return;
+            }
+
+            if (amqpsConvertToProtonReturnValue == null)
+            {
+                // Codes_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
+                this.logger.LogError("No handler found for message conversion! Abandoning message");
+                return;
+            }
+            else
+            {
+                try
+                {
+                    lastDeliveryTag = this.sendMessage(amqpsConvertToProtonReturnValue, message.getConnectionDeviceId());
+                }
+                catch (TransportException e)
+                {
+                    if (e.isRetryable())
+                    {
+                        this.logger.LogError("Encountered exception while sending amqp message, retrying", e);
+                        messagesToSend.add(message);
+                    }
+                    else
+                    {
+                        this.logger.LogError("Encountered non-retryable exception while sending amqp message, abandoning message", e);
+                    }
+
+                    return;
+                }
+
+                if (lastDeliveryTag != -1)
+                {
+                    // Codes_SRS_AMQPSTRANSPORT_34_078: [If the sent message hash is valid, it shall be added to the in progress map and this function shall return OK.]
+                    this.inProgressMessages.put(lastDeliveryTag, message);
+                }
+                else
+                {
+                    //message failed to send, likely due to lack of link credit available. Re-queue and try again later
+                    messagesToSend.add(message);
+                }
+
+                message = messagesToSend.poll();
+            }
+        }
+
+        if (message != null)
+        {
+            //message was polled out of list, but loop exited from processing too many messages before it could process this message, so re-queue it for later
+            messagesToSend.add(message);
+        }
     }
 
     /**
@@ -891,6 +976,14 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
+    @Override
+    public void onTimerTask(Event event)
+    {
+        processMessagesToSend();
+
+        event.getReactor().schedule(SEND_MESSAGES_PERIOD_MILLIS, this);
+    }
+
     /**
      * Notifies all the listeners that a message was received from the server.
      * @param amqpsMessage The message received from server.
@@ -995,34 +1088,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.listener = listener;
     }
 
+    private Queue<com.microsoft.azure.sdk.iot.device.Message> messagesToSend = new ConcurrentLinkedQueue<>();
+
+    int queueCount = 0;
+
     @Override
     public IotHubStatusCode sendMessage(com.microsoft.azure.sdk.iot.device.Message message) throws TransportException
     {
         if (!subscriptionChangeHandler(message))
         {
-            AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = this.convertToProton(message);
-
-            if (amqpsConvertToProtonReturnValue == null)
-            {
-                // Codes_SRS_AMQPSTRANSPORT_34_076: [The function throws IllegalStateException if none of the device operation object could handle the conversion.]
-                throw new IllegalStateException("No handler found for message conversion!");
-            }
-
-            // Codes_SRS_AMQPSTRANSPORT_34_077: [The function shall attempt to send the Proton message to IoTHub using the underlying AMQPS connection.]
-            Integer deliveryTag = this.sendMessage(amqpsConvertToProtonReturnValue.getMessageImpl(), amqpsConvertToProtonReturnValue.getMessageType(), message.getConnectionDeviceId());
-
-            if (deliveryTag != -1)
-            {
-                // Codes_SRS_AMQPSTRANSPORT_34_078: [If the sent message hash is valid, it shall be added to the in progress map and this function shall return OK.]
-                this.inProgressMessages.put(deliveryTag, message);
-            }
-            else
-            {
-                // Codes_SRS_AMQPSTRANSPORT_34_079: [If the sent message hash is -1, this function shall throw a retriable ProtocolException.]
-                ProtocolException protocolException = new ProtocolException("Send failure");
-                protocolException.setRetryable(true);
-                throw protocolException;
-            }
+            messagesToSend.add(message);
         }
 
         return IotHubStatusCode.OK;

@@ -108,35 +108,6 @@ public class AmqpsDeviceAuthenticationCBSTest
     @Mocked
     ProductInfo mockedProductInfo;
 
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_005: [If there is no message in the queue to send the function shall do nothing.]
-    @Test
-    public void sendAuthenticationMessagesEmpty()
-    {
-        // arrange
-        final AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "waitingMessages", mockQueue);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockQueue.isEmpty();
-                result = true;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "sendAuthenticationMessages");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockQueue.remove();
-                times = 0;
-            }
-        };
-    }
-
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_050: [This constructor shall call super with the provided user agent string.]
     @Test
     public void constructorCallsSuperWithConfigUserAgentString()
@@ -161,65 +132,6 @@ public class AmqpsDeviceAuthenticationCBSTest
         //assert
         Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
         assertTrue(amqpProperties.containsValue(expectedUserAgentString));
-    }
-
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_008: [The function shall doubles the buffer if encode throws BufferOverflowException.]
-    @Test
-    public void sendAuthenticationMessagesDoubleBuffer()
-    {
-        // arrange
-        final AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
-        final byte[] bytes = new byte[1024];
-        Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "waitingMessages", mockQueue);
-        Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "senderLink", mockSender);
-
-        new StrictExpectations()
-        {
-            {
-                mockQueue.isEmpty();
-                result = false;
-                mockQueue.remove();
-                result = mockMessageImpl;
-                mockMessageImpl.encode(bytes, anyInt, anyInt);
-                result = new BufferOverflowException();
-                mockMessageImpl.encode((byte[])any, anyInt, anyInt);
-                mockQueue.isEmpty();
-                result = true;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "sendAuthenticationMessages");
-    }
-
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_006: [The function shall read the message from the queue.]
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_007: [The function shall encode the message to a buffer.]
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_009: [The function shall set the delivery tag for the sender.]
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_010: [The function shall call the super class sendMessageAndGetDeliveryTag.]
-    @Test
-    public void sendAuthenticationMessagesSuccess()
-    {
-        // arrange
-        final AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
-        final byte[] bytes = new byte[1024];
-        Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "waitingMessages", mockQueue);
-        Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "senderLink", mockSender);
-
-        new StrictExpectations()
-        {
-            {
-                mockQueue.isEmpty();
-                result = false;
-                mockQueue.remove();
-                result = mockMessageImpl;
-                mockMessageImpl.encode(bytes, anyInt, anyInt);
-                mockQueue.isEmpty();
-                result = true;
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "sendAuthenticationMessages");
     }
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_023: [The function shall call the super to get the message.]
@@ -501,8 +413,6 @@ public class AmqpsDeviceAuthenticationCBSTest
         final String NAME_KEY = "name";
 
         final AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "waitingMessages", mockQueue);
-        Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "waitingMessages", mockQueue);
 
         new NonStrictExpectations()
         {
@@ -513,6 +423,8 @@ public class AmqpsDeviceAuthenticationCBSTest
                 mockMapStringString = new HashMap<>(3);
             }
         };
+
+        Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "openLinks", mockSession);
 
         // act
         Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "authenticate", mockDeviceClientConfig, mockUUID);
@@ -544,8 +456,6 @@ public class AmqpsDeviceAuthenticationCBSTest
                 mockMessageImpl.setApplicationProperties((ApplicationProperties) any);
                 times = 1;
                 mockMessageImpl.setBody((Section) any);
-                times = 1;
-                mockQueue.add((MessageImpl) any);
                 times = 1;
             }
         };

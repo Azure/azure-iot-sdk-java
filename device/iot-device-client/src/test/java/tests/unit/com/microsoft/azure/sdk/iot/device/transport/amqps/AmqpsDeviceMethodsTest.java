@@ -280,44 +280,46 @@ public class AmqpsDeviceMethodsTest
     
     // Tests_SRS_AMQPSDEVICEMETHODS_12_010: [The function shall call the super function if the MessageType is DEVICE_METHODS, and return with it's return value.]
     @Test
-    public void sendMessageAndGetDeliveryHashCallsSuper() throws IOException
+    public void sendMessageAndGetDeliveryTagCallsSuper() throws IOException
     {
         //arrange
         String deviceId = "deviceId";
-        byte[] bytes = new byte[1];
+        byte[] deliveryTag = "0".getBytes();
 
         AmqpsDeviceMethods amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceMethods, "openLinks", mockSession);
 
+        amqpsDeviceMethods.onLinkFlow(100);
+
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, deliveryTag, 0, 1, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
-        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
         //assert
         assertEquals(true, deliverySuccessful);
-        assertNotEquals(-1, deliveryHash);
+        assertNotEquals(String.valueOf(-1).getBytes(), deliveryTag);
     }
 
-    // Tests_SRS_AMQPSDEVICEMETHODS_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery hash.]
+    // Tests_SRS_AMQPSDEVICEMETHODS_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery Tag.]
     @Test
-    public void sendMessageAndGetDeliveryHashReturnsFalse() throws IOException
+    public void sendMessageAndGetDeliveryTagReturnsFalse() throws IOException
     {
         //arrange
         String deviceId = "deviceId";
-        byte[] bytes = new byte[1];
+        byte[] deliveryTag = "0".getBytes();
 
         AmqpsDeviceMethods amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceMethods, "openLinks", mockSession);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryTag",MessageType.DEVICE_TWIN, bytes, 0, 1, bytes);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryTag",MessageType.DEVICE_TWIN, deliveryTag, 0, 1, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
-        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
         //assert
         assertEquals(false, deliverySuccessful);
-        assertEquals(-1, deliveryHash);
+        assertEquals(-1, Integer.parseInt(new String(deliveryTag)));
     }
 
     // Tests_SRS_AMQPSDEVICEMETHODS_12_012: [The function shall call the super function.]

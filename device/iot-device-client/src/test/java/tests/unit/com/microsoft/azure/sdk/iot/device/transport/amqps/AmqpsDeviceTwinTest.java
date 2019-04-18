@@ -99,7 +99,7 @@ public class AmqpsDeviceTwinTest
     // Tests_SRS_AMQPSDEVICETWIN_12_005: [The constructor shall insert the given deviceId argument to the sender and receiver link address.]
     // Tests_SRS_AMQPSDEVICETWIN_12_006: [The constructor shall add the API version key to the amqpProperties.]
     // Tests_SRS_AMQPSDEVICETWIN_12_007: [The constructor shall generate a UUID amd add it as a correlation ID to the amqpProperties.]
-    // Tests_SRS_AMQPSDEVICETWIN_12_009: [The constructor shall create a HashMap for correlationId list.]
+    // Tests_SRS_AMQPSDEVICETWIN_12_009: [The constructor shall create a TagMap for correlationId list.]
     @Test
     public void constructorInitializesAllMembers(
             @Mocked final UUID mockUUID
@@ -311,30 +311,28 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_010: [The function shall call the super function if the MessageType is DEVICE_TWIN, and return with it's return value.]
     @Test
-    public void sendMessageAndGetDeliveryHashCallsSuper() throws IOException
+    public void sendMessageAndGetDeliveryTagCallsSuper() throws IOException
     {
         //arrange
-        String deviceId = "deviceId";
-        byte[] bytes = new byte[1];
+        byte[] deliveryTag = "0".getBytes();
 
         AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        amqpsDeviceTwin.onLinkFlow(100);
 
         //act
-
-
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TWIN, bytes, 0, 1, bytes);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TWIN, deliveryTag, 0, 1, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
-        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
         //assert
         assertTrue(deliverySuccessful);
-        assertNotEquals(-1, deliveryHash);
+        assertNotEquals(-1, Integer.parseInt(new String(deliveryTag)));
     }
 
-    // Tests_SRS_AMQPSDEVICETWIN_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery hash.]
+    // Tests_SRS_AMQPSDEVICETWIN_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery Tag.]
     @Test
-    public void sendMessageAndGetDeliveryHashReturnsFalse() throws IOException
+    public void sendMessageAndGetDeliveryTagReturnsFalse() throws IOException
     {
         //arrange
         String deviceId = "deviceId";
@@ -346,11 +344,11 @@ public class AmqpsDeviceTwinTest
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
-        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        byte[] deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
         //assert
         assertFalse(deliverySuccessful);
-        assertEquals(-1, deliveryHash);
+        assertEquals(-1, (int) new Integer(new String(deliveryTag)));
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_012: [The function shall call the super function.]
