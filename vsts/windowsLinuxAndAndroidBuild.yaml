@@ -142,41 +142,13 @@ jobs:
     continueOnError: true
     condition: always()  
     
- ### Android, Multi configuration build (12 different test groups to cover) ###
-- job: Android
+ ### Android, Multi configuration build (12 different test groups to cover) ###   
+- job: Android_1
   timeoutInMinutes: 180
   pool:
     name: Hosted VS2017
-  strategy:
-    maxParallel: 12
-    matrix:
-      1:
-        ANDROID_TEST_GROUP_ID: TestGroup1
-      2:
-        ANDROID_TEST_GROUP_ID: TestGroup2
-      3:
-        ANDROID_TEST_GROUP_ID: TestGroup3
-      4:
-        ANDROID_TEST_GROUP_ID: TestGroup4
-      5:
-        ANDROID_TEST_GROUP_ID: TestGroup5
-      6:
-        ANDROID_TEST_GROUP_ID: TestGroup6
-      7:
-        ANDROID_TEST_GROUP_ID: TestGroup7
-      8:
-        ANDROID_TEST_GROUP_ID: TestGroup8
-      9:
-        ANDROID_TEST_GROUP_ID: TestGroup9
-      10:
-        ANDROID_TEST_GROUP_ID: TestGroup10
-      11:
-        ANDROID_TEST_GROUP_ID: TestGroup11
-      12:
-        ANDROID_TEST_GROUP_ID: TestGroup12
-        
-      
-  displayName: Android
+  
+  displayName: Android 1
   
   steps:
   - powershell: ./vsts/echo_inputs.ps1
@@ -224,5 +196,622 @@ jobs:
       serverEndpoint: 'AppCenter connection aziotclb'
       appSlug: 'Azure-Iot-Sdk/androide2e'
       devices: 'Azure-Iot-Sdk/api28_2'
-      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.$(ANDROID_TEST_GROUP_ID)'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup1'
+      showDebugOutput: true
+      
+- job: Android_2
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 2
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup2'
+      showDebugOutput: true
+      
+- job: Android_3
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 3
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup3'
+      showDebugOutput: true
+      
+- job: Android_4
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 4
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup4'
+      showDebugOutput: true
+      
+- job: Android_5
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 5
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup5'
+      showDebugOutput: true
+      
+- job: Android_6
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 6
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup6'
+      showDebugOutput: true
+      
+- job: Android_7
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 7
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup7'
+      showDebugOutput: true
+      
+- job: Android_8
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 8
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup8'
+      showDebugOutput: true
+      
+- job: Android_9
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 9
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup9'
+      showDebugOutput: true
+      
+- job: Android_10
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 10
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup10'
+      showDebugOutput: true
+     
+      
+- job: Android_11
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 11
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup11'
+      showDebugOutput: true
+     
+- job: Android_12
+  timeoutInMinutes: 180
+  pool:
+    name: Hosted VS2017
+  
+  displayName: Android 12
+  
+  steps:
+  - powershell: ./vsts/echo_inputs.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+    
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+    
+  - powershell: ./vsts/manual_checkout.ps1
+    displayName: 'GIT checkout'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_java.cmd
+    displayName: 'Android Build'
+    env:
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      STORAGE_ACCOUNT_CONNECTION_STRING: $(ANDROID-STORAGE-ACCOUNT-CONNECTION-STRING)
+      IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      IOTHUB_E2E_X509_PRIVATE_KEY_BASE64: $(IOTHUB-E2E-X509-PRIVATE-KEY-BASE64)
+      IOTHUB_E2E_X509_CERT_BASE64: $(IOTHUB-E2E-X509-CERT-BASE64)
+      IOTHUB_E2E_X509_THUMBPRINT: $(IOTHUB-E2E-X509-THUMBPRINT)
+      APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
+      DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+      DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(IOT-DPS-GLOBAL-ENDPOINT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+      INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+      CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+      FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+    condition: always()
+  
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.TestGroup12'
       showDebugOutput: true
