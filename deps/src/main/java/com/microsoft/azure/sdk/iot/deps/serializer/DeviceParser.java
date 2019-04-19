@@ -85,6 +85,11 @@ public class DeviceParser
     @SerializedName(CAPABILITIES_NAME)
     private DeviceCapabilitiesParser capabilities;
 
+    private static final String SCOPE_NAME = "deviceScope";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(SCOPE_NAME)
+    private String scope;
+
     private transient Gson gson = new Gson();
 
     /**
@@ -168,6 +173,7 @@ public class DeviceParser
         this.status = deviceParser.status;
         this.managedBy = deviceParser.managedBy;
         this.capabilities = deviceParser.capabilities;
+        this.scope = deviceParser.scope;
 
         //convert to date format
         if (deviceParser.lastActivityTimeString != null)
@@ -535,5 +541,23 @@ public class DeviceParser
     {
         //Codes_SRS_DEVICE_PARSER_34_017: [This method shall set the value of this object's capabilities equal to the provided value.]
         this.capabilities = capabilities;
+    }
+
+    /**
+     * Get the security scope for this device
+     * @return the security scope for this device
+     */
+    public String getScope()
+    {
+        return this.scope;
+    }
+
+    /**
+     * Set the security scope for this device
+     * @param scope the security scope to set
+     */
+    public void setScope(String scope)
+    {
+        this.scope = scope;
     }
 }

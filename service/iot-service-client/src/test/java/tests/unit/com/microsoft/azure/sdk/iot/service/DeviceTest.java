@@ -125,7 +125,6 @@ public class DeviceTest
         Device.createDevice("someDevice", null);
     }
 
-
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_003: [The constructor shall create a new instance of Device using the given deviceId and return with it]
     @Test
     public void createFromId_success()
@@ -242,6 +241,7 @@ public class DeviceTest
         String expectedGenerationId = "5678";
         String expectedLastActivityTime = "2001-09-09T09:09:09";
         Boolean expectedCapabilities = false;
+        String scope = "scope";
 
         Device device = Device.createDevice(expectedDeviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
         device.setStatus(expectedDeviceStatus);
@@ -255,6 +255,7 @@ public class DeviceTest
         Deencapsulation.setField(device, "generationId", expectedGenerationId);
         Deencapsulation.setField(device, "lastActivityTime", expectedLastActivityTime);
         Deencapsulation.setField(device, "capabilities", new DeviceCapabilities());
+        Deencapsulation.setField(device, "scope", scope);
         device.getCapabilities().setIotEdge(expectedCapabilities);
 
         // act
@@ -274,6 +275,7 @@ public class DeviceTest
         assertEquals(expectedGenerationId, parser.getGenerationId());
         assertEquals(ParserUtility.getDateTimeUtc(expectedLastActivityTime), parser.getLastActivityTime());
         assertEquals(expectedCapabilities, parser.getCapabilities().getIotEdge());
+        assertEquals(parser.getScope(), scope);
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_018: [This method shall return a new instance of a DeviceParser object that is populated using the properties of this.]
@@ -345,17 +347,18 @@ public class DeviceTest
         assertEquals(AuthenticationType.SELF_SIGNED, deviceSelf.getAuthenticationType());
     }
 
-
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_014: [This constructor shall create a new Device object using the values within the provided parser.]
     @Test
     public void conversionFromDeviceParserWithSASAuthentication()
     {
         // arrange
+        String scope = "scope";
         DeviceParser parserSAS = new DeviceParser();
         parserSAS.setAuthenticationParser(Deencapsulation.newInstance(AuthenticationParser.class));
         parserSAS.getAuthenticationParser().setType(AuthenticationTypeParser.SAS);
         parserSAS.getAuthenticationParser().setSymmetricKey(new SymmetricKeyParser(SAMPLE_KEY, SAMPLE_KEY));
         parserSAS.setDeviceId("deviceSAS");
+        parserSAS.setScope(scope);
 
         // act
         Device deviceSAS = reflectivelyInvokeDeviceParserConstructor(parserSAS);
@@ -365,6 +368,37 @@ public class DeviceTest
         assertNull(deviceSAS.getSecondaryThumbprint());
         assertNotNull(deviceSAS.getSymmetricKey());
         assertEquals(AuthenticationType.SAS, deviceSAS.getAuthenticationType());
+        assertEquals(scope, deviceSAS.getScope());
+    }
+
+    @Test
+    public void setScopeSetsScope()
+    {
+        //arrange
+        String scope = "scope";
+        Device device = Device.createDevice("device", AuthenticationType.SAS);
+
+        //act
+        device.setScope(scope);
+
+        //assert
+        String actualScope = Deencapsulation.getField(device, "scope");
+        assertEquals(scope, actualScope);
+    }
+
+    @Test
+    public void getScopeGetsScope()
+    {
+        //arrange
+        String scope = "scope";
+        Device device = Device.createDevice("device", AuthenticationType.SAS);
+        Deencapsulation.setField(device, "scope", scope);
+
+        //act
+        String actualScope = device.getScope();
+
+        //assert
+        assertEquals(scope, actualScope);
     }
 
     /**
