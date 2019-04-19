@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
@@ -374,7 +375,37 @@ public class RegistryManagerTests extends IntegrationTest
         registryManager.applyConfigurationContentOnDevice(deviceForTest, content);
     }
 
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @Test
+    public void deviceCreationWithSecurityScope() throws IOException, InterruptedException, IotHubException
+    {
+        // Arrange
+        deleteDeviceIfItExistsAlready(registryManager, deviceId);
 
+        //-Create-//
+        Device edgeDevice = Device.createFromId(deviceId, DeviceStatus.Enabled, null);
+        DeviceCapabilities capabilities = new DeviceCapabilities();
+        capabilities.setIotEdge(true);
+        edgeDevice.setCapabilities(capabilities);
+        edgeDevice = Tools.addDeviceWithRetry(registryManager, edgeDevice);
+
+        Device leafDevice = Device.createFromId(deviceId + "-leaf", DeviceStatus.Enabled, null);
+        leafDevice.setScope(edgeDevice.getScope());
+        Tools.addDeviceWithRetry(registryManager, leafDevice);
+
+
+        //-Read-//
+        Device deviceRetrieved = registryManager.getDevice(deviceId);
+
+        //-Delete-//
+        registryManager.removeDevice(deviceId);
+
+        // Assert
+        assertEquals(buildExceptionMessage("Registered device id is not correct", hostName), deviceId, edgeDevice.getDeviceId());
+        assertEquals(buildExceptionMessage("Registered device id is not correct", hostName), deviceId, deviceRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("Security scopes did not match", hostName), deviceRetrieved.getScope(), edgeDevice.getScope());
+    }
+    
     private void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException, InterruptedException
     {
         try
