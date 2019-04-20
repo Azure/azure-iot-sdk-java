@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
     <artifactId>iot-device-samples</artifactId>
-    <version>1.17.0</version>
+    <version>1.17.1</version>
     <name>IoT Hub Java Device SDK Samples</name>
     <packaging>pom</packaging>
     <developers>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.17.0</version>
+            <version>1.17.1</version>
         </dependency>
     </dependencies>
     <build>

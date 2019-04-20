@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
     <artifactId>iot-service-samples</artifactId>
-    <version>1.16.2</version>
+    <version>1.16.3</version>
     <name>IoT Hub Service SDK Samples</name>
     <packaging>pom</packaging>
     <developers>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.16.2</version>
+            <version>1.16.3</version>
         </dependency>
     </dependencies>
     <build>
