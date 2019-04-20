@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
         <artifactId>iot-device-samples</artifactId>
-        <version>1.17.0</version>
+        <version>1.17.1</version>
     </parent>
     <dependencies>
         <dependency>

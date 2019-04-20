@@ -44,7 +44,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // Remote binary dependency
-    api 'com.microsoft.azure.sdk.iot:iot-device-client:1.17.0'
+    api 'com.microsoft.azure.sdk.iot:iot-device-client:1.17.1'
 }
 
 repositories {
