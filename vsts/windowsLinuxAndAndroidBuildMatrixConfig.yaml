@@ -150,29 +150,29 @@ jobs:
   strategy:
     maxParallel: 12
     matrix:
-      1:
+      TestGroup1:
         ANDROID_TEST_GROUP_ID: TestGroup1
-      2:
+      TestGroup2:
         ANDROID_TEST_GROUP_ID: TestGroup2
-      3:
+      TestGroup3:
         ANDROID_TEST_GROUP_ID: TestGroup3
-      4:
+      TestGroup4:
         ANDROID_TEST_GROUP_ID: TestGroup4
-      5:
+      TestGroup5:
         ANDROID_TEST_GROUP_ID: TestGroup5
-      6:
+      TestGroup6:
         ANDROID_TEST_GROUP_ID: TestGroup6
-      7:
+      TestGroup7:
         ANDROID_TEST_GROUP_ID: TestGroup7
-      8:
+      TestGroup8:
         ANDROID_TEST_GROUP_ID: TestGroup8
-      9:
+      TestGroup9:
         ANDROID_TEST_GROUP_ID: TestGroup9
-      10:
+      TestGroup10:
         ANDROID_TEST_GROUP_ID: TestGroup10
-      11:
+      TestGroup11:
         ANDROID_TEST_GROUP_ID: TestGroup11
-      12:
+      TestGroup12:
         ANDROID_TEST_GROUP_ID: TestGroup12
         
       
