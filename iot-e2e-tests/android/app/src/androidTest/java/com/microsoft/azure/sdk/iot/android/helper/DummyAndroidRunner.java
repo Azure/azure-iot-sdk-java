@@ -39,6 +39,32 @@ public class DummyAndroidRunner
     @TestGroup10
     @TestGroup11
     @TestGroup12
+    @TestGroup13
+    @TestGroup14
+    @TestGroup15
+    @TestGroup16
+    @TestGroup17
+    @TestGroup18
+    @TestGroup19
+    @TestGroup20
+    @TestGroup21
+    @TestGroup22
+    @TestGroup23
+    @TestGroup24
+    @TestGroup25
+    @TestGroup26
+    @TestGroup27
+    @TestGroup28
+    @TestGroup29
+    @TestGroup30
+    @TestGroup31
+    @TestGroup32
+    @TestGroup33
+    @TestGroup34
+    @TestGroup35
+    @TestGroup36
+    @TestGroup37
+    @TestGroup38
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = BasicTierOnlyRule.class)
     public void dummyTest()

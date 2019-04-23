@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.methods;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup18;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup6;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-@TestGroup6
+@TestGroup18
 @RunWith(Parameterized.class)
 public class DeviceMethodModuleAndroidRunner extends DeviceMethodTests
 {

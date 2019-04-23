@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.errorinjection.messag
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup15;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup3;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
@@ -31,7 +32,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
-@TestGroup3
+@TestGroup15
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjDeviceAndroidRunner extends SendMessagesErrInjTests
 {

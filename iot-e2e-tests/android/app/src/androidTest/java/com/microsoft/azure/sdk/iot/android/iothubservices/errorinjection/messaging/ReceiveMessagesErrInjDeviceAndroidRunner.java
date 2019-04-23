@@ -9,6 +9,7 @@ import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup1;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup33;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection.ReceiveMessagesErrInjTests;
@@ -31,7 +32,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
-@TestGroup1
+@TestGroup33
 @RunWith(Parameterized.class)
 public class ReceiveMessagesErrInjDeviceAndroidRunner extends ReceiveMessagesErrInjTests
 {

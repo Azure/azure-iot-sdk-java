@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.twin;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup27;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup3;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
@@ -28,7 +29,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
 
-@TestGroup3
+@TestGroup27
 @RunWith(Parameterized.class)
 public class ReportedPropertiesModuleAndroidRunner extends ReportedPropertiesTests
 {
