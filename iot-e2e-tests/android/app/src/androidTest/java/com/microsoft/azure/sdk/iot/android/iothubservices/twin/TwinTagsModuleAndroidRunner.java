@@ -9,6 +9,7 @@ import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup12;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup29;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.TwinTagsTests;
@@ -28,7 +29,7 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
 
-@TestGroup12
+@TestGroup29
 @RunWith(Parameterized.class)
 public class TwinTagsModuleAndroidRunner extends TwinTagsTests
 {
