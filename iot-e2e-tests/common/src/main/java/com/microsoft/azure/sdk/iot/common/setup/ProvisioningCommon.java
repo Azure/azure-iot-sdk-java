@@ -315,7 +315,7 @@ public class ProvisioningCommon extends IntegrationTest
                 {
                     if (((System.currentTimeMillis() - startTime) < timeoutInMillis))
                     {
-                        fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for device to register successfully", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
+                        fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for device to register successfully, last exception: " + Tools.getStackTraceFromThrowable(e), getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
                     }
                     
                     System.out.println("Encountered an exception while registering device, trying again: " + Tools.getStackTraceFromThrowable(e));
