@@ -12,13 +12,13 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
 
-public class SasTokenRenewalHandler extends BaseHandler
+public class AmqpSasTokenRenewalHandler extends BaseHandler
 {
     AmqpsSessionManager amqpsSessionManager;
     CustomLogger logger;
     DeviceClientConfig config;
 
-    public SasTokenRenewalHandler(AmqpsSessionManager amqpsSessionManager, DeviceClientConfig config)
+    public AmqpSasTokenRenewalHandler(AmqpsSessionManager amqpsSessionManager, DeviceClientConfig config)
     {
         this.amqpsSessionManager = amqpsSessionManager;
         this.logger = new CustomLogger(this.getClass());

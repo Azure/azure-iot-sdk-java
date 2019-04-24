@@ -69,7 +69,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
 
-    private SasTokenRenewalHandler sasTokenRenewalHandler;
+    private AmqpSasTokenRenewalHandler sasTokenRenewalHandler;
 
     private CountDownLatch openLatch;
     private CountDownLatch closeLatch;
@@ -85,6 +85,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public AmqpsSessionManager amqpsSessionManager;
     private final static String APPLICATION_PROPERTY_STATUS_CODE = "status-code";
     private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION = "status-description";
+
+    //sending messages is done on reactor thread, but we don't want to hog that thread indefinitely, so there is a limit
+    // on how many messages to send per reactor callback
+    private final static int MAX_MESSAGES_TO_SEND_PER_CALLBACK = 1000;
 
     private boolean methodSubscribed;
     private boolean twinSubscribed;
@@ -185,7 +189,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.savedException = null;
 
         this.amqpsSessionManager = new AmqpsSessionManager(this.deviceClientConfig);
-        this.sasTokenRenewalHandler = new SasTokenRenewalHandler(this.amqpsSessionManager, this.deviceClientConfig);
+        this.sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(this.amqpsSessionManager, this.deviceClientConfig);
 
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -751,7 +755,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         int messagesAttemptedToBeProcessed = 0;
         int lastDeliveryTag = 0;
         com.microsoft.azure.sdk.iot.device.Message message = messagesToSend.poll();
-        while (message != null && messagesAttemptedToBeProcessed < 1000 && lastDeliveryTag >= 0)
+        while (message != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK && lastDeliveryTag >= 0)
         {
             messagesAttemptedToBeProcessed++;
             AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = null;

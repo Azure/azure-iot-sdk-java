@@ -9,7 +9,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSessionManager;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.SasTokenRenewalHandler;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpSasTokenRenewalHandler;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 
-public class SasTokenRenewalHandlerTest
+public class AmqpSasTokenRenewalHandlerTest
 {
     @Mocked
     AmqpsSessionManager mockedAmqpsSessionManager;
@@ -41,7 +41,7 @@ public class SasTokenRenewalHandlerTest
     public void constructorSavesArguments()
     {
         //act
-        SasTokenRenewalHandler sasTokenRenewalHandler = new SasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
+        AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
 
         //assert
         assertEquals(mockedConfig, Deencapsulation.getField(sasTokenRenewalHandler, "config"));
@@ -52,7 +52,7 @@ public class SasTokenRenewalHandlerTest
     public void timerTaskSchedulesNextTimerTask()
     {
         //arrange
-        final SasTokenRenewalHandler sasTokenRenewalHandler = new SasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
+        final AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
 
         final int renewalPeriod = 1234;
 
@@ -85,7 +85,7 @@ public class SasTokenRenewalHandlerTest
     public void timerTaskAuthenticatesUsingSessionManager() throws TransportException
     {
         //arrange
-        final SasTokenRenewalHandler sasTokenRenewalHandler = new SasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
+        final AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
 
         final int renewalPeriod = 1234;
 

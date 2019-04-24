@@ -26,8 +26,8 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for DeviceClient.
- * Methods: 100%
- * Lines: 97%
+ * Methods: 88%
+ * Lines: 91%
  */
 public class AmqpsSessionDeviceOperationTest
 {
