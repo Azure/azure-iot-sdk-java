@@ -64,7 +64,7 @@ public class AmqpsIotHubConnectionTest {
     final String amqpWebSocketPort = "443";
 
     @Mocked
-    SasTokenRenewalHandler mockSasTokenRenewalHandler;
+    AmqpSasTokenRenewalHandler mockAmqpSasTokenRenewalHandler;
 
     @Mocked
     ProtocolException mockedProtocolException;
@@ -1094,7 +1094,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-        Deencapsulation.setField(connection, "sasTokenRenewalHandler", mockSasTokenRenewalHandler);
+        Deencapsulation.setField(connection, "sasTokenRenewalHandler", mockAmqpSasTokenRenewalHandler);
 
 
         connection.onReactorInit(mockEvent);
@@ -1104,7 +1104,7 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockEvent.getReactor();
                 mockReactor.schedule(sendPeriod, connection);
-                mockReactor.schedule(expectedSasTokenRenewalPeriod, mockSasTokenRenewalHandler);
+                mockReactor.schedule(expectedSasTokenRenewalPeriod, mockAmqpSasTokenRenewalHandler);
                 mockReactor.connectionToHost(anyString, anyInt, connection);
             }
         };
@@ -1134,7 +1134,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-        Deencapsulation.setField(connection, "sasTokenRenewalHandler", mockSasTokenRenewalHandler);
+        Deencapsulation.setField(connection, "sasTokenRenewalHandler", mockAmqpSasTokenRenewalHandler);
 
 
         connection.onReactorInit(mockEvent);
@@ -1145,7 +1145,7 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getReactor();
                 mockReactor.schedule(sendPeriod, connection);
 
-                mockReactor.schedule(expectedSasTokenRenewalPeriod, mockSasTokenRenewalHandler);
+                mockReactor.schedule(expectedSasTokenRenewalPeriod, mockAmqpSasTokenRenewalHandler);
                 times = 0;
 
                 mockReactor.connectionToHost(anyString, anyInt, connection);
@@ -3032,7 +3032,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-        Deencapsulation.setField(connection, "sasTokenRenewalHandler", mockSasTokenRenewalHandler);
+        Deencapsulation.setField(connection, "sasTokenRenewalHandler", mockAmqpSasTokenRenewalHandler);
 
 
         connection.onTimerTask(mockEvent);
