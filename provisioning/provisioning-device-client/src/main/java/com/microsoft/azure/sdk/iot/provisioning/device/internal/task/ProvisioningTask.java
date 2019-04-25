@@ -32,6 +32,7 @@ public class ProvisioningTask implements Callable
     private static final int MAX_THREADS_TO_RUN = 2;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000000;
     private static final int MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE = 10000;
+    private static final int DEFAULT_DELAY_BETWEEN_STATUS_CHECKS = 2 * 1000; //2 seconds
     private static final String THREAD_NAME = "azure-iot-sdk-ProvisioningTask";
 
     private SecurityProvider securityProvider = null;
@@ -139,7 +140,7 @@ public class ProvisioningTask implements Callable
                                                                                       ProvisioningDeviceClientException
     {
         // To-Do : Add appropriate wait time retrieved from Service
-        Thread.sleep(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE);
+        Thread.sleep(DEFAULT_DELAY_BETWEEN_STATUS_CHECKS);
         StatusTask statusTask = new StatusTask(securityProvider, provisioningDeviceClientContract, operationId,
                                                this.authorization);
         FutureTask<RegistrationOperationStatusParser> futureStatusTask = new FutureTask<RegistrationOperationStatusParser>(statusTask);
