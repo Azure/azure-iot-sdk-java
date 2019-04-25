@@ -360,9 +360,9 @@ public class ProvisioningCommon extends IntegrationTest
         }
     }
 
-    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities) throws IOException, IotHubException
+    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException
     {
-        DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString);
         Query query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
         assertTrue(deviceTwin.hasNextDeviceTwin(query));
         DeviceTwinDevice provisionedDevice = deviceTwin.getNextDeviceTwin(query);
