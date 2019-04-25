@@ -53,110 +53,6 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void individualEnrollmentProvisioningFlow() throws Exception
-    {
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, getHostName(iotHubConnectionString), getHostName(farAwayIotHubConnectionString));
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
-    public void enrollmentGroupProvisioningFlow() throws Exception
-    {
-        if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP);
-
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-        expectedHubsToProvisionTo.add(getHostName(farAwayIotHubConnectionString));
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, expectedHubsToProvisionTo);
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.GROUP);
-    }
-
-    @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void individualEnrollmentProvisioningFlowWithEdgeDevice() throws Exception
-    {
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(true);
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL, null, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, getHostName(iotHubConnectionString), getHostName(farAwayIotHubConnectionString));
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void enrollmentGroupProvisioningFlowWithEdgeDevice() throws Exception
-    {
-        if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(true);
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP, AllocationPolicy.HASHED, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, expectedHubsToProvisionTo);
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.GROUP);
-    }
-
-    @Test
-    public void individualEnrollmentProvisioningFlowWithNonEdgeDevice() throws Exception
-    {
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(false);
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL, null, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, getHostName(iotHubConnectionString), getHostName(farAwayIotHubConnectionString));
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        // delete enrollment
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
-    public void enrollmentGroupProvisioningFlowWithNonEdgeDevice() throws Exception
-    {
-        if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(false);
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP, AllocationPolicy.HASHED, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, expectedHubsToProvisionTo);
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        // delete enrollment
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.GROUP);
-    }
-
-    @Test
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
@@ -170,18 +66,21 @@ public class ProvisioningTests extends ProvisioningCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void groupEnrollmentProvisioningReprovisioningKeepTwin() throws Exception
+    public void groupEnrollmentReprovisioningCanKeepTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setMigrateDeviceData(true);
         reprovisionPolicy.setUpdateHubAssignment(true);
 
-        reprovisioningFlow(EnrollmentType.GROUP, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
+        DeviceCapabilities deviceCapabilities = new DeviceCapabilities();
+        deviceCapabilities.setIotEdge(true);
+
+        reprovisioningFlow(EnrollmentType.GROUP, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo(), deviceCapabilities);
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void groupEnrollmentProvisioningReprovisioningResetTwin() throws Exception
+    public void groupEnrollmentReprovisioningCanResetTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setMigrateDeviceData(false);
@@ -191,7 +90,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void groupEnrollmentProvisioningReprovisioningCanBlockReprovisioning() throws Exception
+    public void groupEnrollmentCanBlockReprovisioning() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setUpdateHubAssignment(false);
@@ -200,14 +99,14 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void groupEnrollmentProvisioningCustomAllocationPolicy() throws Exception
+    public void groupEnrollmentWithCustomAllocationPolicy() throws Exception
     {
         customAllocationFlow(EnrollmentType.GROUP);
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void individualEnrollmentProvisioningReprovisioningKeepTwin() throws Exception
+    public void individualEnrollmentReprovisioningCanKeepTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setMigrateDeviceData(true);
@@ -218,7 +117,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void individualEnrollmentProvisioningReprovisioningResetTwin() throws Exception
+    public void individualEnrollmentReprovisioningCanResetTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setMigrateDeviceData(false);
@@ -228,7 +127,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void individualEnrollmentProvisioningReprovisioningCanBlockReprovisioning() throws Exception
+    public void individualEnrollmentCanBlockReprovisioning() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setUpdateHubAssignment(false);
@@ -237,7 +136,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void individualEnrollmentProvisioningCustomAllocationPolicy() throws Exception
+    public void individualEnrollmentWithCustomAllocationPolicy() throws Exception
     {
         customAllocationFlow(EnrollmentType.INDIVIDUAL);
     }
@@ -249,7 +148,8 @@ public class ProvisioningTests extends ProvisioningCommon
      * pointing to that Azure function will always enroll to the hub with the longest name
      * @param enrollmentType
      */
-    protected void customAllocationFlow(EnrollmentType enrollmentType) throws Exception {
+    protected void customAllocationFlow(EnrollmentType enrollmentType) throws Exception
+    {
         if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
         {
             //tpm doesn't support group, and x509 group test has not been implemented yet
@@ -287,15 +187,24 @@ public class ProvisioningTests extends ProvisioningCommon
 
     protected void reprovisioningFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt) throws Exception
     {
+        DeviceCapabilities capabilities = new DeviceCapabilities();
+        capabilities.setIotEdge(false);
+        reprovisioningFlow(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, iothubsToFinishAt, capabilities);
+    }
+
+    protected void reprovisioningFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt, DeviceCapabilities capabilities) throws Exception
+    {
         if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
         {
             //tpm doesn't support group, and x509 group test has not been implemented yet
             return;
         }
 
-        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt);
+        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, capabilities);
 
         ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
+
+        assertProvisionedDeviceCapabilitiesAreExpected(capabilities, farAwayIotHubConnectionString);
 
         String expectedReportedPropertyName = "someProperty";
         String expectedReportedPropertyValue = "someValue";
@@ -388,9 +297,8 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
     }
 
-
-
-    private void assertTwinIsCorrect(ReprovisionPolicy reprovisionPolicy, String expectedPropertyName, String expectedPropertyValue, boolean inFarAwayHub) throws IOException, IotHubException {
+    private void assertTwinIsCorrect(ReprovisionPolicy reprovisionPolicy, String expectedPropertyName, String expectedPropertyValue, boolean inFarAwayHub) throws IOException, IotHubException
+    {
         if (reprovisionPolicy != null && reprovisionPolicy.getMigrateDeviceData() == true)
         {
             DeviceTwin twinClient;
@@ -429,7 +337,8 @@ public class ProvisioningTests extends ProvisioningCommon
         }
     }
 
-    private void cleanUpReprovisionedDeviceAndEnrollment(String deviceId, EnrollmentType enrollmentType) throws IOException, IotHubException, ProvisioningServiceClientException {
+    private void cleanUpReprovisionedDeviceAndEnrollment(String deviceId, EnrollmentType enrollmentType) throws IOException, IotHubException, ProvisioningServiceClientException
+    {
         //delete provisioned device
         RegistryManager registryManagerFarAway = RegistryManager.createFromConnectionString(farAwayIotHubConnectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
@@ -482,7 +391,8 @@ public class ProvisioningTests extends ProvisioningCommon
         return iotHubsToReprovisionTo;
     }
 
-    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException {
+    private void sendReportedPropertyUpdate(String expectedReportedPropertyName, String expectedReportedPropertyValue, String iothubUri, String deviceId) throws InterruptedException, IOException, URISyntaxException
+    {
         //hardcoded AMQP here only because we aren't testing this connection. We just need to open a connection to send a twin update so that
         // we can test if the twin updates carry over after reprovisioning
         DeviceClient deviceClient = DeviceClient.createFromSecurityProvider(iothubUri, deviceId, testInstance.securityProvider, IotHubClientProtocol.AMQPS);
