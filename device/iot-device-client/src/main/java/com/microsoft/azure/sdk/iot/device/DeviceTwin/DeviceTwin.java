@@ -47,6 +47,14 @@ public class DeviceTwin
     private ConcurrentSkipListMap<String, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChangeMap;
     private ConcurrentSkipListMap<String, Pair<TwinPropertyCallBack, Object>> onDesiredTwinPropertyChangeMap;
 
+    public void tearDownTwin(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext)
+    {
+        IotHubTransportMessage getTwinRequestMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
+        getTwinRequestMessage.setRequestId(String.valueOf(requestId++));
+        getTwinRequestMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_TEAR_DOWN);
+        this.deviceIO.sendEventAsync(getTwinRequestMessage, twinStatusCallback, twinStatusCallbackContext, this.config.getDeviceId());
+    }
+
     /*
         Callback invoked when a response to device twin operation is issued by iothub
      */
@@ -227,7 +235,7 @@ public class DeviceTwin
                     Don't worry about this....this is just delivery complete. Actual response is
                     another message received in deviceTwinResponseMessageCallback.
                  */
-                if((responseStatus != IotHubStatusCode.OK) && (responseStatus != IotHubStatusCode.OK_EMPTY))
+                if((responseStatus != IotHubStatusCode.OK) && (responseStatus != IotHubStatusCode.OK_EMPTY) && (deviceTwinStatusCallback != null))
                 {
                     deviceTwinStatusCallback.execute(responseStatus, deviceTwinStatusCallbackContext);
                 }

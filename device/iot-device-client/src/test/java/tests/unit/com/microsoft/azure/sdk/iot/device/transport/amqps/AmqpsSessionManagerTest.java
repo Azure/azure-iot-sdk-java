@@ -330,6 +330,46 @@ public class AmqpsSessionManagerTest
         };
     }
 
+    @Test
+    public void closeDeviceOperationLinkSuccess() throws IllegalArgumentException, InterruptedException, TransportException
+    {
+        // arrange
+        final String deviceId = "1234";
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
+        Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
+
+        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
+        sessionList.add(mockAmqpsSessionDeviceOperation);
+        sessionList.add(mockAmqpsSessionDeviceOperation1);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
+        Deencapsulation.setField(amqpsSessionManager, "openLinksLock", mockObjectLock);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockAmqpsDeviceAuthenticationCBS.operationLinksOpened();
+                result = true;
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
+                result = true;
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
+                result = true;
+            }
+        };
+
+        // act
+        Deencapsulation.invoke(amqpsSessionManager, "closeDeviceOperationLink", MessageType.DEVICE_TWIN, deviceId);
+
+        // assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "closeLink", MessageType.DEVICE_TWIN, deviceId);
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "closeLink", MessageType.DEVICE_TWIN, deviceId);
+            }
+        };
+    }
+
     // Tests_SRS_AMQPSESSIONMANAGER_12_023: [The function shall initialize the session member variable from the connection if the session is null.]
     // Tests_SRS_AMQPSESSIONMANAGER_12_024: [The function shall open the initialized session.]
     @Test

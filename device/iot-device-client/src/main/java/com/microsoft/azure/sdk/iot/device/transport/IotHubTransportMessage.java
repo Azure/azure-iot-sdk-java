@@ -203,8 +203,7 @@ public class IotHubTransportMessage extends Message
         if (protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS)
         {
             if (this.operationType == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
-                    || this.operationType == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
-                    || this.operationType == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+                    || this.operationType == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
                 //This is a SUBSCRIBE action in MQTT which we currently treat synchronously, so there is no message ack
                 // unlike other send operations

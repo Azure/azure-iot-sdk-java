@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 
@@ -404,6 +405,19 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             else
             {
                 this.deviceMessaging.send(message);
+            }
+
+            if (message instanceof IotHubTransportMessage)
+            {
+                IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
+
+                if (transportMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
+                        || transportMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
+                        || transportMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_TEAR_DOWN)
+                {
+                    //subscribes and unsubscribes are executed synchronously, so if the message was a sub/unsub, it completed successfully
+                    this.listener.onMessageSent(transportMessage, null);
+                }
             }
 
             return result;

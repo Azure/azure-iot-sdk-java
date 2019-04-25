@@ -394,7 +394,7 @@ public class AmqpsSessionDeviceOperationTest
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
 
         // act
-        Deencapsulation.invoke(amqpsSessionDeviceOperation, "closeLinks");
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "closeAllLinks");
 
         // assert
         new Verifications()
@@ -1129,6 +1129,118 @@ public class AmqpsSessionDeviceOperationTest
                 times = 0;
 
                 mockAmqpsDeviceMethods.onLinkFlow(expectedCredit);
+                times = 0;
+            }
+        };
+    }
+
+    @Test
+    public void closeLinkClosesTelemetryLink() throws IllegalArgumentException, TransportException
+    {
+        // arrange
+        final String deviceId = "1234";
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        new StrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getDeviceId();
+                result = deviceId;
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "closeLinks");
+            }
+        };
+
+        // assert
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "closeLink", DEVICE_TELEMETRY, deviceId);
+    }
+
+    @Test
+    public void closeLinkClosesMethodLink() throws IllegalArgumentException, TransportException
+    {
+        // arrange
+        final String deviceId = "1234";
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        new StrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getDeviceId();
+                result = deviceId;
+                Deencapsulation.invoke(mockAmqpsDeviceMethods, "closeLinks");
+            }
+        };
+
+        // assert
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "closeLink", DEVICE_METHODS, deviceId);
+    }
+
+    @Test
+    public void closeLinkClosesTwinLink() throws IllegalArgumentException, TransportException
+    {
+        // arrange
+        final String deviceId = "1234";
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        new StrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getDeviceId();
+                result = deviceId;
+                Deencapsulation.invoke(mockAmqpsDeviceTwin, "closeLinks");
+            }
+        };
+
+        // assert
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "closeLink", DEVICE_TWIN, deviceId);
+    }
+
+    @Test
+    public void closeLinkOnlyClosesLinksIfDeviceIdMatches() throws IllegalArgumentException, TransportException
+    {
+        // arrange
+        final String deviceId = "1234";
+        final String otherDeviceId = "5678";
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceClientConfig.getDeviceId();
+                result = otherDeviceId;
+            }
+        };
+
+        // assert
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "closeLink", DEVICE_TELEMETRY, deviceId);
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "closeLinks");
+                times = 0;
+                Deencapsulation.invoke(mockAmqpsDeviceMethods, "closeLinks");
+                times = 0;
+                Deencapsulation.invoke(mockAmqpsDeviceTwin, "closeLinks");
                 times = 0;
             }
         };

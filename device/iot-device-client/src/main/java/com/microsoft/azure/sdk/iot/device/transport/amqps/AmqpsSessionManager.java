@@ -184,6 +184,24 @@ public class AmqpsSessionManager
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
+    protected void closeDeviceOperationLink(MessageType msgType, String deviceId)
+    {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
+        if (this.session != null)
+        {
+            for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
+            {
+                if (this.amqpsDeviceSessionList.get(i) != null)
+                {
+                    this.amqpsDeviceSessionList.get(i).closeLink(msgType, deviceId);
+                }
+            }
+        }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
+    }
+
     /**
      * Event handler for connection initialization. 
      * Open the session and the links. 

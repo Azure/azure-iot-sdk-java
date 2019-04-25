@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
-import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
 import static org.junit.Assert.*;
 
 /**
@@ -870,6 +869,67 @@ public class MqttTest
         };
     }
 
+    @Test
+    public void unsubscribeSucceeds() throws MqttException, TransportException
+    {
+        //arrange
+        baseConstructorExpectations();
+        baseConnectExpectation();
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = true;
+                mockMqttAsyncClient.unsubscribe(MOCK_PARSE_TOPIC);
+                result = mockMqttToken;
+            }
+        };
+        Mqtt mockMqtt = instantiateMqtt(true);
+        Deencapsulation.invoke(mockMqtt, "connect");
+
+        //act
+        Deencapsulation.invoke(mockMqtt, "unsubscribe", MOCK_PARSE_TOPIC);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                minTimes = 1;
+                mockMqttAsyncClient.unsubscribe(MOCK_PARSE_TOPIC);
+                times = 1;
+            }
+        };
+    }
+
+    @Test(expected = TransportException.class)
+    public void unsubscribeFailsWhenNotConnected() throws TransportException
+    {
+        //arrange
+        baseConstructorExpectations();
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = false;
+            }
+        };
+
+        Mqtt mockMqtt = instantiateMqtt(true);
+
+        //act
+        Deencapsulation.invoke(mockMqtt, "unsubscribe", MOCK_PARSE_TOPIC);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                minTimes = 1;
+            }
+        };
+    }
+
     // Tests_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
     // Tests_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
    @Test
@@ -1422,45 +1482,6 @@ public class MqttTest
         final Message otherMessage = new Message();
         final IotHubTransportMessage expectedMessage = new IotHubTransportMessage("some body");
         expectedMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
-        Mqtt mockMqtt = instantiateMqtt(true, mockedIotHubListener);
-        Map<Integer, Message> unacknowledgedMessages = new HashMap<>();
-        unacknowledgedMessages.put(12, otherMessage);
-        unacknowledgedMessages.put(expectedMessageId, expectedMessage);
-        Deencapsulation.setField(mockMqtt, "unacknowledgedSentMessages", unacknowledgedMessages);
-        new NonStrictExpectations()
-        {
-            {
-                mockMqttDeliveryToken.getMessageId();
-                result = expectedMessageId;
-            }
-        };
-
-        //act
-        mockMqtt.deliveryComplete(mockMqttDeliveryToken);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedIotHubListener.onMessageSent(expectedMessage, null);
-                times = 0;
-            }
-        };
-    }
-
-    //Tests_SRS_Mqtt_34_056: [If the acknowledged message is of type
-    // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,
-    // or DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST, this function shall not notify the saved
-    // listener that the message was sent.]
-    @Test
-    public void deliveryCompleteDoesNotNotifyListenerIfUnsubscribeToDesiredProperties() throws TransportException
-    {
-        //arrange
-        final int expectedMessageId = 13;
-        baseConstructorExpectations();
-        final Message otherMessage = new Message();
-        final IotHubTransportMessage expectedMessage = new IotHubTransportMessage("some body");
-        expectedMessage.setDeviceOperationType(DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST);
         Mqtt mockMqtt = instantiateMqtt(true, mockedIotHubListener);
         Map<Integer, Message> unacknowledgedMessages = new HashMap<>();
         unacknowledgedMessages.put(12, otherMessage);

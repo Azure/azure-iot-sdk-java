@@ -12,11 +12,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -290,6 +286,35 @@ abstract public class Mqtt implements MqttCallback
         }
     }
 
+    protected void unsubscribe(String topic) throws TransportException
+    {
+        synchronized (this.stateLock)
+        {
+            try
+            {
+                if (topic == null)
+                {
+                    throw new IllegalArgumentException("Topic cannot be null");
+                }
+                else if (!this.mqttConnection.getMqttAsyncClient().isConnected())
+                {
+                    TransportException transportException = new TransportException("Cannot unsubscribe when mqtt client is disconnected");
+                    transportException.setRetryable(true);
+                    throw transportException;
+                }
+
+                IMqttToken subToken = this.mqttConnection.getMqttAsyncClient().unsubscribe(topic);
+
+                subToken.waitForCompletion(MqttConnection.MAX_UNSUBSCRIBE_ACK_WAIT_TIME);
+            }
+            catch (MqttException e)
+            {
+                //Codes_SRS_Mqtt_25_048: [If the Mqtt Client Async throws MqttException for any reason, the function shall throw a ProtocolException with the message.]
+                throw PahoExceptionTranslator.convertToMqttException(e, "Unable to unsubscribe from topic :" + topic);
+            }
+        }
+    }
+
     /**
      * Method to receive messages on mqtt broker connection.
      *
@@ -422,8 +447,7 @@ abstract public class Mqtt implements MqttCallback
         {
             DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
             if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
-                    || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
-                    || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+                    || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
                 //Codes_SRS_Mqtt_34_056: [If the acknowledged message is of type
                 // DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST, DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST,

@@ -458,10 +458,10 @@ public class InternalClient
     /**
      * Starts the device twin.
      *
-     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. If {@code null}, you will unsubscribe from twin.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. If {@code null}, you will unsubscribe from twin.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
@@ -477,12 +477,14 @@ public class InternalClient
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (twinStatusCallback == null || genericPropertyCallBack == null)
+        if (this.twin != null && genericPropertyCallBack == null)
         {
-            throw new IllegalArgumentException("Callback cannot be null");
+            //end twin
+            twin.tearDownTwin(twinStatusCallback, twinStatusCallbackContext);
         }
-        if (this.twin == null)
+        else if (this.twin == null)
         {
+            //start twin
             twin = new DeviceTwin(
                     this.deviceIO,
                     this.config,
@@ -522,21 +524,22 @@ public class InternalClient
             throw new IOException("Open the client connection before using it.");
         }
 
-        if (twinStatusCallback == null || genericPropertyCallBack == null)
+        if (this.twin != null && genericPropertyCallBack == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_082: [If either callback is null, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("Callback cannot be null");
+            //end twin
+            twin.tearDownTwin(twinStatusCallback, twinStatusCallbackContext);
         }
-        if (this.twin == null)
+        else if (this.twin == null)
         {
+            //start twin
             //Codes_SRS_INTERNALCLIENT_34_084: [This function shall initialize a DeviceTwin object and invoke getDeviceTwin on it.]
             twin = new DeviceTwin(this.deviceIO, this.config, twinStatusCallback, twinStatusCallbackContext,
                     genericPropertyCallBack, genericPropertyCallBackContext);
+
             twin.getDeviceTwin();
         }
         else
         {
-            //Codes_SRS_INTERNALCLIENT_34_083: [If either callback is null, this function shall throw an IllegalArgumentException.]
             throw new UnsupportedOperationException("You have already initialised twin");
         }
     }

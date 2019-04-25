@@ -418,6 +418,47 @@ public class MqttDeviceTwinTest
             }
         };
     }
+
+    @Test
+    public void sendUnsubscribesToDesiredPropertiesOnCorrectTopic(@Mocked final Mqtt mockMqtt, @Mocked final IotHubTransportMessage mockMessage) throws TransportException
+    {
+        //arrange
+        final byte[] actualPayload = {0x61, 0x62, 0x63};
+        final String expectedTopic = "$iothub/twin/PATCH/properties/desired/?$version="+ mockVersion;
+        final String expectedSubscribeTopic = "$iothub/twin/PATCH/properties/desired/#";
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "", new HashMap<Integer, Message>());
+        testTwin.start();
+        new NonStrictExpectations()
+        {
+            {
+                mockMessage.getMessageType();
+                result = MessageType.DEVICE_TWIN;
+                mockMessage.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_TEAR_DOWN;
+                mockMessage.getVersion();
+                result = mockVersion;
+                mockMessage.getBytes();
+                result = actualPayload;
+            }
+        };
+
+        //act
+        testTwin.send(mockMessage);
+
+        //assert
+        boolean isStarted = Deencapsulation.getField(testTwin, "isStarted");
+        assertFalse(isStarted);
+        new Verifications()
+        {
+            {
+                mockMessage.getBytes();
+                times = 1;
+                Deencapsulation.invoke(mockMqtt, "unsubscribe", expectedSubscribeTopic);
+                times = 1;
+            }
+        };
+    }
+
     /*
     **Tests_SRS_MQTTDEVICETWIN_25_021: [send method shall throw an IllegalArgumentException if the message is null.]
      */

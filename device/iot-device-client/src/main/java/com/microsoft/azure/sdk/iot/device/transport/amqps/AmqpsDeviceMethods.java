@@ -31,8 +31,8 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
     private static final String SENDER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/methods/devicebound";
     private static final String RECEIVER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/methods/devicebound";
 
-    private static final String SENDER_LINK_TAG_PREFIX = "sender_link_devicemethods-";
-    private static final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_devicemethods-";
+    protected static final String SENDER_LINK_TAG_PREFIX = "sender_link_devicemethods-";
+    protected static final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_devicemethods-";
 
     private DeviceClientConfig deviceClientConfig;
 

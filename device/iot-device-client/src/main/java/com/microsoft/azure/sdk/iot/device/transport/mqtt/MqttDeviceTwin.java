@@ -139,6 +139,7 @@ public class MqttDeviceTwin extends Mqtt
                 break;
             }
             case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
+            case DEVICE_OPERATION_TWIN_TEAR_DOWN:
             {
                 // Building $iothub/twin/PATCH/properties/desired/?$version={new version}
                 //Codes_SRS_MQTTDEVICETWIN_25_029: [send method shall build the subscribe to desired properties request topic of the format mentioned in spec ($iothub/twin/PATCH/properties/desired/?$version={new version}) if the operation is of type DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.]
@@ -212,6 +213,20 @@ public class MqttDeviceTwin extends Mqtt
 
             //Codes_SRS_MQTTDEVICETWIN_25_032: [send method shall subscribe to desired properties by calling method subscribe() on topic "$iothub/twin/PATCH/properties/desired/#" specified in spec if the operation is DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST.]
             this.subscribe(subscribeTopic);
+        }
+        else if (message.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_TEAR_DOWN)
+        {
+            // Unsubscribe to "$iothub/twin/PATCH/properties/desired/#"
+            String subscribeTopic = PATCH +
+                    BACKSLASH +
+                    PROPERTIES +
+                    BACKSLASH +
+                    DESIRED +
+                    BACKSLASH +
+                    POUND;
+
+            this.unsubscribe(subscribeTopic);
+            this.isStarted = false;
         }
         else
         {

@@ -1090,7 +1090,7 @@ public class AmqpsDeviceTwinTest
                 mockCorrelationIdList.containsKey(correlationId.toString());
                 result = true;
                 mockCorrelationIdList.get(correlationId.toString());
-                result = DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
+                result = DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
 
                 mockProperties.getMessageId();
                 result = null;
@@ -1117,7 +1117,7 @@ public class AmqpsDeviceTwinTest
         //assert
         assertNotNull(actualMessage);
         assertEquals(correlationId, (actualMessage).getCorrelationId());
-        assertEquals(DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_RESPONSE, ((IotHubTransportMessage)actualMessage).getDeviceOperationType());
+        assertEquals(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE, ((IotHubTransportMessage)actualMessage).getDeviceOperationType());
 
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
@@ -1159,7 +1159,7 @@ public class AmqpsDeviceTwinTest
                 mockCorrelationIdList.containsKey(correlationId.toString());
                 result = true;
                 mockCorrelationIdList.get(correlationId.toString());
-                result = DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
+                result = DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
 
                 mockProperties.getMessageId();
                 result = null;
@@ -1194,7 +1194,7 @@ public class AmqpsDeviceTwinTest
 
         assertNotNull(actualMessage);
         assertEquals(correlationId, (actualMessage).getCorrelationId());
-        assertEquals(DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_RESPONSE, ((IotHubTransportMessage)actualMessage).getDeviceOperationType());
+        assertEquals(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE, ((IotHubTransportMessage)actualMessage).getDeviceOperationType());
 
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
@@ -1763,67 +1763,6 @@ public class AmqpsDeviceTwinTest
         assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
     }
 
-    // Tests_SRS_AMQPSDEVICETWIN_12_033: [The function shall set the proton message annotation operation field to GET if the IotHubTransportMessage operation type is GET_REQUEST.]
-    @Test
-    public void convertToProtonSetsMessageAnnotationsUnSubscribeDesiredPropertiesRequest(
-            @Mocked final Properties mockProtonProperties,
-            @Mocked final MessageProperty mockMessageProperty,
-            @Mocked final IotHubTransportMessage mockIotHubTransportMessage,
-            @Mocked final MessageImpl mockMessageImpl,
-            @Mocked final ApplicationProperties mockApplicationProperties,
-            @Mocked final Map<Symbol, Object> mockMessageAnnotationsMap,
-            @Mocked final MessageAnnotations mockMessageAnnotations
-    ) throws IOException
-    {
-        //arrange
-        String deviceId = "deviceId";
-        final MessageProperty[] properties = new MessageProperty[1];
-        properties[0] = mockMessageProperty;
-
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
-
-        new NonStrictExpectations()
-        {
-            {
-                new Properties();
-                result = null;
-                mockIotHubTransportMessage.getMessageType();
-                result = MessageType.DEVICE_TWIN;
-                mockIotHubTransportMessage.getMessageId();
-                result = null;
-                mockIotHubTransportMessage.getCorrelationId();
-                result = null;
-                mockIotHubTransportMessage.getProperties();
-                result = properties;
-                new ApplicationProperties((Map) any);
-                result = mockApplicationProperties;
-
-                mockIotHubTransportMessage.getDeviceOperationType();
-                result = DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
-
-                new MessageAnnotations((Map) any);
-                result = mockMessageAnnotations;
-            }
-        };
-
-        //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockMessageImpl.setMessageAnnotations(mockMessageAnnotations);
-                times = 1;
-            }
-        };
-
-        assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageImpl"));
-        assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
-    }
-
     // Codes_SRS_AMQPSDEVICETWIN_12_034: [The function shall set the proton message annotation operation field to PATCH if the IotHubTransportMessage operation type is UPDATE_REPORTED_PROPERTIES_REQUEST.]
     // Codes_SRS_AMQPSDEVICETWIN_12_035: [The function shall set the proton message annotation resource field to "/properties/reported" if the IotHubTransportMessage operation type is UPDATE_REPORTED_PROPERTIES_REQUEST.]
     // Codes_SRS_AMQPSDEVICETWIN_21_049: [If the version is provided, the function shall set the proton message annotation resource field to "version" if the message version.]
@@ -1895,41 +1834,6 @@ public class AmqpsDeviceTwinTest
         Map<Symbol, Object> map = annotations.getValue();
         assertEquals(2, map.size());
         assertEquals("PUT", map.get(Symbol.valueOf("operation")));
-        assertEquals("/notifications/twin/properties/desired", map.get(Symbol.valueOf("resource")));
-    }
-
-    // Codes_SRS_AMQPSDEVICETWIN_12_038: [The function shall set the proton message annotation operation field to DELETE if the IotHubTransportMessage operation type is UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST.]
-    // Codes_SRS_AMQPSDEVICETWIN_12_039: [The function shall set the proton message annotation resource field to "/notifications/twin/properties/desired" if the IotHubTransportMessage operation type is UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST.]
-    @Test
-    public void iotHubMessageToProtonMessageSetAnnotationsForUnsubscribeDesiredProperties(
-            @Mocked final IotHubTransportMessage mockedIotHubTransportMessage)
-    {
-        // arrange
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        final MessageProperty[] messageProperties = new MessageProperty[] {};
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedIotHubTransportMessage.getMessageId();
-                result = null;
-                mockedIotHubTransportMessage.getCorrelationId();
-                result = null;
-                mockedIotHubTransportMessage.getProperties();
-                result = messageProperties;
-                mockedIotHubTransportMessage.getDeviceOperationType();
-                result = DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
-            }
-        };
-
-        // act
-        MessageImpl result = Deencapsulation.invoke(amqpsDeviceTwin, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
-
-        // assert
-        MessageAnnotations annotations = result.getMessageAnnotations();
-        Map<Symbol, Object> map = annotations.getValue();
-        assertEquals(2, map.size());
-        assertEquals("DELETE", map.get(Symbol.valueOf("operation")));
         assertEquals("/notifications/twin/properties/desired", map.get(Symbol.valueOf("resource")));
     }
 

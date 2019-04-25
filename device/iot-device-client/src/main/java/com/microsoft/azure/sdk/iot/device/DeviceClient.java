@@ -446,9 +446,9 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Starts the device twin.
      *
-     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. If {@code null}, you will unsubscribe from twin.
      * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
-     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. If {@code null}, you will unsubscribe from twin.
      * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
      *
      * @throws IllegalArgumentException if the callback is {@code null}

@@ -5,14 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -288,5 +288,66 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         }
 
         removeMultipleDevices(MAX_DEVICES);
+    }
+
+    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void testUnsubscribeFromDesiredProperties() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
+    {
+        // arrange
+        if (deviceUnderTest != null)
+        {
+            if (deviceUnderTest.sCDeviceForTwin != null)
+            {
+                deviceUnderTest.sCDeviceForTwin.clearDesiredProperties();
+            }
+
+            if (deviceUnderTest.dCDeviceForTwin != null && deviceUnderTest.dCDeviceForTwin.getReportedProp() != null)
+            {
+                deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
+            }
+        }
+        deviceUnderTest.dCDeviceForTwin.propertyStateList = new PropertyState[1];
+        PropertyState propertyState = new PropertyState();
+        propertyState.callBackTriggered = false;
+        propertyState.property = new Property(PROPERTY_KEY, PROPERTY_VALUE);
+        deviceUnderTest.dCDeviceForTwin.propertyStateList[0] = propertyState;
+        deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
+
+        internalClient.subscribeToDesiredProperties(deviceUnderTest.dCDeviceForTwin.getDesiredProp());
+
+        // act
+        DeviceState unsubscribeSuccess = new DeviceState();
+        if (internalClient instanceof DeviceClient)
+        {
+            ((DeviceClient) internalClient).startDeviceTwin(new DeviceTwinStatusCallBack(), unsubscribeSuccess, (TwinPropertyCallBack) null, null);
+
+        }
+        else if (internalClient instanceof ModuleClient)
+        {
+            ((ModuleClient) internalClient).startTwin(new DeviceTwinStatusCallBack(), unsubscribeSuccess, (TwinPropertyCallBack) null, null);
+        }
+
+        long startTime = System.currentTimeMillis();
+        while (unsubscribeSuccess.deviceTwinStatus != STATUS.SUCCESS)
+        {
+            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
+
+            if (System.currentTimeMillis() - startTime > UNSUBSCRIBE_TIMEOUT)
+            {
+                fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Twin took too long to unsubscribe, or never unsubscribed", internalClient));
+            }
+        }
+        propertyState.callBackTriggered = false;
+
+
+        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
+        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+
+        // assert twin was established, but that after unsubscribing, the desired property callback was never triggered
+        assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage("Twin was not established before unsubscribing", internalClient), deviceUnderTest.deviceTwinStatus == STATUS.SUCCESS);
+        assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Desired properties value changed on device side after unsubscribing from desired properties", internalClient), propertyState.property.getValue(), PROPERTY_VALUE);
     }
 }

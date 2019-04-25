@@ -858,6 +858,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
+        String linkName = event.getLink().getName();
+        if (!twinSubscribed && (linkName.startsWith(AmqpsDeviceTwin.SENDER_LINK_TAG_PREFIX) || linkName.startsWith(AmqpsDeviceTwin.RECEIVER_LINK_TAG_PREFIX)))
+        {
+            //twin link closed after being unsubscibed. No reason to raise an exception
+            return;
+        }
+
+        if (!methodSubscribed && (linkName.startsWith(AmqpsDeviceMethods.SENDER_LINK_TAG_PREFIX) || linkName.startsWith(AmqpsDeviceMethods.RECEIVER_LINK_TAG_PREFIX)))
+        {
+            //method link closed after being unsubscibed. No reason to raise an exception
+            return;
+        }
+
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
@@ -1103,6 +1116,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             messagesToSend.add(message);
         }
+        else
+        {
+            //subs/unsubs don't get acks, so we just assume they worked
+            this.listener.onMessageSent(message, null);
+        }
 
         return IotHubStatusCode.OK;
     }
@@ -1310,12 +1328,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                     break;
                 case DEVICE_TWIN:
-                    if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                {
-                    //TODO: unsubscribe desired property from application
-                    //this.amqpSessionManager to sever the connection
-                    //twinSubscribed = false;
-                }
+                    if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_TWIN_TEAR_DOWN)
+                    {
+                        this.amqpsSessionManager.closeDeviceOperationLink(DEVICE_TWIN, message.getConnectionDeviceId());
+                        twinSubscribed = false;
+                        handled = true;
+                    }
                     else
                     {
                         this.amqpsSessionManager.openDeviceOperationLinks(DEVICE_TWIN);

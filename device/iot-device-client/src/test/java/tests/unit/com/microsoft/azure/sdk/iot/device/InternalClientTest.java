@@ -619,45 +619,8 @@ public class InternalClientTest
      **Tests_SRS_INTERNALCLIENT_25_026: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an InvalidParameterException.**]**
      */
     @Test (expected = IllegalArgumentException.class)
-    public void startDeviceTwinThrowsIfStatusCBisNull(@Mocked final DeviceTwin mockedDeviceTwin,
-                                                      @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
-
-    {
-        //arrange
-        
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = true;
-            }
-        };
-
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
-        Deencapsulation.invoke(client, "open");
-
-        //act
-        Deencapsulation.invoke(client, "startTwinInternal", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallBack.class, Object.class}, null, null, mockedPropertyCB, null);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedDeviceTwin.getDeviceTwin();
-                times = 0;
-            }
-        };
-
-    }
-
-    /*
-     **Tests_SRS_INTERNALCLIENT_25_026: [**If the deviceTwinStatusCallback or genericPropertyCallBack is null, the function shall throw an InvalidParameterException.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
     public void startDeviceTwinThrowsIfPropCBisNull(@Mocked final DeviceTwin mockedDeviceTwin,
                                                     @Mocked final IotHubEventCallback mockedStatusCB) throws IOException, URISyntaxException
-
     {
         //arrange
         
@@ -675,7 +638,72 @@ public class InternalClientTest
 
         //act
         Deencapsulation.invoke(client, "startTwinInternal", mockedStatusCB, null, (PropertyCallBack) null, null);
+    }
 
+    @Test
+    public void startDeviceTwinTearsDownTwinIfCallbacksAreNull(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                    @Mocked final IotHubEventCallback mockedStatusCB,
+                                                    @Mocked final PropertyCallBack mockedPropertyCB)
+    {
+        //arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceIO.isOpen();
+                result = true;
+                mockedDeviceTwin.getDeviceTwin();
+            }
+        };
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        Deencapsulation.invoke(client, "open");
+        Deencapsulation.invoke(client, "startTwinInternal", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallBack.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedPropertyCB, NULL_OBJECT);
+
+        //act
+        Deencapsulation.invoke(client, "startTwinInternal", new Class[] {IotHubEventCallback.class, Object.class, PropertyCallBack.class, Object.class}, null, null, null, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.tearDownTwin(null, null);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void startDeviceTwinTearsDownTwinIfCallbacksAreNullTwinProperty(@Mocked final DeviceTwin mockedDeviceTwin,
+                                                               @Mocked final IotHubEventCallback mockedStatusCB,
+                                                               @Mocked final PropertyCallBack mockedPropertyCB)
+    {
+        //arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        new NonStrictExpectations()
+        {
+            {
+                mockDeviceIO.isOpen();
+                result = true;
+                mockedDeviceTwin.getDeviceTwin();
+            }
+        };
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        Deencapsulation.invoke(client, "open");
+        Deencapsulation.invoke(client, "startTwinInternal", new Class[] {IotHubEventCallback.class, Object.class, TwinPropertyCallBack.class, Object.class}, mockedStatusCB, NULL_OBJECT, mockedTwinPropertyCallback, NULL_OBJECT);
+
+        //act
+        Deencapsulation.invoke(client, "startTwinInternal", new Class[] {IotHubEventCallback.class, Object.class, TwinPropertyCallBack.class, Object.class}, null, null, null, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedDeviceTwin.tearDownTwin(null, null);
+                times = 1;
+            }
+        };
     }
 
     /*

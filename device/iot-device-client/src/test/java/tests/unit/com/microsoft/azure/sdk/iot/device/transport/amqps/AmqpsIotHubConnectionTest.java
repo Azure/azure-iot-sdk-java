@@ -44,6 +44,7 @@ import java.util.concurrent.*;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 
@@ -2344,6 +2345,10 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedSymbol;
                 mockedSymbol.toString();
                 result = AmqpLinkRedirectException.errorCode;
+                mockEvent.getLink();
+                result = mockLink;
+                mockLink.getName();
+                result = "someTelemetryLink";
             }
         };
 
@@ -3431,6 +3436,41 @@ public class AmqpsIotHubConnectionTest {
 
         //act
         connection.onTimerTask(mockEvent);
+    }
+
+    @Test
+    public void OnLinkRemoteCloseReportsNoErrorIfCausedByTwinUnsubscribe() throws TransportException
+    {
+        final StringBuilder methodsCalled = new StringBuilder();
+        new MockUp<AmqpsIotHubConnection>()
+        {
+            @Mock void scheduleReconnection(Throwable throwable)
+            {
+                methodsCalled.append("scheduleReconnection");
+            }
+        };
+        baseExpectations();
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        connection.setListener(mockedIotHubListener);
+        Deencapsulation.setField(connection, "twinSubscribed", false);
+        Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
+        new Expectations()
+        {
+            {
+                mockEvent.getLink();
+                result = mockLink;
+                mockLink.getName();
+                result = Deencapsulation.getField(AmqpsDeviceTwin.class, "SENDER_LINK_TAG_PREFIX") + "-some-postfix";
+            }
+        };
+
+        //act
+        connection.onLinkRemoteClose(mockEvent);
+
+        //assert
+        assertFalse(methodsCalled.toString().contains("scheduleReconnection"));
+        assertEquals(IotHubConnectionStatus.CONNECTED, Deencapsulation.getField(connection, "state"));
+
     }
 
     private void baseExpectations() throws TransportException

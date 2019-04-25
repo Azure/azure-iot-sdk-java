@@ -82,7 +82,7 @@ public class AmqpsSessionDeviceOperation
      */
     public void close()
     {
-        this.closeLinks();
+        this.closeAllLinks();
 
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
@@ -213,19 +213,32 @@ public class AmqpsSessionDeviceOperation
     /**
      * Delegate the close link call to device operation objects.
      */
-    void closeLinks()
+    void closeAllLinks()
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        Iterator iterator = amqpsDeviceOperationsMap.entrySet().iterator();
-        while (iterator.hasNext())
+        for (AmqpsDeviceOperations deviceOperation : amqpsDeviceOperationsMap.values())
         {
-            Map.Entry<MessageType, AmqpsDeviceOperations> pair = (Map.Entry<MessageType, AmqpsDeviceOperations>)iterator.next();
-            pair.getValue().closeLinks();
-            //iterator.remove();
+            deviceOperation.closeLinks();
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+    }
+
+    void closeLink(MessageType messageType, String deviceId)
+    {
+        if (this.deviceClientConfig.getDeviceId().equals(deviceId))
+        {
+            for (AmqpsDeviceOperations deviceOperation : amqpsDeviceOperationsMap.values())
+            {
+                if ((deviceOperation instanceof AmqpsDeviceTwin && messageType == MessageType.DEVICE_TWIN)
+                        || (deviceOperation instanceof AmqpsDeviceMethods && messageType == MessageType.DEVICE_METHODS)
+                        || (deviceOperation instanceof AmqpsDeviceTelemetry && messageType == DEVICE_TELEMETRY))
+                {
+                    deviceOperation.closeLinks();
+                }
+            }
+        }
     }
 
     /**
