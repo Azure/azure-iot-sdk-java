@@ -6,9 +6,15 @@
  */
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import jdk.nashorn.internal.parser.JSONParser;
+
 
 public final class ProvisioningDeviceClientConfig
 {
@@ -156,8 +162,11 @@ public final class ProvisioningDeviceClientConfig
      * Setter data for custom payload
      * @param json payload data
      */
-    public void setCustomPayload(String jsonPayload)
+    public void setPayload(String jsonPayload)
     {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        gson.toJson(this);
+
         this.jsonPayload = jsonPayload;
     }
 
@@ -165,7 +174,7 @@ public final class ProvisioningDeviceClientConfig
      * Getter for retreiving Custom Payload
      * @return value of the custom payload
      */
-    public String getCustomPayload()
+    public String getPayload()
     {
         return this.jsonPayload;
     }

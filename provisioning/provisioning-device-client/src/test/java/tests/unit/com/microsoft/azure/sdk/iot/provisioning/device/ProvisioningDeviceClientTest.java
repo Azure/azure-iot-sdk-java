@@ -219,21 +219,4 @@ public class ProvisioningDeviceClientTest
             }
         };
     }
-
-    @Test
-    public void setProvisioningPayloadSucceeds() throws ProvisioningDeviceClientException
-    {
-        //arrange
-        ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(END_POINT, SCOPE_ID, TEST_PROTOCOL, mockedSecurityProvider);
-        //act
-        testProvisioningDeviceClient.setProvisioningPayload(CUSTOM_PAYLOAD);
-        //assert
-        new Verifications()
-        {
-            {
-                mockedProvisioningDeviceClientConfig.setCustomPayload(CUSTOM_PAYLOAD);
-                times = 1;
-            }
-        };
-    }
 }

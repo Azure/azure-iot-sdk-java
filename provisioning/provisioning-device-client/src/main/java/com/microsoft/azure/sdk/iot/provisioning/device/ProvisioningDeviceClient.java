@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.Provisionin
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.device.AdditionalData;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -102,12 +103,28 @@ public class ProvisioningDeviceClient
     }
 
     /**
-     * Set the Custom Provisioning payload to send to DPS during the registration process
-     * @param jsonPayload The json payload that will be transferred to DPS
+     * Register's a device with the service and provides you with iothub uri and the registered device.
+     * @param provisioningDeviceClientRegistrationCallback Callback where you can retrieve the status of registration like iothub uri and the registered device or
+     *                                                     any exception that was caused during registration process. Cannot be {@code null}.
+     * @param context Context for the callback. Can be {@code null}.
+     * @throws ProvisioningDeviceClientException if any of the underlying API calls fail to process.
      */
-    public void setProvisioningPayload(String jsonPayload)
+    public void registerDevice(ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback, Object context, AdditionalData additionalData) throws ProvisioningDeviceClientException
     {
-        this.provisioningDeviceClientConfig.setCustomPayload(jsonPayload);
+        if (provisioningDeviceClientRegistrationCallback == null)
+        {
+            //SRS_ProvisioningDeviceClient_25_008: [ This method shall throw IllegalArgumentException if provisioningDeviceClientRegistrationCallback is null. ]
+            throw new IllegalArgumentException("registration callback cannot be null");
+        }
+
+        this.provisioningDeviceClientConfig.setPayload(additionalData.getProvisioningPayload());
+
+        //SRS_ProvisioningDeviceClient_25_009: [ This method shall set the config with the callback. ]
+        this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
+
+        //SRS_ProvisioningDeviceClient_25_010: [ This method shall start the executor with the ProvisioningTask. ]
+        ProvisioningTask provisioningTask = new ProvisioningTask(this.provisioningDeviceClientConfig, this.provisioningDeviceClientContract);
+        executor.submit(provisioningTask);
     }
 
     /**

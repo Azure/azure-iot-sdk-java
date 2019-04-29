@@ -118,10 +118,10 @@ public class ProvisioningDeviceClientConfigTest
         ProvisioningDeviceClientConfig testConfig = new ProvisioningDeviceClientConfig();
 
         //act
-        testConfig.setCustomPayload(CUSTOM_PAYLOAD);
+        testConfig.setPayload(CUSTOM_PAYLOAD);
 
         //assert
-        assertEquals(CUSTOM_PAYLOAD, testConfig.getCustomPayload());
+        assertEquals(CUSTOM_PAYLOAD, testConfig.getPayload());
     }
 
 }
