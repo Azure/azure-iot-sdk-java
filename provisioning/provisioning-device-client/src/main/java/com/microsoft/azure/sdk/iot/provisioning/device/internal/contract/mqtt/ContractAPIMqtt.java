@@ -174,7 +174,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with an invalid status
      */
-    public synchronized void authenticateWithProvisioningService(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
+    public synchronized void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
         //SRS_ContractAPIAmqp_07_003: [If responseCallback is null, this method shall throw ProvisioningDeviceClientException.]
         if (responseCallback == null)
@@ -207,7 +207,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             String topic = String.format(MQTT_REGISTER_MESSAGE_FMT, this.packetId++);
 
             //SRS_ContractAPIMqtt_07_026: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), customPayload).toJson().getBytes();
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes();
 
             // SRS_ContractAPIMqtt_07_005: [This method shall send an MQTT message with the property of iotdps-register.]
             this.executeProvisioningMessage(topic, payload, responseCallback, callbackContext);
@@ -278,7 +278,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
      * @throws ProvisioningDeviceTransportException If any of the API calls to transport fail
      * @throws ProvisioningDeviceHubException If hub responds back with an invalid status
      */
-    public synchronized void requestNonceForTPM(RequestData requestData, String customPayload, ResponseCallback responseCallback, Object authorizationCallbackContext) throws ProvisioningDeviceClientException
+    public synchronized void requestNonceForTPM(RequestData requestData, ResponseCallback responseCallback, Object authorizationCallbackContext) throws ProvisioningDeviceClientException
     {
         if (requestData == null)
         {

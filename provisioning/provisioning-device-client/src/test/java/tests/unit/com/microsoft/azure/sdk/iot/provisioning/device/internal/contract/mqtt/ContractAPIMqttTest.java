@@ -404,7 +404,7 @@ public class ContractAPIMqttTest
         ContractAPIMqtt contractAPIMqtt = createContractClass();
 
         //act
-        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, null, null, null);
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, null, null);
     }
 
     // SRS_ContractAPIMqtt_07_004: [If amqpConnection is null or not connected, this method shall throw ProvisioningDeviceConnectionException.]
@@ -414,7 +414,7 @@ public class ContractAPIMqttTest
         ContractAPIMqtt contractAPIMqtt = createContractClass();
 
         //act
-        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
     }
 
     // SRS_ContractAPIMqtt_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
@@ -447,7 +447,7 @@ public class ContractAPIMqttTest
         contractAPIMqtt.messageReceived(mockedMqttMessage);
 
         //act
-        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         new Verifications()
@@ -474,6 +474,9 @@ public class ContractAPIMqttTest
                 mockedMqttConnection.isMqttConnected();
                 result = true;
 
+                mockedRequestData.getPayload();
+                result = TEST_PAYLOAD;
+
                 Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD);
                 result = mockedDeviceRegistrationParser;
 
@@ -487,7 +490,7 @@ public class ContractAPIMqttTest
         contractAPIMqtt.messageReceived(mockedMqttMessage);
 
         //act
-        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, TEST_PAYLOAD, mockedResponseCallback, null);
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         new Verifications()
@@ -532,7 +535,7 @@ public class ContractAPIMqttTest
         contractAPIMqtt.messageReceived(mockedMqttMessage);
 
         //act
-        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         new Verifications()
@@ -585,7 +588,7 @@ public class ContractAPIMqttTest
         contractAPIMqtt.messageReceived(mockedMqttMessage);
 
         //act
-        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         new Verifications()
@@ -778,7 +781,7 @@ public class ContractAPIMqttTest
         };
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -791,7 +794,7 @@ public class ContractAPIMqttTest
         openContractAPI(contractAPIMqtt);
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", null, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, null, null);
 
         //assert
     }
@@ -817,7 +820,7 @@ public class ContractAPIMqttTest
         };
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -841,7 +844,7 @@ public class ContractAPIMqttTest
         };
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -863,7 +866,7 @@ public class ContractAPIMqttTest
         };
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -882,7 +885,7 @@ public class ContractAPIMqttTest
         };
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -901,7 +904,7 @@ public class ContractAPIMqttTest
         };
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -912,7 +915,7 @@ public class ContractAPIMqttTest
         ContractAPIMqtt ContractAPIMqtt = createContractClass();
 
         //act
-        ContractAPIMqtt.requestNonceForTPM(null, "", mockedResponseCallback, null);
+        ContractAPIMqtt.requestNonceForTPM(null, mockedResponseCallback, null);
 
         //assert
     }
@@ -923,7 +926,7 @@ public class ContractAPIMqttTest
         ContractAPIMqtt contractAPIMqtt = createContractClass();
 
         //act
-        contractAPIMqtt.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIMqtt.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }

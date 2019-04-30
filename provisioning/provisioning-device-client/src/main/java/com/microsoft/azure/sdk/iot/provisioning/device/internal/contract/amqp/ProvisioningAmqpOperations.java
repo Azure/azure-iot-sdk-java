@@ -9,9 +9,6 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
-import org.apache.qpid.proton.amqp.Binary;
-import org.apache.qpid.proton.amqp.messaging.Data;
-import org.apache.qpid.proton.amqp.messaging.Section;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -82,9 +79,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
 
             if (msgBody != null && msgBody.length > 0)
             {
-                Binary binary = new Binary(msgBody);
-                Data msgData = new Data(binary);
-                outgoingMessage.setBody(msgData);
+                outgoingMessage.setBody(msgBody);
             }
             this.amqpConnection.sendAmqpMessage(outgoingMessage);
         }

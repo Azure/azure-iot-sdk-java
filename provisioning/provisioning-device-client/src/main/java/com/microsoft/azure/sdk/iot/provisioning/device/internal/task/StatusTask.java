@@ -104,7 +104,7 @@ public class StatusTask implements Callable
                 throw new ProvisioningDeviceSecurityException("SSL context cannot be null");
             }
 
-            RequestData requestData = new RequestData( registrationId, operationId, authorization.getSslContext(), authorization.getSasToken());
+            RequestData requestData = new RequestData( registrationId, operationId, authorization.getSslContext(), authorization.getSasToken(), null);
             //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationState on the contract API and wait for response and return it. ]
             ResponseData responseData = new ResponseData();
             provisioningDeviceClientContract.getRegistrationStatus(requestData, new ResponseCallbackImpl(), responseData);

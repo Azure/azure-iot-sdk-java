@@ -41,6 +41,13 @@ public class AmqpMessage
         messageImpl.setBody((Section)msgData);
     }
 
+    public void setBody(byte[] msgData)
+    {
+        Binary binary = new Binary(msgData);
+        Data dataSection = new Data(binary);
+        messageImpl.setBody((Section)dataSection);
+    }
+
     /**
      * Returns the amqp body used in the message
      * @return Byte array

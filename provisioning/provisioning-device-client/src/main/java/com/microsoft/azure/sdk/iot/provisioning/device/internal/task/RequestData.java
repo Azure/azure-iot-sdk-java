@@ -19,6 +19,7 @@ public class RequestData
     private SSLContext sslContext;
     private String sasToken;
     private boolean isX509;
+    private String jsonPayload;
 
     /**
      * Constructor for Request data
@@ -27,8 +28,9 @@ public class RequestData
      * @param registrationId Registration ID value. Can be {@code null}
      * @param sslContext SSL context value. Can be {@code null}
      * @param sasToken SasToken value. Can be {@code null}
+     * @param payload Payload value. Can be {@code null}
      */
-    RequestData(byte[] endorsementKey, byte[] storageRootKey, String registrationId, SSLContext sslContext, String sasToken)
+    RequestData(byte[] endorsementKey, byte[] storageRootKey, String registrationId, SSLContext sslContext, String sasToken, String payload)
     {
         //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
         this.endorsementKey = endorsementKey;
@@ -36,6 +38,7 @@ public class RequestData
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.sasToken = sasToken;
+        this.jsonPayload = payload;
     }
 
     /**
@@ -43,13 +46,15 @@ public class RequestData
      * @param registrationId Registration ID value. Can be {@code null}
      * @param sslContext SSL context value. Can be {@code null}
      * @param sasToken SasToken value. Can be {@code null}
+     * @param payload Payload value. Can be {@code null}
      */
-    RequestData(String registrationId, SSLContext sslContext, String sasToken)
+    RequestData(String registrationId, SSLContext sslContext, String sasToken, String payload)
     {
         //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.sasToken = sasToken;
+        this.jsonPayload = payload;
     }
 
     /**
@@ -57,13 +62,15 @@ public class RequestData
      * @param registrationId Registration ID value. Can be {@code null}
      * @param sslContext SSL context value. Can be {@code null}
      * @param isX509 True if X509 flow, false otherwise
+     * @param payload Payload value. Can be {@code null}
      */
-    RequestData(String registrationId, SSLContext sslContext, boolean isX509)
+    RequestData(String registrationId, SSLContext sslContext, boolean isX509, String payload)
     {
         //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.isX509 = isX509;
+        this.jsonPayload = payload;
     }
 
     /**
@@ -72,14 +79,16 @@ public class RequestData
      * @param operationId Operation ID value. Can be {@code null};
      * @param sslContext SSL context value. Can be {@code null};
      * @param sasToken SasToken value. Can be {@code null};
+     * @param payload Payload value. Can be {@code null}
      */
-    RequestData(String registrationId, String operationId, SSLContext sslContext, String sasToken)
+    RequestData(String registrationId, String operationId, SSLContext sslContext, String sasToken, String payload)
     {
         //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
         this.registrationId = registrationId;
         this.operationId = operationId;
         this.sslContext = sslContext;
         this.sasToken = sasToken;
+        this.jsonPayload = payload;
     }
 
     /**
@@ -170,5 +179,23 @@ public class RequestData
     {
         //SRS_RequestData_25_013: [ This method shall set sasToken. ]
         this.sasToken = sasToken;
+    }
+
+    /**
+     * Setter for Payload.
+     * @param payload value. Can be {@code null};
+     */
+    public void setPayload(String payload)
+    {
+        this.jsonPayload = payload;
+    }
+
+    /**
+     * Getter for Payload.
+     * @return Payload value.
+     */
+    public String getPayload()
+    {
+        return this.jsonPayload;
     }
 }

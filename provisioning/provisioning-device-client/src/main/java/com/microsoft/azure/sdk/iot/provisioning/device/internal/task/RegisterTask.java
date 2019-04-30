@@ -111,7 +111,7 @@ public class RegisterTask implements Callable
         {
             //SRS_RegisterTask_25_006: [ If the provided security client is for X509 then, this method shall trigger authenticateWithProvisioningService on the contract API and wait for response and return it. ]
             ResponseData dpsRegistrationData = new ResponseData();
-            this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, provisioningDeviceClientConfig.getPayload(), responseCallback, dpsRegistrationData);
+            this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback, dpsRegistrationData);
 
             waitForResponse(dpsRegistrationData);
 
@@ -196,7 +196,7 @@ public class RegisterTask implements Callable
 
             //SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]
             ResponseData responseDataForSasTokenAuth = new ResponseData();
-            this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, provisioningDeviceClientConfig.getPayload(), responseCallback, responseDataForSasTokenAuth);
+            this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback, responseDataForSasTokenAuth);
             waitForResponse(responseDataForSasTokenAuth);
 
             if (responseDataForSasTokenAuth.getResponseData() != null &&
@@ -231,7 +231,7 @@ public class RegisterTask implements Callable
                 SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
                 //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger authenticateWithTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
                 ResponseData nonceResponseData = new ResponseData();
-                this.provisioningDeviceClientContract.requestNonceForTPM(requestData, provisioningDeviceClientConfig.getPayload(), responseCallback, nonceResponseData);
+                this.provisioningDeviceClientContract.requestNonceForTPM(requestData, responseCallback, nonceResponseData);
 
                 waitForResponse(nonceResponseData);
 
@@ -286,7 +286,7 @@ public class RegisterTask implements Callable
 
             if (this.securityProvider instanceof SecurityProviderX509)
             {
-                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, true);
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, true, this.provisioningDeviceClientConfig.getPayload());
                 return this.authenticateWithX509(requestData);
             }
             else if (this.securityProvider instanceof SecurityProviderTpm )
@@ -298,13 +298,13 @@ public class RegisterTask implements Callable
                 }
 
                 //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
-                RequestData requestData = new RequestData(securityProviderTpm.getEndorsementKey(), securityProviderTpm.getStorageRootKey(), securityProvider.getRegistrationId(), sslContext, null);
+                RequestData requestData = new RequestData(securityProviderTpm.getEndorsementKey(), securityProviderTpm.getStorageRootKey(), securityProvider.getRegistrationId(), sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
                 return this.authenticateWithTPM(requestData);
             }
             else if (this.securityProvider instanceof SecurityProviderSymmetricKey)
             {
-                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null);
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
                 return this.authenticateWithSasToken(requestData);
             }

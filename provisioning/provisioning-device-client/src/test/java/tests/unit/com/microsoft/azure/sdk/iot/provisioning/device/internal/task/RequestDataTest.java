@@ -35,6 +35,7 @@ public class RequestDataTest
     private static final String TEST_REG = "testReg";
     private static final String TEST_OP = "testOp";
     private static final String TEST_SASTOKEN = "testSasToken";
+    private static final String TEST_PAYLOAD = "testPayload";
 
     @Mocked
     SSLContext mockedSslContext;
@@ -45,8 +46,8 @@ public class RequestDataTest
     {
         //act
         RequestData testRequestData = newInstance(RequestData.class, new Class[] {byte[].class, byte[].class, String.class,
-                                                                        SSLContext.class, String.class},
-                                                  TEST_EK, TEST_SRK, TEST_REG, mockedSslContext, TEST_SASTOKEN);
+                                                                        SSLContext.class, String.class, String.class},
+                                                  TEST_EK, TEST_SRK, TEST_REG, mockedSslContext, TEST_SASTOKEN, TEST_PAYLOAD);
 
 
         //assert
@@ -56,6 +57,7 @@ public class RequestDataTest
         assertNull(testRequestData.getOperationId());
         assertEquals(mockedSslContext, testRequestData.getSslContext());
         assertEquals(TEST_SASTOKEN, testRequestData.getSasToken());
+        assertEquals(TEST_PAYLOAD, testRequestData.getPayload());
     }
 
     //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
@@ -64,8 +66,8 @@ public class RequestDataTest
     {
         //act
         RequestData testRequestData = newInstance(RequestData.class, new Class[] {String.class,
-                                                          SSLContext.class, String.class},
-                                                  TEST_REG, mockedSslContext, TEST_SASTOKEN);
+                                                          SSLContext.class, String.class, String.class},
+                                                  TEST_REG, mockedSslContext, TEST_SASTOKEN, TEST_PAYLOAD);
 
 
         //assert
@@ -75,6 +77,7 @@ public class RequestDataTest
         assertNull(testRequestData.getOperationId());
         assertEquals(mockedSslContext, testRequestData.getSslContext());
         assertEquals(TEST_SASTOKEN, testRequestData.getSasToken());
+        assertEquals(TEST_PAYLOAD, testRequestData.getPayload());
     }
 
     //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
@@ -83,8 +86,8 @@ public class RequestDataTest
     {
         //act
         RequestData testRequestData = newInstance(RequestData.class, new Class[] {String.class,
-                                                          String.class, SSLContext.class, String.class},
-                                                  TEST_REG, TEST_OP, mockedSslContext, TEST_SASTOKEN);
+                                                          String.class, SSLContext.class, String.class, String.class},
+                                                  TEST_REG, TEST_OP, mockedSslContext, TEST_SASTOKEN, TEST_PAYLOAD);
 
 
         //assert
@@ -94,6 +97,7 @@ public class RequestDataTest
         assertEquals(TEST_OP, testRequestData.getOperationId());
         assertEquals(mockedSslContext, testRequestData.getSslContext());
         assertEquals(TEST_SASTOKEN, testRequestData.getSasToken());
+        assertEquals(TEST_PAYLOAD, testRequestData.getPayload());
     }
 
     //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
@@ -102,8 +106,8 @@ public class RequestDataTest
     {
         //act
         RequestData testRequestData = newInstance(RequestData.class, new Class[] {String.class,
-                                                          SSLContext.class, boolean.class},
-                                                  TEST_REG, mockedSslContext, true);
+                                                          SSLContext.class, boolean.class, String.class},
+                                                  TEST_REG, mockedSslContext, true, TEST_PAYLOAD);
 
 
         //assert
@@ -114,6 +118,7 @@ public class RequestDataTest
         assertEquals(mockedSslContext, testRequestData.getSslContext());
         assertNull(testRequestData.getSasToken());
         assertTrue(testRequestData.isX509());
+        assertEquals(TEST_PAYLOAD, testRequestData.getPayload());
     }
     //SRS_RequestData_25_002: [ This method shall retrieve endorsementKey. ]
     //SRS_RequestData_25_003: [ This method shall set endorsementKey. ]
@@ -134,8 +139,8 @@ public class RequestDataTest
         //act
         //act
         RequestData testRequestData = newInstance(RequestData.class, new Class[] {byte[].class, byte[].class, String.class,
-                                                          SSLContext.class, String.class},
-                                                  TEST_EK, TEST_SRK, TEST_REG, mockedSslContext, TEST_SASTOKEN);
+                                                          SSLContext.class, String.class, String.class},
+                                                  TEST_EK, TEST_SRK, TEST_REG, mockedSslContext, TEST_SASTOKEN, TEST_PAYLOAD);
 
         //act
         invoke(testRequestData, "setSasToken", TEST_SASTOKEN + random);
@@ -149,6 +154,7 @@ public class RequestDataTest
         assertNull(testRequestData.getOperationId());
         assertEquals(TEST_SASTOKEN + random, testRequestData.getSasToken());
         assertEquals(mockedSslContext, testRequestData.getSslContext());
+        assertEquals(TEST_PAYLOAD, testRequestData.getPayload());
     }
 
     @Test
@@ -158,8 +164,8 @@ public class RequestDataTest
         //act
         //act
         RequestData testRequestData = newInstance(RequestData.class, new Class[] {String.class,
-                                                          String.class, SSLContext.class, String.class},
-                                                  TEST_REG, TEST_OP, mockedSslContext, TEST_SASTOKEN);
+                                                          String.class, SSLContext.class, String.class, String.class},
+                                                  TEST_REG, TEST_OP, mockedSslContext, TEST_SASTOKEN, TEST_PAYLOAD);
 
 
 
@@ -174,6 +180,7 @@ public class RequestDataTest
         assertEquals(TEST_OP, testRequestData.getOperationId());
         assertEquals(mockedSslContext, testRequestData.getSslContext());
         assertEquals(TEST_SASTOKEN + random, testRequestData.getSasToken());
+        assertEquals(TEST_PAYLOAD, testRequestData.getPayload());
     }
 
     @Test
@@ -183,8 +190,8 @@ public class RequestDataTest
         //act
         //act
         RequestData testRequestData = newInstance(RequestData.class, new Class[] {String.class,
-                                                          SSLContext.class, String.class},
-                                                  TEST_REG, mockedSslContext, TEST_SASTOKEN);
+                                                          SSLContext.class, String.class, String.class},
+                                                  TEST_REG, mockedSslContext, TEST_SASTOKEN, TEST_PAYLOAD);
 
         //act
         invoke(testRequestData, "setSasToken", TEST_SASTOKEN + random);
@@ -198,5 +205,6 @@ public class RequestDataTest
         assertEquals(mockedSslContext, testRequestData.getSslContext());
         assertEquals(TEST_SASTOKEN + random, testRequestData.getSasToken());
         assertEquals(mockedSslContext, testRequestData.getSslContext());
+        assertEquals(TEST_PAYLOAD, testRequestData.getPayload());
     }
 }

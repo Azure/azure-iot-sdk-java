@@ -266,7 +266,7 @@ public class ProvisioningTask implements Callable
         try
         {
             //SRS_ProvisioningTask_25_015: [ This method shall invoke open call on the contract.]
-            provisioningDeviceClientContract.open(new RequestData(securityProvider.getRegistrationId(), securityProvider.getSSLContext(), securityProvider instanceof SecurityProviderX509));
+            provisioningDeviceClientContract.open(new RequestData(securityProvider.getRegistrationId(), securityProvider.getSSLContext(), securityProvider instanceof SecurityProviderX509, provisioningDeviceClientConfig.getPayload()));
             //SRS_ProvisioningTask_25_007: [ This method shall invoke Register task and status task to execute the state machine of the service as per below rules.]
             /*
             Service State Machine Rules

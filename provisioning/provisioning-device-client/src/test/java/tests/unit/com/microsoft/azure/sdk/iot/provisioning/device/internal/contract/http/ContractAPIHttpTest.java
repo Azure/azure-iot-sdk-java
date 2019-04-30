@@ -265,7 +265,7 @@ public class ContractAPIHttpTest
         };
 
         //act
-        contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 0);
@@ -307,7 +307,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -330,7 +330,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -353,7 +353,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -376,7 +376,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -399,7 +399,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -422,7 +422,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.requestNonceForTPM(mockedRequestData, "", null, null);
+        contractAPIHttp.requestNonceForTPM(mockedRequestData, null, null);
     }
 
     //SRS_ContractAPIHttp_25_009: [If service return any other status other than 404 then this method shall throw ProvisioningDeviceTransportException in case of 202 or ProvisioningDeviceHubException on any other status.]
@@ -459,7 +459,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+            contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -507,7 +507,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+            contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -546,7 +546,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+            contractAPIHttp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {
@@ -595,7 +595,7 @@ public class ContractAPIHttpTest
         };
 
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 0);
@@ -649,7 +649,7 @@ public class ContractAPIHttpTest
         };
 
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 0);
@@ -700,7 +700,7 @@ public class ContractAPIHttpTest
         };
 
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 0);
@@ -753,7 +753,7 @@ public class ContractAPIHttpTest
         };
 
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         prepareRequestVerifications(HttpMethod.PUT, 1);
@@ -793,7 +793,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
     }
 
@@ -815,7 +815,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -836,7 +836,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
     }
 
     @Test (expected = ProvisioningDeviceClientException.class)
@@ -857,7 +857,7 @@ public class ContractAPIHttpTest
             }
         };
         //act
-        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, null, null);
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, null);
 
     }
 
@@ -883,7 +883,7 @@ public class ContractAPIHttpTest
         //act
         try
         {
-            contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, null, mockedResponseCallback, null);
+            contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
         }
         finally
         {

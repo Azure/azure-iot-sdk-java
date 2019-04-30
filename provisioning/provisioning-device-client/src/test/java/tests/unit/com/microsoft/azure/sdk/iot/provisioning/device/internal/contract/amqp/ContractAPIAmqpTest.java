@@ -46,6 +46,7 @@ public class ContractAPIAmqpTest
     private static final String TEST_REGISTRATION_ID = "testRegistrationId";
     private static final String TEST_OPERATION_ID = "testOperationId";
     private static final String TEST_SAS_TOKEN = "testSasToken";
+    private static final String TEST_PAYLOAD = "testPayload";
     private static final byte[] TEST_EK = "testEK".getBytes();
     private static final byte[] TEST_SRK = "testSRK".getBytes();
 
@@ -342,7 +343,7 @@ public class ContractAPIAmqpTest
         ContractAPIAmqp contractAPIAmqp = createContractClass();
 
         //act
-        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, null, null, null);
+        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, null, null);
     }
 
     // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
@@ -360,7 +361,10 @@ public class ContractAPIAmqpTest
                 mockedRequestData.isX509();
                 result = true;
 
-                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, "");
+                mockedRequestData.getPayload();
+                result = TEST_PAYLOAD;
+
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD);
                 result = mockedDeviceRegistrationParser;
 
                 mockedDeviceRegistrationParser.toJson();
@@ -369,7 +373,7 @@ public class ContractAPIAmqpTest
         };
 
         //act
-        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData,  mockedResponseCallback, null);
 
         //assert
         new Verifications()
@@ -410,7 +414,10 @@ public class ContractAPIAmqpTest
         new Expectations()
         {
             {
-                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, "");
+                mockedRequestData.getPayload();
+                result = TEST_PAYLOAD;
+
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD);
                 result = mockedDeviceRegistrationParser;
 
                 mockedDeviceRegistrationParser.toJson();
@@ -419,7 +426,7 @@ public class ContractAPIAmqpTest
         };
 
         //act
-        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
 
         //assert
         new Verifications()
@@ -589,7 +596,7 @@ public class ContractAPIAmqpTest
         openContractAPI(contractAPIAmqp);
 
         //act
-        contractAPIAmqp.requestNonceForTPM(mockedRequestData, "", null, null);
+        contractAPIAmqp.requestNonceForTPM(mockedRequestData, null, null);
 
         //assert
     }
@@ -615,7 +622,7 @@ public class ContractAPIAmqpTest
         };
 
         //act
-        contractAPIAmqp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -639,7 +646,7 @@ public class ContractAPIAmqpTest
         };
 
         //act
-        contractAPIAmqp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -661,7 +668,7 @@ public class ContractAPIAmqpTest
         };
 
         //act
-        contractAPIAmqp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -680,7 +687,7 @@ public class ContractAPIAmqpTest
         };
 
         //act
-        contractAPIAmqp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -699,7 +706,7 @@ public class ContractAPIAmqpTest
         };
 
         //act
-        contractAPIAmqp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }
@@ -710,7 +717,7 @@ public class ContractAPIAmqpTest
         ContractAPIAmqp contractAPIAmqp = createContractClass();
 
         //act
-        contractAPIAmqp.requestNonceForTPM(null, "", mockedResponseCallback, null);
+        contractAPIAmqp.requestNonceForTPM(null, mockedResponseCallback, null);
 
         //assert
     }
@@ -721,7 +728,7 @@ public class ContractAPIAmqpTest
         ContractAPIAmqp contractAPIAmqp = createContractClass();
 
         //act
-        contractAPIAmqp.requestNonceForTPM(mockedRequestData, "", mockedResponseCallback, null);
+        contractAPIAmqp.requestNonceForTPM(mockedRequestData, mockedResponseCallback, null);
 
         //assert
     }

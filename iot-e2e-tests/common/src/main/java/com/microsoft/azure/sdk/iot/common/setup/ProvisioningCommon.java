@@ -324,7 +324,7 @@ public class ProvisioningCommon extends IntegrationTest
 
                 if (jsonPayload != null || !jsonPayload.isEmpty())
                 {
-                    assertTrue(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningPayload() == jsonPayload);
+                    assertTrue("Payload received from service is not valid", provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningPayload() == jsonPayload);
                 }
                 assertProvisionedIntoCorrectHub(expectedIotHubsToProvisionTo, provisionedHubUri);
                 assertProvisionedDeviceWorks(provisionedHubUri, deviceId);
