@@ -114,7 +114,7 @@ public class MqttTest
                     return new MutablePair<>(MOCK_PARSE_TOPIC, new byte[0]);
                 }
             };
-            return new MqttMessaging(mockedMqttConnection, CLIENT_ID, listener, mockedMessageListener, "", "", false);
+            return new MqttMessaging(mockedMqttConnection, CLIENT_ID, listener, mockedMessageListener, "", "", false, new HashMap<Integer, Message>());
         }
         else
         {
@@ -132,7 +132,7 @@ public class MqttTest
                     return new MutablePair<>(MOCK_PARSE_TOPIC, new byte[0]);
                 }
             };
-            return new MqttDeviceTwin(mockedMqttConnection, "");
+            return new MqttDeviceTwin(mockedMqttConnection, "", new HashMap<Integer, Message>());
         }
     }
 
@@ -308,7 +308,7 @@ public class MqttTest
     {
         Mqtt mockMqtt = null;
         //act
-        mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
     }
 
     /*
@@ -888,7 +888,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         new NonStrictExpectations()
         {
             {
@@ -935,7 +935,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         new NonStrictExpectations()
         {
             {
@@ -970,7 +970,7 @@ public class MqttTest
                 return new MutablePair<>(null, payload);
             }
         };
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
 
         new NonStrictExpectations()
         {
@@ -1005,7 +1005,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         //act
         Message receivedMessage = mockMqtt.receive();
     }
@@ -1026,7 +1026,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         Deencapsulation.setField(mockMqtt, "mqttConnection", null);
 
         //act
@@ -1118,7 +1118,7 @@ public class MqttTest
         try
         {
             //arrange
-            MqttMessaging testMqttClient = new MqttMessaging(mockedMqttConnection,"deviceId", mockedIotHubListener, null, "", "", false);
+            MqttMessaging testMqttClient = new MqttMessaging(mockedMqttConnection,"deviceId", mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
             Queue<Pair<String, byte[]>> testAllReceivedMessages = new ConcurrentLinkedQueue<>();
             Deencapsulation.setField(testMqttClient, "allReceivedMessages", testAllReceivedMessages);
 
@@ -1152,7 +1152,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         new NonStrictExpectations()
         {
             {
@@ -1187,7 +1187,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
 
         new NonStrictExpectations()
         {
@@ -1226,7 +1226,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         new NonStrictExpectations()
         {
             {
@@ -1281,7 +1281,7 @@ public class MqttTest
             }
         };
 
-        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        final Mqtt mockMqtt = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         new NonStrictExpectations()
         {
             {

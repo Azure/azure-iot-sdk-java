@@ -37,7 +37,7 @@ abstract public class Mqtt implements MqttCallback
     protected final Object incomingLock;
     private final Object publishLock;
 
-    private static Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
+    private Map<Integer, Message> unacknowledgedSentMessages;
 
     // SAS token expiration check on retry
     private boolean userSpecifiedSASTokenExpiredOnRetry = false;
@@ -80,7 +80,7 @@ abstract public class Mqtt implements MqttCallback
      * @param connectionId the id of the connection
      * @throws IllegalArgumentException if the provided mqttConnection is null
      */
-    public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener, String connectionId) throws IllegalArgumentException
+    public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener, String connectionId, Map<Integer, Message> unacknowledgedSentMessages) throws IllegalArgumentException
     {
         if (mqttConnection == null)
         {
@@ -98,6 +98,7 @@ abstract public class Mqtt implements MqttCallback
         this.listener = listener;
         this.messageListener = messageListener;
         this.connectionId = connectionId;
+        this.unacknowledgedSentMessages = unacknowledgedSentMessages;
     }
 
     /**
