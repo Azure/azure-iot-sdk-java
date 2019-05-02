@@ -37,9 +37,6 @@ import java.util.Collections;
 @RunWith(Parameterized.class)
 public class DeviceMethodErrInjModuleAndroidRunner extends DeviceMethodErrInjTests
 {
-    static Collection<BaseDevice> identities;
-    static ArrayList<DeviceTestManager> testManagers;
-
     @Rule
     public Rerun count = new Rerun(3);
 
@@ -52,7 +49,7 @@ public class DeviceMethodErrInjModuleAndroidRunner extends DeviceMethodErrInjTes
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1}_{2}_{3}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
     {
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
@@ -65,29 +62,12 @@ public class DeviceMethodErrInjModuleAndroidRunner extends DeviceMethodErrInjTes
 
         if (!isBasicTierHub)
         {
-            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-            Object[] inputsArray = inputs.toArray();
-
-            testManagers = new ArrayList<>();
-            for (int i = 0; i < inputsArray.length; i++)
-            {
-                Object[] inputCollection = (Object[]) inputsArray[i];
-                testManagers.add((DeviceTestManager) inputCollection[0]);
-            }
-
-            identities = getIdentities(inputs);
-            return inputs;
+            return inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
         }
         else
         {
             return Collections.EMPTY_LIST;
         }
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities, testManagers);
     }
 
     @After

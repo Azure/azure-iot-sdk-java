@@ -8,8 +8,10 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothubservices;
 import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.BeforeClass;
 
+@NotThreadSafe
 public class FileUploadJVMRunner extends FileUploadTests
 {
     @BeforeClass

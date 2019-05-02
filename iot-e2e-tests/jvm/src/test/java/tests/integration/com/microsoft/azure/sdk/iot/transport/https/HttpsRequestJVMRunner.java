@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.transport.https;
 
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
@@ -19,7 +20,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 /** Integration tests for HttpsRequest. */
-public class HttpsRequestJVMRunner
+public class HttpsRequestJVMRunner extends IntegrationTest
 {
     @Test
     public void sendHttpsRequestGetsCorrectResponse() throws IOException, TransportException

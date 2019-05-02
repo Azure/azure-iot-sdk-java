@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -37,11 +38,9 @@ import static junit.framework.TestCase.fail;
  */
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
-
-        System.out.println(clientType + " SendMessagesTest UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Test
@@ -142,6 +141,7 @@ public class SendMessagesTests extends SendMessagesCommon
             return;
         }
 
+        AtomicBoolean succeed = new AtomicBoolean();
         Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
         Collection<String> deviceIds = new ArrayList<>();
         String uuid = UUID.randomUUID().toString();
@@ -166,7 +166,8 @@ public class SendMessagesTests extends SendMessagesCommon
                             NUM_MESSAGES_PER_CONNECTION,
                             NUM_KEYS_PER_MESSAGE,
                             SEND_TIMEOUT_MILLISECONDS,
-                            cdl));
+                            cdl,
+                            succeed));
             thread.start();
             threads.add(thread);
         }

@@ -37,8 +37,6 @@ import java.util.Collections;
 @RunWith(Parameterized.class)
 public class ReceiveMessagesModuleAndroidRunner extends ReceiveMessagesTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
@@ -63,20 +61,12 @@ public class ReceiveMessagesModuleAndroidRunner extends ReceiveMessagesTests
 
         if (!isBasicTierHub)
         {
-            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-            identities = getIdentities(inputs);
-            return inputs;
+            return inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
         }
         else
         {
             return Collections.EMPTY_LIST;
         }
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
     }
 
     @After

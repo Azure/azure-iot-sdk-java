@@ -28,7 +28,7 @@ public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTes
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public DeviceTwinWithVersionAndroidRunner(IotHubClientProtocol protocol)
+    public DeviceTwinWithVersionAndroidRunner(IotHubClientProtocol protocol) throws IOException
     {
         super(protocol);
     }

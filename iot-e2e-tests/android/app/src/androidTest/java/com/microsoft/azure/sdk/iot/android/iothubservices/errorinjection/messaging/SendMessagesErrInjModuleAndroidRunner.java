@@ -37,8 +37,6 @@ import java.util.Collections;
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjModuleAndroidRunner extends SendMessagesErrInjTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
@@ -51,7 +49,7 @@ public class SendMessagesErrInjModuleAndroidRunner extends SendMessagesErrInjTes
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1}_{3}_{4}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException {
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
         String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
@@ -63,20 +61,12 @@ public class SendMessagesErrInjModuleAndroidRunner extends SendMessagesErrInjTes
 
         if (!isBasicTierHub)
         {
-            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-            identities = getIdentities(inputs);
-            return inputs;
+            return inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
         }
         else
         {
             return Collections.EMPTY_LIST;
         }
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
     }
 
     @After

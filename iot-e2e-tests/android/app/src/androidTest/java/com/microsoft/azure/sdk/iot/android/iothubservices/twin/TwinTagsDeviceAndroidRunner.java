@@ -32,8 +32,6 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class TwinTagsDeviceAndroidRunner extends TwinTagsTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
@@ -46,7 +44,7 @@ public class TwinTagsDeviceAndroidRunner extends TwinTagsTests
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{2}_{3}_{4}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws IOException, GeneralSecurityException
     {
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
@@ -57,17 +55,7 @@ public class TwinTagsDeviceAndroidRunner extends TwinTagsTests
         String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
 
-        Collection inputs = inputsCommon(ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-
-        identities = getIdentities(inputs);
-
-        return inputs;
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
+        return inputsCommon(ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @After

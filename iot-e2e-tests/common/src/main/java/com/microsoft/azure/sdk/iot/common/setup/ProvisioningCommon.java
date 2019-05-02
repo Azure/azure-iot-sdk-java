@@ -177,6 +177,8 @@ public class ProvisioningCommon extends IntegrationTest
                 ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+
+        this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
     }
 
     @After

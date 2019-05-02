@@ -8,14 +8,12 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.twin;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup20;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.DesiredPropertiesTests;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
 import org.junit.After;
@@ -29,12 +27,12 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
 
+import static com.microsoft.azure.storage.CorsHttpMethods.HEAD;
+
 @TestGroup20
 @RunWith(Parameterized.class)
 public class DesiredPropertiesModuleAndroidRunner extends DesiredPropertiesTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
@@ -47,7 +45,7 @@ public class DesiredPropertiesModuleAndroidRunner extends DesiredPropertiesTests
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{2}_{3}_{4}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws IOException, GeneralSecurityException
     {
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
@@ -60,20 +58,12 @@ public class DesiredPropertiesModuleAndroidRunner extends DesiredPropertiesTests
 
         if (!isBasicTierHub)
         {
-            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-            identities = getIdentities(inputs);
-            return inputs;
+            return inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
         }
         else
         {
             return Collections.EMPTY_LIST;
         }
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
     }
 
     @After
