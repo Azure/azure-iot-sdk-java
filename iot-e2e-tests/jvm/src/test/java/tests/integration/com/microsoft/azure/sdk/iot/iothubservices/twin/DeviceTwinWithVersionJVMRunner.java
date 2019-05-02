@@ -18,7 +18,7 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class DeviceTwinWithVersionJVMRunner extends DeviceTwinWithVersionTests
 {
-    public DeviceTwinWithVersionJVMRunner(IotHubClientProtocol protocol)
+    public DeviceTwinWithVersionJVMRunner(IotHubClientProtocol protocol) throws IOException
     {
         super(protocol);
     }

@@ -30,12 +30,12 @@ import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
 
+import static com.microsoft.azure.storage.CorsHttpMethods.HEAD;
+
 @TestGroup25
 @RunWith(Parameterized.class)
 public class QueryTwinModuleAndroidRunner extends QueryTwinTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
@@ -48,7 +48,7 @@ public class QueryTwinModuleAndroidRunner extends QueryTwinTests
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{2}_{3}_{4}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws IOException, GeneralSecurityException
     {
         String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
@@ -61,20 +61,12 @@ public class QueryTwinModuleAndroidRunner extends QueryTwinTests
 
         if (!isBasicTierHub)
         {
-            Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-            identities = getIdentities(inputs);
-            return inputs;
+            return inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
         }
         else
         {
             return Collections.EMPTY_LIST;
         }
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
     }
 
     @After

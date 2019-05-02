@@ -12,11 +12,14 @@ import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.setup.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.common.tests.provisioning.ProvisioningTests;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
+import net.jcip.annotations.NotThreadSafe;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 
+@NotThreadSafe
 @RunWith(Parameterized.class)
 public class ProvisioningClientTPMJVMRunner extends ProvisioningTests
 {

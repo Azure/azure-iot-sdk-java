@@ -29,11 +29,9 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 public class DeviceMethodErrInjTests extends DeviceMethodCommon
 {
-    public DeviceMethodErrInjTests(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceMethodErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
-
-        System.out.println(clientType + " DeviceMethodErrInjTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Test

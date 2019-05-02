@@ -36,9 +36,9 @@ import static org.junit.Assert.*;
  */
 public class QueryTwinTests extends DeviceTwinCommon
 {
-    public QueryTwinTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
-        super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Test
@@ -236,7 +236,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         final String where = "is_defined(properties.desired." + queryProperty + ")";
 
         SqlQuery sqlQuery;
-        if (this.testInstance.moduleId != null)
+        if (this.testInstance.clientType == ClientType.MODULE_CLIENT)
         {
             sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.MODULES, where, null);
         }

@@ -88,7 +88,7 @@ public class Tools
         }
     }
 
-    public static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
+    public synchronized static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Device ret = null;
@@ -115,7 +115,7 @@ public class Tools
         return ret;
     }
 
-    public static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException
+    public synchronized static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Module ret = null;
