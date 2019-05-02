@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class MqttMessaging extends Mqtt
 {
@@ -20,10 +21,10 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private boolean isEdgeHub;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub) throws TransportException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
-        super(mqttConnection, listener, messageListener, connectionId);
+        super(mqttConnection, listener, messageListener, connectionId, unacknowledgedSentMessages);
 
         if (deviceId == null || deviceId.isEmpty())
         {

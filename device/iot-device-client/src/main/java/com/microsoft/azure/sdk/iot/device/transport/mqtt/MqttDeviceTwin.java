@@ -50,10 +50,10 @@ public class MqttDeviceTwin extends Mqtt
     private final int DESIRED_TOKEN = 4;
     private final int PATCH_VERSION_TOKEN = 5;
 
-    public MqttDeviceTwin(MqttConnection mqttConnection, String connectionId) throws TransportException
+    public MqttDeviceTwin(MqttConnection mqttConnection, String connectionId, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
     {
         //Codes_SRS_MQTTDEVICETWIN_25_001: [The constructor shall instantiate super class without any parameters.]
-        super(mqttConnection, null, null, connectionId);
+        super(mqttConnection, null, null, connectionId, unacknowledgedSentMessages);
 
         //Codes_SRS_MQTTDEVICETWIN_25_002: [The constructor shall construct device twin response subscribeTopic.]
         this.subscribeTopic = RES + BACKSLASH + POUND;
