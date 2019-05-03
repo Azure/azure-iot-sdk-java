@@ -155,7 +155,7 @@ public final class ProvisioningDeviceClientConfig
 
     /**
      * Setter data for custom payload
-     * @param json payload data
+     * @param jsonPayload payload data
      */
     public void setPayload(String jsonPayload)
     {

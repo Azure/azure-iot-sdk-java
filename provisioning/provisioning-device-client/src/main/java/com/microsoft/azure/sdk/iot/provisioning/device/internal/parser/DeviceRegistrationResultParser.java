@@ -185,6 +185,13 @@ public class DeviceRegistrationResultParser
 
     public String getPayload()
     {
-        return jsonPayload.toString();
+        if (jsonPayload == null)
+        {
+            return null;
+        }
+        else
+        {
+            return jsonPayload.toString();
+        }
     }
 }

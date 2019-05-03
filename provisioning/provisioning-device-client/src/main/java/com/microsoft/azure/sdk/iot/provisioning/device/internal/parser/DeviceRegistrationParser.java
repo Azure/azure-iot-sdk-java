@@ -48,6 +48,7 @@ public class DeviceRegistrationParser
     /**
      * Constructor for Device Registration for X509 flow
      * @param registrationId Registration Id to be sent to the service. Cannot be a {@code null} or empty value.
+     * @param customPayload Custom Payload being sent to the DPS service. Can be a {@code null} or empty value.
      * @throws IllegalArgumentException If the provided registration id was {@code null} or empty.
      */
     public DeviceRegistrationParser(String registrationId, String customPayload) throws IllegalArgumentException
@@ -60,7 +61,7 @@ public class DeviceRegistrationParser
 
         //SRS_DeviceRegistration_25_002: [ The constructor shall save the provided Registration Id. ]
         this.registrationId = registrationId;
-        if (!customPayload.isEmpty())
+        if (customPayload != null && !customPayload.isEmpty())
         {
             this.customPayload = customPayload;
         }
@@ -71,6 +72,7 @@ public class DeviceRegistrationParser
      * @param registrationId Registration Id to be sent to the service. Cannot be a {@code null} or empty value.
      * @param endorsementKey endorsement key to be sent to the service. Cannot be a {@code null} or empty value.
      * @param storageRootKey Storage Root Key to be sent to the service. Can be a {@code null} value.
+     * @param customPayload Custom Payload being sent to the DPS service. Can be a {@code null} or empty value.
      * @throws IllegalArgumentException is thrown if any of the input parameters are invalid.
      */
     public DeviceRegistrationParser(String registrationId, String customPayload, String endorsementKey, String storageRootKey) throws IllegalArgumentException
@@ -89,7 +91,7 @@ public class DeviceRegistrationParser
 
         //SRS_DeviceRegistration_25_006: [ The constructor shall save the provided Registration Id, EndorsementKey and StorageRootKey. ]
         this.registrationId = registrationId;
-        if (!customPayload.isEmpty())
+        if (customPayload != null && !customPayload.isEmpty())
         {
             this.customPayload = customPayload;
         }

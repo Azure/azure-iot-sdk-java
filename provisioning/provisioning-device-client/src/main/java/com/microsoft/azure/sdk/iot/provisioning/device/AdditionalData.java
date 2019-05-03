@@ -22,6 +22,7 @@ public class AdditionalData
 
     /**
      * Gets the Custom Provisioning payload that was set for the provisioning payload
+     * @return Returns payload data for provisioning. Can be {@code null} when no data is set.
      */
     public String getProvisioningPayload()
     {
