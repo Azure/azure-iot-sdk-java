@@ -57,7 +57,7 @@
         <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
-            <version>[0.15.0,)</version>
+            <version>0.30.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
