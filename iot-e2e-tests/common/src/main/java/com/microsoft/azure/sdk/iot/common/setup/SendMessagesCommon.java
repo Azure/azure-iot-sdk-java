@@ -52,7 +52,6 @@ public class SendMessagesCommon extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected static String iotHubConnectionString = "";
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     protected static String hostName;
 
@@ -459,20 +458,6 @@ public class SendMessagesCommon extends IntegrationTest
             Tools.removeDevicesAndModules(registryManager, identitiesToDispose);
             registryManager.close();
             registryManager = null;
-        }
-    }
-
-    @After
-    public void delayTests()
-    {
-        try
-        {
-            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
         }
     }
 }

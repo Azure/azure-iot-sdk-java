@@ -61,7 +61,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected static String expectedCorrelationId = "1234";
     protected static String expectedMessageId = "5678";
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
     protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT = 1 * 60 * 1000; // 1 minute
 
     public ReceiveMessagesTestInstance testInstance;
@@ -231,16 +230,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
         //since these lists are recycled between multiple tests, they need to be cleared between each test
         messageIdListStoredOnC2DSend.clear();
         messageIdListStoredOnReceive.clear();
-
-        try
-        {
-            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-            TestCase.fail("Unexpected exception encountered");
-        }
     }
 
     public static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback

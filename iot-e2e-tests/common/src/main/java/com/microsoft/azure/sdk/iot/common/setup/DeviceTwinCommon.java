@@ -65,7 +65,6 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final Integer PAGE_SIZE = 2;
 
     protected static String iotHubConnectionString = "";
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
 
     // Constants used in for Testing
     protected static final String PROPERTY_KEY = "Key";
@@ -467,16 +466,6 @@ public class DeviceTwinCommon extends IntegrationTest
         tearDownTwin(deviceUnderTest);
 
         registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
-
-        try
-        {
-            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-            fail(buildExceptionMessage("Unexpected exception encountered", internalClient));
-        }
     }
 
     protected static Collection<BaseDevice> getIdentities(Collection inputs)
