@@ -92,13 +92,13 @@ public class JobResult
     private String outcome = null;
     private MethodResult outcomeResult = null;
 
-    // The error message of the job in query, if any.
+    // The error message of the job in the query, if any.
     private String error = null;
     /**
      * CONSTRUCTOR
      *
-     * @param body is a array of bytes that contains the response message for jobs
-     * @throws JsonParseException if the content of body is a invalid json
+     * @param The body is an array of bytes that contains the response message for jobs
+     * @throws JsonParseException if the content of the body is an invalid json
      * @throws IllegalArgumentException if the provided body is null
      */
     JobResult(byte[] body) throws JsonParseException, IllegalArgumentException
@@ -377,7 +377,7 @@ public class JobResult
 
     /**
      * getter for the error
-     * @return returns the json formatted error as string
+     * @return the json formatted error as string
      */
     public String getError()
     {
