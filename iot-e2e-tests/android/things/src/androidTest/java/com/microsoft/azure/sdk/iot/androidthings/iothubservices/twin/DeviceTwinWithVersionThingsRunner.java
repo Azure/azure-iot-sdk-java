@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.DeviceTwinWithVersionTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,8 +23,7 @@ public class DeviceTwinWithVersionThingsRunner extends DeviceTwinWithVersionTest
     @Rule
     public Rerun count = new Rerun(3);
 
-    public DeviceTwinWithVersionThingsRunner(IotHubClientProtocol protocol)
-    {
+    public DeviceTwinWithVersionThingsRunner(IotHubClientProtocol protocol) throws IOException {
         super(protocol);
     }
 
