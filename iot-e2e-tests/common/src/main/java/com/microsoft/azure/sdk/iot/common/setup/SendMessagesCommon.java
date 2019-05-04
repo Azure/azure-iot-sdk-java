@@ -357,65 +357,6 @@ public class SendMessagesCommon extends IntegrationTest
     }
 
     /**
-     * Expected callback order by protocol:
-     * amqps/amqps_ws : Connected -> Disconnected (Client_closed)
-     * mqtt/mqtt_ws   : Connected -> Disconnected_Retrying -> Connected -> Disconnected (Client_closed)
-     */
-    protected static class IotHubConnectionStatusChangeTokenRenewalCallbackVerifier implements IotHubConnectionStatusChangeCallback
-    {
-        IotHubClientProtocol protocol;
-        Success amqpDisconnectDidNotHappen;
-        Success mqttDisconnectDidHappen;
-        Success shutdownWasGraceful;
-
-        public IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(IotHubClientProtocol protocol, Success amqpDisconnectDidNotHappen, Success mqttDisconnectDidHappen, Success shutdownWasGraceful)
-        {
-            this.protocol = protocol;
-            this.mqttDisconnectDidHappen = mqttDisconnectDidHappen;
-            this.amqpDisconnectDidNotHappen = amqpDisconnectDidNotHappen;
-            this.shutdownWasGraceful = shutdownWasGraceful;
-        }
-
-        @Override
-        public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
-        {
-            if (status == IotHubConnectionStatus.DISCONNECTED)
-            {
-                if (statusChangeReason != IotHubConnectionStatusChangeReason.CLIENT_CLOSE)
-                {
-                    shutdownWasGraceful.setResult(false);
-                }
-            }
-            else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
-            {
-                //AMQPS/AMQPS_WS is expected to not lose connection at any point except for when the client is closed
-                // MQTT does need to tear down the expired connection in order to send the new sas token, so this
-                // DISCONNECTED RETRYING is expected at least once.
-                mqttDisconnectDidHappen.setResult(true);
-
-                if (protocol == AMQPS || protocol == AMQPS_WS)
-                {
-                    amqpDisconnectDidNotHappen.setResult(false);
-                }
-            }
-        }
-    }
-
-    public static Collection<BaseDevice> getIdentities(Collection inputs)
-    {
-        Set<BaseDevice> identities = new HashSet<>();
-
-        Object[] inputArray = inputs.toArray();
-        for (int i = 0; i < inputs.size(); i++)
-        {
-            Object[] inputsInstance = (Object[]) inputArray[i];
-            identities.add((BaseDevice) inputsInstance[2]);
-        }
-
-        return identities;
-    }
-
-    /**
      * Each error injection test will take a list of messages to send. In that list, there will be an error injection message in the middle
      */
     protected void buildMessageLists()
