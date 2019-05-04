@@ -25,6 +25,7 @@ import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
+import org.apache.qpid.proton.codec.ReadableBuffer;
 import org.apache.qpid.proton.codec.WritableBuffer;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
@@ -63,6 +64,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
     @Mocked Target target;
     @Mocked Link link;
     @Mocked Source source;
+    @Mocked ReadableBuffer readBuf;
 
     AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent = (String feedbackJson) -> {};
 
@@ -420,6 +422,10 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
             @Override
             public void flow(int i)
             { }
+
+            @Override
+            public ReadableBuffer recv()
+            { return readBuf; }
 
             @Override
             public int recv(byte[] bytes, int i, int i1)
@@ -801,6 +807,10 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
 
             @Override
             public boolean isSettled()
+            { return false; }
+
+            @Override
+            public boolean isAborted()
             { return false; }
 
             @Override
