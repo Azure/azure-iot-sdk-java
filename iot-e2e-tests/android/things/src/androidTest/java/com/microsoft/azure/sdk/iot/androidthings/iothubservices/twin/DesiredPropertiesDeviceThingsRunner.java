@@ -30,9 +30,8 @@ public class DesiredPropertiesDeviceThingsRunner extends DesiredPropertiesTests
     @Rule
     public Rerun count = new Rerun(3);
 
-    public DesiredPropertiesDeviceThingsRunner(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
-    {
-        super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    public DesiredPropertiesDeviceThingsRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) {
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
@@ -47,15 +46,6 @@ public class DesiredPropertiesDeviceThingsRunner extends DesiredPropertiesTests
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
 
         Collection inputs = inputsCommon(ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-
-        identities = getIdentities(inputs);
-
         return inputs;
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
     }
 }

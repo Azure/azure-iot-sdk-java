@@ -32,14 +32,11 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class SendMessagesModuleThingsRunner extends SendMessagesTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
-    public SendMessagesModuleThingsRunner(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
-    {
-        super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    public SendMessagesModuleThingsRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception {
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
@@ -54,15 +51,6 @@ public class SendMessagesModuleThingsRunner extends SendMessagesTests
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
 
         Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
-
-        identities = getIdentities(inputs);
-
         return inputs;
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
     }
 }

@@ -43,9 +43,8 @@ public class DeviceMethodDeviceAndroidRunner extends DeviceMethodTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public DeviceMethodDeviceAndroidRunner(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
-    {
-        super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
+    public DeviceMethodDeviceAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception {
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
