@@ -280,6 +280,8 @@ jobs:
         ANDROID_TEST_GROUP_ID: TestGroup37
       TestGroup38:
         ANDROID_TEST_GROUP_ID: TestGroup38
+      TestGroup39:
+        ANDROID_TEST_GROUP_ID: TestGroup39
       
   displayName: Android Test
   dependsOn: AndroidBuild

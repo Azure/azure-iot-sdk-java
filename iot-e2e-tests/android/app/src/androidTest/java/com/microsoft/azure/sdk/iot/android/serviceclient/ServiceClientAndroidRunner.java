@@ -8,7 +8,7 @@ import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup1;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup38;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup4;
 import com.microsoft.azure.sdk.iot.common.tests.serviceclient.ServiceClientTests;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 
@@ -20,7 +20,7 @@ import org.junit.After;
 import java.io.IOException;
 import java.util.Collection;
 
-@TestGroup38
+@TestGroup4
 @RunWith(Parameterized.class)
 public class ServiceClientAndroidRunner extends ServiceClientTests
 {
