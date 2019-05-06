@@ -28,8 +28,6 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
-import static com.microsoft.azure.sdk.iot.common.tests.iothubservices.HubTierConnectionTests.getIdentities;
-
 @TestGroupA
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjModuleThingsRunner extends SendMessagesErrInjTests
