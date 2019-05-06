@@ -8,21 +8,17 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.errorinjection.messag
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup1;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup33;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup18;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection.ReceiveMessagesErrInjTests;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
-import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,7 +28,7 @@ import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 
-@TestGroup33
+@TestGroup18
 @RunWith(Parameterized.class)
 public class ReceiveMessagesErrInjDeviceAndroidRunner extends ReceiveMessagesErrInjTests
 {

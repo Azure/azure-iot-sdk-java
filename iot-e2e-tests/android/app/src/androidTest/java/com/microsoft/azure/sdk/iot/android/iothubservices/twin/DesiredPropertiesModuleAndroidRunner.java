@@ -17,7 +17,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,8 +25,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
 import java.util.Collections;
-
-import static com.microsoft.azure.storage.CorsHttpMethods.HEAD;
 
 @TestGroup20
 @RunWith(Parameterized.class)

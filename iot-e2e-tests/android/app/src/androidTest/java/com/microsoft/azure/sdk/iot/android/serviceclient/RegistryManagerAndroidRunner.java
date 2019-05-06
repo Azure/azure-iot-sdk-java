@@ -8,13 +8,12 @@ package com.microsoft.azure.sdk.iot.android.serviceclient;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup12;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup37;
 import com.microsoft.azure.sdk.iot.common.tests.serviceclient.RegistryManagerTests;
 
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.After;
 
 import java.io.IOException;
 
