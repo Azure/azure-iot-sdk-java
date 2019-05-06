@@ -220,20 +220,6 @@ public class DeviceMethodCommon extends IntegrationTest
         }
     }
 
-    protected static Collection<BaseDevice> getIdentities(Collection inputs)
-    {
-        Set<BaseDevice> identities = new HashSet<>();
-
-        Object[] inputArray = inputs.toArray();
-        for (int i = 0; i < inputs.size(); i++)
-        {
-            Object[] inputsInstance = (Object[]) inputArray[i];
-            identities.add((BaseDevice) inputsInstance[4]);
-        }
-
-        return identities;
-    }
-
     @BeforeClass
     public static void classSetup()
     {
