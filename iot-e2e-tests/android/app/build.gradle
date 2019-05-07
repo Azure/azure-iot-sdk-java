@@ -1,10 +1,7 @@
 apply plugin: 'com.android.application'
 
 //***********************************************************************************************//
-def IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 = project.hasProperty('IotHubPrivateKeyBase64') ? '"'+project.property('IotHubPrivateKeyBase64')+'"' : '""'
-def IOTHUB_E2E_X509_CERT_BASE64 = project.hasProperty('IotHubPublicCertBase64') ? '"'+project.property('IotHubPublicCertBase64')+'"': '""'
 def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IotHubConnectionString') ? '"'+project.property('IotHubConnectionString')+'"' : '""'
-def IOTHUB_E2E_X509_THUMBPRINT = project.hasProperty('IotHubThumbprint') ? '"'+project.property('IotHubThumbprint')+'"': '""'
 def IOTHUB_CONN_STRING_INVALIDCERT = project.hasProperty('IotHubInvalidCertConnectionString') ? '"'+project.property('IotHubInvalidCertConnectionString')+'"': '""'
 def APPCENTER_APP_SECRET = project.hasProperty('AppCenterAppSecret') ? '"'+project.property('AppCenterAppSecret')+'"': '""'
 def STORAGE_ACCOUNT_CONNECTION_STRING = project.hasProperty('StorageAccountConnectionString') ? '"'+project.property('StorageAccountConnectionString')+'"': '""'
@@ -34,10 +31,7 @@ android {
         //********** We can define variables here **********
         each {
             //buildTypes.mBuildConfigFields 'DATATYPE','VARIABLE',|"GRADLE VARIABLE|"'
-            buildConfigField STRING, 'IotHubPrivateKeyBase64', IOTHUB_E2E_X509_PRIVATE_KEY_BASE64
-            buildConfigField STRING, 'IotHubPublicCertBase64', IOTHUB_E2E_X509_CERT_BASE64
             buildConfigField STRING, 'IotHubConnectionString', IOTHUB_CONNECTION_STRING_ENV_VAR_NAME
-            buildConfigField STRING, 'IotHubThumbprint', IOTHUB_E2E_X509_THUMBPRINT
             buildConfigField STRING, 'IotHubInvalidCertConnectionString', IOTHUB_CONN_STRING_INVALIDCERT
             buildConfigField STRING, 'AppCenterAppSecret', APPCENTER_APP_SECRET
             buildConfigField STRING, 'StorageAccountConnectionString', STORAGE_ACCOUNT_CONNECTION_STRING

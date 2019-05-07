@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.android.helper.TestGroup34;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.GetTwinTests;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
@@ -35,7 +34,8 @@ public class GetTwinDeviceAndroidRunner extends GetTwinTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public GetTwinDeviceAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) {
+    public GetTwinDeviceAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
@@ -43,15 +43,10 @@ public class GetTwinDeviceAndroidRunner extends GetTwinTests
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws IOException, GeneralSecurityException
     {
-        String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
-        String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        String x509Thumbprint = BuildConfig.IotHubThumbprint;
-        String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
-        String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
 
-        return inputsCommon(ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
+        return inputsCommon(ClientType.DEVICE_CLIENT);
     }
 
     @After

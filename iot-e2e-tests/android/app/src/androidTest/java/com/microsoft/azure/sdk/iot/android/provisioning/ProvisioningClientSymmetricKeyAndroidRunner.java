@@ -27,7 +27,7 @@ public class ProvisioningClientSymmetricKeyAndroidRunner extends ProvisioningTes
 {
     @Rule
     public Rerun count = new Rerun(3);
-    
+
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 

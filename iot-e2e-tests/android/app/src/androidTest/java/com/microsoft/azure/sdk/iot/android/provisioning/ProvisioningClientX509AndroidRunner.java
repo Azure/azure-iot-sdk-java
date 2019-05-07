@@ -27,7 +27,7 @@ public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
 {
     @Rule
     public Rerun count = new Rerun(3);
-    
+
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
@@ -49,7 +49,6 @@ public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
         provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
         farAwayIotHubConnectionString = BuildConfig.FarAwayIotHubConnectionString;
         customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
-
 
         return ProvisioningCommon.inputs(AttestationType.X509); //tpm tests can't be run on Android until infrastructure is setup
     }
