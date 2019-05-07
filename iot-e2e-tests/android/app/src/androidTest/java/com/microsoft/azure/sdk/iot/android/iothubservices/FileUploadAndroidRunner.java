@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup30;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -35,20 +34,17 @@ public class FileUploadAndroidRunner extends FileUploadTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType) throws InterruptedException, IOException, IotHubException, URISyntaxException {
+    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType) throws InterruptedException, IOException, IotHubException, URISyntaxException
+    {
         super(protocol, authenticationType);
     }
 
     @Parameterized.Parameters(name = "{0}_{1}")
-    public static Collection inputsCommons() throws Exception {
-        String privateKeyBase64Encoded = BuildConfig.IotHubPrivateKeyBase64;
-        String publicKeyCertBase64Encoded = BuildConfig.IotHubPublicCertBase64;
+    public static Collection inputsCommons() throws Exception
+    {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        String x509Thumbprint = BuildConfig.IotHubThumbprint;
-        String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
-        String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
-        return FileUploadTests.inputs(publicKeyCert, privateKey, x509Thumbprint);
+        return FileUploadTests.inputs();
     }
 
     @Ignore

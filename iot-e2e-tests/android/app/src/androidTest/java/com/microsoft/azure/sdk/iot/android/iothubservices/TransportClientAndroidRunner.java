@@ -33,12 +33,14 @@ public class TransportClientAndroidRunner extends TransportClientTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public TransportClientAndroidRunner(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException {
+    public TransportClientAndroidRunner(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
+    {
         super(protocol);
     }
 
     @Parameterized.Parameters(name = "{0}_{1}")
-    public static Collection inputsCommons() throws Exception {
+    public static Collection inputsCommons() throws Exception
+    {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         return TransportClientTests.inputs();
