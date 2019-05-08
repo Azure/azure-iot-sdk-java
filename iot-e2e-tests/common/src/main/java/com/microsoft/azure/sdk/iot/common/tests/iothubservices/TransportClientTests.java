@@ -14,10 +14,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayInputStream;
@@ -138,10 +135,13 @@ public class TransportClientTests extends IntegrationTest
 
         public TransportClientTestInstance(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
         {
+            this.protocol = protocol;
+        }
+
+        public void setup() throws InterruptedException, IotHubException, IOException, URISyntaxException
+        {
             fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
             Assert.assertNotNull(fileUploadNotificationReceiver);
-
-            this.protocol = protocol;
 
             String uuid = UUID.randomUUID().toString();
 
@@ -153,7 +153,6 @@ public class TransportClientTests extends IntegrationTest
             messageProperties.put("name1", "value1");
             messageProperties.put("name2", "value2");
             messageProperties.put("name3", "value3");
-
 
             for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
             {
@@ -174,6 +173,21 @@ public class TransportClientTests extends IntegrationTest
 
             Thread.sleep(REGISTRY_MANAGER_DEVICE_CREATION_DELAY_MILLISECONDS);
         }
+
+        public void dispose()
+        {
+            try
+            {
+                for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
+                {
+                    registryManager.removeDevice(devicesList[i]);
+                }
+            }
+            catch (Exception e)
+            {
+                //ignore the exception, don't care if tear down wasn't successful for this test
+            }
+        }
     }
 
     @AfterClass
@@ -192,17 +206,15 @@ public class TransportClientTests extends IntegrationTest
         }
     }
 
+    @Before
+    public void setupTestInstance() throws InterruptedException, IotHubException, URISyntaxException, IOException
+    {
+        testInstance.setup();
+    }
+
     @After
     public void tearDownTest() throws IOException, IotHubException
     {
-        //if (registryManager != null)
-        //{
-            //for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
-            //{
-            //    registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
-          //  }
-        //}
-
         try
         {
             Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
@@ -212,6 +224,8 @@ public class TransportClientTests extends IntegrationTest
             e.printStackTrace();
             fail("Unexpected exception encountered");
         }
+
+        testInstance.dispose();
     }
 
     @Test

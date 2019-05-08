@@ -157,7 +157,10 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
+        }
 
+        public void setup() throws Exception
+        {
             String TEST_UUID = UUID.randomUUID().toString();
 
             /* Create unique device names */
@@ -232,6 +235,12 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 // If identities are left registered, they will be deleted my nightly cleanup job anyways
             }
         }
+    }
+
+    @Before
+    public void setupTest() throws Exception
+    {
+        testInstance.setup();
     }
 
     @After
