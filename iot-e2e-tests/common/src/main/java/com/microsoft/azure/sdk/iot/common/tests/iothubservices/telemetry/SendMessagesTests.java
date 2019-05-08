@@ -44,14 +44,15 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void sendMessages() throws IOException, InterruptedException
+    public void sendMessages() throws Exception
     {
-
         if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
         {
             //mqtt_ws does not support x509 auth currently
             return;
         }
+
+        this.testInstance.setup();
 
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
@@ -110,7 +111,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void tokenExpiredAfterOpenButBeforeSendHttp() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    public void tokenExpiredAfterOpenButBeforeSendHttp() throws Exception
     {
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
         final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
@@ -121,6 +122,8 @@ public class SendMessagesTests extends SendMessagesCommon
             // as long as token did not expire before open. X509 doesn't apply either
             return;
         }
+
+        this.testInstance.setup();
 
         String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, testInstance.identity.getDeviceId(), testInstance.identity.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
         DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, testInstance.protocol);
@@ -133,8 +136,10 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void expiredMessagesAreNotSent() throws IOException
+    public void expiredMessagesAreNotSent() throws Exception
     {
+        this.testInstance.setup();
+
         IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
     }
 }

@@ -77,9 +77,8 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final String TAG_VALUE = "Tag_Value";
     protected static final String TAG_VALUE_UPDATE = "Tag_Value_Update";
 
-    private static String deviceIdPrefix = "java-twin-e2e-test-device";
-    private static String moduleIdPrefix = "java-twin-e2e-test-module";
-
+    protected static String deviceIdPrefix = "java-twin-e2e-test-device";
+    protected static String moduleIdPrefix = "java-twin-e2e-test-module";
 
     // States of SDK
     protected static RegistryManager registryManager;
@@ -303,20 +302,23 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void tearDownTwin(DeviceState deviceState) throws IOException
+    public void tearDownTwin(DeviceState deviceState) throws IOException
     {
         // tear down twin on device client
-        if (deviceState.sCDeviceForTwin != null)
+        if (deviceState != null)
         {
-            deviceState.sCDeviceForTwin.clearTwin();
-        }
-        if (deviceState.dCDeviceForTwin != null)
-        {
-            deviceState.dCDeviceForTwin.clean();
-
-            if (deviceState.dCDeviceForTwin.getDesiredProp() != null)
+            if (deviceState.sCDeviceForTwin != null)
             {
-                deviceState.dCDeviceForTwin.getDesiredProp().clear();
+                deviceState.sCDeviceForTwin.clearTwin();
+            }
+            if (deviceState.dCDeviceForTwin != null)
+            {
+                deviceState.dCDeviceForTwin.clean();
+
+                if (deviceState.dCDeviceForTwin.getDesiredProp() != null)
+                {
+                    deviceState.dCDeviceForTwin.getDesiredProp().clear();
+                }
             }
         }
         if (internalClient != null)
@@ -424,7 +426,6 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    @Before
     public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
     {
         deviceUnderTest = new DeviceState();
