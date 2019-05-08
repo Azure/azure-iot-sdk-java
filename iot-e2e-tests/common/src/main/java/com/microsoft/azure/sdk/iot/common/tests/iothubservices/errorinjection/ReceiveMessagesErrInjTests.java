@@ -40,7 +40,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithTCPConnectionDrop() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithTCPConnectionDrop() throws Exception
     {
         if (testInstance.protocol == HTTPS)
         {
@@ -48,12 +48,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithAmqpsConnectionDrop() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithAmqpsConnectionDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
@@ -61,12 +62,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithAmqpsSessionDrop() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithAmqpsSessionDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
@@ -74,12 +76,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithAmqpsCBSReqLinkDrop() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithAmqpsCBSReqLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
@@ -93,12 +96,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithAmqpsCBSRespLinkDrop() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithAmqpsCBSRespLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
@@ -112,12 +116,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithAmqpsD2CLinkDrop() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithAmqpsD2CLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
@@ -125,12 +130,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithAmqpsC2DLinkDrop() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithAmqpsC2DLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
@@ -144,12 +150,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithGracefulShutdownAmqp() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithGracefulShutdownAmqp() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
         {
@@ -157,12 +164,13 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void receiveMessagesWithGracefulShutdownMqtt() throws IOException, IotHubException, InterruptedException
+    public void receiveMessagesWithGracefulShutdownMqtt() throws Exception
     {
         if (testInstance.protocol != MQTT && testInstance.protocol != MQTT_WS)
         {
@@ -170,6 +178,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             return;
         }
 
+        super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(DefaultDelayInSec, DefaultDurationInSec));
     }
 

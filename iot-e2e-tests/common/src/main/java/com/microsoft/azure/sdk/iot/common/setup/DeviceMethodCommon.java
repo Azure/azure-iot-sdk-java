@@ -238,7 +238,6 @@ public class DeviceMethodCommon extends IntegrationTest
         }
     }
 
-    @Before
     public void cleanToStart() throws Exception
     {
         testInstance.setup();
@@ -289,7 +288,7 @@ public class DeviceMethodCommon extends IntegrationTest
             fail("Unexpected exception encountered");
         }
 
-        testInstance.dispose();
+        this.testInstance.dispose();
     }
 
     protected static class RunnableInvoke implements Runnable

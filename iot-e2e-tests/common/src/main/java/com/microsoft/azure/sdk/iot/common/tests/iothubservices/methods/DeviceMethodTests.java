@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.LinkedList;
@@ -36,6 +37,12 @@ public class DeviceMethodTests extends DeviceMethodCommon
     public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
+
+    @Before
+    public void cleanToStart() throws Exception
+    {
+        super.cleanToStart();
     }
 
     @Test

@@ -237,7 +237,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
         }
     }
 
-    @Before
     public void setupTest() throws Exception
     {
         testInstance.setup();

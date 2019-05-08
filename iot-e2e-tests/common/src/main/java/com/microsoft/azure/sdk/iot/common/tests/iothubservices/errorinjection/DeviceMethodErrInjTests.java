@@ -38,6 +38,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoveredFromTcpConnectionDrop() throws Exception
     {
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -52,6 +53,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -66,6 +68,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -86,6 +89,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -106,6 +110,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -120,6 +125,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -141,6 +147,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -162,6 +169,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -183,6 +191,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -197,6 +206,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -211,6 +221,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
+        super.cleanToStart();
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));

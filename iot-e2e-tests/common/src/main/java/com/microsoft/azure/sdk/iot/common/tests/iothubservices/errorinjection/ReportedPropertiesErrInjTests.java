@@ -36,6 +36,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void sendReportedPropertiesRecoveredFromTcpConnectionDrop() throws Exception
     {
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -50,6 +51,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -64,6 +66,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -84,6 +87,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -104,6 +108,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -118,6 +123,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -139,6 +145,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -160,6 +167,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -181,6 +189,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSendReportedPropertiesFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));

@@ -37,6 +37,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromTcpConnectionDrop() throws Exception
     {
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -51,6 +52,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -65,6 +67,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -85,6 +88,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -105,6 +109,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -119,6 +124,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -140,6 +146,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -162,6 +169,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -183,6 +192,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -197,6 +208,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -211,6 +223,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));

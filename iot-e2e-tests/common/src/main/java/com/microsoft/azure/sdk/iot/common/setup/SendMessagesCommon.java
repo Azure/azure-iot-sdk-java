@@ -445,12 +445,6 @@ public class SendMessagesCommon extends IntegrationTest
         }
     }
 
-    @Before
-    public void setupTest() throws Exception
-    {
-        testInstance.setup();
-    }
-
     @After
     public void tearDownTest() throws IOException, IotHubException
     {
@@ -464,6 +458,6 @@ public class SendMessagesCommon extends IntegrationTest
             fail("Unexpected exception encountered");
         }
 
-        testInstance.dispose();
+        this.testInstance.dispose();
     }
 }
