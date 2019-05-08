@@ -136,6 +136,9 @@ public class DeviceMethodCommon extends IntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
+        }
+
+        public void setup() throws Exception {
 
             String TEST_UUID = UUID.randomUUID().toString();
 
@@ -238,6 +241,7 @@ public class DeviceMethodCommon extends IntegrationTest
     @Before
     public void cleanToStart() throws Exception
     {
+        testInstance.setup();
         actualStatusUpdates = new ArrayList<Pair<IotHubConnectionStatus, Throwable>>();
         setConnectionStatusCallBack(actualStatusUpdates);
 

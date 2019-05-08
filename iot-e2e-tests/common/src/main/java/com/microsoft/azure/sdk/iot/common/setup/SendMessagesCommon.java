@@ -171,7 +171,9 @@ public class SendMessagesCommon extends IntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
+        }
 
+        public void setup() throws Exception {
             String TEST_UUID = UUID.randomUUID().toString();
 
             /* Create unique device names */
@@ -441,6 +443,12 @@ public class SendMessagesCommon extends IntegrationTest
 
             NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY));
         }
+    }
+
+    @Before
+    public void setupTest() throws Exception
+    {
+        testInstance.setup();
     }
 
     @After
