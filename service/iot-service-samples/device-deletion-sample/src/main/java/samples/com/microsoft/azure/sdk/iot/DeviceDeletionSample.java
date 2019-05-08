@@ -102,6 +102,7 @@ public class DeviceDeletionSample
             try
             {
                 registryManager.removeDevice(deviceIdToRemove);
+                System.out.println("Removed device " + deviceIdToRemove);
                 deletedDeviceCount++;
             }
             catch (Exception e)
