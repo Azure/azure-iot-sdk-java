@@ -24,6 +24,8 @@ public final class MessageProperty {
     public static final String IOTHUB_CONTENT_ENCODING = "iothub-contentencoding";
     public static final String IOTHUB_CONTENT_TYPE = "iothub-contenttype";
 
+    public static final String IOTHUB_CREATION_TIME_UTC = "iothub-creation-time-utc";
+
     static {
         HashSet<String> reservedPropertyNames = new HashSet<>();
         reservedPropertyNames.add("iothub-enqueuedtime");

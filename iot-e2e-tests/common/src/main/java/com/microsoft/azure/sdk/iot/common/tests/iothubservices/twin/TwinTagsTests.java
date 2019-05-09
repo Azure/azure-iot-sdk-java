@@ -6,23 +6,28 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
+import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
+import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -32,12 +37,19 @@ import static org.junit.Assert.assertNotNull;
  */
 public class TwinTagsTests extends DeviceTwinCommon
 {
-    public TwinTagsTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public TwinTagsTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
-        super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
+
+    @Before
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
+    {
+        super.setUpNewDeviceAndModule();
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testGetTwinUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -102,6 +114,7 @@ public class TwinTagsTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testAddTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -133,6 +146,7 @@ public class TwinTagsTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateTagUpdates() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -199,6 +213,7 @@ public class TwinTagsTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void setTagsAtMaxDepthAllowed() throws IOException, IotHubException
     {
         sCDeviceTwin.getTwin(deviceUnderTest.sCDeviceForTwin);

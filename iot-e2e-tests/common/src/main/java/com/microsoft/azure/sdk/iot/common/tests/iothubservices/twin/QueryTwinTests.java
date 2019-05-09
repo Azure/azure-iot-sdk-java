@@ -8,13 +8,17 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
+import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
+import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -34,12 +38,19 @@ import static org.junit.Assert.*;
  */
 public class QueryTwinTests extends DeviceTwinCommon
 {
-    public QueryTwinTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
-        super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
+
+    @Before
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
+    {
+        super.setUpNewDeviceAndModule();
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -51,6 +62,8 @@ public class QueryTwinTests extends DeviceTwinCommon
         final double actualNumOfDevices = MAX_DEVICES;
 
         setDesiredProperties(queryProperty, queryPropertyValue, MAX_DEVICES);
+
+        Thread.sleep(DESIRED_PROPERTIES_PROPAGATION_TIME_MILLIS);
 
         // Raw Query for multiple devices having same property
         final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
@@ -74,6 +87,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -180,6 +194,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testQueryTwin() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -215,6 +230,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(PAGE_SIZE + 1);
@@ -228,7 +244,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         final String where = "is_defined(properties.desired." + queryProperty + ")";
 
         SqlQuery sqlQuery;
-        if (this.testInstance.moduleId != null)
+        if (this.testInstance.clientType == ClientType.MODULE_CLIENT)
         {
             sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.MODULES, where, null);
         }
@@ -281,6 +297,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void queryCollectionCanReturnEmptyQueryResults() {
         try
         {
@@ -300,6 +317,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

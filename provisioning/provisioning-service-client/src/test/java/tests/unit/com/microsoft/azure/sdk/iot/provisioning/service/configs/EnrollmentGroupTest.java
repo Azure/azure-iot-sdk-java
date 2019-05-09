@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
@@ -12,7 +13,10 @@ import mockit.*;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.Helpers;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -156,7 +160,7 @@ public class EnrollmentGroupTest
                 new SymmetricKeyAttestation(VALID_PRIMARY_KEY, VALID_SECONDARY_KEY));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
     @Test
     public void constructorWithX509ParametersUsesSetters()
     {
@@ -171,7 +175,7 @@ public class EnrollmentGroupTest
         assertNotNull(enrollmentGroup.mockedAttestation);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
     @Test
     public void constructorWithSymmetricKeyParametersUsesSetters()
     {
@@ -186,7 +190,7 @@ public class EnrollmentGroupTest
         assertNotNull(enrollmentGroup.mockedAttestation);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithJsonThrowsOnNullJson()
     {
@@ -199,7 +203,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithJsonThrowsOnEmptyJson()
     {
@@ -212,7 +216,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_003: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_003: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
     @Test (expected = JsonSyntaxException.class)
     public void constructorWithJsonThrowsOnInvalidJson()
     {
@@ -225,7 +229,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_004: [The constructor shall deserialize the provided JSON for the enrollmentGroup class and subclasses.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_004: [The constructor shall deserialize the provided JSON for the enrollmentGroup class and subclasses.] */
     @Test
     public void constructorWithJsonSucceedX509Attestation() throws ProvisioningServiceClientException
     {
@@ -286,7 +290,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_ENROLLMENT_GROUP_ID, info.getSha256Thumbprint());
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_004: [The constructor shall deserialize the provided JSON for the enrollmentGroup class and subclasses.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_004: [The constructor shall deserialize the provided JSON for the enrollmentGroup class and subclasses.] */
     @Test
     public void constructorWithJsonSucceedSymmetricKeyAttestation() throws ProvisioningServiceClientException
     {
@@ -334,7 +338,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_SECONDARY_KEY, secondary);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_005: [The constructor shall judge and store the provided mandatory parameters `enrollmentGroupId` and `attestation` using the EnrollmentGroup setters.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_005: [The constructor shall judge and store the provided mandatory parameters `enrollmentGroupId` and `attestation` using the EnrollmentGroup setters.] */
     @Test
     public void constructorWithJsonUsesSetters() throws ProvisioningServiceClientException
     {
@@ -363,7 +367,7 @@ public class EnrollmentGroupTest
         assertNotNull(enrollmentGroup.getAttestation());
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsInitialTwinUsesSetters()
     {
@@ -402,7 +406,7 @@ public class EnrollmentGroupTest
         assertEquals(ProvisioningStatus.ENABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsInitialTwinSucceedOnNull()
     {
@@ -430,7 +434,7 @@ public class EnrollmentGroupTest
         assertNull(enrollmentGroup.mockedProvisioningStatus);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsCreatedDateTimeUtcUsesSetters()
     {
@@ -460,7 +464,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsCreatedDateTimeUtcSucceedOnNull()
     {
@@ -489,7 +493,7 @@ public class EnrollmentGroupTest
         assertNull(enrollmentGroup.mockedCreatedDateTimeUtc);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsLastUpdatedDateTimeUtcUsesSetters()
     {
@@ -519,7 +523,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_DATE, Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsLastUpdatedDateTimeUtcSucceedOnNull()
     {
@@ -548,7 +552,7 @@ public class EnrollmentGroupTest
         assertNull(enrollmentGroup.mockedLastUpdatedDateTimeUtc);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_009: [If the etag is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_009: [If the etag is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsEtagUsesSetters()
     {
@@ -579,7 +583,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_PARSED_ETAG, Deencapsulation.getField(enrollmentGroup, "etag"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_009: [If the etag is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_009: [If the etag is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
     @Test
     public void constructorWithJsonSetsEtagSucceedOnNull()
     {
@@ -609,7 +613,7 @@ public class EnrollmentGroupTest
         assertNull(enrollmentGroup.mockedEtag);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_010: [The toJson shall return a String with the information in this class in a JSON format.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_010: [The toJson shall return a String with the information in this class in a JSON format.] */
     @Test
     public void toJsonSimpleX509Enrollment()
     {
@@ -623,7 +627,7 @@ public class EnrollmentGroupTest
         Helpers.assertJson(enrollmentGroup.mockedJsonElement.toString(), result);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_010: [The toJson shall return a String with the information in this class in a JSON format.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_010: [The toJson shall return a String with the information in this class in a JSON format.] */
     @Test
     public void toJsonSimpleSymmetricKeyEnrollment()
     {
@@ -637,7 +641,7 @@ public class EnrollmentGroupTest
         Helpers.assertJson(enrollmentGroup.mockedJsonElement.toString(), result);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_011: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_011: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
     @Test
     public void toJsonElementSimpleX509Enrollment()
     {
@@ -667,7 +671,7 @@ public class EnrollmentGroupTest
         Helpers.assertJson(result.toString(), json);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_011: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_011: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
     @Test
     public void toJsonElementSimpleSymmetricKeyEnrollment()
     {
@@ -694,7 +698,7 @@ public class EnrollmentGroupTest
         Helpers.assertJson(result.toString(), json);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_012: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_012: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
     @Test
     public void toJsonElementSimpleEnrollmentWithTwin()
     {
@@ -745,7 +749,7 @@ public class EnrollmentGroupTest
         Helpers.assertJson(result.toString(), json);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_013: [The toString shall return a String with the information in this class in a pretty print JSON.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_013: [The toString shall return a String with the information in this class in a pretty print JSON.] */
     @Test
     public void toStringSimpleEnrollmentWithTwin()
     {
@@ -796,14 +800,14 @@ public class EnrollmentGroupTest
         Helpers.assertJson(result, json);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_014: [The getEnrollmentGroupId shall return a String with the stored enrollmentGroupId.] */
-    /* SRS_ENROLLMENT_GROUP_21_017: [The getAttestation shall return a Attestation with the stored attestation.] */
-    /* SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
-    /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
-    /* SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
-    /* SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
-    /* SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
-    /* SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_014: [The getEnrollmentGroupId shall return a String with the stored enrollmentGroupId.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_017: [The getAttestation shall return a Attestation with the stored attestation.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
     @Test
     public void gettersSimpleX509Enrollment() throws ProvisioningServiceClientException
     {
@@ -851,14 +855,14 @@ public class EnrollmentGroupTest
         assertEquals(VALID_PARSED_ETAG, enrollmentGroup.getEtag());
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_014: [The getEnrollmentGroupId shall return a String with the stored enrollmentGroupId.] */
-    /* SRS_ENROLLMENT_GROUP_21_017: [The getAttestation shall return a Attestation with the stored attestation.] */
-    /* SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
-    /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
-    /* SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
-    /* SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
-    /* SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
-    /* SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_014: [The getEnrollmentGroupId shall return a String with the stored enrollmentGroupId.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_017: [The getAttestation shall return a Attestation with the stored attestation.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
     @Test
     public void gettersSimpleSymmetricKeyEnrollment() throws ProvisioningServiceClientException
     {
@@ -903,7 +907,7 @@ public class EnrollmentGroupTest
         assertEquals(VALID_PARSED_ETAG, enrollmentGroup.getEtag());
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnNull()
     {
@@ -916,7 +920,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnEmpty()
     {
@@ -929,7 +933,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnNotUtf8()
     {
@@ -942,7 +946,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEnrollmentGroupIdThrowsOnInvalidChar()
     {
@@ -955,7 +959,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_016: [The setEnrollmentGroupId shall store the provided enrollmentGroupId.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_016: [The setEnrollmentGroupId shall store the provided enrollmentGroupId.] */
     @Test
     public void setEnrollmentGroupIdSucceed()
     {
@@ -971,7 +975,7 @@ public class EnrollmentGroupTest
         assertEquals(newEnrollmentGroupId, Deencapsulation.getField(enrollmentGroup, "enrollmentGroupId"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_018: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_018: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationMechanismThrowsOnNull()
     {
@@ -984,7 +988,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationMechanismThrowsOnTpm(
             @Mocked final TpmAttestation mockedTpmAttestation,
@@ -1007,7 +1011,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationMechanismX509ThrowsOnNoSigningCertificate(
             @Mocked final X509Attestation mockedX509Attestation,
@@ -1032,7 +1036,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
     @Test
     public void setAttestationMechanismX509Succeed(
             @Mocked final X509Attestation mockedX509Attestation,
@@ -1060,7 +1064,7 @@ public class EnrollmentGroupTest
         assertNotNull(Deencapsulation.getField(enrollmentGroup, "attestation"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
     @Test
     public void setAttestationMechanismSymmetricKeySucceed(
             @Mocked final SymmetricKeyAttestation mockedSymmetricKeyAttestation,
@@ -1091,7 +1095,7 @@ public class EnrollmentGroupTest
         assertNotNull(Deencapsulation.getField(enrollmentGroup, "attestation"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_039: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_039: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationThrowsOnNull()
     {
@@ -1104,7 +1108,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationThrowsOnTpm(
             @Mocked final TpmAttestation mockedTpmAttestation,
@@ -1119,7 +1123,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Key] */
     @Test (expected = IllegalArgumentException.class)
     public void setAttestationX509ThrowsOnNoSigningCertificate(
             @Mocked final X509Attestation mockedX509Attestation,
@@ -1142,7 +1146,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
     @Test
     public void setAttestationX509Succeed(
             @Mocked final X509Attestation mockedX509Attestation,
@@ -1173,7 +1177,7 @@ public class EnrollmentGroupTest
         };
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
     @Test
     public void setAttestationSymmetricKeySucceed(
             @Mocked final SymmetricKeyAttestation mockedSymmetricKeyAttestation,
@@ -1195,7 +1199,7 @@ public class EnrollmentGroupTest
         };
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setIotHubHostNameThrowsOnNull()
     {
@@ -1208,7 +1212,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setIotHubHostNameThrowsOnEmpty()
     {
@@ -1221,7 +1225,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setIotHubHostNameThrowsOnNotUTF8()
     {
@@ -1234,7 +1238,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setIotHubHostNameThrowsOnInvalidChar()
     {
@@ -1247,7 +1251,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setIotHubHostNameThrowsOnIncompleteName()
     {
@@ -1260,7 +1264,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
     @Test
     public void setIotHubHostNameSucceed()
     {
@@ -1276,7 +1280,7 @@ public class EnrollmentGroupTest
         assertEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void setInitialTwinThrowsOnNull()
     {
@@ -1289,7 +1293,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
     @Test
     public void setInitialTwinSucceed(@Mocked final TwinState mockedTwinState)
     {
@@ -1304,7 +1308,7 @@ public class EnrollmentGroupTest
         assertEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
     @Test (expected = IllegalArgumentException.class)
     public void setProvisioningStatusThrowsOnNull()
     {
@@ -1317,7 +1321,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_028: [The setProvisioningStatus shall store the provided provisioningStatus.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_028: [The setProvisioningStatus shall store the provided provisioningStatus.] */
     @Test
     public void setProvisioningStatusSucceed()
     {
@@ -1332,7 +1336,7 @@ public class EnrollmentGroupTest
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
     @Test
     public void setCreatedDateTimeUtcSucceed()
     {
@@ -1347,7 +1351,7 @@ public class EnrollmentGroupTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "createdDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnNull()
     {
@@ -1360,7 +1364,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1373,7 +1377,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setCreatedDateTimeUtcThrowsOnInvalid()
     {
@@ -1386,7 +1390,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_033: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_033: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
     @Test
     public void setLastUpdatedDateTimeUtcSucceed()
     {
@@ -1401,7 +1405,7 @@ public class EnrollmentGroupTest
         Helpers.assertDateWithError((Date)Deencapsulation.getField(enrollmentGroup, "lastUpdatedDateTimeUtcDate"), VALID_DATE_AS_STRING);
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnNull()
     {
@@ -1414,7 +1418,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnEmpty()
     {
@@ -1427,7 +1431,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
     @Test (expected = IllegalArgumentException.class)
     public void setLastUpdatedDateTimeUtcThrowsOnInvalid()
     {
@@ -1440,7 +1444,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEtagThrowsOnNull()
     {
@@ -1453,7 +1457,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEtagThrowsOnEmpty()
     {
@@ -1466,7 +1470,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
     @Test (expected = IllegalArgumentException.class)
     public void setEtagThrowsOnNotUTF8()
     {
@@ -1479,7 +1483,7 @@ public class EnrollmentGroupTest
         // assert
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
     @Test
     public void setEtagSucceed()
     {
@@ -1495,7 +1499,7 @@ public class EnrollmentGroupTest
         assertEquals(newEtag, Deencapsulation.getField(enrollmentGroup, "etag"));
     }
 
-    /* SRS_ENROLLMENT_GROUP_21_038: [The EnrollmentGroup shall provide an empty constructor to make GSON happy.] */
+    /* Tests_SRS_ENROLLMENT_GROUP_21_038: [The EnrollmentGroup shall provide an empty constructor to make GSON happy.] */
     @Test
     public void constructorSucceed()
     {
@@ -1506,4 +1510,304 @@ public class EnrollmentGroupTest
         assertNotNull(enrollmentGroup);
     }
 
+    /* Tests_SRS_ENROLLMENT_GROUP_34_046: [This function shall set the reprovision policy to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsReprovisioningPolicy()
+    {
+        // arrange
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"reprovisionPolicy\": {\n" +
+                "    \"updateHubAssignment\": \"true\",\n" +
+                "    \"migrateDeviceData\": \"true\"\n" +
+                "  },\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"x509\",\n" +
+                "    \"x509\": {\n" +
+                "      \"signingCertificates\": {\n" +
+                "        \"primary\": {" +
+                "          \"certificate\":\"" + PUBLIC_KEY_CERTIFICATE_STRING + "\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // assert
+        assertNotNull(enrollmentGroup.getReprovisionPolicy());
+        assertTrue(enrollmentGroup.getReprovisionPolicy().getMigrateDeviceData());
+        assertTrue(enrollmentGroup.getReprovisionPolicy().getUpdateHubAssignment());
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_045: [This function shall set the custom allocation definition to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsCustomAllocationDefinition()
+    {
+        // arrange
+        String expectedWebhookUrl = "https://www.microsoft.com";
+        String expectedApiVersion = "2019-03-31";
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"customAllocationDefinition\": {\n" +
+                "    \"webhookUrl\": \"" + expectedWebhookUrl + "\",\n" +
+                "    \"apiVersion\": \"" + expectedApiVersion + "\"\n" +
+                "  },\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"x509\",\n" +
+                "    \"x509\": {\n" +
+                "      \"signingCertificates\": {\n" +
+                "        \"primary\": {" +
+                "          \"certificate\":\"" + PUBLIC_KEY_CERTIFICATE_STRING + "\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // assert
+        assertNotNull(enrollmentGroup.getCustomAllocationDefinition());
+        assertEquals(expectedApiVersion, enrollmentGroup.getCustomAllocationDefinition().getApiVersion());
+        assertEquals(expectedWebhookUrl, enrollmentGroup.getCustomAllocationDefinition().getWebhookUrl());
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_044: [This function shall set the allocation policy to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsAllocationPolicy()
+    {
+        // arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.GEOLATENCY;
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicy.toString() + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"x509\",\n" +
+                "    \"x509\": {\n" +
+                "      \"signingCertificates\": {\n" +
+                "        \"primary\": {" +
+                "          \"certificate\":\"" + PUBLIC_KEY_CERTIFICATE_STRING + "\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // assert
+        assertNotNull(enrollmentGroup.getAllocationPolicy());
+        assertEquals(expectedAllocationPolicy, enrollmentGroup.getAllocationPolicy());
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_043: [This function shall set the iothubs list to the value from the json.] */
+    @Test
+    public void constructorWithJsonSetsIotHubs()
+    {
+        // arrange
+        final String expectedIotHub1 = "some-iot-hub.azure-devices.net";
+        final String expectedIotHub2 = "some-other-iot-hub.azure-devices.net";
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"x509\",\n" +
+                "    \"x509\": {\n" +
+                "      \"signingCertificates\": {\n" +
+                "        \"primary\": {" +
+                "          \"certificate\":\"" + PUBLIC_KEY_CERTIFICATE_STRING + "\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"iotHubs\": [\"" + expectedIotHub1 + "\", \"" + expectedIotHub2 + "\"],\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // assert
+        assertNotNull(enrollmentGroup.getIotHubs());
+        assertTrue(enrollmentGroup.getIotHubs().contains(expectedIotHub1));
+        assertTrue(enrollmentGroup.getIotHubs().contains(expectedIotHub2));
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_050: [This function shall set the allocation policy.] */
+    @Test
+    public void setAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.CUSTOM;
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+
+        //act
+        enrollmentGroup.setAllocationPolicy(expectedAllocationPolicy);
+
+        //assert
+        assertEquals(expectedAllocationPolicy, enrollmentGroup.getAllocationPolicy());
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_049: [This function shall get the allocation policy.] */
+    @Test
+    public void getAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.CUSTOM;
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+        Deencapsulation.setField(enrollmentGroup, "allocationPolicy", expectedAllocationPolicy);
+
+        //act
+        AllocationPolicy actualAllocationPolicy = enrollmentGroup.getAllocationPolicy();
+
+        //assert
+        assertEquals(expectedAllocationPolicy, actualAllocationPolicy);
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_054: [This function shall set the custom allocation definition.] */
+    @Test
+    public void setCustomAllocationDefinitionWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        CustomAllocationDefinition expectedCustomAllocationDefinition = new CustomAllocationDefinition();
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+
+        //act
+        enrollmentGroup.setCustomAllocationDefinition(expectedCustomAllocationDefinition);
+
+        //assert
+        assertEquals(expectedCustomAllocationDefinition, enrollmentGroup.getCustomAllocationDefinition());
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_053: [This function shall get the custom allocation definition.] */
+    @Test
+    public void getCustomAllocationDefinitionWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        CustomAllocationDefinition expectedCustomAllocationDefinition = new CustomAllocationDefinition();
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+        Deencapsulation.setField(enrollmentGroup, "customAllocationDefinition", expectedCustomAllocationDefinition);
+
+        //act
+        CustomAllocationDefinition actualCustomAllocationDefinition = enrollmentGroup.getCustomAllocationDefinition();
+
+        //assert
+        assertEquals(expectedCustomAllocationDefinition, actualCustomAllocationDefinition);
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_048: [This function shall set the reprovision policy.] */
+    @Test
+    public void setReprovisionPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        ReprovisionPolicy expectedReprovisionPolicy = new ReprovisionPolicy();
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+
+        //act
+        enrollmentGroup.setReprovisionPolicy(expectedReprovisionPolicy);
+
+        //assert
+        assertEquals(expectedReprovisionPolicy, enrollmentGroup.getReprovisionPolicy());
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_047: [This function shall get the reprovision policy.] */
+    @Test
+    public void getReprovisionPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        ReprovisionPolicy expectedReprovisionPolicy = new ReprovisionPolicy();
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+        Deencapsulation.setField(enrollmentGroup, "reprovisionPolicy", expectedReprovisionPolicy);
+
+        //act
+        ReprovisionPolicy actualReprovisionPolicy = enrollmentGroup.getReprovisionPolicy();
+
+        //assert
+        assertEquals(expectedReprovisionPolicy, actualReprovisionPolicy);
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_052: [This function shall set the iothubs list.] */
+    @Test
+    public void setIotHubsWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        List<String> expectedIotHubs = new ArrayList<>();
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+
+        //act
+        enrollmentGroup.setIotHubs(expectedIotHubs);
+
+        //assert
+        assertEquals(expectedIotHubs, enrollmentGroup.getIotHubs());
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_051: [This function shall get the iothubs list.] */
+    @Test
+    public void getIotHubsWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        List<String> expectedIotHubs = new ArrayList<>();
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+        Deencapsulation.setField(enrollmentGroup, "iotHubs", expectedIotHubs);
+
+        //act
+        Collection<String> actualIotHubs = enrollmentGroup.getIotHubs();
+
+        //assert
+        assertEquals(expectedIotHubs, actualIotHubs);
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_073: [This function shall save the provided capabilities.] */
+    @Test
+    public void setDeviceCapabilitiesSucceed()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeMockedSymmetricKeyEnrollmentGroup();
+        final DeviceCapabilities capabilities = new DeviceCapabilities();
+        assertNotEquals(capabilities, Deencapsulation.getField(enrollmentGroup, "capabilities"));
+
+        // act
+        enrollmentGroup.setCapabilities(capabilities);
+
+        // assert
+        assertEquals(capabilities, Deencapsulation.getField(enrollmentGroup, "capabilities"));
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_074: [This function shall return the saved capabilities.] */
+    @Test
+    public void getDeviceCapabilitiesSucceed()
+    {
+        EnrollmentGroup enrollmentGroup = makeMockedSymmetricKeyEnrollmentGroup();
+        final DeviceCapabilities capabilities = new DeviceCapabilities();
+        Deencapsulation.setField(enrollmentGroup, "capabilities", capabilities);
+
+        //act
+        DeviceCapabilities actualDeviceCapabilities = enrollmentGroup.getCapabilities();
+
+        //assert
+        assertEquals(capabilities, actualDeviceCapabilities);
+    }
 }

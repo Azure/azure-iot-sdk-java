@@ -3,15 +3,19 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
+import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -25,8 +29,8 @@ import java.util.Date;
  * The minimum information required by the provisioning service is the {@code registrationId} and the
  * {@code attestation}.</p>
  *
- * <p> A new device can be provisioned by two attestation mechanisms, Trust Platform Module (see {@link TpmAttestation})
- * or X509 (see {@link X509Attestation}). The definition of each one you should use depending on the
+ * <p> A new device can be provisioned by three attestation mechanisms, Trust Platform Module (see {@link TpmAttestation}),
+ * X509 (see {@link X509Attestation}) or {@link SymmetricKeyAttestation} mechanism. The definition of each one you should use depending on the
  * physical authentication hardware that the device contains.</p>
  *
  * <p> The content of this class will be serialized in a JSON format and sent as a body of the rest API to the
@@ -148,12 +152,36 @@ public class IndividualEnrollment extends Serializable
     @SerializedName(DEVICE_CAPABILITIES_TAG)
     private DeviceCapabilities capabilities = new DeviceCapabilities();
 
+    // the reprovisioning policy
+    private static final String REPROVISION_POLICY_TAG = "reprovisionPolicy";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(REPROVISION_POLICY_TAG)
+    private ReprovisionPolicy reprovisionPolicy;
+
+    // the custom allocation definition
+    private static final String CUSTOM_ALLOCATION_DEFINITION_TAG = "customAllocationDefinition";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(CUSTOM_ALLOCATION_DEFINITION_TAG)
+    private CustomAllocationDefinition customAllocationDefinition;
+
+    // the allocation policy of the resource. overrides the tenant level allocation policy
+    private static final String ALLOCATION_POLICY_TAG = "allocationPolicy";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(ALLOCATION_POLICY_TAG)
+    private AllocationPolicy allocationPolicy;
+
+    // the list of names of IoT hubs the device in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
+    private static final String IOT_HUBS_TAG = "iotHubs";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(IOT_HUBS_TAG)
+    private Collection<String> iotHubs;
+
     /**
      * CONSTRUCTOR
      *
      * <p> This constructor creates an instance of the enrollment with the minimum set of information
      * required by the provisioning service. A valid enrollment must contain the registrationId,
-     * which uniquely identify this enrollment, and the attestation mechanism, which can be TPM or X509.</p>
+     * which uniquely identify this enrollment, and the attestation mechanism, which can be TPM, X509 or SymmetricKey.</p>
      *
      * <p> Other parameters can be added by calling the setters on this class.</p>
      *
@@ -174,7 +202,7 @@ public class IndividualEnrollment extends Serializable
      * </pre>
      *
      * @param registrationId the {@code String} with an unique id for this enrollment.
-     * @param attestation    the {@link Attestation} mechanism that can be {@link TpmAttestation} or {@link X509Attestation}.
+     * @param attestation    the {@link Attestation} mechanism that can be {@link TpmAttestation}, {@link X509Attestation} or {@link SymmetricKeyAttestation}.
      * @throws IllegalArgumentException If one of the provided parameters is not correct.
      */
     public IndividualEnrollment(String registrationId, Attestation attestation)
@@ -285,6 +313,18 @@ public class IndividualEnrollment extends Serializable
         {
             this.setCapabilitiesFinal(result.capabilities);
         }
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_066: [This function shall set the iothubs list to the value from the json.] */
+        this.setIotHubs(result.getIotHubs());
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_067: [This function shall set the allocation policy to the value from the json.] */
+        this.setAllocationPolicy(result.getAllocationPolicy());
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_068: [This function shall set the custom allocation definition to the value from the json.] */
+        this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
+
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_069: [This function shall set the reprovision policy to the value from the json.] */
+        this.setReprovisionPolicy(result.getReprovisionPolicy());
     }
 
     /**
@@ -448,7 +488,7 @@ public class IndividualEnrollment extends Serializable
      * Attestation mechanism is a mandatory parameter that provides the mechanism
      * type and the necessary keys/certificates</p>
      *
-     * @param attestationMechanism the {@code AttestationMechanism} with the new attestation mechanism. It can be `tpm` or `x509`.
+     * @param attestationMechanism the {@code AttestationMechanism} with the new attestation mechanism. It can be `tpm`, `x509` or `SymmetricKey`.
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null} or invalid.
      * @see AttestationMechanism
      */
@@ -475,11 +515,12 @@ public class IndividualEnrollment extends Serializable
      * Attestation mechanism is a mandatory parameter that provides the mechanism
      * type and the necessary keys/certificates</p>
      *
-     * @param attestation the {@link Attestation} with the new attestation mechanism. It can be {@link TpmAttestation} or {@link X509Attestation}.
+     * @param attestation the {@link Attestation} with the new attestation mechanism. It can be {@link TpmAttestation}, {@link X509Attestation} or {@link SymmetricKeyAttestation}.
      * @throws IllegalArgumentException If the provided attestation mechanism is {@code null}.
      * @see Attestation
      * @see TpmAttestation
      * @see X509Attestation
+     * @see SymmetricKeyAttestation
      */
     public void setAttestation(Attestation attestation)
     {
@@ -771,6 +812,94 @@ public class IndividualEnrollment extends Serializable
     }
 
     /**
+     * Getter for the reprovision policy.
+     *
+     * @return The {@code ReprovisionPolicy} with the reprovisionPolicy content.
+     */
+    public ReprovisionPolicy getReprovisionPolicy()
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_057: [This function shall get the reprovision policy.] */
+        return this.reprovisionPolicy;
+    }
+
+    /**
+     * Setter for the reprovision policy.
+     *
+     * @param reprovisionPolicy the {@code ReprovisionPolicy} with the behavior when a device is re-provisioned to an IoT hub.
+     */
+    public void setReprovisionPolicy(ReprovisionPolicy reprovisionPolicy)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_058: [This function shall set the reprovision policy.] */
+        this.reprovisionPolicy = reprovisionPolicy;
+    }
+
+    /**
+     * Getter for the allocation policy.
+     *
+     * @return The {@code AllocationPolicy} with the allocationPolicy content.
+     */
+    public AllocationPolicy getAllocationPolicy()
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_059: [This function shall get the allocation policy.] */
+        return this.allocationPolicy;
+    }
+
+    /**
+     * Setter for the allocation policy.
+     *
+     * @param allocationPolicy the {@code AllocationPolicy} with the allocation policy of this resource. Overrides the tenant level allocation policy.
+     */
+    public void setAllocationPolicy(AllocationPolicy allocationPolicy)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_060: [This function shall set the allocation policy.] */
+        this.allocationPolicy = allocationPolicy;
+    }
+
+    /**
+     * Getter for the list of IoTHub names that the device can be allocated to..
+     *
+     * @return The {@code AllocationPolicy} with the allocationPolicy content.
+     */
+    public Collection<String> getIotHubs()
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_061: [This function shall get the iothubs list.] */
+        return this.iotHubs;
+    }
+
+    /**
+     * Setter for the list of IotHubs available for allocation.
+     *
+     * @param iotHubs the {@code List<String>} of names of IoT hubs the device(s) in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
+     */
+    public void setIotHubs(Collection<String> iotHubs)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_062: [This function shall set the iothubs list.] */
+        this.iotHubs = iotHubs;
+    }
+
+    /**
+     * Getter for the custom allocation definition policy.
+     *
+     * @return The {@code CustomAllocationDefinition} policy.
+     */
+    public CustomAllocationDefinition getCustomAllocationDefinition()
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_063: [This function shall get the custom allocation definition.] */
+        return this.customAllocationDefinition;
+    }
+
+    /**
+     * Setter for the custom allocation definition policy.
+     *
+     * @param customAllocationDefinition the {@code CustomAllocationDefinition} with the custom allocation policy of this resource.
+     */
+    public void setCustomAllocationDefinition(CustomAllocationDefinition customAllocationDefinition)
+    {
+        /* SRS_INDIVIDUAL_ENROLLMENT_34_064: [This function shall set the custom allocation definition.] */
+        this.customAllocationDefinition = customAllocationDefinition;
+    }
+    
+    /**
      * Empty constructor
      * <p>
      * Used only by the tools that will deserialize this class.
@@ -781,5 +910,4 @@ public class IndividualEnrollment extends Serializable
     {
         /* SRS_INDIVIDUAL_ENROLLMENT_21_049: [The IndividualEnrollment shall provide an empty constructor to make GSON happy.] */
     }
-
 }

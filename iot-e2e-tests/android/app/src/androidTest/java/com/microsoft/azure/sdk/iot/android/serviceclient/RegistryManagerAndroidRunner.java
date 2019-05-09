@@ -8,13 +8,16 @@ package com.microsoft.azure.sdk.iot.android.serviceclient;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup37;
 import com.microsoft.azure.sdk.iot.common.tests.serviceclient.RegistryManagerTests;
 
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 
 import java.io.IOException;
 
+@TestGroup37
 public class RegistryManagerAndroidRunner extends RegistryManagerTests
 {
     @Rule
@@ -24,6 +27,13 @@ public class RegistryManagerAndroidRunner extends RegistryManagerTests
     public static void setUp() throws IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         RegistryManagerTests.setUp();
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }

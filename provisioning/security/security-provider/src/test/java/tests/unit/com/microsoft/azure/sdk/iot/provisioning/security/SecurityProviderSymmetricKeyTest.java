@@ -41,6 +41,9 @@ public class SecurityProviderSymmetricKeyTest
     private static final byte[] testSymKey = "symmkey".getBytes();
     private static final String testRegId = "regId";
 
+    private static final String testPrimaryKey = "12345";
+    private static final String testSecondaryKey = "6789";
+
     @Mocked
     SecretKeySpec mockedSecretKeySpec;
 
@@ -75,12 +78,53 @@ public class SecurityProviderSymmetricKeyTest
         assertEquals(securityProviderSymmetricKey.getRegistrationId(), testRegId);
     }
 
+    @Test
+    public void testConstructorWithBothKeysSucceeds() throws SecurityProviderException
+    {
+        //act
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testPrimaryKey, testSecondaryKey, testRegId);
+
+        //assert
+        assertEquals(testPrimaryKey, new String(securityProviderSymmetricKey.getSymmetricKey()));
+        assertEquals(testSecondaryKey, new String((byte[]) Deencapsulation.getField(securityProviderSymmetricKey, "secondaryKey")));
+        assertEquals(testRegId, securityProviderSymmetricKey.getRegistrationId());
+    }
+
+
     @Test (expected = IllegalArgumentException.class)
     public void testSymmetrickeyNull()
     {
         //act
         SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(null, testRegId);
         //assert
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorWithBothKeysThrowsIfPrimaryNull()
+    {
+        //act
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(null, testSecondaryKey, testRegId);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorWithBothKeysThrowsIfPrimaryEmpty()
+    {
+        //act
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey("", testSecondaryKey, testRegId);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorWithBothKeysThrowsIfSecondaryNull()
+    {
+        //act
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testPrimaryKey, null, testRegId);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorWithBothKeysThrowsIfSecondaryEmpty()
+    {
+        //act
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testPrimaryKey, "", testRegId);
     }
 
     @Test (expected = IllegalArgumentException.class)

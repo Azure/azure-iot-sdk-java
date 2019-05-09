@@ -5,10 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -31,20 +28,23 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  */
 public class GetTwinErrInjTests extends DeviceTwinCommon
 {
-    public GetTwinErrInjTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public GetTwinErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
-        super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromTcpConnectionDrop() throws Exception
     {
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -52,12 +52,14 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -65,12 +67,14 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -84,12 +88,14 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -103,12 +109,14 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -116,12 +124,14 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -136,6 +146,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -143,6 +154,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -157,12 +169,15 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -177,52 +192,15 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
-    public void getDeviceTwinRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Method Req link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
-
-        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    public void getDeviceTwinRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Method Resp link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
-
-        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromGracefulShutdownAmqp() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -230,12 +208,14 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void getDeviceTwinRecoveredFromGracefulShutdownMqtt() throws Exception
     {
         if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
@@ -243,6 +223,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));

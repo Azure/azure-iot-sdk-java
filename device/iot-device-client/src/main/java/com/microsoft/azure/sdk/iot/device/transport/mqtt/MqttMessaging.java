@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class MqttMessaging extends Mqtt
 {
@@ -20,10 +21,10 @@ public class MqttMessaging extends Mqtt
     private String publishTopic;
     private boolean isEdgeHub;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub) throws TransportException
+    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
-        super(mqttConnection, listener, messageListener, connectionId);
+        super(mqttConnection, listener, messageListener, connectionId, unacknowledgedSentMessages);
 
         if (deviceId == null || deviceId.isEmpty())
         {
@@ -100,6 +101,7 @@ public class MqttMessaging extends Mqtt
         //Codes_SRS_MqttMessaging_34_032: [If the message has a OutputName, this method shall append that to publishTopic before publishing using the key name `$.on`.]
         //Codes_SRS_MqttMessaging_34_032: [If the message has a content type, this method shall append that to publishTopic before publishing using the key name `$.ct`.]
         //Codes_SRS_MqttMessaging_34_032: [If the message has a content encoding, this method shall append that to publishTopic before publishing using the key name `$.ce`.]
+        //Codes_SRS_MqttMessaging_34_034: [If the message has a creation time utc, this method shall append that to publishTopic before publishing using the key name `$.ctime`.]
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MESSAGE_ID, message.getMessageId());
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CORRELATION_ID, message.getCorrelationId());
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, USER_ID, message.getUserId());
@@ -109,6 +111,7 @@ public class MqttMessaging extends Mqtt
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_MODULE_ID, message.getConnectionModuleId());
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_ENCODING, message.getContentEncoding());
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_TYPE, message.getContentType());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CREATION_TIME_UTC, message.getCreationTimeUTCString());
 
         for (MessageProperty property : message.getProperties())
         {

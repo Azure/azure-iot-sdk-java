@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
@@ -103,6 +104,9 @@ public class MqttIotHubConnectionTest
 
     @Mocked
     private MessageCallback mockedMessageCallback;
+
+    @Mocked
+    private ScheduledExecutorService mockedScheduledExecutorService;
 
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
     @Test
@@ -270,7 +274,7 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedSasToken;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -279,7 +283,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
@@ -320,7 +324,7 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedToken;
                 mockConfig.isUseWebsocket();
                 result = true;
@@ -329,7 +333,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
@@ -365,7 +369,7 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedToken;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -383,20 +387,20 @@ public class MqttIotHubConnectionTest
         try
         {
             MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-            connection.open(mockedQueue);
+            connection.open(mockedQueue, mockedScheduledExecutorService);
         }
         catch (Exception e)
         {
             new Verifications()
             {
                 {
-                    new MqttMessaging(mockedMqttConnection, anyString, mockedIotHubListener, null, null, anyString, anyBoolean);
+                    new MqttMessaging(mockedMqttConnection, anyString, mockedIotHubListener, null, null, anyString, anyBoolean, (Map) any);
                     times = 0;
                     Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
                     times = 0;
-                    new MqttDeviceTwin(mockedMqttConnection, anyString);
+                    new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any);
                     times = 0;
-                    new MqttDeviceMethod(mockedMqttConnection, anyString);
+                    new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
                     times = 0;
                     mockDeviceMessaging.start();
                     times = 0;
@@ -433,13 +437,13 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedToken;
-                new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean);
+                new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean, (Map) any);
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
                 result = null;
-                new MqttDeviceMethod(mockedMqttConnection, anyString);
+                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
                 result = new IOException(anyString);
             }
         };
@@ -447,7 +451,7 @@ public class MqttIotHubConnectionTest
         try
         {
             MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-            connection.open(mockedQueue);
+            connection.open(mockedQueue, mockedScheduledExecutorService);
         }
         catch (TransportException e)
         {
@@ -489,14 +493,14 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedToken;
-                new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean);
+                new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean, (Map) any);
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
-                new MqttDeviceMethod(mockedMqttConnection, anyString);
+                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
                 result = mockDeviceMethod;
-                new MqttDeviceTwin(mockedMqttConnection, anyString);
+                new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any);
                 result = new IOException(anyString);
             }
         };
@@ -504,7 +508,7 @@ public class MqttIotHubConnectionTest
         try
         {
             MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-            connection.open(mockedQueue);
+            connection.open(mockedQueue, mockedScheduledExecutorService);
         }
         catch (Exception e)
         {
@@ -531,8 +535,8 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         new Verifications()
         {
@@ -553,8 +557,8 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
-        connection.close(false);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
+        connection.close();
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.DISCONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -594,7 +598,7 @@ public class MqttIotHubConnectionTest
         configs.add(mockConfig);
 
         //act
-        connection.open(configs);
+        connection.open(configs, mockedScheduledExecutorService);
     }
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_021: [If a TransportException is encountered while closing the three clients, this function shall set this object's state to closed and then rethrow the exception.]
@@ -607,7 +611,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         new NonStrictExpectations()
         {
@@ -622,7 +626,7 @@ public class MqttIotHubConnectionTest
         //act
         try
         {
-            connection.close(false);
+            connection.close();
         }
         catch (TransportException e)
         {
@@ -642,7 +646,7 @@ public class MqttIotHubConnectionTest
         baseExpectations();
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-        connection.close(false);
+        connection.close();
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.DISCONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -670,9 +674,9 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
-        connection.close(false);
-        connection.close(false);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
+        connection.close();
+        connection.close();
 
         new Verifications()
         {
@@ -710,7 +714,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         IotHubStatusCode result = connection.sendMessage(mockedMessage);
 
         assertEquals(IotHubStatusCode.OK_EMPTY, result);
@@ -734,7 +738,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         IotHubStatusCode result = connection.sendMessage(null);
 
         assertEquals(IotHubStatusCode.BAD_FORMAT, result);
@@ -760,7 +764,7 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         IotHubStatusCode result = connection.sendMessage(null);
 
         assertEquals(IotHubStatusCode.BAD_FORMAT, result);
@@ -783,7 +787,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         IotHubStatusCode result = connection.sendMessage(mockedMessage);
 
         assertEquals(IotHubStatusCode.BAD_FORMAT, result);
@@ -826,8 +830,8 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
-        connection.open(mockedQueue);
-        connection.close(false);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
+        connection.close();
         connection.sendMessage(mockedMessage);
     }
 
@@ -851,7 +855,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         IotHubStatusCode result = connection.sendMessage(mockDeviceTwinMsg);
 
         assertEquals(IotHubStatusCode.OK_EMPTY, result);
@@ -891,7 +895,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         IotHubStatusCode result = connection.sendMessage(mockDeviceMethodMsg);
 
         assertEquals(IotHubStatusCode.OK_EMPTY, result);
@@ -932,7 +936,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         Message message = Deencapsulation.invoke(connection, "receiveMessage");
         byte[] actualMessageBody = message.getBytes();
@@ -973,7 +977,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         Message message = Deencapsulation.invoke(connection, "receiveMessage");
         byte[] actualMessageBody = message.getBytes();
@@ -1012,7 +1016,7 @@ public class MqttIotHubConnectionTest
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         Message message = Deencapsulation.invoke(connection, "receiveMessage");
         byte[] actualMessageBody = message.getBytes();
@@ -1054,7 +1058,7 @@ public class MqttIotHubConnectionTest
         };
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
     }
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listeners.]
@@ -1070,7 +1074,7 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedSasToken;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -1081,13 +1085,13 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
         //act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         //assert
         new Verifications()
         {
             {
-                new MqttMessaging((MqttConnection) any, anyString, (IotHubListener) any, null, null, anyString, anyBoolean);
+                new MqttMessaging((MqttConnection) any, anyString, (IotHubListener) any, null, null, anyString, anyBoolean, (Map) any);
                 times = 1;
             }
         };
@@ -1107,7 +1111,7 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedSasToken;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -1130,7 +1134,7 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
         //act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         //assert
         new Verifications()
@@ -1155,7 +1159,7 @@ public class MqttIotHubConnectionTest
             {
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = expectedSasToken;
                 mockConfig.isUseWebsocket();
                 result = false;
@@ -1166,7 +1170,7 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
 
         //act
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         //assert
         new Verifications()
@@ -1218,7 +1222,7 @@ public class MqttIotHubConnectionTest
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
         Deencapsulation.setField(connection, "receivedMessagesToAcknowledge", receivedMessagesToAcknowledge);
 
@@ -1236,7 +1240,7 @@ public class MqttIotHubConnectionTest
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         //act
         connection.sendMessageResult(null, expectedResult);
@@ -1252,7 +1256,7 @@ public class MqttIotHubConnectionTest
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
 
         //act
         connection.sendMessageResult(mockedTransportMessage, null);
@@ -1270,7 +1274,7 @@ public class MqttIotHubConnectionTest
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         final int expectedMessageId = 12;
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
         receivedMessagesToAcknowledge.put(mockedTransportMessage, expectedMessageId);
@@ -1325,7 +1329,7 @@ public class MqttIotHubConnectionTest
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         final int expectedMessageId = 12;
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
         receivedMessagesToAcknowledge.put(mockedTransportMessage, expectedMessageId);
@@ -1378,7 +1382,7 @@ public class MqttIotHubConnectionTest
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         final int expectedMessageId = 12;
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
         receivedMessagesToAcknowledge.put(mockedTransportMessage, expectedMessageId);
@@ -1434,7 +1438,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         new StrictExpectations()
         {
             {
@@ -1484,7 +1488,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         new StrictExpectations()
         {
             {
@@ -1523,7 +1527,7 @@ public class MqttIotHubConnectionTest
         openExpectations();
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
-        connection.open(mockedQueue);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
         new StrictExpectations()
         {
             {
@@ -1610,12 +1614,12 @@ public class MqttIotHubConnectionTest
             {
                 Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, anyString, anyString, anyString, anyString, any);
                 result = mockedMqttConnection;
-                new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean);
+                new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean, (Map) any);
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
-                new MqttDeviceTwin(mockedMqttConnection, anyString);
+                new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any);
                 result = mockDeviceTwin;
-                new MqttDeviceMethod(mockedMqttConnection, anyString);
+                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
                 result = mockDeviceMethod;
                 mockDeviceMessaging.start();
                 result = null;

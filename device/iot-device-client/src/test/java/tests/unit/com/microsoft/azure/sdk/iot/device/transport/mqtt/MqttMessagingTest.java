@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -51,7 +53,7 @@ public class MqttMessagingTest
     public void constructorCallsBaseConstructorWithArguments(@Mocked final Mqtt mockMqtt) throws TransportException
     {
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
 
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
         assertNotNull(actualPublishTopic);
@@ -67,7 +69,7 @@ public class MqttMessagingTest
         //arrange
         final String expectedModuleId = "someModule";
         final String expectedDeviceId = "someDevice";
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, expectedDeviceId, mockedIotHubListener, null, "", expectedModuleId, false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, expectedDeviceId, mockedIotHubListener, null, "", expectedModuleId, false, new HashMap<Integer, Message>());
 
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
         assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/events/", actualPublishTopic);
@@ -83,7 +85,7 @@ public class MqttMessagingTest
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfMqttConnectionIsNull() throws TransportException
     {
-        MqttMessaging testMqttMessaging = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
     }
 
     /*
@@ -92,13 +94,13 @@ public class MqttMessagingTest
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfDeviceIDIsEmpty() throws TransportException
     {
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, "", mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, "", mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorFailsIfDeviceIDIsNull() throws TransportException
     {
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, null, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, null, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
     }
 
     /*
@@ -116,7 +118,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
 
         testMqttMessaging.start();
         new Verifications()
@@ -142,7 +144,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         testMqttMessaging.start();
 
         new Verifications()
@@ -170,7 +172,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         testMqttMessaging.start();
 
         new Verifications()
@@ -201,7 +203,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         testMqttMessaging.start();
         testMqttMessaging.stop();
 
@@ -227,7 +229,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         testMqttMessaging.start();
         testMqttMessaging.stop();
 
@@ -256,7 +258,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         testMqttMessaging.send(mockedMessage);
 
         //assert
@@ -285,7 +287,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         testMqttMessaging.send(null);
 
         new Verifications()
@@ -306,7 +308,7 @@ public class MqttMessagingTest
     public void sendShallThrowTransportExceptionIfMessageIsNull(@Mocked final Mqtt mockMqtt) throws TransportException
     {
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         testMqttMessaging.send(null);
 
         new Verifications()
@@ -344,7 +346,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         final String publishTopicWithCustomProperties = String.format(
                 "devices/%s/messages/events/%s=%s&%s=%s", CLIENT_ID, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
@@ -381,7 +383,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -417,7 +419,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null,"",  "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null,"",  "", false, new HashMap<Integer, Message>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -453,7 +455,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -489,7 +491,7 @@ public class MqttMessagingTest
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
 
         //act
         testMqttMessaging.send(mockedMessage);
@@ -511,7 +513,7 @@ public class MqttMessagingTest
     //Tests_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
     //Tests_SRS_MqttMessaging_34_032: [If the message has a OutputName, this method shall append that to publishTopic before publishing using the key name `$.on`.]
     //Tests_SRS_MqttMessaging_34_032: [If the message has a content type, this method shall append that to publishTopic before publishing using the key name `$.ct`.]
-    //Tests_SRS_MqttMessaging_34_032: [If the message has a content encoding, this method shall append that to publishTopic before publishing using the key name `$.ce`.]
+    //Tests_SRS_MqttMessaging_34_034: [If the message has a creation time utc, this method shall append that to publishTopic before publishing using the key name `$.ctime`.]
     @Test
     public void sendShallIncludeAllSystemPropertiesAndAllCustomPropertiesInPublishTopic(@Mocked final Mqtt mockMqtt) throws TransportException, UnsupportedEncodingException
     {
@@ -528,6 +530,8 @@ public class MqttMessagingTest
         final String contentType = "application/json";
         final String contentTypeEncoded = URLEncoder.encode(contentType, StandardCharsets.UTF_8.name());
         final String contentEncoding = "utf-8";
+        final String creationTimeUtc = "2008-10-01T17:04:32.0000000";
+        final String creationTimeUtcEncoded = URLEncoder.encode(creationTimeUtc, StandardCharsets.UTF_8.name());
         final MessageProperty[] messageProperties = new MessageProperty[]
                 {
                         new MessageProperty(propertyName1, propertyValue1),
@@ -554,12 +558,16 @@ public class MqttMessagingTest
                 result = messageProperties;
                 mockedMessage.getOutputName();
                 result = outputName;
+                mockedMessage.getCreationTimeUTC();
+                result = new Date(1234);
+                mockedMessage.getCreationTimeUTCString();
+                result = creationTimeUtc;
             }
         };
 
-        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false);
+        MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
         final String publishTopicWithAllSystemAndCustomProperties = String.format(
-                "devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&$.on=%s&$.ce=%s&$.ct=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, outputName, contentEncoding, contentTypeEncoded, propertyName1, propertyValue1, propertyName2, propertyValue2);
+                "devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&$.on=%s&$.ce=%s&$.ct=%s&$.ctime=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, outputName, contentEncoding, contentTypeEncoded, creationTimeUtcEncoded, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
         // act
         testMqttMessaging.send(mockedMessage);
@@ -582,7 +590,7 @@ public class MqttMessagingTest
         String moduleId = "5678";
         final String inputsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
         final String eventsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
-        final MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, deviceId, mockedIotHubListener, null, "", moduleId, true);
+        final MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, deviceId, mockedIotHubListener, null, "", moduleId, true, new HashMap<Integer, Message>());
 
         //act
         testMqttMessaging.start();
@@ -609,7 +617,7 @@ public class MqttMessagingTest
         String moduleId = "5678";
         final String inputsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
         final String eventsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
-        final MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, deviceId, mockedIotHubListener, null, "", moduleId, false);
+        final MqttMessaging testMqttMessaging = new MqttMessaging(mockedMqttConnection, deviceId, mockedIotHubListener, null, "", moduleId, false, new HashMap<Integer, Message>());
 
         //act
         testMqttMessaging.start();

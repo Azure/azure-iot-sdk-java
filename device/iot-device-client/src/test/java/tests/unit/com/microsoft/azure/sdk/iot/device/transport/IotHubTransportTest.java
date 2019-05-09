@@ -655,7 +655,7 @@ public class IotHubTransportTest
         new Verifications()
         {
             {
-                mockedIotHubTransportConnection.close(false);
+                mockedIotHubTransportConnection.close();
                 times = 1;
             }
         };
@@ -728,9 +728,9 @@ public class IotHubTransportTest
         assertEquals(EXPIRED_SAS_TOKEN, reason);
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, this function shall return BAD_CREDENTIAL.]
+    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, but the exception is an unauthorized exception, this function shall return BAD_CREDENTIAL]
     @Test
-    public void exceptionToStatusChangeReasonBadCredential()
+    public void exceptionToStatusChangeReasonBadCredentialForAmqpUnauthorizedException(@Mocked final AmqpUnauthorizedAccessException mockedUnauthorizedException)
     {
         //arrange
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
@@ -747,7 +747,58 @@ public class IotHubTransportTest
         };
 
         //act
-        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedTransportException);
+        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedUnauthorizedException);
+
+        //assert
+        assertEquals(BAD_CREDENTIAL, reason);
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, but the exception is an unauthorized exception, this function shall return BAD_CREDENTIAL]
+    @Test
+    public void exceptionToStatusChangeReasonBadCredentialForMqttUnauthorizedException(@Mocked final MqttUnauthorizedException mockedUnauthorizedException)
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedTransportException.isRetryable();
+                result = false;
+
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedUnauthorizedException);
+
+        //assert
+        assertEquals(BAD_CREDENTIAL, reason);
+    }
+
+
+    //Tests_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't retryable and the saved sas token has not expired, but the exception is an unauthorized exception, this function shall return BAD_CREDENTIAL]
+    @Test
+    public void exceptionToStatusChangeReasonBadCredentialForGenericUnauthorizedException(@Mocked final UnauthorizedException mockedUnauthorizedException)
+    {
+        //arrange
+        final IotHubTransport transport = new IotHubTransport(mockedConfig);
+
+        new NonStrictExpectations(IotHubTransport.class)
+        {
+            {
+                mockedTransportException.isRetryable();
+                result = false;
+
+                Deencapsulation.invoke(transport, "isSasTokenExpired");
+                result = false;
+            }
+        };
+
+        //act
+        IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedUnauthorizedException);
 
         //assert
         assertEquals(BAD_CREDENTIAL, reason);
@@ -765,6 +816,7 @@ public class IotHubTransportTest
         final Queue<DeviceClientConfig> configs = new ConcurrentLinkedQueue<>();
         configs.add(mockedConfig);
         Deencapsulation.setField(transport, "deviceClientConfigs", configs);
+        Deencapsulation.setField(transport, "iotHubTransportConnection", null);
         new Expectations(IotHubTransport.class)
         {
             {
@@ -780,13 +832,14 @@ public class IotHubTransportTest
         Deencapsulation.invoke(transport, "openConnection");
 
         //assert
+        final ScheduledExecutorService scheduledExecutorService = Deencapsulation.getField(transport, "scheduledExecutorService");
         new Verifications()
         {
             {
                 mockedHttpsIotHubConnection.setListener(transport);
                 times = 1;
 
-                mockedHttpsIotHubConnection.open(configs);
+                mockedHttpsIotHubConnection.open(configs, scheduledExecutorService);
                 times = 1;
 
                 Deencapsulation.invoke(transport, "updateStatus",
@@ -820,13 +873,14 @@ public class IotHubTransportTest
         Deencapsulation.invoke(transport, "openConnection");
 
         //assert
+        final ScheduledExecutorService scheduledExecutorService = Deencapsulation.getField(transport, "scheduledExecutorService");
         new Verifications()
         {
             {
                 mockedMqttIotHubConnection.setListener(transport);
                 times = 1;
 
-                mockedMqttIotHubConnection.open(configs);
+                mockedMqttIotHubConnection.open(configs, scheduledExecutorService);
                 times = 1;
             }
         };
@@ -856,13 +910,14 @@ public class IotHubTransportTest
         Deencapsulation.invoke(transport, "openConnection");
 
         //assert
+        final ScheduledExecutorService scheduledExecutorService = Deencapsulation.getField(transport, "scheduledExecutorService");
         new Verifications()
         {
             {
                 mockedMqttIotHubConnection.setListener(transport);
                 times = 1;
 
-                mockedMqttIotHubConnection.open(configs);
+                mockedMqttIotHubConnection.open(configs, scheduledExecutorService);
                 times = 1;
             }
         };
@@ -884,7 +939,7 @@ public class IotHubTransportTest
                 result = IotHubClientProtocol.AMQPS;
                 Executors.newScheduledThreadPool(1);
                 result = mockedScheduledExecutorService;
-                new AmqpsIotHubConnection(mockedConfig, mockedScheduledExecutorService);
+                new AmqpsIotHubConnection(mockedConfig);
                 result = mockedAmqpsIotHubConnection;
             }
         };
@@ -893,13 +948,14 @@ public class IotHubTransportTest
         Deencapsulation.invoke(transport, "openConnection");
 
         //assert
+        final ScheduledExecutorService scheduledExecutorService = Deencapsulation.getField(transport, "scheduledExecutorService");
         new Verifications()
         {
             {
                 mockedAmqpsIotHubConnection.setListener(transport);
                 times = 1;
 
-                mockedAmqpsIotHubConnection.open(configs);
+                mockedAmqpsIotHubConnection.open(configs, scheduledExecutorService);
                 times = 1;
             }
         };
@@ -921,7 +977,7 @@ public class IotHubTransportTest
                 result = IotHubClientProtocol.AMQPS_WS;
                 Executors.newScheduledThreadPool(1);
                 result = mockedScheduledExecutorService;
-                new AmqpsIotHubConnection(mockedConfig, mockedScheduledExecutorService);
+                new AmqpsIotHubConnection(mockedConfig);
                 result = mockedAmqpsIotHubConnection;
             }
         };
@@ -930,13 +986,14 @@ public class IotHubTransportTest
         Deencapsulation.invoke(transport, "openConnection");
 
         //assert
+        final ScheduledExecutorService scheduledExecutorService = Deencapsulation.getField(transport, "scheduledExecutorService");
         new Verifications()
         {
             {
                 mockedAmqpsIotHubConnection.setListener(transport);
                 times = 1;
 
-                mockedAmqpsIotHubConnection.open(configs);
+                mockedAmqpsIotHubConnection.open(configs, scheduledExecutorService);
                 times = 1;
             }
         };
@@ -1560,7 +1617,7 @@ public class IotHubTransportTest
         {
             {
                 //open and close happen with no exception
-                mockedIotHubTransportConnection.close(true);
+                mockedIotHubTransportConnection.close();
             }
         };
 
@@ -1584,7 +1641,7 @@ public class IotHubTransportTest
         {
             {
                 //open and close happen with no exception
-                mockedIotHubTransportConnection.close(true);
+                mockedIotHubTransportConnection.close();
                 result = mockedTransportException;
 
                 Deencapsulation.invoke(transport, "checkForUnauthorizedException", mockedTransportException);

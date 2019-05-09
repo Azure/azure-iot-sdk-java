@@ -6,13 +6,19 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
+import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
+import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to getDeviceTwin/getTwin. Class needs to be extended
@@ -20,12 +26,19 @@ import java.io.IOException;
  */
 public class GetTwinTests extends DeviceTwinCommon
 {
-    public GetTwinTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public GetTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
-        super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
+
+    @Before
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
+    {
+        super.setUpNewDeviceAndModule();
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         super.testGetDeviceTwin();

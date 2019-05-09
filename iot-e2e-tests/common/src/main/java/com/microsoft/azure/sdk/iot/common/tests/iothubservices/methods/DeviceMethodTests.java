@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.methods;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceMethodCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
@@ -18,11 +16,13 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static org.junit.Assert.assertEquals;
@@ -34,20 +34,26 @@ import static org.junit.Assert.assertNotNull;
  */
 public class DeviceMethodTests extends DeviceMethodCommon
 {
-    public DeviceMethodTests(DeviceTestManager deviceTestManager, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, BaseDevice identity, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        super(deviceTestManager, protocol, authenticationType, clientType, identity, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
 
-        System.out.println(clientType + " DeviceMethodTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+    @Before
+    public void cleanToStart() throws Exception
+    {
+        super.cleanToStart();
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodSucceed() throws Exception
     {
         super.invokeMethodSucceed();
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
         // Arrange
@@ -69,7 +75,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
             runs.add(runnableInvoke);
         }
 
-        cdl.await();
+        cdl.await(3, TimeUnit.MINUTES);
 
         for (RunnableInvoke run:runs)
         {
@@ -81,6 +87,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodStandardTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -107,6 +114,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodNullPayloadSucceed() throws Exception
     {
         // Arrange
@@ -132,6 +140,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodNumberSucceed() throws Exception
     {
         // Arrange
@@ -157,6 +166,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodThrowsNumberFormatExceptionFailed() throws Exception
     {
         // Arrange
@@ -182,6 +192,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodUnknownFailed() throws Exception
     {
         // Arrange
@@ -207,6 +218,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodRecoverFromTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -249,6 +261,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodDefaultResponseTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -274,6 +287,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodDefaultConnectionTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -299,6 +313,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test (expected = IotHubGatewayTimeoutException.class)
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodResponseTimeoutFailed() throws Exception
     {
         // Arrange
@@ -314,6 +329,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test(expected = IotHubNotFoundException.class)
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodUnknownDeviceFailed() throws Exception
     {
         if (testInstance.identity instanceof Module)
@@ -327,6 +343,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodResetDeviceFailed() throws Exception
     {
         // Arrange

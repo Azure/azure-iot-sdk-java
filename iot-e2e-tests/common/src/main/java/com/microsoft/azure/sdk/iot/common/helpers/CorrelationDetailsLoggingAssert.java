@@ -168,6 +168,59 @@ public class CorrelationDetailsLoggingAssert
                 new ArrayList<>());
     }
 
+    public static String buildExceptionMessageIndividualEnrollment(String baseMessage, String registrationId, String dpsHostname)
+    {
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String correlationString = "DPS Hostname: " + dpsHostname;
+        correlationString += " registrationId: " + registrationId;
+
+        correlationString += " Timestamp: " + timeStamp;
+
+        return baseMessage + "\n(Correlation details: <" + correlationString + ">)";
+    }
+
+    public static String buildExceptionMessageEnrollmentGroup(String baseMessage, String groupId, String dpsHostname)
+    {
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String correlationString = "DPS Hostname: " + dpsHostname;
+        correlationString += " groupId: " + groupId;
+
+        correlationString += " Timestamp: " + timeStamp;
+
+        return baseMessage + "\n(Correlation details: <" + correlationString + ">)";
+    }
+
+    public static String buildExceptionMessageDpsHostnameOnly(String baseMessage, String dpsHostname)
+    {
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String correlationString = "DPS Hostname: " + dpsHostname;
+
+        correlationString += " Timestamp: " + timeStamp;
+
+        return baseMessage + "\n(Correlation details: <" + correlationString + ">)";
+    }
+
+    public static String buildExceptionMessageDpsIndividualOrGroup(String baseMessage, String dpsHostname, String groupId, String registrationId)
+    {
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String correlationString = "DPS Hostname: " + dpsHostname;
+
+        if (groupId != null && !groupId.isEmpty())
+        {
+            correlationString += " groupId: " + groupId;
+        }
+
+        if (registrationId != null && !registrationId.isEmpty())
+        {
+            correlationString += " registrationId: " + registrationId;
+        }
+
+        correlationString += " Timestamp: " + timeStamp;
+
+        return baseMessage + "\n(Correlation details: <" + correlationString + ">)";
+    }
+
+
     public void assertTrue(String message, boolean condition)
     {
         if (!condition)

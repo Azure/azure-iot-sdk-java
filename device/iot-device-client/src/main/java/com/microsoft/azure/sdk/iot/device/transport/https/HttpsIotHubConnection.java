@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * An HTTPS connection between a device and an IoT Hub. Contains functionality
@@ -108,6 +109,12 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             {
                 // Codes_SRS_HTTPSIOTHUBCONNECTION_34_074: [If the provided message has a content type, this function shall set the request header to include that value with the key "iothub-contenttype".]
                 request.setHeaderField(MessageProperty.IOTHUB_CONTENT_TYPE, message.getContentType());
+            }
+
+            if (message.getCreationTimeUTC() != null)
+            {
+                // Codes_SRS_HTTPSIOTHUBCONNECTION_34_075: [If the provided message has a creation time utc, this function shall set the request header to include that value with the key "iothub-contenttype".]
+                request.setHeaderField(MessageProperty.IOTHUB_CREATION_TIME_UTC, message.getCreationTimeUTCString());
             }
 
             Map<String, String> systemProperties = httpsMessage.getSystemProperties();
@@ -273,7 +280,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     }
 
     @Override
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs)
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService)
     {
 
     }
@@ -292,7 +299,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     }
 
     @Override
-    public void close(boolean isReconnecting)
+    public void close()
     {
         //Dummy call
     }
@@ -445,7 +452,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     {
         try
         {
-            return this.config.getSasTokenAuthentication().getRenewedSasToken(false);
+            return this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
         }
         catch (IOException e)
         {

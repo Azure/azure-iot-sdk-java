@@ -26,6 +26,7 @@ import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.*;
 import org.apache.qpid.proton.amqp.transport.Source;
 import org.apache.qpid.proton.codec.ReadableBuffer;
+import org.apache.qpid.proton.codec.WritableBuffer;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
@@ -940,6 +941,10 @@ public class AmqpSendHandlerTest
             { return 0; }
 
             @Override
+            public void decode(ReadableBuffer buf)
+            { }
+
+            @Override
             public int encode(byte[] bytes, int i, int i1)
             {
                 if (exceptionCount == 0)
@@ -952,6 +957,9 @@ public class AmqpSendHandlerTest
                     return 0;
                 }
             }
+            @Override
+            public int encode(WritableBuffer buf)
+            { return 0; }
 
             @Override
             public void clear()
@@ -1018,6 +1026,12 @@ public class AmqpSendHandlerTest
 
             @Override
             public int send(ReadableBuffer readableBuffer)
+            {
+                return 0;
+            }
+
+            @Override
+            public int sendNoCopy(ReadableBuffer readableBuffer)
             {
                 return 0;
             }

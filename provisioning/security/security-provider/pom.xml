@@ -9,7 +9,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
     <artifactId>security-provider</artifactId>
     <name>Provisioning Security Provider</name>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     <packaging>jar</packaging>
     <description>The Microsoft Azure IoT Provisioning Security Provider for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>

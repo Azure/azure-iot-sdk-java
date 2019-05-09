@@ -15,10 +15,12 @@ import tss.tpm.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 
 public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 {
+    private static final int TPM_PORT = 2321;
     private static final String REGEX_FOR_VALID_REGISTRATION_ID = "^[a-z0-9-]{1,128}$";
     private static final TPM_HANDLE SRK_PERSISTENT_HANDLE = TPM_HANDLE.persistent(0x00000001);
     private static final TPM_HANDLE EK_PERSISTENT_HANDLE = TPM_HANDLE.persistent(0x00010001);
@@ -53,6 +55,8 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
     private TPMT_PUBLIC ekPublic = null;
     private TPMT_PUBLIC srkPublic = null;
     private TPM2B_PUBLIC idKeyPub = null;
+
+    private static final int MILLISECONDS_BETWEEN_TPM_CONNECTION_ATTEMPTS = 1000; //1 second
 
     /**
      * Constructor for creating a Security Provider on TPM Simulator
@@ -99,6 +103,70 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
     }
 
     /**
+     * Constructor for creating a Security Provider on TPM Simulator with the supplied Registration ID
+     * @param registrationId A non {@code null} or empty value tied to this registration
+     * @throws SecurityProviderException If the constructor could not start the TPM
+     */
+    public SecurityProviderTPMEmulator(String registrationId, int tpmConnectRetryAttempts) throws SecurityProviderException
+    {
+        if (registrationId == null || registrationId.isEmpty())
+        {
+            throw new IllegalArgumentException("Registration Id cannot be null or empty");
+        }
+        if (!registrationId.matches(REGEX_FOR_VALID_REGISTRATION_ID))
+        {
+            throw new IllegalArgumentException("The registration ID is alphanumeric, lowercase, and may contain hyphens. Max characters allowed is 128.");
+        }
+
+        if (tpmConnectRetryAttempts <= 0)
+        {
+            throw new IllegalArgumentException("tpmConnectRetryAttempts must be a positive integer");
+        }
+
+        this.registrationId = registrationId;
+        tpm = localTpmSimulatorWithRetry(tpmConnectRetryAttempts);
+        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
+        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
+        ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
+        srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
+    }
+
+    public static Tpm localTpmSimulatorWithRetry(int retryAttempts) throws SecurityProviderException
+    {
+        if (retryAttempts <= 0)
+        {
+            throw new SecurityProviderException("Could not connect to tpm successfully");
+        }
+
+        new Tpm();
+        TpmDeviceBase device = new TpmDeviceTcp("localhost", 2321);
+        device.powerCycle();
+        Tpm tpm = new Tpm();
+        tpm._setDevice(device);
+        try
+        {
+            tpm.Startup(TPM_SU.CLEAR);
+            tpm.DictionaryAttackLockReset(TPM_HANDLE.from(TPM_RH.LOCKOUT));
+        }
+        catch (BufferUnderflowException e)
+        {
+            //TODO need to investigate why tpm emulator occasionally gives unexpected response to the startup call, kanban task 4268737
+            try
+            {
+                tpm.close();
+                Thread.sleep(MILLISECONDS_BETWEEN_TPM_CONNECTION_ATTEMPTS);
+                return localTpmSimulatorWithRetry(--retryAttempts);
+            }
+            catch (Exception e1)
+            {
+                throw new SecurityProviderException(e1);
+            }
+        }
+
+        return tpm;
+    }
+
+    /**
      * Constructor for creating a Security Provider on TPM Simulator with the supplied Registration ID and
      * ip address of the the remote where TPM simulator is running
      * @param registrationId A non {@code null} or empty value tied to this registration
@@ -135,7 +203,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 
         //SRS_SecurityProviderTPMEmulator_25_005: [ The constructor shall save the registration Id if it was provided. ]
         this.registrationId = registrationId;
-        tpm = TpmFactory.remoteTpmSimulator(inetAddress.getHostName());
+        tpm = TpmFactory.remoteTpm(inetAddress.getHostName(), TPM_PORT);
         clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
         clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
@@ -401,7 +469,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 
         //SRS_SecurityProviderTPMEmulator_25_026: [ This method shall Encrypt Decrypt the symmetric Key. ]
         //TODO : Use software encryption/decryption using AES instead of TPM command to support international markets.
-        EncryptDecrypt2Response edResp = tpm.EncryptDecrypt2(hSymKey, encUriData.buffer, (byte)1, TPM_ALG_ID.CFB, iv);
+        EncryptDecryptResponse edResp = tpm.EncryptDecrypt(hSymKey, (byte)1, TPM_ALG_ID.CFB, iv, encUriData.buffer);
 
         if (edResp == null)
         {

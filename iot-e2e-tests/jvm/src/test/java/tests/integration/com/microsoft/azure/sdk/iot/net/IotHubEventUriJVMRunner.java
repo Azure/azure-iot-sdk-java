@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.net;
 
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.device.net.IotHubEventUri;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 /** Integration tests for IotHubEventUri. */
-public class IotHubEventUriJVMRunner
+public class IotHubEventUriJVMRunner extends IntegrationTest
 {
     @Test
     public void eventUriIsCorrect() throws URISyntaxException

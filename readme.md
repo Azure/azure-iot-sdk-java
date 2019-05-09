@@ -1,5 +1,12 @@
 # Microsoft Azure IoT SDKs for Java
-[![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/Java%20Nightly%20Build%20Canary)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=39)
+
+### Build status
+Due to security considerations, build logs are not publicly available.
+
+| Service Environment      | Status |
+| ---                      | ---    |
+| WestUS                   | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Prod?branchName=master)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=252&branchName=master)|
+| Canary                   | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Canary?branchName=master)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=245&branchName=master)|
 
 This repository contains the following:
 * **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub (supports Java 7+)
@@ -134,9 +141,9 @@ This folder contains application development guides and device setup instruction
 
 This folder contains end to end tests source code for running on jvm and android.
 
-### /jenkins
+### /vsts
 
-This folder contains scripts to build and run Java SDK provided proper environmental variables are set
+This folder contains scripts to build and run Java SDK provided proper environmental variables are set, as well as azure pipeline resources used for our gating process
 
 ### /service
 

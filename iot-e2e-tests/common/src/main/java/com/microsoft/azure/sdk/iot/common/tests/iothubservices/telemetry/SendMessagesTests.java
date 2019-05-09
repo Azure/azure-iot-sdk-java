@@ -24,10 +24,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
+import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 
 /**
@@ -36,68 +38,23 @@ import static junit.framework.TestCase.fail;
  */
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
-
-        System.out.println(clientType + " SendMessagesTest UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Test
-    public void sendMessages() throws IOException, InterruptedException
+    public void sendMessages() throws Exception
     {
-
         if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
         {
             //mqtt_ws does not support x509 auth currently
             return;
         }
 
+        this.testInstance.setup();
+
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
-    }
-
-    @Test
-    public void tokenRenewalWorks() throws InterruptedException, IOException
-    {
-        final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 60;
-        final long DEFAULT_SAS_TOKEN_EXPIRY_TIME = 3600;
-        final long WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE = 15;
-
-        if (testInstance.authenticationType != SAS)
-        {
-            //this scenario is not applicable for x509 auth
-            return;
-        }
-
-        //set it so a newly generated sas token only lasts for a small amount of time
-        testInstance.client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
-        IotHubServicesCommon.openClientWithRetry(testInstance.client);
-
-        //wait until old sas token has expired, this should force the config to generate a new one from the device key
-        Thread.sleep((SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL + WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE) * 1000);
-
-        Success messageSent = new Success();
-        EventCallback callback = new EventCallback(IotHubStatusCode.OK_EMPTY);
-        testInstance.client.sendEventAsync(new Message("some message body"), callback, messageSent);
-
-        long startTime = System.currentTimeMillis();
-        while(!messageSent.wasCallbackFired())
-        {
-            Thread.sleep(RETRY_MILLISECONDS);
-            if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for successful message callback");
-            }
-        }
-
-        if (messageSent.getCallbackStatusCode() != IotHubStatusCode.OK_EMPTY)
-        {
-            fail("Sending messages over " + testInstance.protocol + " failed: expected OK_EMPTY message callback but received " + messageSent.getCallbackStatusCode());
-        }
-
-        // resetting the device's option to default
-        testInstance.client.close();
-        testInstance.client.setOption("SetSASTokenExpiryTime", DEFAULT_SAS_TOKEN_EXPIRY_TIME);
     }
 
     @Test
@@ -109,6 +66,7 @@ public class SendMessagesTests extends SendMessagesCommon
             return;
         }
 
+        AtomicBoolean succeed = new AtomicBoolean();
         Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
         Collection<String> deviceIds = new ArrayList<>();
         String uuid = UUID.randomUUID().toString();
@@ -133,7 +91,8 @@ public class SendMessagesTests extends SendMessagesCommon
                             NUM_MESSAGES_PER_CONNECTION,
                             NUM_KEYS_PER_MESSAGE,
                             SEND_TIMEOUT_MILLISECONDS,
-                            cdl));
+                            cdl,
+                            succeed));
             thread.start();
             threads.add(thread);
         }
@@ -152,7 +111,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void tokenExpiredAfterOpenButBeforeSendHttp() throws InvalidKeyException, IOException, InterruptedException, URISyntaxException
+    public void tokenExpiredAfterOpenButBeforeSendHttp() throws Exception
     {
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
         final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
@@ -163,6 +122,8 @@ public class SendMessagesTests extends SendMessagesCommon
             // as long as token did not expire before open. X509 doesn't apply either
             return;
         }
+
+        this.testInstance.setup();
 
         String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, testInstance.identity.getDeviceId(), testInstance.identity.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
         DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, testInstance.protocol);
@@ -175,8 +136,10 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void expiredMessagesAreNotSent() throws IOException
+    public void expiredMessagesAreNotSent() throws Exception
     {
+        this.testInstance.setup();
+
         IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
     }
 }

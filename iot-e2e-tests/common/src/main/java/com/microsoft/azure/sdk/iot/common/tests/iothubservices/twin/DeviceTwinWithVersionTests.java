@@ -5,11 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 
-import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
-import com.microsoft.azure.sdk.iot.common.helpers.DeviceConnectionString;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
@@ -21,10 +17,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -61,10 +54,6 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     };
 
     private static RegistryManager registryManager;
-    private static com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;
-
-    private static DeviceTwin sCDeviceTwin;
-    private static TestDevice testDevice;
 
     private enum STATUS
     {
@@ -87,12 +76,12 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
     private void assertSetEquals(Set<Property> expected, Set<Pair> actual)
     {
-        assertEquals(buildExceptionMessage("Expected size " + expected.size() + " but was size " + actual.size(), testDevice.deviceClient), expected.size(), actual.size());
+        assertEquals(buildExceptionMessage("Expected size " + expected.size() + " but was size " + actual.size(), testInstance.testDevice.deviceClient), expected.size(), actual.size());
         for(Pair actualProperty: actual)
         {
             Property expectedProperty = fetchProperty(expected, actualProperty.getKey());
-            assertNotNull(buildExceptionMessage("Expected Set of Properties to not contain " + actualProperty.getKey(), testDevice.deviceClient), expectedProperty);
-            assertEquals(buildExceptionMessage("Expected value " + expectedProperty.getValue() + " but got " + actualProperty.getValue(), testDevice.deviceClient), expectedProperty.getValue(), actualProperty.getValue());
+            assertNotNull(buildExceptionMessage("Expected Set of Properties to not contain " + actualProperty.getKey(), testInstance.testDevice.deviceClient), expectedProperty);
+            assertEquals(buildExceptionMessage("Expected value " + expectedProperty.getValue() + " but got " + actualProperty.getValue(), testInstance.testDevice.deviceClient), expectedProperty.getValue(), actualProperty.getValue());
         }
     }
 
@@ -163,13 +152,9 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         // Create a register manager
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
-        // Create the service client
-        sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-
         List inputs =  Arrays.asList(
                     new Object[][]
                             {
-                                    //sas token, device client
                                     {AMQPS},
                                     {AMQPS_WS},
                                     {MQTT},
@@ -183,7 +168,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     public DeviceTwinWithVersionTestInstance testInstance;
 
 
-    public DeviceTwinWithVersionTests(IotHubClientProtocol protocol)
+    public DeviceTwinWithVersionTests(IotHubClientProtocol protocol) throws IOException
     {
         this.testInstance = new DeviceTwinWithVersionTestInstance(protocol);
     }
@@ -191,19 +176,23 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     public class DeviceTwinWithVersionTestInstance
     {
         public IotHubClientProtocol protocol;
+        private com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;
 
-        public DeviceTwinWithVersionTestInstance(IotHubClientProtocol protocol)
+        private DeviceTwin sCDeviceTwin;
+        private TestDevice testDevice;
+
+        public DeviceTwinWithVersionTestInstance(IotHubClientProtocol protocol) throws IOException
         {
             this.protocol = protocol;
+
+            this.sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+            this.testDevice = new TestDevice();
         }
     }
 
     @AfterClass
     public static void tearDown() throws Exception
     {
-        // Destroy the service client
-        sCDeviceTwin = null;
-
         if (registryManager != null)
         {
             registryManager.close();
@@ -213,113 +202,118 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
     private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException, InterruptedException
     {
-        testDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceForRegistryManager), protocol);
-        IotHubServicesCommon.openClientWithRetry(testDevice.deviceClient);
-        testDevice.deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), testDevice, new DeviceTwinPropertyCallback(), testDevice);
+        testInstance.testDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, testInstance.deviceForRegistryManager), protocol);
+        IotHubServicesCommon.openClientWithRetry(testInstance.testDevice.deviceClient);
+        testInstance.testDevice.deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), testInstance.testDevice, new DeviceTwinPropertyCallback(), testInstance.testDevice);
     }
 
     @Before
     public void createDevice() throws Exception
     {
-        testDevice = new TestDevice();
-        testDevice.deviceId = "java-twin-version-e2e-test-".concat(UUID.randomUUID().toString());
-        testDevice.receivedProperties = new HashSet<>();
+        testInstance.testDevice = new TestDevice();
+        testInstance.testDevice.deviceId = "java-twin-version-e2e-test-".concat(UUID.randomUUID().toString());
+        testInstance.testDevice.receivedProperties = new HashSet<>();
 
-        deviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(testDevice.deviceId, null, null);
-        deviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, deviceForRegistryManager);
+        testInstance.deviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(testInstance.testDevice.deviceId, null, null);
+        testInstance.deviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, testInstance.deviceForRegistryManager);
 
     }
 
     @After
     public void destroyDevice() throws Exception
     {
-        testDevice.deviceClient.closeNow();
-        testDevice.deviceClient = null;
-        testDevice.expectedProperties = null;
-        testDevice.reportedPropertyVersion = null;
-        testDevice.receivedProperties = null;
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        if (testInstance.testDevice != null)
+        {
+            testInstance.testDevice.deviceClient.closeNow();
+            testInstance.testDevice.deviceClient = null;
+            testInstance.testDevice.expectedProperties = null;
+            testInstance.testDevice.reportedPropertyVersion = null;
+            testInstance.testDevice.receivedProperties = null;
+            testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+            registryManager.removeDevice(testInstance.testDevice.deviceId);
+        }
 
-        registryManager.removeDevice(testDevice.deviceId);
-        testDevice = null;
+        testInstance.testDevice = null;
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSendReportedPropertiesWithoutVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
         createDevice(testInstance.protocol);
-        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
 
         // act
-        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.testDevice.deviceClient.sendReportedProperties(PROPERTIES);
 
         // assert
         // test device client
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        while(testInstance.testDevice.deviceTwinStatus == STATUS.UNKNOWN)
         {
             Thread.sleep(BREATHE_TIME);
         }
 
-        testDevice.deviceClient.getDeviceTwin();
+        testInstance.testDevice.deviceClient.getDeviceTwin();
         long startTime = System.currentTimeMillis();
-        while(!testDevice.expectedProperties.isEmpty())
+        while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
             if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
             {
-                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
 
             Thread.sleep(BREATHE_TIME);
-            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
-                throw new IOException(testDevice.exception);
+                throw new IOException(testInstance.testDevice.exception);
             }
         }
-        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.testDevice.reportedPropertyVersion, testInstance.testDevice.deviceClient), 2, (int)testInstance.testDevice.reportedPropertyVersion);
 
         // test service client
-        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
-        sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
+        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateReportedPropertiesWithVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
         createDevice(testInstance.protocol);
-        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testInstance.testDevice.expectedProperties = new HashSet<>(PROPERTIES);
 
         // Create the first version of the reported properties.
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.deviceClient.sendReportedProperties(PROPERTIES);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        testDevice.deviceClient.getDeviceTwin();
+        testInstance.testDevice.deviceClient.getDeviceTwin();
         long startTime = System.currentTimeMillis();
-        while(!testDevice.expectedProperties.isEmpty())
+        while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
             if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
             {
-                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
 
             Thread.sleep(BREATHE_TIME);
-            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
             {
                 throw new IOException("IoTHub send Http error code");
             }
-            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
-                throw new IOException(testDevice.exception);
+                throw new IOException(testInstance.testDevice.exception);
             }
         }
-        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.testDevice.reportedPropertyVersion, testInstance.testDevice.deviceClient), 2, (int)testInstance.testDevice.reportedPropertyVersion);
 
         // New values for the reported properties
         final Set<Property> newValues = new HashSet<Property>()
@@ -329,84 +323,85 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
                 add(new Property(PROPERTY_KEY_2, "newValue2"));
             }
         };
-        testDevice.expectedProperties = new HashSet<>(newValues);
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.reportedPropertyVersion = null;
-        testDevice.receivedProperties = new HashSet<>();
+        testInstance.testDevice.expectedProperties = new HashSet<>(newValues);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.reportedPropertyVersion = null;
+        testInstance.testDevice.receivedProperties = new HashSet<>();
 
         // act
-        testDevice.deviceClient.sendReportedProperties(newValues, 2);
+        testInstance.testDevice.deviceClient.sendReportedProperties(newValues, 2);
 
         // assert
         // test device client
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        while(testDevice.deviceTwinStatus == STATUS.UNKNOWN)
+        while(testInstance.testDevice.deviceTwinStatus == STATUS.UNKNOWN)
         {
             Thread.sleep(BREATHE_TIME);
         }
 
         do {
             Thread.sleep(BREATHE_TIME);
-            testDevice.expectedProperties = new HashSet<>(newValues);
-            testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-            testDevice.reportedPropertyVersion = null;
-            testDevice.receivedProperties = new HashSet<>();
-            testDevice.deviceClient.getDeviceTwin();
+            testInstance.testDevice.expectedProperties = new HashSet<>(newValues);
+            testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+            testInstance.testDevice.reportedPropertyVersion = null;
+            testInstance.testDevice.receivedProperties = new HashSet<>();
+            testInstance.testDevice.deviceClient.getDeviceTwin();
             startTime = System.currentTimeMillis();
-            while(!testDevice.expectedProperties.isEmpty())
+            while(!testInstance.testDevice.expectedProperties.isEmpty())
             {
                 if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
                 {
-                    fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                    fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
                 }
 
                 Thread.sleep(BREATHE_TIME);
-                if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+                if(testInstance.testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
                 {
-                    throw new IOException(testDevice.exception);
+                    throw new IOException(testInstance.testDevice.exception);
                 }
             }
-        }while (testDevice.reportedPropertyVersion != 3);
+        }while (testInstance.testDevice.reportedPropertyVersion != 3);
 
         // test service client
-        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
-        sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(buildExceptionMessage("Expected reported properties version 3 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 3, (int)deviceOnServiceClient.getReportedPropertiesVersion());        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
+        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(buildExceptionMessage("Expected reported properties version 3 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 3, (int)deviceOnServiceClient.getReportedPropertiesVersion());        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(newValues, reported);
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateReportedPropertiesWithLowerVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
         createDevice(testInstance.protocol);
-        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testInstance.testDevice.expectedProperties = new HashSet<>(PROPERTIES);
 
         // Create the first version of the reported properties.
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.deviceClient.sendReportedProperties(PROPERTIES);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        testDevice.deviceClient.getDeviceTwin();
+        testInstance.testDevice.deviceClient.getDeviceTwin();
         long startTime = System.currentTimeMillis();
-        while(!testDevice.expectedProperties.isEmpty())
+        while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
             if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
             {
-                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
 
             Thread.sleep(BREATHE_TIME);
-            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
             {
                 throw new IOException("IoTHub send Http error code");
             }
-            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
-                throw new IOException(testDevice.exception);
+                throw new IOException(testInstance.testDevice.exception);
             }
         }
-        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.testDevice.reportedPropertyVersion, testInstance.testDevice.deviceClient), 2, (int)testInstance.testDevice.reportedPropertyVersion);
 
         // New values for the reported properties
         final Set<Property> newValues = new HashSet<Property>()
@@ -416,82 +411,83 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
                 add(new Property(PROPERTY_KEY_2, "newValue2"));
             }
         };
-        testDevice.expectedProperties = new HashSet<>(newValues);
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.reportedPropertyVersion = null;
-        testDevice.receivedProperties = new HashSet<>();
+        testInstance.testDevice.expectedProperties = new HashSet<>(newValues);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.reportedPropertyVersion = null;
+        testInstance.testDevice.receivedProperties = new HashSet<>();
 
         // act
-        testDevice.deviceClient.sendReportedProperties(newValues, 1);
+        testInstance.testDevice.deviceClient.sendReportedProperties(newValues, 1);
 
         // assert
         // test device client
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        while((testInstance.testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testInstance.testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
         {
             Thread.sleep(BREATHE_TIME);
         }
-        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.reportedPropertyVersion = null;
-        testDevice.receivedProperties = new HashSet<>();
-        testDevice.deviceClient.getDeviceTwin();
+        testInstance.testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.reportedPropertyVersion = null;
+        testInstance.testDevice.receivedProperties = new HashSet<>();
+        testInstance.testDevice.deviceClient.getDeviceTwin();
         startTime = System.currentTimeMillis();
-        while(!testDevice.expectedProperties.isEmpty())
+        while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
             if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
             {
-                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
 
             Thread.sleep(BREATHE_TIME);
-            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
-                throw new IOException(testDevice.exception);
+                throw new IOException(testInstance.testDevice.exception);
             }
         }
-        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.testDevice.reportedPropertyVersion, testInstance.testDevice.deviceClient), 2, (int)testInstance.testDevice.reportedPropertyVersion);
 
         // test service client
-        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
-        sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
+        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateReportedPropertiesWithHigherVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
         createDevice(testInstance.protocol);
-        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testInstance.testDevice.expectedProperties = new HashSet<>(PROPERTIES);
 
         // Create the first version of the reported properties.
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.deviceClient.sendReportedProperties(PROPERTIES);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.deviceClient.sendReportedProperties(PROPERTIES);
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
 
-        testDevice.deviceClient.getDeviceTwin();
+        testInstance.testDevice.deviceClient.getDeviceTwin();
         long startTime = System.currentTimeMillis();
-        while(!testDevice.expectedProperties.isEmpty())
+        while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
             if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
             {
-                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
 
             Thread.sleep(BREATHE_TIME);
-            if(testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.IOTHUB_FAILURE)
             {
                 throw new IOException("IoTHub send Http error code");
             }
-            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
-                throw new IOException(testDevice.exception);
+                throw new IOException(testInstance.testDevice.exception);
             }
         }
-        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.testDevice.reportedPropertyVersion, testInstance.testDevice.deviceClient), 2, (int)testInstance.testDevice.reportedPropertyVersion);
 
         // New values for the reported properties
         final Set<Property> newValues = new HashSet<Property>()
@@ -501,46 +497,46 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
                 add(new Property(PROPERTY_KEY_2, "newValue2"));
             }
         };
-        testDevice.expectedProperties = new HashSet<>(newValues);
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.reportedPropertyVersion = null;
-        testDevice.receivedProperties = new HashSet<>();
+        testInstance.testDevice.expectedProperties = new HashSet<>(newValues);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.reportedPropertyVersion = null;
+        testInstance.testDevice.receivedProperties = new HashSet<>();
 
         // act
-        testDevice.deviceClient.sendReportedProperties(newValues, 3);
+        testInstance.testDevice.deviceClient.sendReportedProperties(newValues, 3);
 
         // assert
         // test device client
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-        while((testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
+        while((testInstance.testDevice.deviceTwinStatus != STATUS.BAD_ANSWER) && (testInstance.testDevice.deviceTwinStatus != STATUS.IOTHUB_FAILURE))
         {
             Thread.sleep(BREATHE_TIME);
         }
-        testDevice.expectedProperties = new HashSet<>(PROPERTIES);
-        testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        testDevice.reportedPropertyVersion = null;
-        testDevice.receivedProperties = new HashSet<>();
-        testDevice.deviceClient.getDeviceTwin();
+        testInstance.testDevice.expectedProperties = new HashSet<>(PROPERTIES);
+        testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
+        testInstance.testDevice.reportedPropertyVersion = null;
+        testInstance.testDevice.receivedProperties = new HashSet<>();
+        testInstance.testDevice.deviceClient.getDeviceTwin();
         startTime = System.currentTimeMillis();
-        while(!testDevice.expectedProperties.isEmpty())
+        while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
             if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
             {
-                fail(buildExceptionMessage("Timed out waiting for expected property change", testDevice.deviceClient));
+                fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
 
             Thread.sleep(BREATHE_TIME);
-            if(testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
+            if(testInstance.testDevice.deviceTwinStatus == STATUS.BAD_ANSWER)
             {
-                throw new IOException(testDevice.exception);
+                throw new IOException(testInstance.testDevice.exception);
             }
         }
-        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testDevice.reportedPropertyVersion, testDevice.deviceClient), 2, (int)testDevice.reportedPropertyVersion);
+        assertEquals(buildExceptionMessage("Expected 2, but reported properties version was " + testInstance.testDevice.reportedPropertyVersion, testInstance.testDevice.deviceClient), 2, (int)testInstance.testDevice.reportedPropertyVersion);
 
         // test service client
-        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testDevice.deviceId);
-        sCDeviceTwin.getTwin(deviceOnServiceClient);
-        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
+        DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
+        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
     }

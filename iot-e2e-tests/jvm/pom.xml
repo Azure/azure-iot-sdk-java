@@ -7,7 +7,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-e2e-jvm-tests</artifactId>
     <name>IoT Hub Java SDK jvm tests</name>
-    <version>0.21.0</version>
+    <version>0.24.0</version>
     <description>Test suite for the Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
@@ -34,25 +34,25 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-device-client</artifactId>
-            <version>1.4.0</version>
+            <version>1.6.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-service-client</artifactId>
-            <version>1.3.5</version>
+            <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.15.0</version>
+            <version>1.17.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.16.0</version>
+            <version>1.16.3</version>
             <scope>test</scope>
         </dependency>
         <!-- test dependencies -->
@@ -77,12 +77,17 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-e2e-common</artifactId>
-            <version>0.21.0</version>
+            <version>0.24.0</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jcip</groupId>
+            <artifactId>jcip-annotations</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
     <build>
@@ -123,15 +128,20 @@
                         <!-- Mvn install will run tests found in the files that match the ______JVMRunner.java naming pattern -->
                         <include>*JVMRunner.java</include>
                     </includes>
-                    <!--
-                    Maximum of 8 jvm instances active at a time, may be running test methods
-                    from different test classes at the same time. But since they are in seperate JVM's, race conditions
-                    or other threading issues won't be a problem
 
-                    See:
+                    <!--
+                    For more details on parallelization in use here, see:
                     http://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html
                     -->
-                    <forkCount>8</forkCount>
+                    <!--Intentionally not using multiple forks. Tests are safe across threads, but don't appear to be safe across jvm instances at the same time-->
+                    <forkCount>1</forkCount>
+
+                    <!--Tests can be run in parallel with tests within their own test class as well as in parallel with tests from other test classes-->
+                    <parallel>both</parallel>
+
+                    <!--Maven will spawn up as many threads as it wants/can while running tests in parallel-->
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
+
                     <skipITs>${skipITs}</skipITs>
                     <argLine>
                         -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.24/jmockit-1.24.jar

@@ -1,0 +1,1 @@
+﻿mvn install -DskipITs=false -T 2C "-Dfailsafe.rerunFailingTestsCount=2" #parallelized to use 2 threads per core

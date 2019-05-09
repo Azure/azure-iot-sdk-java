@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
@@ -20,8 +19,8 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -51,6 +50,8 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final long DELAY_BETWEEN_OPERATIONS = 200; // 0.2 sec
     public static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes
 
+    public static final long DESIRED_PROPERTIES_PROPAGATION_TIME_MILLIS = 5 * 1000; //5 seconds
+
     protected static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = 5000; // 5 sec
 
     // Max reported properties to be tested
@@ -75,6 +76,9 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final String TAG_KEY = "Tag_Key";
     protected static final String TAG_VALUE = "Tag_Value";
     protected static final String TAG_VALUE_UPDATE = "Tag_Value_Update";
+
+    protected static String deviceIdPrefix = "java-twin-e2e-test-device";
+    protected static String moduleIdPrefix = "java-twin-e2e-test-module";
 
     // States of SDK
     protected static RegistryManager registryManager;
@@ -237,7 +241,7 @@ public class DeviceTwinCommon extends IntegrationTest
             deviceState.dCDeviceForTwin = new DeviceExtension();
             if (this.testInstance.authenticationType == SAS)
             {
-                if (this.testInstance.moduleId == null)
+                if (this.testInstance.clientType == ClientType.DEVICE_CLIENT)
                 {
                     internalClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager),
                             this.testInstance.protocol);
@@ -250,7 +254,7 @@ public class DeviceTwinCommon extends IntegrationTest
             }
             else if (this.testInstance.authenticationType == SELF_SIGNED)
             {
-                if (this.testInstance.moduleId == null)
+                if (this.testInstance.clientType == ClientType.DEVICE_CLIENT)
                 {
                     internalClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceUnderTest.sCDeviceForRegistryManager),
                             this.testInstance.protocol,
@@ -284,7 +288,7 @@ public class DeviceTwinCommon extends IntegrationTest
         // set up twin on ServiceClient
         if (sCDeviceTwin != null)
         {
-            if (testInstance.moduleId == null)
+            if (testInstance.clientType == ClientType.DEVICE_CLIENT)
             {
                 deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId());
             }
@@ -298,20 +302,23 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void tearDownTwin(DeviceState deviceState) throws IOException
+    public void tearDownTwin(DeviceState deviceState) throws IOException
     {
         // tear down twin on device client
-        if (deviceState.sCDeviceForTwin != null)
+        if (deviceState != null)
         {
-            deviceState.sCDeviceForTwin.clearTwin();
-        }
-        if (deviceState.dCDeviceForTwin != null)
-        {
-            deviceState.dCDeviceForTwin.clean();
-
-            if (deviceState.dCDeviceForTwin.getDesiredProp() != null)
+            if (deviceState.sCDeviceForTwin != null)
             {
-                deviceState.dCDeviceForTwin.getDesiredProp().clear();
+                deviceState.sCDeviceForTwin.clearTwin();
+            }
+            if (deviceState.dCDeviceForTwin != null)
+            {
+                deviceState.dCDeviceForTwin.clean();
+
+                if (deviceState.dCDeviceForTwin.getDesiredProp() != null)
+                {
+                    deviceState.dCDeviceForTwin.getDesiredProp().clear();
+                }
             }
         }
         if (internalClient != null)
@@ -321,24 +328,17 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
+    protected static Collection inputsCommon(ClientType clientType) throws IOException
+    {
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        return inputsCommon(clientType, certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
+    }
+
     protected static Collection inputsCommon(ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
     {
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
-
-        //base names for devices and modules. Each test creates a device/module with this as the prefix, and a unique uuid as the suffix
-        String deviceIdAmqps = "java-device-client-e2e-test-amqps-";
-        String deviceIdAmqpsWs = "java-device-client-e2e-test-amqpsws-";
-        String deviceIdMqtt = "java-device-client-e2e-test-mqtt-";
-        String deviceIdMqttWs = "java-device-client-e2e-test-mqttws-";
-        String deviceIdMqttX509 = "java-device-client-e2e-test-mqtt-X509-";
-        String deviceIdAmqpsX509 = "java-device-client-e2e-test-amqps-X509-";
-
-        String moduleIdAmqps = "java-device-client-e2e-test-amqps-module-";
-        String moduleIdAmqpsWs = "java-device-client-e2e-test-amqpsws-module-";
-        String moduleIdMqtt = "java-device-client-e2e-test-mqtt-module-";
-        String moduleIdMqttWs = "java-device-client-e2e-test-mqttws-module-";
 
         List inputs;
         if (clientType == ClientType.DEVICE_CLIENT)
@@ -347,14 +347,14 @@ public class DeviceTwinCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token, device client
-                                    {deviceIdAmqps, null, AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdAmqpsWs, null, AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqtt, null, MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttWs,  null, MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
 
                                     //x509, device client
-                                    {deviceIdAmqpsX509, null, AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttX509, null, MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
                             }
             );
         }
@@ -364,10 +364,10 @@ public class DeviceTwinCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token, module client
-                                    {deviceIdAmqps, moduleIdAmqps, AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdAmqpsWs, moduleIdAmqpsWs, AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqtt, moduleIdMqtt, MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {deviceIdMqttWs,  moduleIdMqttWs, MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
+                                    {AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
                             }
             );
         }
@@ -375,31 +375,29 @@ public class DeviceTwinCommon extends IntegrationTest
         return inputs;
     }
 
-    public DeviceTwinCommon(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceTwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
-        this.testInstance = new DeviceTwinTestInstance(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     public class DeviceTwinTestInstance
     {
-        public String deviceId;
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
-        public String moduleId;
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
         public String uuid;
+        public ClientType clientType;
 
-        public DeviceTwinTestInstance(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+        public DeviceTwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
         {
-            this.deviceId = deviceId;
             this.protocol = protocol;
             this.authenticationType = authenticationType;
-            this.moduleId = moduleId;
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
+            this.clientType = clientType;
         }
     }
 
@@ -419,7 +417,15 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    @Before
+    @AfterClass
+    public static void classTearDown()
+    {
+        if (registryManager != null)
+        {
+            registryManager.close();
+        }
+    }
+
     public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
     {
         deviceUnderTest = new DeviceState();
@@ -427,16 +433,16 @@ public class DeviceTwinCommon extends IntegrationTest
 
         if (this.testInstance.authenticationType == SAS)
         {
-            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(this.testInstance.deviceId + this.testInstance.uuid, null, null);
+            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceIdPrefix + this.testInstance.uuid, null, null);
 
-            if (this.testInstance.moduleId != null)
+            if (this.testInstance.clientType == ClientType.MODULE_CLIENT)
             {
-                deviceUnderTest.sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(this.testInstance.deviceId + this.testInstance.uuid, this.testInstance.moduleId + this.testInstance.uuid, null);
+                deviceUnderTest.sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(deviceIdPrefix + this.testInstance.uuid, moduleIdPrefix + this.testInstance.uuid, null);
             }
         }
         else if (this.testInstance.authenticationType == SELF_SIGNED)
         {
-            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(this.testInstance.deviceId + this.testInstance.uuid, SELF_SIGNED);
+            deviceUnderTest.sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdPrefix + this.testInstance.uuid, SELF_SIGNED);
             deviceUnderTest.sCDeviceForRegistryManager.setThumbprintFinal(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
         }
 
@@ -458,7 +464,14 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         tearDownTwin(deviceUnderTest);
 
-        registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+        try
+        {
+            registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+        }
+        catch (Exception e)
+        {
+
+        }
 
         try
         {
@@ -469,24 +482,6 @@ public class DeviceTwinCommon extends IntegrationTest
             e.printStackTrace();
             fail(buildExceptionMessage("Unexpected exception encountered", internalClient));
         }
-    }
-
-    protected static Collection<BaseDevice> getIdentities(Collection inputs)
-    {
-        //twin tests tear down and build up identities in between tests, not at the end of the suite
-        return new HashSet<>();
-    }
-
-    protected static void tearDown(Collection<BaseDevice> identitiesToDispose)
-    {
-        if (registryManager != null)
-        {
-            Tools.removeDevicesAndModules(registryManager, identitiesToDispose);
-            registryManager.close();
-        }
-
-        registryManager = null;
-        sCDeviceTwin = null;
     }
 
     protected void readReportedPropertiesAndVerify(DeviceState deviceState, String startsWithKey, String startsWithValue, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException

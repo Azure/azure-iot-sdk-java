@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpDeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.qpid.proton.engine.*;
@@ -11,6 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.device.MessageType.*;
+
 public class AmqpsSessionDeviceOperation
 {
     private final DeviceClientConfig deviceClientConfig;
@@ -18,20 +21,15 @@ public class AmqpsSessionDeviceOperation
     private AmqpsDeviceAuthenticationState amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.UNKNOWN;
     private final AmqpsDeviceAuthentication amqpsDeviceAuthentication;
 
-    private ArrayList<AmqpsDeviceOperations> amqpsDeviceOperationsList = new ArrayList<>();;
+    private Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
 
-    private long nextTag = 0;
+    private static long nextTag = 0;
 
     private Integer openLock = new Integer(1);
 
-    private long tokenRenewalPeriodInMilliseconds = 4000; //4 seconds;
-
-    private ScheduledExecutorService taskSchedulerTokenRenewal;
-    private AmqpsDeviceAuthenticationCBSTokenRenewalTask tokenRenewalTask = null;
-
     private static final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
     private static final double PERCENTAGE_FACTOR = 0.75;
-    private static final int SEC_IN_MILLISEC = 1000;
+    private static final int MILLISECECONDS_PER_SECOND = 1000;
 
     private final CountDownLatch authenticationLatch = new CountDownLatch(1);
 
@@ -62,10 +60,8 @@ public class AmqpsSessionDeviceOperation
         this.deviceClientConfig = deviceClientConfig;
         this.amqpsDeviceAuthentication = amqpsDeviceAuthentication;
 
-        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_003: [The constructor shall create AmqpsDeviceTelemetry, AmqpsDeviceMethods and AmqpsDeviceTwin and add them to the device operations list. ]
-        this.amqpsDeviceOperationsList.add(new AmqpsDeviceTelemetry(this.deviceClientConfig));
-        this.amqpsDeviceOperationsList.add(new AmqpsDeviceMethods(this.deviceClientConfig));
-        this.amqpsDeviceOperationsList.add(new AmqpsDeviceTwin(this.deviceClientConfig));
+        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_003: [The constructor shall create AmqpsDeviceTelemetry and add it to the device operations map. ]
+        this.amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, new AmqpsDeviceTelemetry(this.deviceClientConfig));
 
         this.logger = new CustomLogger(this.getClass());
 
@@ -73,14 +69,6 @@ public class AmqpsSessionDeviceOperation
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_004: [The constructor shall set the authentication state to not authenticated if the authentication type is CBS.]
             this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.NOT_AUTHENTICATED;
-
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_044: [The constructor shall calculate the token renewal period as the 75% of the expiration period.]
-            this.tokenRenewalTask = new AmqpsDeviceAuthenticationCBSTokenRenewalTask(this);
-
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_048: [The constructor saves the calculated renewal period if it is greater than zero.]
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_045: [The constructor shall create AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_046: [The constructor shall create and start a scheduler with the calculated renewal period for AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
-            this.scheduleRenewalThread();
         }
         else
         {
@@ -94,7 +82,6 @@ public class AmqpsSessionDeviceOperation
      */
     public void close()
     {
-        this.shutDownScheduler();
         this.closeLinks();
 
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
@@ -148,32 +135,6 @@ public class AmqpsSessionDeviceOperation
     }
 
     /**
-     * Start the token renewal process using CBS authentication.
-     *
-     * @throws TransportException throw if Proton operation throws.
-     */
-    public void renewToken() throws TransportException
-    {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
-        if ((this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN) &&
-                (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED))
-        {
-            if (this.deviceClientConfig.getSasTokenAuthentication().isRenewalNecessary())
-            {
-                logger.LogDebug("Sas token cannot be renewed automatically, so amqp connection will be unauthorized soon, method: %s", logger.getMethodName());
-            }
-            else
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
-                authenticate();
-            }
-        }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
-    }
-
-    /**
      * Return the current authentication state.
      *
      * @return the current state.
@@ -193,10 +154,10 @@ public class AmqpsSessionDeviceOperation
     {
         Boolean allLinksOpened = true;
 
-        for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+        for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_008: [The function shall return true if all operation links are opene, otherwise return false.]
-            if (!this.amqpsDeviceOperationsList.get(i).operationLinksOpened())
+            if (!entry.getValue().operationLinksOpened())
             {
                 allLinksOpened = false;
                 break;
@@ -211,8 +172,10 @@ public class AmqpsSessionDeviceOperation
      * @param session the Proton session to open the links on.
      * @throws TransportException throw if Proton operation throws.
      */
-    void openLinks(Session session) throws TransportException
+    boolean openLinks(Session session, MessageType msgType) throws TransportException
     {
+        boolean waitForRemoteOpenCallback = false;
+
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_042: [The function shall do nothing if the session parameter is null.]
@@ -220,18 +183,31 @@ public class AmqpsSessionDeviceOperation
         {
             if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
             {
-                for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+                if (this.amqpsDeviceOperationsMap.get(msgType) == null)
                 {
-                    synchronized (this.openLock)
+                    switch(msgType)
                     {
-                        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
-                        this.amqpsDeviceOperationsList.get(i).openLinks(session);
+                        case DEVICE_METHODS:
+                            this.amqpsDeviceOperationsMap.put(DEVICE_METHODS, new AmqpsDeviceMethods(this.deviceClientConfig));
+                            break;
+                        case DEVICE_TWIN:
+                            this.amqpsDeviceOperationsMap.put(DEVICE_TWIN, new AmqpsDeviceTwin(this.deviceClientConfig));
+                            break;
+                        default:
+                            break;
                     }
+                }
+
+                synchronized (this.openLock)
+                {
+                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
+                    waitForRemoteOpenCallback = this.amqpsDeviceOperationsMap.get(msgType).openLinks(session);
                 }
             }
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+        return waitForRemoteOpenCallback;
     }
 
     /**
@@ -241,10 +217,12 @@ public class AmqpsSessionDeviceOperation
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        for (int i = 0; i < amqpsDeviceOperationsList.size(); i++)
+        Iterator iterator = amqpsDeviceOperationsMap.entrySet().iterator();
+        while (iterator.hasNext())
         {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_010: [The function shall call closeLinks on all device operations.]
-            amqpsDeviceOperationsList.get(i).closeLinks();
+            Map.Entry<MessageType, AmqpsDeviceOperations> pair = (Map.Entry<MessageType, AmqpsDeviceOperations>)iterator.next();
+            pair.getValue().closeLinks();
+            //iterator.remove();
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -266,10 +244,9 @@ public class AmqpsSessionDeviceOperation
         {
             if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
             {
-                for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+                for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
                 {
-                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_011: [The function shall call initLink on all device operations.**]**]
-                    this.amqpsDeviceOperationsList.get(i).initLink(link);
+                    entry.getValue().initLink(link);
                 }
             }
         }
@@ -315,11 +292,21 @@ public class AmqpsSessionDeviceOperation
                     }
                 }
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_017: [The function shall set the delivery tag for the sender.]
-                byte[] deliveryTag = String.valueOf(this.nextTag++).getBytes();
+                byte[] deliveryTag = String.valueOf(this.nextTag).getBytes();
 
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
+                //want to avoid negative delivery tags since -1 is the designated failure value
+                if (this.nextTag == Integer.MAX_VALUE || this.nextTag < 0)
+                {
+                    this.nextTag = 0;
+                }
+                else
+                {
+                    this.nextTag++;
+                }
+
+                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryTag on all device operation objects.]
                 // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
-                return this.sendMessageAndGetDeliveryHash(messageType, msgData, 0, length, deliveryTag);
+                return this.sendMessageAndGetDeliveryTag(messageType, msgData, 0, length, deliveryTag);
             }
             else
             {
@@ -346,21 +333,18 @@ public class AmqpsSessionDeviceOperation
      * @throws IllegalArgumentException if deliveryTag's length is 0
      * @return Integer
      */
-    private Integer sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    private Integer sendMessageAndGetDeliveryTag(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
-        Integer deliveryHash = -1;
-
-        for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+        if (amqpsDeviceOperationsMap.get(messageType) != null)
         {
-            AmqpsSendReturnValue amqpsSendReturnValue = null;
-            amqpsSendReturnValue = this.amqpsDeviceOperationsList.get(i).sendMessageAndGetDeliveryHash(messageType, msgData, 0, length, deliveryTag);
+            AmqpsSendReturnValue amqpsSendReturnValue = amqpsDeviceOperationsMap.get(messageType).sendMessageAndGetDeliveryTag(messageType, msgData, offset, length, deliveryTag);
             if (amqpsSendReturnValue.isDeliverySuccessful())
             {
-                return amqpsSendReturnValue.getDeliveryHash();
+                return Integer.parseInt(new String(amqpsSendReturnValue.getDeliveryTag()));
             }
         }
 
-        return deliveryHash;
+        return -1;
     }
 
     /**
@@ -414,9 +398,9 @@ public class AmqpsSessionDeviceOperation
         else
         {
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_057: [If the state is other than authenticating the function shall try to read the message from the device operation objects.]
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+            for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
             {
-                amqpsMessage = this.amqpsDeviceOperationsList.get(i).getMessageFromReceiverLink(linkName);
+                amqpsMessage = entry.getValue().getMessageFromReceiverLink(linkName);
                 if (amqpsMessage != null)
                 {
                     break;
@@ -439,9 +423,9 @@ public class AmqpsSessionDeviceOperation
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_024: [The function shall return true if any of the operation's link name is a match and return false otherwise.]
         if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
         {
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
+            for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
             {
-                if (this.amqpsDeviceOperationsList.get(i).isLinkFound(linkName))
+                if (entry.getValue().isLinkFound(linkName))
                 {
                     return true;
                 }
@@ -461,22 +445,25 @@ public class AmqpsSessionDeviceOperation
      */
     AmqpsConvertToProtonReturnValue convertToProton(Message message) throws TransportException
     {
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = null;
-
-        if (this.amqpsDeviceOperationsList != null)
+        MessageType msgType;
+        if (message.getMessageType() == null)
         {
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_040: [The function shall call all device operation's convertToProton, and if any of them not null return with the value.]
-                amqpsConvertToProtonReturnValue = this.amqpsDeviceOperationsList.get(i).convertToProton(message);
-                if (amqpsConvertToProtonReturnValue != null)
-                {
-                    break;
-                }
-            }
+            msgType = DEVICE_TELEMETRY;
+        }
+        else
+        {
+            msgType = message.getMessageType();
         }
 
-        return amqpsConvertToProtonReturnValue;
+        if (amqpsDeviceOperationsMap.get(msgType) != null)
+        {
+            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_040: [The function shall call all device operation's convertToProton, and if any of them not null return with the value.]
+            return this.amqpsDeviceOperationsMap.get(msgType).convertToProton(message);
+        }
+        else
+        {
+            return null;
+        }
     }
 
     /**
@@ -492,73 +479,13 @@ public class AmqpsSessionDeviceOperation
      */
     AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
-        AmqpsConvertFromProtonReturnValue amqpsHandleMessageReturnValue = null;
-
-        if (this.amqpsDeviceOperationsList != null)
+        AmqpsConvertFromProtonReturnValue ret = null;
+        if (this.amqpsDeviceOperationsMap.get(amqpsMessage.getAmqpsMessageType()) != null)
         {
-            for (int i = 0; i < this.amqpsDeviceOperationsList.size(); i++)
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_041: [The function shall call all device operation's convertFromProton, and if any of them not null return with the value.]
-                amqpsHandleMessageReturnValue = this.amqpsDeviceOperationsList.get(i).convertFromProton(amqpsMessage, deviceClientConfig);
-                if (amqpsHandleMessageReturnValue != null)
-                {
-                    break;
-                }
-            }
+            ret =  this.amqpsDeviceOperationsMap.get(amqpsMessage.getAmqpsMessageType()).convertFromProton(amqpsMessage, deviceClientConfig);
         }
 
-        return amqpsHandleMessageReturnValue;
-    }
-
-    /**
-     * Restart the renewal thread
-     *
-     * @return true is the renewal is successful
-     */
-    private void scheduleRenewalThread()
-    {
-        long renewalPeriod = calculateRenewalTimeInMilliseconds(this.deviceClientConfig.getSasTokenAuthentication().getTokenValidSecs());
-        if (renewalPeriod > 0)
-        {
-            this.tokenRenewalPeriodInMilliseconds = renewalPeriod;
-
-
-            shutDownScheduler();
-            this.taskSchedulerTokenRenewal = Executors.newScheduledThreadPool(1);
-            this.taskSchedulerTokenRenewal.scheduleAtFixedRate(this.tokenRenewalTask, 0, this.tokenRenewalPeriodInMilliseconds, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    /**
-     * Shut down the renewal thread
-     */
-    private void shutDownScheduler()
-    {
-        if (this.taskSchedulerTokenRenewal  != null)
-        {
-            taskSchedulerTokenRenewal.shutdown(); // Disable new tasks from being submitted
-            try
-            {
-                // Wait a while for existing tasks to terminate
-                if (!taskSchedulerTokenRenewal.awaitTermination(10, TimeUnit.SECONDS))
-                {
-                    taskSchedulerTokenRenewal.shutdownNow(); // Cancel currently executing tasks
-
-                    // Wait a while for tasks to respond to being cancelled
-                    if (!taskSchedulerTokenRenewal.awaitTermination(10, TimeUnit.SECONDS))
-                    {
-                        System.err.println("taskSchedulerTokenRenewal did not terminate correctly");
-                    }
-                }
-            }
-            catch (InterruptedException ie)
-            {
-                // (Re-)Cancel if current thread also interrupted
-                taskSchedulerTokenRenewal.shutdownNow();
-                // Preserve interrupt status
-                Thread.currentThread().interrupt();
-            }
-        }
+        return ret;
     }
 
     /**
@@ -568,13 +495,34 @@ public class AmqpsSessionDeviceOperation
      * @return 75% of the given time
      * @throws IllegalArgumentException if validInSecs is less than 0
      */
-    private long calculateRenewalTimeInMilliseconds(long validInSecs) throws IllegalArgumentException
+    private long calculateRenewalPeriodInMilliseconds(long validInSecs) throws IllegalArgumentException
     {
         if (validInSecs < 0)
         {
             throw new IllegalArgumentException("validInSecs cannot be less than 0.");
         }
 
-        return (long)(validInSecs * PERCENTAGE_FACTOR * SEC_IN_MILLISEC);
+        return (long)(validInSecs * PERCENTAGE_FACTOR * MILLISECECONDS_PER_SECOND);
+    }
+
+    public boolean onLinkFlow(Event event)
+    {
+        Link link = event.getLink();
+        for (AmqpsDeviceOperations deviceOperations : amqpsDeviceOperationsMap.values())
+        {
+            if (link.getName().startsWith(deviceOperations.getSenderLinkTag()))
+            {
+                deviceOperations.onLinkFlow(link.getCredit());
+                return true;
+            }
+        }
+
+        if (link.getName().startsWith(this.amqpsDeviceAuthentication.getSenderLinkTag()))
+        {
+            this.amqpsDeviceAuthentication.onLinkFlow(link.getCredit());
+            return true;
+        }
+
+        return false;
     }
 }

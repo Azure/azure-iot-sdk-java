@@ -3,20 +3,13 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.util.Tools;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
-import org.apache.qpid.proton.amqp.messaging.Data;
-import org.apache.qpid.proton.amqp.messaging.Properties;
-import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,12 +95,12 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * @throws IllegalArgumentException if deliveryTag's length is 0
      */
     @Override
-    protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
+    protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryTag(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException
     {
         if (messageType == MessageType.DEVICE_TELEMETRY)
         {
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_007: [The function shall call the super function with the arguments and return with it's return value.]
-            return super.sendMessageAndGetDeliveryHash(messageType, msgData, offset, length, deliveryTag);
+            return super.sendMessageAndGetDeliveryTag(messageType, msgData, offset, length, deliveryTag);
         }
         else
         {

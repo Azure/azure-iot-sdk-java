@@ -145,6 +145,7 @@ public class DeviceParserTest
         String managedBy = "someentity";
         String lastActivityTime = ParserUtility.getDateStringFromDate(new Date());
         int cloudToDeviceMessageCount = 20;
+        String scope = "securityscope";
 
         String json = "{\n" +
                 "  \"encryptionMethod\": \"AES\",\n" +
@@ -161,7 +162,8 @@ public class DeviceParserTest
                 "  \"forceUpdate\": \"false\",\n" +
                 "  \"managedBy\": \"" + managedBy + "\",\n" +
                 "  \"capabilities\": {\n" +
-                "    \"iotEdge\": true },\n" +
+                "   \"iotEdge\": true },\n" +
+                "  \"deviceScope\": \"" + scope + "\",\n" +
                 "  \"authentication\": {\n" +
                 "    \"type\": \"" + CERTIFICATE_AUTHORITY_JSON_VALUE + "\"\n" +
                 "  }\n" +
@@ -190,6 +192,7 @@ public class DeviceParserTest
         assertEquals(statusUpdatedTime, actualStatusUpdatedTime);
         assertEquals(connectionStateUpdatedTime, actualConnectionStateUpdatedTime);
         assertEquals(lastActivityTime, actualLastActivityTime);
+        assertEquals(scope, parser.getScope());
     }
 
     //Tests_SRS_DEVICE_PARSER_34_001: [This method shall return a json representation of this.]
@@ -288,6 +291,7 @@ public class DeviceParserTest
         String statusReason = "no reason";
         long cloudToDeviceMessageCount = 2;
         String managedBy = "someentity";
+        String scope = "securityscope";
 
         //act
         parser.setAuthenticationParser(new AuthenticationParser());
@@ -303,6 +307,7 @@ public class DeviceParserTest
         parser.setStatusUpdatedTime(statusUpdatedTime);
         parser.setManagedBy(managedBy);
         parser.setCapabilities(new DeviceCapabilitiesParser());
+        parser.setScope(scope);
 
         //assert
         assertEquals(new AuthenticationParser().getType(), parser.getAuthenticationParser().getType());
@@ -320,6 +325,7 @@ public class DeviceParserTest
         assertEquals(statusUpdatedTime, parser.getStatusUpdatedTime());
         assertEquals(managedBy, parser.getManagedBy());
         assertEquals(new DeviceCapabilitiesParser().getIotEdge(), parser.getCapabilities().getIotEdge());
+        assertEquals(scope, parser.getScope());
     }
 
     //Tests_SRS_DEVICE_PARSER_34_004: [For each of this parser's properties, if the setter is called with a null argument, an IllegalArgumentException shall be thrown.]

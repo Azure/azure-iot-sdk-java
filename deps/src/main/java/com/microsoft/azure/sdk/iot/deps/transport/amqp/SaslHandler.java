@@ -65,4 +65,11 @@ public interface SaslHandler
      * @throws Exception if sasl negotiation fails
      */
     void handleOutcome(SaslOutcome outcome) throws Exception;
+
+    String getPlainUsername();
+
+    String getPlainPassword();
+
+    void setSasToken(String sasToken);
+
 }

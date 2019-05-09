@@ -1,13 +1,18 @@
 apply plugin: 'com.android.application'
 
 //***********************************************************************************************//
-def IOTHUB_E2E_X509_PRIVATE_KEY_BASE64 = project.hasProperty('IotHubPrivateKeyBase64') ? '"'+project.property('IotHubPrivateKeyBase64')+'"' : '"Define IotHub Private Key"'
-def IOTHUB_E2E_X509_CERT_BASE64 = project.hasProperty('IotHubPublicCertBase64') ? '"'+project.property('IotHubPublicCertBase64')+'"': '"Define IotHub Public Cert"'
-def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IotHubConnectionString') ? '"'+project.property('IotHubConnectionString')+'"' : '"Define IotHub Connection"'
-def IOTHUB_E2E_X509_THUMBPRINT = project.hasProperty('IotHubThumbprint') ? '"'+project.property('IotHubThumbprint')+'"': '"Define IotHub Cert Thumbprint"'
-def IOTHUB_CONN_STRING_INVALIDCERT = project.hasProperty('IotHubInvalidCertConnectionString') ? '"'+project.property('IotHubInvalidCertConnectionString')+'"': '"Define IotHub Invalid Cert Connection"'
-def APPCENTER_APP_SECRET = project.hasProperty('AppCenterAppSecret') ? '"'+project.property('AppCenterAppSecret')+'"': '"Define AppCenter App Secret"'
-def STORAGE_ACCOUNT_CONNECTION_STRING = project.hasProperty('StorageAccountConnectionString') ? '"'+project.property('StorageAccountConnectionString')+'"': '"Define Storage Account Connection String"'
+def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IotHubConnectionString') ? '"'+project.property('IotHubConnectionString')+'"' : '""'
+def IOTHUB_CONN_STRING_INVALIDCERT = project.hasProperty('IotHubInvalidCertConnectionString') ? '"'+project.property('IotHubInvalidCertConnectionString')+'"': '""'
+def APPCENTER_APP_SECRET = project.hasProperty('AppCenterAppSecret') ? '"'+project.property('AppCenterAppSecret')+'"': '""'
+def STORAGE_ACCOUNT_CONNECTION_STRING = project.hasProperty('StorageAccountConnectionString') ? '"'+project.property('StorageAccountConnectionString')+'"': '""'
+def IOT_DPS_CONNECTION_STRING = project.hasProperty('DeviceProvisioningServiceConnectionString') ? '"'+project.property('DeviceProvisioningServiceConnectionString')+'"': '""'
+def DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('DeviceProvisioningServiceGlobalEndpoint') ? '"'+project.property('DeviceProvisioningServiceGlobalEndpoint')+'"': '""'
+def INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('InvalidDeviceProvisioningServiceGlobalEndpoint') ? '"'+project.property('InvalidDeviceProvisioningServiceGlobalEndpoint')+'"': '""'
+def INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING = project.hasProperty('InvalidDeviceProvisioningServiceConnectionString') ? '"'+project.property('InvalidDeviceProvisioningServiceConnectionString')+'"': '""'
+def DEVICE_PROVISIONING_SERVICE_ID_SCOPE = project.hasProperty('DeviceProvisioningServiceIdScope') ? '"'+project.property('DeviceProvisioningServiceIdScope')+'"': '""'
+def CUSTOM_ALLOCATION_WEBHOOK_URL = project.hasProperty('CustomAllocationWebhookUrl') ? '"'+project.property('CustomAllocationWebhookUrl')+'"': '""'
+def FAR_AWAY_IOT_HUB_CONNECTION_STRING = project.hasProperty('FarAwayIotHubConnectionString') ? '"'+project.property('FarAwayIotHubConnectionString')+'"': '""'
+def IS_BASIC_TIER_HUB = project.hasProperty('IsBasicTierHub') ? '"'+project.property('IsBasicTierHub')+'"' : '"false"'
 
 def STRING='String'
 //***********************************************************************************************//
@@ -26,13 +31,18 @@ android {
         //********** We can define variables here **********
         each {
             //buildTypes.mBuildConfigFields 'DATATYPE','VARIABLE',|"GRADLE VARIABLE|"'
-            buildConfigField STRING, 'IotHubPrivateKeyBase64', IOTHUB_E2E_X509_PRIVATE_KEY_BASE64
-            buildConfigField STRING, 'IotHubPublicCertBase64', IOTHUB_E2E_X509_CERT_BASE64
             buildConfigField STRING, 'IotHubConnectionString', IOTHUB_CONNECTION_STRING_ENV_VAR_NAME
-            buildConfigField STRING, 'IotHubThumbprint', IOTHUB_E2E_X509_THUMBPRINT
             buildConfigField STRING, 'IotHubInvalidCertConnectionString', IOTHUB_CONN_STRING_INVALIDCERT
             buildConfigField STRING, 'AppCenterAppSecret', APPCENTER_APP_SECRET
             buildConfigField STRING, 'StorageAccountConnectionString', STORAGE_ACCOUNT_CONNECTION_STRING
+            buildConfigField STRING, 'DeviceProvisioningServiceConnectionString', IOT_DPS_CONNECTION_STRING
+            buildConfigField STRING, 'DeviceProvisioningServiceGlobalEndpoint', DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT
+            buildConfigField STRING, 'InvalidDeviceProvisioningServiceGlobalEndpoint', INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT
+            buildConfigField STRING, 'InvalidDeviceProvisioningServiceConnectionString', INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING
+            buildConfigField STRING, 'DeviceProvisioningServiceIdScope', DEVICE_PROVISIONING_SERVICE_ID_SCOPE
+            buildConfigField STRING, 'CustomAllocationWebhookUrl', CUSTOM_ALLOCATION_WEBHOOK_URL
+            buildConfigField STRING, 'FarAwayIotHubConnectionString', FAR_AWAY_IOT_HUB_CONNECTION_STRING
+            buildConfigField STRING, 'IsBasicTierHub', IS_BASIC_TIER_HUB
         }
     }
     buildTypes {
@@ -76,7 +86,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:multidex:1.0.3'
 
-    implementation ('com.microsoft.azure.sdk.iot:iot-e2e-common:0.21.0'){
+    implementation ('com.microsoft.azure.sdk.iot:iot-e2e-common:0.24.0'){
         exclude module: 'junit'
         exclude module: 'azure-storage'
     }

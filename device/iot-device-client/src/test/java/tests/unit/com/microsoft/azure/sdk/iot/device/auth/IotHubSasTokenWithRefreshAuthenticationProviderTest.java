@@ -126,7 +126,25 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
 
         //act
-        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(true);
+        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(true, false);
+
+        //assert
+        assertEquals(newSasToken.toString(), actual);
+    }
+
+    @Test
+    public void getRenewedSasTokenForcesRefresh() throws IOException, TransportException
+    {
+        //arrange
+        final IotHubSasToken oldSasToken = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, "", "", "", "", "", 1);
+        final IotHubSasToken newSasToken = mockedIotHubSasToken;
+        IotHubImplSasTokenWithRefreshAuthenticationProvider moduleAuthenticationWithTokenRefresh = new IotHubImplSasTokenWithRefreshAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedSharedAccessToken, expectedTimeToLive, expectedTimeBufferPercentage);
+        Deencapsulation.setField(moduleAuthenticationWithTokenRefresh, "sasToken", oldSasToken);
+        moduleAuthenticationWithTokenRefresh.shouldRefresh = false;
+        moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
+
+        //act
+        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(true, true);
 
         //assert
         assertEquals(newSasToken.toString(), actual);
@@ -146,7 +164,7 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
 
         //act
-        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(false);
+        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(false, false);
 
         //assert
         assertEquals(oldSasToken.toString(), actual);

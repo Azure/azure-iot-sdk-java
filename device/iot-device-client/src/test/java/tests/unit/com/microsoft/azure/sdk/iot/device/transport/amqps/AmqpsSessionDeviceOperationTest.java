@@ -4,32 +4,30 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
+import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.Session;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
+import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TELEMETRY;
+import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.*;
 
 /**
  * Unit tests for DeviceClient.
- * Methods: 100%
- * Lines: 97%
+ * Methods: 88%
+ * Lines: 91%
  */
 public class AmqpsSessionDeviceOperationTest
 {
@@ -91,9 +89,6 @@ public class AmqpsSessionDeviceOperationTest
     ScheduledExecutorService mockScheduledExecutorService;
 
     @Mocked
-    AmqpsDeviceAuthenticationCBSTokenRenewalTask mockAmqpsDeviceAuthenticationCBSTokenRenewalTask;
-
-    @Mocked
     UUID mockUUID;
 
     @Mocked
@@ -101,6 +96,9 @@ public class AmqpsSessionDeviceOperationTest
 
     @Mocked
     List<UUID> mockListUUID;
+
+    @Mocked
+    Event mockEvent;
 
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig or the amqpsDeviceAuthentication parameter is null.]
@@ -144,9 +142,9 @@ public class AmqpsSessionDeviceOperationTest
                 Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
                 times = 1;
                 Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
-                times = 1;
+                times = 0;
                 Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-                times = 1;
+                times = 0;
             }
         };
     }
@@ -163,8 +161,6 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final long tokenValidSecs = 3600;
-        final long expectedRenewalTimeMillisecs = 2700 * 1000;
-
         new NonStrictExpectations()
         {
             {
@@ -174,12 +170,6 @@ public class AmqpsSessionDeviceOperationTest
                 result = mockIotHubSasTokenAuthenticationProvider;
                 mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
                 result = tokenValidSecs;
-
-                new AmqpsDeviceAuthenticationCBSTokenRenewalTask((AmqpsSessionDeviceOperation)any);
-                result = mockAmqpsDeviceAuthenticationCBSTokenRenewalTask;
-                mockExecutors.newScheduledThreadPool(1);
-                result = mockScheduledExecutorService;
-                mockScheduledExecutorService.scheduleAtFixedRate(mockAmqpsDeviceAuthenticationCBSTokenRenewalTask, 0, expectedRenewalTimeMillisecs, TimeUnit.MILLISECONDS);
             }
         };
 
@@ -190,25 +180,19 @@ public class AmqpsSessionDeviceOperationTest
         DeviceClientConfig actualDeviceClientConfig = Deencapsulation.getField(amqpsSessionDeviceOperation, "deviceClientConfig");
         AmqpsDeviceAuthentication actualAmqpsDeviceAuthentication = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication");
         AmqpsDeviceAuthenticationState authenticatorState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
-        long actualRenewalPeriod = Deencapsulation.getField(amqpsSessionDeviceOperation, "tokenRenewalPeriodInMilliseconds");
 
         assertEquals(mockDeviceClientConfig, actualDeviceClientConfig);
         assertEquals(mockAmqpsDeviceAuthenticationCBS, actualAmqpsDeviceAuthentication);
         assertEquals(AmqpsDeviceAuthenticationState.NOT_AUTHENTICATED, authenticatorState);
-        assertEquals(actualRenewalPeriod, expectedRenewalTimeMillisecs);
         new Verifications()
         {
             {
                 Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
                 times = 1;
                 Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
-                times = 1;
+                times = 0;
                 Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-                times = 1;
-                mockExecutors.newScheduledThreadPool(1);
-                times = 1;
-                mockScheduledExecutorService.scheduleAtFixedRate(mockAmqpsDeviceAuthenticationCBSTokenRenewalTask, 0, expectedRenewalTimeMillisecs, TimeUnit.MILLISECONDS);
-                times = 1;
+                times = 0;
             }
         };
     }
@@ -221,7 +205,6 @@ public class AmqpsSessionDeviceOperationTest
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "deviceClientConfig", mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "taskSchedulerTokenRenewal", mockScheduledExecutorService);
 
         // act
         amqpsSessionDeviceOperation.close();
@@ -230,10 +213,8 @@ public class AmqpsSessionDeviceOperationTest
         new Verifications()
         {
             {
-                mockScheduledExecutorService.shutdownNow();
-                times = 1;
                 Deencapsulation.invoke(mockAmqpsDeviceOperations, "closeLinks");
-                times = 3;
+                times = 1;
             }
         };
     }
@@ -306,46 +287,6 @@ public class AmqpsSessionDeviceOperationTest
         amqpsSessionDeviceOperation.authenticate();
     }
 
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_051: [The function start the authentication with the new token.]
-    @Test
-    public void renewTokenSuccess() throws IllegalArgumentException, TransportException
-    {
-        // arrange
-        final long tokenValidSecs = 3600;
-        final long expectedRenewalTimeMillisecs = 2700 * 1000;
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "taskSchedulerTokenRenewal", mockScheduledExecutorService);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockDeviceClientConfig.getSasTokenAuthentication();
-                result = mockIotHubSasTokenAuthenticationProvider;
-                mockIotHubSasTokenAuthenticationProvider.getTokenValidSecs();
-                result = tokenValidSecs;
-            }
-        };
-
-        // act
-        amqpsSessionDeviceOperation.renewToken();
-
-        // assert
-        AmqpsDeviceAuthenticationState authenticatorState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
-
-        assertEquals(AmqpsDeviceAuthenticationState.AUTHENTICATING, authenticatorState);
-
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthentication ,"authenticate", new Class[] {DeviceClientConfig.class, UUID.class}, (DeviceClientConfig) any, (UUID) any);
-                times = 1;
-            }
-        };
-    }
-
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_007: [The function shall return the current authentication state.]
     @Test
     public void getAmqpsAuthenticatorState() throws TransportException
@@ -367,11 +308,11 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        ArrayList<AmqpsDeviceOperations> operationList = new ArrayList<>();
-        operationList.add(mockAmqpsDeviceTelemetry);
-        operationList.add(mockAmqpsDeviceMethods);
-        operationList.add(mockAmqpsDeviceTwin);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsList", operationList);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
 
         new NonStrictExpectations()
         {
@@ -399,11 +340,11 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        ArrayList<AmqpsDeviceOperations> operationList = new ArrayList<>();
-        operationList.add(mockAmqpsDeviceTelemetry);
-        operationList.add(mockAmqpsDeviceMethods);
-        operationList.add(mockAmqpsDeviceTwin);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsList", operationList);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
 
         new NonStrictExpectations()
         {
@@ -433,14 +374,14 @@ public class AmqpsSessionDeviceOperationTest
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         // act
-        Deencapsulation.invoke(amqpsSessionDeviceOperation, "openLinks", mockSession);
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "openLinks", mockSession, DEVICE_TELEMETRY);
 
         // assert
         new Verifications()
         {
             {
                 Deencapsulation.invoke(mockAmqpsDeviceOperations, "openLinks", mockSession);
-                times = 3;
+                times = 1;
             }
         };
     }
@@ -460,7 +401,7 @@ public class AmqpsSessionDeviceOperationTest
         {
             {
                 Deencapsulation.invoke(mockAmqpsDeviceOperations, "closeLinks");
-                times = 3;
+                times = 1;
             }
         };
     }
@@ -481,7 +422,7 @@ public class AmqpsSessionDeviceOperationTest
         {
             {
                 Deencapsulation.invoke(mockAmqpsDeviceOperations, "initLink", mockLink);
-                times = 3;
+                times = 1;
             }
         };
     }
@@ -528,7 +469,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_014: [The function shall encode the message and copy the contents to the byte buffer.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_017: [The function shall set the delivery tag for the sender.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
+    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryTag on all device operation objects.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
     @Test
     public void sendMessageNoDelivery() throws IllegalArgumentException, TransportException
@@ -547,7 +488,7 @@ public class AmqpsSessionDeviceOperationTest
 
                 mockProtonMessage.encode(bytes, anyInt, anyInt);
 
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
                 result = mockAmqpsSendReturnValue;
                 Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = false;
@@ -573,7 +514,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_014: [The function shall encode the message and copy the contents to the byte buffer.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_017: [The function shall set the delivery tag for the sender.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryHash on all device operation objects.]
+    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_018: [The function shall call sendMessageAndGetDeliveryTag on all device operation objects.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_019: [The function shall return the delivery hash.]
     @Test
     public void sendMessageSuccess() throws IllegalArgumentException, TransportException
@@ -592,10 +533,12 @@ public class AmqpsSessionDeviceOperationTest
 
                 mockProtonMessage.encode(bytes, anyInt, anyInt);
 
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
                 result = mockAmqpsSendReturnValue;
                 Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = true;
+                mockAmqpsSendReturnValue.getDeliveryTag();
+                result = "12".getBytes();
 
                 mockDeviceClientConfig.getDeviceId();
                 result = "someDeviceId";
@@ -635,13 +578,16 @@ public class AmqpsSessionDeviceOperationTest
                 mockProtonMessage.encode(bytes, anyInt, anyInt);
                 result = new BufferOverflowException();
 
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, bytes, anyInt, anyInt, bytes);
                 result = mockAmqpsSendReturnValue;
                 Deencapsulation.invoke(mockAmqpsSendReturnValue, "isDeliverySuccessful");
                 result = true;
 
                 mockDeviceClientConfig.getDeviceId();
                 result = "someDeviceId";
+
+                mockAmqpsSendReturnValue.getDeliveryTag();
+                result = "12".getBytes();
             }
         };
 
@@ -893,9 +839,9 @@ public class AmqpsSessionDeviceOperationTest
         cbsCorrelationIdList.add(mockUUID);
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.UNKNOWN);
-        ArrayList<AmqpsDeviceOperations> operationList = new ArrayList<>();
-        operationList.add(mockAmqpsDeviceTelemetry);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsList", operationList);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
 
         new NonStrictExpectations()
         {
@@ -981,6 +927,8 @@ public class AmqpsSessionDeviceOperationTest
             {
                 Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "convertToProton", mockMessage);
                 result = mockAmqpsConvertToProtonReturnValue;
+                mockMessage.getMessageType();
+                result = DEVICE_TELEMETRY;
             }
         };
 
@@ -994,7 +942,7 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_040: [The function shall call all device operation's convertToProton, and if any of them not null return with the value.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_041: [The function shall call all device operation's convertFromProton, and if any of them not null return with the value.]
     @Test
-    public void convertFromoProtonSuccess() throws IllegalArgumentException, TransportException
+    public void convertFromProtonSuccess() throws IllegalArgumentException, TransportException
     {
         // arrange
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
@@ -1004,6 +952,8 @@ public class AmqpsSessionDeviceOperationTest
             {
                 Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
                 result = mockAmqpsConvertFromProtonReturnValue;
+                mockAmqpsMessage.getAmqpsMessageType();
+                result = DEVICE_TELEMETRY;
             }
         };
 
@@ -1012,5 +962,175 @@ public class AmqpsSessionDeviceOperationTest
 
         // assert
         assertTrue(mockAmqpsConvertFromProtonReturnValue == actualAmqpsConvertFromProtonReturnValue);
+    }
+
+    @Test
+    public void onLinkFlowSendsToWorkerLink()
+    {
+        //arrange
+        final String targetLinkPrefix = "somelinkprefix-";
+        final String telemetryLinkName = "telemetry";
+        final String twinLinkName = "twin";
+        final String methodLinkName = "method";
+        final int expectedCredit = 1234;
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getCredit();
+                result = expectedCredit;
+
+                mockLink.getName();
+                result = targetLinkPrefix + telemetryLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "getSenderLinkTag");
+                result = targetLinkPrefix + telemetryLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceTwin, "getSenderLinkTag");
+                result = targetLinkPrefix + twinLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceMethods, "getSenderLinkTag");
+                result = targetLinkPrefix + methodLinkName;
+            }
+        };
+
+        //act
+        amqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockAmqpsDeviceTelemetry.onLinkFlow(expectedCredit);
+            }
+        };
+    }
+
+    @Test
+    public void onLinkFlowSendsToAuthenticationLink()
+    {
+        //arrange
+        final String targetLinkPrefix = "somelinkprefix-";
+        final String telemetryLinkName = "telemetry";
+        final String twinLinkName = "twin";
+        final String methodLinkName = "method";
+        final String cbsLinkName = "cbs";
+        final int expectedCredit = 1234;
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getCredit();
+                result = expectedCredit;
+
+                mockLink.getName();
+                result = targetLinkPrefix + cbsLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "getSenderLinkTag");
+                result = targetLinkPrefix + telemetryLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceTwin, "getSenderLinkTag");
+                result = targetLinkPrefix + twinLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceMethods, "getSenderLinkTag");
+                result = targetLinkPrefix + methodLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "getSenderLinkTag");
+                result = targetLinkPrefix + cbsLinkName;
+            }
+        };
+
+        //act
+        amqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockAmqpsDeviceAuthenticationCBS.onLinkFlow(expectedCredit);
+            }
+        };
+    }
+
+    @Test
+    public void onLinkFlowSendsToNoLink()
+    {
+        //arrange
+        final String targetLinkPrefix = "somelinkprefix-";
+        final String telemetryLinkName = "telemetry";
+        final String twinLinkName = "twin";
+        final String methodLinkName = "method";
+        final String cbsLinkName = "cbs";
+        final int expectedCredit = 1234;
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+        new NonStrictExpectations()
+        {
+            {
+                mockEvent.getLink();
+                result = mockLink;
+
+                mockLink.getCredit();
+                result = expectedCredit;
+
+                mockLink.getName();
+                result = targetLinkPrefix + "some-unknown-link";
+
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "getSenderLinkTag");
+                result = targetLinkPrefix + telemetryLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceTwin, "getSenderLinkTag");
+                result = targetLinkPrefix + twinLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceMethods, "getSenderLinkTag");
+                result = targetLinkPrefix + methodLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "getSenderLinkTag");
+                result = targetLinkPrefix + cbsLinkName;
+            }
+        };
+
+        //act
+        amqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockAmqpsDeviceAuthenticationCBS.onLinkFlow(expectedCredit);
+                times = 0;
+
+                mockAmqpsDeviceTelemetry.onLinkFlow(expectedCredit);
+                times = 0;
+
+                mockAmqpsDeviceTwin.onLinkFlow(expectedCredit);
+                times = 0;
+
+                mockAmqpsDeviceMethods.onLinkFlow(expectedCredit);
+                times = 0;
+            }
+        };
     }
 }

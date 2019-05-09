@@ -5,10 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.ErrorInjectionHelper;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.MessageAndResult;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -32,20 +29,23 @@ import static org.junit.Assert.assertEquals;
  */
 public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
 {
-    public DesiredPropertiesErrInjTests(String deviceId, String moduleId, IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DesiredPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
-        super(deviceId, moduleId, protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromTcpConnectionDrop() throws Exception
     {
+        super.setUpNewDeviceAndModule();
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -53,12 +53,15 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -66,12 +69,15 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSReqLinkrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -85,12 +91,15 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -104,12 +113,15 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsD2CDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -117,12 +129,15 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromC2DDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -137,12 +152,15 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -157,18 +175,23 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
             return;
         }
 
+        super.setUpNewDeviceAndModule();
+
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
         {
             return;
         }
+
+        super.setUpNewDeviceAndModule();
 
         if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
         {
@@ -180,47 +203,6 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
         this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    public void subscribeToDesiredPropertiesRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Method Req link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
-
-        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsMethodReqLinkDropErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    public void subscribeToDesiredPropertiesRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Method Resp link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
-
-        this.errorInjectionSubscribeToDesiredPropertiesFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-
     }
 
     public void errorInjectionSubscribeToDesiredPropertiesFlow(Message errorInjectionMessage) throws Exception

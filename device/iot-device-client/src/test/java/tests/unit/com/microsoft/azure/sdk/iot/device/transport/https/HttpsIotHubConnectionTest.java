@@ -21,8 +21,10 @@ import org.junit.Test;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -56,7 +58,8 @@ public class HttpsIotHubConnectionTest
     ResponseMessage mockResponseMessage;
     @Mocked
     IotHubTransportMessage mockedTransportMessage;
-
+    @Mocked
+    ScheduledExecutorService mockedScheduledExecutorService;
 
     private static final String testSasToken = "SharedAccessSignature sr=test&sig=test&se=0";
 
@@ -66,7 +69,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result=testSasToken;
             }
         };
@@ -262,7 +265,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = tokenStr;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
@@ -352,6 +355,43 @@ public class HttpsIotHubConnectionTest
             {
                 mockRequest.setHeaderField(MessageProperty.IOTHUB_CONTENT_TYPE, contentType);
                 mockRequest.setHeaderField(MessageProperty.IOTHUB_CONTENT_ENCODING, contentEncoding);
+            }
+        };
+    }
+
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_34_075: [If the provided message has a creation time utc, this function shall set the request header to include that value with the key "iothub-contenttype".]
+    @Test
+    public void sendEventSetsCreationTimeUtcIfPresent(@Mocked final IotHubEventUri mockUri) throws TransportException
+    {
+        final String expectedCreationTimeUTCString = "1969-12-31T16:00:00.0000000";
+        new NonStrictExpectations()
+        {
+            {
+                new IotHubEventUri((String)any, (String)any, null);
+                result = mockUri;
+                new HttpsRequest((URL)any, HttpsMethod.POST, (byte[]) any, anyString);
+                result = mockRequest;
+                mockUri.getPath();
+                result = "some path";
+                mockedMessage.getCreationTimeUTC();
+                result = new Date(0);
+                mockedMessage.getCreationTimeUTCString();
+                result = expectedCreationTimeUTCString;
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.setListener(mockedListener);
+
+        //act
+        conn.sendMessage(mockedMessage);
+
+        new Verifications()
+        {
+            {
+                mockRequest.setHeaderField(MessageProperty.IOTHUB_CREATION_TIME_UTC, expectedCreationTimeUTCString);
             }
         };
     }
@@ -627,7 +667,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = tokenStr;
             }
         };
@@ -876,7 +916,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = tokenStr;
             }
         };
@@ -1517,7 +1557,7 @@ public class HttpsIotHubConnectionTest
                 result = iotHubHostname;
                 mockConfig.getDeviceId();
                 result = deviceId;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 result = tokenStr;
             }
         };
@@ -1706,7 +1746,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 times = 1;
             }
         };
@@ -1733,7 +1773,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false);
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 times = 1;
             }
         };
@@ -1994,7 +2034,7 @@ public class HttpsIotHubConnectionTest
     public void openAndCloseDoNothing() throws IOException, TransportException
     {
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
-        connection.open(null);
-        connection.close(false);
+        connection.open(null, mockedScheduledExecutorService);
+        connection.close();
     }
 }

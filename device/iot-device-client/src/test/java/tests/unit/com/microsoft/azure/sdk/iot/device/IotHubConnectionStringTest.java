@@ -93,6 +93,25 @@ public class IotHubConnectionStringTest
         assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getGatewayHostName());
     }
 
+    // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
+    // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_043: [The getGatewayHostName shall return the stored gateway host name.]
+    @Test
+    public void ConstructorSavesAttributesCaseInsensitively() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HOSTNAME=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;" +
+                "DeVicEid=" + VALID_DEVICEID + ";SharedACCESSKey=" + VALID_SHARED_ACCESS_KEY + ";MoDuLeId=" +
+                VALID_MODULEID +";GATeWayHOstnaMe=" + VALID_GATEWAYHOSTNAME + ";";
+
+        //act
+        IotHubConnectionString connectionString = new IotHubConnectionString(connString);
+
+        //assert
+        assertEquals(VALID_MODULEID, connectionString.getModuleId());
+        assertEquals(VALID_HOSTNAME, connectionString.getHostName());
+        assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getGatewayHostName());
+    }
+
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_020: [The constructor shall save the IoT Hub hostname as the value of `hostName` in the connection string.] */
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_021: [The constructor shall save the first part of the IoT Hub hostname as the value of `hubName`, hostname split by `.`.] */
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_022: [The constructor shall save the device ID as the UTF-8 URL-decoded value of `deviceId` in the connection string.] */

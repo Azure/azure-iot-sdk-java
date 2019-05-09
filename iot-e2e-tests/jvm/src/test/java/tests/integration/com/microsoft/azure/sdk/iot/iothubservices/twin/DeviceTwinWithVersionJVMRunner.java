@@ -18,7 +18,7 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class DeviceTwinWithVersionJVMRunner extends DeviceTwinWithVersionTests
 {
-    public DeviceTwinWithVersionJVMRunner(IotHubClientProtocol protocol)
+    public DeviceTwinWithVersionJVMRunner(IotHubClientProtocol protocol) throws IOException
     {
         super(protocol);
     }
@@ -28,6 +28,7 @@ public class DeviceTwinWithVersionJVMRunner extends DeviceTwinWithVersionTests
     public static Collection inputs() throws IOException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         return inputsCommon();
     }
 }

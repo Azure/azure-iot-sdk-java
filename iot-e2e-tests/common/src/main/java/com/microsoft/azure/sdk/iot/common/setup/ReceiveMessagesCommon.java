@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.io.IOException;
@@ -42,17 +43,9 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     // variables used in E2E test for sending back to back messages using C2D sendAsync method
     protected static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to be sent in a loop
-    protected static final List messageIdListStoredOnC2DSend = new ArrayList(); // store the message id list on sending C2D commands using service client
-    protected static final List messageIdListStoredOnReceive = new ArrayList(); // store the message id list on receiving C2D commands using device client
 
     protected static String iotHubConnectionString = "";
     protected static RegistryManager registryManager;
-
-    protected static Device device;
-    protected static Device deviceX509;
-
-    protected static Module module;
-    protected static Module moduleX509;
 
     protected static ServiceClient serviceClient;
 
@@ -66,23 +59,9 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public ReceiveMessagesTestInstance testInstance;
 
-    public ReceiveMessagesCommon(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public ReceiveMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        this.testInstance = new ReceiveMessagesTestInstance(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
-    }
-
-    protected static Collection<BaseDevice> getIdentities(Collection inputs)
-    {
-        Set<BaseDevice> identities = new HashSet<>();
-
-        Object[] inputArray = inputs.toArray();
-        for (int i = 0; i < inputs.size(); i++)
-        {
-            Object[] inputsInstance = (Object[]) inputArray[i];
-            identities.add((BaseDevice) inputsInstance[2]);
-        }
-
-        return identities;
+        this.testInstance = new ReceiveMessagesTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @BeforeClass
@@ -101,41 +80,15 @@ public class ReceiveMessagesCommon extends IntegrationTest
         }
     }
 
+    protected static Collection inputsCommon(ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
+    {
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        return inputsCommon(clientType, certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
+    }
+
     protected static Collection inputsCommon(ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        String uuid = UUID.randomUUID().toString();
-
-        String deviceId = "java-device-client-e2e-test-receive-messages".concat("-" + uuid);
-        String deviceIdX509 = "java-device-client-e2e-test-receive-messages-x509".concat("-" + uuid);
-        String moduleId = "java-module-client-e2e-test-receive-messages".concat("-" + uuid);
-        String moduleIdX509 = "java-module-client-e2e-test-receive-messages-X509".concat("-" + uuid);
-
-        device = Device.createFromId(deviceId, null, null);
-        deviceX509 = Device.createDevice(deviceIdX509, SELF_SIGNED);
-
-        module = Module.createFromId(deviceId, moduleId, null);
-        moduleX509 = Module.createModule(deviceIdX509, moduleIdX509, SELF_SIGNED);
-
-        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-        moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-
-        module = Module.createFromId(deviceId, moduleId, null);
-        moduleX509 = Module.createModule(deviceIdX509, moduleIdX509, SELF_SIGNED);
-
-        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-        moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-
-        Tools.addDeviceWithRetry(registryManager, device);
-        Tools.addDeviceWithRetry(registryManager, deviceX509);
-
-        if (clientType == ClientType.MODULE_CLIENT)
-        {
-            Tools.addModuleWithRetry(registryManager, module);
-            Tools.addModuleWithRetry(registryManager, moduleX509);
-        }
-
-        Thread.sleep(2000);
 
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
@@ -151,17 +104,16 @@ public class ReceiveMessagesCommon extends IntegrationTest
             inputs = Arrays.asList(
                     new Object[][]
                             {
-                                    //sas token
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), HTTPS), HTTPS, device, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT), MQTT, device, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), MQTT_WS), MQTT_WS, device, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    //sas token module client
+                                    {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
 
-                                    //x509
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), HTTPS, publicKeyCert, false, privateKey, false), HTTPS, deviceX509, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, deviceX509, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
+                                    //x509 module client
+                                    {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
                             }
             );
         }
@@ -171,14 +123,15 @@ public class ReceiveMessagesCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token module client
-                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT), MQTT, module, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), MQTT_WS), MQTT_WS, module, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS), AMQPS, module, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), AMQPS_WS), AMQPS_WS, module, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
 
                                     //x509 module client
-                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), MQTT, publicKeyCert, false, privateKey, false), MQTT, moduleX509, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                    {new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, moduleX509, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}                           }
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
+                            }
             );
         }
 
@@ -196,36 +149,102 @@ public class ReceiveMessagesCommon extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
 
-        public ReceiveMessagesTestInstance(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+        public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
         {
-            this.client = client;
             this.protocol = protocol;
-            this.identity = identity;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
         }
-    }
 
-    protected static void tearDown(Collection<BaseDevice> identitiesToDispose)
-    {
-        if (registryManager != null)
+        public void setup() throws Exception
         {
-            Tools.removeDevicesAndModules(registryManager, identitiesToDispose);
-            registryManager.close();
-            registryManager = null;
+            String TEST_UUID = UUID.randomUUID().toString();
+
+            /* Create unique device names */
+            String deviceId = "java-method-e2e-test-device".concat("-" + TEST_UUID);
+            String moduleId = "java-method-e2e-test-module".concat("-" + TEST_UUID);
+            String deviceX509Id = "java-method-e2e-test-device-x509".concat("-" + TEST_UUID);
+            String moduleX509Id = "java-method-e2e-test-module-x509".concat("-" + TEST_UUID);
+
+            /* Create device on the service */
+            Device device = Device.createFromId(deviceId, null, null);
+            Module module = Module.createFromId(deviceId, moduleId, null);
+
+            Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
+            deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
+            moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            device = Tools.addDeviceWithRetry(registryManager, device);
+            deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
+
+            if (clientType == ClientType.DEVICE_CLIENT)
+            {
+                if (authenticationType == SAS)
+                {
+                    //sas device client
+                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
+                    this.identity = device;
+                }
+                else if (authenticationType == SELF_SIGNED)
+                {
+                    //x509 device client
+                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, publicKeyCert, false, privateKey, false);
+                    this.identity = deviceX509;
+                }
+                else
+                {
+                    throw new Exception("Test code has not been written for this path yet");
+                }
+            }
+            else if (clientType == ClientType.MODULE_CLIENT)
+            {
+                if (authenticationType == SAS)
+                {
+                    //sas module client
+                    module = Tools.addModuleWithRetry(registryManager, module);
+                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
+                    this.identity = module;
+                }
+                else if (authenticationType == SELF_SIGNED)
+                {
+                    //x509 module client
+                    moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
+                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, publicKeyCert, false, privateKey, false);
+                    this.identity = moduleX509;
+                }
+                else
+                {
+                    throw new Exception("Test code has not been written for this path yet");
+                }
+            }
+        }
+
+        public void dispose()
+        {
+            try
+            {
+                this.client.closeNow();
+                registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
+            }
+            catch (Exception e)
+            {
+                //not a big deal if dispose fails. This test suite is not testing the functions in this cleanup.
+                // If identities are left registered, they will be deleted my nightly cleanup job anyways
+            }
         }
     }
 
-    @After
-    public void delayTests()
+    public void setupTest() throws Exception
     {
-        //since these lists are recycled between multiple tests, they need to be cleared between each test
-        messageIdListStoredOnC2DSend.clear();
-        messageIdListStoredOnReceive.clear();
+        testInstance.setup();
+    }
 
+    @After
+    public void tearDownTest() throws IOException, IotHubException
+    {
         try
         {
             Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
@@ -235,10 +254,19 @@ public class ReceiveMessagesCommon extends IntegrationTest
             e.printStackTrace();
             TestCase.fail("Unexpected exception encountered");
         }
+
+        testInstance.dispose();
     }
 
     public static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
+        private List messageIdListStoredOnReceive;
+
+        public MessageCallbackForBackToBackC2DMessages(List messageIdListStoredOnReceive)
+        {
+            this.messageIdListStoredOnReceive = messageIdListStoredOnReceive;
+        }
+
         public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {
             messageIdListStoredOnReceive.add(msg.getMessageId()); // add received messsage id to messageList
@@ -356,7 +384,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         }
     }
 
-    protected void waitForBackToBackC2DMessagesToBeReceived()
+    protected void waitForBackToBackC2DMessagesToBeReceived(List messageIdListStoredOnReceive)
     {
         try
         {

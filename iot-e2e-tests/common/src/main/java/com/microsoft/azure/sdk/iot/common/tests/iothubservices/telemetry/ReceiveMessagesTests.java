@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices.telemetry;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon;
-import com.microsoft.azure.sdk.iot.common.helpers.Success;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.ReceiveMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
@@ -17,12 +15,14 @@ import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -33,14 +33,19 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
  */
 public class ReceiveMessagesTests extends ReceiveMessagesCommon
 {
-    public ReceiveMessagesTests(InternalClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public ReceiveMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        super(client, protocol, identity, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
 
-        System.out.println(clientType + " ReceiveMessagesTests UUID: " + (identity instanceof Module ? ((Module) identity).getId() : identity.getDeviceId()));
+    @Before
+    public void setupTest() throws Exception
+    {
+        super.setupTest();
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveMessagesOverIncludingProperties() throws Exception
     {
         if (testInstance.protocol == HTTPS)
@@ -84,8 +89,11 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
     }
 
     @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveBackToBackUniqueC2DCommandsOverAmqpsUsingSendAsync() throws Exception
     {
+        List messageIdListStoredOnC2DSend = new ArrayList(); // store the message id list on sending C2D commands using service client
+        List messageIdListStoredOnReceive = new ArrayList(); // store the message id list on receiving C2D commands using device client
 
         if (this.testInstance.protocol != AMQPS)
         {
@@ -100,7 +108,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         IotHubServicesCommon.openClientWithRetry(testInstance.client);
 
         // set call back for device client for receiving message
-        com.microsoft.azure.sdk.iot.device.MessageCallback callBackOnRx = new MessageCallbackForBackToBackC2DMessages();
+        com.microsoft.azure.sdk.iot.device.MessageCallback callBackOnRx = new MessageCallbackForBackToBackC2DMessages(messageIdListStoredOnReceive);
 
         if (testInstance.client instanceof DeviceClient)
         {
@@ -136,11 +144,13 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
             }
         }
 
+        int futureTimeout = 3;
+
         for (CompletableFuture<Void> future : futureList)
         {
             try
             {
-                future.get();
+                future.get(futureTimeout, TimeUnit.MINUTES);
             }
             catch (ExecutionException e)
             {
@@ -149,7 +159,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         }
 
         // Now wait for messages to be received in the device client
-        waitForBackToBackC2DMessagesToBeReceived();
+        waitForBackToBackC2DMessagesToBeReceived(messageIdListStoredOnReceive);
         testInstance.client.closeNow(); //close the device client connection
         Assert.assertTrue(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Received messages don't match up with sent messages", testInstance.client), messageIdListStoredOnReceive.containsAll(messageIdListStoredOnC2DSend)); // check if the received list is same as the actual list that was created on sending the messages
         messageIdListStoredOnReceive.clear();

@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
@@ -21,7 +22,6 @@ public class IotHubConnectionStringBuilder
     private static final String SHARED_ACCESS_SIGNATURE_REGEX = "^.+$";
 
     private String hostNameSuffix;
-    private static final HashMap<String, String> keyValueMap = new HashMap<String, String>();
 
     /**
      * Static constructor to create IotHubConnectionString deserialize the given string
@@ -80,6 +80,8 @@ public class IotHubConnectionStringBuilder
      */
     protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString) throws IOException
     {
+        Map<String, String> keyValueMap = new HashMap<String, String>();
+
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_006: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))
         {
@@ -93,7 +95,6 @@ public class IotHubConnectionStringBuilder
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_008: [The function shall throw exception if tokenizing or parsing failed]
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_009: [The function shall tokenize and parse the given connection string and fill up the target IotHubConnectionString object with proper values]
-        keyValueMap.clear();
         StringTokenizer stringTokenizer1 = new StringTokenizer(connectionString, IotHubConnectionString.VALUE_PAIR_DELIMITER);
         while (stringTokenizer1.hasMoreTokens())
         {
@@ -101,7 +102,9 @@ public class IotHubConnectionStringBuilder
 
             String[] splitString = currentToken.split(IotHubConnectionString.VALUE_PAIR_SEPARATOR, 2);
             if (splitString.length == 2)
+            {
                 keyValueMap.put(splitString[0], splitString[1]);
+            }
         }
 
         iotHubConnectionString.hostName = Tools.getValueStringByKey(keyValueMap, IotHubConnectionString.HOST_NAME_PROPERTY_NAME);

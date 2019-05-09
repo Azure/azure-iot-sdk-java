@@ -23,10 +23,6 @@ public class AmqpsSessionManager
     private AmqpsDeviceAuthentication amqpsDeviceAuthentication;
     private ArrayList<AmqpsSessionDeviceOperation> amqpsDeviceSessionList = new ArrayList<>();
 
-    private long SEND_PERIOD_MILLISECONDS = 300;
-    private ScheduledExecutorService taskSchedulerCBSSend;
-    private AmqpsDeviceAuthenticationCBSSendTask cbsAuthSendTask = null;
-
     private static final int MAX_WAIT_TO_AUTHENTICATE_MS = 10*1000;
 
     private final ObjectLock openLinksLock = new ObjectLock();
@@ -40,18 +36,12 @@ public class AmqpsSessionManager
      *                           session management.
      * @throws TransportException if a transport error occurs.
      */
-    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig, ScheduledExecutorService scheduledExecutorService) throws TransportException
+    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig) throws TransportException
     {
         // Codes_SRS_AMQPSESSIONMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
         if (deviceClientConfig == null)
         {
             throw new IllegalArgumentException("deviceClientConfig cannot be null.");
-        }
-
-        // Codes_SRS_AMQPSESSIONMANAGER_28_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
-        if (scheduledExecutorService == null)
-        {
-            throw new IllegalArgumentException("scheduledExecutorService cannot be null.");
         }
 
         this.logger = new CustomLogger(this.getClass());
@@ -65,11 +55,6 @@ public class AmqpsSessionManager
             case SAS_TOKEN:
                 // Codes_SRS_AMQPSESSIONMANAGER_12_005: [The constructor shall create AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
                 this.amqpsDeviceAuthentication = new AmqpsDeviceAuthenticationCBS(this.deviceClientConfig);
-
-                // Codes_SRS_AMQPSESSIONMANAGER_12_006: [The constructor shall create and start a scheduler for AmqpsDeviceAuthenticationCBSTokenRenewalTask if the authentication type is CBS.]
-                this.cbsAuthSendTask = new AmqpsDeviceAuthenticationCBSSendTask((AmqpsDeviceAuthenticationCBS) this.amqpsDeviceAuthentication);
-                this.taskSchedulerCBSSend = scheduledExecutorService;
-                this.taskSchedulerCBSSend.scheduleAtFixedRate(this.cbsAuthSendTask, 0, SEND_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
                 break;
 
             case X509_CERTIFICATE:
@@ -94,7 +79,7 @@ public class AmqpsSessionManager
             throw new IllegalArgumentException("deviceClientConfig cannot be null.");
         }
 
-        // Codes_SRS_AMQPSESSIONMANAGER_12_009: [The function shall create a new  AmqpsSessionDeviceOperation with the given deviceClietnConfig and add it to the session list.]
+        // Codes_SRS_AMQPSESSIONMANAGER_12_009: [The function shall create a new  AmqpsSessionDeviceOperation with the given deviceClientConfig and add it to the session list.]
         AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(deviceClientConfig, this.amqpsDeviceAuthentication);
         this.amqpsDeviceSessionList.add(amqpsSessionDeviceOperation);
     }
@@ -107,9 +92,6 @@ public class AmqpsSessionManager
     void closeNow()
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
-
-        // Codes_SRS_AMQPSESSIONMANAGER_12_043: [THe function shall shut down the scheduler.]
-        this.shutDownScheduler();
 
         // Codes_SRS_AMQPSESSIONMANAGER_12_010: [The function shall call all device session to closeNow links.]
         for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
@@ -167,7 +149,7 @@ public class AmqpsSessionManager
      *
      * @throws TransportException if open lock throws.
      */
-    public void openDeviceOperationLinks() throws TransportException
+    public void openDeviceOperationLinks(MessageType msgType) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -179,19 +161,20 @@ public class AmqpsSessionManager
                 if (this.amqpsDeviceSessionList.get(i) != null)
                 {
                     // Codes_SRS_AMQPSESSIONMANAGER_12_019: [The function shall call openLinks on all session list members.]
-                    this.amqpsDeviceSessionList.get(i).openLinks(this.session);
-
-                    synchronized (this.openLinksLock)
+                    if (this.amqpsDeviceSessionList.get(i).openLinks(this.session, msgType))
                     {
-                        try
+                        synchronized (this.openLinksLock)
                         {
-                            // Codes_SRS_AMQPSESSIONMANAGER_12_020: [The function shall lock the execution with waitLock.]
-                            this.openLinksLock.waitLock(MAX_WAIT_TO_AUTHENTICATE_MS);
-                        }
-                        catch (InterruptedException e)
-                        {
-                            // Codes_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw TransportException if the lock throws.]
-                            throw new TransportException("Waited too long for the connection to onConnectionInit.");
+                            try
+                            {
+                                // Codes_SRS_AMQPSESSIONMANAGER_12_020: [The function shall lock the execution with waitLock.]
+                                this.openLinksLock.waitLock(MAX_WAIT_TO_AUTHENTICATE_MS);
+                            }
+                            catch (InterruptedException e)
+                            {
+                                // Codes_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw TransportException if the lock throws.]
+                                throw new TransportException("Waited too long for the connection to onConnectionInit.");
+                            }
                         }
                     }
                 }
@@ -206,11 +189,13 @@ public class AmqpsSessionManager
      * Open the session and the links. 
      *
      * @param connection the Proton connection object to work with.
+     * @return Boolean true if connection is ready, otherwise false to indicate authentication links open in progress
      */
-    void onConnectionInit(Connection connection) throws TransportException
+    Boolean onConnectionInit(Connection connection) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
+        Boolean ret = false;
         if (connection != null)
         {
             if (this.session == null)
@@ -226,11 +211,7 @@ public class AmqpsSessionManager
         {
             if (this.isAuthenticationOpened())
             {
-                for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
-                {
-                    // Codes_SRS_AMQPSESSIONMANAGER_12_042: [The function shall call openLinks on all device sessions if the session is not null and the authentication is open.]
-                    this.amqpsDeviceSessionList.get(i).openLinks(this.session);
-                }
+                ret = true;
             }
             else
             {
@@ -240,6 +221,7 @@ public class AmqpsSessionManager
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
+        return ret;
     }
 
     /**
@@ -321,11 +303,13 @@ public class AmqpsSessionManager
                 {
                     if (this.amqpsDeviceSessionList.get(i).operationLinksOpened())
                     {
+                        logger.LogDebug("before notify openLinksLock.");
                         synchronized (this.openLinksLock)
                         {
                             // Codes_SRS_AMQPSESSIONMANAGER_12_031: [The function shall call authentication isLinkFound if the authentication is not open and return true if both links are open]
                             this.openLinksLock.notifyLock();
                         }
+                        logger.LogDebug("after notify openLinksLock.");
                         break;
                     }
                 }
@@ -360,27 +344,27 @@ public class AmqpsSessionManager
      */
     Integer sendMessage(org.apache.qpid.proton.message.Message message, MessageType messageType, String deviceId) throws TransportException
     {
-        Integer deliveryHash = -1;
+        Integer deliveryTag = -1;
 
         if (this.session != null)
         {
             for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
             {
                 // Codes_SRS_AMQPSESSIONMANAGER_12_032: [The function shall call sendMessage on all session list member and if there is a successful send return with the deliveryHash, otherwise return -1.]
-                deliveryHash = this.amqpsDeviceSessionList.get(i).sendMessage(message, messageType, deviceId);
-                if (deliveryHash != -1)
+                deliveryTag = this.amqpsDeviceSessionList.get(i).sendMessage(message, messageType, deviceId);
+                if (deliveryTag != -1)
                 {
                     break;
                 }
             }
         }
 
-        return deliveryHash;
+        return deliveryTag;
     }
 
     /**
      * Delegate the onDelivery call to device operation objects.
-     * Loop through the device operation list and find the receiver 
+     * Loop through the device operation list and find the receiver `
      * object by link name. 
      *
      * @param linkName the link name to identify the receiver.
@@ -415,38 +399,6 @@ public class AmqpsSessionManager
         }
 
         return amqpsMessage;
-    }
-
-    /**
-     * Find the link by link name in the managed device operations. 
-     *
-     * @param linkName the name to find.
-     *
-     * @return Boolean true if found, false otherwise.
-     */
-    boolean isLinkFound(String linkName)
-    {
-        Boolean isLinkFound = false;
-
-        if (this.isAuthenticationOpened())
-        {
-            for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
-            {
-                // Codes_SRS_AMQPSESSIONMANAGER_12_038: [The function shall call all device session's isLinkFound, and if any of them true return true otherwise return false.]
-                isLinkFound = this.amqpsDeviceSessionList.get(i).isLinkFound(linkName);
-                if (isLinkFound == true)
-                {
-                    break;
-                }
-            }
-        }
-        else
-        {
-            // Codes_SRS_AMQPSESSIONMANAGER_12_037: [The function shall return with the authentication isLinkFound's return value if the authentication is not open.]
-            isLinkFound = this.amqpsDeviceAuthentication.isLinkFound(linkName);
-        }
-
-        return isLinkFound;
     }
 
     boolean areAllLinksOpen()
@@ -537,33 +489,13 @@ public class AmqpsSessionManager
         return amqpsConvertFromProtonReturnValue;
     }
 
-    /**
-     * Shut down the CBS authentication sender thread
-     */
-    private void shutDownScheduler()
+    public void onLinkFlow(Event event)
     {
-        if (this.taskSchedulerCBSSend != null)
+        for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
         {
-            this.taskSchedulerCBSSend.shutdown(); // Disable new tasks from being submitted
-            try
+            if (this.amqpsDeviceSessionList.get(i).onLinkFlow(event))
             {
-                // Wait a while for existing tasks to terminate
-                if (!this.taskSchedulerCBSSend.awaitTermination(10, TimeUnit.SECONDS))
-                {
-                    this.taskSchedulerCBSSend.shutdownNow(); // Cancel currently executing tasks
-                    // Wait a while for tasks to respond to being cancelled
-                    if (!this.taskSchedulerCBSSend.awaitTermination(10, TimeUnit.SECONDS))
-                    {
-                        System.err.println("taskSchedulerTokenRenewal did not terminate correctly");
-                    }
-                }
-            }
-            catch (InterruptedException ie)
-            {
-                // (Re-)Cancel if current thread also interrupted
-                this.taskSchedulerCBSSend.shutdownNow();
-                // Preserve interrupt status
-                Thread.currentThread().interrupt();
+                break;
             }
         }
     }

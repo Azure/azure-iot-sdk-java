@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import java.util.Queue;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Interface of what all a Transport Connection object must do. Serves to decouple the Message Queueing of the
@@ -27,7 +28,7 @@ public interface IotHubTransportConnection
      *                            will be used
      * @throws TransportException If any exceptions are encountered while opening the connection
      */
-    void open(Queue<DeviceClientConfig> deviceClientConfigs) throws TransportException;
+    void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService) throws TransportException;
 
     /**
      * Sets a listener into the Transport Connection object. This listener updates the Transport layer of connection status
@@ -39,10 +40,9 @@ public interface IotHubTransportConnection
 
     /**
      * Closes the transport connection.
-     * @param isReconnecting if the caller is in the process of reconnecting or not
      * @throws TransportException If any exceptions are encountered while closing.
      */
-    void close(boolean isReconnecting) throws TransportException;
+    void close() throws TransportException;
 
     /**
      * Send a single message to the IotHub over the Transport Connection

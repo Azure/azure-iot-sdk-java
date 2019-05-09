@@ -5,10 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
+import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
 import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.service.*;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 
@@ -30,7 +31,7 @@ public class ServiceClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";
-    private static String deviceId = "java-service-client-e2e-test";
+    private static String deviceIdPrefix = "java-service-client-e2e-test";
     private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
     private static String hostName;
 
@@ -44,10 +45,13 @@ public class ServiceClientTests extends IntegrationTest
     private class ServiceClientITRunner
     {
         private IotHubServiceClientProtocol protocol;
+        private String deviceId;
 
         public ServiceClientITRunner(IotHubServiceClientProtocol protocol)
         {
             this.protocol = protocol;
+            this.deviceId = deviceIdPrefix.concat("-" + UUID.randomUUID().toString());
+
         }
     }
 
@@ -57,8 +61,6 @@ public class ServiceClientTests extends IntegrationTest
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputsCommon() throws IOException
     {
-        String uuid = UUID.randomUUID().toString();
-        deviceId = deviceId.concat("-" + uuid);
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
 
 
@@ -74,6 +76,7 @@ public class ServiceClientTests extends IntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void cloudToDeviceTelemetry() throws Exception
     {
         // Arrange
@@ -81,19 +84,10 @@ public class ServiceClientTests extends IntegrationTest
         // We remove and recreate the device for a clean start
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
-        try
-        {
-            // We remove and recreate the device for a clean start
-            registryManager.removeDevice(deviceId);
-        }
-        catch (IOException|IotHubException e)
-        {
-        }
-
-        Device deviceAdded = Device.createFromId(deviceId, null, null);
+        Device deviceAdded = Device.createFromId(testInstance.deviceId, null, null);
         Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
-        Device deviceGetBefore = registryManager.getDevice(deviceId);
+        Device deviceGetBefore = registryManager.getDevice(testInstance.deviceId);
 
         // Act
 
@@ -104,14 +98,14 @@ public class ServiceClientTests extends IntegrationTest
 
         Message message = new Message(content.getBytes());
 
-        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(deviceId, message);
+        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(testInstance.deviceId, message);
         completableFuture.get();
 
-        Device deviceGetAfter = registryManager.getDevice(deviceId);
+        Device deviceGetAfter = registryManager.getDevice(testInstance.deviceId);
         CompletableFuture<Void> futureClose = serviceClient.closeAsync();
         futureClose.get();
 
-        registryManager.removeDevice(deviceId);
+        registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
@@ -131,7 +125,7 @@ public class ServiceClientTests extends IntegrationTest
         try
         {
             serviceClient.open();
-            serviceClient.send(deviceId, new Message("some message"));
+            serviceClient.send(testInstance.deviceId, new Message("some message"));
         }
         catch (IOException e)
         {

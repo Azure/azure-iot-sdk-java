@@ -8,10 +8,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
@@ -501,7 +498,7 @@ public class AmqpsDeviceOperationsTest
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", null);
 
         //act
-        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
     }
 
     // Tests_SRS_AMQPSDEVICEOPERATIONS_12_020: [The function shall throw IllegalArgumentException if the deliveryTag length is zero.]
@@ -517,7 +514,7 @@ public class AmqpsDeviceOperationsTest
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
 
         //act
-        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
     }
 
     /*
@@ -535,9 +532,9 @@ public class AmqpsDeviceOperationsTest
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
-        final byte[] deliveryTag = new byte[1];
+        final byte[] deliveryTag = "0".getBytes();
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
-
+        amqpsDeviceOperations.onLinkFlow(100);
         new NonStrictExpectations()
         {
             {
@@ -549,12 +546,12 @@ public class AmqpsDeviceOperationsTest
         };
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
         assertTrue(deliveryHash != -1);
-        new Verifications()
+        new VerificationsInOrder()
         {
             {
                 mockSender.delivery(deliveryTag);
@@ -563,8 +560,52 @@ public class AmqpsDeviceOperationsTest
                 times = 1;
                 mockSender.advance();
                 times = 1;
+                mockSender.getCredit();
+                times = 1;
                 mockDelivery.hashCode();
                 times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void sendMessageAndGetDeliveryHashFailsIfNoLinkCreditAvailable()
+    {
+        //arrange
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig, "", "", "", "", "", "");
+        final byte[] msgData = new byte[1];
+        final int offset = 0;
+        final int length = 1;
+        final byte[] deliveryTag = "0".getBytes();
+        Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
+        amqpsDeviceOperations.onLinkFlow(0);
+        new NonStrictExpectations()
+        {
+            {
+                mockSender.delivery(deliveryTag);
+                result = mockDelivery;
+                mockDelivery.hashCode();
+                result = new byte[1];
+            }
+        };
+
+        //act
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+
+        //assert
+        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
+        assertTrue(deliveryHash == -1);
+        new Verifications()
+        {
+            {
+                mockSender.delivery(deliveryTag);
+                times = 0;
+                mockSender.send(msgData, offset, length);
+                times = 0;
+                mockSender.advance();
+                times = 0;
+                mockDelivery.hashCode();
+                times = 0;
             }
         };
     }
@@ -581,9 +622,9 @@ public class AmqpsDeviceOperationsTest
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
-        final byte[] deliveryTag = new byte[1];
+        final byte[] deliveryTag = "0".getBytes();
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
-
+        amqpsDeviceOperations.onLinkFlow(100);
         new NonStrictExpectations()
         {
             {
@@ -596,7 +637,7 @@ public class AmqpsDeviceOperationsTest
         };
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryHash", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
 
         //assert
         int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
@@ -961,6 +1002,7 @@ public class AmqpsDeviceOperationsTest
     //Tests_SRS_AMQPSDEVICEOPERATION_34_016: [The function shall copy the correlationId, messageId, content type and content encoding properties to the Proton message properties.]
     //Tests_SRS_AMQPSDEVICEOPERATION_34_017: [The function shall copy the user properties to Proton message application properties excluding the reserved property names.]
     //Tests_SRS_AMQPSDEVICEOPERATION_34_051: [This function shall set the message's saved outputname in the application properties of the new proton message.]
+    //Tests_SRS_AMQPSDEVICEOPERATION_34_055: [This function shall set the message's saved creationTimeUTC in the application properties of the new proton message.]
     @Test
     public void convertToProtonSuccess(
             @Mocked final Message mockMessage,
@@ -975,6 +1017,7 @@ public class AmqpsDeviceOperationsTest
         final String contentEncoding = "some content encoding";
         final String connectionDeviceId = "some connection device id";
         final String connectionModuleId = "some connection module id";
+        final String creationTimeUTCString = "1969-12-31T16:00:00.0000000";
         final MessageProperty[] iotHubMessageProperties = new MessageProperty[]
                 {
                         new MessageProperty("key1", "value1"),
@@ -1013,6 +1056,14 @@ public class AmqpsDeviceOperationsTest
                 times = 2;
                 mockMessage.getProperties();
                 result = iotHubMessageProperties;
+
+                mockMessage.getCreationTimeUTC();
+                result = new Date(0);
+                times = 1;
+
+                mockMessage.getCreationTimeUTCString();
+                result = "1969-12-31T16:00:00.0000000";
+                times = 1;
 
                 new ApplicationProperties(userProperties);
             }
@@ -1155,5 +1206,20 @@ public class AmqpsDeviceOperationsTest
                 actualMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + userIdKey, userId.toString());
             }
         };
+    }
+
+    @Test
+    public void onLinkFlowSavesLinkCredit()
+    {
+        //arrange
+        int expectedLinkCredit = 2345;
+        AmqpsDeviceOperations amqpsDeviceOperations = Deencapsulation.newInstance(AmqpsDeviceOperations.class, mockDeviceClientConfig, "some string", "some string", "some string", "some string", "some string", "some string");
+
+        //act
+        amqpsDeviceOperations.onLinkFlow(expectedLinkCredit);
+
+        //assert
+        int actualLinkCredit = Deencapsulation.getField(amqpsDeviceOperations, "linkCredit");
+        assertEquals(expectedLinkCredit, actualLinkCredit);
     }
 }

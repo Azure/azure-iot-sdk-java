@@ -24,7 +24,7 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * Unit tests for SaslListenerImpl.java
- * Coverage : 75% method, 95% line
+ * Coverage : 75% method, 89% line
  * (Two methods currently have no implementation)
  */
 @RunWith(JMockit.class)
@@ -52,7 +52,7 @@ public class SaslListenerImplTest
     }
 
     // Tests_SRS_SASLLISTENERIMPL_34_002: [This function shall retrieve the remote mechanisms and give them to the saved saslHandler object to decide which mechanism to use.]
-    // Tests_SRS_SASLLISTENERIMPL_34_003: [This function shall ask the saved saslHandler object to create the init payload for the chosen sasl mechanism and then send that payload.]
+    // Tests_SRS_SASLLISTENERIMPL_34_003: [This function shall ask the saved saslHandler object to create the init payload for the chosen sasl mechanism and then send that payload if the init payload is larger than 0 bytes.]
     @Test
     public void onSaslMechanismsTest() throws Exception
     {
@@ -89,6 +89,102 @@ public class SaslListenerImplTest
                 times = 1;
 
                 mockedSasl.send(initPayload, 0, initPayload.length);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_SASLLISTENERIMPL_34_003: [This function shall ask the saved saslHandler object to create the init payload for the chosen sasl mechanism and then send that payload if the init payload is larger than 0 bytes.]
+    @Test
+    public void onSaslMechanismsTestWithoutInit() throws Exception
+    {
+        //arrange
+        final String[] remoteMechanisms = new String[] {"1", "2"};
+        final String chosenMechanism = "1";
+        final byte[] initPayload = new byte[0];
+        SaslListener saslListener = new SaslListenerImpl(mockedSaslHandler);
+        new NonStrictExpectations()
+        {
+            {
+                mockedSasl.getRemoteMechanisms();
+                result = remoteMechanisms;
+
+                mockedSaslHandler.chooseSaslMechanism(remoteMechanisms);
+                result = chosenMechanism;
+
+                mockedSaslHandler.getInitPayload(chosenMechanism);
+                result = initPayload;
+            }
+        };
+
+        //act
+        saslListener.onSaslMechanisms(mockedSasl, mockedTransport);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedSaslHandler.chooseSaslMechanism(remoteMechanisms);
+                times = 1;
+
+                mockedSaslHandler.getInitPayload(chosenMechanism);
+                times = 1;
+
+                mockedSasl.send(initPayload, 0, initPayload.length);
+                times = 0;
+            }
+        };
+    }
+
+    //Tests_SRS_SASLLISTENERIMPL_34_015: [If the chosen mechanism is PLAIN, this function shall call sasl.plain(...) with the inputs given by the saslhandler.]
+    @Test
+    public void onSaslMechanismsWithPlainMechanism() throws Exception
+    {
+        //arrange
+        final String[] remoteMechanisms = new String[] {"PLAIN"};
+        final String chosenMechanism = "PLAIN";
+        final byte[] initPayload = new byte[0];
+        SaslListener saslListener = new SaslListenerImpl(mockedSaslHandler);
+        final String expectedUsername = "1234";
+        final String expectedPass = "5678";
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedSasl.getRemoteMechanisms();
+                result = remoteMechanisms;
+
+                mockedSaslHandler.chooseSaslMechanism(remoteMechanisms);
+                result = chosenMechanism;
+
+                mockedSaslHandler.getInitPayload(chosenMechanism);
+                result = initPayload;
+
+                mockedSaslHandler.getPlainUsername();
+                result = expectedUsername;
+
+                mockedSaslHandler.getPlainPassword();
+                result = expectedPass;
+            }
+        };
+
+        //act
+        saslListener.onSaslMechanisms(mockedSasl, mockedTransport);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedSaslHandler.chooseSaslMechanism(remoteMechanisms);
+                times = 1;
+
+                mockedSaslHandler.getInitPayload(chosenMechanism);
+                times = 1;
+
+                mockedSasl.send(initPayload, 0, initPayload.length);
+                times = 0;
+
+                mockedSasl.plain(expectedUsername, expectedPass);
                 times = 1;
             }
         };

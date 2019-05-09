@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
@@ -32,7 +33,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
     //string constants
     private static final String WS_SSL_PREFIX = "wss://";
-    private static final String WS_SSL_PORT_SUFFIX = ":443";
 
     private static final String WEBSOCKET_RAW_PATH = "/$iothub/websocket";
     private static final String WEBSOCKET_QUERY = "?iothub-no-client-cert=true";
@@ -42,7 +42,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
     private static final String API_VERSION = "?api-version=" + TransportUtils.IOTHUB_API_VERSION;
 
-    private String connectionId = UUID.randomUUID().toString();
+    private String connectionId;
 
     private IotHubListener listener;
 
@@ -54,6 +54,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private MqttDeviceMethod deviceMethod;
 
     private Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
+    private Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}
@@ -100,8 +101,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      *
      * @throws TransportException if a connection could not to be established.
      */
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs) throws TransportException
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService) throws TransportException
     {
+        connectionId = UUID.randomUUID().toString();
         if (deviceClientConfigs.size() > 1)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_022: [If the list of device client configuration objects is larger than 1, this function shall throw an UnsupportedOperationException.]
@@ -123,7 +125,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 SSLContext sslContext = this.config.getAuthenticationProvider().getSSLContext();
                 if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
-                    this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false);
+                    this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
                 {
@@ -171,10 +173,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 }
 
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]
-                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this, this.connectionId, this.config.getModuleId(), this.config.getGatewayHostname() != null);
+                this.deviceMessaging = new MqttMessaging(mqttConnection, this.config.getDeviceId(), this.listener, this, this.connectionId, this.config.getModuleId(), this.config.getGatewayHostname() != null, unacknowledgedSentMessages);
                 this.mqttConnection.setMqttCallback(this.deviceMessaging);
-                this.deviceMethod = new MqttDeviceMethod(mqttConnection, this.connectionId);
-                this.deviceTwin = new MqttDeviceTwin(mqttConnection, this.connectionId);
+                this.deviceMethod = new MqttDeviceMethod(mqttConnection, this.connectionId, unacknowledgedSentMessages);
+                this.deviceTwin = new MqttDeviceTwin(mqttConnection, this.connectionId, unacknowledgedSentMessages);
 
                 this.deviceMessaging.start();
                 this.state = IotHubConnectionStatus.CONNECTED;
@@ -208,7 +210,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * Closes the connection. After the connection is closed, it is no longer usable.
      * If the connection is already closed, the function shall do nothing.
      */
-    public void close(boolean isReconnecting) throws TransportException
+    public void close() throws TransportException
     {
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_007: [If the MQTT session is closed, the function shall do nothing.]
         if (this.state == IotHubConnectionStatus.DISCONNECTED)

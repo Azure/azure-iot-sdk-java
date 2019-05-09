@@ -24,15 +24,39 @@ public class AmqpsSendReturnValueTest
         //arrange
         boolean isDeliverySuccessful = false;
         int deliveryHash = 42;
+        byte[] expectedDeliveryTag = "-1".getBytes();
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.newInstance(AmqpsSendReturnValue.class, isDeliverySuccessful, deliveryHash);
         boolean actualIsDeliverySuccessful = Deencapsulation.getField(amqpsSendReturnValue, "deliverySuccessful");
         int actualDeliveryHash = Deencapsulation.getField(amqpsSendReturnValue, "deliveryHash");
+        byte[] actualDeliveryTag = Deencapsulation.getField(amqpsSendReturnValue, "deliveryTag");
 
         //assert
         assertEquals(isDeliverySuccessful, actualIsDeliverySuccessful);
         assertEquals(deliveryHash, actualDeliveryHash);
+        assertEquals(new String(expectedDeliveryTag), new String(actualDeliveryTag));
+    }
+
+    // Tests_SRS_AMQPSSENDRETURNVALUE_34_005: [The constructor shall initialize deliverySuccessful, deliveryHash, and deliveryTag private member variables with the given arguments.]
+    @Test
+    public void constructorInitializesAllMembersWithDeliveryTag()
+    {
+        //arrange
+        boolean isDeliverySuccessful = false;
+        int deliveryHash = 42;
+        byte[] expectedDeliveryTag = "1234".getBytes();
+
+        //act
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.newInstance(AmqpsSendReturnValue.class, isDeliverySuccessful, deliveryHash, expectedDeliveryTag);
+        boolean actualIsDeliverySuccessful = Deencapsulation.getField(amqpsSendReturnValue, "deliverySuccessful");
+        int actualDeliveryHash = Deencapsulation.getField(amqpsSendReturnValue, "deliveryHash");
+        byte[] actualDeliveryTag = Deencapsulation.getField(amqpsSendReturnValue, "deliveryTag");
+
+        //assert
+        assertEquals(isDeliverySuccessful, actualIsDeliverySuccessful);
+        assertEquals(deliveryHash, actualDeliveryHash);
+        assertEquals(expectedDeliveryTag, actualDeliveryTag);
     }
 
     // Tests_SRS_AMQPSSENDRETURNVALUE_12_002: [The function shall return the current value of deliverySuccessful private member.]
@@ -43,6 +67,7 @@ public class AmqpsSendReturnValueTest
         //arrange
         boolean isDeliverySuccessful = true;
         int deliveryHash = 42;
+        byte[] deliveryTag = new byte[] {1,2,3,4};
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.newInstance(AmqpsSendReturnValue.class, isDeliverySuccessful, deliveryHash);
 
         //act
@@ -52,5 +77,22 @@ public class AmqpsSendReturnValueTest
         //assert
         assertEquals(isDeliverySuccessful, actualIsDeliverySuccessful);
         assertEquals(deliveryHash, actualDeliveryHash);
+    }
+
+    // Tests_SRS_AMQPSSENDRETURNVALUE_34_004: [The function shall return the saved value of the delivery tag.]
+    @Test
+    public void getDeliveryTagWorks()
+    {
+        //arrange
+        boolean isDeliverySuccessful = true;
+        int deliveryHash = 42;
+        byte[] deliveryTag = new byte[] {1,2,3,4};
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.newInstance(AmqpsSendReturnValue.class, isDeliverySuccessful, deliveryHash, deliveryTag);
+
+        //act
+        byte[] actualDeliveryTag = amqpsSendReturnValue.getDeliveryTag();
+
+        //assert
+        assertEquals(new String(deliveryTag), new String(actualDeliveryTag));
     }
 }

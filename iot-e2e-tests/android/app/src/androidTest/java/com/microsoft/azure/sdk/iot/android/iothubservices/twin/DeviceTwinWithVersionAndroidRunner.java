@@ -8,9 +8,11 @@ package com.microsoft.azure.sdk.iot.android.iothubservices.twin;
 import com.microsoft.appcenter.espresso.Factory;
 import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup21;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.DeviceTwinWithVersionTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -18,13 +20,14 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.Collection;
 
+@TestGroup21
 @RunWith(Parameterized.class)
 public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTests
 {
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public DeviceTwinWithVersionAndroidRunner(IotHubClientProtocol protocol)
+    public DeviceTwinWithVersionAndroidRunner(IotHubClientProtocol protocol) throws IOException
     {
         super(protocol);
     }
@@ -34,6 +37,13 @@ public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTes
     public static Collection inputs() throws IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         return inputsCommon();
+    }
+
+    @After
+    public void labelSnapshot()
+    {
+        reportHelper.label("Stopping App");
     }
 }
