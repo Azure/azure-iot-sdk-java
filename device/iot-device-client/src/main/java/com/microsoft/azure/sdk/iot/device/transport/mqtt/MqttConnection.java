@@ -31,8 +31,8 @@ public class MqttConnection
     static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
     static final int MAX_UNSUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
 
-    // paho mqtt only supports 10 messages in flight at the same time
-    static final int MAX_IN_FLIGHT_COUNT = 10;
+    // paho mqtt only supports 65535 messages in flight at the same time
+    static final int MAX_IN_FLIGHT_COUNT = 65535;
 
     /**
      * Constructor to create MqttAsync Client with Paho
@@ -64,6 +64,7 @@ public class MqttConnection
             this.mqttAsyncClient = new MqttAsyncClient(serverURI, clientId, new MemoryPersistence());
             this.mqttAsyncClient.setManualAcks(true);
             this.connectionOptions = new MqttConnectOptions();
+            this.connectionOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
             this.updateConnectionOptions(userName, password, iotHubSSLContext);
         }
         catch (MqttException e)
