@@ -91,7 +91,7 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String TPM_SIMULATOR_IP_ADDRESS_ENV_NAME = "IOT_DPS_TPM_SIMULATOR_IP_ADDRESS"; // ip address of TPM simulator
     public static String tpmSimulatorIpAddress = "";
 
-    public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 30 * 1000;
+    public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 60 * 1000;
 
     public static final String HMAC_SHA256 = "HmacSHA256";
 
