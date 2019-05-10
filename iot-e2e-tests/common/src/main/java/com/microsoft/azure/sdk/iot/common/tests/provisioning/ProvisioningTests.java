@@ -59,6 +59,36 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    public void ProvisioningWithCustomPayloadFlow() throws Exception
+    {
+        String jsonPayload = "{\"a\":\"b\"}";
+        String expectedHubToProvisionTo;
+        String farAwayIotHubHostname = IotHubConnectionString.createConnectionString(farAwayIotHubConnectionString).getHostName();
+        String iothubHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+
+        if (farAwayIotHubHostname.length() > iothubHostName.length())
+        {
+            expectedHubToProvisionTo = farAwayIotHubHostname;
+        }
+        else if (iothubHostName.length() > farAwayIotHubHostname.length())
+        {
+            expectedHubToProvisionTo = iothubHostName;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Both possible hub's cannot have a host name of the same length for this test to work");
+        }
+
+        CustomAllocationDefinition allocDefinition = new CustomAllocationDefinition();
+        allocDefinition.setApiVersion(CUSTOM_ALLOCATION_WEBHOOK_API_VERSION);
+        allocDefinition.setWebhookUrl(customAllocationWebhookUrl);
+
+        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL, AllocationPolicy.CUSTOM, null, allocDefinition, null);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, jsonPayload, expectedHubToProvisionTo);
+        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
+    }
+
+    @Test
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
@@ -182,7 +212,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
         testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, AllocationPolicy.CUSTOM, null, customAllocationDefinition, possibleStartingHubHostNames);
 
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, expectedHubToProvisionTo);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, expectedHubToProvisionTo, null);
     }
 
     protected void reprovisioningFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt) throws Exception
@@ -260,7 +290,7 @@ public class ProvisioningTests extends ProvisioningCommon
         // Register identity
         try
         {
-            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert, false, null, null);
+            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert, false, null, null, null);
         }
         catch (Exception | AssertionError e)
         {

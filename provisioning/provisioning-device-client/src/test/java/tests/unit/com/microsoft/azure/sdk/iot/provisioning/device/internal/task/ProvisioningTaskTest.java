@@ -155,8 +155,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        any, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        any, any, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
@@ -205,8 +205,8 @@ public class ProvisioningTaskTest
                 result = mockedDeviceRegistrationResultParser;
                 mockedDeviceRegistrationResultParser.getErrorMessage();
                 result = "Test Error Message";
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        any, any, PROVISIONING_DEVICE_STATUS_FAILED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        any, any, any, PROVISIONING_DEVICE_STATUS_FAILED);
                 result = mockedRegistrationData;
             }
         };
@@ -255,8 +255,8 @@ public class ProvisioningTaskTest
                 result = mockedDeviceRegistrationResultParser;
                 mockedDeviceRegistrationResultParser.getErrorMessage();
                 result = "Test Error Message";
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        any, any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
                 result = mockedRegistrationData;
             }
         };
@@ -345,8 +345,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
@@ -433,8 +433,8 @@ public class ProvisioningTaskTest
                 result = mockedDeviceRegistrationResultParser;
                 mockedDeviceRegistrationResultParser.getErrorMessage();
                 result = "Some error Message";
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        any, any, PROVISIONING_DEVICE_STATUS_FAILED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        any, any, any, PROVISIONING_DEVICE_STATUS_FAILED);
                 result = mockedRegistrationData;
             }
         };
@@ -521,8 +521,8 @@ public class ProvisioningTaskTest
                 result = mockedDeviceRegistrationResultParser;
                 mockedDeviceRegistrationResultParser.getErrorMessage();
                 result = "Some error Message";
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        any, any, any, PROVISIONING_DEVICE_STATUS_DISABLED);
                 result = mockedRegistrationData;
             }
         };
@@ -603,8 +603,8 @@ public class ProvisioningTaskTest
                 result = mockedDeviceRegistrationResultParser;
                 mockedDeviceRegistrationResultParser.getErrorMessage();
                 result = "Test Error Message";
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        null, null, PROVISIONING_DEVICE_STATUS_DISABLED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        null, null, any, PROVISIONING_DEVICE_STATUS_DISABLED);
                 result = mockedRegistrationData;
             }
         };
@@ -693,8 +693,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
@@ -784,8 +784,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
@@ -854,8 +854,8 @@ public class ProvisioningTaskTest
                 result = mockedDeviceRegistrationResultParser;
                 mockedDeviceRegistrationResultParser.getErrorMessage();
                 result = "Test Error Message";
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        any, any, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        any, any, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -906,8 +906,8 @@ public class ProvisioningTaskTest
                 result = TEST_OPERATION_ID;
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
                 result = null;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        null, null, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -961,8 +961,8 @@ public class ProvisioningTaskTest
                 result = TEST_OPERATION_ID;
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
                 result = mockedRegistrationOperationStatusParser;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        null, null, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1016,8 +1016,8 @@ public class ProvisioningTaskTest
                 result = TEST_OPERATION_ID;
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
                 result = mockedRegistrationOperationStatusParser;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        null, null, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1051,8 +1051,8 @@ public class ProvisioningTaskTest
             {
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
                 result = mockedRegistrationOperationStatusParser;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                                            null, null, null, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1097,8 +1097,8 @@ public class ProvisioningTaskTest
             {
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
                 result = null;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        null, null, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1133,8 +1133,8 @@ public class ProvisioningTaskTest
             {
                 mockedFutureTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION, TimeUnit.MILLISECONDS);
                 result = mockedRegistrationOperationStatusParser;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                                            null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                                            null, null, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1181,8 +1181,8 @@ public class ProvisioningTaskTest
                 result = "assigned";
                 mockedRegistrationOperationStatusParser.getOperationId();
                 result = null;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        null, null, PROVISIONING_DEVICE_STATUS_ERROR);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        null, null, any, PROVISIONING_DEVICE_STATUS_ERROR);
                 result = mockedRegistrationData;
             }
         };
@@ -1388,8 +1388,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
             }
         };
@@ -1466,8 +1466,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
                 mockedDeviceRegistrationResultParser.getTpm();
                 result = mockedTpm;
@@ -1554,8 +1554,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
                 mockedDeviceRegistrationResultParser.getTpm();
                 result = mockedTpm;
@@ -2120,8 +2120,8 @@ public class ProvisioningTaskTest
                 result = TEST_HUB;
                 mockedDeviceRegistrationResultParser.getDeviceId();
                 result = TEST_DEVICE_ID;
-                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, ProvisioningDeviceClientStatus.class},
-                        TEST_HUB, TEST_DEVICE_ID, PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                Deencapsulation.newInstance(RegistrationResult.class, new Class[] {String.class, String.class, String.class, ProvisioningDeviceClientStatus.class},
+                        TEST_HUB, TEST_DEVICE_ID, any, PROVISIONING_DEVICE_STATUS_ASSIGNED);
                 result = mockedRegistrationData;
                 mockedDeviceRegistrationResultParser.getTpm();
                 result = mockedTpm;

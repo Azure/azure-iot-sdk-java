@@ -16,13 +16,15 @@ public class RegistrationResult extends ProvisioningDeviceClientRegistrationResu
      * Constructor to set iothub uri, device id and status of the service as retrieved
      * @param iothubUri Value of iothub uri. Can be {@code null}
      * @param deviceId Value of device id. Can be {@code null}
+     * @param jsonPayload Value of custom json payload. Can be {@code null}
      * @param dpsStatus Status of the service.
      */
-    RegistrationResult(String iothubUri, String deviceId, ProvisioningDeviceClientStatus dpsStatus)
+    RegistrationResult(String iothubUri, String deviceId, String jsonPayload, ProvisioningDeviceClientStatus dpsStatus)
     {
         super();
         this.iothubUri = iothubUri;
         this.deviceId = deviceId;
+        this.payload = jsonPayload;
         this.provisioningDeviceClientStatus = dpsStatus;
     }
 }

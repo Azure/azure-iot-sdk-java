@@ -286,7 +286,7 @@ public class RegisterTask implements Callable
 
             if (this.securityProvider instanceof SecurityProviderX509)
             {
-                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, true);
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, true, this.provisioningDeviceClientConfig.getPayload());
                 return this.authenticateWithX509(requestData);
             }
             else if (this.securityProvider instanceof SecurityProviderTpm )
@@ -298,13 +298,13 @@ public class RegisterTask implements Callable
                 }
 
                 //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
-                RequestData requestData = new RequestData(securityProviderTpm.getEndorsementKey(), securityProviderTpm.getStorageRootKey(), securityProvider.getRegistrationId(), sslContext, null);
+                RequestData requestData = new RequestData(securityProviderTpm.getEndorsementKey(), securityProviderTpm.getStorageRootKey(), securityProvider.getRegistrationId(), sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
                 return this.authenticateWithTPM(requestData);
             }
             else if (this.securityProvider instanceof SecurityProviderSymmetricKey)
             {
-                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null);
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
                 return this.authenticateWithSasToken(requestData);
             }

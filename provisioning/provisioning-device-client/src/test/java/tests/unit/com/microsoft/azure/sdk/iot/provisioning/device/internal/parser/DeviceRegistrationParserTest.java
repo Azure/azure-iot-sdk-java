@@ -27,7 +27,7 @@ public class DeviceRegistrationParserTest
     {
         final String expectedJson = "{\"registrationId\":\"" + TEST_REGISTRATION_ID + "\"}";
 
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(TEST_REGISTRATION_ID);
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(TEST_REGISTRATION_ID, "");
 
         assertNotNull(deviceRegistrationParser.toJson());
         assertEquals(expectedJson, deviceRegistrationParser.toJson());
@@ -37,14 +37,14 @@ public class DeviceRegistrationParserTest
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithoutTPMOnNullRegistrationIdThrows() throws Exception
     {
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(null);
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(null, "");
     }
 
 
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithoutTPMOnEmptyRegistrationIdThrows() throws Exception
     {
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser("");
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser("", "");
     }
 
     //SRS_DeviceRegistration_25_006: [ The constructor shall save the provided Registration Id, EndorsementKey and StorageRootKey. ]
@@ -61,9 +61,9 @@ public class DeviceRegistrationParserTest
                     "\"storageRootKey\":\"testStorageRootKey\"" +
                 "}}";
 
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(regID, eKey, sRKey);
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(regID, "", eKey, sRKey);
         assertNotNull(deviceRegistrationParser.toJson());
-        assertEquals(deviceRegistrationParser.toJson(), expectedJson);
+        assertEquals(expectedJson, deviceRegistrationParser.toJson());
     }
 
     //SRS_DeviceRegistration_25_003: [ The constructor shall throw IllegalArgumentException if Registration Id is null or empty. ]
@@ -72,7 +72,7 @@ public class DeviceRegistrationParserTest
     {
         final String eKey = "testEndorsementKey";
         final String sRKey = "testStorageRootKey";
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(null, eKey, sRKey);
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(null, "", eKey, sRKey);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -80,7 +80,7 @@ public class DeviceRegistrationParserTest
     {
         final String eKey = "testEndorsementKey";
         final String sRKey = "testStorageRootKey";
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser("", eKey, sRKey);
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser("", "", eKey, sRKey);
     }
 
     //SRS_DeviceRegistration_25_004: [ The constructor shall throw IllegalArgumentException if EndorsementKey is null or empty. ]
@@ -89,7 +89,7 @@ public class DeviceRegistrationParserTest
     {
         final String eKey = "testEndorsementKey";
         final String sRKey = "testStorageRootKey";
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(TEST_REGISTRATION_ID, null, sRKey);
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(TEST_REGISTRATION_ID, "", null, sRKey);
     }
 
     @Test (expected = IllegalArgumentException.class)
@@ -97,6 +97,6 @@ public class DeviceRegistrationParserTest
     {
         final String eKey = "testEndorsementKey";
         final String sRKey = "testStorageRootKey";
-        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(TEST_REGISTRATION_ID, "", sRKey);
+        DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(TEST_REGISTRATION_ID, "", "", sRKey);
     }
 }
