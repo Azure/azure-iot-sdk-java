@@ -126,7 +126,7 @@ public class JobClientTests
         {
             testDevice = Tools.addDeviceWithRetry(registryManager, Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
             DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
-            testManager.start(true, true);
+            testManager.setup(true, true);
             devices.add(testManager);
         }
     }
@@ -174,7 +174,7 @@ public class JobClientTests
     {
         for (DeviceTestManager device:devices)
         {
-            device.stop();
+            device.tearDown();
         }
 
         if (registryManager != null)

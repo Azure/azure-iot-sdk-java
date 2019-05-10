@@ -52,7 +52,7 @@ public class TransportClientTests extends IntegrationTest
 
     private static final long RETRY_MILLISECONDS = 100; //.1 seconds
     private static final long SEND_TIMEOUT_MILLISECONDS = 5 * 60 * 1000; // 5 minutes
-    private static final long INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
+    private static final long INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 0;
     private static final long RECEIVE_MESSAGE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 10 * 1000; // 10 seconds
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION = 500; // .5 seconds
