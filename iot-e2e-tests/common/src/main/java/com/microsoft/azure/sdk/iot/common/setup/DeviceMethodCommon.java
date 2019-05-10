@@ -52,7 +52,7 @@ public class DeviceMethodCommon extends IntegrationTest
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
     protected static final int NUMBER_INVOKES_PARALLEL = 10;
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
+    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 0;
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
 
@@ -212,7 +212,7 @@ public class DeviceMethodCommon extends IntegrationTest
         {
             try
             {
-                this.deviceTestManager.stop();
+                this.deviceTestManager.tearDown();
                 registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
             }
             catch (Exception e)
@@ -246,7 +246,7 @@ public class DeviceMethodCommon extends IntegrationTest
 
         try
         {
-            this.testInstance.deviceTestManager.stop();
+            this.testInstance.deviceTestManager.tearDown();
         }
         catch (IOException e)
         {
@@ -261,7 +261,7 @@ public class DeviceMethodCommon extends IntegrationTest
 
         try
         {
-            this.testInstance.deviceTestManager.start(true, false);
+            this.testInstance.deviceTestManager.setup(true, false);
             IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000, this.testInstance.deviceTestManager.client);
         }
         catch (IOException | InterruptedException e)

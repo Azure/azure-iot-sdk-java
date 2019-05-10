@@ -53,7 +53,7 @@ public class SendMessagesCommon extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected static String iotHubConnectionString = "";
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
+    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 0;
 
     protected static String hostName;
 

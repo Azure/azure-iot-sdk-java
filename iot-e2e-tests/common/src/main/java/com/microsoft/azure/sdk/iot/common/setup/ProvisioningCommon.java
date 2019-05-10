@@ -102,7 +102,7 @@ public class ProvisioningCommon extends IntegrationTest
     public ProvisioningServiceClient provisioningServiceClient = null;
     public RegistryManager registryManager = null;
 
-    public static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 2000;
+    public static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 0;
 
     //sending reported properties for twin operations takes some time to get the appropriate callback
     public static final int MAX_TWIN_PROPAGATION_WAIT_SECONDS = 60;

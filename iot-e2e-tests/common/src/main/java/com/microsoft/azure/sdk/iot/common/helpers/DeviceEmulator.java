@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Implement a fake device to the end to end test.
  */
-public class DeviceEmulator  implements Runnable
+public class DeviceEmulator
 {
     public static final String METHOD_RESET = "reset";
     public static final String METHOD_LOOPBACK = "loopback";
@@ -31,21 +31,14 @@ public class DeviceEmulator  implements Runnable
     public static final int METHOD_THROWS = 403;
     public static final int METHOD_NOT_DEFINED = 404;
 
-    private static final int STOP_DEVICE_INTERVAL_IN_MILLISECONDS = 10000;
-
-    private enum LIGHTS{ ON, OFF, DISABLED }
-
     private InternalClient client;
     private DeviceStatus deviceStatus = new DeviceStatus();
     private ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = new ConcurrentHashMap<>();
-    private Boolean stopDevice = false;
 
     private DeviceMethodCallback deviceMethodCallback;
     private Object deviceMethodCallbackContext;
     private IotHubEventCallback deviceMethodStatusCallback;
     private Object deviceMethodStatusCallbackContext;
-
-    private final static String THREAD_NAME = "azure-iot-sdk-DeviceEmulator";
 
     /**
      * CONSTRUCTOR
@@ -61,25 +54,7 @@ public class DeviceEmulator  implements Runnable
         this.client = client;
     }
 
-    @Override
-    public void run()
-    {
-        Thread.currentThread().setName(THREAD_NAME);
-
-        while(!stopDevice)
-        {
-            try
-            {
-                Thread.sleep(STOP_DEVICE_INTERVAL_IN_MILLISECONDS);
-            }
-            catch (InterruptedException e)
-            {
-
-            }
-        }
-    }
-
-    void start() throws InterruptedException
+    void setup() throws InterruptedException
     {
         try
         {
@@ -105,13 +80,12 @@ public class DeviceEmulator  implements Runnable
      * Ends the DeviceClient connection and destroy the thread.
      * @throws IOException if the DeviceClient cannot close the connection with the IoTHub.
      */
-    void stop() throws IOException
+    void tearDown() throws IOException
     {
         if (this.client != null)
         {
             this.client.closeNow();
         }
-        stopDevice = true;
     }
 
     /**
@@ -330,7 +304,7 @@ public class DeviceEmulator  implements Runnable
                     case METHOD_RESET:
                         result = METHOD_RESET + ":succeed";
                         status = METHOD_SUCCESS;
-                        stop();
+                        tearDown();
                         break;
                     case METHOD_LOOPBACK:
                         result = loopback(methodData);

@@ -433,7 +433,7 @@ public class IotHubServicesCommon
             while (numOfUpdates == 0 || numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size() - 1).getKey() != IotHubConnectionStatus.CONNECTED)
             {
                 numOfUpdates = actualStatusUpdates.size();
-                Thread.sleep(6 * 1000);
+                Thread.sleep(3 * 1000);
                 timeElapsed = System.currentTimeMillis() - startTime;
 
                 if (timeElapsed > timeout)
