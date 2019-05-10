@@ -42,7 +42,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
     @Before
     public void cleanToStart() throws Exception
     {
+        long startTime = System.currentTimeMillis();
         super.cleanToStart();
+        System.out.println("Time taken to cleanToStart " + ((System.currentTimeMillis() - startTime) / 1000.0));
     }
 
     @Test
