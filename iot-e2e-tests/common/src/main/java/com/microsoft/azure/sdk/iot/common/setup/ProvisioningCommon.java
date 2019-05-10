@@ -47,6 +47,7 @@ import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggi
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class ProvisioningCommon extends IntegrationTest
 {
@@ -271,17 +272,22 @@ public class ProvisioningCommon extends IntegrationTest
         assertFalse(testInstance.provisionedIotHubUri.isEmpty());
     }
 
-    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, String... expectedIotHubsToProvisionTo) throws Exception
+    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, String jsonPayload, String... expectedIotHubsToProvisionTo) throws Exception
     {
         ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
         for (String iothubToProvisionTo : expectedIotHubsToProvisionTo)
         {
             expectedHubsToProvisionTo.add(iothubToProvisionTo);
         }
-        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedHubsToProvisionTo);
+        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedHubsToProvisionTo, jsonPayload);
     }
 
     public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, List<String> expectedIotHubsToProvisionTo) throws Exception
+    {
+        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedIotHubsToProvisionTo, null);
+    }
+
+    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, List<String> expectedIotHubsToProvisionTo, String jsonPayload) throws Exception
     {
         ProvisioningStatus provisioningStatus = null;
         long startTime = System.currentTimeMillis();
@@ -297,7 +303,16 @@ public class ProvisioningCommon extends IntegrationTest
                         protocol,
                         securityProvider);
 
-                provisioningStatus.provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
+                if (jsonPayload == null)
+                {
+                    provisioningStatus.provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
+                }
+                else
+                {
+                    AdditionalData additionalData = new AdditionalData();
+                    additionalData.setProvisioningPayload(jsonPayload);
+                    provisioningStatus.provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus, additionalData);
+                }
                 waitForRegistrationCallback(provisioningStatus);
 
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
@@ -307,6 +322,11 @@ public class ProvisioningCommon extends IntegrationTest
                 assertFalse(deviceId.isEmpty());
                 assertFalse(provisionedHubUri.isEmpty());
 
+                if (jsonPayload != null && !jsonPayload.isEmpty())
+                {
+                    String returnJson = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningPayload();
+                    assertTrue("Payload received from service is not the same values. Sent Json: " + jsonPayload + " returned json " + returnJson, returnJson.equals(jsonPayload));
+                }
                 assertProvisionedIntoCorrectHub(expectedIotHubsToProvisionTo, provisionedHubUri);
                 assertProvisionedDeviceWorks(provisionedHubUri, deviceId);
                 deviceRegisteredSuccessfully = true;
@@ -319,7 +339,7 @@ public class ProvisioningCommon extends IntegrationTest
                     {
                         fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for device to register successfully, last exception: " + Tools.getStackTraceFromThrowable(e), getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
                     }
-                    
+
                     System.out.println("Encountered an exception while registering device, trying again: " + Tools.getStackTraceFromThrowable(e));
                     Thread.sleep(10*1000);
                 }

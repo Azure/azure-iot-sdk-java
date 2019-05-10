@@ -62,7 +62,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         this.hostName = hostName;
     }
 
-    private synchronized void sendAmqpMessage(String msgType, String operationId) throws ProvisioningDeviceClientException
+    private synchronized void sendAmqpMessage(String msgType, String operationId, byte[] msgBody) throws ProvisioningDeviceClientException
     {
         try
         {
@@ -77,6 +77,10 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             }
             outgoingMessage.setApplicationProperty(userProperties);
 
+            if (msgBody != null && msgBody.length > 0)
+            {
+                outgoingMessage.setBody(msgBody);
+            }
             this.amqpConnection.sendAmqpMessage(outgoingMessage);
         }
         catch (Exception e)
@@ -101,6 +105,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     /**
      * Determines if the AMQP connect is up
      * @return boolean true is connected false otherwise
+     * @throws ProvisioningDeviceConnectionException if connection could not succeed for any reason.
      */
     public boolean isAmqpConnected() throws ProvisioningDeviceClientException
     {
@@ -124,6 +129,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * @param registrationId The specified registration id for the connection
      * @param sslContext The SSLContext that will get used for this connection
      * @param saslHandler custom handler for sasl logic. May be null if no sasl frames are expected
+     * @param useWebSockets Flag to determine if using WebSockets
      * @throws ProvisioningDeviceConnectionException if connection could not succeed for any reason.
      */
     public void open(String registrationId, SSLContext sslContext, SaslHandler saslHandler, boolean useWebSockets) throws ProvisioningDeviceConnectionException
@@ -207,7 +213,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         }
 
         // SRS_ProvisioningAmqpOperations_07_016: [This method shall send the Operation Status AMQP Provisioning message.]
-        this.sendAmqpMessage(AMQP_OPERATION_STATUS, operationId);
+        this.sendAmqpMessage(AMQP_OPERATION_STATUS, operationId, null);
 
         try
         {
@@ -229,9 +235,10 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
      * Sends the Registration message to the Amqp Endpoint
      * @param responseCallback Callback that gets initiated when the function call is complete
      * @param callbackContext Callback context for the response call.
+     * @param msgBody Callback context for the response call.
      * @throws ProvisioningDeviceClientException If sending Register Message is unsuccessful for any reason.
      */
-    public void sendRegisterMessage(ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
+    public void sendRegisterMessage(ResponseCallback responseCallback, Object callbackContext, byte[] msgBody) throws ProvisioningDeviceClientException
     {
         // SRS_ProvisioningAmqpOperations_07_009: [sendRegisterMessage shall throw ProvisioningDeviceClientException if either responseCallback is null.]
         if (responseCallback == null)
@@ -261,7 +268,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         }
 
         // SRS_ProvisioningAmqpOperations_07_010: [This method shall send the Register AMQP Provisioning message.]
-        this.sendAmqpMessage(AMQP_REGISTER_DEVICE, null);
+        this.sendAmqpMessage(AMQP_REGISTER_DEVICE, null, msgBody);
 
         try
         {

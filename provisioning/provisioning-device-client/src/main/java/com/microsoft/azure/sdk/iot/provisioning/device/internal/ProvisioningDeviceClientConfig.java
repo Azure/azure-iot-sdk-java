@@ -6,6 +6,7 @@
  */
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal;
+
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -20,6 +21,7 @@ public final class ProvisioningDeviceClientConfig
 
     private ProvisioningDeviceClientRegistrationCallback registrationCallback;
     private Object registrationCallbackContext;
+    private String jsonPayload;
 
     /**
      * Setter for the Registration Callback.
@@ -149,5 +151,23 @@ public final class ProvisioningDeviceClientConfig
     public boolean getUseWebSockets()
     {
         return this.useWebSockets;
+    }
+
+    /**
+     * Setter data for custom payload
+     * @param jsonPayload payload data
+     */
+    public void setPayload(String jsonPayload)
+    {
+        this.jsonPayload = jsonPayload;
+    }
+
+    /**
+     * Getter for retreiving Custom Payload
+     * @return value of the custom payload
+     */
+    public String getPayload()
+    {
+        return this.jsonPayload;
     }
 }

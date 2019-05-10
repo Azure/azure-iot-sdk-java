@@ -453,7 +453,7 @@ public class ProvisioningAmqpOperationsTest
         ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
 
         //act
-        provisioningAmqpOperations.sendRegisterMessage(null, null);
+        provisioningAmqpOperations.sendRegisterMessage(null, null, null);
 
         //assert
     }
@@ -484,7 +484,7 @@ public class ProvisioningAmqpOperationsTest
         };
 
         //act
-        provisioningAmqpOperations.sendRegisterMessage(mockedResponseCallback, null);
+        provisioningAmqpOperations.sendRegisterMessage(mockedResponseCallback, null, null);
 
         //assert
     }
@@ -510,7 +510,7 @@ public class ProvisioningAmqpOperationsTest
         setupSendReceiveMocks();
 
         //act
-        provisioningAmqpOperations.sendRegisterMessage(mockedResponseCallback, null);
+        provisioningAmqpOperations.sendRegisterMessage(mockedResponseCallback, null, null);
 
         //assert
     }

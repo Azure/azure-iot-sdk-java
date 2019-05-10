@@ -25,6 +25,8 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.junit.Assert.assertEquals;
+
 /*
     Unit tests for ProvisioningDeviceClient
     Coverage : 100% methods, 100% lines
@@ -36,6 +38,7 @@ public class ProvisioningDeviceClientTest
     private static final String END_POINT = "testEndPoint";
     private static final String SCOPE_ID = "testScopeId";
     private static final ProvisioningDeviceClientTransportProtocol TEST_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
+    private static final String CUSTOM_PAYLOAD = "{ \"dpsCustomPayload\": \"dataValue\" }";
 
     @Mocked
     SecurityProvider mockedSecurityProvider;

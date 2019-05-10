@@ -12,7 +12,7 @@ public class ProvisioningDeviceClientRegistrationResult
     protected String iothubUri;
     protected String deviceId;
     protected ProvisioningDeviceClientStatus provisioningDeviceClientStatus;
-
+    protected String payload;
     /**
      * Empty constructor to let users gather the data.
      */
@@ -50,4 +50,14 @@ public class ProvisioningDeviceClientRegistrationResult
         //SRS_ProvisioningDeviceClientRegistrationResult_25_004: [ This method shall retrieve provisioningDeviceClientStatus. ]
         return provisioningDeviceClientStatus;
     }
+
+    /**
+     * Retrieves the provisioning payload results from DPS
+     * @return A string representation of the provisioning payload
+     */
+    public String getProvisioningPayload()
+    {
+        return payload;
+    }
+
 }

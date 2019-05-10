@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.Respons
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt.ContractAPIMqtt;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 import mockit.*;
@@ -44,6 +45,7 @@ public class ContractAPIMqttTest
     private static final String TEST_HOST_NAME = "testHostName";
     private static final String TEST_REGISTRATION_ID = "testRegistrationId";
     private static final String TEST_OPERATION_ID = "testOperationId";
+    private static final String TEST_PAYLOAD = "{\"a\":\"b\"}";
 
     @Mocked
     MqttConnection mockedMqttConnection;
@@ -80,6 +82,9 @@ public class ContractAPIMqttTest
 
     @Mocked
     ProvisioningDeviceClientConfig mockedProvisioningDeviceClientConfig;
+
+    @Mocked
+    DeviceRegistrationParser mockedDeviceRegistrationParser;
 
     @Mocked
     byte[] mockedByteArray = new byte[10];
@@ -415,29 +420,72 @@ public class ContractAPIMqttTest
     // SRS_ContractAPIMqtt_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
     // SRS_ContractAPIMqtt_07_006: [This method shall wait MAX_WAIT_TO_SEND_MSG for a reply from the service.]
     @Test
-    public void authenticateWithProvisioningServiceSucceeds() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    public void authenticateWithProvisioningServiceWithX509Succeeds() throws ProvisioningDeviceClientException, IOException, InterruptedException
     {
         //arrange
         ContractAPIMqtt contractAPIMqtt = createContractClass();
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                mockedMqttConnection.isMqttConnected();
-                result = true;
-
-                mockedMqttConnection.isMqttConnected();
-                result = true;
-
-                mockedMqttConnection.publishMessage(anyString, (MqttQos) any, null);
-
-                mockedObjectLock.waitLock(anyInt);
-
                 mockedRequestData.isX509();
                 result = true;
+
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, null);
+                result = mockedDeviceRegistrationParser;
+
+                mockedDeviceRegistrationParser.toJson();
+                result = "{ \"registration\":\"" + TEST_REGISTRATION_ID + "\" }";
+
+                mockedMqttConnection.publishMessage(anyString, (MqttQos) any, (byte[])any);
             }
         };
+        openContractAPI(contractAPIMqtt);
+        contractAPIMqtt.messageReceived(mockedMqttMessage);
 
+        //act
+        contractAPIMqtt.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedMqttConnection.publishMessage(anyString, (MqttQos)any, null);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void authenticateWithProvisioningServiceWithPayloadSucceeds() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    {
+        //arrange
+        ContractAPIMqtt contractAPIMqtt = createContractClass();
+
+        new Expectations()
+        {
+            {
+                mockedRequestData.isX509();
+                result = true;
+
+                mockedMqttConnection.isMqttConnected();
+                result = true;
+
+                mockedRequestData.getPayload();
+                result = TEST_PAYLOAD;
+
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD);
+                result = mockedDeviceRegistrationParser;
+
+                mockedDeviceRegistrationParser.toJson();
+                result = "{ \"registration\":\"" + TEST_REGISTRATION_ID + "\", \"payload\": \"{\"a\":\"b\"}\" }";
+
+                mockedMqttConnection.publishMessage(anyString, (MqttQos) any, (byte[])any);
+            }
+        };
         openContractAPI(contractAPIMqtt);
         contractAPIMqtt.messageReceived(mockedMqttMessage);
 
@@ -508,24 +556,31 @@ public class ContractAPIMqttTest
         final String expectedSasToken = "asdf";
         ContractAPIMqtt contractAPIMqtt = createContractClass();
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                mockedMqttConnection.isMqttConnected();
-                result = true;
-
-                mockedMqttConnection.isMqttConnected();
-                result = true;
-
-                mockedMqttConnection.publishMessage(anyString, (MqttQos) any, null);
-
-                mockedObjectLock.waitLock(anyInt);
-
                 mockedRequestData.isX509();
-                result = false;
+                result = true;
+
+                mockedMqttConnection.isMqttConnected();
+                result = true;
 
                 mockedRequestData.getSasToken();
                 result = expectedSasToken;
+
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, null);
+                result = mockedDeviceRegistrationParser;
+
+                mockedDeviceRegistrationParser.toJson();
+                result = "{ \"registration\":\"" + TEST_REGISTRATION_ID + "\" }";
+
+                mockedMqttConnection.publishMessage(anyString, (MqttQos) any, (byte[])any);
             }
         };
 

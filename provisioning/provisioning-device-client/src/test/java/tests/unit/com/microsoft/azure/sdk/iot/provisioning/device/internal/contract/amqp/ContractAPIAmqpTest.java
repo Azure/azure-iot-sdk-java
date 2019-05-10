@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.Pr
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp.ContractAPIAmqp;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceConnectionException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationParser;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
@@ -45,6 +46,7 @@ public class ContractAPIAmqpTest
     private static final String TEST_REGISTRATION_ID = "testRegistrationId";
     private static final String TEST_OPERATION_ID = "testOperationId";
     private static final String TEST_SAS_TOKEN = "testSasToken";
+    private static final String TEST_PAYLOAD = "testPayload";
     private static final byte[] TEST_EK = "testEK".getBytes();
     private static final byte[] TEST_SRK = "testSRK".getBytes();
 
@@ -80,6 +82,9 @@ public class ContractAPIAmqpTest
 
     @Mocked
     AmqpsProvisioningSymmetricKeySaslHandler mockedAmqpsProvisioningSymmetricKeySaslHandler;
+
+    @Mocked
+    DeviceRegistrationParser mockedDeviceRegistrationParser;
 
     private ContractAPIAmqp createContractClass() throws ProvisioningDeviceClientException
     {
@@ -344,43 +349,37 @@ public class ContractAPIAmqpTest
     // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
     // SRS_ContractAPIAmqp_07_006: [This method shall wait MAX_WAIT_TO_SEND_MSG for a reply from the service.]
     @Test
-    public void authenticateWithProvisioningServiceSucceeds() throws Exception
+    public void authenticateWithProvisioningServiceX509Succeeds() throws Exception
     {
         //arrange
         ContractAPIAmqp contractAPIAmqp = createContractClass();
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockedRequestData.getRegistrationId();
                 result = TEST_REGISTRATION_ID;
-                mockedRequestData.getSslContext();
-                result = mockedSslContext;
-            }
-        };
-        contractAPIAmqp.open(mockedRequestData);
-        new NonStrictExpectations()
-        {
-            {
-                mockedProvisionAmqpConnection.isAmqpConnected();
+                mockedRequestData.isX509();
                 result = true;
-            }
-        };
 
-        new NonStrictExpectations()
-        {
-            {
-                mockSendLock.wait(anyLong);
+                mockedRequestData.getPayload();
+                result = TEST_PAYLOAD;
+
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD);
+                result = mockedDeviceRegistrationParser;
+
+                mockedDeviceRegistrationParser.toJson();
+                result = "{ \"registration\":\"" + TEST_REGISTRATION_ID + "\" }";
             }
         };
 
         //act
-        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
+        contractAPIAmqp.authenticateWithProvisioningService(mockedRequestData,  mockedResponseCallback, null);
 
         //assert
         new Verifications()
         {
             {
-                mockedProvisionAmqpConnection.sendRegisterMessage((ResponseCallback)any, (Object)any);
+                mockedProvisionAmqpConnection.sendRegisterMessage((ResponseCallback)any, any, (byte[])any);
                 times = 1;
             }
         };
@@ -393,6 +392,8 @@ public class ContractAPIAmqpTest
     {
         //arrange
         final String expectedSasToken = "asdf";
+        ContractAPIAmqp contractAPIAmqp = createContractClass();
+
         new NonStrictExpectations()
         {
             {
@@ -408,21 +409,19 @@ public class ContractAPIAmqpTest
                 result = mockedAmqpsProvisioningSymmetricKeySaslHandler;
             }
         };
-        ContractAPIAmqp contractAPIAmqp = createContractClass();
 
         contractAPIAmqp.open(mockedRequestData);
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                mockedProvisionAmqpConnection.isAmqpConnected();
-                result = true;
-            }
-        };
+                mockedRequestData.getPayload();
+                result = TEST_PAYLOAD;
 
-        new NonStrictExpectations()
-        {
-            {
-                mockSendLock.wait(anyLong);
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD);
+                result = mockedDeviceRegistrationParser;
+
+                mockedDeviceRegistrationParser.toJson();
+                result = "{ \"registration\":\"" + TEST_REGISTRATION_ID + "\" }";
             }
         };
 
@@ -436,7 +435,7 @@ public class ContractAPIAmqpTest
                 mockedProvisionAmqpConnection.open(TEST_REGISTRATION_ID, mockedSslContext, mockedAmqpsProvisioningSymmetricKeySaslHandler, anyBoolean);
                 times = 1;
 
-                mockedProvisionAmqpConnection.sendRegisterMessage((ResponseCallback)any, (Object)any);
+                mockedProvisionAmqpConnection.sendRegisterMessage((ResponseCallback)any, any, (byte[])any);
                 times = 1;
             }
         };
