@@ -263,13 +263,13 @@ public class ProvisioningCommon extends IntegrationTest
             }
         }
 
-        assertEquals(PROVISIONING_DEVICE_STATUS_ASSIGNED, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus());
+        assertEquals(buildExceptionMessageDpsIndividualOrGroup("Unexpected status", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), PROVISIONING_DEVICE_STATUS_ASSIGNED, provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus());
         testInstance.provisionedDeviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
         testInstance.provisionedIotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
-        assertNotNull(testInstance.provisionedDeviceId);
-        assertFalse(testInstance.provisionedDeviceId.isEmpty());
-        assertNotNull(testInstance.provisionedIotHubUri);
-        assertFalse(testInstance.provisionedIotHubUri.isEmpty());
+        assertNotNull(buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId);
+        assertFalse(buildExceptionMessageDpsIndividualOrGroup("Expected a device id", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId.isEmpty());
+        assertNotNull(buildExceptionMessageDpsIndividualOrGroup("Expected uri", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedIotHubUri);
+        assertFalse(buildExceptionMessageDpsIndividualOrGroup("Expected uri", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedIotHubUri.isEmpty());
     }
 
     public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, String jsonPayload, String... expectedIotHubsToProvisionTo) throws Exception
@@ -318,14 +318,14 @@ public class ProvisioningCommon extends IntegrationTest
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 String provisionedHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
 
-                assertTrue(provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED);
-                assertFalse(deviceId.isEmpty());
-                assertFalse(provisionedHubUri.isEmpty());
+                assertTrue(buildExceptionMessageDpsIndividualOrGroup("Unexpected status", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED);
+                assertFalse(buildExceptionMessageDpsIndividualOrGroup("Unexpected deviceId", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), deviceId.isEmpty());
+                assertFalse(buildExceptionMessageDpsIndividualOrGroup("Unexpected uri", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedHubUri.isEmpty());
 
                 if (jsonPayload != null && !jsonPayload.isEmpty())
                 {
                     String returnJson = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningPayload();
-                    assertTrue("Payload received from service is not the same values. Sent Json: " + jsonPayload + " returned json " + returnJson, returnJson.equals(jsonPayload));
+                    assertTrue(buildExceptionMessageDpsIndividualOrGroup("Payload received from service is not the same values. Sent Json: " + jsonPayload + " returned json " + returnJson, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), returnJson.equals(jsonPayload));
                 }
                 assertProvisionedIntoCorrectHub(expectedIotHubsToProvisionTo, provisionedHubUri);
                 assertProvisionedDeviceWorks(provisionedHubUri, deviceId);
@@ -386,15 +386,15 @@ public class ProvisioningCommon extends IntegrationTest
     {
         DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString);
         Query query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
-        assertTrue(deviceTwin.hasNextDeviceTwin(query));
+        assertTrue(buildExceptionMessageDpsIndividualOrGroup("Provisioned device " + testInstance.provisionedDeviceId + "not found in expected hub", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), deviceTwin.hasNextDeviceTwin(query));
         DeviceTwinDevice provisionedDevice = deviceTwin.getNextDeviceTwin(query);
         if (expectedDeviceCapabilities.isIotEdge())
         {
-            assertTrue(provisionedDevice.getCapabilities().isIotEdge());
+            assertTrue(buildExceptionMessageDpsIndividualOrGroup("Provisioned device isn't edge device: " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedDevice.getCapabilities().isIotEdge());
         }
         else
         {
-            assertTrue(provisionedDevice.getCapabilities() == null || !provisionedDevice.getCapabilities().isIotEdge());
+            assertTrue(buildExceptionMessageDpsIndividualOrGroup("Provisioned device shouldn't be edge device " + testInstance.provisionedDeviceId, getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), provisionedDevice.getCapabilities() == null || !provisionedDevice.getCapabilities().isIotEdge());
         }
     }
 
@@ -497,15 +497,15 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 Attestation attestation = new SymmetricKeyAttestation(null, null);
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
-                assertTrue(testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
+                assertTrue(buildExceptionMessageDpsIndividualOrGroup("Expected symmetric key attestation", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.individualEnrollment.getAttestation() instanceof  SymmetricKeyAttestation);
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) testInstance.individualEnrollment.getAttestation();
                 securityProvider = new SecurityProviderSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(), testInstance.registrationId);
             }
 
-            assertEquals(testInstance.provisionedDeviceId, testInstance.individualEnrollment.getDeviceId());
-            assertNotNull(testInstance.individualEnrollment.getInitialTwin());
-            assertEquals(TEST_VALUE_TAG, testInstance.individualEnrollment.getInitialTwin().getTags().get(TEST_KEY_TAG));
-            assertEquals(TEST_VALUE_DP, testInstance.individualEnrollment.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
+            assertEquals(buildExceptionMessageDpsIndividualOrGroup("Unexpected device id assigned", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedDeviceId, testInstance.individualEnrollment.getDeviceId());
+            assertNotNull(buildExceptionMessageDpsIndividualOrGroup("Expected twin to not be null", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.individualEnrollment.getInitialTwin());
+            assertEquals(buildExceptionMessageDpsIndividualOrGroup("Unexpected tags found", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), TEST_VALUE_TAG, testInstance.individualEnrollment.getInitialTwin().getTags().get(TEST_KEY_TAG));
+            assertEquals(buildExceptionMessageDpsIndividualOrGroup("Unexpected desired properties", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), TEST_VALUE_DP, testInstance.individualEnrollment.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
         }
 
         return securityProvider;
