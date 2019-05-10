@@ -39,7 +39,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_PATH_DEVICES = "devices";
     private static final String URL_PATH_MODULES = "modules";
     private static final String URL_PATH_CONFIG = "configurations";
-    private static final String URL_API_VERSION = "api-version=2018-06-30";
+    private static final String URL_API_VERSION = "api-version=2019-03-30";
     private static final String URL_MAX_COUNT = "top=";
     private static final String URL_PATH_DEVICESTATISTICS = "statistics";
     private static final String USER_SEPARATOR = "@";

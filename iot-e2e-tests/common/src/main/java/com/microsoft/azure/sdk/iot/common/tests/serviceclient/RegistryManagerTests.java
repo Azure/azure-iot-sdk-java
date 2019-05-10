@@ -402,6 +402,7 @@ public class RegistryManagerTests extends IntegrationTest
         edgeDevice = Tools.addDeviceWithRetry(registryManager, edgeDevice);
 
         Device leafDevice = Device.createFromId(testInstance.deviceId + "-leaf", DeviceStatus.Enabled, null);
+        assertNotNull(edgeDevice.getScope());
         leafDevice.setScope(edgeDevice.getScope());
         Tools.addDeviceWithRetry(registryManager, leafDevice);
 
