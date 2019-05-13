@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-service-client</artifactId>
-            <version>1.5.0</version>
+            <version>1.5.1</version>
         </dependency>
     </dependencies>
     <build>
