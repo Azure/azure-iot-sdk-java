@@ -1,0 +1,38 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-sdk-java-digital-twin</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <name>Azure IoT Sdk Java Digital Twin Device</name>
+    <description>Device of Azure IoT Sdk Java Digital Twin</description>
+    <artifactId>iot-sdk-java-digital-twin-device</artifactId>
+    <version>${project-device-version}</version>
+    <packaging>jar</packaging>
+    <properties>
+        <jackson-version>2.9.9</jackson-version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client</artifactId>
+            <version>${iot-device-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+    </dependencies>
+</project>
