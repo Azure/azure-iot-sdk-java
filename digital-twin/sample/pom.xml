@@ -1,0 +1,25 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-sdk-java-digital-twin</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <digitalTwinName>Azure IoT Sdk Java Digital Twin Sample</digitalTwinName>
+    <description>Azure IoT Sdk Java Digital Twin Sample</description>
+    <artifactId>iot-sdk-java-digital-twin-sample</artifactId>
+    <version>${project-sample-version}</version>
+    <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-sdk-java-digital-twin-device</artifactId>
+            <version>${project-device-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j-version}</version>
+        </dependency>
+    </dependencies>
+</project>
