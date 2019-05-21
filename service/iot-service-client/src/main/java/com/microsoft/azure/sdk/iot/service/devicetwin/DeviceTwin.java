@@ -121,6 +121,7 @@ public class DeviceTwin
         device.setReportedProperties(twinState.getReportedProperty());
         device.setCapabilities(twinState.getCapabilities());
         device.setConfigurations(twinState.getConfigurations());
+        device.setConnectionState(twinState.getConnectionState());
     }
 
     /**

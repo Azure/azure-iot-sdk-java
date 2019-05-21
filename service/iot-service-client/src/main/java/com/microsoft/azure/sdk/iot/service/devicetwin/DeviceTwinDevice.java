@@ -33,6 +33,7 @@ public class DeviceTwinDevice
     private TwinCollection desiredProperties = null;
     private Map<String, ConfigurationInfo> configurations = null;
     private DeviceCapabilities capabilities = null;
+    private String connectionState;
 
     /**
      * Constructor to create instance for a device
@@ -203,7 +204,6 @@ public class DeviceTwinDevice
          */
         this.tag = this.setToMap(tags);
     }
-
 
     /**
      * Getter to get Tags Set
@@ -493,6 +493,23 @@ public class DeviceTwinDevice
          **Codes_SRS_DEVICETWINDEVICE_28_004: [** The getCapabilities shall return the stored capabilities.**]**
          */
         return this.capabilities;
+    }
+
+    /**
+     * @return get the connection state as last reported by the service
+     */
+    public String getConnectionState()
+    {
+        return this.connectionState;
+    }
+
+    /**
+     * Set the connection state of the device
+     * @param connectionState the state to set
+     */
+    protected void setConnectionState(String connectionState)
+    {
+        this.connectionState = connectionState;
     }
 
     /**

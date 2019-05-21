@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.twin;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinProperties;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import mockit.Deencapsulation;
@@ -261,11 +262,14 @@ public class TwinStateTest
     {
         // arrange
         TwinState twinState = new TwinState(TAGS, PROPERTIES, PROPERTIES);
+        TwinConnectionState expectedConnectionState = TwinConnectionState.CONNECTED;
+        Deencapsulation.setField(twinState, "connectionState", expectedConnectionState);
 
         // act - assert
         assertEquals(TAGS, twinState.getTags());
         assertEquals(PROPERTIES, twinState.getDesiredProperty());
         assertEquals(PROPERTIES, twinState.getReportedProperty());
+        assertEquals(expectedConnectionState.toString(), twinState.getConnectionState());
     }
 
     /* SRS_TWIN_STATE_21_006: [The getDesiredProperty shall return a TwinCollection with the stored desired property.] */
@@ -388,7 +392,7 @@ public class TwinStateTest
     {
         // arrange
         final String json =
-                "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":{\"p1\":{\"status\":\"targeted\"},\"p2\":{\"status\":\"applied\"}},\"deviceId\":\"validDeviceId\",\"moduleId\":null,\"generationId\":\"validGenerationId\",\"etag\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"version\":3,\"status\":\"enabled\",\"statusReason\":\"validStatusReason\",\"statusUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"connectionState\":\"disconnected\",\"connectionStateUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"lastActivityTime\":\"xxx\",\"capabilities\":null}";
+                "{\"tags\":{\"tag1\":\"val1\",\"tag2\":\"val2\",\"tag3\":\"val3\"},\"properties\":{\"desired\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"},\"reported\":{\"prop2\":\"val2\",\"prop1\":\"val1\",\"prop3\":\"val3\"}},\"configurations\":{\"p1\":{\"status\":\"targeted\"},\"p2\":{\"status\":\"applied\"}},\"deviceId\":\"validDeviceId\",\"moduleId\":null,\"generationId\":\"validGenerationId\",\"etag\":\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\"version\":3,\"status\":\"enabled\",\"statusReason\":\"validStatusReason\",\"statusUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"connectionState\":\"Disconnected\",\"connectionStateUpdatedTime\":\"2016-06-01T21:22:41+00:00\",\"lastActivityTime\":\"xxx\",\"capabilities\":null}";
 
         // act
         TwinState twinState = TwinState.createFromTwinJson(json);

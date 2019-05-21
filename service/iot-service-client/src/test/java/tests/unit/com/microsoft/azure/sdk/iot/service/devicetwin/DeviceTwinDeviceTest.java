@@ -5,10 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
-import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationStatus;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.*;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import mockit.Deencapsulation;
@@ -187,7 +184,21 @@ public class DeviceTwinDeviceTest
 
         //assert
         assertTrue(devId.equals("testDevice"));
+    }
 
+    @Test
+    public void getConnectionStateGets()
+    {
+        //arrange
+        String expectedConnectionState = TwinConnectionState.DISCONNECTED.toString();
+        DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
+        Deencapsulation.setField(testDevice, "connectionState", expectedConnectionState);
+
+        //act
+        String actualConnectionState = testDevice.getConnectionState();
+
+        //assert
+        assertEquals(expectedConnectionState, actualConnectionState);
     }
 
     /*

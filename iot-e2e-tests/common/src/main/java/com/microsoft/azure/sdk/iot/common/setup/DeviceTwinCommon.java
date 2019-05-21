@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.setup;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -671,6 +672,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
         // assert
+        assertEquals(TwinConnectionState.CONNECTED.toString(), deviceUnderTest.sCDeviceForTwin.getConnectionState());
         waitAndVerifyTwinStatusBecomesSuccess();
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);
     }
