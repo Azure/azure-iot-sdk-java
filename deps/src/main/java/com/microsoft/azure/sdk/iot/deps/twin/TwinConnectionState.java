@@ -10,9 +10,9 @@ import com.google.gson.annotations.SerializedName;
  */
 public enum TwinConnectionState
 {
-    @SerializedName("disconnected")
+    @SerializedName(value = "Disconnected", alternate = "disconnected")
     DISCONNECTED,
 
-    @SerializedName("connected")
+    @SerializedName(value = "Connected", alternate = "connected")
     CONNECTED
 }

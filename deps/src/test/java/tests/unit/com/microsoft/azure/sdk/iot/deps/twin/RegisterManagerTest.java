@@ -27,7 +27,7 @@ public class RegisterManagerTest
             "\"status\":\"enabled\"," +
             "\"statusReason\":\"validStatusReason\"," +
             "\"statusUpdatedTime\":\"2016-06-01T21:22:41+00:00\"," +
-            "\"connectionState\":\"disconnected\"," +
+            "\"connectionState\":\"Disconnected\"," +
             "\"connectionStateUpdatedTime\":\"2016-06-01T21:22:41+00:00\"," +
             "\"lastActivityTime\":\"xxx\"," +
             "\"capabilities\": {\n" +

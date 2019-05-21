@@ -5,10 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
-import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
+import com.microsoft.azure.sdk.iot.deps.twin.*;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -182,6 +179,7 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
         TwinCollection testMap = new TwinCollection();
+        String expectedConnectionState = TwinConnectionState.CONNECTED.toString();
         new NonStrictExpectations()
         {
             {
@@ -193,6 +191,8 @@ public class DeviceTwinTest
                 result = mockCapabilities;
                 mockedTwinState.getConfigurations();
                 result = mockConfigurations;
+                mockedTwinState.getConnectionState();
+                result = expectedConnectionState;
             }
         };
 
@@ -231,6 +231,8 @@ public class DeviceTwinTest
                 Deencapsulation.invoke(mockedDevice, "setCapabilities", mockCapabilities);
                 times = 1;
                 Deencapsulation.invoke(mockedDevice, "setConfigurations", mockConfigurations);
+                times = 1;
+                Deencapsulation.invoke(mockedDevice, "setConnectionState", expectedConnectionState);
                 times = 1;
             }
         };
