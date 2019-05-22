@@ -1216,6 +1216,58 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         return this.deviceClientConfig.getIotHubHostname();
     }
 
+    private String getErrorCondition(ErrorCondition condition)
+    {
+        if (condition != null)
+        {
+            if (condition.getCondition() != null)
+            {
+                return condition.getCondition().toString();
+            }
+        }
+
+        return null;
+    }
+
+    private String getErrorDescription(ErrorCondition condition)
+    {
+        if (condition != null)
+        {
+            return condition.getDescription();
+        }
+
+        return null;
+    }
+
+    private ErrorCondition getErrorConditionFromEndpoint(Endpoint endpoint)
+    {
+        return endpoint.getCondition() != null && endpoint.getCondition().getCondition() != null ? endpoint.getCondition() : endpoint.getRemoteCondition();
+    }
+
+    private TransportException getTransportExceptionFromProtonEndpoints(Endpoint... endpoints)
+    {
+        for (Endpoint endpoint : endpoints)
+        {
+            if (endpoint == null)
+            {
+                continue;
+            }
+
+            ErrorCondition errorCondition = getErrorConditionFromEndpoint(endpoint);
+            if (errorCondition == null || errorCondition.getCondition() == null)
+            {
+                continue;
+            }
+
+            String error = errorCondition.getCondition().toString();
+            String errorDescription = errorCondition.getDescription();
+
+            return AmqpsExceptionTranslator.convertToAmqpException(error, errorDescription);
+        }
+
+        return null;
+    }
+
     /**
      * Derive the transport exception from the provided event, defaulting to a generic, retryable TransportException
      * @param event the event context
@@ -1223,68 +1275,19 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     private TransportException getTransportExceptionFromEvent(Event event)
     {
-        TransportException transportException = new TransportException("Unknown transport exception occurred");
-        transportException.setRetryable(true);
-
-        String error = "";
-        String errorDescription = "";
-
-        String senderError = event.getSender() != null && event.getSender().getRemoteCondition() != null && event.getSender().getRemoteCondition().getCondition() != null ? event.getSender().getRemoteCondition().getCondition().toString() : "";
-        String receiverError = event.getReceiver() != null && event.getReceiver().getRemoteCondition() != null && event.getReceiver().getRemoteCondition().getCondition() != null ? event.getReceiver().getRemoteCondition().getCondition().toString() : "";
-        String sessionError = event.getSession() != null && event.getSession().getRemoteCondition() != null && event.getSession().getRemoteCondition().getCondition() != null ? event.getSession().getRemoteCondition().getCondition().toString() : "";
-        String connectionError = event.getConnection() != null && event.getConnection().getRemoteCondition() != null && event.getConnection().getRemoteCondition().getCondition() != null ? event.getConnection().getRemoteCondition().getCondition().toString() : "";
-        String linkError = event.getLink() != null && event.getLink().getRemoteCondition() != null && event.getLink().getRemoteCondition().getCondition() != null ? event.getLink().getRemoteCondition().getCondition().toString() : "";
-        String transportError = event.getTransport() != null && event.getTransport().getRemoteCondition() != null && event.getTransport().getRemoteCondition().getCondition() != null ? event.getTransport().getRemoteCondition().getCondition().toString() : "";
-
-        String senderErrorDescription = event.getSender() != null && event.getSender().getRemoteCondition() != null && event.getSender().getRemoteCondition().getDescription() != null ? event.getSender().getRemoteCondition().getDescription() : "";
-        String receiverErrorDescription = event.getReceiver() != null && event.getReceiver().getRemoteCondition() != null && event.getReceiver().getRemoteCondition().getDescription() != null ? event.getReceiver().getRemoteCondition().getDescription() : "";
-        String sessionErrorDescription = event.getSession() != null && event.getSession().getRemoteCondition() != null && event.getSession().getRemoteCondition().getDescription() != null ? event.getSession().getRemoteCondition().getDescription() : "";
-        String connectionErrorDescription = event.getConnection() != null && event.getConnection().getRemoteCondition() != null && event.getConnection().getRemoteCondition().getDescription() != null ? event.getConnection().getRemoteCondition().getDescription() : "";
-        String linkErrorDescription = event.getLink() != null && event.getLink().getRemoteCondition() != null && event.getLink().getRemoteCondition().getDescription() != null ? event.getLink().getRemoteCondition().getDescription() : "";
-        String transportErrorDescription = event.getTransport() != null && event.getTransport().getRemoteCondition() != null && event.getTransport().getRemoteCondition().getDescription() != null ? event.getTransport().getRemoteCondition().getDescription() : "";
-
-        if (!senderError.isEmpty())
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_081: [If an exception can be found in the sender, this function shall return a the mapped amqp exception derived from that exception.]
-            error = senderError;
-            errorDescription = senderErrorDescription;
-        }
-        else if (!receiverError.isEmpty())
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_082: [If an exception can be found in the receiver, this function shall return a the mapped amqp exception derived from that exception.]
-            error = receiverError;
-            errorDescription = receiverErrorDescription;
-        }
-        else if (!sessionError.isEmpty())
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_083: [If an exception can be found in the session, this function shall return a the mapped amqp exception derived from that exception.]
-            error = sessionError;
-            errorDescription = sessionErrorDescription;
-        }
-        else if (!connectionError.isEmpty())
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_084: [If an exception can be found in the connection, this function shall return a the mapped amqp exception derived from that exception.]
-            error = connectionError;
-            errorDescription = connectionErrorDescription;
-        }
-        else if (!linkError.isEmpty())
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_085: [If an exception can be found in the link, this function shall return a the mapped amqp exception derived from that exception.]
-            error = linkError;
-            errorDescription = linkErrorDescription;
-        }
-        else if (!transportError.isEmpty())
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_34_086: [If an exception can be found in the transport, this function shall return a the mapped amqp exception derived from that exception.]
-            error = transportError;
-            errorDescription = transportErrorDescription;
-        }
-
-
         // Codes_SRS_AMQPSIOTHUBCONNECTION_34_080: [If no exception can be found in the sender, receiver, session, connection, link, or transport, this function shall return a generic TransportException.]
-        if (!error.isEmpty())
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_081: [If an exception can be found in the sender, this function shall return a the mapped amqp exception derived from that exception.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_082: [If an exception can be found in the receiver, this function shall return a the mapped amqp exception derived from that exception.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_083: [If an exception can be found in the session, this function shall return a the mapped amqp exception derived from that exception.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_084: [If an exception can be found in the connection, this function shall return a the mapped amqp exception derived from that exception.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_085: [If an exception can be found in the link, this function shall return a the mapped amqp exception derived from that exception.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_086: [If an exception can be found in the transport, this function shall return a the mapped amqp exception derived from that exception.]
+        TransportException transportException = getTransportExceptionFromProtonEndpoints(event.getSender(), event.getReceiver(), event.getConnection(), event.getTransport(), event.getSession(), event.getLink());
+
+        if (transportException == null)
         {
-            transportException = AmqpsExceptionTranslator.convertToAmqpException(error, errorDescription);
+            transportException = new TransportException("Unknown transport exception occurred");
+            transportException.setRetryable(true);
         }
 
         return transportException;
