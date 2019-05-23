@@ -141,7 +141,7 @@ public class IotHubConnectionString
                                   String sharedAccessKey, String sharedAccessToken)
             throws IllegalArgumentException, URISyntaxException
     {
-        this(hostName, deviceId, sharedAccessKey, sharedAccessToken, "");
+        this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null);
     }
 
     public IotHubConnectionString(String hostName, String deviceId,
