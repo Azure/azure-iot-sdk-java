@@ -365,9 +365,6 @@ public class EnrollmentGroup extends Serializable
      */
     protected final void setEnrollmentGroupId(String enrollmentGroupId)
     {
-        /* SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
-        ParserUtility.validateId(enrollmentGroupId);
-
         /* SRS_ENROLLMENT_GROUP_21_016: [The setEnrollmentGroupId shall store the provided enrollmentGroupId.] */
         this.enrollmentGroupId = enrollmentGroupId;
     }
@@ -488,9 +485,6 @@ public class EnrollmentGroup extends Serializable
     @Deprecated
     public void setIotHubHostName(String iotHubHostName)
     {
-        /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-        ParserUtility.validateHostName(iotHubHostName);
-
         /* SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
@@ -511,9 +505,6 @@ public class EnrollmentGroup extends Serializable
      */
     public final void setIotHubHostNameFinal(String iotHubHostName)
     {
-        /* SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-        ParserUtility.validateHostName(iotHubHostName);
-
         /* SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
@@ -717,9 +708,6 @@ public class EnrollmentGroup extends Serializable
     @Deprecated
     public void setEtag(String etag)
     {
-        /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-        ParserUtility.validateStringUTF8(etag);
-
         /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
@@ -732,9 +720,6 @@ public class EnrollmentGroup extends Serializable
      */
     public final void setEtagFinal(String etag)
     {
-        /* SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-        ParserUtility.validateStringUTF8(etag);
-
         /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }

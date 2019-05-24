@@ -771,58 +771,6 @@ public class IndividualEnrollmentTest
         assertEquals(VALID_PARSED_ETAG, individualEnrollment.getEtag());
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setRegistrationIdThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setRegistrationId", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setRegistrationIdThrowsOnEmpty()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setRegistrationId", new Class[] {String.class}, "");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setRegistrationIdThrowsOnNotUtf8()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setRegistrationId", new Class[] {String.class}, "\u1234-invalid");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setRegistrationIdThrowsOnInvalidChar()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setRegistrationId", new Class[] {String.class}, "invalid&");
-
-        // assert
-    }
-
     /* SRS_INDIVIDUAL_ENROLLMENT_21_018: [The setRegistrationId shall store the provided registrationId.] */
     @Test
     public void setRegistrationIdSucceed()
@@ -837,32 +785,6 @@ public class IndividualEnrollmentTest
 
         // assert
         assertEquals(newRegistrationId, Deencapsulation.getField(individualEnrollment, "registrationId"));
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setDeviceIdThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setDeviceId", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_020: [The setDeviceId shall throw IllegalArgumentException if the provided deviceId is {@code null}, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setDeviceIdThrowsOnEmpty()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setDeviceId", new Class[] {String.class}, "");
-
-        // assert
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
@@ -881,19 +803,6 @@ public class IndividualEnrollmentTest
         assertEquals(newDeviceId, Deencapsulation.getField(individualEnrollment, "deviceId"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throw IllegalArgumentException if the provided registrationState is null.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setRegistrationStateThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setRegistrationState", new Class[] {DeviceRegistrationState.class}, (DeviceRegistrationState)null);
-
-        // assert
-    }
-
     /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setRegistrationState shall store the provided registrationState.] */
     @Test
     public void setRegistrationStateSucceed(@Mocked final DeviceRegistrationState mockedDeviceRegistrationState)
@@ -907,19 +816,6 @@ public class IndividualEnrollmentTest
 
         // assert
         assertEquals(mockedDeviceRegistrationState, Deencapsulation.getField(individualEnrollment, "registrationState"));
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_026: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setAttestationMechanismThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setAttestation", new Class[]{AttestationMechanism.class}, (AttestationMechanism)null);
-
-        // assert
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
@@ -982,71 +878,6 @@ public class IndividualEnrollmentTest
         };
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        individualEnrollment.setIotHubHostNameFinal(null);
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnEmpty()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        individualEnrollment.setIotHubHostNameFinal("");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnNotUTF8()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        individualEnrollment.setIotHubHostNameFinal("NewHostName.\u1234a.b");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnInvalidChar()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        individualEnrollment.setIotHubHostNameFinal("NewHostName.&a.b");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnIncompleteName()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        individualEnrollment.setIotHubHostNameFinal("NewHostName");
-
-        // assert
-    }
-
     /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
     @Test
     public void setIotHubHostNameSucceed()
@@ -1063,19 +894,6 @@ public class IndividualEnrollmentTest
         assertEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
     }
 
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_032: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setInitialTwinThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        individualEnrollment.setInitialTwin(null);
-
-        // assert
-    }
-
     /* SRS_INDIVIDUAL_ENROLLMENT_21_033: [The setInitialTwin shall store the provided initialTwin.] */
     @Test
     public void setInitialTwinSucceed(@Mocked final TwinState mockedTwinState)
@@ -1089,19 +907,6 @@ public class IndividualEnrollmentTest
 
         // assert
         assertEquals(mockedTwinState, Deencapsulation.getField(individualEnrollment, "initialTwin"));
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_035: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setProvisioningStatusThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        individualEnrollment.setProvisioningStatusFinal(null);
-
-        // assert
     }
 
     /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
@@ -1223,45 +1028,6 @@ public class IndividualEnrollmentTest
 
         // act
         Deencapsulation.invoke(individualEnrollment,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEtagThrowsOnNull()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setEtag", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEtagThrowsOnEmpty()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setEtag", new Class[] {String.class}, (String)"");
-
-        // assert
-    }
-
-    /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEtagThrowsOnNotUTF8()
-    {
-        // arrange
-        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
-
-        // act
-        Deencapsulation.invoke(individualEnrollment, "setEtag", new Class[] {String.class}, (String)"\u1234InvalidEtag");
 
         // assert
     }

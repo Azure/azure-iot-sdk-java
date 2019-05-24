@@ -115,17 +115,12 @@ public class DeviceRegistrationState
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         DeviceRegistrationState result = gson.fromJson(json, DeviceRegistrationState.class);
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_004: [The constructor shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
-        ParserUtility.validateId(result.registrationId);
-
         /* SRS_DEVICE_REGISTRATION_STATE_21_005: [The constructor shall store the provided registrationId.] */
         this.registrationId = result.registrationId;
 
         /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throw IllegalArgumentException if the provided deviceId is empty, or invalid.] */
         if(result.deviceId != null)
         {
-            ParserUtility.validateId(result.deviceId);
-
             /* SRS_DEVICE_REGISTRATION_STATE_21_007: [The constructor shall store the provided deviceId.] */
             this.deviceId = result.deviceId;
         }
@@ -147,8 +142,6 @@ public class DeviceRegistrationState
         /* SRS_DEVICE_REGISTRATION_STATE_21_010: [If the assignedHub is not null, the constructor shall judge and store it.] */
         if(result.assignedHub != null)
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_011: [The constructor shall throw IllegalArgumentException if an provided assignedHub is empty or invalid.] */
-            ParserUtility.validateHostName(result.assignedHub);
             this.assignedHub = result.assignedHub;
         }
 
