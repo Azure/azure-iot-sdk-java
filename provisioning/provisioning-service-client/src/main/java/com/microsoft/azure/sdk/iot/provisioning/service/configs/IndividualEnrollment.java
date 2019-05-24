@@ -377,9 +377,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setRegistrationId(String registrationId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_017: [The setRegistrationId shall throw IllegalArgumentException if the provided registrationId is null, empty, or invalid.] */
-        ParserUtility.validateId(registrationId);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_018: [The setRegistrationId shall store the provided registrationId.] */
         this.registrationId = registrationId;
     }
@@ -420,11 +417,6 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setDeviceIdFinal(String deviceId)
     {
-        if (deviceId == null || deviceId.isEmpty())
-        {
-            throw new IllegalArgumentException("Invalid deviceId parameter specified");
-        }
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
         this.deviceId = deviceId;
     }
@@ -449,9 +441,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setRegistrationState(DeviceRegistrationState registrationState)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_023: [The setRegistrationState shall throw IllegalArgumentException if the provided registrationState is null.] */
-        ParserUtility.validateObject(registrationState);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setRegistrationState shall store the provided registrationState.] */
         this.registrationState = registrationState;
     }
@@ -481,9 +470,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setAttestation(AttestationMechanism attestationMechanism)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_026: [The setAttestation shall throw IllegalArgumentException if the attestation is null or invalid.] */
-        ParserUtility.validateObject(attestationMechanism);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
         try
         {
@@ -551,9 +537,6 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setIotHubHostName(String iotHubHostName)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-        ParserUtility.validateHostName(iotHubHostName);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
@@ -574,9 +557,6 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setIotHubHostNameFinal(String iotHubHostName)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_029: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-        ParserUtility.validateHostName(iotHubHostName);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
@@ -604,9 +584,6 @@ public class IndividualEnrollment extends Serializable
      */
     public void setInitialTwin(TwinState initialTwin)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_032: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
-        ParserUtility.validateObject(initialTwin);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_033: [The setInitialTwin shall store the provided initialTwin.] */
         this.initialTwin = initialTwin;
     }
@@ -637,9 +614,6 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_035: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
-        ParserUtility.validateObject(provisioningStatus);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
         this.provisioningStatus = provisioningStatus;
     }
@@ -656,9 +630,6 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_035: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
-        ParserUtility.validateObject(provisioningStatus);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
         this.provisioningStatus = provisioningStatus;
     }
@@ -749,9 +720,6 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setEtag(String etag)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-        ParserUtility.validateStringUTF8(etag);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
@@ -764,9 +732,6 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setEtagFinal(String etag)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_047: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-        ParserUtility.validateStringUTF8(etag);
-
         /* SRS_INDIVIDUAL_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }

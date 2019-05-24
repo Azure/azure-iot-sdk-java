@@ -907,58 +907,6 @@ public class EnrollmentGroupTest
         assertEquals(VALID_PARSED_ETAG, enrollmentGroup.getEtag());
     }
 
-    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEnrollmentGroupIdThrowsOnNull()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEnrollmentGroupIdThrowsOnEmpty()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, "");
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEnrollmentGroupIdThrowsOnNotUtf8()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, "\u1234-invalid");
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_015: [The setEnrollmentGroupId shall throw IllegalArgumentException if the provided enrollmentGroupId is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEnrollmentGroupIdThrowsOnInvalidChar()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setEnrollmentGroupId", new Class[] {String.class}, "invalid&");
-
-        // assert
-    }
-
     /* Tests_SRS_ENROLLMENT_GROUP_21_016: [The setEnrollmentGroupId shall store the provided enrollmentGroupId.] */
     @Test
     public void setEnrollmentGroupIdSucceed()
@@ -1199,71 +1147,6 @@ public class EnrollmentGroupTest
         };
     }
 
-    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnNull()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        enrollmentGroup.setIotHubHostNameFinal(null);
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnEmpty()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        enrollmentGroup.setIotHubHostNameFinal("");
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnNotUTF8()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        enrollmentGroup.setIotHubHostNameFinal("NewHostName.\u1234a.b");
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnInvalidChar()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        enrollmentGroup.setIotHubHostNameFinal("NewHostName.&a.b");
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_021: [The setIotHubHostName shall throw IllegalArgumentException if the iotHubHostName is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setIotHubHostNameThrowsOnIncompleteName()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        enrollmentGroup.setIotHubHostNameFinal("NewHostName");
-
-        // assert
-    }
-
     /* Tests_SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
     @Test
     public void setIotHubHostNameSucceed()
@@ -1440,45 +1323,6 @@ public class EnrollmentGroupTest
 
         // act
         Deencapsulation.invoke(enrollmentGroup,"setLastUpdatedDateTimeUtc", new Class[] {String.class}, (String)"0000-00-00 00:00:00");
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEtagThrowsOnNull()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setEtag", new Class[] {String.class}, (String)null);
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEtagThrowsOnEmpty()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setEtag", new Class[] {String.class}, (String)"");
-
-        // assert
-    }
-
-    /* Tests_SRS_ENROLLMENT_GROUP_21_036: [The setEtag shall throw IllegalArgumentException if the etag is null, empty, or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void setEtagThrowsOnNotUTF8()
-    {
-        // arrange
-        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
-
-        // act
-        Deencapsulation.invoke(enrollmentGroup, "setEtag", new Class[] {String.class}, (String)"\u1234InvalidEtag");
 
         // assert
     }
