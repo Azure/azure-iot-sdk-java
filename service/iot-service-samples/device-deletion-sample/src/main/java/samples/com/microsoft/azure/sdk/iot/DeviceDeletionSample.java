@@ -88,7 +88,10 @@ public class DeviceDeletionSample
             while (deviceTwin.hasNextDeviceTwin(query))
             {
                 DeviceTwinDevice device = deviceTwin.getNextDeviceTwin(query);
-                deviceIdsToRemove.add(device.getDeviceId());
+                if (!device.getDeviceId().toLowerCase().contains("longhaul"))
+                {
+                    deviceIdsToRemove.add(device.getDeviceId());
+                }
             }
         }
         catch (Exception e)
