@@ -130,6 +130,7 @@ public class AmqpsConnection extends BaseHandler
 
     /**
      * Returns the status of the connection
+     * @throws Exception if any exception occurred during sasl negotiation
      * @return status of the connection
      */
     public boolean isConnected() throws Exception

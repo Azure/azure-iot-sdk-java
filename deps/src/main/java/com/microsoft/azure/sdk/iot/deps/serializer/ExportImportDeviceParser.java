@@ -269,7 +269,7 @@ public class ExportImportDeviceParser
 
     /**
      * Setter for authentication
-     *
+     * @param authentication the authentication to set
      * @throws IllegalArgumentException if authentication is null
      */
     public void setAuthentication(AuthenticationParser authentication) throws IllegalArgumentException

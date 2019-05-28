@@ -125,6 +125,7 @@ public class IotHubSSLContext
      * @throws IOException If the certificate provided was null or invalid
      * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      * @throws NoSuchAlgorithmException if the default SSL Context cannot be created
+     * @throws UnrecoverableKeyException if accessing the protected keystore fails
      */
     public IotHubSSLContext(String publicKeyCertificateString, String privateKeyString, String cert, boolean isPath)
             throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException

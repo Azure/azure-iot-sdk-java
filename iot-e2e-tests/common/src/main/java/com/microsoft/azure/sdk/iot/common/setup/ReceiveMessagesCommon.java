@@ -179,11 +179,11 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
             /* Create device on the service */
             Device device = Device.createFromId(deviceId, null, null);
-            Module module = Module.createFromId(deviceId, moduleId, null);
+            com.microsoft.azure.sdk.iot.service.Module module = com.microsoft.azure.sdk.iot.service.Module.createFromId(deviceId, moduleId, null);
 
             Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
             deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-            Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
+            com.microsoft.azure.sdk.iot.service.Module moduleX509 = com.microsoft.azure.sdk.iot.service.Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
             moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(registryManager, device);
             deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);

@@ -191,14 +191,14 @@ public class RegistryManagerTests extends IntegrationTest
         deleteModuleIfItExistsAlready(registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
-        Module moduleAdded = Module.createFromId(testInstance.deviceId, testInstance.moduleId, null);
+        com.microsoft.azure.sdk.iot.service.Module moduleAdded = com.microsoft.azure.sdk.iot.service.Module.createFromId(testInstance.deviceId, testInstance.moduleId, null);
         Tools.addModuleWithRetry(registryManager, moduleAdded);
 
         //-Read-//
-        Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        com.microsoft.azure.sdk.iot.service.Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
 
         //-Update-//
-        Module moduleUpdated = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        com.microsoft.azure.sdk.iot.service.Module moduleUpdated = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
         moduleUpdated.getSymmetricKey().setPrimaryKeyFinal(expectedSymmetricKey.getPrimaryKey());
         moduleUpdated = registryManager.updateModule(moduleUpdated);
 
@@ -227,11 +227,11 @@ public class RegistryManagerTests extends IntegrationTest
         deleteModuleIfItExistsAlready(registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
-        Module moduleAdded = Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.CERTIFICATE_AUTHORITY);
+        com.microsoft.azure.sdk.iot.service.Module moduleAdded = com.microsoft.azure.sdk.iot.service.Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.CERTIFICATE_AUTHORITY);
         Tools.addModuleWithRetry(registryManager, moduleAdded);
 
         //-Read-//
-        Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        com.microsoft.azure.sdk.iot.service.Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
 
         //-Delete-//
         registryManager.removeModule(testInstance.deviceId, testInstance.moduleId);
@@ -260,15 +260,15 @@ public class RegistryManagerTests extends IntegrationTest
         deleteModuleIfItExistsAlready(registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
-        Module moduleAdded = Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.SELF_SIGNED);
+        com.microsoft.azure.sdk.iot.service.Module moduleAdded = com.microsoft.azure.sdk.iot.service.Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.SELF_SIGNED);
         moduleAdded.setThumbprintFinal(primaryThumbprint, secondaryThumbprint);
         Tools.addModuleWithRetry(registryManager, moduleAdded);
 
         //-Read-//
-        Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        com.microsoft.azure.sdk.iot.service.Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
 
         //-Update-//
-        Module moduleUpdated = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        com.microsoft.azure.sdk.iot.service.Module moduleUpdated = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
         moduleUpdated.setThumbprintFinal(primaryThumbprint2, secondaryThumbprint2);
         moduleUpdated = registryManager.updateModule(moduleUpdated);
 
