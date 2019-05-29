@@ -16,10 +16,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -360,6 +357,8 @@ public class IotHubTransport implements IotHubListener
      */
     public void sendMessages()
     {
+        checkForExpiredMessages();
+
         if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED
                 || this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
@@ -384,6 +383,50 @@ public class IotHubTransport implements IotHubListener
                     // queue and send them until connection status isn't CONNECTED or until 10 messages have been sent]
                     sendPacket(packet);
                 }
+            }
+        }
+    }
+
+    private void checkForExpiredMessages()
+    {
+        //Check waiting packets
+        IotHubTransportPacket packet = this.waitingPacketsQueue.poll();
+        Queue<IotHubTransportPacket> packetsToAddBackIntoWaitingPacketsQueue = new LinkedBlockingQueue<>();
+        while (packet != null)
+        {
+            if (packet.getMessage().isExpired())
+            {
+                packet.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
+                this.addToCallbackQueue(packet);
+            }
+            else
+            {
+                //message not expired, requeue it
+                packetsToAddBackIntoWaitingPacketsQueue.add(packet);
+            }
+
+            packet = this.waitingPacketsQueue.poll();
+        }
+
+        this.waitingPacketsQueue.addAll(packetsToAddBackIntoWaitingPacketsQueue);
+
+        //Check in progress messages
+        synchronized (this.inProgressMessagesLock)
+        {
+            List<String> expiredPacketMessageIds = new ArrayList<>();
+            for (String messageId : this.inProgressPackets.keySet())
+            {
+                if (this.inProgressPackets.get(messageId).getMessage().isExpired())
+                {
+                    expiredPacketMessageIds.add(messageId);
+                }
+            }
+
+            for (String messageId : expiredPacketMessageIds)
+            {
+                IotHubTransportPacket expiredPacket = this.inProgressPackets.remove(messageId);
+                expiredPacket.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
+                this.addToCallbackQueue(expiredPacket);
             }
         }
     }

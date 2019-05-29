@@ -2843,4 +2843,83 @@ public class IotHubTransportTest
         };
     }
 
+    @Test
+    public void sendMessagesChecksForExpiredMessagesInWaitingQueue()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Map<String, IotHubTransportPacket> inProgressMessages = new HashMap<>();
+        Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
+        Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
+        Deencapsulation.setField(transport, "callbackPacketsQueue", callbackPacketsQueue);
+        Deencapsulation.setField(transport, "inProgressPackets", inProgressMessages);
+        Deencapsulation.setField(transport, "waitingPacketsQueue", waitingPacketsQueue);
+        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
+
+        waitingPacketsQueue.add(mockedPacket);
+
+        new Expectations()
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedMessage;
+                mockedMessage.isExpired();
+                result = true;
+            }
+        };
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        assertTrue(waitingPacketsQueue.isEmpty());
+        assertTrue(callbackPacketsQueue.contains(mockedPacket));
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void sendMessagesChecksForExpiredMessagesInInProgressPackets()
+    {
+        //arrange
+        IotHubTransport transport = new IotHubTransport(mockedConfig);
+        Map<String, IotHubTransportPacket> inProgressMessages = new HashMap<>();
+        Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
+        Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
+        Deencapsulation.setField(transport, "callbackPacketsQueue", callbackPacketsQueue);
+        Deencapsulation.setField(transport, "inProgressPackets", inProgressMessages);
+        Deencapsulation.setField(transport, "waitingPacketsQueue", waitingPacketsQueue);
+        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
+
+        inProgressMessages.put("someMessageId", mockedPacket);
+
+        new Expectations()
+        {
+            {
+                mockedPacket.getMessage();
+                result = mockedMessage;
+                mockedMessage.isExpired();
+                result = true;
+            }
+        };
+
+        //act
+        transport.sendMessages();
+
+        //assert
+        assertTrue(callbackPacketsQueue.contains(mockedPacket));
+        assertTrue(inProgressMessages.isEmpty());
+        new Verifications()
+        {
+            {
+                mockedPacket.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
+                times = 1;
+            }
+        };
+    }
 }
