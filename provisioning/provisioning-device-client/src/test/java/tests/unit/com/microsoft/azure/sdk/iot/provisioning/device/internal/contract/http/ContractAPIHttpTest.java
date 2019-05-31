@@ -774,6 +774,65 @@ public class ContractAPIHttpTest
         };
     }
 
+    @Test
+    public void authenticateWithDPSWithAuthAndRetryAfterSucceeds() throws IOException, ProvisioningDeviceClientException
+    {
+        //arrange
+        final byte[] expectedPayload = "testByte".getBytes();
+        ContractAPIHttp contractAPIHttp = createContractClass();
+        prepareRequestExpectations();
+        new NonStrictExpectations()
+        {
+            {
+                mockedRequestData.getRegistrationId();
+                result = TEST_REGISTRATION_ID;
+                mockedRequestData.getEndorsementKey();
+                result = TEST_EK;
+                mockedRequestData.getStorageRootKey();
+                result = TEST_SRK;
+                mockedRequestData.getSslContext();
+                result = mockedSslContext;
+                mockedRequestData.getSasToken();
+                result = TEST_SAS_TOKEN;
+                mockedHttpRequest.send();
+                result = mockedHttpResponse;
+
+                mockedHttpResponse.isFieldAvailable("retry-after");
+                result = true;
+                mockedHttpResponse.getHeaderField("retry-after");
+                result = "3";
+
+                mockedHttpResponse.getStatus();
+                result = 400;
+                new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
+                result = mockedDeviceRegistrationParser;
+                mockedDeviceRegistrationParser.toJson();
+                result = "some json";
+            }
+        };
+
+        //act
+        contractAPIHttp.authenticateWithProvisioningService(mockedRequestData, mockedResponseCallback, null);
+
+        //assert
+        prepareRequestVerifications(HttpMethod.PUT, 1);
+
+        new Verifications()
+        {
+            {
+                new UrlPathBuilder(TEST_HOST_NAME, TEST_SCOPE_ID, ProvisioningDeviceClientTransportProtocol.HTTPS);
+                times = 1;
+                mockedUrlPathBuilder.generateRegisterUrl(TEST_REGISTRATION_ID);
+                times = 1;
+                mockedHttpRequest.setSSLContext(mockedSslContext);
+                times = 1;
+                mockedResponseCallback.run((ResponseData) any, null);
+                times = 1;
+
+            }
+        };
+    }
+
     //SRS_ContractAPIHttp_25_011: [If either registrationId, sslcontext or restResponseCallback is null or if registrationId is empty then this method shall throw ProvisioningDeviceClientException.]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void authenticateWithDPSThrowsOnNullRegistrationId() throws ProvisioningDeviceClientException

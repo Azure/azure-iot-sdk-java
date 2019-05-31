@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+
 /*
  * Unit tests for ContractAPIMqtt
  * Code coverage : 80% methods, 85% lines
@@ -85,6 +87,9 @@ public class ContractAPIMqttTest
 
     @Mocked
     DeviceRegistrationParser mockedDeviceRegistrationParser;
+
+    @Mocked
+    Integer mockedInteger;
 
     @Mocked
     byte[] mockedByteArray = new byte[10];
@@ -455,6 +460,33 @@ public class ContractAPIMqttTest
             {
                 mockedMqttConnection.publishMessage(anyString, (MqttQos)any, null);
                 times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void authenticateWithProvisioningServiceWithRetryAfterSucceeds() throws ProvisioningDeviceClientException, IOException, InterruptedException
+    {
+        //arrange
+        ContractAPIMqtt contractAPIMqtt = createContractClass();
+
+        new Expectations()
+        {
+            {
+                mockedMqttMessage.getTopic();
+                result = "mqtt/topic/value&retry-after=5;more-values=value";
+            }
+        };
+        openContractAPI(contractAPIMqtt);
+
+        //act
+        contractAPIMqtt.messageReceived(mockedMqttMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                assertEquals(5000, contractAPIMqtt.getRetryValue());
             }
         };
     }
