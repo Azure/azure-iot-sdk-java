@@ -3,26 +3,24 @@
  *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package tests.integration.com.microsoft.azure.sdk.iot.iothubservices.twin;
+package tests.integration.com.microsoft.azure.sdk.iot.iothubservices.errorinjection.messaging;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
-import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.TwinTagsTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection.SendMessagesErrInjTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import org.junit.AfterClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @RunWith(Parameterized.class)
-public class TwinTagsDeviceJVMRunner extends TwinTagsTests
+public class SendMessagesErrInjJVMRunner extends SendMessagesErrInjTests
 {
-    public TwinTagsDeviceJVMRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public SendMessagesErrInjJVMRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
@@ -33,6 +31,15 @@ public class TwinTagsDeviceJVMRunner extends TwinTagsTests
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
-        return DeviceTwinCommon.inputsCommon(ClientType.DEVICE_CLIENT);
+        if (!isBasicTierHub)
+        {
+            //Device and Module
+            return inputsCommon();
+        }
+        else
+        {
+            //only Device
+            return inputsCommon(ClientType.DEVICE_CLIENT);
+        }
     }
 }

@@ -64,33 +64,41 @@ public class DeviceMethodCommon extends IntegrationTest
     protected DeviceMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
 
-    protected static Collection inputsCommon(ClientType clientType) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
+    protected static Collection inputsCommon() throws IOException
     {
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        return inputsCommon(clientType, certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint());
+        return inputsCommon(ClientType.DEVICE_CLIENT, ClientType.MODULE_CLIENT);
     }
 
-    protected static Collection inputsCommon(ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, InterruptedException, ModuleClientException
+    protected static Collection inputsCommon(ClientType... clientTypes) throws IOException
+    {
+        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
+        return inputsCommon(certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint(), clientTypes);
+    }
+
+    protected static Collection inputsCommon(String publicKeyCert, String privateKey, String x509Thumbprint, ClientType... clientTypes) throws IOException
     {
         methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         Collection<Object[]> inputs = new ArrayList<>();
 
-        for (IotHubClientProtocol protocol : IotHubClientProtocol.values())
+        for (ClientType clientType : clientTypes)
         {
-            if (protocol != HTTPS)
+            for (IotHubClientProtocol protocol : IotHubClientProtocol.values())
             {
-                for (AuthenticationType authenticationType : AuthenticationType.values())
+                if (protocol != HTTPS)
                 {
-                    if (authenticationType == SAS)
+                    for (AuthenticationType authenticationType : AuthenticationType.values())
                     {
-                        inputs.add(makeSubArray(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint));
-                    }
-                    else if (authenticationType == SELF_SIGNED)
-                    {
-                        if (protocol != AMQPS_WS && protocol != MQTT_WS)
+                        if (authenticationType == SAS)
                         {
                             inputs.add(makeSubArray(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint));
+                        }
+                        else if (authenticationType == SELF_SIGNED)
+                        {
+                            if (protocol != AMQPS_WS && protocol != MQTT_WS)
+                            {
+                                inputs.add(makeSubArray(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint));
+                            }
                         }
                     }
                 }
