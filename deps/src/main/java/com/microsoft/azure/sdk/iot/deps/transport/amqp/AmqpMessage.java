@@ -73,6 +73,23 @@ public class AmqpMessage
     }
 
     /**
+     * Set the application property for the message
+     * @return Map of properties
+     */
+    public Map<String, Object> getApplicationProperty()
+    {
+        ApplicationProperties appProperty = this.messageImpl.getApplicationProperties();
+        if (appProperty == null)
+        {
+            return null;
+        }
+        else
+        {
+            return appProperty.getValue();
+        }
+    }
+
+    /**
      * Sets the data value
      * @param data the {@code byte[]} to be decoded
      * @param offset the offset in the byte[]

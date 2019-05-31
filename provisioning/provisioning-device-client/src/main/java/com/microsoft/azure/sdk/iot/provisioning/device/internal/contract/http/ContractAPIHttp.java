@@ -141,6 +141,15 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         return response;
     }
 
+    private void processRetryAfterValue(HttpResponse httpResponse)
+    {
+        if (httpResponse.isFieldAvailable(RETRY_AFTER))
+        {
+            // Set the retry after value
+            setRetrieveRetryAfterValue(httpResponse.getHeaderField(RETRY_AFTER));
+        }
+    }
+
     /**
      * Requests hub to provide a device key to begin authentication over HTTP (Only for TPM)
      * @param responseCallback A non {@code null} value for the callback
@@ -280,6 +289,10 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             //SRS_ContractAPIHttp_25_015: [This method shall send http request and verify the status by calling 'ProvisioningDeviceClientExceptionManager.verifyHttpResponse'.]
             //SRS_ContractAPIHttp_25_017: [If service return any other status other than <300 then this method shall throw ProvisioningDeviceHubException.]
             HttpResponse httpResponse = this.sendRequest(httpRequest);
+
+            // Set the retry after value
+            processRetryAfterValue(httpResponse);
+
             //SRS_ContractAPIHttp_25_016: [If service return a status as < 300 then this method shall trigger the callback to the user with the response message.]
             responseCallback.run(new ResponseData(httpResponse.getBody(), ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
         }
@@ -338,6 +351,10 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             //SRS_ContractAPIHttp_25_022: [This method shall send http request and verify the status by calling 'ProvisioningDeviceClientExceptionManager.verifyHttpResponse'.]
             //SRS_ContractAPIHttp_25_024: [If service return any other status other than < 300 then this method shall throw ProvisioningDeviceHubException.]
             HttpResponse httpResponse = this.sendRequest(httpRequest);
+
+            // Set the retry after value from the service
+            processRetryAfterValue(httpResponse);
+
             //SRS_ContractAPIHttp_25_023: [If service return a status as < 300 then this method shall trigger the callback to the user with the response message.]
             responseCallback.run(new ResponseData(httpResponse.getBody(),ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
         }

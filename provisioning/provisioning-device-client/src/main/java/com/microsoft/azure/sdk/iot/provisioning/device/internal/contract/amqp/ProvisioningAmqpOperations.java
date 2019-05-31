@@ -35,6 +35,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     private final Queue<AmqpMessage> receivedMessages = new LinkedBlockingQueue<>();
     private final ObjectLock receiveLock = new ObjectLock();
 
+    private Map<String, Object> messageAppProperties;
     private String idScope;
     private String hostName;
 
@@ -94,6 +95,9 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         if (this.receivedMessages.size() > 0)
         {
             AmqpMessage message = this.receivedMessages.remove();
+
+            // Need to keep property around to get the retry-after value
+            this.messageAppProperties = message.getApplicationProperty();
             byte[] msgData = message.getAmqpBody();
             if (msgData != null)
             {
@@ -284,6 +288,15 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             // SRS_ProvisioningAmqpOperations_07_012: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
             throw new ProvisioningDeviceClientException("Provisioning service failed to reply is allotted time.");
         }
+    }
+
+    /**
+     * Returns the message properties of the current message
+     * @return Map of application properties
+     */
+    public Map<String, Object> getAmqpMessageProperties()
+    {
+        return this.messageAppProperties;
     }
 
     /**
