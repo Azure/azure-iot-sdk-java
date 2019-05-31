@@ -91,6 +91,8 @@ public class AmqpsExceptionTranslator
             case AmqpConnectionThrottledException.errorCode:
                 // Codes_SRS_AMQPSEXCEPTIONTRANSLATOR_28_001: [The function shall map amqp exception code "com.microsoft:device-container-throttled" to TransportException "AmqpConnectionThrottledException".]
                 return new AmqpConnectionThrottledException(description);
+            case ProtonIOException.errorCode:
+                return  new ProtonIOException(description);
             default:
                 // Codes_SRS_AMQPSEXCEPTIONTRANSLATOR_34_026: [The function shall map all other amqp exception codes to the generic TransportException "ProtocolException".]
                 return new ProtocolException(description);
