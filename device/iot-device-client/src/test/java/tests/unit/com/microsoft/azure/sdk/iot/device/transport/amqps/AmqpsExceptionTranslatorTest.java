@@ -73,5 +73,6 @@ public class AmqpsExceptionTranslatorTest
         assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpLinkRedirectException.errorCode, "") instanceof AmqpLinkRedirectException);
         assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", AmqpConnectionThrottledException.errorCode, "") instanceof AmqpConnectionThrottledException);
         assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", "Not a protocol standard error code", "") instanceof ProtocolException);
+        assertTrue(Deencapsulation.invoke(AmqpsExceptionTranslator.class, "convertToAmqpException", ProtonIOException.errorCode, "") instanceof ProtonIOException);
     }
 }
