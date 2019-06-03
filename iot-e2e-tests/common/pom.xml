@@ -5,7 +5,7 @@
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-e2e-common</artifactId>
     <name>IoT Hub Java SDK common</name>
-    <version>0.25.0</version>
+    <version>0.25.1</version>
     <description>Test suite fot the Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.17.2</version>
+            <version>1.17.3</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>
@@ -42,18 +42,18 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.17.0</version>
+            <version>1.17.1</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-device-client</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-service-client</artifactId>
-            <version>1.5.1</version>
+            <version>1.5.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

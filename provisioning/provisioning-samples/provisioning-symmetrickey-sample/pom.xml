@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
     <artifactId>provisioning-symmetrickey-sample</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.1</version>
     <name>Provisioning Symmetric Key Sample for Device Client</name>
     <developers>
         <developer>
@@ -28,12 +28,12 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-device-client</artifactId>
-            <version>1.7.0</version>
+            <version>1.7.1</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.17.2</version>
+            <version>1.17.3</version>
         </dependency>
     </dependencies>
     <build>
