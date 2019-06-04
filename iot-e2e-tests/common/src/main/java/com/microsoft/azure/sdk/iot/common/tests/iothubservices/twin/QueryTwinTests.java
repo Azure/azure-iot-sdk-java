@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -217,6 +218,8 @@ public class QueryTwinTests extends DeviceTwinCommon
             {
                 DeviceTwinDevice d = sCDeviceTwin.getNextDeviceTwin(twinQuery);
                 assertNotNull(d.getVersion());
+
+                assertEquals(TwinConnectionState.DISCONNECTED.toString(), d.getConnectionState());
 
                 for (Pair dp : d.getDesiredProperties())
                 {
