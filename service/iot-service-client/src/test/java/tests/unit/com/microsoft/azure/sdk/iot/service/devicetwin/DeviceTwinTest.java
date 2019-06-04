@@ -85,7 +85,7 @@ public class DeviceTwinTest
                 SqlQuery.FromType.DEVICES, "tags.building = '43'", null).getQuery();
     }
 
-    private void assetEqualSetAndMap(Set<Pair> pairSet, Map<String, String> map)
+    private void assertEqualSetAndMap(Set<Pair> pairSet, Map<String, String> map)
     {
         assertEquals(pairSet.size(), map.size());
         for(Pair p : pairSet)
@@ -1001,9 +1001,9 @@ public class DeviceTwinTest
 
         assertEquals(version, result.getVersion());
         assertEquals(etag, result.getETag());
-        assetEqualSetAndMap(result.getTags(), (Map)tags);
-        assetEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
-        assetEqualSetAndMap(result.getReportedProperties(), (Map)rp);
+        assertEqualSetAndMap(result.getTags(), (Map)tags);
+        assertEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
+        assertEqualSetAndMap(result.getReportedProperties(), (Map)rp);
         assertTrue(result.getCapabilities().isIotEdge());
         assertNull(result.getModuleId());
     }
@@ -1013,6 +1013,7 @@ public class DeviceTwinTest
     public void nextRetrievesCorrectlyWithModuleId() throws IotHubException, IOException
     {
         //arrange
+        final String connectionState = "Connected";
         final String expectedModuleId = "someModuleId";
         final Integer version = 15;
         final String etag = "validEtag";
@@ -1049,6 +1050,10 @@ public class DeviceTwinTest
                 result = dp;
                 mockedTwinState.getReportedProperty();
                 result = rp;
+                mockedTwinState.getConnectionState();
+                result = connectionState;
+                mockedTwinState.getConfigurations();
+                result = mockConfigurations;
             }
         };
 
@@ -1072,10 +1077,12 @@ public class DeviceTwinTest
 
         assertEquals(version, result.getVersion());
         assertEquals(etag, result.getETag());
-        assetEqualSetAndMap(result.getTags(), (Map)tags);
-        assetEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
-        assetEqualSetAndMap(result.getReportedProperties(), (Map)rp);
+        assertEqualSetAndMap(result.getTags(), (Map)tags);
+        assertEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
+        assertEqualSetAndMap(result.getReportedProperties(), (Map)rp);
         assertEquals(expectedModuleId, result.getModuleId());
+        assertEquals(connectionState, result.getConnectionState());
+        assertTrue(mockConfigurations == result.getConfigurations());
     }
 
     @Test (expected = IllegalArgumentException.class)
