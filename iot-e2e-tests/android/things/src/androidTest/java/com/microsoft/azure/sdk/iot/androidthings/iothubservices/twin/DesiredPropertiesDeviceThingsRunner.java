@@ -45,7 +45,7 @@ public class DesiredPropertiesDeviceThingsRunner extends DesiredPropertiesTests
         String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
 
-        Collection inputs = inputsCommon(ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
+        Collection inputs = inputsCommon(publicKeyCert, privateKey, x509Thumbprint, ClientType.DEVICE_CLIENT);
         return inputs;
     }
 }

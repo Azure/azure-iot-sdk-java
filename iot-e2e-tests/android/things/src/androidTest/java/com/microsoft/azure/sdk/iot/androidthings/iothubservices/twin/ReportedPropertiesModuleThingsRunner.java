@@ -43,7 +43,7 @@ public class ReportedPropertiesModuleThingsRunner extends ReportedPropertiesTest
         String x509Thumbprint = BuildConfig.IotHubThumbprint;
         String privateKey = new String(Base64.decodeBase64Local(privateKeyBase64Encoded.getBytes()));
         String publicKeyCert = new String(Base64.decodeBase64Local(publicKeyCertBase64Encoded.getBytes()));
-        Collection inputs = inputsCommon(ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint);
+        Collection inputs = inputsCommon(publicKeyCert, privateKey, x509Thumbprint, ClientType.MODULE_CLIENT);
         return inputs;
     }
 }
