@@ -495,7 +495,11 @@ public class DeviceTwin
         deviceTwinDevice.setDesiredProperties(twinState.getDesiredProperty());
         deviceTwinDevice.setReportedProperties(twinState.getReportedProperty());
         deviceTwinDevice.setCapabilities(twinState.getCapabilities());
-
+        /**
+         * missing fix for bug : https://github.com/Azure/azure-iot-sdk-java/issues/520
+         */
+        deviceTwinDevice.setConnectionState(twinState.getConnectionState());
+        
         if (twinState.getModuleId() != null && !twinState.getModuleId().isEmpty())
         {
             deviceTwinDevice.setModuleId(twinState.getModuleId());
