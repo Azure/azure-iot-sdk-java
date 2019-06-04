@@ -7,7 +7,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
     <artifactId>provisioning-device-client</artifactId>
     <name>Provisioning Device Client</name>
-    <version>1.7.0</version>
+    <version>1.7.1</version>
     <packaging>jar</packaging>
     <description>The Microsoft Azure IoT Provisioning Device Client for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-deps</artifactId>
-            <version>0.8.3</version>
+            <version>0.8.4</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>

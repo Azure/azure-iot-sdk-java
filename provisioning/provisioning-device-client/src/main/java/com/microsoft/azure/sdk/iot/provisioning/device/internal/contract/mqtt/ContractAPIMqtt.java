@@ -101,6 +101,37 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     }
 
+    private void processRetryAfterValue(String mqttTopic)
+    {
+        if (mqttTopic != null && !mqttTopic.isEmpty())
+        {
+            // Split the string
+            for (String topicPart: mqttTopic.split("&"))
+            {
+                int retryPosition = topicPart.indexOf(RETRY_AFTER);
+                // if retry-after is in here we need parse out the value
+                if (retryPosition > -1)
+                {
+                    String targetRetryAfter;
+                    // Make sure there's no data after the retry after
+                    int topicSeparator = topicPart.indexOf(";");
+                    if (topicSeparator > -1)
+                    {
+                        // substring the value adding 1 for the = and only go to the ;
+                        targetRetryAfter = topicPart.substring(RETRY_AFTER.length()+1, topicSeparator);
+                    }
+                    else
+                    {
+                        // substring the value adding 1 for the = and only go to the ;
+                        targetRetryAfter = topicPart.substring(RETRY_AFTER.length()+1);
+                    }
+                    setRetrieveRetryAfterValue(targetRetryAfter);
+                    break;
+                }
+            }
+        }
+    }
+
     /**
      * Indicates need to open MQTT connection
      * @param requestData Data used for the connection initialization
@@ -314,6 +345,8 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
     @Override
     public void messageReceived(MqttMessage message)
     {
+        processRetryAfterValue(message.getTopic());
+
         // SRS_ProvisioningAmqpOperations_07_013: [This method shall add the message to a message queue.]
         this.receivedMessages.add(message);
         synchronized (this.receiveLock)

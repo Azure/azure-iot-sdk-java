@@ -139,8 +139,7 @@ public class ProvisioningTask implements Callable
     private RegistrationOperationStatusParser invokeStatus(String operationId) throws TimeoutException, InterruptedException, ExecutionException,
                                                                                       ProvisioningDeviceClientException
     {
-        // To-Do : Add appropriate wait time retrieved from Service
-        Thread.sleep(DEFAULT_DELAY_BETWEEN_STATUS_CHECKS);
+        Thread.sleep(provisioningDeviceClientContract.getRetryValue());
         StatusTask statusTask = new StatusTask(securityProvider, provisioningDeviceClientContract, operationId,
                                                this.authorization);
         FutureTask<RegistrationOperationStatusParser> futureStatusTask = new FutureTask<RegistrationOperationStatusParser>(statusTask);

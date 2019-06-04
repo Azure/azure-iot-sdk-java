@@ -103,6 +103,12 @@ public class HttpResponse
         return values;
     }
 
+    public boolean isFieldAvailable(String field)
+    {
+        String canonicalizedField = canonicalizeFieldName(field);
+        return this.headerFields.containsKey(canonicalizedField);
+    }
+
     /**
      * Getter for the header fields.
      *

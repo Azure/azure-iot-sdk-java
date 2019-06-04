@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Map;
 
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 {
@@ -26,6 +27,18 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 
     private String idScope;
     private SaslHandler amqpSaslHandler;
+
+    private void processRetryAfterValue(Map<String, Object> appProperties)
+    {
+        if (appProperties != null)
+        {
+            if (appProperties.containsKey(RETRY_AFTER))
+            {
+                Object retryAfterValue = appProperties.get(RETRY_AFTER);
+                setRetrieveRetryAfterValue(retryAfterValue.toString());
+            }
+        }
+    }
 
     /**
      * This constructor creates an instance of DpsAPIAmqps class and initializes member variables
@@ -173,6 +186,8 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 
         // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
         this.provisioningAmqpOperations.sendRegisterMessage(responseCallback, callbackContext, payload);
+
+        processRetryAfterValue(this.provisioningAmqpOperations.getAmqpMessageProperties());
     }
 
     /**
