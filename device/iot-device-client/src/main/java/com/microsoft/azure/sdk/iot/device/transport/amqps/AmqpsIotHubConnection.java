@@ -8,10 +8,7 @@ import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportConnection;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -1173,35 +1170,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         if (!reconnectionScheduled)
         {
             reconnectionScheduled = true;
-            scheduledExecutorService.schedule(new ReconnectionTask(throwable, this.listener, this.connectionId), 0, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    /**
-     * Runnable task to restart the AMQPS connection. Cannot do this work synchronously because the proton reactor can't
-     * block and wait for itself to be closed. The thread spawning this thread will close the reactor thread while the
-     * spawned thread creates a new reactor once the old reactor closes
-     */
-    public static class ReconnectionTask implements Callable
-    {
-        private final static String THREAD_NAME = "azure-iot-sdk-ReconnectionTask";
-        private Throwable connectionLossCause;
-        private IotHubListener listener;
-        private String connectionId;
-
-        private ReconnectionTask(Throwable connectionLossCause, IotHubListener listener, String connectionId)
-        {
-            this.connectionLossCause = connectionLossCause;
-            this.listener = listener;
-            this.connectionId = connectionId;
-        }
-
-        @Override
-        public Object call()
-        {
-            Thread.currentThread().setName(THREAD_NAME);
-            this.listener.onConnectionLost(this.connectionLossCause, this.connectionId);
-            return null;
+            ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);
         }
     }
 
