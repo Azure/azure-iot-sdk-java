@@ -790,7 +790,7 @@ public class IotHubTransport implements IotHubListener
                         IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
                         new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
             }
-            else if (!transportException.isRetryable())
+            else if (transportException != null && !transportException.isRetryable())
             {
                 //Codes_SRS_IOTHUBTRANSPORT_34_070: [If the reconnection effort ends because a terminal exception is
                 // encountered, this function shall invoke close with that terminal exception.]

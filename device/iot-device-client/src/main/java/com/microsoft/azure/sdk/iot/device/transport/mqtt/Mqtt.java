@@ -9,20 +9,16 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.device.transport.ReconnectionNotifier;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 abstract public class Mqtt implements MqttCallback
@@ -380,7 +376,7 @@ abstract public class Mqtt implements MqttCallback
             }
 
             //Codes_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]
-            this.listener.onConnectionLost(throwable, this.connectionId);
+            ReconnectionNotifier.notifyDisconnectAsync(throwable, this.listener, this.connectionId);
         }
     }
 
