@@ -86,6 +86,21 @@ public class IotHubExceptionManagerTest
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
+    // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_34_018: [The function shall throw IotHubConflictException if the Http response status equal 409]
+    // Assert
+    @Test (expected = IotHubConflictException.class)
+    public void httpResponseVerification409() throws IotHubException
+    {
+        // Arrange
+        final int status = 409;
+        final byte[] body = { 1 };
+        final Map<String, List<String>> headerFields = new HashMap<>();
+        final byte[] errorReason = { 2, 3, 4, 5 };
+        HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
+        // Act
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_005: [The function shall throw IotHubPreconditionFailedException if the Http response status equal 412]
     // Assert
     @Test (expected = IotHubPreconditionFailedException.class)
