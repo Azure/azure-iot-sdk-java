@@ -70,6 +70,11 @@ public class IotHubExceptionManager
         {
             throw new IotHubNotFoundException(errorMessage);
         }
+        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_34_018: [The function shall throw IotHubConflictException if the Http response status equal 409]
+        else if (409 == responseStatus)
+        {
+            throw new IotHubConflictException(errorMessage);
+        }
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_005: [The function shall throw IotHubPreconditionFailedException if the Http response status equal 412]
         else if (412 == responseStatus)
         {
