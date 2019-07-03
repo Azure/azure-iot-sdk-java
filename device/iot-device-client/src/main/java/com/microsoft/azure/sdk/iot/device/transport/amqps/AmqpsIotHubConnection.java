@@ -557,7 +557,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_25_049: [If websocket enabled the event handler shall configure the transport layer for websocket.]
                 WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, 0, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                String query = "iothub-no-client-cert=true";
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, query, 443, WEB_SOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
@@ -1183,29 +1184,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         return this.deviceClientConfig.getIotHubHostname();
-    }
-
-    private String getErrorCondition(ErrorCondition condition)
-    {
-        if (condition != null)
-        {
-            if (condition.getCondition() != null)
-            {
-                return condition.getCondition().toString();
-            }
-        }
-
-        return null;
-    }
-
-    private String getErrorDescription(ErrorCondition condition)
-    {
-        if (condition != null)
-        {
-            return condition.getDescription();
-        }
-
-        return null;
     }
 
     private ErrorCondition getErrorConditionFromEndpoint(Endpoint endpoint)

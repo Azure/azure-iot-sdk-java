@@ -5,8 +5,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import com.microsoft.azure.proton.transport.ws.WebSocketHandler;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
@@ -1378,7 +1378,7 @@ public class AmqpsIotHubConnectionTest {
                 result = mockTransportInternal;
                 new WebSocketImpl();
                 result = mockWebSocket;
-                mockWebSocket.configure(anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
+                mockWebSocket.configure(anyString, anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
                 mockTransportInternal.addTransportLayer(mockWebSocket);
             }
         };
