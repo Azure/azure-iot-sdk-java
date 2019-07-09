@@ -139,6 +139,7 @@ public class DeviceTwinCommon extends IntegrationTest
         public Property property;
         public Object propertyNewValue;
         public Integer propertyNewVersion;
+        public String errorMessage;
     }
 
     public class OnProperty implements TwinPropertyCallBack
@@ -149,9 +150,14 @@ public class DeviceTwinCommon extends IntegrationTest
             PropertyState propertyState = (PropertyState) context;
             if (property.getKey().equals(propertyState.property.getKey()))
             {
+                System.out.println("TwinPropertyCallback accepted for property key " + property.getKey());
                 propertyState.callBackTriggered = true;
                 propertyState.propertyNewValue = property.getValue();
                 propertyState.propertyNewVersion = property.getVersion();
+            }
+            else
+            {
+                System.out.println("TwinPropertyCallback ignored for property key " + property.getKey());
             }
         }
     }
@@ -166,8 +172,13 @@ public class DeviceTwinCommon extends IntegrationTest
             PropertyState propertyState = (PropertyState) context;
             if (propertyKey.equals(propertyState.property.getKey()))
             {
+                System.out.println("TwinPropertyCallback accepted for property key " + propertyKey);
                 propertyState.callBackTriggered = true;
                 propertyState.propertyNewValue = propertyValue;
+            }
+            else
+            {
+                propertyState.errorMessage = "TwinPropertyCallback ignored for property key " + propertyKey;
             }
         }
 
@@ -566,7 +577,7 @@ public class DeviceTwinCommon extends IntegrationTest
         for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
             PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
-            while (!propertyState.callBackTriggered || propertyState.propertyNewValue == null || !((String) propertyState.propertyNewValue).startsWith(propPrefix))
+            while (!propertyState.callBackTriggered || propertyState.propertyNewValue == null || !((String) propertyState.propertyNewValue).startsWith(propPrefix) || propertyState.errorMessage != null)
             {
                 Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
                 timeElapsed = System.currentTimeMillis() - startTime;
@@ -575,6 +586,12 @@ public class DeviceTwinCommon extends IntegrationTest
                     break;
                 }
             }
+            for (int j = 0; j < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; j++)
+            {
+                String errorMessage = deviceUnderTest.dCDeviceForTwin.propertyStateList[i].errorMessage;
+                assertNull(buildExceptionMessage("Exception message from propertyState: " + errorMessage == null ? "null" : errorMessage, internalClient), errorMessage);
+            }
+
             assertTrue(buildExceptionMessage("Callback was not triggered for one or more properties", internalClient), propertyState.callBackTriggered);
             assertTrue(buildExceptionMessage("Missing the expected prefix, was " + propertyState.propertyNewValue, internalClient), ((String) propertyState.propertyNewValue).startsWith(propPrefix));
             if (withVersion)
