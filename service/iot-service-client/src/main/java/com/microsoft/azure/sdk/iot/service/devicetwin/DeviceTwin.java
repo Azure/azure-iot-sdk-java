@@ -495,6 +495,8 @@ public class DeviceTwin
         deviceTwinDevice.setDesiredProperties(twinState.getDesiredProperty());
         deviceTwinDevice.setReportedProperties(twinState.getReportedProperty());
         deviceTwinDevice.setCapabilities(twinState.getCapabilities());
+        deviceTwinDevice.setConnectionState(twinState.getConnectionState());
+        deviceTwinDevice.setConfigurations(twinState.getConfigurations());
 
         if (twinState.getModuleId() != null && !twinState.getModuleId().isEmpty())
         {
