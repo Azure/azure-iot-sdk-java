@@ -107,10 +107,6 @@ public class MqttConnectionTest
         assertNotNull(actualAsyncClient);
         MqttConnectOptions actualConnectionOptions = Deencapsulation.getField(mqttConnection, "connectionOptions");
         assertNotNull(actualConnectionOptions);
-        Queue<Pair<String, byte[]>> actualQueue = Deencapsulation.getField(mqttConnection, "allReceivedMessages");
-        assertNotNull(actualQueue);
-        Object actualLock = Deencapsulation.getField(mqttConnection, "mqttLock");
-        assertNotNull(actualLock);
     }
 
     @Test (expected = ProtocolException.class)
@@ -191,34 +187,6 @@ public class MqttConnectionTest
         assertNotNull(mqttAsyncClient);
     }
 
-    //Tests_SRS_MQTTCONNECTION_25_008: [Getter for the Message Queue.]
-    @Test
-    public void getAllReceivedMessagesSucceeds() throws Exception
-    {
-        //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockIotHubSSLContext);
-
-        //act
-        ConcurrentLinkedQueue concurrentLinkedQueue = Deencapsulation.invoke(mqttConnection, "getAllReceivedMessages");
-
-        //assert
-        assertNotNull(concurrentLinkedQueue);
-    }
-
-    //Tests_SRS_MQTTCONNECTION_25_009: [Getter for the Mqtt Lock on this connection.]
-    @Test
-    public void getMqttLockSucceeds() throws Exception
-    {
-        //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockIotHubSSLContext);
-
-        //act
-        Object mqttLock = Deencapsulation.invoke(mqttConnection, "getMqttLock");
-
-        //assert
-        assertNotNull(mqttLock);
-    }
-
     //Tests_SRS_MQTTCONNECTION_25_010: [Getter for the MqttConnectionOptions.]
     @Test
     public void getConnectionOptionsSucceeds() throws Exception
@@ -255,14 +223,19 @@ public class MqttConnectionTest
     {
         //arrange
         final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockIotHubSSLContext);
-        MqttCallback testMqttCallback = mockedMqttCallback;
+        final MqttCallback testMqttCallback = mockedMqttCallback;
 
         //act
         Deencapsulation.invoke(mqttConnection, "setMqttCallback", new Class[] {MqttCallback.class}, testMqttCallback);
 
         //assert
-        MqttCallback actualMqttCallback = Deencapsulation.getField(mqttConnection,  "mqttCallback");
-        assertEquals(actualMqttCallback, testMqttCallback);
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.setCallback(testMqttCallback);
+                times = 1;
+            }
+        };
     }
 
     //Tests_SRS_MQTTCONNECTION_25_006: [This method shall throw IllegalArgumentException if callback is null.]

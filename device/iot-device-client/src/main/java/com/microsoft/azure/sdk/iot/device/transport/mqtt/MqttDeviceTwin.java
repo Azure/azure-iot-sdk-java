@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -273,141 +274,128 @@ public class MqttDeviceTwin extends Mqtt
     }
 
     @Override
-    public IotHubTransportMessage receive() throws TransportException
+    public IotHubTransportMessage receive(String topic, MqttMessage mqttMessage) throws TransportException
     {
-        synchronized (this.incomingLock)
+        IotHubTransportMessage message = null;
+
+        // Codes_SRS_MQTTDEVICETWIN_25_035: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
+        if (topic != null && topic.length() > 0)
         {
-            IotHubTransportMessage message = null;
-
-            // Codes_SRS_MQTTDEVICETWIN_25_035: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
-            Pair<String, byte[]> messagePair = peekMessage();
-
-            if (messagePair != null)
+            if (topic.length() > TWIN.length() && topic.startsWith(TWIN))
             {
-                String topic = messagePair.getKey();
+                byte[] data = mqttMessage.getPayload();
 
-                if (topic != null && topic.length() > 0)
+                if (topic.length() > RES.length() && topic.startsWith(RES))
                 {
-                    if (topic.length() > TWIN.length() && topic.startsWith(TWIN))
+                    // Tokenize on backslash
+                    String[] topicTokens = topic.split(Pattern.quote("/"));
+                    if (data != null && data.length > 0)
                     {
-                        byte[] data = messagePair.getValue();
+                        //Codes_SRS_MQTTDEVICETWIN_25_044: [If the topic is of type response then this method shall set data and operation type as DEVICE_OPERATION_TWIN_GET_RESPONSE if data is not null]
+                        message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
+                        message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
+                    }
+                    else
+                    {
+                        // Case for $iothub/twin/res/{status}/?$rid={request id}
+                        //Codes_SRS_MQTTDEVICETWIN_25_045: [If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty]
+                        message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
+                        message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
-                        //remove this message from the queue as this is the correct handler
-                        allReceivedMessages.poll();
+                    }
 
-                        if (topic.length() > RES.length() && topic.startsWith(RES))
+                    // Case for $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
+                    if (topicTokens.length > STATUS_TOKEN)
+                    {
+                        //Codes_SRS_MQTTDEVICETWIN_25_038: [If the topic is of type response topic then this method shall parse further for status and set it for the message by calling setStatus for the message]
+                        message.setStatus(getStatus(topicTokens[STATUS_TOKEN]));
+                    }
+                    else
+                    {
+                        this.throwDeviceTwinTransportException(new IotHubServiceException("Message received without status"));
+                    }
+
+                    if (topicTokens.length > REQID_TOKEN)
+                    {
+                        //Codes_SRS_MQTTDEVICETWIN_25_040: [If the topic is of type response topic then this method shall parse further to look for request id which if found is set by calling setRequestId]
+                        String requestId = getRequestId(topicTokens[REQID_TOKEN]);
+                        message.setRequestId(requestId);
+                        if (requestMap.containsKey(requestId))
                         {
-                            // Tokenize on backslash
-                            String[] topicTokens = topic.split(Pattern.quote("/"));
-                            if (data != null && data.length > 0)
+                            switch (requestMap.remove(requestId))
                             {
-                                //Codes_SRS_MQTTDEVICETWIN_25_044: [If the topic is of type response then this method shall set data and operation type as DEVICE_OPERATION_TWIN_GET_RESPONSE if data is not null]
-                                message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
-                            }
-                            else
-                            {
-                                // Case for $iothub/twin/res/{status}/?$rid={request id}
-                                //Codes_SRS_MQTTDEVICETWIN_25_045: [If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty]
-                                message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
-
-                            }
-
-                            // Case for $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
-                            if (topicTokens.length > STATUS_TOKEN)
-                            {
-                                //Codes_SRS_MQTTDEVICETWIN_25_038: [If the topic is of type response topic then this method shall parse further for status and set it for the message by calling setStatus for the message]
-                                message.setStatus(getStatus(topicTokens[STATUS_TOKEN]));
-                            }
-                            else
-                            {
-                                this.throwDeviceTwinTransportException(new IotHubServiceException("Message received without status"));
-                            }
-
-                            if (topicTokens.length > REQID_TOKEN)
-                            {
-                                //Codes_SRS_MQTTDEVICETWIN_25_040: [If the topic is of type response topic then this method shall parse further to look for request id which if found is set by calling setRequestId]
-                                String requestId = getRequestId(topicTokens[REQID_TOKEN]);
-                                message.setRequestId(requestId);
-                                if (requestMap.containsKey(requestId))
-                                {
-                                    switch (requestMap.remove(requestId))
-                                    {
-                                        case DEVICE_OPERATION_TWIN_GET_REQUEST:
-                                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
-                                            break;
-                                        case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
-                                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
-                                            break;
-                                        default:
-                                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
-                                    }
-                                }
-                                else
-                                {
-                                    this.throwDeviceTwinTransportException(new UnsupportedOperationException("Request Id is mandatory"));
-                                }
-                            }
-
-                            if (topicTokens.length > VERSION_TOKEN)
-                            {
-                                //Codes_SRS_MQTTDEVICETWIN_25_041: [If the topic is of type response topic then this method shall parse further to look for version which if found is set by calling setVersion]
-                                message.setVersion(getVersion(topicTokens[VERSION_TOKEN]));
-                            }
-                        }
-                        else if (topic.length() > PATCH.length() && topic.startsWith(PATCH))
-                        {
-                            if (topic.startsWith(PATCH + BACKSLASH + PROPERTIES + BACKSLASH + DESIRED))
-                            {
-                                if (data != null)
-                                {
-                                    //Codes_SRS_MQTTDEVICETWIN_25_046: [If the topic is of type patch for desired properties then this method shall set the data and operation type as DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if data is not null or empty]
-                                    message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
-                                    message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
-                                }
-                                else
-                                {
-
-                                    //Codes_SRS_MQTTDEVICETWIN_25_047: [If the topic is of type patch for desired properties then this method shall throw TransportException if data is null or empty]
-                                    this.throwDeviceTwinTransportException(new UnsupportedOperationException());
-                                }
-
-                                // Case for $iothub/twin/PATCH/properties/desired/?$version={new version}
-                                // Tokenize on backslash
-                                String[] topicTokens = topic.split(Pattern.quote("/"));
-                                if (topicTokens.length > PATCH_VERSION_TOKEN)
-                                {
-                                    if (message != null)
-                                    {
-                                        //Codes_SRS_MQTTDEVICETWIN_25_042: [If the topic is of type patch for desired properties then this method shall parse further to look for version which if found is set by calling setVersion]
-                                        message.setVersion(getVersion(topicTokens[PATCH_VERSION_TOKEN]));
-                                    }
-                                }
-
-                                if (message != null)
-                                {
-                                    logger.LogInfo("Message received on DT " + message.getDeviceOperationType());
-                                }
-                            }
-                            else
-                            {
-                                //Codes_SRS_MQTTDEVICETWIN_25_043: [If the topic is not of type response for desired properties then this method shall throw TransportException]
-                                this.throwDeviceTwinTransportException(new UnsupportedOperationException());
+                                case DEVICE_OPERATION_TWIN_GET_REQUEST:
+                                    message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_RESPONSE);
+                                    break;
+                                case DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST:
+                                    message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+                                    break;
+                                default:
+                                    message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                         }
                         else
                         {
-                            //Codes_SRS_MQTTDEVICETWIN_25_037: [This method shall parse topic to look for only either twin response topic or twin patch topic and thorw TransportException other wise.]
-                            this.throwDeviceTwinTransportException(new UnsupportedOperationException());
+                            this.throwDeviceTwinTransportException(new UnsupportedOperationException("Request Id is mandatory"));
                         }
                     }
+
+                    if (topicTokens.length > VERSION_TOKEN)
+                    {
+                        //Codes_SRS_MQTTDEVICETWIN_25_041: [If the topic is of type response topic then this method shall parse further to look for version which if found is set by calling setVersion]
+                        message.setVersion(getVersion(topicTokens[VERSION_TOKEN]));
+                    }
+                }
+                else if (topic.length() > PATCH.length() && topic.startsWith(PATCH))
+                {
+                    if (topic.startsWith(PATCH + BACKSLASH + PROPERTIES + BACKSLASH + DESIRED))
+                    {
+                        if (data != null)
+                        {
+                            //Codes_SRS_MQTTDEVICETWIN_25_046: [If the topic is of type patch for desired properties then this method shall set the data and operation type as DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if data is not null or empty]
+                            message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
+                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+                        }
+                        else
+                        {
+
+                            //Codes_SRS_MQTTDEVICETWIN_25_047: [If the topic is of type patch for desired properties then this method shall throw TransportException if data is null or empty]
+                            this.throwDeviceTwinTransportException(new UnsupportedOperationException());
+                        }
+
+                        // Case for $iothub/twin/PATCH/properties/desired/?$version={new version}
+                        // Tokenize on backslash
+                        String[] topicTokens = topic.split(Pattern.quote("/"));
+                        if (topicTokens.length > PATCH_VERSION_TOKEN)
+                        {
+                            if (message != null)
+                            {
+                                //Codes_SRS_MQTTDEVICETWIN_25_042: [If the topic is of type patch for desired properties then this method shall parse further to look for version which if found is set by calling setVersion]
+                                message.setVersion(getVersion(topicTokens[PATCH_VERSION_TOKEN]));
+                            }
+                        }
+
+                        if (message != null)
+                        {
+                            logger.LogInfo("Message received on DT " + message.getDeviceOperationType());
+                        }
+                    }
+                    else
+                    {
+                        //Codes_SRS_MQTTDEVICETWIN_25_043: [If the topic is not of type response for desired properties then this method shall throw TransportException]
+                        this.throwDeviceTwinTransportException(new UnsupportedOperationException());
+                    }
+                }
+                else
+                {
+                    //Codes_SRS_MQTTDEVICETWIN_25_037: [This method shall parse topic to look for only either twin response topic or twin patch topic and thorw TransportException other wise.]
+                    this.throwDeviceTwinTransportException(new UnsupportedOperationException());
                 }
             }
-
-            // Codes_SRS_MQTTDEVICETWIN_34_034: [If the call peekMessage returns null or empty string then this method shall do nothing and return null]
-            return message;
         }
+
+        // Codes_SRS_MQTTDEVICETWIN_34_034: [If the call peekMessage returns null or empty string then this method shall do nothing and return null]
+        return message;
     }
 
     private void throwDeviceTwinTransportException(String message) throws TransportException

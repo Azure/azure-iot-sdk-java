@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -142,71 +143,56 @@ public class MqttDeviceMethod extends Mqtt
     }
 
     @Override
-    public IotHubTransportMessage receive() throws TransportException
+    public IotHubTransportMessage receive(String topic, MqttMessage mqttMessage) throws TransportException
     {
-        synchronized (this.incomingLock)
+        IotHubTransportMessage message = null;
+        if (topic != null && topic.length() > 0)
         {
-            IotHubTransportMessage message = null;
+            // Codes_SRS_MQTTDEVICEMETHOD_25_026: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
+            byte[] data = mqttMessage.getPayload();
 
-            Pair<String, byte[]> messagePair = peekMessage();
-
-            if (messagePair != null)
+            if (topic.length() > METHOD.length() && topic.startsWith(METHOD))
             {
-                String topic = messagePair.getKey();
-
-                if (topic != null && topic.length() > 0)
+                //Codes_SRS_MqttDeviceMethod_34_027: [This method shall parse message to look for Post topic ($iothub/methods/POST/) and return null other wise.]
+                if (topic.length() > POST.length() && topic.startsWith(POST))
                 {
-                    // Codes_SRS_MQTTDEVICEMETHOD_25_026: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
-                    byte[] data = messagePair.getValue();
+                    // Case for $iothub/methods/POST/{method name}/?$rid={request id}
+                    TopicParser topicParser = new TopicParser(topic);
 
-                    if (topic.length() > METHOD.length() && topic.startsWith(METHOD))
+                    if (data != null && data.length > 0)
                     {
-                        //Codes_SRS_MqttDeviceMethod_34_027: [This method shall parse message to look for Post topic ($iothub/methods/POST/) and return null other wise.]
-                        if (topic.length() > POST.length() && topic.startsWith(POST))
-                        {
-                            //remove this message from the queue as this is the correct handler
-                            allReceivedMessages.poll();
+                        message = new IotHubTransportMessage(data, MessageType.DEVICE_METHODS);
+                    }
+                    else
+                    {
+                        message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
+                    }
 
-                            // Case for $iothub/methods/POST/{method name}/?$rid={request id}
-                            TopicParser topicParser = new TopicParser(topic);
+                    message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
-                            if (data != null && data.length > 0)
-                            {
-                                message = new IotHubTransportMessage(data, MessageType.DEVICE_METHODS);
-                            }
-                            else
-                            {
-                                message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
-                            }
+                    //Codes_SRS_MqttDeviceMethod_25_028: [If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message]
+                    String methodName = topicParser.getMethodName(METHOD_TOKEN);
+                    message.setMethodName(methodName);
 
-                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
+                    String reqId = topicParser.getRequestId(REQID_TOKEN);
+                    if (reqId != null)
+                    {
+                        //Codes_SRS_MqttDeviceMethod_25_030: [If the topic is of type post topic then this method shall parse further to look for request id which if found is set by calling setRequestId]
+                        message.setRequestId(reqId);
 
-                            //Codes_SRS_MqttDeviceMethod_25_028: [If the topic is of type post topic then this method shall parse further for method name and set it for the message by calling setMethodName for the message]
-                            String methodName = topicParser.getMethodName(METHOD_TOKEN);
-                            message.setMethodName(methodName);
-
-                            String reqId = topicParser.getRequestId(REQID_TOKEN);
-                            if (reqId != null)
-                            {
-                                //Codes_SRS_MqttDeviceMethod_25_030: [If the topic is of type post topic then this method shall parse further to look for request id which if found is set by calling setRequestId]
-                                message.setRequestId(reqId);
-
-                                //Codes_SRS_MqttDeviceMethod_25_032: [If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST ]
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-                                requestMap.put(reqId, DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-                            }
-                            else
-                            {
-                                //Codes_SRS_MqttDeviceMethod_25_031: [If request id is not found or is null then receive shall throw TransportException]
-                                throwMethodsTransportException("Request ID cannot be null");
-                            }
-                        }
+                        //Codes_SRS_MqttDeviceMethod_25_032: [If the topic is of type post topic and if method name and request id has been successfully parsed then this method shall set operation type as DEVICE_OPERATION_METHOD_RECEIVE_REQUEST ]
+                        message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+                        requestMap.put(reqId, DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+                    }
+                    else
+                    {
+                        //Codes_SRS_MqttDeviceMethod_25_031: [If request id is not found or is null then receive shall throw TransportException]
+                        throwMethodsTransportException("Request ID cannot be null");
                     }
                 }
             }
-
-            return message;
         }
+        return message;
     }
 
     private void throwMethodsTransportException(String message) throws TransportException

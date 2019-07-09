@@ -28,9 +28,7 @@ abstract public class Mqtt implements MqttCallback
 
     private MqttConnection mqttConnection;
     private MqttMessageListener messageListener;
-    ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
     private final Object stateLock;
-    protected final Object incomingLock;
     private final Object publishLock;
 
     private Map<Integer, Message> unacknowledgedSentMessages;
@@ -86,9 +84,7 @@ abstract public class Mqtt implements MqttCallback
 
         //Codes_SRS_Mqtt_25_003: [The constructor shall retrieve lock, queue from the provided connection information and save the connection.]
         this.mqttConnection = mqttConnection;
-        this.allReceivedMessages = mqttConnection.getAllReceivedMessages();
-        this.stateLock = mqttConnection.getMqttLock();
-        this.incomingLock = new Object();
+        this.stateLock = new Object();
         this.publishLock = new Object();
         this.userSpecifiedSASTokenExpiredOnRetry = false;
         this.listener = listener;
@@ -292,45 +288,31 @@ abstract public class Mqtt implements MqttCallback
      * @return a received message. It can be {@code null}
      * @throws TransportException if failed to receive mqtt message.
      */
-    public IotHubTransportMessage receive() throws TransportException
+    public IotHubTransportMessage receive(String topic, MqttMessage mqttMessage) throws TransportException
     {
-        synchronized (this.incomingLock)
+        if (this.mqttConnection == null)
         {
-            if (this.mqttConnection == null)
+            throw new TransportException(new IllegalArgumentException("Mqtt client should be initialised at least once before using it"));
+        }
+
+        // Codes_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
+        if (topic != null)
+        {
+            byte[] data = mqttMessage.getPayload();
+            if (data != null)
             {
-                throw new TransportException(new IllegalArgumentException("Mqtt client should be initialised at least once before using it"));
+                // Codes_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
+                return constructMessage(data, topic);
             }
-
-            // Codes_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
-            Pair<String, byte[]> messagePair = peekMessage();
-            if (messagePair != null)
+            else
             {
-                String topic = messagePair.getKey();
-                if (topic != null)
-                {
-                    byte[] data = messagePair.getValue();
-                    if (data != null)
-                    {
-                        //remove this message from the queue as this is the correct handler
-                        allReceivedMessages.poll();
-
-                        // Codes_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
-                        return constructMessage(data, topic);
-                    }
-                    else
-                    {
-                        // Codes_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw a TransportException]
-                        throw new TransportException("Data cannot be null when topic is non-null");
-                    }
-                }
-                else
-                {
-                    // Codes_SRS_Mqtt_34_022: [If the call peekMessage returns a null or empty string then this method shall do nothing and return null]
-                    return null;
-                }
+                // Codes_SRS_Mqtt_34_025: [If the call to peekMessage returns null when topic is non-null then this method will throw a TransportException]
+                throw new TransportException("Data cannot be null when topic is non-null");
             }
-
-            // Codes_SRS_Mqtt_34_021: [If the call peekMessage returns null then this method shall do nothing and return null]
+        }
+        else
+        {
+            // Codes_SRS_Mqtt_34_022: [If the call peekMessage returns a null or empty string then this method shall do nothing and return null]
             return null;
         }
     }
@@ -388,13 +370,10 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage)
     {
-        //Codes_SRS_Mqtt_25_030: [The payload of the message and the topic is added to the received messages queue .]
-        this.mqttConnection.getAllReceivedMessages().add(new MutablePair<>(topic, mqttMessage.getPayload()));
-
         if (this.messageListener != null)
         {
             //Codes_SRS_Mqtt_34_045: [If there is a saved listener, this function shall notify that listener that a message arrived.]
-            this.messageListener.onMessageArrived(mqttMessage.getId());
+            this.messageListener.onMessageArrived(topic, mqttMessage);
         }
     }
 
@@ -432,11 +411,6 @@ abstract public class Mqtt implements MqttCallback
 
         //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
         this.listener.onMessageSent(deliveredMessage, null);
-    }
-
-    public Pair<String, byte[]> peekMessage()
-    {
-        return this.allReceivedMessages.peek();
     }
 
     /**

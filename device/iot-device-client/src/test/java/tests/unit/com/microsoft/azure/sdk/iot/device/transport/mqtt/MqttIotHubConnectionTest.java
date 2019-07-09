@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import mockit.*;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -925,11 +926,11 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 result = null;
-                mockDeviceTwin.receive();
+                mockDeviceTwin.receive(anyString, (MqttMessage) any);
                 result = null;
-                mockDeviceMessaging.receive();
+                mockDeviceMessaging.receive(anyString, (MqttMessage) any);
                 result = mockedTransportMessage;
             }
         };
@@ -938,7 +939,7 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
 
-        Message message = Deencapsulation.invoke(connection, "receiveMessage");
+        Message message = Deencapsulation.invoke(connection, "receiveMessage", "someTopicString", new MqttMessage());
         byte[] actualMessageBody = message.getBytes();
 
         for (int i = 0; i < expectedMessageBody.length; i++)
@@ -949,11 +950,11 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                mockDeviceTwin.receive();
+                mockDeviceTwin.receive(anyString, (MqttMessage) any);
                 times = 1;
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 times = 1;
-                mockDeviceMessaging.receive();
+                mockDeviceMessaging.receive(anyString, (MqttMessage) any);
                 times = 1;
             }
         };
@@ -968,9 +969,9 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 result = null;
-                mockDeviceTwin.receive();
+                mockDeviceTwin.receive(anyString, (MqttMessage) any);
                 result = mockedTransportMessage;
             }
         };
@@ -979,7 +980,7 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
 
-        Message message = Deencapsulation.invoke(connection, "receiveMessage");
+        Message message = Deencapsulation.invoke(connection, "receiveMessage", "someTopicString", new MqttMessage());
         byte[] actualMessageBody = message.getBytes();
 
         assertNotNull(message);
@@ -992,9 +993,9 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 times = 1;
-                mockDeviceMessaging.receive();
+                mockDeviceMessaging.receive(anyString, (MqttMessage) any);
                 times = 0;
             }
         };
@@ -1009,7 +1010,7 @@ public class MqttIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 result = mockedTransportMessage;
             }
         };
@@ -1018,7 +1019,7 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
 
-        Message message = Deencapsulation.invoke(connection, "receiveMessage");
+        Message message = Deencapsulation.invoke(connection, "receiveMessage", "some topic string", new MqttMessage());
         byte[] actualMessageBody = message.getBytes();
 
         assertNotNull(message);
@@ -1031,11 +1032,11 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 times = 1;
-                mockDeviceTwin.receive();
+                mockDeviceTwin.receive(anyString, (MqttMessage) any);
                 times = 0;
-                mockDeviceMessaging.receive();
+                mockDeviceMessaging.receive(anyString, (MqttMessage) any);
                 times = 0;
             }
         };
@@ -1429,7 +1430,7 @@ public class MqttIotHubConnectionTest
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_060: [If a transport message is successfully received, and the message has a type of DEVICE_TWIN, this function shall set the callback and callback context of this object from the saved values in config for methods.]
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_063: [If a transport message is successfully received, this function shall notify its listener that a message was received and provide the received message.]
     @Test
-    public void onMessageArrivedReceivesMessageForTwin() throws TransportException, IOException
+    public void onMessageArrivedReceivesMessageForTwin(@Mocked final MqttMessage mockMqttMessage) throws TransportException, IOException
     {
         //arrange
         final int expectedMessageId = 2000;
@@ -1442,11 +1443,14 @@ public class MqttIotHubConnectionTest
         new StrictExpectations()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, mockMqttMessage);
                 result = null;
 
-                mockDeviceTwin.receive();
+                mockDeviceTwin.receive(anyString, mockMqttMessage);
                 result = mockedTransportMessage;
+
+                mockMqttMessage.getId();
+                result = expectedMessageId;
 
                 mockedTransportMessage.getMessageType();
                 result = MessageType.DEVICE_TWIN;
@@ -1466,14 +1470,13 @@ public class MqttIotHubConnectionTest
         };
 
         //act
-        connection.onMessageArrived(expectedMessageId);
+        connection.onMessageArrived("someTopic", mockMqttMessage);
 
         //assert
         Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = Deencapsulation.getField(connection, "receivedMessagesToAcknowledge");
         assertEquals(1, receivedMessagesToAcknowledge.size());
         assertTrue(receivedMessagesToAcknowledge.containsKey(mockedTransportMessage));
         assertEquals(expectedMessageId, (int) receivedMessagesToAcknowledge.get(mockedTransportMessage));
-
     }
 
 
@@ -1492,7 +1495,7 @@ public class MqttIotHubConnectionTest
         new StrictExpectations()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 result = mockedTransportMessage;
 
                 mockedTransportMessage.getMessageType();
@@ -1513,7 +1516,7 @@ public class MqttIotHubConnectionTest
         };
 
         //act
-        connection.onMessageArrived(expectedMessageId);
+        connection.onMessageArrived("someTopic", new MqttMessage());
     }
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_062: [If a transport message is successfully received, and the message has a type of DEVICE_TELEMETRY, this function shall set the callback and callback context of this object from the saved values in config for telemetry.]
@@ -1531,13 +1534,13 @@ public class MqttIotHubConnectionTest
         new StrictExpectations()
         {
             {
-                mockDeviceMethod.receive();
+                mockDeviceMethod.receive(anyString, (MqttMessage) any);
                 result = null;
 
-                mockDeviceTwin.receive();
+                mockDeviceTwin.receive(anyString, (MqttMessage) any);
                 result = null;
 
-                mockDeviceMessaging.receive();
+                mockDeviceMessaging.receive(anyString, (MqttMessage) any);
                 result = mockedTransportMessage;
 
                 mockedTransportMessage.getMessageType();
@@ -1564,7 +1567,7 @@ public class MqttIotHubConnectionTest
         };
 
         //act
-        connection.onMessageArrived(expectedMessageId);
+        connection.onMessageArrived("someTopic", new MqttMessage());
     }
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_064: [This function shall return the saved connectionId.]

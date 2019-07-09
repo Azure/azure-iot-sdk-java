@@ -19,9 +19,6 @@ public class MqttConnection
 {
     private MqttAsyncClient mqttAsyncClient = null;
     private MqttConnectOptions connectionOptions = null;
-    private ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
-    private Object mqttLock;
-    private MqttCallback mqttCallback;
 
     //mqtt connection options
     private static final int KEEP_ALIVE_INTERVAL = 230;
@@ -72,10 +69,6 @@ public class MqttConnection
             TransportException transportException = PahoExceptionTranslator.convertToMqttException(e, "Unable to create mqttAsyncClient");
             throw transportException;
         }
-
-        //Codes_SRS_MQTTCONNECTION_25_003: [The constructor shall create lock, queue for this MqttConnection.]
-        this.allReceivedMessages = new ConcurrentLinkedQueue<>();
-        this.mqttLock = new Object();
     }
 
     /**
@@ -112,7 +105,6 @@ public class MqttConnection
         }
 
         //Codes_SRS_MQTTCONNECTION_25_005: [This method shall set the callback for Mqtt.]
-        this.mqttCallback = mqttCallback;
         this.getMqttAsyncClient().setCallback(mqttCallback);
     }
 
@@ -160,26 +152,6 @@ public class MqttConnection
             // close on that object.]
             this.mqttAsyncClient.close();
         }
-    }
-
-    /**
-     * Getter for queue for the messages
-     * @return Queue for the messages
-     */
-    ConcurrentLinkedQueue<Pair<String, byte[]>> getAllReceivedMessages()
-    {
-        //Codes_SRS_MQTTCONNECTION_25_008: [Getter for the Message Queue.]
-        return this.allReceivedMessages;
-    }
-
-    /**
-     * Getter for Mqtt Lock
-     * @return The object to be used for the lock
-     */
-    Object getMqttLock()
-    {
-        //Codes_SRS_MQTTCONNECTION_25_009: [Getter for the Mqtt Lock on this connection.]
-        return this.mqttLock;
     }
 
     /**
