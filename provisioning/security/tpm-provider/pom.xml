@@ -36,9 +36,9 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.github.microsoft</groupId>
+            <groupId>com.microsoft.azure</groupId>
             <artifactId>TSS.Java</artifactId>
-            <version>0.2.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
