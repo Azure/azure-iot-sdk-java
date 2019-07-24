@@ -14,6 +14,8 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.*;
@@ -90,6 +92,16 @@ public class HubTierConnectionTests extends IntegrationTest
         catch (IOException e)
         {
             fail("Failed to stop the test proxy");
+        }
+    }
+
+    @Before
+    public void SetProxyIfApplicable()
+    {
+        if (testInstance.useHttpProxy)
+        {
+            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+            testInstance.client.setProxySettings(new ProxySettings(testProxy));
         }
     }
 

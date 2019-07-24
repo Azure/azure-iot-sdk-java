@@ -2668,6 +2668,9 @@ public class InternalClientTest
                 Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
                 result = mockDeviceIO;
 
+                mockDeviceIO.isOpen();
+                result = false;
+
                 mockDeviceIO.getProtocol();
                 result = protocol;
 

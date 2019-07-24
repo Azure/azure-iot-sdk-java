@@ -4,7 +4,10 @@
  */
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -470,7 +473,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
         if(this.useWebSockets)
         {
-            reactor.connectionToHost(this.chooseHostname(), AMQP_WEB_SOCKET_PORT, this);
+            ProxySettings proxySettings = this.deviceClientConfig.getProxySettings();
+            if (proxySettings != null)
+            {
+                reactor.connectionToHost(proxySettings.getHostname(), proxySettings.getPort(), this);
+            }
+            else
+            {
+                reactor.connectionToHost(this.chooseHostname(), AMQP_WEB_SOCKET_PORT, this);
+            }
         }
         else
         {
@@ -571,6 +582,17 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 this.savedException = e;
                 logger.LogError(this.savedException);
+            }
+
+            //Adding proxy layer needs to be done after sending SSL message
+            if (this.deviceClientConfig.getProxySettings() != null)
+            {
+                final ProxyImpl proxy = new ProxyImpl();
+                final String hostName = event.getConnection().getHostname();
+                final ProxyHandler proxyHandler = new ProxyHandlerImpl();
+                proxy.configure(hostName, null, proxyHandler, transport);
+
+                ((TransportInternal) transport).addTransportLayer(proxy);
             }
         }
 
@@ -1258,11 +1280,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     break;
                 case DEVICE_TWIN:
                     if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-                {
-                    //TODO: unsubscribe desired property from application
-                    //this.amqpSessionManager to sever the connection
-                    //twinSubscribed = false;
-                }
+                    {
+                        //TODO: unsubscribe desired property from application
+                        //this.amqpSessionManager to sever the connection
+                        //twinSubscribed = false;
+                    }
                     else
                     {
                         this.amqpsSessionManager.openDeviceOperationLinks(DEVICE_TWIN);

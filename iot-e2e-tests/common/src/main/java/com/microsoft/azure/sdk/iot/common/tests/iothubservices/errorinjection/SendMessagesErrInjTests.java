@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -44,7 +43,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithTcpConnectionDrop() throws Exception
     {
-        if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS))
+        if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS) || testInstance.useHttpProxy)
         {
             //TCP connection is not maintained between device and service when using HTTPS, so this test case isn't applicable
             //MQTT_WS + x509 is not supported for sending messages
@@ -59,7 +58,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithConnectionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
             return;
@@ -73,7 +72,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithSessionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
             return;
@@ -87,7 +86,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithCbsRequestLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
+        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS and AMQPS_WS
             return;
@@ -107,7 +106,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithCbsResponseLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
+        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS and AMQPS_WS
             return;
@@ -127,7 +126,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithD2CLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
             return;
@@ -141,7 +140,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithC2DLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)))
+        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
             return;
@@ -163,7 +162,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithThrottling() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS and AMQPS_WS
             return;
@@ -182,7 +181,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithThrottlingNoRetry() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS and AMQPS_WS
             return;
@@ -201,7 +200,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithAuthenticationError() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS and AMQPS_WS
             return;
@@ -219,7 +218,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithQuotaExceeded() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS and AMQPS_WS
             return;
@@ -236,7 +235,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithGracefulShutdown() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
+        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for AMQPS and AMQPS_WS
             return;
@@ -250,7 +249,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverMqttWithGracefulShutdown() throws Exception
     {
-        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
+        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS) || testInstance.useHttpProxy)
         {
             //This error injection test only applies for MQTT and MQTT_WS
             return;
@@ -264,7 +263,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws Exception
     {
-        if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS))
+        if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS) || testInstance.useHttpProxy)
         {
             //TCP connection is not maintained between device and service when using HTTPS, so this test case isn't applicable
             //MQTT_WS + x509 is not supported for sending messages
