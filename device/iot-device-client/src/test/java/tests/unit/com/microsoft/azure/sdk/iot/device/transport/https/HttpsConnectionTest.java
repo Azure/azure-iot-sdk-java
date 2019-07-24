@@ -3,14 +3,12 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -18,10 +16,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.NoRouteToHostException;
-import java.net.SocketException;
-import java.net.URL;
+import java.net.*;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +37,8 @@ public class HttpsConnectionTest
     HttpsURLConnection mockUrlConn;
     @Mocked
     HttpURLConnection mockHttpURLConnection;
+    @Mocked
+    ProxySettings mockProxySettings;
 
     // Tests_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
     @Test
@@ -66,6 +63,31 @@ public class HttpsConnectionTest
                 mockUrl.openConnection();
             }
         };
+    }
+
+    @Test
+    public void constructorOpensConnectionWithProxy(@Mocked final Proxy mockProxy) throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        final String expectedProxyHostname = "127.0.0.1";
+        final int expectedProxyPort = 8888;
+        final InetSocketAddress inetSocketAddress = new InetSocketAddress(expectedProxyHostname, expectedProxyPort);
+        new Expectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+
+                mockProxySettings.getProxy();
+                result = mockProxy;
+
+                mockUrl.openConnection(mockProxy);
+                result = mockUrlConn;
+            }
+        };
+
+        // act
+        new HttpsConnection(mockUrl, httpsMethod, mockProxySettings);
     }
 
     // Tests_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw a TransportException if the connection was unable to be opened.]

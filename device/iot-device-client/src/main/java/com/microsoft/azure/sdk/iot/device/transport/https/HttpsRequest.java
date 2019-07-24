@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.SSLContext;
@@ -23,6 +24,7 @@ public class HttpsRequest
     private Map<String, List<String>> headers;
     private int connectionTimeout;
     private SSLContext sslContext;
+    private ProxySettings proxySettings;
 
     /**
      * Constructor. Takes a URL as an argument and returns an HTTPS request that
@@ -35,6 +37,22 @@ public class HttpsRequest
      * @param userAgentString the user agent string to attach to all http communications
      */
     public HttpsRequest(URL url, HttpsMethod method, byte[] body, String userAgentString)
+    {
+        this(url, method, body, userAgentString, null);
+    }
+
+    /**
+     * Constructor. Takes a URL as an argument and returns an HTTPS request that
+     * is ready to be sent.
+     *
+     * @param url the URL for the request.
+     * @param method the HTTPS request method (i.e. GET).
+     * @param body the request body. Must be an array of size 0 if the request
+     * method is GET or DELETE.
+     * @param userAgentString the user agent string to attach to all http communications
+     * @param proxySettings The proxy settings to use when connecting. If null then no proxy will be used
+     */
+    public HttpsRequest(URL url, HttpsMethod method, byte[] body, String userAgentString, ProxySettings proxySettings)
     {
         // Codes_SRS_HTTPSREQUEST_34_031: [The function shall save the provided arguments to be used when the http connection is built during the call to send().]
         this.url = url;
@@ -62,6 +80,7 @@ public class HttpsRequest
             headers.put("User-Agent", headerValues);
         }
 
+        this.proxySettings = proxySettings;
     }
 
     /**
@@ -74,7 +93,7 @@ public class HttpsRequest
      */
     public HttpsResponse send() throws TransportException
     {
-        HttpsConnection connection = new HttpsConnection(url, method);
+        HttpsConnection connection = new HttpsConnection(url, method, this.proxySettings);
 
         for (String headerKey : headers.keySet())
         {

@@ -26,8 +26,8 @@ public class FileUploadThingsRunner extends FileUploadTests
     @Rule
     public Rerun count = new Rerun(3);
 
-    public FileUploadThingsRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType) throws InterruptedException, IOException, IotHubException, URISyntaxException {
-        super(protocol, authenticationType);
+    public FileUploadThingsRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException {
+        super(protocol, authenticationType, withProxy);
     }
 
     @BeforeClass

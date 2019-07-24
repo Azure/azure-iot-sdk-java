@@ -30,6 +30,7 @@ public final class DeviceClientConfig
     private static final long DEFAULT_OPERATION_TIMEOUT = 4 * 60 * 1000; //4 minutes
 
     private boolean useWebsocket;
+    private ProxySettings proxySettings;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -608,6 +609,16 @@ public final class DeviceClientConfig
     {
         //Codes_SRS_DEVICECLIENTCONFIG_34_040: [This function shall return the saved product info.]
         return this.productInfo;
+    }
+
+    public void setProxy(ProxySettings proxySettings)
+    {
+        this.proxySettings = proxySettings;
+    }
+
+    public ProxySettings getProxySettings()
+    {
+        return this.proxySettings;
     }
 
     @SuppressWarnings("unused")

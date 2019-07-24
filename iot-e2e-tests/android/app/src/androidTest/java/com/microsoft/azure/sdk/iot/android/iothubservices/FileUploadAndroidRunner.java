@@ -34,12 +34,12 @@ public class FileUploadAndroidRunner extends FileUploadTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType) throws InterruptedException, IOException, IotHubException, URISyntaxException
+    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
     {
-        super(protocol, authenticationType);
+        super(protocol, authenticationType, withProxy);
     }
 
-    @Parameterized.Parameters(name = "{0}_{1}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws Exception
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;

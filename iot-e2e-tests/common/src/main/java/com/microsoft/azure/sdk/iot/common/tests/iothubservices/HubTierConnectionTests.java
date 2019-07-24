@@ -2,6 +2,7 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.jproxy.ProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
@@ -36,6 +37,9 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected static String iotHubConnectionString = "";
+    protected static ProxyServer proxyServer;
+    protected static String testProxyHostname = "127.0.0.1";
+    protected static int testProxyPort = 8897;
 
     protected static String hostName;
 
@@ -43,9 +47,9 @@ public class HubTierConnectionTests extends IntegrationTest
 
     protected static RegistryManager registryManager;
 
-    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
     {
-        this.testInstance = new HubTierConnectionTestInstance(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint);
+        this.testInstance = new HubTierConnectionTestInstance(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
     }
 
     @BeforeClass
@@ -62,6 +66,33 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
+    @BeforeClass
+    public static void startProxy()
+    {
+        proxyServer = ProxyServer.create(testProxyHostname, testProxyPort);
+        try
+        {
+            proxyServer.start(ex -> {});
+        }
+        catch (IOException e)
+        {
+            fail("Failed to start the test proxy");
+        }
+    }
+
+    @AfterClass
+    public static void stopProxy()
+    {
+        try
+        {
+            proxyServer.stop();
+        }
+        catch (IOException e)
+        {
+            fail("Failed to stop the test proxy");
+        }
+    }
+
     public class HubTierConnectionTestInstance
     {
         public DeviceClient client;
@@ -73,8 +104,9 @@ public class HubTierConnectionTests extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
         public CorrelationDetailsLoggingAssert correlationDetailsLoggingAssert;
+        public boolean useHttpProxy;
 
-        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint)
+        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
         {
             this.client = client;
             this.protocol = protocol;
@@ -84,6 +116,7 @@ public class HubTierConnectionTests extends IntegrationTest
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
             String deviceId = identity.getDeviceId();
+            this.useHttpProxy = useHttpProxy;
 
             this.correlationDetailsLoggingAssert = new CorrelationDetailsLoggingAssert(this.client.getConfig().getIotHubHostname(), deviceId, protocol.toString(), null);
         }
@@ -112,17 +145,22 @@ public class HubTierConnectionTests extends IntegrationTest
 
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
 
-        List inputs = Arrays.asList(
+        List inputs = new ArrayList();
+        inputs.addAll(Arrays.asList(
             new Object[][]
                 {
                     //sas token device client
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, publicKeyCert, privateKey, x509Thumbprint},
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, false},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, false},
 
                     //x509 device client
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, publicKeyCert, privateKey, x509Thumbprint}
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, publicKeyCert, privateKey, x509Thumbprint, false}
+
+                    //sas token device client, with proxy
+                    //Commented out until AMQP supports proxies
+                    //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, true}}
                 }
-        );
+        ));
 
         Thread.sleep(2000);
 
@@ -209,6 +247,8 @@ public class HubTierConnectionTests extends IntegrationTest
             }
         }
     }
+
+
 
     public static boolean actualStatusUpdatesContainsStatus(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, IotHubConnectionStatus status)
     {

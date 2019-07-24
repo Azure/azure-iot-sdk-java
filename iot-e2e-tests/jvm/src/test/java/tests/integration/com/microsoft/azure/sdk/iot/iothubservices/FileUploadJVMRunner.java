@@ -9,12 +9,9 @@ import com.microsoft.azure.sdk.iot.common.helpers.TestConstants;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.X509CertificateGenerator;
 import com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import net.jcip.annotations.NotThreadSafe;
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -25,12 +22,12 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class FileUploadJVMRunner extends FileUploadTests
 {
-    public FileUploadJVMRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType) throws InterruptedException, IOException, IotHubException, URISyntaxException
+    public FileUploadJVMRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
     {
-        super(protocol, authenticationType);
+        super(protocol, authenticationType, withProxy);
     }
 
-    @Parameterized.Parameters(name = "{0} {1}")
+    @Parameterized.Parameters(name = "{0} {1} with proxy? {2}")
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);

@@ -70,6 +70,9 @@ public class InternalClientTest
     @Mocked
     ProductInfo mockedProductInfo;
 
+    @Mocked
+    ProxySettings mockProxySettings;
+
     private static long SEND_PERIOD_MILLIS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
     private static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
@@ -2601,6 +2604,121 @@ public class InternalClientTest
             {
                 mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(expectedCertificatePath);
                 times = 1;
+            }
+        };
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void setProxyThrowsIfClientAlreadyOpen()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                new DeviceClientConfig(mockIotHubConnectionString);
+                result = mockConfig;
+
+                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
+                result = mockDeviceIO;
+
+                mockDeviceIO.getProtocol();
+                result = IotHubClientProtocol.MQTT_WS;
+
+                mockConfig.getAuthenticationProvider();
+                result = mockIotHubAuthenticationProvider;
+
+                mockDeviceIO.isOpen();
+                result = true;
+            }
+        };
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, IotHubClientProtocol.MQTT_WS, SEND_PERIOD, RECEIVE_PERIOD);
+
+        // act
+        client.setProxySettings(mockProxySettings);
+    }
+
+    @Test (expected = UnsupportedOperationException.class)
+    public void setProxyThrowsIfClientIsUsingMQTT()
+    {
+        setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.MQTT);
+    }
+
+    @Test (expected = UnsupportedOperationException.class)
+    public void setProxyThrowsIfClientIsUsingAMQPS()
+    {
+        setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.AMQPS);
+    }
+
+    @Test (expected = UnsupportedOperationException.class)
+    public void setProxyThrowsIfClientIsUsingMQTTWS()
+    {
+        setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.MQTT_WS);
+    }
+
+    private void setProxyThrowsIfClientUsingUnsupportedProtocol(final IotHubClientProtocol protocol)
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                new DeviceClientConfig(mockIotHubConnectionString);
+                result = mockConfig;
+
+                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
+                result = mockDeviceIO;
+
+                mockDeviceIO.getProtocol();
+                result = protocol;
+
+                mockConfig.getAuthenticationProvider();
+                result = mockIotHubAuthenticationProvider;
+
+                mockDeviceIO.isOpen();
+                result = false;
+            }
+        };
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+
+        // act
+        client.setProxySettings(mockProxySettings);
+    }
+
+    @Test
+    public void setProxySavesHostnameAndPortToConfig()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                new DeviceClientConfig(mockIotHubConnectionString);
+                result = mockConfig;
+
+                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
+                result = mockDeviceIO;
+
+                mockDeviceIO.getProtocol();
+                result = IotHubClientProtocol.HTTPS;
+
+                mockConfig.getAuthenticationProvider();
+                result = mockIotHubAuthenticationProvider;
+
+                mockDeviceIO.isOpen();
+                result = false;
+            }
+        };
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, IotHubClientProtocol.HTTPS, SEND_PERIOD, RECEIVE_PERIOD);
+
+        // act
+        client.setProxySettings(mockProxySettings);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockConfig.setProxy(mockProxySettings);
             }
         };
     }

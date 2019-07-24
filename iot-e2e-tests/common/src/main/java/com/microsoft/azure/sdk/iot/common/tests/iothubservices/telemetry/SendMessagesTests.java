@@ -38,9 +38,9 @@ import static junit.framework.TestCase.fail;
  */
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, withProxy);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class SendMessagesTests extends SendMessagesCommon
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
         final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
 
-        if (testInstance.protocol != HTTPS || testInstance.authenticationType != SAS)
+        if (testInstance.protocol != HTTPS || testInstance.authenticationType != SAS || testInstance.useHttpProxy)
         {
             //This scenario only applies to HTTP since MQTT and AMQP allow expired sas tokens for 30 minutes after open
             // as long as token did not expire before open. X509 doesn't apply either
@@ -138,6 +138,12 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void expiredMessagesAreNotSent() throws Exception
     {
+        if (testInstance.useHttpProxy)
+        {
+            //Not worth testing
+            return;
+        }
+
         this.testInstance.setup();
 
         IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);

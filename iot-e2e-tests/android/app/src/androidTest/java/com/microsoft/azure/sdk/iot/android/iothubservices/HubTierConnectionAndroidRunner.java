@@ -36,16 +36,15 @@ public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public HubTierConnectionAndroidRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public HubTierConnectionAndroidRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
     {
-        super(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint);
+        super(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {3}")
+    @Parameterized.Parameters(name = "{1} with {3} with proxy? {7}")
     public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
     {
-
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         Collection inputs = inputsCommon();
