@@ -3,6 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
@@ -47,7 +48,31 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                new HttpsConnection(mockUrl, (HttpsMethod) any);
+                new HttpsConnection(mockUrl, (HttpsMethod) any, null);
+            }
+        };
+    }
+
+    @Test
+    public void sendRequestWithProxyUsesProxyFromConstructor(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl, @Mocked final ProxySettings mockProxySettings) throws TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.GET;
+        final byte[] body = new byte[0];
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+            }
+        };
+
+        HttpsRequest request = new HttpsRequest(mockUrl, httpsMethod, body, "", mockProxySettings);
+
+        request.send();
+        new Verifications()
+        {
+            {
+                new HttpsConnection(mockUrl, (HttpsMethod) any, mockProxySettings);
             }
         };
     }
@@ -74,7 +99,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                new HttpsConnection(mockUrl, (HttpsMethod) any)
+                new HttpsConnection(mockUrl, (HttpsMethod) any, null)
                         .writeOutput(expectedBody);
             }
         };
@@ -100,7 +125,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                new HttpsConnection((URL) any, httpsMethod);
+                new HttpsConnection((URL) any, httpsMethod, null);
             }
         };
     }
@@ -116,7 +141,7 @@ public class HttpsRequestTest
             HttpsMethod testMethod;
 
             @Mock
-            public void $init(URL url, HttpsMethod method)
+            public void $init(URL url, HttpsMethod method, ProxySettings proxySettings)
             {
                 this.testMethod = method;
             }
@@ -195,7 +220,7 @@ public class HttpsRequestTest
             Map<String, String> testHeaderFields = new HashMap<>();
 
             @Mock
-            public void $init(URL url, HttpsMethod method)
+            public void $init(URL url, HttpsMethod method, ProxySettings proxySettings)
             {
             }
 
@@ -273,7 +298,7 @@ public class HttpsRequestTest
             byte[] testBody;
 
             @Mock
-            public void $init(URL url, HttpsMethod method)
+            public void $init(URL url, HttpsMethod method, ProxySettings proxySettings)
             {
             }
 
@@ -431,7 +456,7 @@ public class HttpsRequestTest
         new NonStrictExpectations()
         {
             {
-                new HttpsConnection((URL) any, httpsMethod);
+                new HttpsConnection((URL) any, httpsMethod, null);
                 result = mockConn;
 
                 mockUrl.getProtocol();
@@ -461,7 +486,7 @@ public class HttpsRequestTest
         new NonStrictExpectations()
         {
             {
-                new HttpsConnection(mockUrl, httpsMethod);
+                new HttpsConnection(mockUrl, httpsMethod, null);
                 result = mockConn;
 
                 mockUrl.getProtocol();
@@ -547,7 +572,7 @@ public class HttpsRequestTest
         new NonStrictExpectations()
         {
             {
-                new HttpsConnection((URL) any, HttpsMethod.POST);
+                new HttpsConnection((URL) any, HttpsMethod.POST, null);
                 result = mockConn;
 
                 Deencapsulation.invoke(mockConn, "getBody");

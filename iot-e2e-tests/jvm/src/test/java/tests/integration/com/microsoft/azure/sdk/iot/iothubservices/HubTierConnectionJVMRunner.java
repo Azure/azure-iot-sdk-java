@@ -24,13 +24,13 @@ public class HubTierConnectionJVMRunner extends HubTierConnectionTests
 {
     static Collection<BaseDevice> identities;
 
-    public HubTierConnectionJVMRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public HubTierConnectionJVMRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
     {
-        super(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint);
+        super(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
     }
 
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {3}")
+    @Parameterized.Parameters(name = "{1} with {3} with proxy? {7}")
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);

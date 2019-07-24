@@ -750,6 +750,27 @@ public class InternalClient
         }
     }
 
+    /**
+     * Set the proxy settings for this client to connect through. If null then any previous settings will be erased
+     * @param proxySettings the settings to be used when connecting to iothub through a proxy. If null, any previously saved
+     *                      settings will be erased, and no proxy will be used
+     */
+    public void setProxySettings(ProxySettings proxySettings)
+    {
+        if (this.deviceIO.isOpen())
+        {
+            throw new IllegalStateException("Cannot set proxy after connection was already opened");
+        }
+
+        IotHubClientProtocol protocol = this.deviceIO.getProtocol();
+        if (protocol != HTTPS)
+        {
+            throw new UnsupportedOperationException("Cannot use proxy unsupported unless you are using HTTPS");
+        }
+
+        this.config.setProxy(proxySettings);
+    }
+
     private void commonConstructorVerification(IotHubConnectionString connectionString, IotHubClientProtocol protocol)
     {
         if (connectionString == null)

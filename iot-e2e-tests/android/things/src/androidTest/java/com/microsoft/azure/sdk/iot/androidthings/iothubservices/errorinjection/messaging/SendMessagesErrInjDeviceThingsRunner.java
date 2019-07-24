@@ -35,8 +35,9 @@ public class SendMessagesErrInjDeviceThingsRunner extends SendMessagesErrInjTest
     @Rule
     public Rerun count = new Rerun(3);
 
-    public SendMessagesErrInjDeviceThingsRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    public SendMessagesErrInjDeviceThingsRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy) throws Exception
+    {
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
     }
 
     @Parameterized.Parameters(name = "{1}_{3}_{4}")

@@ -1060,4 +1060,32 @@ public class DeviceClientConfigTest
         assertNotNull(actualMap);
         assertFalse(actualMap.containsKey(inputName));
     }
+
+    @Test
+    public void setProxySettingsSets(@Mocked final ProxySettings mockedProxySettings)
+    {
+        //arrange
+        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+
+        //act
+        config.setProxy(mockedProxySettings);
+
+        //assert
+        ProxySettings savedProxySettings = Deencapsulation.getField(config, "proxySettings");
+        assertEquals(mockedProxySettings, savedProxySettings);
+    }
+
+    @Test
+    public void getProxyHostnameGets(@Mocked final ProxySettings mockedProxySettings)
+    {
+        //arrange
+        DeviceClientConfig config = new DeviceClientConfig(mockIotHubConnectionString);
+        Deencapsulation.setField(config, "proxySettings", mockedProxySettings);
+
+        //act
+        ProxySettings actualProxySettings = config.getProxySettings();
+
+        //assert
+        assertEquals(mockedProxySettings, actualProxySettings);
+    }
 }

@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.jproxy.ProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -14,9 +15,13 @@ import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +35,9 @@ public class TokenRenewalTests extends IntegrationTest
 {
     protected static String iotHubConnectionString;
     private static RegistryManager registryManager;
+    protected static ProxyServer proxyServer;
+    protected static String testProxyHostname = "127.0.0.1";
+    protected static int testProxyPort = 8898;
 
     private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
     private static final Integer RETRY_MILLISECONDS = 100;
@@ -37,6 +45,33 @@ public class TokenRenewalTests extends IntegrationTest
     public static void setup() throws IOException
     {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+    }
+
+    @BeforeClass
+    public static void startProxy()
+    {
+        proxyServer = ProxyServer.create(testProxyHostname, testProxyPort);
+        try
+        {
+            proxyServer.start(ex -> {});
+        }
+        catch (IOException e)
+        {
+            fail("Failed to start the test proxy");
+        }
+    }
+
+    @AfterClass
+    public static void stopProxy()
+    {
+        try
+        {
+            proxyServer.stop();
+        }
+        catch (IOException e)
+        {
+            fail("Failed to stop the test proxy");
+        }
     }
 
     /**
@@ -138,9 +173,17 @@ public class TokenRenewalTests extends IntegrationTest
     private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, ModuleClientException
     {
         List<InternalClient> clients = new ArrayList<>();
+        Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         for (IotHubClientProtocol protocol: IotHubClientProtocol.values())
         {
             clients.add(createDeviceClient(protocol));
+            if (protocol == HTTPS)
+            {
+                InternalClient client = createDeviceClient(protocol);
+                ProxySettings proxySettings = new ProxySettings(testProxy);
+                client.setProxySettings(proxySettings);
+                clients.add(client);
+            }
 
             if (protocol != IotHubClientProtocol.HTTPS && !isBasicTierHub)
             {

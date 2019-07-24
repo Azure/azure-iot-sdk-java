@@ -5,21 +5,20 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
-import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.jproxy.ProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runners.Parameterized;
+import org.junit.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -31,6 +30,7 @@ import static com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUpload
 import static com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests.STATUS.SUCCESS;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
 /**
@@ -64,6 +64,10 @@ public class FileUploadTests extends IntegrationTest
     private static String publicKeyCertificate;
     private static String privateKeyCertificate;
     private static String x509Thumbprint;
+
+    protected static ProxyServer proxyServer;
+    protected static String testProxyHostname = "127.0.0.1";
+    protected static int testProxyPort = 8897;
 
     static Set<FileUploadNotification> activeFileUploadNotifications = new ConcurrentSkipListSet<>(new Comparator<FileUploadNotification>()
     {
@@ -128,14 +132,19 @@ public class FileUploadTests extends IntegrationTest
         return Arrays.asList(
                 new Object[][]
                         {
-                                {IotHubClientProtocol.HTTPS, AuthenticationType.SAS},
-                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED}
+                                //without proxy
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, false},
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, false},
+
+                                //with proxy
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, true},
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, true}
                         });
     }
 
-    public FileUploadTests(IotHubClientProtocol protocol, AuthenticationType authenticationType) throws InterruptedException, IOException, IotHubException, URISyntaxException
+    public FileUploadTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
     {
-        this.testInstance = new FileUploadTestInstance(protocol, authenticationType);
+        this.testInstance = new FileUploadTestInstance(protocol, authenticationType, withProxy);
     }
 
     public FileUploadTestInstance testInstance;
@@ -146,11 +155,13 @@ public class FileUploadTests extends IntegrationTest
         public AuthenticationType authenticationType;
         private FileUploadState[] fileUploadState;
         private MessageState[] messageStates;
+        private boolean withProxy;
 
-        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType) throws InterruptedException, IOException, IotHubException, URISyntaxException
+        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
+            this.withProxy = withProxy;
         }
     }
 
@@ -307,6 +318,33 @@ public class FileUploadTests extends IntegrationTest
         fileUploadNotificationListenerThread.stop();
     }
 
+    @BeforeClass
+    public static void startProxy()
+    {
+        proxyServer = ProxyServer.create(testProxyHostname, testProxyPort);
+        try
+        {
+            proxyServer.start(ex -> {});
+        }
+        catch (IOException e)
+        {
+            fail("Failed to start the test proxy");
+        }
+    }
+
+    @AfterClass
+    public static void stopProxy()
+    {
+        try
+        {
+            proxyServer.stop();
+        }
+        catch (IOException e)
+        {
+            fail("Failed to stop the test proxy");
+        }
+    }
+
     private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException
     {
         DeviceClient deviceClient;
@@ -331,6 +369,12 @@ public class FileUploadTests extends IntegrationTest
         else
         {
             throw new IllegalArgumentException("Test code has not been written for this authentication type yet");
+        }
+
+        if (testInstance.withProxy)
+        {
+            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+            deviceClient.setProxySettings(new ProxySettings(testProxy));
         }
 
         Thread.sleep(5000);

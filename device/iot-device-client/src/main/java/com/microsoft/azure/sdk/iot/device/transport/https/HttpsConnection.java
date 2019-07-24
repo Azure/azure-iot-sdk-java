@@ -6,16 +6,14 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.NoRouteToHostException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,13 +50,26 @@ public class HttpsConnection
      *
      * @param url the URL for the HTTP/HTTPS connection.
      * @param method the HTTP method (i.e. GET).
-     *
      * @throws TransportException if the connection could not be opened.
      */
     public HttpsConnection(URL url, HttpsMethod method) throws TransportException
     {
+        this(url, method, null);
+    }
+
+    /**
+     * Constructor. Opens a connection to the given URL. Can be HTTPS or HTTP
+     *
+     * @param url the URL for the HTTP/HTTPS connection.
+     * @param method the HTTP method (i.e. GET).
+     * @param proxySettings The proxy settings to use when connecting. If null, then no proxy will be used
+     *
+     * @throws TransportException if the connection could not be opened.
+     */
+    public HttpsConnection(URL url, HttpsMethod method, final ProxySettings proxySettings) throws TransportException
+    {
         // Codes_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS or HTTP protocol, the constructor shall throw an IllegalArgumentException.]
-        String protocol = url.getProtocol();
+        final String protocol = url.getProtocol();
         if (!protocol.equalsIgnoreCase("HTTPS") && !protocol.equalsIgnoreCase("HTTP"))
         {
             String errMsg = String.format("Expected URL that uses protocol "
@@ -73,7 +84,27 @@ public class HttpsConnection
         try
         {
             // Codes_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
-            this.connection = (HttpURLConnection) url.openConnection();
+            if (proxySettings != null)
+            {
+                this.connection = (HttpURLConnection) url.openConnection(proxySettings.getProxy());
+
+                if (proxySettings.getUsername() != null && proxySettings.getPassword() != null)
+                {
+                    Authenticator authenticator = new Authenticator()
+                    {
+                        public PasswordAuthentication getPasswordAuthentication()
+                        {
+                            return (new PasswordAuthentication(proxySettings.getUsername(), proxySettings.getPassword()));
+                        }
+                    };
+                    Authenticator.setDefault(authenticator);
+                }
+            }
+            else
+            {
+                this.connection = (HttpURLConnection) url.openConnection();
+            }
+
             // Codes_SRS_HTTPSCONNECTION_11_021: [The constructor shall set the HTTPS method to the given method.]
             this.connection.setRequestMethod(method.name());
         }
