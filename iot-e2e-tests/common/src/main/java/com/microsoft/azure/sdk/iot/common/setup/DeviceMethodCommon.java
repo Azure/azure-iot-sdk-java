@@ -52,7 +52,6 @@ public class DeviceMethodCommon extends IntegrationTest
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
     protected static final int NUMBER_INVOKES_PARALLEL = 10;
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 0;
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
 
@@ -284,18 +283,8 @@ public class DeviceMethodCommon extends IntegrationTest
     }
 
     @After
-    public void afterTest() throws IOException, IotHubException
+    public void afterTest()
     {
-        try
-        {
-            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
-
         this.testInstance.dispose();
     }
 

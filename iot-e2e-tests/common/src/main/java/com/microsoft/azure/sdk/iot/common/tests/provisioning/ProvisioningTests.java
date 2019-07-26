@@ -367,41 +367,48 @@ public class ProvisioningTests extends ProvisioningCommon
         }
     }
 
-    private void cleanUpReprovisionedDeviceAndEnrollment(String deviceId, EnrollmentType enrollmentType) throws IOException, IotHubException, ProvisioningServiceClientException
+    private void cleanUpReprovisionedDeviceAndEnrollment(String deviceId, EnrollmentType enrollmentType)
     {
-        //delete provisioned device
-        RegistryManager registryManagerFarAway = RegistryManager.createFromConnectionString(farAwayIotHubConnectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-
-        if (deviceId != null && !deviceId.isEmpty())
+        try
         {
-            try
+            //delete provisioned device
+            RegistryManager registryManagerFarAway = RegistryManager.createFromConnectionString(farAwayIotHubConnectionString);
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+
+            if (deviceId != null && !deviceId.isEmpty())
             {
-                registryManager.removeDevice(deviceId);
-            }
-            catch (IotHubNotFoundException e)
-            {
-                //device wasn't in hub, can ignore this exception
+                try
+                {
+                    registryManager.removeDevice(deviceId);
+                }
+                catch (IotHubNotFoundException e)
+                {
+                    //device wasn't in hub, can ignore this exception
+                }
+
+                try
+                {
+                    registryManagerFarAway.removeDevice(deviceId);
+                }
+                catch (IotHubNotFoundException e)
+                {
+                    //device wasn't in hub, can ignore this exception
+                }
             }
 
-            try
+            //delete enrollment
+            if (enrollmentType == EnrollmentType.GROUP)
             {
-                registryManagerFarAway.removeDevice(deviceId);
+                provisioningServiceClient.deleteEnrollmentGroup(testInstance.groupId);
             }
-            catch (IotHubNotFoundException e)
+            else
             {
-                //device wasn't in hub, can ignore this exception
+                provisioningServiceClient.deleteIndividualEnrollment(testInstance.individualEnrollment.getRegistrationId());
             }
         }
-
-        //delete enrollment
-        if (enrollmentType == EnrollmentType.GROUP)
+        catch (Exception e)
         {
-            provisioningServiceClient.deleteEnrollmentGroup(testInstance.groupId);
-        }
-        else
-        {
-            provisioningServiceClient.deleteIndividualEnrollment(testInstance.individualEnrollment.getRegistrationId());
+            //Don't really care if test tear down failed. Nightly jobs will clean up these enrollments if the above code fails in any way
         }
     }
 

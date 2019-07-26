@@ -66,7 +66,6 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final Integer PAGE_SIZE = 2;
 
     protected static String iotHubConnectionString = "";
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 0;
 
     // Constants used in for Testing
     protected static final String PROPERTY_KEY = "Key";
@@ -471,27 +470,16 @@ public class DeviceTwinCommon extends IntegrationTest
     }
 
     @After
-    public void tearDownNewDeviceAndModule() throws IOException, IotHubException
+    public void tearDownNewDeviceAndModule()
     {
-        tearDownTwin(deviceUnderTest);
-
         try
         {
+            tearDownTwin(deviceUnderTest);
             registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
         }
         catch (Exception e)
         {
-
-        }
-
-        try
-        {
-            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-            fail(buildExceptionMessage("Unexpected exception encountered", internalClient));
+            //Don't care if tear down failed. Nightly job will clean up these identities
         }
     }
 
