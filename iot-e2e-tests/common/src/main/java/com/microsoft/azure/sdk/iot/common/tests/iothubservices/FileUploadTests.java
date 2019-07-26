@@ -453,6 +453,12 @@ public class FileUploadTests extends IntegrationTest
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException, IotHubException
     {
+        if (testInstance.withProxy)
+        {
+            //No need to do performance test both with and without proxy
+            return;
+        }
+        
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
         ExecutorService executor = Executors.newFixedThreadPool(2);
