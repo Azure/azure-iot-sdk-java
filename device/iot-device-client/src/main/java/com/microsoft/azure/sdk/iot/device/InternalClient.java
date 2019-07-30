@@ -287,7 +287,7 @@ public class InternalClient
      * be provided alongside the status and reason.
      *
      * @param callback The callback to be fired when the connection status of the device changes. Can be null to
-     *                 unset this listener as long as the provided callbackContext is also null.
+     *                 unset this listener as long as the maven-javadoc-pluginprovided callbackContext is also null.
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
      * @throws IllegalArgumentException if provided callback is null
      */
