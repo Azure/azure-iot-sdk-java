@@ -2638,19 +2638,19 @@ public class InternalClientTest
         client.setProxySettings(mockProxySettings);
     }
 
-    @Test (expected = UnsupportedOperationException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void setProxyThrowsIfClientIsUsingMQTT()
     {
         setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.MQTT);
     }
 
-    @Test (expected = UnsupportedOperationException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void setProxyThrowsIfClientIsUsingAMQPS()
     {
         setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.AMQPS);
     }
 
-    @Test (expected = UnsupportedOperationException.class)
+    @Test (expected = IllegalArgumentException.class)
     public void setProxyThrowsIfClientIsUsingMQTTWS()
     {
         setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.MQTT_WS);

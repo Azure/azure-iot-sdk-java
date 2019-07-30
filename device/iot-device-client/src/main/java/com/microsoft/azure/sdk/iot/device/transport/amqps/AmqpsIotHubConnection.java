@@ -47,6 +47,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     /** The {@link Delivery} tag. */
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
+    private static final String WEBSOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final int WEBSOCKET_PORT = 443;
     private static final int AMQP_PORT = 5671;
     private static final int AMQP_WEB_SOCKET_PORT = 443;
 
@@ -568,8 +570,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_25_049: [If websocket enabled the event handler shall configure the transport layer for websocket.]
                 WebSocketImpl webSocket = new WebSocketImpl();
-                String query = "iothub-no-client-cert=true";
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, query, 443, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEBSOCKET_QUERY, WEBSOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
