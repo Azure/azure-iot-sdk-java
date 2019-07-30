@@ -86,8 +86,6 @@ public class HttpsConnection
             // Codes_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
             if (proxySettings != null)
             {
-                this.connection = (HttpURLConnection) url.openConnection(proxySettings.getProxy());
-
                 if (proxySettings.getUsername() != null && proxySettings.getPassword() != null)
                 {
                     Authenticator authenticator = new Authenticator()
@@ -99,6 +97,8 @@ public class HttpsConnection
                     };
                     Authenticator.setDefault(authenticator);
                 }
+
+                this.connection = (HttpURLConnection) url.openConnection(proxySettings.getProxy());
             }
             else
             {

@@ -5,8 +5,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
+import com.microsoft.azure.proton.transport.ws.WebSocketHandler;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
@@ -1111,6 +1113,51 @@ public class AmqpsIotHubConnectionTest {
     }
 
     @Test
+    public void onReactorInitWithProxySettings(@Mocked final ProxySettings mockProxySettings) throws TransportException
+    {
+        baseExpectations();
+
+        final int expectedSasTokenRenewalPeriod = 444;
+        final String expectedProxyHostname = "127.0.0.1";
+        final int expectedProxyPort = 1234;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.isUseWebsocket();
+                result = true;
+                mockConfig.getProxySettings();
+                result = mockProxySettings;
+                mockProxySettings.getHostname();
+                result = expectedProxyHostname;
+                mockProxySettings.getPort();
+                result = expectedProxyPort;
+                mockEvent.getReactor();
+                result = mockReactor;
+                mockReactor.connectionToHost(anyString, anyInt, (Handler) any);
+                mockConfig.getAuthenticationProvider();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockConfig.getSasTokenAuthentication();
+                result = mockIotHubSasTokenAuthenticationProvider;
+                mockIotHubSasTokenAuthenticationProvider.getMillisecondsBeforeProactiveRenewal();
+                result = expectedSasTokenRenewalPeriod;
+            }
+        };
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "sasTokenRenewalHandler", mockAmqpSasTokenRenewalHandler);
+
+
+        connection.onReactorInit(mockEvent);
+
+        new Verifications()
+        {
+            {
+                mockReactor.connectionToHost(expectedProxyHostname, expectedProxyPort, connection);
+            }
+        };
+    }
+
+    @Test
     public void onReactorInitX509() throws TransportException
     {
         baseExpectations();
@@ -1338,6 +1385,8 @@ public class AmqpsIotHubConnectionTest {
                 result = mockConnection;
                 mockConnection.getTransport();
                 result = mockTransport;
+                mockConfig.getProxySettings();
+                result = null;
             }
         };
 
@@ -1378,8 +1427,10 @@ public class AmqpsIotHubConnectionTest {
                 result = mockTransportInternal;
                 new WebSocketImpl();
                 result = mockWebSocket;
-                mockWebSocket.configure(anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
+                mockWebSocket.configure(anyString, anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
                 mockTransportInternal.addTransportLayer(mockWebSocket);
+                mockConfig.getProxySettings();
+                result = null;
             }
         };
 
@@ -1393,6 +1444,49 @@ public class AmqpsIotHubConnectionTest {
         {
             {
                 Deencapsulation.invoke(mockAmqpsSessionManager, "onConnectionBound", mockTransportInternal);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void onConnectionBoundWebSocketsWithProxy(@Mocked final ProxyHandlerImpl mockProxyHandlerImpl, @Mocked final ProxyImpl mockProxyImpl, @Mocked final ProxySettings mockProxySettings) throws TransportException, IOException
+    {
+        baseExpectations();
+        new Expectations()
+        {
+            {
+                mockConfig.isUseWebsocket();
+                result = true;
+                mockEvent.getConnection();
+                result = mockConnection;
+                mockConnection.getTransport();
+                result = mockTransportInternal;
+                new WebSocketImpl();
+                result = mockWebSocket;
+                mockWebSocket.configure(anyString, anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
+                mockTransportInternal.addTransportLayer(mockWebSocket);
+                mockConfig.getProxySettings();
+                result = mockProxySettings;
+                new ProxyHandlerImpl();
+                result = mockProxyHandlerImpl;
+                new ProxyImpl();
+                result = mockProxyImpl;
+                mockProxyImpl.configure(anyString, null, mockProxyHandlerImpl, (Transport) any);
+
+            }
+        };
+
+        final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "amqpsSessionManager", mockAmqpsSessionManager);
+        Deencapsulation.setField(connection, "useWebSockets", true);
+
+        connection.onConnectionBound(mockEvent);
+
+        new Verifications()
+        {
+            {
+                mockTransportInternal.addTransportLayer(mockProxyImpl);
                 times = 1;
             }
         };
