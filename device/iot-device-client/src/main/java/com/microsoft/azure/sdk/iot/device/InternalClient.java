@@ -286,6 +286,9 @@ public class InternalClient
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
+     * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
+     * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
+     *
      * @param callback The callback to be fired when the connection status of the device changes. Can be null to
      *                 unset this listener as long as the provided callbackContext is also null.
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
