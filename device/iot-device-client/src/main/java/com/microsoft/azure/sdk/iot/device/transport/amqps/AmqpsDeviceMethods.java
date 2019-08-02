@@ -3,8 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
@@ -70,7 +73,7 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
      * @return true if the link is owned by the operation, false otherwise
      */
     @Override
-    protected Boolean isLinkFound(String linkName)
+    protected boolean onLinkRemoteOpen(String linkName)
     {
         // Codes_SRS_AMQPSDEVICEMETHODS_12_047: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
         if (linkName.equals(this.getSenderLinkTag()))
@@ -122,10 +125,9 @@ public final class AmqpsDeviceMethods extends AmqpsDeviceOperations
      *
      * @param linkName The receiver link's name to read from
      * @return the received message
-     * @throws TransportException if Proton throws
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws TransportException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName)
     {
         // Codes_SRS_AMQPSDEVICEMETHODS_12_012: [The function shall call the super function.]
         AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink(linkName);

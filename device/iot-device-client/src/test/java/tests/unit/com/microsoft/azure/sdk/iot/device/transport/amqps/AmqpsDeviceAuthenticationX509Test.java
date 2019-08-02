@@ -234,15 +234,15 @@ public class AmqpsDeviceAuthenticationX509Test
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_012: [The function shall override the default behaviour and return true.]
     @Test
-    public void isLinkFoundReturnsTrue()
+    public void onLinkRemoteOpenReturnsFalse()
     {
         //arrange
         final AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
 
         //act
-        boolean result = Deencapsulation.invoke(auth, "isLinkFound", new Class[] {String.class}, "");
+        boolean result = Deencapsulation.invoke(auth, "onLinkRemoteOpen", new Class[] {String.class}, "");
 
         //assert
-        assertTrue(result);
+        assertFalse(result);
     }
 }

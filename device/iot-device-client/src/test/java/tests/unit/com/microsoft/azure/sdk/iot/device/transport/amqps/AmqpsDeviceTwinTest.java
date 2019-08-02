@@ -255,60 +255,6 @@ public class AmqpsDeviceTwinTest
         assertTrue(MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED.equals("/notifications/twin/properties/desired"));
     }
 
-    @Test
-    public void isLinkFoundReturnsTrueIfSenderLinkTagMatches()
-    {
-        // arrange
-        String linkName = "linkName";
-
-        //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "senderLinkTag", linkName);
-        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsSendLinkState");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTwin, "isLinkFound", linkName);
-        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsSendLinkState");
-
-        // assert
-        assertTrue(retVal);
-        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
-        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
-    }
-
-    @Test
-    public void isLinkFoundReturnsTrueIfReceiverLinkTagMatches()
-    {
-        // arrange
-        String linkName = "linkName";
-
-        //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "receiverLinkTag", linkName);
-        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsRecvLinkState");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTwin, "isLinkFound", linkName);
-        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTwin, "amqpsRecvLinkState");
-
-        // assert
-        assertTrue(retVal);
-        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
-        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
-    }
-
-    @Test
-    public void isLinkFoundReturnsFalseIfThereIsNoMatch()
-    {
-        // arrange
-        String linkName = "linkName";
-
-        //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "senderLinkTag", "xxx");
-        Deencapsulation.setField(amqpsDeviceTwin, "receiverLinkTag", "yyy");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTwin, "isLinkFound", linkName);
-
-        // assert
-        assertFalse(retVal);
-    }
-
     // Tests_SRS_AMQPSDEVICETWIN_12_010: [The function shall call the super function if the MessageType is DEVICE_TWIN, and return with it's return value.]
     @Test
     public void sendMessageAndGetDeliveryTagCallsSuper() throws IOException
