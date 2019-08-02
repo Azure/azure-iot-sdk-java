@@ -713,14 +713,6 @@ public class IotHubTransportTest
         };
         final IotHubTransport transport = new IotHubTransport(mockedConfig);
 
-        new Expectations()
-        {
-            {
-                mockedTransportException.isRetryable();
-                result = false;
-            }
-        };
-
         //act
         IotHubConnectionStatusChangeReason reason = Deencapsulation.invoke(transport, "exceptionToStatusChangeReason", new Class[] {Throwable.class}, mockedTransportException);
 

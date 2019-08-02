@@ -634,23 +634,16 @@ public class IotHubTransport implements IotHubListener
         if (e instanceof TransportException)
         {
             TransportException transportException = (TransportException) e;
-            if (transportException.isRetryable())
+            if (isSasTokenExpired())
             {
-                //Codes_SRS_IOTHUBTRANSPORT_34_033: [If the provided exception is a retryable TransportException,
-                // this function shall return NO_NETWORK.]
-                return IotHubConnectionStatusChangeReason.NO_NETWORK;
-            }
-            else if (isSasTokenExpired())
-            {
-                //Codes_SRS_IOTHUBTRANSPORT_34_034: [If the provided exception is a TransportException that isn't
-                // retryable and the saved sas token has expired, this function shall return EXPIRED_SAS_TOKEN.]
                 return IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN;
+            }
+            else if (transportException.isRetryable())
+            {
+                return IotHubConnectionStatusChangeReason.NO_NETWORK;
             }
             else if (e instanceof UnauthorizedException || e instanceof MqttUnauthorizedException || e instanceof AmqpUnauthorizedAccessException)
             {
-                //Codes_SRS_IOTHUBTRANSPORT_34_035: [If the provided exception is a TransportException that isn't
-                // retryable and the saved sas token has not expired, but the exception is an unauthorized exception,
-                // this function shall return BAD_CREDENTIAL.]
                 return IotHubConnectionStatusChangeReason.BAD_CREDENTIAL;
             }
         }
