@@ -3,13 +3,17 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.*;
+import org.apache.qpid.proton.amqp.messaging.MessageAnnotations;
+import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
 import java.util.HashMap;
@@ -81,7 +85,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      * @return true if the link is owned by the operation, false otherwise
      */
     @Override
-    protected Boolean isLinkFound(String linkName)
+    protected boolean onLinkRemoteOpen(String linkName)
     {
         // Codes_SRS_AMQPSDEVICETWIN_12_046: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
         if (linkName.equals(this.getSenderLinkTag()))
@@ -133,11 +137,9 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      *
      * @param linkName The receiver link's name to read from
      * @return the received message
-     * @throws IllegalArgumentException if linkName argument is empty
-     * @throws TransportException if Proton throws
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName)
     {
         // Codes_SRS_AMQPSDEVICETWIN_12_012: [The function shall call the super function.]
         AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink(linkName);
@@ -157,7 +159,6 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
      *
      * @param amqpsMessage The Proton message to convert
      * @param deviceClientConfig The device client configuration
-     * @throws TransportException if the conversion fails
      * @return the converted message
      */
     @Override

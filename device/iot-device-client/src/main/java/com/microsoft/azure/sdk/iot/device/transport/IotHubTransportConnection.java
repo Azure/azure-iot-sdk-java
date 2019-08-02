@@ -26,6 +26,7 @@ public interface IotHubTransportConnection
      * Opens the transport connection object
      * @param deviceClientConfigs The list of configs to use. If more than 1 configs are in this list, multiplexing
      *                            will be used
+     * @param scheduledExecutorService the executor service to use when spawning threads
      * @throws TransportException If any exceptions are encountered while opening the connection
      */
     void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService) throws TransportException;

@@ -12,12 +12,16 @@ import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Sasl;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.message.impl.MessageImpl;
+
 import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthentication
 {
@@ -26,8 +30,8 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
     public static final String SENDER_LINK_ENDPOINT_PATH = "$cbs";
     public static final String RECEIVER_LINK_ENDPOINT_PATH = "$cbs";
 
-    private static final String SENDER_LINK_TAG_PREFIX = "cbs-sender-";
-    private static final String RECEIVER_LINK_TAG_PREFIX = "cbs-receiver-";
+    public static final String SENDER_LINK_TAG_PREFIX = "cbs-sender-";
+    public static final String RECEIVER_LINK_TAG_PREFIX = "cbs-receiver-";
 
     private static final String CBS_TO = "$cbs";
     private static final String CBS_REPLY = "cbs";
@@ -88,11 +92,9 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      *
      * @param linkName The receiver link's name to read from
      * @return the Proton message
-     * @throws IllegalArgumentException if link name argument is empty
-     * @throws TransportException if Proton throws
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, TransportException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_023: [The function shall call the super to get the message.]
         AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink(linkName);
@@ -114,7 +116,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      * @return true if it is 200OK and correlationId matches, false otherwise.
      */
     @Override
-    protected Boolean authenticationMessageReceived(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
+    protected boolean authenticationMessageReceived(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_026: [The function shall return false if the amqpdMessage parameter is null or does not have Properties and Application properties.]
         if ((amqpsMessage != null) && (amqpsMessage.getApplicationProperties() != null) && (amqpsMessage.getProperties() != null))
@@ -223,11 +225,11 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      * Search for a link using the given link name. 
      * 
      * @param linkName name (tag) of the link to find
-     * 
-     * @return Boolean true is found, false otherwise
+     *
+     * @return true is found, false otherwise
      */
     @Override
-    protected Boolean isLinkFound(String linkName)
+    protected boolean onLinkRemoteOpen(String linkName)
     {
         if (linkName.equals(this.getSenderLinkTag()))
         {
@@ -235,7 +237,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
             this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
             return true;
         }
-        if (linkName.equals(this.getReceiverLinkTag()))
+        else if (linkName.equals(this.getReceiverLinkTag()))
         {
             // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_021: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
             this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;

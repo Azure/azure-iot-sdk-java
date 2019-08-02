@@ -232,7 +232,6 @@ public class AmqpsSessionDeviceOperationTest
         final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
         final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "deviceClientConfig", mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", mockListUUID);
 
         new NonStrictExpectations()
@@ -259,110 +258,8 @@ public class AmqpsSessionDeviceOperationTest
                 times = 1;
                 Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticate", mockDeviceClientConfig, mockUUID);
                 times = 1;
-                mockCountDownLatch.await(MAX_WAIT_TO_AUTHENTICATE, TimeUnit.MILLISECONDS);
             }
         };
-    }
-
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_34_063: [If an InterruptedException is encountered while waiting for authentication to finish, this function shall throw a TransportException.]
-    @Test (expected = TransportException.class)
-    public void authenticateLockThrows() throws IllegalArgumentException, InterruptedException, TransportException
-    {
-        // arrange
-        final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceClientConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockCountDownLatch.await(MAX_WAIT_TO_AUTHENTICATE, TimeUnit.MILLISECONDS);
-                result = new InterruptedException();
-            }
-        };
-
-        // act
-        amqpsSessionDeviceOperation.authenticate();
-    }
-
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_007: [The function shall return the current authentication state.]
-    @Test
-    public void getAmqpsAuthenticatorState() throws TransportException
-    {
-        // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.UNKNOWN);
-
-        // act
-        AmqpsDeviceAuthenticationState authenticatorState = amqpsSessionDeviceOperation.getAmqpsAuthenticatorState();
-
-        // assert
-        assertEquals(AmqpsDeviceAuthenticationState.UNKNOWN, authenticatorState);
-    }
-
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_008: [The function shall return true if all operation links are opene, otherwise return false.]
-    @Test
-    public void operationLinksOpenedTrue() throws IllegalArgumentException, TransportException
-    {
-        // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
-        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
-        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
-        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockAmqpsDeviceTelemetry.operationLinksOpened();
-                result = true;
-                mockAmqpsDeviceMethods.operationLinksOpened();
-                result = true;
-                mockAmqpsDeviceTwin.operationLinksOpened();
-                result = true;
-            }
-        };
-
-        // act
-        Boolean actualOperationLinkOpened = amqpsSessionDeviceOperation.operationLinksOpened();
-
-        // assert
-
-        assertEquals(true, actualOperationLinkOpened);
-    }
-
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_008: [The function shall return true if all operation links are opene, otherwise return false.]
-    @Test
-    public void operationLinksOpenedFalse() throws IllegalArgumentException, TransportException
-    {
-        // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
-        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
-        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
-        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockAmqpsDeviceTelemetry.operationLinksOpened();
-                result = false;
-                mockAmqpsDeviceMethods.operationLinksOpened();
-                result = true;
-                mockAmqpsDeviceTwin.operationLinksOpened();
-                result = true;
-            }
-        };
-
-        // act
-        Boolean actualOperationLinkOpened = amqpsSessionDeviceOperation.operationLinksOpened();
-
-        // assert
-        assertEquals(false, actualOperationLinkOpened);
     }
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
@@ -374,7 +271,7 @@ public class AmqpsSessionDeviceOperationTest
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         // act
-        Deencapsulation.invoke(amqpsSessionDeviceOperation, "openLinks", mockSession, DEVICE_TELEMETRY);
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "openLinks", mockSession);
 
         // assert
         new Verifications()
@@ -687,55 +584,6 @@ public class AmqpsSessionDeviceOperationTest
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
     @Test
-    public void getMessageFromReceiverLinkAuthenticating() throws IllegalArgumentException, TransportException
-    {
-        // arrange
-        final String linkName = "linkName";
-        final String propertyKey = "status-code";
-        final Integer propertyValue = 200;
-        final List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
-        cbsCorrelationIdList.add(mockUUID);
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "getMessageFromReceiverLink", linkName);
-                result = mockAmqpsMessage;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
-                result = true;
-            }
-        };
-
-        // act
-        AmqpsMessage actualAmqpsMessage = Deencapsulation.invoke(amqpsSessionDeviceOperation, "getMessageFromReceiverLink", linkName);
-
-        // assert
-        AmqpsDeviceAuthenticationState actualAmqpsDeviceAuthenticationState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
-        assertNotNull(actualAmqpsMessage);
-        assertTrue(actualAmqpsDeviceAuthenticationState == actualAmqpsDeviceAuthenticationState.AUTHENTICATED);
-
-        new Verifications()
-        {
-            {
-                mockCountDownLatch.countDown();
-                times = 1;
-                cbsCorrelationIdList.remove(mockUUID);
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_023: [If the state is authenticating the function shall call getMessageFromReceiverLink on the authentication object.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_055: [The function shall find the correlation ID in the correlationIdlist.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call authenticationMessageReceived with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
-    @Test
     public void getMessageFromReceiverLinkAuthenticatingNoUUID() throws IllegalArgumentException, TransportException
     {
         // arrange
@@ -747,7 +595,6 @@ public class AmqpsSessionDeviceOperationTest
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
 
         new NonStrictExpectations()
         {
@@ -766,16 +613,6 @@ public class AmqpsSessionDeviceOperationTest
         AmqpsDeviceAuthenticationState actualAmqpsDeviceAuthenticationState = Deencapsulation.getField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState");
         assertNotNull(actualAmqpsMessage);
         assertTrue(actualAmqpsDeviceAuthenticationState == actualAmqpsDeviceAuthenticationState.AUTHENTICATING);
-
-        new Verifications()
-        {
-            {
-                mockCountDownLatch.countDown();
-                times = 0;
-                cbsCorrelationIdList.remove(mockUUID);
-                times = 0;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_023: [If the state is authenticating the function shall call getMessageFromReceiverLink on the authentication object.]
@@ -796,7 +633,6 @@ public class AmqpsSessionDeviceOperationTest
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "authenticationLatch", mockCountDownLatch);
 
         new NonStrictExpectations()
         {
@@ -819,8 +655,6 @@ public class AmqpsSessionDeviceOperationTest
         new Verifications()
         {
             {
-                mockCountDownLatch.countDown();
-                times = 0;
                 cbsCorrelationIdList.remove(mockUUID);
                 times = 0;
             }
@@ -868,7 +702,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_024: [The function shall return true if any of the operation's link name is a match and return false otherwise.]
     @Test
-    public void isLinkFoundTrue() throws TransportException
+    public void onLinkRemoteOpenTrue() throws TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -878,13 +712,13 @@ public class AmqpsSessionDeviceOperationTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "isLinkFound", linkName);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "onLinkRemoteOpen", linkName);
                 result = true;
             }
         };
 
         // act
-        Boolean isFound = Deencapsulation.invoke(amqpsSessionDeviceOperation, "isLinkFound", linkName);
+        Boolean isFound = Deencapsulation.invoke(amqpsSessionDeviceOperation, "onLinkRemoteOpen", linkName);
 
         // assert
         assertTrue(isFound);
@@ -892,7 +726,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_024: [The function shall return true if any of the operation's link name is a match and return false otherwise.]
     @Test
-    public void isLinkFoundFalse() throws TransportException
+    public void onLinkRemoteOpenFalse() throws TransportException
     {
         // arrange
         final String linkName = "linkName";
@@ -902,13 +736,13 @@ public class AmqpsSessionDeviceOperationTest
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "isLinkFound", linkName);
+                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "onLinkRemoteOpen", linkName);
                 result = false;
             }
         };
 
         // act
-        Boolean isFound = Deencapsulation.invoke(amqpsSessionDeviceOperation, "isLinkFound", linkName);
+        Boolean isFound = Deencapsulation.invoke(amqpsSessionDeviceOperation, "onLinkRemoteOpen", linkName);
 
         // assert
         assertFalse(isFound);
@@ -982,9 +816,6 @@ public class AmqpsSessionDeviceOperationTest
         new NonStrictExpectations()
         {
             {
-                mockEvent.getLink();
-                result = mockLink;
-
                 mockLink.getCredit();
                 result = expectedCredit;
 
@@ -1003,7 +834,7 @@ public class AmqpsSessionDeviceOperationTest
         };
 
         //act
-        amqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+        amqpsSessionDeviceOperation.onLinkFlow(mockLink);
 
         //assert
         new Verifications()
@@ -1034,9 +865,6 @@ public class AmqpsSessionDeviceOperationTest
         new NonStrictExpectations()
         {
             {
-                mockEvent.getLink();
-                result = mockLink;
-
                 mockLink.getCredit();
                 result = expectedCredit;
 
@@ -1058,7 +886,7 @@ public class AmqpsSessionDeviceOperationTest
         };
 
         //act
-        amqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+        amqpsSessionDeviceOperation.onLinkFlow(mockLink);
 
         //assert
         new Verifications()
@@ -1089,9 +917,6 @@ public class AmqpsSessionDeviceOperationTest
         new NonStrictExpectations()
         {
             {
-                mockEvent.getLink();
-                result = mockLink;
-
                 mockLink.getCredit();
                 result = expectedCredit;
 
@@ -1113,7 +938,7 @@ public class AmqpsSessionDeviceOperationTest
         };
 
         //act
-        amqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+        amqpsSessionDeviceOperation.onLinkFlow(mockLink);
 
         //assert
         new Verifications()
@@ -1133,4 +958,235 @@ public class AmqpsSessionDeviceOperationTest
             }
         };
     }
+
+    @Test
+    public void handleAuthenticationMessageSuccess()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        List<UUID> cbsCorrelationIdList = Deencapsulation.getField(amqpsSessionDeviceOperation, "cbsCorrelationIdList");
+        final UUID uuid = UUID.randomUUID();
+        cbsCorrelationIdList.add(0, uuid);
+
+        new Expectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, uuid);
+                result = true;
+            }
+        };
+
+        //act
+        boolean handled = Deencapsulation.invoke(amqpsSessionDeviceOperation, "handleAuthenticationMessage", mockAmqpsMessage);
+
+        //assert
+        assertTrue(handled);
+    }
+
+    @Test
+    public void handleAuthenticationMessageWithNoSavedUUID()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+
+        //intentionally leave this list empty
+        List<UUID> cbsCorrelationIdList = Deencapsulation.getField(amqpsSessionDeviceOperation, "cbsCorrelationIdList");
+
+        //act
+        boolean handled = Deencapsulation.invoke(amqpsSessionDeviceOperation, "handleAuthenticationMessage", mockAmqpsMessage);
+
+        //assert
+        assertFalse(handled);
+    }
+
+    @Test
+    public void handleAuthenticationMessageFailure()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        List<UUID> cbsCorrelationIdList = Deencapsulation.getField(amqpsSessionDeviceOperation, "cbsCorrelationIdList");
+        final UUID uuid = UUID.randomUUID();
+        cbsCorrelationIdList.add(0, uuid);
+
+        new Expectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, uuid);
+                result = false;
+            }
+        };
+
+        //act
+        boolean handled = Deencapsulation.invoke(amqpsSessionDeviceOperation, "handleAuthenticationMessage", mockAmqpsMessage);
+
+        //assert
+        assertFalse(handled);
+    }
+
+    @Test
+    public void getExpectedWorkerLinkCountWithTelemetry()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        //act
+        int actualExpectedWorkerLinkCount = Deencapsulation.invoke(amqpsSessionDeviceOperation, "getExpectedWorkerLinkCount");
+
+        //assert
+        assertEquals(2, actualExpectedWorkerLinkCount);
+    }
+
+    @Test
+    public void getExpectedWorkerLinkCountWithTwin()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        //act
+        int actualExpectedWorkerLinkCount = Deencapsulation.invoke(amqpsSessionDeviceOperation, "getExpectedWorkerLinkCount");
+
+        //assert
+        assertEquals(2, actualExpectedWorkerLinkCount);
+    }
+
+    @Test
+    public void getExpectedWorkerLinkCountWithMethods()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        //act
+        int actualExpectedWorkerLinkCount = Deencapsulation.invoke(amqpsSessionDeviceOperation, "getExpectedWorkerLinkCount");
+
+        //assert
+        assertEquals(2, actualExpectedWorkerLinkCount);
+    }
+
+    @Test
+    public void getExpectedWorkerLinkCountWithTelemetryAndMethods()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        //act
+        int actualExpectedWorkerLinkCount = Deencapsulation.invoke(amqpsSessionDeviceOperation, "getExpectedWorkerLinkCount");
+
+        //assert
+        assertEquals(4, actualExpectedWorkerLinkCount);
+    }
+
+    @Test
+    public void getExpectedWorkerLinkCountWithTelemetryAndMethodsAndTwin()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
+        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        //act
+        int actualExpectedWorkerLinkCount = Deencapsulation.invoke(amqpsSessionDeviceOperation, "getExpectedWorkerLinkCount");
+
+        //assert
+        assertEquals(6, actualExpectedWorkerLinkCount);
+    }
+
+    @Test
+    public void subscribeToMessageTypeForMethodsSavesInMapAndCallsOpenLinks()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        new Expectations()
+        {
+            {
+                Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
+                result = mockAmqpsDeviceMethods;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "subscribeToMessageType", mockSession, DEVICE_METHODS);
+
+        //assert
+        assertTrue(amqpsDeviceOperationsMap.containsKey(DEVICE_METHODS));
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsDeviceMethods, "openLinks", mockSession);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void subscribeToMessageTypeForTwinSavesInMapAndCallsOpenLinks()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        new Expectations()
+        {
+            {
+                Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+                result = mockAmqpsDeviceTwin;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "subscribeToMessageType", mockSession, DEVICE_TWIN);
+
+        //assert
+        assertTrue(amqpsDeviceOperationsMap.containsKey(DEVICE_TWIN));
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsDeviceTwin, "openLinks", mockSession);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void subscribeToMessageTypeForTwinDoesNothingIfAlreadySubscribed()
+    {
+        //arrange
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
+        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
+        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
+
+        //act
+        Deencapsulation.invoke(amqpsSessionDeviceOperation, "subscribeToMessageType", mockSession, DEVICE_TWIN);
+
+        //assert
+        assertTrue(amqpsDeviceOperationsMap.containsKey(DEVICE_TWIN));
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsDeviceTwin, "openLinks", mockSession);
+                times = 0;
+            }
+        };
+    }
+
 }

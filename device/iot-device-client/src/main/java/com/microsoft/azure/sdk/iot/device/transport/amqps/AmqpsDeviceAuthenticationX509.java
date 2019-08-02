@@ -2,12 +2,14 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.qpid.proton.engine.SslDomain;
 import org.apache.qpid.proton.engine.Transport;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
 {
@@ -86,6 +88,18 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
         transport.ssl(domain);
     }
 
+    @Override
+    protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
+    {
+        throw new TransportException("Cannot authenticate on demand with x509 auth");
+    }
+
+    @Override
+    protected boolean authenticationMessageReceived(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
+    {
+        return false;
+    }
+
     /**
      * Found the link by name.
      *
@@ -93,9 +107,19 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
      * @return true if link found, false otherwise.
      */
     @Override
-    protected Boolean isLinkFound(String linkName)
+    protected boolean onLinkRemoteOpen(String linkName)
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_012: [The function shall override the default behaviour and return true.]
+        //No link should ever be opened specifically for x509 auth, so this always returns false
+        return false;
+    }
+
+    /**
+     * X509 authentication does not have any links, so this will always return true
+     * @return true
+     */
+    @Override
+    public boolean operationLinksOpened()
+    {
         return true;
     }
 }

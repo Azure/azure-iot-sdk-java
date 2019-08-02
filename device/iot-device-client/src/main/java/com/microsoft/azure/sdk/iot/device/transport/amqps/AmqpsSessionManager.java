@@ -2,13 +2,12 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.ObjectLock;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.qpid.proton.engine.*;
+
 import java.util.ArrayList;
-import java.util.concurrent.*;
 
 
 /**
@@ -23,10 +22,6 @@ public class AmqpsSessionManager
     private AmqpsDeviceAuthentication amqpsDeviceAuthentication;
     private ArrayList<AmqpsSessionDeviceOperation> amqpsDeviceSessionList = new ArrayList<>();
 
-    private static final int MAX_WAIT_TO_AUTHENTICATE_MS = 10*1000;
-
-    private final ObjectLock openLinksLock = new ObjectLock();
-
     private CustomLogger logger;
 
     /**
@@ -34,9 +29,8 @@ public class AmqpsSessionManager
      *
      * @param deviceClientConfig the device configuration to use for 
      *                           session management.
-     * @throws TransportException if a transport error occurs.
      */
-    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig) throws TransportException
+    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig)
     {
         // Codes_SRS_AMQPSESSIONMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
         if (deviceClientConfig == null)
@@ -71,7 +65,7 @@ public class AmqpsSessionManager
      *
      * @param deviceClientConfig the device to register.
      */
-    final void addDeviceOperationSession(DeviceClientConfig deviceClientConfig) throws TransportException
+    final void addDeviceOperationSession(DeviceClientConfig deviceClientConfig)
     {
         // Codes_SRS_AMQPSESSIONMANAGER_12_008: [The function shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
         if (deviceClientConfig == null)
@@ -126,16 +120,12 @@ public class AmqpsSessionManager
 
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
-            // Codes_SRS_AMQPSESSIONMANAGER_12_014: [The function shall do nothing if the authentication is not open.]
-            if (this.isAuthenticationOpened())
+            for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
             {
-                for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
+                if (this.amqpsDeviceSessionList.get(i) != null)
                 {
-                    if (this.amqpsDeviceSessionList.get(i) != null)
-                    {
-                        // Codes_SRS_AMQPSESSIONMANAGER_12_015: [The function shall call authenticate on all session list members.]
-                        this.amqpsDeviceSessionList.get(i).authenticate();
-                    }
+                    // Codes_SRS_AMQPSESSIONMANAGER_12_015: [The function shall call authenticate on all session list members.]
+                    this.amqpsDeviceSessionList.get(i).authenticate();
                 }
             }
         }
@@ -143,13 +133,7 @@ public class AmqpsSessionManager
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
-    /**
-     * Loop through the device list and open the links. 
-     * Lock the execution to wait for the open finish. 
-     *
-     * @throws TransportException if open lock throws.
-     */
-    public void openDeviceOperationLinks(MessageType msgType) throws TransportException
+    protected void subscribeDeviceToMessageType(MessageType messageType, String deviceId)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -158,25 +142,10 @@ public class AmqpsSessionManager
         {
             for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
             {
-                if (this.amqpsDeviceSessionList.get(i) != null)
+                if (this.amqpsDeviceSessionList.get(i).getDeviceId().equals(deviceId))
                 {
-                    // Codes_SRS_AMQPSESSIONMANAGER_12_019: [The function shall call openLinks on all session list members.]
-                    if (this.amqpsDeviceSessionList.get(i).openLinks(this.session, msgType))
-                    {
-                        synchronized (this.openLinksLock)
-                        {
-                            try
-                            {
-                                // Codes_SRS_AMQPSESSIONMANAGER_12_020: [The function shall lock the execution with waitLock.]
-                                this.openLinksLock.waitLock(MAX_WAIT_TO_AUTHENTICATE_MS);
-                            }
-                            catch (InterruptedException e)
-                            {
-                                // Codes_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw TransportException if the lock throws.]
-                                throw new TransportException("Waited too long for the connection to onConnectionInit.");
-                            }
-                        }
-                    }
+                    this.amqpsDeviceSessionList.get(i).subscribeToMessageType(this.session, messageType);
+                    return;
                 }
             }
         }
@@ -189,13 +158,12 @@ public class AmqpsSessionManager
      * Open the session and the links. 
      *
      * @param connection the Proton connection object to work with.
-     * @return Boolean true if connection is ready, otherwise false to indicate authentication links open in progress
+     * @return true if connection is ready, otherwise false to indicate authentication links open in progress
      */
-    Boolean onConnectionInit(Connection connection) throws TransportException
+    void onConnectionInit(Connection connection) throws TransportException
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        Boolean ret = false;
         if (connection != null)
         {
             if (this.session == null)
@@ -207,21 +175,46 @@ public class AmqpsSessionManager
             }
         }
 
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
+    }
+
+    void onSessionRemoteOpen(Session session)
+    {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
+        if (this.amqpsDeviceAuthentication instanceof AmqpsDeviceAuthenticationCBS)
+        {
+            this.amqpsDeviceAuthentication.openLinks(session);
+        }
+        else
+        {
+            this.openWorkerLinks();
+        }
+
+        logger.LogDebug("Exited from method %s", logger.getMethodName());
+    }
+
+    /**
+     * Opens all the operation links by calling the AmqpsSessionManager.
+     */
+    public void openWorkerLinks()
+    {
+        logger.LogDebug("Entered in method %s", logger.getMethodName());
+
+        // Codes_SRS_AMQPSESSIONMANAGER_12_018: [The function shall do nothing if the session is not open.]
         if (this.session != null)
         {
-            if (this.isAuthenticationOpened())
+            for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
             {
-                ret = true;
-            }
-            else
-            {
-                // Codes_SRS_AMQPSESSIONMANAGER_12_025: [The function shall call authentication's openLink if the session is not null and the authentication is not open.]
-                this.amqpsDeviceAuthentication.openLinks(this.session);
+                if (this.amqpsDeviceSessionList.get(i) != null)
+                {
+                    // Codes_SRS_AMQPSESSIONMANAGER_12_019: [The function shall call openWorkerLinks on all session list members.]
+                    this.amqpsDeviceSessionList.get(i).openLinks(this.session);
+                }
             }
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
-        return ret;
     }
 
     /**
@@ -252,7 +245,7 @@ public class AmqpsSessionManager
      *
      * @param link the link to initialize.
      */
-    void onLinkInit(Link link) throws TransportException, IllegalArgumentException
+    void onLinkInit(Link link)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -283,54 +276,36 @@ public class AmqpsSessionManager
      * If the manager is in opened state check the operation links 
      * state. 
      *
-     * @param event Proton Event object to get the link name.
+     * @param link Proton link object that was opened
      *
      * @return Boolean true if all links open, false otherwise.
      */
-    boolean onLinkRemoteOpen(Event event)
+    boolean onLinkRemoteOpen(Link link)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
-        Boolean isLinkFound = false;
-
-        String linkName = event.getLink().getName();
+        String linkName = link.getName();
         if (this.isAuthenticationOpened())
         {
             for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
             {
-                isLinkFound = this.amqpsDeviceSessionList.get(i).isLinkFound(linkName);
-                if (isLinkFound == true)
+                if (this.amqpsDeviceSessionList.get(i).onLinkRemoteOpen(linkName))
                 {
-                    if (this.amqpsDeviceSessionList.get(i).operationLinksOpened())
-                    {
-                        logger.LogDebug("before notify openLinksLock.");
-                        synchronized (this.openLinksLock)
-                        {
-                            // Codes_SRS_AMQPSESSIONMANAGER_12_031: [The function shall call authentication isLinkFound if the authentication is not open and return true if both links are open]
-                            this.openLinksLock.notifyLock();
-                        }
-                        logger.LogDebug("after notify openLinksLock.");
-                        break;
-                    }
+                    //found the worker link that was opened in the list of amqpSessionDeviceOperations and updated its state to OPEN
+                    return true;
                 }
             }
         }
         else
         {
-            if (this.amqpsDeviceAuthentication.isLinkFound(linkName))
-            {
-                // Codes_SRS_AMQPSESSIONMANAGER_12_030: [The function shall call authentication isLinkFound if the authentication is not open and return false if only one link is open]
-                if (this.isAuthenticationOpened())
-                {
-                    // Codes_SRS_AMQPSESSIONMANAGER_12_029: [The function shall call authentication isLinkFound if the authentication is not open and return true if both links are open]
-                    isLinkFound = true;
-                }
-            }
+            //If the link was not a worker link, then it should be a cbs link
+            return this.amqpsDeviceAuthentication.onLinkRemoteOpen(linkName);
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
 
-        return isLinkFound;
+        //If the link was not a worker link, and it wasn't a cbs link, then it was not handled
+        return false;
     }
 
     /**
@@ -379,7 +354,20 @@ public class AmqpsSessionManager
         // Codes_SRS_AMQPSESSIONMANAGER_12_033: [The function shall do nothing and return null if the session is not open.]
         if (this.session != null)
         {
-            if (this.isAuthenticationOpened())
+            if (linkName.startsWith(AmqpsDeviceAuthenticationCBS.RECEIVER_LINK_TAG_PREFIX) || linkName.startsWith(AmqpsDeviceAuthenticationCBS.SENDER_LINK_TAG_PREFIX))
+            {
+                // Codes_SRS_AMQPSESSIONMANAGER_12_034: [The function shall call authentication getMessageFromReceiverLink if the authentication is not open.]
+                amqpsMessage = this.amqpsDeviceAuthentication.getMessageFromReceiverLink(linkName);
+
+                for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
+                {
+                    if (this.amqpsDeviceSessionList.get(i).handleAuthenticationMessage(amqpsMessage))
+                    {
+                        break;
+                    }
+                }
+            }
+            else
             {
                 for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
                 {
@@ -391,34 +379,9 @@ public class AmqpsSessionManager
                     }
                 }
             }
-            else
-            {
-                // Codes_SRS_AMQPSESSIONMANAGER_12_034: [The function shall call authentication getMessageFromReceiverLink if the authentication is not open.]
-                amqpsMessage = this.amqpsDeviceAuthentication.getMessageFromReceiverLink(linkName);
-            }
         }
 
         return amqpsMessage;
-    }
-
-    boolean areAllLinksOpen()
-    {
-        boolean areAllLinksOpen = true;
-        if (this.isAuthenticationOpened())
-        {
-            for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
-            {
-                // Codes_SRS_AMQPSESSIONMANAGER_34_044: [If this object's authentication is open, this function shall return if all saved sessions' links are open.]
-                areAllLinksOpen &= this.amqpsDeviceSessionList.get(i).operationLinksOpened();
-            }
-        }
-        else
-        {
-            // Codes_SRS_AMQPSESSIONMANAGER_34_045: [If this object's authentication is not open, this function shall return false.]
-            return false;
-        }
-
-        return areAllLinksOpen;
     }
 
     /**
@@ -426,9 +389,9 @@ public class AmqpsSessionManager
      *
      * @return Boolean true if all link open, false otherwise.
      */
-    Boolean isAuthenticationOpened()
+    boolean isAuthenticationOpened()
     {
-        // Codes_SRS_AMQPSESSIONMANAGER_12_039: [The function shall return with the return value of authentication.operationLinksOpened.]
+        // Codes_SRS_AMQPSESSIONMANAGER_12_039: [The function shall return with the return value of authentication.onLinkRemoteOpen.]
         return (this.amqpsDeviceAuthentication.operationLinksOpened());
     }
 
@@ -489,14 +452,25 @@ public class AmqpsSessionManager
         return amqpsConvertFromProtonReturnValue;
     }
 
-    public void onLinkFlow(Event event)
+    public void onLinkFlow(Link link)
     {
         for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
         {
-            if (this.amqpsDeviceSessionList.get(i).onLinkFlow(event))
+            if (this.amqpsDeviceSessionList.get(i).onLinkFlow(link))
             {
                 break;
             }
         }
+    }
+
+    int getExpectedWorkerLinkCount()
+    {
+        int expectedWorkerLinkCount = 0;
+        for (AmqpsSessionDeviceOperation deviceOperation : this.amqpsDeviceSessionList)
+        {
+            expectedWorkerLinkCount += deviceOperation.getExpectedWorkerLinkCount();
+        }
+
+        return expectedWorkerLinkCount;
     }
 }
