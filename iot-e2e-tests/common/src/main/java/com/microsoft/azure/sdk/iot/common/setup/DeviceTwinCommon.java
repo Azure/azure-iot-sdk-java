@@ -276,7 +276,7 @@ public class DeviceTwinCommon extends IntegrationTest
                             false);
                 }
             }
-            IotHubServicesCommon.openClientWithRetry(internalClient);
+            internalClient.open();
             if (internalClient instanceof DeviceClient)
             {
                 ((DeviceClient) internalClient).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);

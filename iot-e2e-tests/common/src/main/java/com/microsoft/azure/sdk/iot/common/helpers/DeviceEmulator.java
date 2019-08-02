@@ -54,7 +54,7 @@ public class DeviceEmulator
         this.client = client;
     }
 
-    void setup() throws InterruptedException
+    void setup() throws IOException
     {
         try
         {
@@ -72,7 +72,7 @@ public class DeviceEmulator
 
         if (this.client != null)
         {
-            IotHubServicesCommon.openClientWithRetry(this.client);
+            this.client.open();
         }
     }
 

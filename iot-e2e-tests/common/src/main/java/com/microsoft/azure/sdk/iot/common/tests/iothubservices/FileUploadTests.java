@@ -379,7 +379,7 @@ public class FileUploadTests extends IntegrationTest
 
         Thread.sleep(5000);
 
-        IotHubServicesCommon.openClientWithRetry(deviceClient);
+        deviceClient.open();
         return deviceClient;
     }
 

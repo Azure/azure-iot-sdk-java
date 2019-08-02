@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
-import static com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon.openTransportClientWithRetry;
 import static com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon.sendMessagesMultiplex;
 import static com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTests.STATUS.FAILURE;
 import static com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTests.STATUS.SUCCESS;
@@ -147,7 +146,7 @@ public class TransportClientTests extends IntegrationTest
 
             succeed = new AtomicBoolean();
 
-            System.out.print("TransportClientTests UUID: " + uuid);
+            System.out.println("TransportClientTests UUID: " + uuid);
 
             messageProperties = new HashMap<>(3);
             messageProperties.put("name1", "value1");
@@ -231,7 +230,7 @@ public class TransportClientTests extends IntegrationTest
     @Test
     public void sendMessages() throws URISyntaxException, IOException, InterruptedException
     {
-        openTransportClientWithRetry(testInstance.transportClient, testInstance.clientArrayList);
+        testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
@@ -245,7 +244,7 @@ public class TransportClientTests extends IntegrationTest
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveMessagesIncludingProperties() throws Exception
     {
-        IotHubServicesCommon.openTransportClientWithRetry(testInstance.transportClient, testInstance.clientArrayList);
+        testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
@@ -267,7 +266,7 @@ public class TransportClientTests extends IntegrationTest
     {
         CountDownLatch cdl = new CountDownLatch(testInstance.clientArrayList.size());
 
-        IotHubServicesCommon.openTransportClientWithRetry(testInstance.transportClient, testInstance.clientArrayList);
+        testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
@@ -292,7 +291,7 @@ public class TransportClientTests extends IntegrationTest
         // arrange
         setUpFileUploadState();
 
-        IotHubServicesCommon.openTransportClientWithRetry(testInstance.transportClient, testInstance.clientArrayList);
+        testInstance.transportClient.open();
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -357,7 +356,7 @@ public class TransportClientTests extends IntegrationTest
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodSucceed() throws Exception
     {
-        IotHubServicesCommon.openTransportClientWithRetry(testInstance.transportClient, testInstance.clientArrayList);
+        testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
@@ -381,7 +380,7 @@ public class TransportClientTests extends IntegrationTest
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
-        IotHubServicesCommon.openTransportClientWithRetry(testInstance.transportClient, testInstance.clientArrayList);
+        testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
@@ -955,7 +954,7 @@ public class TransportClientTests extends IntegrationTest
                 testInstance.clientArrayList.add(deviceState.deviceClient);
             }
 
-            IotHubServicesCommon.openTransportClientWithRetry(transportClient, testInstance.clientArrayList);
+            transportClient.open();
 
             for (int i = 0; i < MAX_DEVICES; i++)
             {

@@ -211,7 +211,7 @@ public class HubTierConnectionTests extends IntegrationTest
             }
         }, null);
 
-        IotHubServicesCommon.openClientWithRetry(testInstance.client);
+        testInstance.client.open();
 
         //act
         testInstance.client.subscribeToDeviceMethod(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
