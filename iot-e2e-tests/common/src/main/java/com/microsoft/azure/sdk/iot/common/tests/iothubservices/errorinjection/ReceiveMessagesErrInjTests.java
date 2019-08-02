@@ -213,7 +213,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
         try
         {
-            IotHubServicesCommon.openClientWithRetry(testInstance.client);
+            testInstance.client.open();
             IotHubServicesCommon.confirmOpenStabilized(connectionStatusUpdates, 120000, testInstance.client);
 
             //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,

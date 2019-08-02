@@ -203,11 +203,11 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private void openEachClient(List<InternalClient> clients) throws InterruptedException
+    private void openEachClient(List<InternalClient> clients) throws IOException
     {
         for (int clientIndex = 0; clientIndex < clients.size(); clientIndex++)
         {
-            IotHubServicesCommon.openClientWithRetry(clients.get(clientIndex));
+            clients.get(clientIndex).open();
         }
     }
 

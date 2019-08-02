@@ -373,7 +373,7 @@ public class SendMessagesCommon extends IntegrationTest
         public void openConnection() throws IOException, URISyntaxException, InterruptedException
         {
             client = new DeviceClient(connString, protocol);
-            IotHubServicesCommon.openClientWithRetry(client);
+            client.open();
         }
 
         public void sendMessages()

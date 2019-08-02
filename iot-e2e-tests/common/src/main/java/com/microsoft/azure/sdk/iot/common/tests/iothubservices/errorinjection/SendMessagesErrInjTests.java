@@ -335,7 +335,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         {
             client.setRetryPolicy(new NoRetry());
         }
-        IotHubServicesCommon.openClientWithRetry(client);
+        client.open();
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,null);
