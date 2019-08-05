@@ -433,7 +433,7 @@ public class ProvisioningTests extends ProvisioningCommon
         reportedProperties.add(new Property(expectedReportedPropertyName, expectedReportedPropertyValue));
         deviceClient.sendReportedProperties(reportedProperties);
         twinLock.await(MAX_TWIN_PROPAGATION_WAIT_SECONDS, TimeUnit.SECONDS);
-        deviceClient.close();
+        deviceClient.closeNow();
     }
 
     private void updateEnrollmentToForceReprovisioning(EnrollmentType enrollmentType, List<String> iothubsToFinishAt) throws ProvisioningServiceClientException
