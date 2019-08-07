@@ -90,7 +90,7 @@ public class AmqpsDeviceMethodsTest
 
     // Tests_SRS_AMQPSDEVICEMETHODS_12_047: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
     @Test
-    public void isLinkFoundReturnsTrueIfSenderLinkTagMatches()
+    public void onLinkRemoteOpenReturnsTrueIfSenderLinkTagMatches()
     {
         // arrange
         String linkName = "linkName";
@@ -99,7 +99,7 @@ public class AmqpsDeviceMethodsTest
         AmqpsDeviceMethods amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceMethods, "senderLinkTag", linkName);
         AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceMethods, "amqpsSendLinkState");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceMethods, "isLinkFound", linkName);
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceMethods, "onLinkRemoteOpen", linkName);
         AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceMethods, "amqpsSendLinkState");
 
         // assert
@@ -110,7 +110,7 @@ public class AmqpsDeviceMethodsTest
 
     // Tests_SRS_AMQPSDEVICEMETHODS_12_048: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
     @Test
-    public void isLinkFoundReturnsTrueIfReceiverLinkTagMatches()
+    public void onLinkRemoteOpenReturnsTrueIfReceiverLinkTagMatches()
     {
         // arrange
         String linkName = "linkName";
@@ -119,7 +119,7 @@ public class AmqpsDeviceMethodsTest
         AmqpsDeviceMethods amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceMethods, "receiverLinkTag", linkName);
         AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceMethods, "amqpsRecvLinkState");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceMethods, "isLinkFound", linkName);
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceMethods, "onLinkRemoteOpen", linkName);
         AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceMethods, "amqpsRecvLinkState");
 
         // assert
@@ -130,7 +130,7 @@ public class AmqpsDeviceMethodsTest
 
     // Tests_SRS_AMQPSDEVICEMETHODS_12_049: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
     @Test
-    public void isLinkFoundReturnsFalseIfThereIsNoMatch()
+    public void onLinkRemoteOpenReturnsFalseIfThereIsNoMatch()
     {
         // arrange
         String linkName = "linkName";
@@ -139,7 +139,7 @@ public class AmqpsDeviceMethodsTest
         AmqpsDeviceMethods amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
         Deencapsulation.setField(amqpsDeviceMethods, "senderLinkTag", "xxx");
         Deencapsulation.setField(amqpsDeviceMethods, "receiverLinkTag", "yyy");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceMethods, "isLinkFound", linkName);
+        Boolean retVal = Deencapsulation.invoke(amqpsDeviceMethods, "onLinkRemoteOpen", linkName);
 
         // assert
         assertFalse(retVal);

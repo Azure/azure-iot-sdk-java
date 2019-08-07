@@ -63,7 +63,7 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * @return true if the link is owned by the operation, false otherwise
      */
     @Override
-    protected Boolean isLinkFound(String linkName)
+    protected boolean onLinkRemoteOpen(String linkName)
     {
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
         if (linkName.equals(this.getSenderLinkTag()))
@@ -116,10 +116,9 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * @param linkName The receiver link's name to read from
      * @return the received message
      * @throws IllegalArgumentException if linkName argument is empty
-     * @throws TransportException if Proton throws
      */
     @Override
-    protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws TransportException
+    protected AmqpsMessage getMessageFromReceiverLink(String linkName)
     {
         // Codes_SRS_AMQPSDEVICETELEMETRY_12_020: [The function shall call the super function.]
         AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink(linkName);
@@ -198,7 +197,6 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
      * Converts an AMQPS message to a corresponding IoT Hub message.
      *
      * @param protonMsg the AMQPS message.
-     * @throws TransportException if the conversion fails
      * @return the corresponding IoT Hub message.
      */
     @Override
@@ -231,7 +229,6 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
     /**
      * Creates a proton message from the IoTHub message.
      * @param message the IoTHub input message.
-     * @throws TransportException if the conversion fails
      * @return the proton message.
      */
     @Override

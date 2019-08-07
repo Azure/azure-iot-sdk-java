@@ -1,16 +1,15 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpDeviceOperations;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.CustomLogger;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Session;
 
 import java.nio.BufferOverflowException;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.*;
 
@@ -26,12 +25,6 @@ public class AmqpsSessionDeviceOperation
     private static long nextTag = 0;
 
     private Integer openLock = new Integer(1);
-
-    private static final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
-    private static final double PERCENTAGE_FACTOR = 0.75;
-    private static final int MILLISECECONDS_PER_SECOND = 1000;
-
-    private final CountDownLatch authenticationLatch = new CountDownLatch(1);
 
     private List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
 
@@ -117,65 +110,16 @@ public class AmqpsSessionDeviceOperation
 
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_005: [The function shall set the authentication state to not authenticated if the authentication type is CBS.]
             this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATING;
-            try
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_062: [The function shall start the authentication process and start the lock wait if the authentication type is CBS.]
-                this.authenticationLatch.await(MAX_WAIT_TO_AUTHENTICATE, TimeUnit.MILLISECONDS);
-            }
-            catch (InterruptedException e)
-            {
-                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_34_063: [If an InterruptedException is encountered while waiting for authentication to finish, this function shall throw a TransportException.]
-                cbsCorrelationIdList.remove(correlationId);
-                throw new TransportException("Waited too long for the authentication message reply.");
-            }
-
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
-     * Return the current authentication state.
-     *
-     * @return the current state.
-     */
-    public AmqpsDeviceAuthenticationState getAmqpsAuthenticatorState()
-    {
-        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_007: [The function shall return the current authentication state.]
-        return this.amqpsAuthenticatorState;
-    }
-
-    /**
-     * Verify if all operation links are open.
-     *
-     * @return true if all links are open, false otherwise.
-     */
-    public Boolean operationLinksOpened()
-    {
-        Boolean allLinksOpened = true;
-
-        for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
-        {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_008: [The function shall return true if all operation links are opene, otherwise return false.]
-            if (!entry.getValue().operationLinksOpened())
-            {
-                allLinksOpened = false;
-                break;
-            }
-        }
-
-        return allLinksOpened;
-    }
-
-    /**
-     *
      * @param session the Proton session to open the links on.
-     * @throws TransportException throw if Proton operation throws.
      */
-    boolean openLinks(Session session, MessageType msgType) throws TransportException
+    void openLinks(Session session)
     {
-        boolean waitForRemoteOpenCallback = false;
-
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_042: [The function shall do nothing if the session parameter is null.]
@@ -183,31 +127,17 @@ public class AmqpsSessionDeviceOperation
         {
             if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
             {
-                if (this.amqpsDeviceOperationsMap.get(msgType) == null)
-                {
-                    switch(msgType)
-                    {
-                        case DEVICE_METHODS:
-                            this.amqpsDeviceOperationsMap.put(DEVICE_METHODS, new AmqpsDeviceMethods(this.deviceClientConfig));
-                            break;
-                        case DEVICE_TWIN:
-                            this.amqpsDeviceOperationsMap.put(DEVICE_TWIN, new AmqpsDeviceTwin(this.deviceClientConfig));
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
                 synchronized (this.openLock)
                 {
-                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_009: [The function shall call openLinks on all device operations if the authentication state is authenticated.]
-                    waitForRemoteOpenCallback = this.amqpsDeviceOperationsMap.get(msgType).openLinks(session);
+                    for (AmqpsDeviceOperations amqpDeviceOperation : this.amqpsDeviceOperationsMap.values())
+                    {
+                        amqpDeviceOperation.openLinks(session);
+                    }
                 }
             }
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
-        return waitForRemoteOpenCallback;
     }
 
     /**
@@ -222,7 +152,6 @@ public class AmqpsSessionDeviceOperation
         {
             Map.Entry<MessageType, AmqpsDeviceOperations> pair = (Map.Entry<MessageType, AmqpsDeviceOperations>)iterator.next();
             pair.getValue().closeLinks();
-            //iterator.remove();
         }
 
         logger.LogDebug("Exited from method %s", logger.getMethodName());
@@ -235,7 +164,7 @@ public class AmqpsSessionDeviceOperation
      * @throws TransportException throw if Proton operation throws.
      * @throws IllegalArgumentException throw if the link parameter is null.
      */
-    void initLink(Link link) throws TransportException, IllegalArgumentException
+    void initLink(Link link)
     {
         logger.LogDebug("Entered in method %s", logger.getMethodName());
 
@@ -362,53 +291,48 @@ public class AmqpsSessionDeviceOperation
     {
         AmqpsMessage amqpsMessage = null;
 
-        if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATING)
+        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_057: [If the state is other than authenticating the function shall try to read the message from the device operation objects.]
+        for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
         {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_023: [If the state is authenticating the function shall call getMessageFromReceiverLink on the authentication object.]
-            amqpsMessage = this.amqpsDeviceAuthentication.getMessageFromReceiverLink(linkName);
-
+            amqpsMessage = entry.getValue().getMessageFromReceiverLink(linkName);
             if (amqpsMessage != null)
             {
-                synchronized (this.cbsCorrelationIdList)
-                {
-                    UUID uuidFound = null;
-                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_055: [The function shall find the correlation ID in the correlationIdlist.]
-                    for (UUID correlationId : this.cbsCorrelationIdList)
-                    {
-                        if (this.amqpsDeviceAuthentication.authenticationMessageReceived(amqpsMessage, correlationId))
-                        {
-                            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call authenticationMessageReceived with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
-                            this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATED;
-                            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
-                            this.authenticationLatch.countDown();
-
-                            uuidFound = correlationId;
-                            break;
-                        }
-                    }
-                    // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
-                    if (uuidFound != null)
-                    {
-                        this.cbsCorrelationIdList.remove(uuidFound);
-                    }
-                }
-                return amqpsMessage;
-            }
-        }
-        else
-        {
-            // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_057: [If the state is other than authenticating the function shall try to read the message from the device operation objects.]
-            for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
-            {
-                amqpsMessage = entry.getValue().getMessageFromReceiverLink(linkName);
-                if (amqpsMessage != null)
-                {
-                    break;
-                }
+                break;
             }
         }
 
         return amqpsMessage;
+    }
+
+    boolean handleAuthenticationMessage(AmqpsMessage amqpsMessage)
+    {
+        boolean handledAuthenticationMessage = false;
+        if (amqpsMessage != null)
+        {
+            synchronized (this.cbsCorrelationIdList)
+            {
+                UUID uuidFound = null;
+                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_055: [The function shall find the correlation ID in the correlationIdlist.]
+                for (UUID correlationId : this.cbsCorrelationIdList)
+                {
+                    if (this.amqpsDeviceAuthentication.authenticationMessageReceived(amqpsMessage, correlationId))
+                    {
+                        // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call authenticationMessageReceived with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
+                        this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATED;
+                        uuidFound = correlationId;
+                        break;
+                    }
+                }
+                // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
+                if (uuidFound != null)
+                {
+                    this.cbsCorrelationIdList.remove(uuidFound);
+                    handledAuthenticationMessage = true;
+                }
+            }
+        }
+
+        return handledAuthenticationMessage;
     }
 
     /**
@@ -418,19 +342,20 @@ public class AmqpsSessionDeviceOperation
      *
      * @return Boolean true if found, false otherwise.
      */
-    Boolean isLinkFound(String linkName)
+    boolean onLinkRemoteOpen(String linkName)
     {
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_024: [The function shall return true if any of the operation's link name is a match and return false otherwise.]
         if (this.amqpsAuthenticatorState == AmqpsDeviceAuthenticationState.AUTHENTICATED)
         {
             for (Map.Entry<MessageType, AmqpsDeviceOperations> entry : amqpsDeviceOperationsMap.entrySet())
             {
-                if (entry.getValue().isLinkFound(linkName))
+                if (entry.getValue().onLinkRemoteOpen(linkName))
                 {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
@@ -488,26 +413,8 @@ public class AmqpsSessionDeviceOperation
         return ret;
     }
 
-    /**
-     * Calculate 75 percent of given time
-     *
-     * @param validInSecs the time
-     * @return 75% of the given time
-     * @throws IllegalArgumentException if validInSecs is less than 0
-     */
-    private long calculateRenewalPeriodInMilliseconds(long validInSecs) throws IllegalArgumentException
+    public boolean onLinkFlow(Link link)
     {
-        if (validInSecs < 0)
-        {
-            throw new IllegalArgumentException("validInSecs cannot be less than 0.");
-        }
-
-        return (long)(validInSecs * PERCENTAGE_FACTOR * MILLISECECONDS_PER_SECOND);
-    }
-
-    public boolean onLinkFlow(Event event)
-    {
-        Link link = event.getLink();
         for (AmqpsDeviceOperations deviceOperations : amqpsDeviceOperationsMap.values())
         {
             if (link.getName().startsWith(deviceOperations.getSenderLinkTag()))
@@ -524,5 +431,30 @@ public class AmqpsSessionDeviceOperation
         }
 
         return false;
+    }
+
+    int getExpectedWorkerLinkCount()
+    {
+        //For each entry (Telemetry, twin, and/or methods) there is a sender and a receiver link. This applies for both device connections and module connections
+        return this.amqpsDeviceOperationsMap.size() * 2;
+    }
+
+    public String getDeviceId()
+    {
+        return this.deviceClientConfig.getDeviceId();
+    }
+
+    public void subscribeToMessageType(Session session, MessageType messageType)
+    {
+        if (messageType == DEVICE_METHODS && !this.amqpsDeviceOperationsMap.keySet().contains(DEVICE_METHODS))
+        {
+            this.amqpsDeviceOperationsMap.put(DEVICE_METHODS, new AmqpsDeviceMethods(this.deviceClientConfig));
+            this.openLinks(session);
+        }
+        if (messageType == DEVICE_TWIN && !this.amqpsDeviceOperationsMap.keySet().contains(DEVICE_TWIN))
+        {
+            this.amqpsDeviceOperationsMap.put(DEVICE_TWIN, new AmqpsDeviceTwin(this.deviceClientConfig));
+            this.openLinks(session);
+        }
     }
 }

@@ -28,6 +28,9 @@ public class AmqpsSessionManagerTest
     AmqpsDeviceAuthenticationCBS mockAmqpsDeviceAuthenticationCBS;
 
     @Mocked
+    AmqpsDeviceAuthenticationX509 mockAmqpsDeviceAuthenticationX509;
+
+    @Mocked
     AmqpsSessionDeviceOperation mockAmqpsSessionDeviceOperation;
 
     @Mocked
@@ -249,7 +252,7 @@ public class AmqpsSessionManagerTest
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_018: [The function shall do nothing if the session is not open.]
     @Test
-    public void openDeviceOperationLinksDoesNothing() throws IllegalArgumentException, InterruptedException, TransportException
+    public void openWorkerLinksDoesNothing() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
         final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
@@ -257,42 +260,13 @@ public class AmqpsSessionManagerTest
         Deencapsulation.setField(amqpsSessionManager, "session", null);
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
-    }
-
-    // Tests_SRS_AMQPSESSIONMANAGER_12_021: [The function shall throw TransportException if the lock throws.]
-    @Test (expected = TransportException.class)
-    public void openDeviceOperationLinksLockThrows() throws IllegalArgumentException, InterruptedException, TransportException
-    {
-        // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
-        Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
-
-        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
-        sessionList.add(mockAmqpsSessionDeviceOperation);
-        sessionList.add(mockAmqpsSessionDeviceOperation1);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-        Deencapsulation.setField(amqpsSessionManager, "openLinksLock", mockObjectLock);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
-                result = true;
-                mockObjectLock.waitLock(anyLong);
-                result = new InterruptedException();
-            }
-        };
-
-        // act
-        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
+        Deencapsulation.invoke(amqpsSessionManager, "openWorkerLinks");
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_019: [The function shall call openLinks on all session list members.]
     // Tests_SRS_AMQPSESSIONMANAGER_12_020: [The function shall lock the execution with waitLock.]
     @Test
-    public void openDeviceOperationLinksSuccess() throws IllegalArgumentException, InterruptedException, TransportException
+    public void openWorkerLinksSuccess() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
         final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
@@ -303,31 +277,17 @@ public class AmqpsSessionManagerTest
         sessionList.add(mockAmqpsSessionDeviceOperation);
         sessionList.add(mockAmqpsSessionDeviceOperation1);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-        Deencapsulation.setField(amqpsSessionManager, "openLinksLock", mockObjectLock);
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                mockAmqpsDeviceAuthenticationCBS.operationLinksOpened();
-                result = true;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
-                result = true;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession, MessageType.DEVICE_TELEMETRY);
-                result = true;
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession);
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession);
             }
         };
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "openDeviceOperationLinks", MessageType.DEVICE_TELEMETRY);
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockObjectLock.waitLock(anyLong);
-                times = 2;
-            }
-        };
+        Deencapsulation.invoke(amqpsSessionManager, "openWorkerLinks");
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_023: [The function shall initialize the session member variable from the connection if the session is null.]
@@ -365,7 +325,7 @@ public class AmqpsSessionManagerTest
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_025: [The function shall call authentication's openLink if the session is not null and the authentication is not open.]
     @Test
-    public void onConnectionInitCallsAuthOpenLinks() throws IllegalArgumentException, InterruptedException, TransportException
+    public void onSessionRemoteOpenCallsAuthOpenLinks() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
         final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
@@ -373,7 +333,7 @@ public class AmqpsSessionManagerTest
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
         // act
-        Deencapsulation.invoke(amqpsSessionManager, "onConnectionInit", mockConnection);
+        Deencapsulation.invoke(amqpsSessionManager, "onSessionRemoteOpen", mockSession);
 
         // assert
 
@@ -386,13 +346,12 @@ public class AmqpsSessionManagerTest
         };
     }
 
-    // Tests_SRS_AMQPSESSIONMANAGER_12_042: [The function shall call openLinks on all device sessions if the session is not null and the authentication is open.]
     @Test
-    public void onConnectionInitCallsDeviceSessionsOpenLinks() throws IllegalArgumentException, InterruptedException, TransportException
+    public void onSessionRemoteOpenCallsOpenWorkerLinksForX509() throws IllegalArgumentException
     {
         // arrange
         final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationX509);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
@@ -400,19 +359,53 @@ public class AmqpsSessionManagerTest
         sessionList.add(mockAmqpsSessionDeviceOperation1);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
 
+        // act
+        Deencapsulation.invoke(amqpsSessionManager, "onSessionRemoteOpen", mockSession);
+
+        // assert
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationX509, "openLinks", mockSession);
+                times = 0;
+
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "openLinks", mockSession);
+                times = 1;
+
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "openLinks", mockSession);
+                times = 1;
+            }
+        };
+    }
+
+    // Tests_SRS_AMQPSESSIONMANAGER_12_042: [The function shall call openLinks on all device sessions if the session is not null and the authentication is open.]
+    @Test
+    public void onConnectionInitCallsDeviceSessionsOpenLinks() throws IllegalArgumentException, InterruptedException, TransportException
+    {
+        // arrange
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
+
         new NonStrictExpectations()
         {
             {
-                mockAmqpsDeviceAuthenticationCBS.operationLinksOpened();
-                result = true;
+                mockConnection.session();
+                result = mockSession;
             }
         };
 
         // act
-        Boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onConnectionInit", mockConnection);
+        Deencapsulation.invoke(amqpsSessionManager, "onConnectionInit", mockConnection);
 
         // assert
-        assertTrue(returnValue);
+        new Verifications()
+        {
+            {
+                mockSession.open();
+                times = 1;
+            }
+        };
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_026: [The function shall call setSslDomain on authentication if the session is not null.]
@@ -505,7 +498,7 @@ public class AmqpsSessionManagerTest
         };
     }
 
-    // Tests_SRS_AMQPSESSIONMANAGER_12_029: [The function shall call authentication isLinkFound if the authentication is not open and return true if both links are open]
+    // Tests_SRS_AMQPSESSIONMANAGER_12_029: [The function shall call authentication onLinkRemoteOpen if the authentication is not open and return true if both links are open]
     @Test
     public void onLinkRemoteOpenCallsAuthOneLinkIsOpen() throws IllegalArgumentException, InterruptedException, TransportException
     {
@@ -521,28 +514,26 @@ public class AmqpsSessionManagerTest
                 result = mockLink;
                 mockLink.getName();
                 result = linkName;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "onLinkRemoteOpen", linkName);
                 result = true;
             }
         };
 
         // act
-        Boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onLinkRemoteOpen", mockEvent);
+        boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onLinkRemoteOpen", mockLink);
 
         // assert
-        assertFalse(returnValue);
+        assertTrue(returnValue);
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "onLinkRemoteOpen", linkName);
                 times = 1;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "operationLinksOpened");
-                times = 2;
             }
         };
     }
 
-    // Tests_SRS_AMQPSESSIONMANAGER_12_030: [The function shall call authentication isLinkFound if the authentication is not open and return false if only one link is open]
+    // Tests_SRS_AMQPSESSIONMANAGER_12_030: [The function shall call authentication onLinkRemoteOpen if the authentication is not open and return false if only one link is open]
     @Test
     public void onLinkRemoteOpenCallsAuthBothLinkAreOpen() throws IllegalArgumentException, InterruptedException, TransportException
     {
@@ -554,83 +545,19 @@ public class AmqpsSessionManagerTest
         new Expectations()
         {
             {
-                mockEvent.getLink();
-                result = mockLink;
                 mockLink.getName();
                 result = linkName;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "onLinkRemoteOpen", linkName);
                 result = true;
                 times = 1;
             }
         };
 
-        new StrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "operationLinksOpened");
-                result = false;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "operationLinksOpened");
-                result = true;
-            }
-        };
-
         // act
-        Boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onLinkRemoteOpen", mockEvent);
+        boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onLinkRemoteOpen", mockLink);
 
         // assert
         assertTrue(returnValue);
-    }
-
-    // Tests_SRS_AMQPSESSIONMANAGER_12_031: [The function shall call all all device session's isLinkFound, and if both links are opened notify the lock.]
-    @Test
-    public void onLinkRemoteOpenNotify() throws IllegalArgumentException, InterruptedException, TransportException
-    {
-        // arrange
-        final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
-
-        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
-        sessionList.add(mockAmqpsSessionDeviceOperation);
-        sessionList.add(mockAmqpsSessionDeviceOperation1);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-
-        Deencapsulation.setField(amqpsSessionManager, "openLinksLock", mockObjectLock);
-
-        new Expectations()
-        {
-            {
-                mockEvent.getLink();
-                result = mockLink;
-                mockLink.getName();
-                result = linkName;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "isLinkFound", linkName);
-                result = true;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "operationLinksOpened");
-                result = true;
-            }
-        };
-
-        new StrictExpectations()
-        {
-            {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "operationLinksOpened");
-                result = true;
-            }
-        };
-
-        // act
-        Boolean returnValue = Deencapsulation.invoke(amqpsSessionManager, "onLinkRemoteOpen", mockEvent);
-
-        // assert
-        assertTrue(returnValue);
-        new Verifications()
-        {
-            {
-                mockObjectLock.notifyLock();
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_032: [The function shall call sendMessage on all session list member and if there is a successful send return with the deliveryHash, otherwise return -1.]
@@ -697,83 +624,6 @@ public class AmqpsSessionManagerTest
         assertEquals((Integer)42, deliveryHash);
     }
 
-    // Tests_SRS_AMQPSESSIONMANAGER_12_033: [The function shall do nothing and return null if the session is not open.]
-    @Test
-    public void getMessageFromReceiverLinkDoesNothing() throws IllegalArgumentException, InterruptedException, TransportException
-    {
-        // arrange
-        String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionManager, "session", null);
-
-        // act
-        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsSessionManager, "getMessageFromReceiverLink", linkName);
-
-        // assert
-        assertNull(amqpsMessage);
-
-    }
-
-    // Tests_SRS_AMQPSESSIONMANAGER_12_034: [The function shall call authentication getMessageFromReceiverLink if the authentication is not open.]
-    @Test
-    public void getMessageFromReceiverLinkCallsAuth() throws IllegalArgumentException, InterruptedException, TransportException
-    {
-        // arrange
-        final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
-
-        new Expectations()
-        {
-            {
-                mockAmqpsDeviceAuthenticationCBS.operationLinksOpened();
-                result = false;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "getMessageFromReceiverLink", linkName);
-                result = mockAmqpsMessage;
-            }
-        };
-
-        // act
-        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsSessionManager, "getMessageFromReceiverLink", linkName);
-
-        // assert
-        assertEquals(mockAmqpsMessage, amqpsMessage);
-
-    }
-
-    // Tests_SRS_AMQPSESSIONMANAGER_12_035: [The function shall call device sessions getMessageFromReceiverLink if the authentication is open.]
-    @Test
-    public void getMessageFromReceiverLinkCallsDeviceSessionsAuthenticated() throws IllegalArgumentException, InterruptedException, TransportException
-    {
-        // arrange
-        final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
-
-        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
-        sessionList.add(mockAmqpsSessionDeviceOperation);
-        sessionList.add(mockAmqpsSessionDeviceOperation1);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-
-        new Expectations()
-        {
-            {
-                mockAmqpsDeviceAuthenticationCBS.operationLinksOpened();
-                result = true;
-                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "getMessageFromReceiverLink", linkName);
-                result = mockAmqpsMessage;
-            }
-        };
-
-        // act
-        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsSessionManager, "getMessageFromReceiverLink", linkName);
-
-        // assert
-        assertEquals(mockAmqpsMessage, amqpsMessage);
-    }
-
     // Tests_SRS_AMQPSESSIONMANAGER_12_039: [The function shall return with the return value of authentication.operationLinksOpened.]
     @Test
     public void isAuthenticationOpenedTrue() throws IllegalArgumentException, InterruptedException, TransportException
@@ -792,7 +642,7 @@ public class AmqpsSessionManagerTest
         };
 
         // act
-        Boolean isOpened = Deencapsulation.invoke(amqpsSessionManager, "isAuthenticationOpened");
+        boolean isOpened = Deencapsulation.invoke(amqpsSessionManager, "isAuthenticationOpened");
 
         // assert
         assertEquals(true, isOpened);
@@ -817,7 +667,7 @@ public class AmqpsSessionManagerTest
         };
 
         // act
-        Boolean isOpened = Deencapsulation.invoke(amqpsSessionManager, "isAuthenticationOpened");
+        boolean isOpened = Deencapsulation.invoke(amqpsSessionManager, "isAuthenticationOpened");
 
         // assert
         assertEquals(false, isOpened);
@@ -892,7 +742,6 @@ public class AmqpsSessionManagerTest
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_041: [The function shall call all device session's convertFromProton, and if any of them not null return with the value.]
-
     @Test
     public void convertFromProtonSuccess() throws IllegalArgumentException, InterruptedException, TransportException
     {
@@ -961,92 +810,6 @@ public class AmqpsSessionManagerTest
         assertNull(amqpsConvertFromProtonReturnValue);
     }
 
-    // Tests_SRS_AMQPSESSIONMANAGER_34_045: [If this object's authentication is not open, this function shall return false.]
-    @Test
-    public void areAllLinksOpenReturnsFalseIfAuthClosed() throws TransportException
-    {
-        //arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-
-        new Expectations(AmqpsSessionManager.class)
-        {
-            {
-                Deencapsulation.invoke(amqpsSessionManager, "isAuthenticationOpened");
-                result = false;
-            }
-        };
-
-        //act
-        boolean result = Deencapsulation.invoke(amqpsSessionManager, "areAllLinksOpen");
-
-        //assert
-        assertFalse(result);
-    }
-
-    // Tests_SRS_AMQPSESSIONMANAGER_34_044: [If this object's authentication is open, this function shall return if all saved sessions' links are open.]
-    @Test
-    public void areAllLinksOpenChecksEachSessionForClosedLinks() throws TransportException
-    {
-        //arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
-        sessionList.add(mockAmqpsSessionDeviceOperation);
-        sessionList.add(mockAmqpsSessionDeviceOperation1);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-        new Expectations(AmqpsSessionManager.class)
-        {
-            {
-                Deencapsulation.invoke(amqpsSessionManager, "isAuthenticationOpened");
-                result = true;
-
-                mockAmqpsSessionDeviceOperation.operationLinksOpened();
-                result = true;
-                times = 1;
-
-                mockAmqpsSessionDeviceOperation1.operationLinksOpened();
-                result = false;
-                times = 1;
-            }
-        };
-
-        //act
-        boolean result = Deencapsulation.invoke(amqpsSessionManager, "areAllLinksOpen");
-
-        //assert
-        assertFalse(result);
-    }
-
-    // Tests_SRS_AMQPSESSIONMANAGER_34_044: [If this object's authentication is open, this function shall return if all saved sessions' links are open.]
-    @Test
-    public void areAllLinksOpenChecksEachSessionForOpenLinks() throws TransportException
-    {
-        //arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
-        sessionList.add(mockAmqpsSessionDeviceOperation);
-        sessionList.add(mockAmqpsSessionDeviceOperation1);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-        new Expectations(AmqpsSessionManager.class)
-        {
-            {
-                Deencapsulation.invoke(amqpsSessionManager, "isAuthenticationOpened");
-                result = true;
-
-                mockAmqpsSessionDeviceOperation.operationLinksOpened();
-                result = true;
-
-                mockAmqpsSessionDeviceOperation1.operationLinksOpened();
-                result = true;
-            }
-        };
-
-        //act
-        boolean result = Deencapsulation.invoke(amqpsSessionManager, "areAllLinksOpen");
-
-        //assert
-        assertTrue(result);
-    }
-
     @Test
     public void onLinkFlowSuccess() throws TransportException
     {
@@ -1060,15 +823,15 @@ public class AmqpsSessionManagerTest
         new Expectations()
         {
             {
-                mockAmqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+                mockAmqpsSessionDeviceOperation.onLinkFlow(mockLink);
                 result = false;
-                mockAmqpsSessionDeviceOperation1.onLinkFlow(mockEvent);
+                mockAmqpsSessionDeviceOperation1.onLinkFlow(mockLink);
                 result = true;
             }
         };
 
         //act
-        amqpsSessionManager.onLinkFlow(mockEvent);
+        amqpsSessionManager.onLinkFlow(mockLink);
     }
 
     @Test
@@ -1084,18 +847,190 @@ public class AmqpsSessionManagerTest
         new Expectations()
         {
             {
-                mockAmqpsSessionDeviceOperation.onLinkFlow(mockEvent);
+                mockAmqpsSessionDeviceOperation.onLinkFlow(mockLink);
                 result = true;
             }
         };
 
         //act
-        amqpsSessionManager.onLinkFlow(mockEvent);
+        amqpsSessionManager.onLinkFlow(mockLink);
 
         new Verifications()
         {
             {
-                mockAmqpsSessionDeviceOperation1.onLinkFlow(mockEvent);
+                mockAmqpsSessionDeviceOperation1.onLinkFlow(mockLink);
+                times = 0;
+            }
+        };
+    }
+
+    @Test
+    public void getExpectedWorkerLinkCountWithOneSession()
+    {
+        //arrange
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
+        sessionList.add(mockAmqpsSessionDeviceOperation);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
+
+        new Expectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "getExpectedWorkerLinkCount");
+                result = 2;
+            }
+        };
+
+        //act
+        int actualExpectedWorkerLinkCount = Deencapsulation.invoke(amqpsSessionManager, "getExpectedWorkerLinkCount");
+
+        //assert
+        assertEquals(2, actualExpectedWorkerLinkCount);
+    }
+
+    @Test
+    public void getExpectedWorkerLinkCountWithMultipleSession()
+    {
+        //arrange
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
+        sessionList.add(mockAmqpsSessionDeviceOperation);
+        sessionList.add(mockAmqpsSessionDeviceOperation1);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
+
+        new Expectations()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "getExpectedWorkerLinkCount");
+                result = 2;
+
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "getExpectedWorkerLinkCount");
+                result = 4;
+            }
+        };
+
+        //act
+        int actualExpectedWorkerLinkCount = Deencapsulation.invoke(amqpsSessionManager, "getExpectedWorkerLinkCount");
+
+        //assert
+        assertEquals(6, actualExpectedWorkerLinkCount);
+    }
+
+    @Test
+    public void subscribeDeviceToMessageTypeChecksDeviceId()
+    {
+        // arrange
+        final String expectedDeviceId = "aDeviceId";
+        final MessageType expectedMessageType = MessageType.DEVICE_TWIN;
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationX509);
+        Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
+
+        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
+        sessionList.add(mockAmqpsSessionDeviceOperation);
+        sessionList.add(mockAmqpsSessionDeviceOperation1);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
+
+        new Expectations()
+        {
+            {
+                mockAmqpsSessionDeviceOperation.getDeviceId();
+                result = "some unrelated deviceId";
+
+                mockAmqpsSessionDeviceOperation1.getDeviceId();
+                result = expectedDeviceId;
+            }
+        };
+
+        // act
+        Deencapsulation.invoke(amqpsSessionManager, "subscribeDeviceToMessageType", new Class[] {MessageType.class, String.class}, expectedMessageType, expectedDeviceId);
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "subscribeToMessageType", new Class[] {Session.class, MessageType.class}, mockSession, (MessageType) any);
+                times = 0;
+
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "subscribeToMessageType", new Class[] {Session.class, MessageType.class}, mockSession, expectedMessageType);
+                times = 1;
+
+            }
+        };
+    }
+
+    @Test
+    public void onLinkRemoteOpenChecksSessionListsWorkerLinksIfAuthLinksAlreadyOpened()
+    {
+        // arrange
+        final String expectedLinkName = "someTelemetryLink";
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
+        Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
+
+        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
+        sessionList.add(mockAmqpsSessionDeviceOperation);
+        sessionList.add(mockAmqpsSessionDeviceOperation1);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
+
+        new Expectations()
+        {
+            {
+                mockLink.getName();
+                result = expectedLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "operationLinksOpened");
+                result = true;
+
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "onLinkRemoteOpen", expectedLinkName);
+                result = false;
+
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "onLinkRemoteOpen", expectedLinkName);
+                result = true;
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(amqpsSessionManager, "onLinkRemoteOpen", mockLink);
+    }
+
+    @Test
+    public void onLinkRemoteOpenChecksSessionListsWorkerLinksIfAuthLinksAlreadyOpenedAndStopsOnceItIsHandled()
+    {
+        // arrange
+        final String expectedLinkName = "someTelemetryLink";
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
+        Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
+
+        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
+        sessionList.add(mockAmqpsSessionDeviceOperation);
+        sessionList.add(mockAmqpsSessionDeviceOperation1);
+        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
+
+        new Expectations()
+        {
+            {
+                mockLink.getName();
+                result = expectedLinkName;
+
+                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "operationLinksOpened");
+                result = true;
+
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation, "onLinkRemoteOpen", expectedLinkName);
+                result = true;
+
+            }
+        };
+
+        //act
+        Deencapsulation.invoke(amqpsSessionManager, "onLinkRemoteOpen", mockLink);
+
+        //assert
+        new Verifications()
+        {
+            {
+                //first entry in list returns true, so there should be no need to check the second entry in the list
+                Deencapsulation.invoke(mockAmqpsSessionDeviceOperation1, "onLinkRemoteOpen", expectedLinkName);
                 times = 0;
             }
         };

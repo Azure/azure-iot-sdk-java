@@ -28,7 +28,7 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 public class IotHubTransport implements IotHubListener
 {
     private static final int MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
-    private IotHubConnectionStatus connectionStatus;
+    private volatile IotHubConnectionStatus connectionStatus;
     private IotHubTransportConnection iotHubTransportConnection;
 
     /* Messages waiting to be sent to the IoT Hub. */

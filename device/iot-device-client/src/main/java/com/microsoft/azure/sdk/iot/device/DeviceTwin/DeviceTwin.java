@@ -293,6 +293,8 @@ public class DeviceTwin
 
     public void getDeviceTwin()
     {
+        checkSubscription();
+
         /*
          **Codes_SRS_DEVICETWIN_25_005: [**The method shall create a device twin message with empty payload to be sent IotHub.**]**
          */

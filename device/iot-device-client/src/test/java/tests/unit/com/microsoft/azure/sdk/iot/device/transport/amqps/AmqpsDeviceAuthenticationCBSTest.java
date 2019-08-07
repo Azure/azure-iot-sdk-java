@@ -465,7 +465,7 @@ public class AmqpsDeviceAuthenticationCBSTest
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_020: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
     @Test
-    public void isLinkFoundSendTrue()
+    public void onLinkRemoteOpenSendTrue()
     {
         // arrange
         final AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
@@ -477,7 +477,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "senderLinkTag", linkName);
 
         // act
-        Boolean isFound = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
+        Boolean isFound = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "onLinkRemoteOpen", linkName);
 
         // assert
         assertTrue(isFound);
@@ -490,7 +490,7 @@ public class AmqpsDeviceAuthenticationCBSTest
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_021: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
     @Test
-    public void isLinkFoundRecvTrue()
+    public void onLinkRemoteOpenRecvTrue()
     {
         // arrange
         final AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
@@ -502,7 +502,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         Deencapsulation.setField(amqpsDeviceAuthenticationCBS, "receiverLinkTag", linkName);
 
         // act
-        Boolean isFound = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
+        Boolean isFound = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "onLinkRemoteOpen", linkName);
 
         // assert
         assertTrue(isFound);
@@ -515,7 +515,7 @@ public class AmqpsDeviceAuthenticationCBSTest
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_022: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
     @Test
-    public void isLinkFoundFalse()
+    public void onLinkRemoteOpenFalse()
     {
         // arrange
         final AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
@@ -525,7 +525,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         final String linkName = "linkName";
 
         // act
-        Boolean isFound = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "isLinkFound", linkName);
+        Boolean isFound = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "onLinkRemoteOpen", linkName);
 
         // assert
         assertFalse(isFound);
