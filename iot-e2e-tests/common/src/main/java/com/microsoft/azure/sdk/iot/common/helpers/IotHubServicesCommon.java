@@ -41,7 +41,7 @@ public class IotHubServicesCommon
     {
         try
         {
-            openClientWithRetry(client);
+            client.open();
             if (statusUpdates != null)
             {
                 confirmOpenStabilized(statusUpdates, 120000, client);
@@ -214,7 +214,7 @@ public class IotHubServicesCommon
             expiredMessage.setAbsoluteExpiryTime(1); //setting this to 0 causes the message to never expire
             Success messageSentExpiredCallback = new Success();
 
-            openClientWithRetry(client);
+            client.open();
             client.sendEventAsync(expiredMessage, new EventCallback(IotHubStatusCode.MESSAGE_EXPIRED), messageSentExpiredCallback);
 
             long startTime = System.currentTimeMillis();
@@ -256,7 +256,7 @@ public class IotHubServicesCommon
             }
         }, new Object());
 
-        openClientWithRetry(client);
+        client.open();
 
         client.sendEventAsync(errorInjectionMessage, new EventCallback(null), new Success());
 
@@ -319,76 +319,6 @@ public class IotHubServicesCommon
         }
 
         return false;
-    }
-
-    public static void openClientWithRetry(InternalClient client) throws InterruptedException
-    {
-        //Check again
-        int count = 0;
-        boolean clientOpenSucceeded = false;
-        long startTime = System.currentTimeMillis();
-        while (!clientOpenSucceeded)
-        {
-            if (System.currentTimeMillis() - startTime > OPEN_RETRY_TIMEOUT)
-            {
-                Assert.fail(buildExceptionMessage("Timed out trying to open the client " + count, client));
-            }
-
-            try
-            {
-                count++;
-                client.open();
-                clientOpenSucceeded = true;
-            }
-            catch (IOException e)
-            {
-                //ignore and try again
-                System.out.println("Encountered exception while opening device client, retrying...: " + Tools.getStackTraceFromThrowable(e));
-                try
-                {
-                    client.closeNow();
-                }
-                catch (IOException ioException)
-                {
-                    System.out.println("Failed to close client: " + Tools.getStackTraceFromThrowable(ioException));
-                }
-                Thread.sleep(400);
-            }
-        }
-    }
-
-    public static void openTransportClientWithRetry(TransportClient client, Collection<InternalClient> clients) throws InterruptedException
-    {
-        boolean clientOpenSucceeded = false;
-        long startTime = System.currentTimeMillis();
-        while (!clientOpenSucceeded)
-        {
-            if (System.currentTimeMillis() - startTime > OPEN_RETRY_TIMEOUT)
-            {
-                Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Timed out trying to open the transport client", clients));
-            }
-
-            try
-            {
-                client.open();
-                clientOpenSucceeded = true;
-            }
-            catch (IOException e)
-            {
-                //ignore and try again
-                System.out.println("Encountered exception while opening transport client, retrying...: " + Tools.getStackTraceFromThrowable(e));
-
-                try
-                {
-                    client.closeNow();
-                }
-                catch (IOException ioException)
-                {
-                    System.out.println("Failed to close client: " + Tools.getStackTraceFromThrowable(ioException));
-                }
-                Thread.sleep(400);
-            }
-        }
     }
 
     public static void waitForStabilizedConnection(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException

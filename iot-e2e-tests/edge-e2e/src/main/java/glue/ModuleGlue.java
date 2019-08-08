@@ -77,7 +77,7 @@ public class ModuleGlue
         try
         {
             ModuleClient client = ModuleClient.createFromEnvironment(protocol);
-            openClientWithRetry(client);
+            client.open();
 
             this._clientCount++;
             String connectionId = "moduleClient_" + this._clientCount;
@@ -86,7 +86,7 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        } catch (ModuleClientException | InterruptedException e)
+        } catch (ModuleClientException | IOException e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -125,7 +125,7 @@ public class ModuleGlue
                 client.setOption("SetCertificateAuthority", cert);
             }
 
-            openClientWithRetry(client);
+            client.open();
 
             this._clientCount++;
             String connectionId = "moduleClient_" + this._clientCount;
@@ -134,7 +134,7 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        } catch (InterruptedException | ModuleClientException | URISyntaxException e)
+        } catch (ModuleClientException | URISyntaxException | IOException e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -709,39 +709,5 @@ public class ModuleGlue
                 this._closeConnection(key);
             }
         }
-    }
-
-    public static void openClientWithRetry(InternalClient client) throws InterruptedException
-    {
-        RetryPolicy retryPolicy = new ExponentialBackoffWithJitter();
-
-        //Check again
-        int count = 0;
-        boolean clientOpenSucceeded = false;
-        long startTime = System.currentTimeMillis();
-        while (!clientOpenSucceeded)
-        {
-            if (System.currentTimeMillis() - startTime > OPEN_RETRY_TIMEOUT)
-            {
-                Assert.fail("Timed out trying to open the client " + count);
-            }
-
-            try
-            {
-                count++;
-                client.open();
-                clientOpenSucceeded = true;
-            } catch (IOException e)
-            {
-                //ignore and try again
-                System.out.println("Encountered exception while opening device client, retrying...");
-                e.printStackTrace();
-
-                RetryDecision retryDecision = retryPolicy.getRetryDecision(count, new TransportException());
-                Thread.sleep(retryDecision.getDuration());
-            }
-        }
-
-        System.out.println("Successfully opened connection!");
     }
 }

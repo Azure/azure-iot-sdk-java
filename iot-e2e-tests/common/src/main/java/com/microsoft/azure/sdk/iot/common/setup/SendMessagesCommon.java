@@ -55,7 +55,6 @@ public class SendMessagesCommon extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected static String iotHubConnectionString = "";
-    protected static final int INTERTEST_GUARDIAN_DELAY_MILLISECONDS = 0;
 
     protected static String hostName;
 
@@ -130,7 +129,6 @@ public class SendMessagesCommon extends IntegrationTest
             fail("Failed to stop the test proxy");
         }
     }
-
 
     protected static Collection inputsCommon() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
     {
@@ -373,7 +371,7 @@ public class SendMessagesCommon extends IntegrationTest
         public void openConnection() throws IOException, URISyntaxException, InterruptedException
         {
             client = new DeviceClient(connString, protocol);
-            IotHubServicesCommon.openClientWithRetry(client);
+            client.open();
         }
 
         public void sendMessages()
@@ -509,18 +507,8 @@ public class SendMessagesCommon extends IntegrationTest
     }
 
     @After
-    public void tearDownTest() throws IOException, IotHubException
+    public void tearDownTest()
     {
-        try
-        {
-            Thread.sleep(INTERTEST_GUARDIAN_DELAY_MILLISECONDS);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
-
         this.testInstance.dispose();
     }
 }

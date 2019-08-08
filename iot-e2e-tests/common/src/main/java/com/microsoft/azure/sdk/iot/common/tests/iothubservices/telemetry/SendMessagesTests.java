@@ -127,7 +127,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, testInstance.identity.getDeviceId(), testInstance.identity.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
         DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, testInstance.protocol);
-        IotHubServicesCommon.openClientWithRetry(client);
+        client.open();
 
         //Force the SAS token to expire before sending messages
         Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);

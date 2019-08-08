@@ -53,7 +53,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
             testInstance.client.setOption(SET_MINIMUM_POLLING_INTERVAL, ONE_SECOND_POLLING_INTERVAL);
         }
 
-        IotHubServicesCommon.openClientWithRetry(testInstance.client);
+        testInstance.client.open();
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
@@ -105,7 +105,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
         // set identity to receive back to back different commands using AMQPS protocol
-        IotHubServicesCommon.openClientWithRetry(testInstance.client);
+        testInstance.client.open();
 
         // set call back for device client for receiving message
         com.microsoft.azure.sdk.iot.device.MessageCallback callBackOnRx = new MessageCallbackForBackToBackC2DMessages(messageIdListStoredOnReceive);
