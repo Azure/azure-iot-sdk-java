@@ -2,8 +2,6 @@ package com.microsoft.azure.sdk.iot.digitaltwin.device;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyUpdate;
 
-import java.util.List;
-
 /**
  * Callback that is invoked by the Digital Twin SDK when a desired property is available from the service.
  * There are two scenarios where this callback may be invoked.  After this interface is initially registered, the Digital Twin SDK will query all desired properties on
@@ -15,7 +13,7 @@ public interface DigitalTwinPropertyUpdateCallback {
     /**
      * Callback that is invoked by the Digital Twin SDK when a desired property is available from the service.
      * @param digitalTwinPropertyUpdate {@link DigitalTwinPropertyUpdate} structure filled in by the SDK with information about the updated property.
-     * @param context Context pointer that was specified in the parameter context during the device application's {@link DigitalTwinDeviceClient#registerInterfacesAsync(String, List, DigitalTwinCallback, Object)} call.
+     * @param context Context that was specified in {@link AbstractDigitalTwinInterfaceClient} constrictor.
      */
     void onPropertyUpdate(DigitalTwinPropertyUpdate digitalTwinPropertyUpdate, Object context);
 }
