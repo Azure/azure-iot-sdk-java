@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import static lombok.AccessLevel.NONE;
 import static lombok.AccessLevel.PACKAGE;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -16,12 +17,22 @@ import static lombok.AccessLevel.PROTECTED;
  * Digital Twin interface implementations to receive requests on this interface from the server (namely commands and property updates) and to send data from the interface to the server (namely reported properties and telemetry).
  */
 @RequiredArgsConstructor
-public abstract class AbstractDigitalTwinInterfaceClient {
-    @Getter(PROTECTED)
+@Getter(PROTECTED)
+public abstract class AbstractDigitalTwinInterfaceClient implements DigitalTwinCallback {
+    /**
+     *   The interface instance name associated with this interface Id. For example, environmentalSensor.
+     */
     private final String digitalTwinInterfaceInstanceName;
-    @Getter(PROTECTED)
+    /**
+     * The interfaceId of interface to be registered.  For example, urn:contoso:com:EnvironmentalSensor:1.
+     */
     private final String digitalTwinInterfaceId;
+    /**
+     * Context passed to digitalTwinInterfaceRegisteredCallback function on interface change, command updates, and property updates.
+     */
+    private final Object context;
     @Setter(PACKAGE)
+    @Getter(NONE)
     private DigitalTwinDeviceClient digitalTwinDeviceClient;
 
     /**
@@ -104,10 +115,13 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * The device application invokes this function to update the status of an asynchronous command.  This status could indicate a success, a fatal failure, or else that the command is still running and provide some simple progress.
      * Values specified in the {@link DigitalTwinAsyncCommandUpdate} - in particular {@link DigitalTwinAsyncCommandUpdate#getCommandName()} that initiated the command name and its {@link DigitalTwinAsyncCommandUpdate#getRequestId()} are specified in the initial command callback's passed in {@link DigitalTwinCommandRequest#getRequestId()}.
      * @param digitalTwinAsyncCommandUpdate containing updates about the status to send to the server.
+     * @param digitalTwinUpdateAsyncCommandStatusCallback Callback be invoked when the async command update is successfully reported or fails.
+     * @param context Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
      * @return if this async function is accepted or not.
      */
     protected final DigitalTwinClientResult updateAsyncCommandStatusAsync(
-            @NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate, 
+            @NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate,
+            @NonNull final DigitalTwinCallback digitalTwinUpdateAsyncCommandStatusCallback,
             final Object context) {
         // TODO
         throw new NotImplementedException();

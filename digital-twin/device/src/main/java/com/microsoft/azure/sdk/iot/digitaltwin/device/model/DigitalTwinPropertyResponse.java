@@ -8,13 +8,6 @@ import lombok.NonNull;
 @Builder
 @Getter
 public class DigitalTwinPropertyResponse {
-    private final static int DIGITAL_TWIN_PROPERTY_RESPONSE_VERSION_1 = 1;
-    /**
-     * The version <b>of the structure</b> that the SDK is passing.  This is <b>NOT</b> related to the server version.
-     * Currently {@link #DIGITAL_TWIN_PROPERTY_RESPONSE_VERSION_1} but would be incremented if new fields are added.
-     */
-    @Builder.Default
-    private int version = DIGITAL_TWIN_PROPERTY_RESPONSE_VERSION_1;
     /**
      * This is used for server to disambiguate calls for given property.
      * It should match {@link DigitalTwinPropertyUpdate#getDesiredVersion()} that this is responding to.

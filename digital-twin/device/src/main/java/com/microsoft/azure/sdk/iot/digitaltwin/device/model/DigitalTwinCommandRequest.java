@@ -1,7 +1,6 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.device.model;
 
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -11,13 +10,6 @@ import lombok.NonNull;
 @Builder
 @Getter
 public class DigitalTwinCommandRequest {
-    private final static int DIGITAL_TWIN_COMMAND_REQUEST_VERSION_1 = 1;
-    /**
-     * The version <b>of the structure</b> that the SDK is passing.  This is <b>NOT</b> related to the server version.
-     * Currently {@link #DIGITAL_TWIN_COMMAND_REQUEST_VERSION_1} but would be incremented if new fields are added.
-     */
-    @Default
-    private int version = DIGITAL_TWIN_COMMAND_REQUEST_VERSION_1;
     /** Name of the command to execute on this interface. */
     @NonNull
     private final String commandName;
