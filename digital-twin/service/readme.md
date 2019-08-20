@@ -40,5 +40,4 @@ java:
     namespace: com.microsoft.azure.sdk.iot.digitaltwin.service.generated
     output-folder: ./
     add-credentials: true
-    use-internal-constructors: true
 ```

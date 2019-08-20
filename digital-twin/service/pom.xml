@@ -1,10 +1,12 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
-    <parent>
+    <!--<parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java-digital-twin</artifactId>
         <version>1.0.0</version>
-    </parent>
+    </parent>-->
+    <!-- remove this line when un-commenting above parent block -->
+    <groupId>com.microsoft.azure.sdk.iot</groupId>
     <name>Azure IoT Sdk Java Digital Twin Service</name>
     <description>The Microsoft Azure IoT Digital Twin Service SDK for Java</description>
     <artifactId>iot-sdk-java-digital-twin-service</artifactId>
@@ -30,6 +32,11 @@
             <groupId>com.microsoft.rest</groupId>
             <artifactId>client-runtime</artifactId>
             <version>1.6.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-core</artifactId>
+            <version>1.0.0-preview.3</version>
         </dependency>
     </dependencies>
     <build>
