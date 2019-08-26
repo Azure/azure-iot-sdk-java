@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
-/** Structure filled in by the device application when it is responding to a server initiated request to update a property. */
+/** Structure filled in by the device application when it is responding to a server initiated request to update a property to specify the status. */
 @Builder
 @Getter
 public class DigitalTwinPropertyResponse {
@@ -13,7 +13,7 @@ public class DigitalTwinPropertyResponse {
      * It should match {@link DigitalTwinPropertyUpdate#getDesiredVersion()} that this is responding to.
      */
     @NonNull
-    private final Integer responseVersion;
+    private final Integer statusVersion;
     /** Which should map to appropriate HTTP status code - of property update.*/
     @NonNull
     private final Integer statusCode;

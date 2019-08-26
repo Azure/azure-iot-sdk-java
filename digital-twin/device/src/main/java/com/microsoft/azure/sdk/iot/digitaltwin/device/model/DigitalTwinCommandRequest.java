@@ -20,5 +20,5 @@ public class DigitalTwinCommandRequest {
     @NonNull
     private final String requestId;
     /** Raw payload of the request. */
-    private byte[] payload;
+    private String payload;
 }
