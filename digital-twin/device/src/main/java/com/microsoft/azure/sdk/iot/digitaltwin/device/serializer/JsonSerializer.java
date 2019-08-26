@@ -8,24 +8,19 @@ import java.io.IOException;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-public final class JsonSerializer implements Serializer {
-    private final static Serializer INSTANCE = new JsonSerializer();
+public final class JsonSerializer {
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(NON_NULL);
 
     private JsonSerializer() {
     }
 
-    public static Serializer getInstance() {
-        return INSTANCE;
+    public static <T> String serialize(T object) throws IOException {
+        return OBJECT_MAPPER.writeValueAsString(object);
     }
-
-    public byte[] serialize(Object object) throws IOException {
-        return OBJECT_MAPPER.writeValueAsBytes(object);
-    }
-    public <T> T deserialize(byte[] payload, Class<T> clazz) throws IOException {
+    public static <T> T deserialize(byte[] payload, Class<T> clazz) throws IOException {
         return OBJECT_MAPPER.readValue(payload, clazz);
     }
-    public <T> T deserialize(String payload, Class<T> clazz) throws IOException {
+    public static <T> T deserialize(String payload, Class<T> clazz) throws IOException {
         return OBJECT_MAPPER.readValue(payload, clazz);
     }
     public static <T> T nodeToValue(JsonNode node, Class<T> clazz) throws IOException {
@@ -39,5 +34,22 @@ public final class JsonSerializer implements Serializer {
     }
     public static JsonNode deserialize(byte[] content) throws IOException {
         return OBJECT_MAPPER.readTree(content);
+    }
+    public static JsonNode deserialize(String content) throws IOException {
+        return OBJECT_MAPPER.readTree(content);
+    }
+    public static String getAttributeAsString(JsonNode node, String name) {
+        JsonNode attribute = node.get(name);
+        if (attribute == null || !attribute.isTextual()) {
+            return null;
+        } else {
+            return attribute.asText();
+        }
+    }
+    public static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
+    public static boolean isNotEmpty(String value) {
+        return !isNullOrEmpty(value);
     }
 }

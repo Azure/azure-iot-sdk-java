@@ -24,5 +24,5 @@ public class DigitalTwinAsyncCommandUpdate {
     @NonNull
     private String requestId;
     /** Payload that the device should send to the service. */
-    private byte[] payload;
+    private String payload;
 }

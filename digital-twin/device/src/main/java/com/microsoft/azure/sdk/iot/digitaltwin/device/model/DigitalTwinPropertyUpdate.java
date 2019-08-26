@@ -13,16 +13,10 @@ public class DigitalTwinPropertyUpdate {
     private final String propertyName;
     private final Integer reportedVersion;
     /**
-     * Value that the device application had previously reported for this property.
-     * This value may be NULL if the application never reported a property.
-     * It will also be NULL when an update arrives to the given property <b>after</b> the initial callback.
-     */
-    private final byte[] propertyReported;
-    /**
      * Version (from the service, NOT the C structure) of this property.
      * This version should be specified when updating this property.
      */
     private final Integer desiredVersion;
     /** Number of bytes in propertyDesired. */
-    private final byte[] propertyDesired;
+    private final String propertyDesired;
 }
