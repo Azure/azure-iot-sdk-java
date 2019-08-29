@@ -8,13 +8,17 @@ import com.azure.core.implementation.annotation.ServiceClient;
 import com.azure.core.implementation.annotation.ServiceMethod;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
+import com.microsoft.rest.serializer.JacksonAdapter;
+
+import java.io.IOException;
 
 @ServiceClient(
         builder = DigitalTwinServiceClientBuilder.class,
         serviceInterfaces = DigitalTwins.class)
 public final class DigitalTwinServiceClient {
-    DigitalTwinsImpl digitalTwins;
+    private DigitalTwinsImpl digitalTwins;
 
     /**
      * Creates a {@link DigitalTwinsImpl} object that is used to invoke the Digital Twin features
@@ -27,7 +31,7 @@ public final class DigitalTwinServiceClient {
     /**
      * Retrieves the state of a single digital twin
      * @param digitalTwinId The ID of the digital twin. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional
-     * @return The state of the full digital twin, including all properties of all components registered by that digital twin
+     * @return The state of the full digital twin, including all properties of all interface instances registered by that digital twin
      */
     @ServiceMethod(returns = ReturnType.SINGLE)
     public DigitalTwin getDigitalTwin(String digitalTwinId) {
@@ -54,6 +58,75 @@ public final class DigitalTwinServiceClient {
     @ServiceMethod(returns = ReturnType.SINGLE)
     public String getModel(String modelId, Boolean expand) {
         return String.valueOf(this.digitalTwins.getDigitalTwinModel(modelId, expand));
+    }
+
+    /**
+     * Update one to many properties on one to many interface instances on one digital twin instance
+     * @param digitalTwinId The ID of the digital twin to update
+     * @param patch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
+     *              {
+     *                  "interfaces": {
+     *                      "sampleDeviceInfo": {
+     *                          "properties": {
+     *                              "somePropertyName": {
+     *                                  "desired": {
+     *                                      "value": "somePropertyValue"
+     *                                  }
+     *                              },
+     *                              "somePropertyName2": {
+     *                                  "desired": {
+     *                                      "value": "somePropertyValue"
+     *                                  }
+     *                              }
+     *                          }
+     *                      }
+     *                  }
+     *              }
+     *              Nested properties are allowed, but the maximum depth allowed is 7.
+     * @return The updated state of the digital twin representation
+     * @throws IOException
+     */
+    @ServiceMethod(returns = ReturnType.SINGLE)
+    public DigitalTwin updateDigitalTwinProperties(String digitalTwinId, String patch) throws IOException {
+        JacksonAdapter adapter = new JacksonAdapter();
+        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = adapter.deserialize(patch, DigitalTwinInterfacesPatch.class);
+
+        return new DigitalTwin(this.digitalTwins.updateInterfaces(digitalTwinId, digitalTwinInterfacesPatch));
+    }
+
+    /**
+     * Update one to many properties on one to many interface instances on one digital twin instance
+     * @param digitalTwinId The ID of the digital twin to update
+     * @param patch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
+     *              {
+     *                  "interfaces": {
+     *                      "sampleDeviceInfo": {
+     *                          "properties": {
+     *                              "somePropertyName": {
+     *                                  "desired": {
+     *                                      "value": "somePropertyValue"
+     *                                  }
+     *                              },
+     *                              "somePropertyName2": {
+     *                                  "desired": {
+     *                                      "value": "somePropertyValue"
+     *                                  }
+     *                              }
+     *                          }
+     *                      }
+     *                  }
+     *              }
+     *              Nested properties are allowed, but the maximum depth allowed is 7.
+     * @param etag The ETag of the digital twin
+     * @return The updated state of the digital twin representation
+     * @throws IOException
+     */
+    @ServiceMethod(returns = ReturnType.SINGLE)
+    public DigitalTwin updateDigitalTwinProperties(String digitalTwinId, String patch, String etag) throws IOException {
+        JacksonAdapter adapter = new JacksonAdapter();
+        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = adapter.deserialize(patch, DigitalTwinInterfacesPatch.class);
+
+        return new DigitalTwin(this.digitalTwins.updateInterfaces(digitalTwinId, digitalTwinInterfacesPatch, etag));
     }
 
 }
