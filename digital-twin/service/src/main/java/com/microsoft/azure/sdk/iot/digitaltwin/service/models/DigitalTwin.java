@@ -26,8 +26,8 @@ public class DigitalTwin
 
     public DigitalTwin(DigitalTwinInterfaces digitalTwinInterfaces) {
         this.interfaceInstances = new HashMap<String, InterfaceModel>();
-        for (String digitalTwinInterfaceComponentName : digitalTwinInterfaces.interfaces().keySet()) {
-            this.interfaceInstances.put(digitalTwinInterfaceComponentName, digitalTwinInterfaces.interfaces().get(digitalTwinInterfaceComponentName));
+        for (String digitalTwinInterfaceInstanceName : digitalTwinInterfaces.interfaces().keySet()) {
+            this.interfaceInstances.put(digitalTwinInterfaceInstanceName, digitalTwinInterfaces.interfaces().get(digitalTwinInterfaceInstanceName));
         }
         this.version = digitalTwinInterfaces.version();
     }
