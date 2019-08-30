@@ -139,4 +139,34 @@ public final class DigitalTwinServiceAsyncClient {
                                 .map(DigitalTwin ::new);
     }
 
+    /**
+     * Invoke a digital twin command on the given interface instance that is implemented by the given digital twin
+     * @param digitalTwinId The digital twin to invoke the command on
+     * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
+     * @param commandName The name of the command to be invoked
+     * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
+     * @return The observable to the result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
+     */
+    @ServiceMethod(returns = ReturnType.SINGLE)
+    public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument) {
+        return this.digitalTwins.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument)
+                .map(String :: valueOf);
+    }
+
+    /**
+     * Invoke a digital twin command on the given interface instance that is implemented by the given digital twin
+     * @param digitalTwinId The digital twin to invoke the command on
+     * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
+     * @param commandName The name of the command to be invoked
+     * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
+     * @param connectTimeoutInSeconds The connect timeout in seconds
+     * @param responseTimeoutInSeconds The response timeout in seconds
+     * @return The observable to the result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
+     */
+    @ServiceMethod(returns = ReturnType.SINGLE)
+    public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
+        return this.digitalTwins.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds)
+                .map(String :: valueOf);
+    }
+
 }
