@@ -396,4 +396,21 @@ public class MessageTest
         //assert
         assertEquals(expectedCreationTimeUtcString, creationTimeUtcString);
     }
+
+    @Test
+    public void testSecurityPropertyGettersAndSetters()
+    {
+        //arrange
+        final String contentEncoding = "application/json";
+
+        Message msg = new Message();
+
+        //act
+        msg.setAsSecurityMessage();
+
+        //assert
+        assertEquals(contentEncoding, msg.getContentEncoding());
+        assertTrue(msg.isSecurityMessage());
+    }
+
 }

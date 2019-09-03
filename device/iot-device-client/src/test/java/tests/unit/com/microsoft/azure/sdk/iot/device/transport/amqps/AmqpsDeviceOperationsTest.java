@@ -1046,6 +1046,10 @@ public class AmqpsDeviceOperationsTest
                 result = "1969-12-31T16:00:00.0000000";
                 times = 1;
 
+                mockMessage.isSecurityMessage();
+                result = false;
+                times = 1;
+
                 new ApplicationProperties(userProperties);
             }
         };

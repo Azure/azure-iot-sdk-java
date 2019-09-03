@@ -25,6 +25,9 @@ public final class MessageProperty {
     public static final String IOTHUB_CONTENT_TYPE = "iothub-contenttype";
 
     public static final String IOTHUB_CREATION_TIME_UTC = "iothub-creation-time-utc";
+    public static final String IOTHUB_SECURITY_INTERFACE_ID = "iothub-interface-id";
+    public static final String IOTHUB_SECURITY_INTERFACE_ID_VALUE = "urn:azureiot:Security:SecurityAgent:1";
+
 
     static {
         HashSet<String> reservedPropertyNames = new HashSet<>();

@@ -44,6 +44,20 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    public void sendSecurityMessages() throws Exception
+    {
+        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
+        {
+            //mqtt_ws does not support x509 auth currently
+            return;
+        }
+
+        this.testInstance.setup();
+
+        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
+
+    @Test
     public void sendMessages() throws Exception
     {
         if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
