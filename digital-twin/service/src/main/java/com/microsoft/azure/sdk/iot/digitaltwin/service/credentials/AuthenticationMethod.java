@@ -5,13 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 
-/** 
- * Class used to abstract the different 
- * authentication methods used to use IoT Hub SDK. 
- * 
+/**
+ * Class used to abstract the different
+ * authentication methods used to use IoT Hub SDK.
  */
-public abstract class AuthenticationMethod
-{
+public abstract class AuthenticationMethod {
     /**
      * Authentication policy name
      */
@@ -30,8 +28,8 @@ public abstract class AuthenticationMethod
     /**
      * Abstract helper function to populate {@code ServiceConnectionString} class with
      * proper authentication properties
-     * 
-     * @param ServiceConnectionStringBuilder  The {@link ServiceConnectionString} that is
+     *
+     * @param ServiceConnectionStringBuilder The {@link ServiceConnectionString} that is
      *                                       to be populated with the authentication
      *                                       properties.
      * @return An instance of {@link ServiceConnectionString} populated with the

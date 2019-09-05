@@ -3,17 +3,14 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 
-public class SharedAccessSignatureCredentials extends IoTServiceClientCredentials
-{
-	private final String sasKey;
+public class SharedAccessSignatureCredentials extends IoTServiceClientCredentials {
+    private final String sasKey;
 
-	public SharedAccessSignatureCredentials(String sasKey)
-	{
-		this.sasKey = sasKey;
-	}
+    public SharedAccessSignatureCredentials(String sasKey) {
+        this.sasKey = sasKey;
+    }
 
-	protected String getSASToken()
-	{
-		return this.sasKey;
-	}
+    protected String getSasToken() {
+        return this.sasKey;
+    }
 }

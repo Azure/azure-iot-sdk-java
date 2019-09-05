@@ -3,34 +3,70 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service;
 
-import com.azure.core.implementation.annotation.ReturnType;
-import com.azure.core.implementation.annotation.ServiceClient;
-import com.azure.core.implementation.annotation.ServiceMethod;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.IoTServiceClientCredentials;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnectionString;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.SharedAccessKeyCredentials;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.IotHubGatewayServiceAPIs20190701PreviewImpl;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfaces;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatchInterfacesValue;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
+import com.microsoft.rest.RestClient;
+import com.microsoft.rest.ServiceResponseBuilder;
 import com.microsoft.rest.serializer.JacksonAdapter;
-import retrofit2.Retrofit;
+import lombok.Builder;
 import rx.Observable;
+import rx.functions.Func1;
 
 import java.io.IOException;
+import java.util.HashMap;
 
-@ServiceClient(
-        builder = DigitalTwinServiceClientBuilder.class,
-        serviceInterfaces = DigitalTwins.class,
-        isAsync = true)
 public final class DigitalTwinServiceAsyncClient {
-    DigitalTwinsImpl digitalTwins;
+    DigitalTwinsImpl digitalTwin;
 
-    /**
-     * Creates a {@link DigitalTwinsImpl} object that is used to invoke the Digital Twin features
-     * @param retrofit The Retrofit instance built from a Retrofit builder containing the service endpoint and credentials
-     * @param client The instance of service client containing the operation class
+    /***
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param connectionString The IoTHub connection string
+     * @param credential The sas token provider to use for authorization
+     * @param httpsEndpoint The https endpoint to connect to
+     * @param apiVersion The ServiceVersion for the service client to use
+     * @throws IOException This exception is thrown if the service connection string parsing fails
+     * @throws IllegalStateException This exception is thrown if expected paramters are not passed to the builder
      */
-    DigitalTwinServiceAsyncClient(Retrofit retrofit, IotHubGatewayServiceAPIs20190701PreviewImpl client) {
-        this.digitalTwins = new DigitalTwinsImpl(retrofit, client);
+    @Builder
+    DigitalTwinServiceAsyncClient(String connectionString, IoTServiceClientCredentials credential, String
+            httpsEndpoint, String apiVersion) throws IOException {
+
+        if (apiVersion == null) {
+            apiVersion = ServiceVersion.V2019_07_01_preview.getApiVersion();
+        }
+        if (credential != null && httpsEndpoint == null) {
+            throw new IllegalStateException("Please provide either 'Service Connection String' or " +
+                    "('ServiceClientCredentails' and host https endpoint to connect to).");
+        }
+        if (connectionString != null) {
+            if (credential !=null || httpsEndpoint != null)
+                throw new IllegalStateException("Please provide either 'Service Connection String' or " +
+                        "('ServiceClientCredentails' and host https endpoint to connect to).");
+
+            ServiceConnectionString serviceConnectionString = ServiceConnectionStringBuilder.createConnectionString(connectionString);
+            credential = new SharedAccessKeyCredentials(serviceConnectionString);
+            httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
+        }
+
+        RestClient simpleRestClient = new RestClient.Builder().withBaseUrl(httpsEndpoint)
+                                                              .withCredentials(credential)
+                                                              .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
+                                                              .withSerializerAdapter(new JacksonAdapter())
+                                                              .build();
+
+        IotHubGatewayServiceAPIs20190701PreviewImpl protocolLayerClient = new IotHubGatewayServiceAPIs20190701PreviewImpl(simpleRestClient);
+        protocolLayerClient.withApiVersion(apiVersion);
+
+        this.digitalTwin = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
     }
 
     /**
@@ -38,10 +74,15 @@ public final class DigitalTwinServiceAsyncClient {
      * @param digitalTwinId The ID of the digital twin. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional
      * @return The observable to the state of the full digital twin, including all properties of all interface instances registered by that digital twin
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public Observable<DigitalTwin> getDigitalTwin(String digitalTwinId) {
-        return this.digitalTwins.getInterfacesAsync(digitalTwinId)
-                .map(DigitalTwin ::new);
+        return this.digitalTwin.getInterfacesAsync(digitalTwinId)
+                .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
+
+                    @Override
+                    public DigitalTwin call(DigitalTwinInterfaces digitalTwin) {
+                        return new DigitalTwin(digitalTwin);
+                    }
+                });
     }
 
     /**
@@ -49,10 +90,15 @@ public final class DigitalTwinServiceAsyncClient {
      * @param modelId The model ID. Ex: &lt;example&gt;urn:contoso:TemperatureSensor:1&lt;/example&gt;
      * @return The observable to the DigitalTwin model definition
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public Observable<String> getModel(String modelId) {
-        return this.digitalTwins.getDigitalTwinModelAsync(modelId)
-                .map(String :: valueOf);
+        return this.digitalTwin.getDigitalTwinModelAsync(modelId)
+                .map(new Func1<Object, String>() {
+
+                    @Override
+                    public String call(Object model) {
+                        return String.valueOf(model);
+                    }
+                });
     }
 
     /**
@@ -62,81 +108,58 @@ public final class DigitalTwinServiceAsyncClient {
      *               This query parameter ONLY applies to Capability model.
      * @return The observable to the DigitalTwin model definition
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public Observable<String> getModel(String modelId, Boolean expand) {
-        return this.digitalTwins.getDigitalTwinModelAsync(modelId, expand)
-                .map(String :: valueOf);
+        return this.digitalTwin.getDigitalTwinModelAsync(modelId, expand)
+                .map(new Func1<Object, String>() {
+
+                    @Override
+                    public String call (Object model) {
+                        return String.valueOf(model);
+                    }
+                });
     }
 
     /**
-     * Update one to many properties on one to many interface instances on one digital twin instance
+     * Update one to many properties on one interface instance on one digital twin instance
      * @param digitalTwinId The ID of the digital twin to update
-     * @param patch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
-     *              {
-     *                  "interfaces": {
-     *                      "sampleDeviceInfo": {
-     *                          "properties": {
-     *                              "somePropertyName": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              },
-     *                              "somePropertyName2": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              }
+     * @param propertyPatch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
+     *				{
+     *                  "properties": {
+     *                      "somePropertyName": {
+     *                          "desired": {
+     *                              "value": "somePropertyValue"
+     *                          }
+     *                      },
+     *                      "somePropertyName2": {
+     *                          "desired": {
+     *                              "value": "somePropertyValue"
      *                          }
      *                      }
      *                  }
      *              }
      *              Nested properties are allowed, but the maximum depth allowed is 7.
-     * @return The observable to the updated state of the digital twin representation
-     * @throws IOException
+     * @return The observable to the updated state  of the digital twin representation
+     * @throws IOException Throws IOException if the json deserialization fails
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
-    public Observable<DigitalTwin> updateDigitalTwinProperties(String digitalTwinId, String patch) throws IOException {
+    public Observable<DigitalTwin> updateDigitalTwinProperties(String digitalTwinId, final String interfaceInstanceName, String propertyPatch) throws IOException {
         JacksonAdapter adapter = new JacksonAdapter();
-        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = adapter.deserialize(patch, DigitalTwinInterfacesPatch.class);
+        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = adapter.deserialize(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
 
-        return this.digitalTwins.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
-                                .map(DigitalTwin ::new);
-    }
+        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = new DigitalTwinInterfacesPatch()
+                .withInterfaces(
+                        new HashMap<String, DigitalTwinInterfacesPatchInterfacesValue>() {{
+                            put(interfaceInstanceName, digitalTwinInterfacesPropertyPatch);
+                        }}
+                );
 
-    /**
-     * Update one to many properties on one to many interface instances on one digital twin instance
-     * @param digitalTwinId The ID of the digital twin to update
-     * @param patch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
-     *              {
-     *                  "interfaces": {
-     *                      "sampleDeviceInfo": {
-     *                          "properties": {
-     *                              "somePropertyName": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              },
-     *                              "somePropertyName2": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              }
-     *                          }
-     *                      }
-     *                  }
-     *              }
-     *              Nested properties are allowed, but the maximum depth allowed is 7.
-     * @param etag The ETag of the digital twin
-     * @return The observable to the updated state of the digital twin representation
-     * @throws IOException
-     */
-    @ServiceMethod(returns = ReturnType.SINGLE)
-    public Observable<DigitalTwin> updateDigitalTwinProperties(String digitalTwinId, String patch, String etag) throws IOException {
-        JacksonAdapter adapter = new JacksonAdapter();
-        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = adapter.deserialize(patch, DigitalTwinInterfacesPatch.class);
+        return this.digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
+                                .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
 
-        return this.digitalTwins.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch, etag)
-                                .map(DigitalTwin ::new);
+                                    @Override
+                                    public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
+                                        return new DigitalTwin(digitalTwinInterfaces);
+                                    }
+                                });
     }
 
     /**
@@ -145,12 +168,18 @@ public final class DigitalTwinServiceAsyncClient {
      * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
      * @param commandName The name of the command to be invoked
      * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
-     * @return The observable to the result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
+     * @return The observable to the result of the command invocation. Like the argument given, the result must be
+     * UTF-8 encoded JSON bytes
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument) {
-        return this.digitalTwins.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument)
-                .map(String :: valueOf);
+        return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument)
+                .map(new Func1<Object, String>() {
+
+                    @Override
+                    public String call(Object commandResponse) {
+                        return String.valueOf(commandResponse);
+                    }
+                });
     }
 
     /**
@@ -161,12 +190,18 @@ public final class DigitalTwinServiceAsyncClient {
      * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
      * @param connectTimeoutInSeconds The connect timeout in seconds
      * @param responseTimeoutInSeconds The response timeout in seconds
-     * @return The observable to the result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
+     * @return The observable to the result of the command invocation. Like the argument given, the result must be
+     * UTF-8 encoded JSON bytes
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
-    public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
-        return this.digitalTwins.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds)
-                .map(String :: valueOf);
+    public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, final String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
+        return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds)
+                .map(new Func1<Object, String>() {
+
+                    @Override
+                    public String call(Object commandResponse) {
+                        return String.valueOf(commandResponse);
+                    }
+                });
     }
 
 }

@@ -13,8 +13,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-public class ServiceConnectionStringBuilder
-{
+public class ServiceConnectionStringBuilder {
     private static final String HOST_NAME_REGEX = "[a-zA-Z0-9_\\-\\.]+$";
     private static final String SHARED_ACCESS_KEY_NAME_REGEX = "^[a-zA-Z0-9_\\-@\\.]+$";
     private static final String SHARED_ACCESS_KEY_REGEX = "^.+$";
@@ -28,11 +27,9 @@ public class ServiceConnectionStringBuilder
      * @return The ServiceConnectionString object
      * @throws IOException This exception is thrown if the object creation failed
      */
-    public static ServiceConnectionString createConnectionString(String connectionString) throws IOException
-    {
+    public static ServiceConnectionString createConnectionString(String connectionString) throws IOException {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_001: [The function shall throw IllegalArgumentException if the input string is empty or null]
-        if (Tools.isNullOrEmpty(connectionString))
-        {
+        if (Tools.isNullOrEmpty(connectionString)) {
             throw new IllegalArgumentException("connection string cannot be null or empty");
         }
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_002: [The function shall create a new ServiceConnectionString object deserializing the given string]
@@ -44,21 +41,18 @@ public class ServiceConnectionStringBuilder
     /**
      * Static constructor to create ServiceConnectionString from host name and authentication method
      *
-     * @param hostName The hostName string
+     * @param hostName             The hostName string
      * @param authenticationMethod The AuthenticationMethod object
      * @return The ServiceConnectionString object
      * @throws IOException This exception is thrown if the object creation failed
      */
-    public static ServiceConnectionString createConnectionString(String hostName, AuthenticationMethod authenticationMethod) throws IOException
-    {
+    public static ServiceConnectionString createConnectionString(String hostName, AuthenticationMethod authenticationMethod) throws IOException {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_003: [The function shall throw IllegalArgumentException if the input string is empty or null]
-        if (Tools.isNullOrEmpty(hostName))
-        {
+        if (Tools.isNullOrEmpty(hostName)) {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_004: [The function shall throw IllegalArgumentException if the input authenticationMethod is null]
-        if (authenticationMethod == null)
-        {
+        if (authenticationMethod == null) {
             throw new IllegalArgumentException("authenticationMethod cannot be null");
         }
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_005: [The function shall create a new ServiceConnectionString object using the given hostname and auhtenticationMethod]
@@ -72,35 +66,30 @@ public class ServiceConnectionStringBuilder
     /**
      * Deserialize connection string
      *
-     * @param connectionString The connection string to deserialize
+     * @param connectionString        The connection string to deserialize
      * @param ServiceConnectionString The target object for deserialization
      * @throws IOException This exception is thrown if the parsing failed
      */
-    protected static void parse(String connectionString, ServiceConnectionString ServiceConnectionString) throws IOException
-    {
+    protected static void parse(String connectionString, ServiceConnectionString ServiceConnectionString) throws IOException {
         Map<String, String> keyValueMap = new HashMap<String, String>();
 
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_006: [The function shall throw IllegalArgumentException if the input string is empty or null]
-        if (Tools.isNullOrEmpty(connectionString))
-        {
+        if (Tools.isNullOrEmpty(connectionString)) {
             throw new IllegalArgumentException("connectionString cannot be null or empty");
         }
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_007: [The function shall throw IllegalArgumentException if the input target itoHubConnectionString is null]
-        if (ServiceConnectionString == null)
-        {
+        if (ServiceConnectionString == null) {
             throw new IllegalArgumentException("ServiceConnectionString cannot be null");
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_008: [The function shall throw exception if tokenizing or parsing failed]
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_009: [The function shall tokenize and parse the given connection string and fill up the target ServiceConnectionString object with proper values]
         StringTokenizer stringTokenizer1 = new StringTokenizer(connectionString, ServiceConnectionString.VALUE_PAIR_DELIMITER);
-        while (stringTokenizer1.hasMoreTokens())
-        {
+        while (stringTokenizer1.hasMoreTokens()) {
             String currentToken = stringTokenizer1.nextToken();
 
             String[] splitString = currentToken.split(ServiceConnectionString.VALUE_PAIR_SEPARATOR, 2);
-            if (splitString.length == 2)
-            {
+            if (splitString.length == 2) {
                 keyValueMap.put(splitString[0], splitString[1]);
             }
         }
@@ -113,15 +102,13 @@ public class ServiceConnectionStringBuilder
         ServiceConnectionString.httpsEndpoint = buildHttpsEndpoint(ServiceConnectionString);
 
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_010: [The function shall create new ServiceAuthenticationWithSharedAccessPolicyToken and set the authenticationMethod if sharedAccessKey is not defined]
-        if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessKey))
-        {
+        if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessKey)) {
             ServiceConnectionString.authenticationMethod = new ServiceAuthenticationWithSharedAccessPolicyToken(
                     ServiceConnectionString.sharedAccessKeyName,
                     ServiceConnectionString.sharedAccessSignature);
         }
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_011: [The function shall create new ServiceAuthenticationWithSharedAccessPolicyKey and set the authenticationMethod if the sharedAccessSignature is not defined]
-        else if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessSignature))
-        {
+        else if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessSignature)) {
             ServiceConnectionString.authenticationMethod = new ServiceAuthenticationWithSharedAccessPolicyKey(
                     ServiceConnectionString.sharedAccessKeyName,
                     ServiceConnectionString.sharedAccessKey);
@@ -133,11 +120,11 @@ public class ServiceConnectionStringBuilder
 
     /**
      * Returns the service endpoint that the client connects to
+     *
      * @param ServiceConnectionString The ServiceConnectionString containing the endpoint and authentication details
      * @return The service endpoint that the client connects to
      */
-    protected static String buildHttpsEndpoint(ServiceConnectionString ServiceConnectionString)
-    {
+    protected static String buildHttpsEndpoint(ServiceConnectionString ServiceConnectionString) {
         URL url = new HttpUrl.Builder()
                 .scheme(ENDPOINT_PROTOCOL)
                 .host(ServiceConnectionString.hostName)
@@ -152,17 +139,14 @@ public class ServiceConnectionStringBuilder
      * @param ServiceConnectionString The source ServiceConnectionString containing the hostName
      * @return The substring of the host name until the first "." character
      */
-    protected static String parseIotHubName(ServiceConnectionString ServiceConnectionString)
-    {
+    protected static String parseIotHubName(ServiceConnectionString ServiceConnectionString) {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_013: [The function shall return the substring of the host name until the first "." character]
         Integer index = ServiceConnectionString.hostName.indexOf(ServiceConnectionString.HOST_NAME_SEPARATOR);
-        if (index >= 0)
-        {
+        if (index >= 0) {
             return ServiceConnectionString.hostName.substring(0, index);
         }
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_014: [The function shall return empty string if "." character was not found]
-        else
-        {
+        else {
             return "";
         }
     }
@@ -173,16 +157,13 @@ public class ServiceConnectionStringBuilder
      * @param ServiceConnectionString The object to validate
      * @throws IllegalArgumentException This exception is thrown if the input object is null
      */
-    protected static void validate(ServiceConnectionString ServiceConnectionString) throws IllegalArgumentException
-    {
+    protected static void validate(ServiceConnectionString ServiceConnectionString) throws IllegalArgumentException {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_015: [The function shall throw IllegalArgumentException if the sharedAccessKeyName of the input itoHubConnectionString is empty]
-        if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessKeyName))
-        {
+        if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessKeyName)) {
             throw new IllegalArgumentException("SharedAccessKeyName cannot be null or empty");
         }
         // CodesSRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_016: [The function shall throw IllegalArgumentException if either of the sharedAccessKey or the sharedAccessSignature of the input itoHubConnectionString is empty]
-        if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessKey) && Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessSignature))
-        {
+        if (Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessKey) && Tools.isNullOrWhiteSpace(ServiceConnectionString.sharedAccessSignature)) {
             throw new IllegalArgumentException("Should specify either sharedAccessKey or sharedAccessSignature");
         }
 
@@ -196,17 +177,15 @@ public class ServiceConnectionStringBuilder
     /**
      * Validate string property using given regex
      *
-     * @param value The string value to validate
+     * @param value        The string value to validate
      * @param propertyName The property name
-     * @param regex The regex used for validation
+     * @param regex        The regex used for validation
      */
-    protected static void validateFormat(String value, String propertyName, String regex)
-    {
+    protected static void validateFormat(String value, String propertyName, String regex) {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_018: [The function shall validate the property value against the given regex]
         final Pattern pattern = Pattern.compile(regex);
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_019: [The function shall throw IllegalArgumentException if the value did not match with the pattern]
-        if (!pattern.matcher(value).matches())
-        {
+        if (! pattern.matcher(value).matches()) {
             throw new IllegalArgumentException("The connection string has an invalid value for property.");
         }
     }
@@ -214,15 +193,13 @@ public class ServiceConnectionStringBuilder
     /**
      * Validate string property using given regex if value is not null or empty
      *
-     * @param value string value to validate
+     * @param value        string value to validate
      * @param propertyName property name
-     * @param regex regex used for validation
+     * @param regex        regex used for validation
      */
-    protected static void validateFormatIfSpecified(String value, String propertyName, String regex)
-    {
+    protected static void validateFormatIfSpecified(String value, String propertyName, String regex) {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_020: [The function shall validate the property value against the given regex if the value is not null or empty]
-        if (!Tools.isNullOrEmpty(value))
-        {
+        if (! Tools.isNullOrEmpty(value)) {
             validateFormat(value, propertyName, regex);
         }
     }
@@ -230,11 +207,10 @@ public class ServiceConnectionStringBuilder
     /**
      * Set host name value to target ServiceConnectionString object
      *
-     * @param hostName host name string
+     * @param hostName                host name string
      * @param ServiceConnectionString target ServiceConnectionString object
      */
-    protected static void setHostName(String hostName, ServiceConnectionString ServiceConnectionString)
-    {
+    protected static void setHostName(String hostName, ServiceConnectionString ServiceConnectionString) {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_021: [The function shall validate the given hostName]
         validateFormat(hostName, ServiceConnectionString.HOST_NAME_PROPERTY_NAME, HOST_NAME_REGEX);
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_022: [The function shall parse and set the hostname to the given target ServiceConnectionString object]
@@ -245,11 +221,10 @@ public class ServiceConnectionStringBuilder
     /**
      * Set authentication method to target ServiceConnectionString object
      *
-     * @param authenticationMethod value to set
+     * @param authenticationMethod    value to set
      * @param ServiceConnectionString target ServiceConnectionString object
      */
-    protected static void setAuthenticationMethod(AuthenticationMethod authenticationMethod, ServiceConnectionString ServiceConnectionString)
-    {
+    protected static void setAuthenticationMethod(AuthenticationMethod authenticationMethod, ServiceConnectionString ServiceConnectionString) {
         // Codes_SRS_SERVICE_SDK_JAVA_ServiceConnectionStringBUILDER_12_023: [The function shall populate and set the authenticationMethod on the given target ServiceConnectionString object]
         authenticationMethod.populate(ServiceConnectionString);
         ServiceConnectionString.authenticationMethod = authenticationMethod;

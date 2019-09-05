@@ -12,12 +12,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-/** 
- * Grants device access to an IoT Hub for the specified amount of time. 
+/**
+ * Grants device access to an IoT Hub for the specified amount of time.
  */
-public final class IotHubServiceSasToken
-{
-    long TOKEN_VALID_SECS = 365*24*60*60;
+public final class IotHubServiceSasToken {
+    long TOKEN_VALID_SECS = 365 * 24 * 60 * 60;
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:
@@ -46,11 +45,9 @@ public final class IotHubServiceSasToken
      *
      * @param ServiceConnectionString Connection string object containing the connection parameters
      */
-    public IotHubServiceSasToken(ServiceConnectionString ServiceConnectionString)
-    {
+    public IotHubServiceSasToken(ServiceConnectionString ServiceConnectionString) {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_001: [The constructor shall throw IllegalArgumentException if the input object is null]
-        if (ServiceConnectionString == null)
-        {
+        if (ServiceConnectionString == null) {
             throw new IllegalArgumentException();
         }
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
@@ -62,7 +59,7 @@ public final class IotHubServiceSasToken
         this.keyValue = ServiceConnectionString.getSharedAccessKey();
         this.keyName = ServiceConnectionString.getSharedAccessKeyName();
         this.expiryTime = buildExpiresOn();
-        this.token =  buildToken();
+        this.token = buildToken();
     }
 
     /**
@@ -70,11 +67,9 @@ public final class IotHubServiceSasToken
      *
      * @return Valid token string
      */
-    private String buildToken()
-    {
+    private String buildToken() {
         String targetUri;
-        try
-        {
+        try {
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
             targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), String.valueOf(StandardCharsets.UTF_8));
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_003: [The constructor shall create a string to sign by concatenating the target uri and the expiry time string (one year)]
@@ -100,8 +95,8 @@ public final class IotHubServiceSasToken
             String token = String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
 
             return token;
-        } catch (Exception e)
-        {
+        }
+        catch (Exception e) {
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_007: [The constructor shall throw Exception if building the token failed]
             throw new RuntimeException(e);
         }
@@ -112,8 +107,7 @@ public final class IotHubServiceSasToken
      *
      * @return Seconds from now to expiry
      */
-    private long buildExpiresOn()
-    {
+    private long buildExpiresOn() {
         long expiresOnDate = System.currentTimeMillis();
         expiresOnDate += TOKEN_VALID_SECS * 1000;
         return expiresOnDate / 1000;
@@ -125,8 +119,7 @@ public final class IotHubServiceSasToken
      * @return The string representation of the SAS token.
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_008: [The constructor shall return with the generated token]
         return this.token;
     }

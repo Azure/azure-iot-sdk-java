@@ -9,23 +9,19 @@ import okhttp3.Response;
 
 import java.io.IOException;
 
-public class BasicAuthInterceptor implements Interceptor
-{
+public class BasicAuthInterceptor implements Interceptor {
 
-	private final String credentials;
-	private static final String AUTHORIZATION = "Authorization";
+    private final String credentials;
+    private static final String AUTHORIZATION = "Authorization";
 
-	public BasicAuthInterceptor(String credentials)
-	{
-		this.credentials = credentials;
-	}
+    public BasicAuthInterceptor(String credentials) {
+        this.credentials = credentials;
+    }
 
-	@Override
-	public Response intercept(Chain chain) throws IOException
-	{
-		Request request = chain.request();
-		Request authenticatedRequest = request.newBuilder().header(AUTHORIZATION, credentials).build();
-		return chain.proceed(authenticatedRequest);
-	}
-
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+        Request request = chain.request();
+        Request authenticatedRequest = request.newBuilder().header(AUTHORIZATION, credentials).build();
+        return chain.proceed(authenticatedRequest);
+    }
 }

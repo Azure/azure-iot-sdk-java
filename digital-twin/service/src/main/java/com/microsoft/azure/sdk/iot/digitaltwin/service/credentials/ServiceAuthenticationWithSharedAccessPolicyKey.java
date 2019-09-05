@@ -11,16 +11,14 @@ package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
  * ServiceAuthenticationWithSharedAccessPolicyKey type policy on
  * given ServiceConnectionString object.
  */
-public class ServiceAuthenticationWithSharedAccessPolicyKey extends AuthenticationMethod
-{
+public class ServiceAuthenticationWithSharedAccessPolicyKey extends AuthenticationMethod {
     /**
      * Constructor to create instance from policy name and policy key
      *
      * @param policyName The policy name string
-     * @param key The policy key string
+     * @param key        The policy key string
      */
-    public ServiceAuthenticationWithSharedAccessPolicyKey(String policyName, String key)
-    {
+    public ServiceAuthenticationWithSharedAccessPolicyKey(String policyName, String key) {
         this.policyName = policyName;
         this.key = key;
     }
@@ -33,11 +31,9 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
      * @return The populated ServiceConnectionString object
      */
     @Override
-    protected ServiceConnectionString populate(ServiceConnectionString ServiceConnectionString)
-    {
+    protected ServiceConnectionString populate(ServiceConnectionString ServiceConnectionString) {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICEAUTHENTICATIONWITHSHAREDACCESSKEY_12_002: [The function shall throw IllegalArgumentException if the input object is null]
-        if (ServiceConnectionString == null)
-        {
+        if (ServiceConnectionString == null) {
             throw new IllegalArgumentException("Input parameter \"ServiceConnectionStringBuilder\" is null");
         }
 
@@ -55,37 +51,37 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
 
     /**
      * Getter for policy name
+     *
      * @return The policy name string
      */
-    public String getPolicyName()
-    {
+    public String getPolicyName() {
         return this.policyName;
     }
 
     /**
      * Setter for policy name
+     *
      * @param policyName The string value to set
      */
-    protected void setPolicyName(String policyName)
-    {
+    protected void setPolicyName(String policyName) {
         this.policyName = policyName;
     }
 
     /**
      * Getter for policy key
+     *
      * @return The policy key string
      */
-    public String getKey()
-    {
+    public String getKey() {
         return this.key;
     }
 
     /**
      * Setter for policy key
+     *
      * @param key The string value to set
      */
-    protected void setKey(String key)
-    {
+    protected void setKey(String key) {
         this.key = key;
     }
 }
