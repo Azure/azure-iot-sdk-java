@@ -6,15 +6,12 @@ package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
 import okhttp3.OkHttpClient;
 
-public abstract class IoTServiceClientCredentials implements ServiceClientCredentials
-{
+public abstract class IoTServiceClientCredentials implements ServiceClientCredentials {
     @Override
-    public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder)
-    {
-        String sasToken = getSASToken();
+    public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
+        String sasToken = getSasToken();
         clientBuilder.addInterceptor(new BasicAuthInterceptor(sasToken)).build();
     }
 
-    protected abstract String getSASToken();
-
+    protected abstract String getSasToken();
 }

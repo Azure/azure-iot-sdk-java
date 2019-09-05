@@ -3,17 +3,14 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 
-public class SharedAccessKeyCredentials extends IoTServiceClientCredentials
-{
-	private final ServiceConnectionString serviceConnectionString;
+public class SharedAccessKeyCredentials extends IoTServiceClientCredentials {
+    private final ServiceConnectionString serviceConnectionString;
 
-	public SharedAccessKeyCredentials(ServiceConnectionString connectionString)
-	{
-		this.serviceConnectionString = connectionString;
-	}
+    public SharedAccessKeyCredentials(ServiceConnectionString connectionString) {
+        this.serviceConnectionString = connectionString;
+    }
 
-	protected String getSASToken()
-	{
-		return new IotHubServiceSasToken(serviceConnectionString).toString();
-	}
+    protected String getSasToken() {
+        return new IotHubServiceSasToken(serviceConnectionString).toString();
+    }
 }

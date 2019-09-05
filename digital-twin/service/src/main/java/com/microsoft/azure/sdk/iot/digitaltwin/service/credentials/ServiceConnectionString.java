@@ -3,8 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 
-public class ServiceConnectionString
-{
+public class ServiceConnectionString {
     protected static final String VALUE_PAIR_DELIMITER = ";";
     protected static final String VALUE_PAIR_SEPARATOR = "=";
     protected static final String HOST_NAME_SEPARATOR = ".";
@@ -23,8 +22,8 @@ public class ServiceConnectionString
     protected String sharedAccessKey;
     protected String sharedAccessSignature;
 
-
-    protected ServiceConnectionString() {}
+    protected ServiceConnectionString() {
+    }
 
     /**
      * Serialize connection string
@@ -32,8 +31,7 @@ public class ServiceConnectionString
      * @return Iot Hub connection string
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_007: [The function shall serialize the object to a
         // string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=]
         StringBuilder stringBuilder = new StringBuilder();
@@ -64,8 +62,7 @@ public class ServiceConnectionString
      *
      * @return The iot hub name string
      */
-    public String getIotHubName()
-    {
+    public String getIotHubName() {
         return this.iotHubName;
     }
 
@@ -74,8 +71,7 @@ public class ServiceConnectionString
      *
      * @return The HTTPS endpoint for the IoTHub
      */
-    public String getHttpsEndpoint()
-    {
+    public String getHttpsEndpoint() {
         return this.httpsEndpoint;
     }
 
@@ -84,8 +80,7 @@ public class ServiceConnectionString
      *
      * @return The authenticationMethod object
      */
-    public AuthenticationMethod getAuthenticationMethod()
-    {
+    public AuthenticationMethod getAuthenticationMethod() {
         return this.authenticationMethod;
     }
 
@@ -94,8 +89,7 @@ public class ServiceConnectionString
      *
      * @return The sharedAccessKeyName string
      */
-    public String getSharedAccessKeyName()
-    {
+    public String getSharedAccessKeyName() {
         return this.sharedAccessKeyName;
     }
 
@@ -104,8 +98,7 @@ public class ServiceConnectionString
      *
      * @return The sharedAccessKey string
      */
-    public String getSharedAccessKey()
-    {
+    public String getSharedAccessKey() {
         return this.sharedAccessKey;
     }
 
@@ -114,8 +107,7 @@ public class ServiceConnectionString
      *
      * @return The sharedAccessSignature string
      */
-    public String getSharedAccessSignature()
-    {
+    public String getSharedAccessSignature() {
         return this.sharedAccessSignature;
     }
 
@@ -124,8 +116,7 @@ public class ServiceConnectionString
      *
      * @return The hostName string
      */
-    public String getHostName()
-    {
+    public String getHostName() {
         return this.hostName;
     }
 
@@ -134,8 +125,7 @@ public class ServiceConnectionString
      *
      * @param sharedAccessKeyName The value of the signature to set
      */
-    protected void setSharedAccessKeyName(String sharedAccessKeyName)
-    {
+    protected void setSharedAccessKeyName(String sharedAccessKeyName) {
         this.sharedAccessKeyName = sharedAccessKeyName;
     }
 
@@ -144,8 +134,7 @@ public class ServiceConnectionString
      *
      * @param sharedAccessKey The value of the signature to set
      */
-    protected void setSharedAccessKey(String sharedAccessKey)
-    {
+    protected void setSharedAccessKey(String sharedAccessKey) {
         this.sharedAccessKey = sharedAccessKey;
     }
 
@@ -154,9 +143,7 @@ public class ServiceConnectionString
      *
      * @param sharedAccessSignature The value of the signature to set
      */
-    protected void setSharedAccessSignature(String sharedAccessSignature)
-    {
+    protected void setSharedAccessSignature(String sharedAccessSignature) {
         this.sharedAccessSignature = sharedAccessSignature;
     }
-
 }

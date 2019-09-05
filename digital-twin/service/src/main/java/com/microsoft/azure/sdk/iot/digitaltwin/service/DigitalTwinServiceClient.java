@@ -3,29 +3,40 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service;
 
-import com.azure.core.implementation.annotation.ReturnType;
-import com.azure.core.implementation.annotation.ServiceClient;
-import com.azure.core.implementation.annotation.ServiceMethod;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.IoTServiceClientCredentials;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatchInterfacesValue;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
 import com.microsoft.rest.serializer.JacksonAdapter;
+import lombok.Builder;
 
 import java.io.IOException;
+import java.util.HashMap;
 
-@ServiceClient(
-        builder = DigitalTwinServiceClientBuilder.class,
-        serviceInterfaces = DigitalTwins.class)
 public final class DigitalTwinServiceClient {
-    private DigitalTwinsImpl digitalTwins;
+    private DigitalTwinsImpl digitalTwin;
 
-    /**
-     * Creates a {@link DigitalTwinsImpl} object that is used to invoke the Digital Twin features
-     * @param client The DigitalTwinServiceAsyncCilent containing the DigitalTwinImpl object
+    /***
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param connectionString The IoTHub connection string
+     * @param credential The sas token provider to use for authorization
+     * @param httpsEndpoint The https endpoint to connect to
+     * @param apiVersion The ServiceVersion for the service client to use
+     * @throws IOException This exception is thrown if the service connection string parsing fails
+     * @throws IllegalStateException This exception is thrown if expected paramters are not passed to the builder
      */
-    DigitalTwinServiceClient(DigitalTwinServiceAsyncClient client) {
-        this.digitalTwins = client.digitalTwins;
+    @Builder
+    DigitalTwinServiceClient(String connectionString, IoTServiceClientCredentials credential, String
+            httpsEndpoint, String apiVersion) throws IOException {
+
+        DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient = DigitalTwinServiceAsyncClient.builder()
+                                                                                                   .apiVersion(apiVersion)
+                                                                                                   .connectionString(connectionString)
+                                                                                                   .credential(credential)
+                                                                                                   .httpsEndpoint(httpsEndpoint).build();
+        this.digitalTwin = digitalTwinServiceAsyncClient.digitalTwin;
     }
 
     /**
@@ -33,9 +44,8 @@ public final class DigitalTwinServiceClient {
      * @param digitalTwinId The ID of the digital twin. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional
      * @return The state of the full digital twin, including all properties of all interface instances registered by that digital twin
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public DigitalTwin getDigitalTwin(String digitalTwinId) {
-        return new DigitalTwin(this.digitalTwins.getInterfaces(digitalTwinId));
+        return new DigitalTwin(this.digitalTwin.getInterfaces(digitalTwinId));
     }
 
     /**
@@ -43,9 +53,8 @@ public final class DigitalTwinServiceClient {
      * @param modelId The model ID. Ex: &lt;example&gt;urn:contoso:TemperatureSensor:1&lt;/example&gt;
      * @return The DigitalTwin model definition
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public String getModel(String modelId) {
-        return String.valueOf(this.digitalTwins.getDigitalTwinModel(modelId));
+        return String.valueOf(this.digitalTwin.getDigitalTwinModel(modelId));
     }
 
     /**
@@ -55,78 +64,44 @@ public final class DigitalTwinServiceClient {
      *               This query parameter ONLY applies to Capability model.
      * @return The DigitalTwin model definition
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public String getModel(String modelId, Boolean expand) {
-        return String.valueOf(this.digitalTwins.getDigitalTwinModel(modelId, expand));
+        return String.valueOf(this.digitalTwin.getDigitalTwinModel(modelId, expand));
     }
 
     /**
-     * Update one to many properties on one to many interface instances on one digital twin instance
+     * Update one to many properties on one interface instance on one digital twin instance
      * @param digitalTwinId The ID of the digital twin to update
-     * @param patch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
-     *              {
-     *                  "interfaces": {
-     *                      "sampleDeviceInfo": {
-     *                          "properties": {
-     *                              "somePropertyName": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              },
-     *                              "somePropertyName2": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              }
+     * @param propertyPatch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
+     *				{
+     *                  "properties": {
+     *                      "somePropertyName": {
+     *                          "desired": {
+     *                              "value": "somePropertyValue"
+     *                          }
+     *                      },
+     *                      "somePropertyName2": {
+     *                          "desired": {
+     *                              "value": "somePropertyValue"
      *                          }
      *                      }
      *                  }
      *              }
      *              Nested properties are allowed, but the maximum depth allowed is 7.
      * @return The updated state of the digital twin representation
-     * @throws IOException
+     * @throws IOException Throws IOException if the json deserialization fails
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
-    public DigitalTwin updateDigitalTwinProperties(String digitalTwinId, String patch) throws IOException {
+    public DigitalTwin updateDigitalTwinProperties(String digitalTwinId, final String interfaceInstanceName, String propertyPatch) throws IOException {
         JacksonAdapter adapter = new JacksonAdapter();
-        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = adapter.deserialize(patch, DigitalTwinInterfacesPatch.class);
+        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = adapter.deserialize(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
 
-        return new DigitalTwin(this.digitalTwins.updateInterfaces(digitalTwinId, digitalTwinInterfacesPatch));
-    }
+        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = new DigitalTwinInterfacesPatch()
+                .withInterfaces(
+                        new HashMap<String, DigitalTwinInterfacesPatchInterfacesValue>() {{
+                            put(interfaceInstanceName, digitalTwinInterfacesPropertyPatch);
+                        }}
+                );
 
-    /**
-     * Update one to many properties on one to many interface instances on one digital twin instance
-     * @param digitalTwinId The ID of the digital twin to update
-     * @param patch The JSON representation of the patch. For example, to update two separate properties on the interface instance "sampleDeviceInfo", the JSON should look like:
-     *              {
-     *                  "interfaces": {
-     *                      "sampleDeviceInfo": {
-     *                          "properties": {
-     *                              "somePropertyName": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              },
-     *                              "somePropertyName2": {
-     *                                  "desired": {
-     *                                      "value": "somePropertyValue"
-     *                                  }
-     *                              }
-     *                          }
-     *                      }
-     *                  }
-     *              }
-     *              Nested properties are allowed, but the maximum depth allowed is 7.
-     * @param etag The ETag of the digital twin
-     * @return The updated state of the digital twin representation
-     * @throws IOException
-     */
-    @ServiceMethod(returns = ReturnType.SINGLE)
-    public DigitalTwin updateDigitalTwinProperties(String digitalTwinId, String patch, String etag) throws IOException {
-        JacksonAdapter adapter = new JacksonAdapter();
-        DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = adapter.deserialize(patch, DigitalTwinInterfacesPatch.class);
-
-        return new DigitalTwin(this.digitalTwins.updateInterfaces(digitalTwinId, digitalTwinInterfacesPatch, etag));
+        return new DigitalTwin(this.digitalTwin.updateInterfaces(digitalTwinId, digitalTwinInterfacesPatch));
     }
 
     /**
@@ -137,9 +112,8 @@ public final class DigitalTwinServiceClient {
      * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
      * @return The result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public String invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument) {
-        return String.valueOf(this.digitalTwins.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument));
+        return String.valueOf(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument));
     }
 
     /**
@@ -152,9 +126,8 @@ public final class DigitalTwinServiceClient {
      * @param responseTimeoutInSeconds The response timeout in seconds
      * @return The result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
      */
-    @ServiceMethod(returns = ReturnType.SINGLE)
     public String invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
-        return String.valueOf(this.digitalTwins.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds));
+        return String.valueOf(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds));
     }
 
 }
