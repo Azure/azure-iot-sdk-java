@@ -14,7 +14,7 @@ public class BasicAuthInterceptor implements Interceptor {
     private final String credentials;
     private static final String AUTHORIZATION = "Authorization";
 
-    public BasicAuthInterceptor(String credentials) {
+    BasicAuthInterceptor(String credentials) {
         this.credentials = credentials;
     }
 

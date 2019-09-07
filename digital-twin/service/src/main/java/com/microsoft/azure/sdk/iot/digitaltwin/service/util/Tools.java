@@ -3,7 +3,17 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.util;
 
+import rx.functions.Func1;
+
 public final class Tools {
+
+    public static final Func1<Object, String> FUNC_MAP_TO_STRING = new Func1<Object, String>() {
+
+        @Override
+        public String call(Object object) {
+            return object == null ? null : object.toString();
+        }
+    };
 
     /**
      * Empty private constructor to prevent accidental creation of instances
@@ -31,4 +41,5 @@ public final class Tools {
     public static boolean isNullOrWhiteSpace(String value) {
         return (value == null || value.trim().isEmpty());
     }
+
 }

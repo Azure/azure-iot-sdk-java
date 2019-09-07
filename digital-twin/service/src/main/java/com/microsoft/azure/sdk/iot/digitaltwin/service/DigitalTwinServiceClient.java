@@ -15,6 +15,8 @@ import lombok.Builder;
 import java.io.IOException;
 import java.util.HashMap;
 
+import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.FUNC_MAP_TO_STRING;
+
 public final class DigitalTwinServiceClient {
     private DigitalTwinsImpl digitalTwin;
 
@@ -54,7 +56,7 @@ public final class DigitalTwinServiceClient {
      * @return The DigitalTwin model definition
      */
     public String getModel(String modelId) {
-        return String.valueOf(this.digitalTwin.getDigitalTwinModel(modelId));
+        return FUNC_MAP_TO_STRING.call(this.digitalTwin.getDigitalTwinModel(modelId));
     }
 
     /**
@@ -65,7 +67,7 @@ public final class DigitalTwinServiceClient {
      * @return The DigitalTwin model definition
      */
     public String getModel(String modelId, Boolean expand) {
-        return String.valueOf(this.digitalTwin.getDigitalTwinModel(modelId, expand));
+        return FUNC_MAP_TO_STRING.call(this.digitalTwin.getDigitalTwinModel(modelId, expand));
     }
 
     /**
@@ -113,7 +115,7 @@ public final class DigitalTwinServiceClient {
      * @return The result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
      */
     public String invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument) {
-        return String.valueOf(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument));
+        return FUNC_MAP_TO_STRING.call(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument));
     }
 
     /**
@@ -127,7 +129,7 @@ public final class DigitalTwinServiceClient {
      * @return The result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
      */
     public String invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
-        return String.valueOf(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds));
+        return FUNC_MAP_TO_STRING.call(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds));
     }
 
 }

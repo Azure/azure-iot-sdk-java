@@ -24,6 +24,8 @@ import rx.functions.Func1;
 import java.io.IOException;
 import java.util.HashMap;
 
+import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.FUNC_MAP_TO_STRING;
+
 public final class DigitalTwinServiceAsyncClient {
     DigitalTwinsImpl digitalTwin;
 
@@ -92,13 +94,7 @@ public final class DigitalTwinServiceAsyncClient {
      */
     public Observable<String> getModel(String modelId) {
         return this.digitalTwin.getDigitalTwinModelAsync(modelId)
-                .map(new Func1<Object, String>() {
-
-                    @Override
-                    public String call(Object model) {
-                        return String.valueOf(model);
-                    }
-                });
+                .map(FUNC_MAP_TO_STRING);
     }
 
     /**
@@ -110,13 +106,7 @@ public final class DigitalTwinServiceAsyncClient {
      */
     public Observable<String> getModel(String modelId, Boolean expand) {
         return this.digitalTwin.getDigitalTwinModelAsync(modelId, expand)
-                .map(new Func1<Object, String>() {
-
-                    @Override
-                    public String call (Object model) {
-                        return String.valueOf(model);
-                    }
-                });
+                .map(FUNC_MAP_TO_STRING);
     }
 
     /**
@@ -173,13 +163,7 @@ public final class DigitalTwinServiceAsyncClient {
      */
     public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument) {
         return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument)
-                .map(new Func1<Object, String>() {
-
-                    @Override
-                    public String call(Object commandResponse) {
-                        return String.valueOf(commandResponse);
-                    }
-                });
+                .map(FUNC_MAP_TO_STRING);
     }
 
     /**
@@ -195,13 +179,6 @@ public final class DigitalTwinServiceAsyncClient {
      */
     public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, final String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
         return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds)
-                .map(new Func1<Object, String>() {
-
-                    @Override
-                    public String call(Object commandResponse) {
-                        return String.valueOf(commandResponse);
-                    }
-                });
+                .map(FUNC_MAP_TO_STRING);
     }
-
 }
