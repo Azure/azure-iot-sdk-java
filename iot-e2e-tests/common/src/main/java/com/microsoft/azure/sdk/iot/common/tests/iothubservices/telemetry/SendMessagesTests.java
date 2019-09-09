@@ -54,7 +54,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        IotHubServicesCommon.sendSecurityMessages(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, null);
     }
 
     @Test
