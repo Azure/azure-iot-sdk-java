@@ -3,10 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service;
 
-import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.IoTServiceClientCredentials;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnectionString;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.SharedAccessKeyCredentials;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.*;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.IotHubGatewayServiceAPIs20190701PreviewImpl;
@@ -32,35 +29,35 @@ public final class DigitalTwinServiceAsyncClient {
     /***
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoTHub connection string
-     * @param credential The sas token provider to use for authorization
+     * @param sasTokenProvider The sas token provider to use for authorization
      * @param httpsEndpoint The https endpoint to connect to
      * @param apiVersion The ServiceVersion for the service client to use
      * @throws IOException This exception is thrown if the service connection string parsing fails
      * @throws IllegalStateException This exception is thrown if expected paramters are not passed to the builder
      */
     @Builder
-    DigitalTwinServiceAsyncClient(String connectionString, IoTServiceClientCredentials credential, String
+    DigitalTwinServiceAsyncClient(String connectionString, SasTokenProvider sasTokenProvider, String
             httpsEndpoint, String apiVersion) throws IOException {
 
         if (apiVersion == null) {
             apiVersion = ServiceVersion.V2019_07_01_preview.getApiVersion();
         }
-        if (credential != null && httpsEndpoint == null) {
+        if (sasTokenProvider != null && httpsEndpoint == null) {
             throw new IllegalStateException("Please provide either 'Service Connection String' or " +
                     "('ServiceClientCredentails' and host https endpoint to connect to).");
         }
         if (connectionString != null) {
-            if (credential !=null || httpsEndpoint != null)
+            if (sasTokenProvider !=null || httpsEndpoint != null)
                 throw new IllegalStateException("Please provide either 'Service Connection String' or " +
                         "('ServiceClientCredentails' and host https endpoint to connect to).");
 
             ServiceConnectionString serviceConnectionString = ServiceConnectionStringBuilder.createConnectionString(connectionString);
-            credential = new SharedAccessKeyCredentials(serviceConnectionString);
+            sasTokenProvider = new SharedAccessKeySasTokenProvider(serviceConnectionString);
             httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
         }
 
         RestClient simpleRestClient = new RestClient.Builder().withBaseUrl(httpsEndpoint)
-                                                              .withCredentials(credential)
+                                                              .withCredentials(new IoTServiceClientCredentialsProvider(sasTokenProvider))
                                                               .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
                                                               .withSerializerAdapter(new JacksonAdapter())
                                                               .build();

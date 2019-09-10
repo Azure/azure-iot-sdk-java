@@ -3,14 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 
-public class SharedAccessKeyCredentials extends IoTServiceClientCredentials {
+public class SharedAccessKeySasTokenProvider implements SasTokenProvider {
     private final ServiceConnectionString serviceConnectionString;
 
-    public SharedAccessKeyCredentials(ServiceConnectionString connectionString) {
+    public SharedAccessKeySasTokenProvider(ServiceConnectionString connectionString) {
         this.serviceConnectionString = connectionString;
     }
 
-    protected String getSasToken() {
+    public String getSasToken() {
+        System.out.println("Should verify if token is valid or should be refreshed");
         return new IotHubServiceSasToken(serviceConnectionString).toString();
     }
 }
