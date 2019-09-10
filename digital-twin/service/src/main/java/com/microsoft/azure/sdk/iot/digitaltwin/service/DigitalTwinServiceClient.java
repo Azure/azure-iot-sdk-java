@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service;
 
-import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.IoTServiceClientCredentials;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.SasTokenProvider;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
@@ -23,20 +23,20 @@ public final class DigitalTwinServiceClient {
     /***
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoTHub connection string
-     * @param credential The sas token provider to use for authorization
+     * @param sasTokenProvider The sas token provider to use for authorization
      * @param httpsEndpoint The https endpoint to connect to
      * @param apiVersion The ServiceVersion for the service client to use
      * @throws IOException This exception is thrown if the service connection string parsing fails
      * @throws IllegalStateException This exception is thrown if expected paramters are not passed to the builder
      */
     @Builder
-    DigitalTwinServiceClient(String connectionString, IoTServiceClientCredentials credential, String
+    DigitalTwinServiceClient(String connectionString, SasTokenProvider sasTokenProvider, String
             httpsEndpoint, String apiVersion) throws IOException {
 
         DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient = DigitalTwinServiceAsyncClient.builder()
                                                                                                    .apiVersion(apiVersion)
                                                                                                    .connectionString(connectionString)
-                                                                                                   .credential(credential)
+                                                                                                   .sasTokenProvider(sasTokenProvider)
                                                                                                    .httpsEndpoint(httpsEndpoint).build();
         this.digitalTwin = digitalTwinServiceAsyncClient.digitalTwin;
     }
