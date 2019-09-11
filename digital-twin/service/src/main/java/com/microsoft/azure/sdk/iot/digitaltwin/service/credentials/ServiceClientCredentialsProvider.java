@@ -14,7 +14,7 @@ import okhttp3.Response;
 import java.io.IOException;
 
 @AllArgsConstructor
-public class IoTServiceClientCredentialsProvider implements ServiceClientCredentials {
+public class ServiceClientCredentialsProvider implements ServiceClientCredentials {
 
     private static final String AUTHORIZATION = "Authorization";
     @NonNull

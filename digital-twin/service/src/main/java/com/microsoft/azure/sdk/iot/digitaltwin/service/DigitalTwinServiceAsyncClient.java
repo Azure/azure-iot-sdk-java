@@ -3,7 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service;
 
-import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.SasTokenProvider;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceClientCredentialsProvider;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnectionString;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnectionStringParser;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.IotHubGatewayServiceAPIs20190701PreviewImpl;
@@ -13,7 +17,6 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalT
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
-import com.microsoft.rest.serializer.JacksonAdapter;
 import lombok.Builder;
 import rx.Observable;
 import rx.functions.Func1;
@@ -43,23 +46,21 @@ public final class DigitalTwinServiceAsyncClient {
             apiVersion = ServiceVersion.V2019_07_01_preview.getApiVersion();
         }
         if (sasTokenProvider != null && httpsEndpoint == null) {
-            throw new IllegalStateException("Please provide either 'Service Connection String' or " +
-                    "('ServiceClientCredentails' and host https endpoint to connect to).");
+            throw new IllegalStateException("Please provide the Sas token provider and host https endpoint to connect to).");
         }
         if (connectionString != null) {
             if (sasTokenProvider !=null || httpsEndpoint != null)
-                throw new IllegalStateException("Please provide either 'Service Connection String' or " +
-                        "('ServiceClientCredentails' and host https endpoint to connect to).");
+                throw new IllegalStateException("Please provide either 'Service Connection String' or ('ServiceClientCredentails' and host https endpoint to connect to).");
 
-            ServiceConnectionString serviceConnectionString = ServiceConnectionStringBuilder.createConnectionString(connectionString);
-            sasTokenProvider = new SharedAccessKeySasTokenProvider(serviceConnectionString);
+            ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
+            sasTokenProvider = serviceConnectionString.createSasTokenProvider();
             httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
         }
 
         RestClient simpleRestClient = new RestClient.Builder().withBaseUrl(httpsEndpoint)
-                                                              .withCredentials(new IoTServiceClientCredentialsProvider(sasTokenProvider))
+                                                              .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
                                                               .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
-                                                              .withSerializerAdapter(new JacksonAdapter())
+                                                              .withSerializerAdapter(new CustomJsonAdapter())
                                                               .build();
 
         IotHubGatewayServiceAPIs20190701PreviewImpl protocolLayerClient = new IotHubGatewayServiceAPIs20190701PreviewImpl(simpleRestClient);
@@ -129,8 +130,8 @@ public final class DigitalTwinServiceAsyncClient {
      * @throws IOException Throws IOException if the json deserialization fails
      */
     public Observable<DigitalTwin> updateDigitalTwinProperties(String digitalTwinId, final String interfaceInstanceName, String propertyPatch) throws IOException {
-        JacksonAdapter adapter = new JacksonAdapter();
-        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = adapter.deserialize(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = objectMapper.readValue(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
 
         DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = new DigitalTwinInterfacesPatch()
                 .withInterfaces(
@@ -138,15 +139,16 @@ public final class DigitalTwinServiceAsyncClient {
                             put(interfaceInstanceName, digitalTwinInterfacesPropertyPatch);
                         }}
                 );
+        String digitalTwinInterfacesPatchString = objectMapper.writeValueAsString(digitalTwinInterfacesPatch);
 
-        return this.digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
-                                .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
+        return this.digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatchString)
+                               .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
 
-                                    @Override
-                                    public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
-                                        return new DigitalTwin(digitalTwinInterfaces);
-                                    }
-                                });
+                                   @Override
+                                   public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
+                                       return new DigitalTwin(digitalTwinInterfaces);
+                                   }
+                               });
     }
 
     /**
