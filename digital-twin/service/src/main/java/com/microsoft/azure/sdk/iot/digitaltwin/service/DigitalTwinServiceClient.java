@@ -3,13 +3,13 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.SasTokenProvider;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatchInterfacesValue;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
-import com.microsoft.rest.serializer.JacksonAdapter;
 import lombok.Builder;
 
 import java.io.IOException;
@@ -93,8 +93,8 @@ public final class DigitalTwinServiceClient {
      * @throws IOException Throws IOException if the json deserialization fails
      */
     public DigitalTwin updateDigitalTwinProperties(String digitalTwinId, final String interfaceInstanceName, String propertyPatch) throws IOException {
-        JacksonAdapter adapter = new JacksonAdapter();
-        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = adapter.deserialize(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = objectMapper.readValue(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
 
         DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = new DigitalTwinInterfacesPatch()
                 .withInterfaces(
@@ -102,8 +102,9 @@ public final class DigitalTwinServiceClient {
                             put(interfaceInstanceName, digitalTwinInterfacesPropertyPatch);
                         }}
                 );
+        String digitalTwinInterfacesPatchString = objectMapper.writeValueAsString(digitalTwinInterfacesPatch);
 
-        return new DigitalTwin(this.digitalTwin.updateInterfaces(digitalTwinId, digitalTwinInterfacesPatch));
+        return new DigitalTwin(this.digitalTwin.updateInterfaces(digitalTwinId, digitalTwinInterfacesPatchString));
     }
 
     /**
