@@ -1439,7 +1439,7 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
-        new StrictExpectations()
+        new Expectations()
         {
             {
                 mockDeviceMethod.receive();
@@ -1489,7 +1489,7 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
-        new StrictExpectations()
+        new Expectations()
         {
             {
                 mockDeviceMethod.receive();
@@ -1528,7 +1528,7 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
-        new StrictExpectations()
+        new Expectations()
         {
             {
                 mockDeviceMethod.receive();

@@ -3,24 +3,24 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class MqttDeviceMethod extends Mqtt
 {
     private String subscribeTopic;
     private String responseTopic;
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
-    private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private final String POUND = "#";
     private final String BACKSLASH = "/";
@@ -61,7 +61,7 @@ public class MqttDeviceMethod extends Mqtt
 
         if (!requestMap.isEmpty())
         {
-            logger.LogInfo("Pending %d responses to be sent to IotHub yet unsubscribed %s", requestMap.size(), logger.getMethodName());
+            log.trace("Pending {} responses to be sent to IotHub yet unsubscribed", requestMap.size());
         }
     }
 

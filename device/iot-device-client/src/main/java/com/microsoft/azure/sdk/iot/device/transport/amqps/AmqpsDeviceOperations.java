@@ -4,8 +4,10 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 public abstract class AmqpsDeviceOperations
 {
     // Codes_SRS_AMQPSDEVICEOPERATIONS_12_032: [The class has static members for version identifier and api version keys.]
@@ -38,6 +41,7 @@ public abstract class AmqpsDeviceOperations
 
     protected String senderLinkTag;
     protected String receiverLinkTag;
+    protected String linkCorrelationId;
 
     protected String senderLinkEndpointPath;
     protected String receiverLinkEndpointPath;
@@ -48,20 +52,26 @@ public abstract class AmqpsDeviceOperations
     protected Sender senderLink;
     protected Receiver receiverLink;
 
-    private CustomLogger logger;
-
-    int linkCredit;
-
     /**
-     * This constructor creates an instance of device operation class and initializes member variables
      *
      * @param deviceClientConfig the config to pull the user agent string from
      *
      * @throws IllegalArgumentException if the provided deviceClientConfig is null
      */
+    /**
+     * This constructor creates an instance of device operation class and initializes member variables
+     *
+     * @param deviceClientConfig the config to pull the user agent string from
+     * @param senderLinkEndpointPath the sender link path to use for device clients
+     * @param receiverLinkEndpointpath the receiver link path to use for device clients
+     * @param senderLinkEndpointPathModules the sender link path to use for module clients
+     * @param receiverLinkEndpointPathModules the receiver link path to use for module clients
+     * @param senderLinkTagPrefix the prefix for the sender links
+     * @param receiverLinkTagPrefix the prefix for the receiver links
+     */
     public AmqpsDeviceOperations(DeviceClientConfig deviceClientConfig, String senderLinkEndpointPath, String receiverLinkEndpointpath,
                           String senderLinkEndpointPathModules, String receiverLinkEndpointPathModules,
-                          String senderLinkTagPrefix, String receiverLinkTagPrefix) throws IllegalArgumentException
+                          String senderLinkTagPrefix, String receiverLinkTagPrefix)
     {
         if (deviceClientConfig == null)
         {
@@ -74,9 +84,7 @@ public abstract class AmqpsDeviceOperations
         this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());
 
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_002: [The constructor shall initialize sender and receiver tags with UUID string.]
-        String uuidStr = UUID.randomUUID().toString();
-        this.senderLinkTag = uuidStr;
-        this.receiverLinkTag = uuidStr;
+        this.linkCorrelationId = UUID.randomUUID().toString();
 
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_005: [The constructor shall initialize sender and receiver link objects to null.]
         this.senderLink = null;
@@ -85,10 +93,6 @@ public abstract class AmqpsDeviceOperations
         this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.CLOSED;
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.CLOSED;
 
-        this.logger = new CustomLogger(this.getClass());
-
-        linkCredit = 0;
-
         String moduleId = deviceClientConfig.getModuleId();
         String deviceId = deviceClientConfig.getDeviceId();
         if (moduleId != null && !moduleId.isEmpty())
@@ -96,8 +100,8 @@ public abstract class AmqpsDeviceOperations
             this.senderLinkEndpointPath = senderLinkEndpointPathModules;
             this.receiverLinkEndpointPath = receiverLinkEndpointPathModules;
 
-            this.senderLinkTag = senderLinkTagPrefix + deviceId + "/" + moduleId + "-" + senderLinkTag;
-            this.receiverLinkTag = receiverLinkTagPrefix + deviceId + "/" + moduleId + "-" + receiverLinkTag;
+            this.senderLinkTag = senderLinkTagPrefix + deviceId + "/" + moduleId + "-" + this.linkCorrelationId;
+            this.receiverLinkTag = receiverLinkTagPrefix + deviceId + "/" + moduleId + "-" + this.linkCorrelationId;
 
             this.senderLinkAddress = String.format(this.senderLinkEndpointPath, deviceId, moduleId);
             this.receiverLinkAddress = String.format(receiverLinkEndpointPath, deviceId, moduleId);
@@ -107,8 +111,8 @@ public abstract class AmqpsDeviceOperations
             this.senderLinkEndpointPath = senderLinkEndpointPath;
             this.receiverLinkEndpointPath = receiverLinkEndpointpath;
 
-            this.senderLinkTag = senderLinkTagPrefix + deviceId + "-" + senderLinkTag;
-            this.receiverLinkTag = receiverLinkTagPrefix + deviceId + "-" + receiverLinkTag;
+            this.senderLinkTag = senderLinkTagPrefix + deviceId + "-" + this.linkCorrelationId;
+            this.receiverLinkTag = receiverLinkTagPrefix + deviceId + "-" + this.linkCorrelationId;
 
             this.senderLinkAddress = String.format(this.senderLinkEndpointPath, deviceId);
             this.receiverLinkAddress = String.format(receiverLinkEndpointPath, deviceId);
@@ -122,8 +126,6 @@ public abstract class AmqpsDeviceOperations
      */
     protected synchronized void openLinks(Session session)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_006: [The function shall throw IllegalArgumentException if the session argument is null.]
         if (session == null)
         {
@@ -149,6 +151,7 @@ public abstract class AmqpsDeviceOperations
 
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_010: [The function^ shall onConnectionInit both receiver and sender link.]
             this.senderLink.open();
+            this.log.debug("Opening {} sender link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId);
         }
 
         if ((this.receiverLink == null) && (this.amqpsRecvLinkState == AmqpsDeviceOperationLinkState.CLOSED))
@@ -170,9 +173,8 @@ public abstract class AmqpsDeviceOperations
 
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_010: [The function shall onConnectionInit both receiver and sender link.]
             this.receiverLink.open();
+            this.log.debug("Opening {} receiver link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId);
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -180,24 +182,32 @@ public abstract class AmqpsDeviceOperations
      */
     protected void closeLinks()
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_011: [If the sender link is not null the function shall close it and sets it to null.]
         if (this.senderLink != null)
         {
             this.senderLink.close();
             this.senderLink = null;
+            this.log.debug("Closed {} sender link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId);
         }
+        else
+        {
+            this.log.trace("Sender link was already closed, so nothing was done to the link");
+        }
+
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_012: [If the receiver link is not null the function shall close it and sets it to null.]
         if (this.receiverLink != null)
         {
             this.receiverLink.close();
             this.receiverLink = null;
+            this.log.debug("Closed {} receiver link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId);
         }
+        else
+        {
+            this.log.trace("Receiver link was already closed, so nothing was done to the link");
+        }
+
         this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.CLOSED;
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.CLOSED;
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -206,8 +216,6 @@ public abstract class AmqpsDeviceOperations
      */
     protected synchronized void initLink(Link link)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (link == null)
         {
             throw new IllegalArgumentException("The link cannot be null.");
@@ -215,38 +223,37 @@ public abstract class AmqpsDeviceOperations
 
         String linkName = link.getName();
 
-        if (linkName.equals(this.getSenderLinkTag()))
+        if (linkName.equals(this.getSenderLinkTag()) && this.amqpsSendLinkState == AmqpsDeviceOperationLinkState.OPENING)
         {
-            if (this.amqpsSendLinkState == AmqpsDeviceOperationLinkState.OPENING)
-            {
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_043: [If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.]
-                Target target = new Target();
-                target.setAddress(this.getSenderLinkAddress());
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_043: [If the link is the Sender link, the event handler shall create a new Target (Proton) object using the sender endpoint address member variable.]
+            Target target = new Target();
+            target.setAddress(this.getSenderLinkAddress());
 
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_044: [If the link is the Sender link, the event handler shall set its target to the created Target (Proton) object.]
-                link.setTarget(target);
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_044: [If the link is the Sender link, the event handler shall set its target to the created Target (Proton) object.]
+            link.setTarget(target);
 
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_14_045: [If the link is the Sender link, the event handler shall set the SenderSettleMode to UNSETTLED.]
-                link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
-            }
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_045: [If the link is the Sender link, the event handler shall set the SenderSettleMode to UNSETTLED.]
+            link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
+
+            this.log.trace("Initializing sender link with correlation id {}", this.linkCorrelationId);
         }
-
-        if (linkName.equals(this.getReceiverLinkTag()))
+        else if (linkName.equals(this.getReceiverLinkTag()) && this.amqpsRecvLinkState == AmqpsDeviceOperationLinkState.OPENING)
         {
-            if (this.amqpsRecvLinkState == AmqpsDeviceOperationLinkState.OPENING)
-            {
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_14_046: [If the link is the Receiver link, the event handler shall create a new Source (Proton) object using the receiver endpoint address member variable.]
-                Source source = new Source();
-                source.setAddress(this.getReceiverLinkAddress());
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_046: [If the link is the Receiver link, the event handler shall create a new Source (Proton) object using the receiver endpoint address member variable.]
+            Source source = new Source();
+            source.setAddress(this.getReceiverLinkAddress());
 
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_14_047: [If the link is the Receiver link, the event handler shall set its source to the created Source (Proton) object.]
-                link.setSource(source);
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_14_047: [If the link is the Receiver link, the event handler shall set its source to the created Source (Proton) object.]
+            link.setSource(source);
 
-                link.setReceiverSettleMode(ReceiverSettleMode.FIRST);
-            }
+            link.setReceiverSettleMode(ReceiverSettleMode.FIRST);
+
+            this.log.trace("Initializing receiver link with correlation id {}", this.linkCorrelationId);
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
+        else
+        {
+            this.log.trace("InitLink called, but no link names matched {} or the link was not opening yet", linkName);
+        }
     }
 
     /**
@@ -255,7 +262,7 @@ public abstract class AmqpsDeviceOperations
      * @param msgData The binary array of the bytes to send
      * @param offset The start offset to copy the bytes from
      * @param length The number of bytes to be send related to the offset
-     * @param deliveryTag The unique identfier of the delivery
+     * @param deliveryTag The unique identifier of the delivery
      * @return delivery tag
      */
     protected synchronized AmqpsSendReturnValue sendMessageAndGetDeliveryTag(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag)
@@ -272,28 +279,36 @@ public abstract class AmqpsDeviceOperations
             throw new IllegalArgumentException("Trying deliveryTag cannot be null.");
         }
 
-        if (this.linkCredit <= 0)
-        {
-            //not enough credit to send this message
-            return new AmqpsSendReturnValue(false, -1);
-        }
-
         // Codes_SRS_AMQPSDEVICEOPERATIONS_12_021: [The function shall create a Delivery object using the sender link and the deliveryTag.]
         Delivery delivery = this.senderLink.delivery(deliveryTag);
         try
         {
+            this.log.trace("Sending {} bytes over the amqp {} sender link with link correlation id {}", length, getLinkInstanceType(), this.linkCorrelationId);
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_022: [The function shall try to send the message data using the sender link with the offset and length argument.]
-            this.senderLink.send(msgData, offset, length);
+            int bytesSent = this.senderLink.send(msgData, offset, length);
+            this.log.trace("{} bytes sent over the amqp {} sender link with link correlation id {}", bytesSent, getLinkInstanceType(), this.linkCorrelationId);
+
+            if (bytesSent != length)
+            {
+                ProtocolException amqpSendFailedException = new ProtocolException(String.format("Amqp send operation did not send all of the expected bytes for %s sender link with link correlation id %s, retrying to send the message", getLinkInstanceType(), this.linkCorrelationId));
+                throw amqpSendFailedException;
+            }
+
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_023: [The function shall advance the sender link.]
-            this.senderLink.advance();
+            boolean canAdvance = this.senderLink.advance();
 
-            this.linkCredit = this.senderLink.getCredit();
+            if (!canAdvance)
+            {
+                ProtocolException amqpSendFailedException = new ProtocolException(String.format("Failed to advance the senderLink after sending a message on %s sender link with link correlation id %s, retrying to send the message", getLinkInstanceType(), this.linkCorrelationId));
+                throw amqpSendFailedException;
+            }
 
-            // Codes_SRS_AMQPSDEVICEOPERATIONS_12_024: [The function shall set the delivery hash to the value returned by the sender link.]
+            this.log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag), delivery.hashCode());
             return new AmqpsSendReturnValue(true, delivery.hashCode(), deliveryTag);
         }
         catch (Exception e)
         {
+            this.log.warn("Encountered a problem while sending a message on {} sender link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId, e);
             // Codes_SRS_AMQPSDEVICEOPERATIONS_12_025: [If proton failed sending the function shall advance the sender link, release the delivery object and sets the delivery hash to -1.]
             this.senderLink.advance();
             delivery.free();
@@ -301,6 +316,8 @@ public abstract class AmqpsDeviceOperations
             return new AmqpsSendReturnValue(false, -1);
         }
     }
+
+    public abstract String getLinkInstanceType();
 
     /**
      * Reads the received buffer and handles the link
@@ -325,15 +342,26 @@ public abstract class AmqpsDeviceOperations
                 // Codes_SRS_AMQPSDEVICEOPERATIONS_12_034: [The function shall read the full message into a buffer.]
                 int size = delivery.pending();
                 byte[] buffer = new byte[size];
-                int read = this.receiverLink.recv(buffer, 0, buffer.length);
+                int bytesRead = this.receiverLink.recv(buffer, 0, buffer.length);
+                this.log.trace("read {} bytes from receiver link {}", bytesRead, this.receiverLinkTag);
 
                 // Codes_SRS_AMQPSDEVICEOPERATIONS_12_035: [The function shall advance the receiver link.]
-                this.receiverLink.advance();
+                boolean receiverLinkAdvanced = this.receiverLink.advance();
+
+                if (!receiverLinkAdvanced)
+                {
+                    this.log.warn("{} receiver link with link correlation id {} did not advance after bytes were read from it", getLinkInstanceType(), this.linkCorrelationId);
+                }
+
+                if (size != bytesRead)
+                {
+                    log.warn("Amqp read from {} receiver link with link correlation id {} did not read the expected amount of bytes. Read {} but expected {}", getLinkInstanceType(), this.linkCorrelationId, bytesRead, size);
+                }
 
                 // Codes_SRS_AMQPSDEVICEOPERATIONS_12_038: [The function shall create a Proton message from the received buffer and return with it.]
                 AmqpsMessage amqpsMessage = new AmqpsMessage();
                 amqpsMessage.setDelivery(delivery);
-                amqpsMessage.decode(buffer, 0, read);
+                amqpsMessage.decode(buffer, 0, bytesRead);
 
                 return amqpsMessage;
             }
@@ -355,13 +383,31 @@ public abstract class AmqpsDeviceOperations
     }
 
     /**
-     * abstract function for operation specific implementations to identify if the given link is owned by the operation
+     * Identify if the given link is owned by the operation
      *
-     * @param linkName the name of the link to find.
      * @return true if the link is owned by the operation, false otherwise
      */
-    abstract protected boolean onLinkRemoteOpen(String linkName);
+    protected boolean onLinkRemoteOpen(String linkName)
+    {
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getSenderLinkTag()))
+        {
+            this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
+            this.log.debug("{} sender link with link correlation id {} was successfully opened {}", getLinkInstanceType(), this.linkCorrelationId);
+            return true;
+        }
 
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_027: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getReceiverLinkTag()))
+        {
+            this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
+            this.log.debug("{} receiver link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
+            return true;
+        }
+
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_028: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
+        return false;
+    }
     /**
      * abstract function for operation specific implementations to convert Proton message to IoTHubMessage
      *
@@ -391,6 +437,7 @@ public abstract class AmqpsDeviceOperations
     protected IotHubTransportMessage protonMessageToIoTHubMessage(MessageImpl protonMsg) throws com.microsoft.azure.sdk.iot.device.exceptions.TransportException
     {
         //Codes_SRS_AMQPSDEVICEOPERATION_34_009: [The function shall create a new IoTHubMessage using the Proton message body.]
+        this.log.trace("Converting proton message to iot hub message for {} receiver link with link correlation id {}. Proton message correlation id {}", getLinkInstanceType(), this.linkCorrelationId, protonMsg.getCorrelationId());
         byte[] msgBody;
         Data d = (Data) protonMsg.getBody();
         if (d != null)
@@ -478,6 +525,7 @@ public abstract class AmqpsDeviceOperations
      */
     protected MessageImpl iotHubMessageToProtonMessage(Message message) throws com.microsoft.azure.sdk.iot.device.exceptions.TransportException
     {
+        this.log.trace("Converting IoT Hub message to proton message for {} sender link with link correlation id {}. IoT Hub message correlationId {}", getLinkInstanceType(), this.linkCorrelationId, message.getCorrelationId());
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();
 
         Properties properties = new Properties();
@@ -598,8 +646,25 @@ public abstract class AmqpsDeviceOperations
         return this.receiverLinkAddress;
     }
 
-    public void onLinkFlow(int linkCredit)
+    boolean onLinkRemoteClose(String linkName)
     {
-        this.linkCredit = linkCredit;
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getSenderLinkTag()))
+        {
+            this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.CLOSED;
+            this.log.debug("{} sender link with link correlation id {} was closed", getLinkInstanceType(), this.linkCorrelationId);
+            return true;
+        }
+
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_027: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
+        if (linkName.equals(this.getReceiverLinkTag()))
+        {
+            this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.CLOSED;
+            this.log.debug("{} receiver link with link correlation id {} was closed", getLinkInstanceType(), this.linkCorrelationId);
+            return true;
+        }
+
+        // Codes_SRS_AMQPSDEVICETELEMETRY_12_028: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
+        return false;
     }
 }

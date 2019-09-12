@@ -1,6 +1,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
  * </p>
  * The multiplexed connection is supported with AMQPS / AMQPS_WS protocols.
  */
+@Slf4j
 public class TransportClient
 {
     public enum TransportClientState
@@ -31,8 +33,6 @@ public class TransportClient
     private TransportClientState transportClientState;
 
     private ArrayList<DeviceClient> deviceClientList;
-
-    private CustomLogger logger;
 
     /**
      * Constructor that takes a protocol as an argument.
@@ -68,10 +68,6 @@ public class TransportClient
         this.deviceClientList = new ArrayList<>();
 
         this.transportClientState = TransportClientState.CLOSED;
-
-        this.logger = new CustomLogger(this.getClass());
-
-        logger.LogInfo("TransportClient object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**
@@ -113,7 +109,7 @@ public class TransportClient
 
         this.transportClientState = TransportClientState.OPENED;
 
-        logger.LogInfo("TransportClient is opened successfully, method name is %s ", logger.getMethodName());
+        log.info("Transport client opened successfully");
     }
 
     /**
@@ -139,7 +135,7 @@ public class TransportClient
             this.deviceIO = null;
         }
 
-        logger.LogInfo("Connection closed with success, method name is %s ", logger.getMethodName());
+        log.info("Transport client closed successfully");
     }
 
     /***
@@ -165,7 +161,7 @@ public class TransportClient
         // Codes_SRS_TRANSPORTCLIENT_12_018: [The function shall set the new interval on the underlying device IO it the transport client is not open.]
         this.deviceIO.setSendPeriodInMilliseconds(newIntervalInMilliseconds);
 
-        logger.LogInfo("Send interval updated successfully in the transport client, method name is %s ", logger.getMethodName());
+        log.debug("Send interval updated successfully in the transport client");
     }
 
     /**
@@ -190,7 +186,7 @@ public class TransportClient
             deviceClientList.get(i).getConfig().setRetryPolicy(retryPolicy);
         }
 
-        logger.LogInfo("Retry policy updated successfully in the transport client, method name is %s ", logger.getMethodName());
+        log.debug("Retry policy updated successfully in the transport client");
     }
 
     /**
@@ -216,7 +212,7 @@ public class TransportClient
         // Codes_SRS_TRANSPORTCLIENT_12_007: [The function shall add the given device client to the deviceClientList.]
         this.deviceClientList.add(deviceClient);
 
-        logger.LogInfo("DeviceClient is added successfully to the transport client, method name is %s ", logger.getMethodName());
+        log.debug("DeviceClient instance successfully added to the transport client");
     }
 
     /**

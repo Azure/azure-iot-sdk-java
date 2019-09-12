@@ -80,32 +80,6 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
     }
 
     /**
-     * Identify if the given link is owned by the operation
-     *
-     * @return true if the link is owned by the operation, false otherwise
-     */
-    @Override
-    protected boolean onLinkRemoteOpen(String linkName)
-    {
-        // Codes_SRS_AMQPSDEVICETWIN_12_046: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
-        if (linkName.equals(this.getSenderLinkTag()))
-        {
-            this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            return true;
-        }
-
-        // Codes_SRS_AMQPSDEVICETWIN_12_047: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
-        if (linkName.equals(this.getReceiverLinkTag()))
-        {
-            this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            return true;
-        }
-
-        // Codes_SRS_AMQPSDEVICETWIN_12_048: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
-        return false;
-    }
-
-    /**
      * Sends the given message and returns with the delivery hash if the message type is twin
      *
      * @param msgData The binary array of the bytes to send
@@ -129,6 +103,12 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICETWIN_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery hash.]
             return new AmqpsSendReturnValue(false, -1);
         }
+    }
+
+    @Override
+    public String getLinkInstanceType()
+    {
+        return "twin";
     }
 
     /**
@@ -168,7 +148,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
             (this.deviceClientConfig.getDeviceId().equals(deviceClientConfig.getDeviceId())))
         {
             // Codes_SRS_AMQPSDEVICETWIN_12_016: [The function shall convert the amqpsMessage to IoTHubTransportMessage.]
-            Message message = protonMessageToIoTHubMessage(amqpsMessage);
+            IotHubTransportMessage message = protonMessageToIoTHubMessage(amqpsMessage);
 
             MessageCallback messageCallback = deviceClientConfig.getDeviceTwinMessageCallback();
             Object messageContext = deviceClientConfig.getDeviceTwinMessageContext();

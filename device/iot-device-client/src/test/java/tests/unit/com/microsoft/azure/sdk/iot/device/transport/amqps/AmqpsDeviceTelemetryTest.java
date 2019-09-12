@@ -6,10 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
@@ -297,12 +294,26 @@ public class AmqpsDeviceTelemetryTest
     {
         //arrange
         AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
         byte[] deliveryTag = "0".getBytes();
-        amqpsDeviceTelemetry.onLinkFlow(100);
+
+        new Expectations()
+        {
+            {
+                mockSession.sender(anyString);
+                result = mockSender;
+
+                mockSender.send(msgData, offset, length);
+                result = length;
+
+                mockSender.advance();
+                result = true;
+            }
+        };
+
+        Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
 
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);

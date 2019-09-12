@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
@@ -13,6 +15,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
+@Slf4j
 public class Message
 {
     // ----- Constants -----
@@ -147,7 +150,6 @@ public class Message
      * Stream that will provide the bytes for the body of the
      */
     private ByteArrayInputStream bodyStream;
-    private CustomLogger logger;
 
     /**
      * Security Client flag
@@ -300,7 +302,7 @@ public class Message
             this.properties.remove(messageProperty);
         }
 
-        logger.LogInfo("Setting message property, method name is %s ", logger.getMethodName());
+        log.trace("Setting message property");
         this.properties.add(new MessageProperty(name, value));
     }
 
@@ -328,7 +330,6 @@ public class Message
         this.feedbackStatusCode = FeedbackStatusCodeEnum.none;
         this.ack = FeedbackStatusCodeEnum.none;
         this.properties = new ArrayList<>();
-        this.logger = new CustomLogger(this.getClass());
         this.isSecurityClient = false;
     }
 
@@ -351,7 +352,7 @@ public class Message
             long currentTime = System.currentTimeMillis();
             if (currentTime > expiryTime)
             {
-                logger.LogWarn("The message with messageid %s expired on %s, method name is %s ", this.getMessageId(), new Date(), logger.getMethodName());
+                log.warn("The message with correlation id {} expired", this.getCorrelationId());
                 messageExpired = true;
             }
             else
@@ -396,6 +397,11 @@ public class Message
     public String getCorrelationId()
     {
         // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
+        if (correlationId == null)
+        {
+            return "";
+        }
+
         return correlationId;
     }
 
@@ -418,7 +424,7 @@ public class Message
         // Codes_SRS_MESSAGE_34_047: [The function shall set the message's expiry time.]
         long currentTime = System.currentTimeMillis();
         this.expiryTime = currentTime + timeOut;
-        logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), timeOut, new Date(this.expiryTime), logger.getMethodName());
+        log.trace("The message with messageid {} has expiry time in {} milliseconds and the message will expire on {}", this.getMessageId(), timeOut, new Date(this.expiryTime));
     }
 
     /**
@@ -435,7 +441,6 @@ public class Message
 
         // Codes_SRS_MESSAGE_34_037: [The function shall set the message's expiry time to be the number of milliseconds since the epoch provided in absoluteTimeout.]
         this.expiryTime = absoluteTimeout;
-        logger.LogInfo("The message with messageid %s has expiry time as %s milliseconds and the message will expire on %s, method name is %s ", this.getMessageId(), absoluteTimeout, new Date(this.expiryTime), logger.getMethodName());
     }
 
     /**
@@ -661,5 +666,23 @@ public class Message
     public boolean isSecurityMessage()
     {
         return this.isSecurityClient;
+    }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder s = new StringBuilder();
+        s.append(" Message details: ");
+        if (this.correlationId != null && !this.correlationId.isEmpty())
+        {
+            s.append("Correlation Id [").append(this.correlationId).append("] ");
+        }
+
+        if (this.messageId != null && !this.messageId.isEmpty())
+        {
+            s.append("Message Id [").append(this.messageId).append("] ");
+        }
+
+        return s.toString();
     }
 }

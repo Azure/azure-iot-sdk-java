@@ -3,25 +3,25 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class MqttDeviceTwin extends Mqtt
 {
     private String subscribeTopic;
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
-    private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private final String BACKSLASH = "/";
     private final String AND = "&";
@@ -75,7 +75,7 @@ public class MqttDeviceTwin extends Mqtt
 
         if (!requestMap.isEmpty())
         {
-            logger.LogInfo("Pending %d responses from IotHub yet unsubscribed %s", requestMap.size(), logger.getMethodName());
+            log.trace("Pending {} responses from IotHub yet unsubscribed", requestMap.size());
         }
     }
 
@@ -383,11 +383,6 @@ public class MqttDeviceTwin extends Mqtt
                                         //Codes_SRS_MQTTDEVICETWIN_25_042: [If the topic is of type patch for desired properties then this method shall parse further to look for version which if found is set by calling setVersion]
                                         message.setVersion(getVersion(topicTokens[PATCH_VERSION_TOKEN]));
                                     }
-                                }
-
-                                if (message != null)
-                                {
-                                    logger.LogInfo("Message received on DT " + message.getDeviceOperationType());
                                 }
                             }
                             else

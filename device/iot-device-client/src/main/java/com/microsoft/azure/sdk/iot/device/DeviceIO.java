@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -66,6 +67,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The task scheduler for sending and receiving messages for the Device Client
  */
+@Slf4j
 public final class DeviceIO
 {
     /** The state of the IoT Hub client's connection with the IoT Hub. */
@@ -77,7 +79,6 @@ public final class DeviceIO
     private long sendPeriodInMilliseconds;
     private long receivePeriodInMilliseconds;
 
-    private CustomLogger logger;
     private IotHubTransport transport;
     private DeviceClientConfig config;
     private IotHubSendTask sendTask = null;
@@ -134,9 +135,6 @@ public final class DeviceIO
 
         /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubClientState.CLOSED;
-
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceIO object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**
@@ -291,7 +289,6 @@ public final class DeviceIO
             message.setConnectionDeviceId(deviceId);
         }
 
-        logger.LogInfo("Message with messageid %s along with callback and callbackcontext is added to the queue, method name is %s ", message.getMessageId(), logger.getMethodName());
         /* Codes_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
         transport.addMessage(message, callback, callbackContext);
     }

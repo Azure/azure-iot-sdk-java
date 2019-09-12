@@ -811,60 +811,6 @@ public class AmqpsSessionManagerTest
     }
 
     @Test
-    public void onLinkFlowSuccess() throws TransportException
-    {
-        //arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
-        sessionList.add(mockAmqpsSessionDeviceOperation);
-        sessionList.add(mockAmqpsSessionDeviceOperation1);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-
-        new Expectations()
-        {
-            {
-                mockAmqpsSessionDeviceOperation.onLinkFlow(mockLink);
-                result = false;
-                mockAmqpsSessionDeviceOperation1.onLinkFlow(mockLink);
-                result = true;
-            }
-        };
-
-        //act
-        amqpsSessionManager.onLinkFlow(mockLink);
-    }
-
-    @Test
-    public void onLinkFlowSuccessOnFirstDeviceOperation() throws TransportException
-    {
-        //arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
-        ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
-        sessionList.add(mockAmqpsSessionDeviceOperation);
-        sessionList.add(mockAmqpsSessionDeviceOperation1);
-        Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
-
-        new Expectations()
-        {
-            {
-                mockAmqpsSessionDeviceOperation.onLinkFlow(mockLink);
-                result = true;
-            }
-        };
-
-        //act
-        amqpsSessionManager.onLinkFlow(mockLink);
-
-        new Verifications()
-        {
-            {
-                mockAmqpsSessionDeviceOperation1.onLinkFlow(mockLink);
-                times = 0;
-            }
-        };
-    }
-
-    @Test
     public void getExpectedWorkerLinkCountWithOneSession()
     {
         //arrange

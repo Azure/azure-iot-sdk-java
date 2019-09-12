@@ -1,11 +1,13 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.MessageType;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import org.apache.qpid.proton.engine.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.Transport;
 
 import java.util.ArrayList;
 
@@ -14,6 +16,7 @@ import java.util.ArrayList;
  * Manage multiple device clients and the authentication 
  * mechanism
  */
+@Slf4j
 public class AmqpsSessionManager
 {
     private final DeviceClientConfig deviceClientConfig;
@@ -21,8 +24,6 @@ public class AmqpsSessionManager
 
     private AmqpsDeviceAuthentication amqpsDeviceAuthentication;
     private ArrayList<AmqpsSessionDeviceOperation> amqpsDeviceSessionList = new ArrayList<>();
-
-    private CustomLogger logger;
 
     /**
      * Constructor that takes a device configuration.
@@ -37,8 +38,6 @@ public class AmqpsSessionManager
         {
             throw new IllegalArgumentException("deviceClientConfig cannot be null.");
         }
-
-        this.logger = new CustomLogger(this.getClass());
 
         // Codes_SRS_AMQPSESSIONMANAGER_12_002: [The constructor shall save the deviceClientConfig parameter value to a member variable.]
         this.deviceClientConfig = deviceClientConfig;
@@ -85,7 +84,7 @@ public class AmqpsSessionManager
      */
     void closeNow()
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
+        this.log.debug("Closing AMQP session");
 
         // Codes_SRS_AMQPSESSIONMANAGER_12_010: [The function shall call all device session to closeNow links.]
         for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
@@ -105,8 +104,6 @@ public class AmqpsSessionManager
             this.session.close();
             this.session = null;
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -116,8 +113,6 @@ public class AmqpsSessionManager
      */
     public void authenticate() throws TransportException
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
@@ -129,14 +124,11 @@ public class AmqpsSessionManager
                 }
             }
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     protected void subscribeDeviceToMessageType(MessageType messageType, String deviceId)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
+        this.log.trace("Subscribing to {}", messageType);
         // Codes_SRS_AMQPSESSIONMANAGER_12_018: [The function shall do nothing if the session is not open.]
         if (this.session != null)
         {
@@ -149,8 +141,6 @@ public class AmqpsSessionManager
                 }
             }
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -162,26 +152,22 @@ public class AmqpsSessionManager
      */
     void onConnectionInit(Connection connection) throws TransportException
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (connection != null)
         {
             if (this.session == null)
             {
                 // Codes_SRS_AMQPSESSIONMANAGER_12_023: [The function shall initialize the session member variable from the connection if the session is null.]
                 this.session = connection.session();
+
+                this.log.trace("Opening session...");
                 // Codes_SRS_AMQPSESSIONMANAGER_12_024: [The function shall open the initialized session.]
                 this.session.open();
             }
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     void onSessionRemoteOpen(Session session)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (this.amqpsDeviceAuthentication instanceof AmqpsDeviceAuthenticationCBS)
         {
             this.amqpsDeviceAuthentication.openLinks(session);
@@ -190,8 +176,6 @@ public class AmqpsSessionManager
         {
             this.openWorkerLinks();
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -199,8 +183,6 @@ public class AmqpsSessionManager
      */
     public void openWorkerLinks()
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         // Codes_SRS_AMQPSESSIONMANAGER_12_018: [The function shall do nothing if the session is not open.]
         if (this.session != null)
         {
@@ -213,8 +195,6 @@ public class AmqpsSessionManager
                 }
             }
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -225,15 +205,11 @@ public class AmqpsSessionManager
      */
     void onConnectionBound(Transport transport) throws TransportException
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (this.session != null)
         {
             // Codes_SRS_AMQPSESSIONMANAGER_12_026: [The function shall call setSslDomain on authentication if the session is not null.]
             this.amqpsDeviceAuthentication.setSslDomain(transport);
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -247,8 +223,6 @@ public class AmqpsSessionManager
      */
     void onLinkInit(Link link)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (this.session != null)
         {
             if (this.isAuthenticationOpened())
@@ -265,8 +239,6 @@ public class AmqpsSessionManager
                 this.amqpsDeviceAuthentication.initLink(link);
             }
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -282,8 +254,6 @@ public class AmqpsSessionManager
      */
     boolean onLinkRemoteOpen(Link link)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         String linkName = link.getName();
         if (this.isAuthenticationOpened())
         {
@@ -302,7 +272,7 @@ public class AmqpsSessionManager
             return this.amqpsDeviceAuthentication.onLinkRemoteOpen(linkName);
         }
 
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
+        this.log.warn("onLinkRemoteOpen could not be correlated with a local link, ignoring it");
 
         //If the link was not a worker link, and it wasn't a cbs link, then it was not handled
         return false;
@@ -452,17 +422,6 @@ public class AmqpsSessionManager
         return amqpsConvertFromProtonReturnValue;
     }
 
-    public void onLinkFlow(Link link)
-    {
-        for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
-        {
-            if (this.amqpsDeviceSessionList.get(i).onLinkFlow(link))
-            {
-                break;
-            }
-        }
-    }
-
     int getExpectedWorkerLinkCount()
     {
         int expectedWorkerLinkCount = 0;
@@ -472,5 +431,27 @@ public class AmqpsSessionManager
         }
 
         return expectedWorkerLinkCount;
+    }
+
+    public void onLinkRemoteClose(Link link)
+    {
+        String linkName = link.getName();
+
+        for (int i = 0; i < this.amqpsDeviceSessionList.size(); i++)
+        {
+            if (this.amqpsDeviceSessionList.get(i).onLinkRemoteClose(linkName))
+            {
+                //found the worker link that was closed in the list of amqpSessionDeviceOperations and updated its state to CLOSED
+                return;
+            }
+        }
+
+        //If the link was not a worker link, then it should be a cbs link
+        if (this.amqpsDeviceAuthentication.onLinkRemoteClose(linkName))
+        {
+            return;
+        }
+
+        this.log.warn("onLinkRemoteClose could not be correlated with a local link, ignoring it");
     }
 }

@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOError;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 
+@Slf4j
 public class InternalClient
 {
     static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
@@ -33,8 +35,6 @@ public class InternalClient
     private DeviceTwin twin;
     private DeviceMethod method;
 
-    protected CustomLogger logger;
-
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis)
     {
         /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
@@ -44,8 +44,6 @@ public class InternalClient
         this.config.setProtocol(protocol);
 
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-
-        this.logger = new CustomLogger(this.getClass());
     }
 
     InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
@@ -53,7 +51,6 @@ public class InternalClient
         this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
         this.config.setProtocol(protocol);
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-        this.logger = new CustomLogger(this.getClass());
     }
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException
@@ -67,8 +64,6 @@ public class InternalClient
 
         // Codes_SRS_INTERNALCLIENT_34_080: [This function shall save a new DeviceIO instance using the created config and the provided send/receive periods.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-
-        this.logger = new CustomLogger(this.getClass());
     }
 
     InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException, IOException
@@ -106,8 +101,6 @@ public class InternalClient
 
         //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-
-        this.logger = new CustomLogger(this.getClass());
     }
 
     //unused

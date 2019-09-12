@@ -315,7 +315,6 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         DeviceClient client = new DeviceClient(connString, protocol);
-        Deencapsulation.setField(client, "logger", new CustomLogger(this.getClass()));
 
         // act
         client.open();
@@ -392,7 +391,6 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         DeviceClient client = new DeviceClient(connString, protocol);
-        Deencapsulation.setField(client, "logger", new CustomLogger(this.getClass()));
 
         // act
         client.close();
@@ -527,7 +525,6 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         DeviceClient client = new DeviceClient(connString, protocol);
-        Deencapsulation.setField(client, "logger", new CustomLogger(this.getClass()));
 
         // act
         client.closeNow();
@@ -1593,7 +1590,6 @@ public class DeviceClientTest
             }
         };
         DeviceClient client = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
-        Deencapsulation.setField(client, "logger", new CustomLogger(this.getClass()));
         Deencapsulation.setField(client, "config", mockConfig);
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
 
@@ -1785,7 +1781,6 @@ public class DeviceClientTest
         };
         DeviceClient client = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
         Deencapsulation.invoke(client, "open");
-        Deencapsulation.setField(client, "logger", new CustomLogger(this.getClass()));
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
 
         // act

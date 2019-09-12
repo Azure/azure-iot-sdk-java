@@ -61,9 +61,15 @@ public class AmqpsDeviceAuthenticationTest
         }
 
         @Override
-        protected boolean authenticationMessageReceived(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
+        protected boolean handleAuthenticationMessage(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
         {
             return false;
+        }
+
+        @Override
+        public String getLinkInstanceType()
+        {
+            return "mockAuthentication";
         }
 
         @Override

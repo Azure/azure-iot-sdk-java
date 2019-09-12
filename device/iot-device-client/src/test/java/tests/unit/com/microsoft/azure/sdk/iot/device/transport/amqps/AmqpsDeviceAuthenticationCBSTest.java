@@ -230,7 +230,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = Deencapsulation.newInstance(AmqpsDeviceAuthenticationCBS.class, mockDeviceClientConfig);
 
         //act
-        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
+        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "handleAuthenticationMessage", mockAmqpsMessage, mockUUID);
 
         //assert
         assertTrue(isAuthenticated);
@@ -261,7 +261,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = Deencapsulation.newInstance(AmqpsDeviceAuthenticationCBS.class, mockDeviceClientConfig);
 
         //act
-        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
+        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "handleAuthenticationMessage", mockAmqpsMessage, mockUUID);
 
         //assert
         assertFalse(isAuthenticated);
@@ -287,7 +287,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = Deencapsulation.newInstance(AmqpsDeviceAuthenticationCBS.class, mockDeviceClientConfig);
 
         //act
-        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
+        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "handleAuthenticationMessage", mockAmqpsMessage, mockUUID);
 
         //assert
         assertFalse(isAuthenticated);
@@ -317,7 +317,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = Deencapsulation.newInstance(AmqpsDeviceAuthenticationCBS.class, mockDeviceClientConfig);
 
         //act
-        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
+        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "handleAuthenticationMessage", mockAmqpsMessage, mockUUID);
 
         //assert
         assertFalse(isAuthenticated);
@@ -355,7 +355,7 @@ public class AmqpsDeviceAuthenticationCBSTest
         AmqpsDeviceAuthenticationCBS amqpsDeviceAuthenticationCBS = Deencapsulation.newInstance(AmqpsDeviceAuthenticationCBS.class, mockDeviceClientConfig);
 
         //act
-        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
+        Boolean isAuthenticated = Deencapsulation.invoke(amqpsDeviceAuthenticationCBS, "handleAuthenticationMessage", mockAmqpsMessage, mockUUID);
 
         //assert
         assertFalse(isAuthenticated);

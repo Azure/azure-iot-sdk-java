@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.Date;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.COMPLETE;
 
+@Slf4j
 public class DeviceTwin
 {
     private int requestId;
@@ -87,7 +89,9 @@ public class DeviceTwin
                          **Codes_SRS_DEVICETWIN_25_029: [**If the message is of type DEVICE_TWIN and DEVICE_OPERATION_TWIN_GET_RESPONSE then the user call with a valid status is triggered.**]**
                          */
 
+                        log.trace("Executing twin callback for message {}", dtMessage);
                         deviceTwinStatusCallback.execute(iotHubStatus, deviceTwinStatusCallbackContext);
+                        log.trace("Twin callback returned for message {}", dtMessage);
 
                         if (iotHubStatus == IotHubStatusCode.OK)
                         {
@@ -115,8 +119,8 @@ public class DeviceTwin
                         /*
                          **Codes_SRS_DEVICETWIN_25_027: [**If the message is of type DEVICE_TWIN and DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE then the user call with a valid status is triggered.**]**
                          */
+                        log.trace("Executing twin status callback for device operation twin update reported properties response with status " + iotHubStatus);
                         deviceTwinStatusCallback.execute(iotHubStatus, deviceTwinStatusCallbackContext);
-
                         break;
                     }
                     case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE:

@@ -6,7 +6,9 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public final class DeviceMethod
 {
     private DeviceMethodCallback deviceMethodCallback;
@@ -19,8 +21,6 @@ public final class DeviceMethod
 
     private DeviceIO deviceIO;
     private DeviceClientConfig config;
-
-    private final CustomLogger logger = new CustomLogger(this.getClass());
 
     private final class deviceMethodResponseCallback implements MessageCallback
     {
@@ -42,7 +42,7 @@ public final class DeviceMethod
                     /*
                     **Codes_SRS_DEVICEMETHOD_25_009: [**If the received message is not of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Abandon **]**
                      */
-                    logger.LogError("Unexpected message type received");
+                    log.error("Unexpected message type received {}", message.getMessageType());
                     deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
                     return IotHubMessageResult.ABANDON;
                 }
@@ -64,7 +64,10 @@ public final class DeviceMethod
                                 /*
                                 **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
                                  */
+                                log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
                                 DeviceMethodData responseData = deviceMethodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
+                                log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
+
                                 /*
                                 **Codes_SRS_DEVICEMETHOD_25_010: [**User is expected to provide response message and status upon invoking the device method callback.**]**
                                  */
@@ -95,7 +98,7 @@ public final class DeviceMethod
                                 }
                                 else
                                 {
-                                    logger.LogInfo("User callback did not send any data for response");
+                                    log.info("User callback did not send any data for response");
                                     result = IotHubMessageResult.REJECT;
                                     /*
                                     **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
@@ -105,7 +108,7 @@ public final class DeviceMethod
                             }
                             catch (Exception e)
                             {
-                                logger.LogInfo("User callback did not succeed");
+                                log.info("User callback did not succeed");
                                 result = IotHubMessageResult.REJECT;
                                 /*
                                 **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
@@ -115,12 +118,12 @@ public final class DeviceMethod
                         }
                         else
                         {
-                            logger.LogInfo("Received device method request, but device has not setup device method");
+                            log.warn("Received device method request, but device has not setup device method");
                         }
                         break;
 
                     default:
-                        logger.LogError("Received unknown type message for device methods");
+                        log.warn("Received unknown type message for device methods");
                         break;
                 }
 

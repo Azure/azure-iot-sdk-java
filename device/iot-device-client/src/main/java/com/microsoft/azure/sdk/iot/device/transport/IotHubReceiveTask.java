@@ -3,28 +3,22 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Polls an IoT Hub for messages and invokes a callback if one is found.
  * Meant to be used with an executor that continuously calls run().
  */
+@Slf4j
 public final class IotHubReceiveTask implements Runnable
 {
     private static final String THREAD_NAME = "azure-iot-sdk-IotHubReceiveTask";
     private final IotHubTransport transport;
 
-    /**
-     * Private logger for class
-     */
-    private final CustomLogger logger = new CustomLogger(this.getClass());
-
     public IotHubReceiveTask(IotHubTransport transport)
     {
         if (transport == null)
         {
-
-            logger.LogError("IotHubReceiveTask constructor called with null value for parameter transport");
             throw new IllegalArgumentException("Parameter 'transport' must not be null");
         }
 
@@ -40,14 +34,12 @@ public final class IotHubReceiveTask implements Runnable
         {
             // Codes_SRS_IOTHUBRECEIVETASK_11_002: [The function shall poll an IoT Hub for messages, invoke the message callback if one exists, and return one of COMPLETE, ABANDON, or REJECT to the IoT Hub.]
             this.transport.handleMessage();
-
         }
         // Codes_SRS_IOTHUBRECEIVETASK_11_004: [The function shall not crash because of an IOException thrown by the transport.]
         // Codes_SRS_IOTHUBRECEIVETASK_11_005: [The function shall not crash because of any error or exception thrown by the transport.]
         catch (Throwable e)
         {
-            logger.LogError(e.toString() + ": " + e.getMessage());
-            logger.LogDebug("Exception on receiving queued messages to IoT Hub", e);
+            log.warn("Receive task thread encountered exception while processing received messages", e);
         }
     }
 }

@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Closeable;
 import java.io.IOError;
@@ -35,6 +36,7 @@ import java.nio.charset.StandardCharsets;
  * </p>
  * The client supports HTTPS 1.1 and AMQPS 1.0 transports.
  */
+@Slf4j
 public final class DeviceClient extends InternalClient implements Closeable
 {
     /**
@@ -149,9 +151,6 @@ public final class DeviceClient extends InternalClient implements Closeable
 
         // Codes_SRS_DEVICECLIENT_12_017: [The constructor shall register the device client with the transport client.]
         this.transportClient.registerDeviceClient(this);
-
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClient object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**
@@ -308,7 +307,7 @@ public final class DeviceClient extends InternalClient implements Closeable
             else
             {
                 // Codes_SRS_DEVICECLIENT_12_019: [If the client has been initialized to use TransportClient and the TransportClient is already opened the function shall do nothing.]
-                logger.LogInfo("Connection already opened by TransportClient.");
+                log.debug("Connection already opened by TransportClient.");
             }
         }
         else
@@ -317,7 +316,7 @@ public final class DeviceClient extends InternalClient implements Closeable
             super.open();
         }
 
-        logger.LogInfo("Connection opened with success, method name is %s ", logger.getMethodName());
+        log.info("Device client opened successfully");
     }
 
     /**
@@ -342,16 +341,17 @@ public final class DeviceClient extends InternalClient implements Closeable
             else
             {
                 // Codes_SRS_DEVICECLIENT_12_020: [If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall do nothing.]
-                logger.LogInfo("Connection already closed by TransportClient.");
+                log.info("Connection already closed by TransportClient.");
             }
         }
         else
         {
             //Codes_SRS_DEVICECLIENT_34_040: [If this object is not using a transport client, it shall invoke super.close().]
+            log.info("Closing device client...");
             super.close();
         }
 
-        logger.LogInfo("Connection closed with success, method name is %s ", logger.getMethodName());
+        log.info("Device client closed successfully");
     }
 
     /**
@@ -377,17 +377,18 @@ public final class DeviceClient extends InternalClient implements Closeable
             else
             {
                 // Codes_SRS_DEVICECLIENT_12_021: [If the client has been initialized to use TransportClient and the TransportClient is not opened yet the function shall do nothing.]
-                logger.LogInfo("Connection already closed by TransportClient.");
+                log.info("Connection already closed by TransportClient.");
             }
         }
         else
         {
             //Codes_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.closeNow().]
+            log.info("Closing device client...");
             super.closeNow();
             this.closeFileUpload();
         }
 
-        logger.LogInfo("Connection closed with success, method name is %s ", logger.getMethodName());
+        log.info("Device client closed successfully");
     }
 
     /**
@@ -647,7 +648,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     @Override
     void setOption_SetSASTokenExpiryTime(Object value) throws IllegalArgumentException
     {
-        logger.LogInfo("Setting SASTokenExpiryTime as %s seconds, method name is %s ", value, logger.getMethodName());
+        log.debug("Setting SASTokenExpiryTime as {} seconds", value);
 
         if (this.getConfig().getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
         {
