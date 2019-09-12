@@ -55,7 +55,7 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                                                             .propertyName(PROPERTY_STATE)
                                                                             .propertyValue(String.valueOf(state))
                                                                             .build();
-        return reportPropertyAsync(
+        return reportPropertiesAsync(
             singletonList(reportProperty),
             new DigitalTwinCallback() {
                 @Override
@@ -129,7 +129,7 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                                                                     .propertyValue(propertyDesired)
                                                                                     .propertyResponse(propertyResponse)
                                                                                     .build();
-                reportPropertyAsync(
+                reportPropertiesAsync(
                         singletonList(reportProperty),
                         new DigitalTwinCallback() {
                             @Override

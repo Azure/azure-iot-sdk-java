@@ -50,6 +50,7 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.CommandJ
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.deserialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TelemetryJsonSerializer.serializeTelemetry;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.serializeReportProperty;
 import static java.util.Collections.singleton;
 import static lombok.AccessLevel.PACKAGE;
@@ -67,27 +68,26 @@ public final class DigitalTwinDeviceClient {
     private static final String INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN = "\"Interface instance [%s] not found.\"";
     private static final String INVALID_METHOD_PAYLOAD_MESSAGE_PATTERN = "\"Invalid method payload: %s.\"";
     private static final String INVALID_METHOD_PAYLOAD_TYPE_MESSAGE = "\"Method data is not byte array.\"";
-    private final static String DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_INSTANCE = "urn_azureiot_ModelDiscovery_ModelInformation";
-    private final static String DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_ID = "urn:azureiot:ModelDiscovery:ModelInformation:1";
-    private final static String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE = "urn_azureiot_Client_SDKInformation";
-    private final static String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_ID = "urn:azureiot:Client:SDKInformation:1";
-    private final static String PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE = "$.ifname";
-    private final static String PROPERTY_DIGITAL_TWIN_INTERFACE_ID = "$.ifid";
-    private final static String PROPERTY_MESSAGE_SCHEMA = "$.schema";
-    private final static String PROPERTY_COMMAND_NAME = "iothub-command-name";
-    private final static String PROPERTY_REQUEST_ID = "iothub-command-request-id";
-    private final static String PROPERTY_STATUS = "iothub-command-statuscode";
-    private final static String TOKEN_INTERFACE_INSTANCE_NAME = "interfaceInstanceName";
-    private final static String TOKEN_COMMAND_NAME = "command";
-    public final static String DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX = "$iotin:";
-    private final static Pattern COMMAND_PARSER = Pattern.compile(String.format(
+    private static final String DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_INSTANCE = "urn_azureiot_ModelDiscovery_ModelInformation";
+    private static final String DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_ID = "urn:azureiot:ModelDiscovery:ModelInformation:1";
+    private static final String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE = "urn_azureiot_Client_SDKInformation";
+    private static final String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_ID = "urn:azureiot:Client:SDKInformation:1";
+    private static final String PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE = "$.ifname";
+    private static final String PROPERTY_DIGITAL_TWIN_INTERFACE_ID = "$.ifid";
+    private static final String PROPERTY_MESSAGE_SCHEMA = "$.schema";
+    private static final String PROPERTY_COMMAND_NAME = "iothub-command-name";
+    private static final String PROPERTY_REQUEST_ID = "iothub-command-request-id";
+    private static final String PROPERTY_STATUS = "iothub-command-statuscode";
+    private static final String TOKEN_INTERFACE_INSTANCE_NAME = "interfaceInstanceName";
+    private static final String TOKEN_COMMAND_NAME = "command";
+    private static final Pattern COMMAND_PARSER = Pattern.compile(String.format(
             "^\\%s(?<%s>.*)\\*(?<%s>.*)$",
             DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX,
             TOKEN_INTERFACE_INSTANCE_NAME,
             TOKEN_COMMAND_NAME
     ));
 
-    private final static String DIGITAL_TWIN_MODEL_DISCOVERY_MESSAGE_SCHEMA = "modelInformation";
+    private static final String DIGITAL_TWIN_MODEL_DISCOVERY_MESSAGE_SCHEMA = "modelInformation";
 
     private final DeviceClient deviceClient;
     private final Map<String, AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients;
@@ -216,7 +216,7 @@ public final class DigitalTwinDeviceClient {
                         return;
                     }
                     log.debug("Reporting SdkInformation...");
-                    reportPropertyAsync(
+                    reportPropertiesAsync(
                             DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE,
                             DIGITAL_TWIN_SDK_INFORMATION_PROPERTIES,
                             reportSdkInformationCallback,
@@ -326,7 +326,7 @@ public final class DigitalTwinDeviceClient {
         }
     }
 
-    DigitalTwinClientResult reportPropertyAsync(
+    DigitalTwinClientResult reportPropertiesAsync(
             @NonNull final String digitalTwinInterfaceInstanceName,
             @NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties,
             @NonNull final DigitalTwinCallback digitalTwinReportedPropertyUpdatedCallback,

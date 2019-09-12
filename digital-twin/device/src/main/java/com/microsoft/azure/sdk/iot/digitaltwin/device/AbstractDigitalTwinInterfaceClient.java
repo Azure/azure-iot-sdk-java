@@ -94,14 +94,14 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * @param context Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
      * @return if this async function is accepted or not.
      */
-    protected final DigitalTwinClientResult reportPropertyAsync(
+    protected final DigitalTwinClientResult reportPropertiesAsync(
             @NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties,
             @NonNull final DigitalTwinCallback digitalTwinReportedPropertyUpdatedCallback,
             final Object context) {
         if (digitalTwinDeviceClient == null) {
             return DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
         } else {
-            return digitalTwinDeviceClient.reportPropertyAsync(
+            return digitalTwinDeviceClient.reportPropertiesAsync(
                     digitalTwinInterfaceInstanceName,
                     digitalTwinReportProperties,
                     digitalTwinReportedPropertyUpdatedCallback,

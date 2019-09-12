@@ -5,7 +5,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,13 +39,13 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DeviceClient.class})
 public class DigitalTwinDeviceClientTest {
-    private final static String DIGITAL_TWIN_INTERFACE_INSTANCE_1 = "DIGITAL_TWIN_INTERFACE_INSTANCE_1";
-    private final static String DIGITAL_TWIN_INTERFACE_INSTANCE_2 = "DIGITAL_TWIN_INTERFACE_INSTANCE_2";
-    private final static String DIGITAL_TWIN_INTERFACE_ID_1 = "DIGITAL_TWIN_INTERFACE_ID_1";
-    private final static String DIGITAL_TWIN_INTERFACE_ID_2 = "DIGITAL_TWIN_INTERFACE_ID_2";
-    private final static String DIGITAL_TWIN_DCM_ID = "DIGITAL_TWIN_DCM_ID";
-    private final static int DELAY_IN_MS = 100;
-    private final static int REGISTRATION_LATENCY = 3000;
+    private static final String DIGITAL_TWIN_INTERFACE_INSTANCE_1 = "DIGITAL_TWIN_INTERFACE_INSTANCE_1";
+    private static final String DIGITAL_TWIN_INTERFACE_INSTANCE_2 = "DIGITAL_TWIN_INTERFACE_INSTANCE_2";
+    private static final String DIGITAL_TWIN_INTERFACE_ID_1 = "DIGITAL_TWIN_INTERFACE_ID_1";
+    private static final String DIGITAL_TWIN_INTERFACE_ID_2 = "DIGITAL_TWIN_INTERFACE_ID_2";
+    private static final String DIGITAL_TWIN_DCM_ID = "DIGITAL_TWIN_DCM_ID";
+    private static final int DELAY_IN_MS = 100;
+    private static final int REGISTRATION_LATENCY = 3000;
 
     private DigitalTwinDeviceClient testee;
     private List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients;
@@ -222,6 +221,33 @@ public class DigitalTwinDeviceClientTest {
                     }
                 }).start();
                 return null;
+            }
+        }).when(deviceClient)
+          .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
+
+        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(
+                DIGITAL_TWIN_DCM_ID,
+                digitalTwinInterfaceClients,
+                digitalTwinInterfaceRegistrationCallback,
+                context
+        );
+        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERING);
+        Thread.sleep(REGISTRATION_LATENCY);
+        verify(digitalTwinInterfaceRegistrationCallback).onResult(eq(DIGITALTWIN_CLIENT_ERROR), eq(context));
+        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
+        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
+        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
+        verify(digitalTwinInterfaceClient1, never()).onRegistered();
+        verify(digitalTwinInterfaceClient2, never()).onRegistered();
+    }
+
+    @Test
+    public void registerInterfaceSendEventThrowExceptionTest() throws InterruptedException {
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Exception {
+                throw new Exception("SendEventThrowException");
             }
         }).when(deviceClient)
           .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
