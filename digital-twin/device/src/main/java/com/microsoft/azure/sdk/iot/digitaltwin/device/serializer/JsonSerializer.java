@@ -9,7 +9,7 @@ import java.io.IOException;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public final class JsonSerializer {
-    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(NON_NULL);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(NON_NULL);
 
     private JsonSerializer() {
     }

@@ -12,9 +12,9 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSeri
 
 @Slf4j
 public final class CommandJsonSerializer {
-    private final static String ATTRIBUTE_COMMAND_REQUEST = "commandRequest";
-    private final static String ATTRIBUTE_VALUE = "value";
-    private final static String ATTRIBUTE_REQUEST_ID = "requestId";
+    private static final String ATTRIBUTE_COMMAND_REQUEST = "commandRequest";
+    private static final String ATTRIBUTE_VALUE = "value";
+    private static final String ATTRIBUTE_REQUEST_ID = "requestId";
 ;
     private CommandJsonSerializer() {
     }

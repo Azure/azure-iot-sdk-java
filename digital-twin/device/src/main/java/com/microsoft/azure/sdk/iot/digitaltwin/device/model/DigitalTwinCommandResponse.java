@@ -16,8 +16,7 @@ public class DigitalTwinCommandResponse {
     @NonNull
     private final Integer status;
     /**
-     * Response payload to send to server.  This *MUST* be allocated with <c>malloc()</c> by the application.
-     * The Digital Twin SDK takes responsibility for calling <c>free()</c> on this value when the structure is returned.
+     * Response payload to send to server.
      */
     private String payload;
 }

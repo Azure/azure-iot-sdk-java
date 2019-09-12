@@ -9,15 +9,15 @@ import lombok.NonNull;
 
 import java.util.List;
 
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.isNotEmpty;
 
 public final class TwinPropertyJsonSerializer {
-    private final static String ATTRIBUTE_VALUE = "value";
-    private final static String ATTRIBUTE_STATUS_CODE = "sc";
-    private final static String ATTRIBUTE_STATUS_VERSION = "sv";
-    private final static String ATTRIBUTE_STATUS_DESCRIPTION = "sd";
-    private final static JsonParser JSON_PARSER = new JsonParser();
+    public static final String DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX = "$iotin:";
+    private static final String ATTRIBUTE_VALUE = "value";
+    private static final String ATTRIBUTE_STATUS_CODE = "sc";
+    private static final String ATTRIBUTE_STATUS_VERSION = "sv";
+    private static final String ATTRIBUTE_STATUS_DESCRIPTION = "sd";
+    private static final JsonParser JSON_PARSER = new JsonParser();
 
     private TwinPropertyJsonSerializer() {
     }
