@@ -3,11 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.device.fileupload;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,12 +19,12 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * Provide means to upload file in the Azure Storage using the IoTHub.
  */
+@Slf4j
 public final class FileUpload
 {
     private static final int MAX_UPLOAD_PARALLEL = 10;
 
     private HttpsTransportManager httpsTransportManager;
-    private static CustomLogger logger;
     private ScheduledExecutorService taskScheduler;
     private FileUploadStatusCallBack fileUploadStatusCallBack;
     private static Queue<FileUploadInProgress> fileUploadInProgressesSet;
@@ -66,8 +66,7 @@ public final class FileUpload
         /* Codes_SRS_FILEUPLOAD_21_014: [The constructor shall create an Event callback `fileUploadStatusCallBack` to receive the upload status.] */
         fileUploadStatusCallBack = new FileUploadStatusCallBack();
 
-        logger = new CustomLogger(this.getClass());
-        logger.LogInfo("FileUpload object is created successfully, method name is %s ", logger.getMethodName());
+        log.info("FileUpload object is created successfully");
     }
 
     /**
@@ -150,13 +149,13 @@ public final class FileUpload
                 catch (ClassCastException | NullPointerException | UnsupportedOperationException e)
                 {
                     /* Codes_SRS_FILEUPLOAD_21_023: [If the FileUploadStatusCallBack failed to delete the `FileUploadInProgress`, it shall log a error.] */
-                    logger.LogError("FileUploadStatusCallBack received callback for unknown FileUpload");
+                    log.error("FileUploadStatusCallBack received callback for unknown FileUpload", e);
                 }
             }
             else
             {
                 /* Codes_SRS_FILEUPLOAD_21_022: [If the received context is not type of `FileUploadInProgress`, the FileUploadStatusCallBack shall log a error and ignore the message.] */
-                logger.LogError("FileUploadStatusCallBack received callback for unknown FileUpload");
+                log.error("FileUploadStatusCallBack received callback for unknown FileUpload");
             }
         }
     }

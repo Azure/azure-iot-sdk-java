@@ -1,20 +1,19 @@
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.engine.SslDomain;
 import org.apache.qpid.proton.engine.Transport;
 
 import java.io.IOException;
 import java.util.UUID;
 
+@Slf4j
 public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
 {
     private final DeviceClientConfig deviceClientConfig;
-    private CustomLogger logger;
 
     /**
      * This constructor creates an instance of AmqpsDeviceAuthenticationSAS class and initializes member variables
@@ -33,8 +32,6 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_003: [The constructor shall set both the sender and the receiver link state to OPENED.]
         this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
         this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
-
-        this.logger = new CustomLogger(this.getClass());
     }
 
     /**
@@ -45,6 +42,12 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_004: [The function shall override the default behaviour and return null.]
         return null;
+    }
+
+    @Override
+    public String getLinkInstanceType()
+    {
+        return "x509";
     }
 
     /**
@@ -80,7 +83,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
         }
         catch (IOException e)
         {
-            logger.LogDebug("setSslDomain has thrown exception: %s", e.getMessage());
+            log.warn("setSslDomain has thrown exception", e);
             throw new TransportException(e);
         }
 
@@ -95,7 +98,7 @@ public class AmqpsDeviceAuthenticationX509 extends AmqpsDeviceAuthentication
     }
 
     @Override
-    protected boolean authenticationMessageReceived(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
+    protected boolean handleAuthenticationMessage(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
     {
         return false;
     }

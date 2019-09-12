@@ -3,6 +3,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.ProtonUnsupportedOperationException;
 import org.apache.qpid.proton.engine.SslDomain;
@@ -11,6 +12,7 @@ import org.apache.qpid.proton.engine.Transport;
 import javax.net.ssl.SSLContext;
 import java.util.UUID;
 
+@Slf4j
 public abstract class AmqpsDeviceAuthentication extends AmqpsDeviceOperations
 {
     public AmqpsDeviceAuthentication(DeviceClientConfig config)
@@ -39,6 +41,7 @@ public abstract class AmqpsDeviceAuthentication extends AmqpsDeviceOperations
         }
         catch (ProtonUnsupportedOperationException e)
         {
+            log.warn("Encountered an exception while making ssl domain for amqp connection", e);
             throw new TransportException(e);
         }
 
@@ -69,7 +72,7 @@ public abstract class AmqpsDeviceAuthentication extends AmqpsDeviceOperations
      * @param authenticationCorrelationId the expected correlation ID.
      * @return true if the message acknowledge the authentication, false otherwise.
      */
-    abstract protected boolean authenticationMessageReceived(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId);
+    abstract protected boolean handleAuthenticationMessage(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId);
 
     @Override
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException

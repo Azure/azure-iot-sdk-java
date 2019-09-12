@@ -283,4 +283,16 @@ public class IotHubTransportMessage extends Message
         /* Codes_SRS_IOTHUBTRANSPORTMESSAGE_21_005: [The getUriPath shall return the stored uriPath.] */
         return uriPath;
     }
+
+    @Override
+    public String toString()
+    {
+        StringBuilder base = new StringBuilder(super.toString());
+        if (this.requestId != null && !this.requestId.isEmpty())
+        {
+            base.append("Request Id [").append(this.requestId).append("] ");
+        }
+
+        return base.toString();
+    }
 }

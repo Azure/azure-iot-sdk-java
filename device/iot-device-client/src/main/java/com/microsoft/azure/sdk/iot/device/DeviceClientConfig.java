@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
  * Configuration settings for an IoT Hub client. Validates all user-defined
  * settings.
  */
+@Slf4j
 public final class DeviceClientConfig
 {
     /** The default value for readTimeoutMillis. */
@@ -56,8 +58,6 @@ public final class DeviceClientConfig
     private Object defaultDeviceTelemetryMessageContext;
 
     private Map<String, Pair<MessageCallback, Object>> inputChannelMessageCallbacks = new HashMap<>();
-
-    private CustomLogger logger;
 
     private ProductInfo productInfo;
 
@@ -110,10 +110,6 @@ public final class DeviceClientConfig
 
         //Codes_SRS_DEVICECLIENTCONFIG_34_041: [This function shall save a new default product info.]
         this.productInfo = new ProductInfo();
-
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
-                iotHubConnectionString.getHostName(), iotHubConnectionString.getDeviceId(), logger.getMethodName());
     }
 
     public DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider) throws IllegalArgumentException
@@ -128,10 +124,6 @@ public final class DeviceClientConfig
         this.useWebsocket = false;
 
         this.productInfo = new ProductInfo();
-
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
-                this.authenticationProvider.getHostname(), authenticationProvider.getDeviceId(), logger.getMethodName());
     }
 
     /**
@@ -170,9 +162,7 @@ public final class DeviceClientConfig
                 iotHubConnectionString.getModuleId(),
                 publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
 
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClientConfig object is created successfully, method name is %s ",
-                logger.getMethodName());
+        log.trace("DeviceClientConfig object is created successfully");
     }
 
     /**
@@ -235,10 +225,6 @@ public final class DeviceClientConfig
 
         //Codes_SRS_DEVICECLIENTCONFIG_34_043: [This function shall save a new default product info.]
         this.productInfo = new ProductInfo();
-
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("DeviceClientConfig object is created successfully with IotHubName=%s, deviceID=%s , method name is %s ",
-                connectionString.getHostName(), connectionString.getDeviceId(), logger.getMethodName());
     }
 
     public IotHubClientProtocol getProtocol()
@@ -631,7 +617,6 @@ public final class DeviceClientConfig
         this.deviceMethodsMessageContext = null;
         this.defaultDeviceTelemetryMessageContext = null;
         this.deviceTwinMessageContext = null;
-        this.logger = null;
         this.useWebsocket = false;
     }
 }

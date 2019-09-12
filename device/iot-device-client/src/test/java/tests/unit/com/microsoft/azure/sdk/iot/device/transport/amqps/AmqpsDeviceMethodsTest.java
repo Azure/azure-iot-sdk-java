@@ -7,10 +7,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
@@ -283,22 +280,33 @@ public class AmqpsDeviceMethodsTest
     public void sendMessageAndGetDeliveryTagCallsSuper() throws IOException
     {
         //arrange
-        String deviceId = "deviceId";
-        byte[] deliveryTag = "0".getBytes();
+        final byte[] deliveryTag = "0".getBytes();
+
+        new Expectations()
+        {
+            {
+                mockSession.sender(anyString);
+                result = mockSender;
+
+                mockSender.send(deliveryTag, 0, 1);
+                result = 1;
+
+                mockSender.advance();
+                result = true;
+            }
+        };
 
         AmqpsDeviceMethods amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceMethods.class, mockDeviceClientConfig);
         Deencapsulation.invoke(amqpsDeviceMethods, "openLinks", mockSession);
 
-        amqpsDeviceMethods.onLinkFlow(100);
-
         //act
         AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceMethods, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, deliveryTag, 0, 1, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
-        deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
+        byte[] deliveryTagActual = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
         //assert
         assertEquals(true, deliverySuccessful);
-        assertNotEquals(String.valueOf(-1).getBytes(), deliveryTag);
+        assertNotEquals(String.valueOf(-1).getBytes(), deliveryTagActual);
     }
 
     // Tests_SRS_AMQPSDEVICEMETHODS_12_011: [The function shall return with AmqpsSendReturnValue with false success and -1 delivery Tag.]

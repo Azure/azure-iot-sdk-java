@@ -580,7 +580,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_023: [If the state is authenticating the function shall call getMessageFromReceiverLink on the authentication object.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_055: [The function shall find the correlation ID in the correlationIdlist.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call authenticationMessageReceived with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
+    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call handleAuthenticationMessage with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
     @Test
@@ -601,7 +601,7 @@ public class AmqpsSessionDeviceOperationTest
             {
                 Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "getMessageFromReceiverLink", linkName);
                 result = mockAmqpsMessage;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
+                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "handleAuthenticationMessage", mockAmqpsMessage, mockUUID);
                 result = true;
             }
         };
@@ -617,7 +617,7 @@ public class AmqpsSessionDeviceOperationTest
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_023: [If the state is authenticating the function shall call getMessageFromReceiverLink on the authentication object.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_055: [The function shall find the correlation ID in the correlationIdlist.]
-    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call authenticationMessageReceived with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
+    // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_053: [The function shall call handleAuthenticationMessage with the correlation ID on the authentication object and if it returns true set the authentication state to authenticated.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_054: [The function shall call notify the lock if after receiving the message and the authentication is in authenticating state.]
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_056: [The function shall remove the correlationId from the list if it is found.]
     @Test
@@ -639,7 +639,7 @@ public class AmqpsSessionDeviceOperationTest
             {
                 Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "getMessageFromReceiverLink", linkName);
                 result = mockAmqpsMessage;
-                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, mockUUID);
+                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "handleAuthenticationMessage", mockAmqpsMessage, mockUUID);
                 result = false;
             }
         };
@@ -799,167 +799,6 @@ public class AmqpsSessionDeviceOperationTest
     }
 
     @Test
-    public void onLinkFlowSendsToWorkerLink()
-    {
-        //arrange
-        final String targetLinkPrefix = "somelinkprefix-";
-        final String telemetryLinkName = "telemetry";
-        final String twinLinkName = "twin";
-        final String methodLinkName = "method";
-        final int expectedCredit = 1234;
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
-        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
-        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
-        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
-        new NonStrictExpectations()
-        {
-            {
-                mockLink.getCredit();
-                result = expectedCredit;
-
-                mockLink.getName();
-                result = targetLinkPrefix + telemetryLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "getSenderLinkTag");
-                result = targetLinkPrefix + telemetryLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceTwin, "getSenderLinkTag");
-                result = targetLinkPrefix + twinLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceMethods, "getSenderLinkTag");
-                result = targetLinkPrefix + methodLinkName;
-            }
-        };
-
-        //act
-        amqpsSessionDeviceOperation.onLinkFlow(mockLink);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockAmqpsDeviceTelemetry.onLinkFlow(expectedCredit);
-            }
-        };
-    }
-
-    @Test
-    public void onLinkFlowSendsToAuthenticationLink()
-    {
-        //arrange
-        final String targetLinkPrefix = "somelinkprefix-";
-        final String telemetryLinkName = "telemetry";
-        final String twinLinkName = "twin";
-        final String methodLinkName = "method";
-        final String cbsLinkName = "cbs";
-        final int expectedCredit = 1234;
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
-        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
-        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
-        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
-        new NonStrictExpectations()
-        {
-            {
-                mockLink.getCredit();
-                result = expectedCredit;
-
-                mockLink.getName();
-                result = targetLinkPrefix + cbsLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "getSenderLinkTag");
-                result = targetLinkPrefix + telemetryLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceTwin, "getSenderLinkTag");
-                result = targetLinkPrefix + twinLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceMethods, "getSenderLinkTag");
-                result = targetLinkPrefix + methodLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "getSenderLinkTag");
-                result = targetLinkPrefix + cbsLinkName;
-            }
-        };
-
-        //act
-        amqpsSessionDeviceOperation.onLinkFlow(mockLink);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockAmqpsDeviceAuthenticationCBS.onLinkFlow(expectedCredit);
-            }
-        };
-    }
-
-    @Test
-    public void onLinkFlowSendsToNoLink()
-    {
-        //arrange
-        final String targetLinkPrefix = "somelinkprefix-";
-        final String telemetryLinkName = "telemetry";
-        final String twinLinkName = "twin";
-        final String methodLinkName = "method";
-        final String cbsLinkName = "cbs";
-        final int expectedCredit = 1234;
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
-        Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
-        amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
-        amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
-        amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
-        Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
-        new NonStrictExpectations()
-        {
-            {
-                mockLink.getCredit();
-                result = expectedCredit;
-
-                mockLink.getName();
-                result = targetLinkPrefix + "some-unknown-link";
-
-                Deencapsulation.invoke(mockAmqpsDeviceTelemetry, "getSenderLinkTag");
-                result = targetLinkPrefix + telemetryLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceTwin, "getSenderLinkTag");
-                result = targetLinkPrefix + twinLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceMethods, "getSenderLinkTag");
-                result = targetLinkPrefix + methodLinkName;
-
-                Deencapsulation.invoke(mockAmqpsDeviceAuthenticationCBS, "getSenderLinkTag");
-                result = targetLinkPrefix + cbsLinkName;
-            }
-        };
-
-        //act
-        amqpsSessionDeviceOperation.onLinkFlow(mockLink);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockAmqpsDeviceAuthenticationCBS.onLinkFlow(expectedCredit);
-                times = 0;
-
-                mockAmqpsDeviceTelemetry.onLinkFlow(expectedCredit);
-                times = 0;
-
-                mockAmqpsDeviceTwin.onLinkFlow(expectedCredit);
-                times = 0;
-
-                mockAmqpsDeviceMethods.onLinkFlow(expectedCredit);
-                times = 0;
-            }
-        };
-    }
-
-    @Test
     public void handleAuthenticationMessageSuccess()
     {
         //arrange
@@ -971,7 +810,7 @@ public class AmqpsSessionDeviceOperationTest
         new Expectations()
         {
             {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, uuid);
+                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "handleAuthenticationMessage", mockAmqpsMessage, uuid);
                 result = true;
             }
         };
@@ -1011,7 +850,7 @@ public class AmqpsSessionDeviceOperationTest
         new Expectations()
         {
             {
-                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "authenticationMessageReceived", mockAmqpsMessage, uuid);
+                Deencapsulation.invoke(mockAmqpsDeviceAuthentication, "handleAuthenticationMessage", mockAmqpsMessage, uuid);
                 result = false;
             }
         };

@@ -81,6 +81,12 @@ public class AmqpsDeviceOperationsTest
         }
 
         @Override
+        public String getLinkInstanceType()
+        {
+            return "mock";
+        }
+
+        @Override
         protected boolean onLinkRemoteOpen(String linkName)
         {
             return false;
@@ -561,14 +567,20 @@ public class AmqpsDeviceOperationsTest
         final int length = 1;
         final byte[] deliveryTag = "0".getBytes();
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
-        amqpsDeviceOperations.onLinkFlow(100);
         new NonStrictExpectations()
         {
             {
                 mockSender.delivery(deliveryTag);
                 result = mockDelivery;
+
                 mockDelivery.hashCode();
                 result = new byte[1];
+
+                mockSender.send(msgData, offset, length);
+                result = length;
+
+                mockSender.advance();
+                result = true;
             }
         };
 
@@ -587,52 +599,8 @@ public class AmqpsDeviceOperationsTest
                 times = 1;
                 mockSender.advance();
                 times = 1;
-                mockSender.getCredit();
-                times = 1;
                 mockDelivery.hashCode();
                 times = 1;
-            }
-        };
-    }
-
-    @Test
-    public void sendMessageAndGetDeliveryHashFailsIfNoLinkCreditAvailable()
-    {
-        //arrange
-        AmqpsDeviceOperationsMock amqpsDeviceOperations = new AmqpsDeviceOperationsMock(mockDeviceClientConfig);
-        final byte[] msgData = new byte[1];
-        final int offset = 0;
-        final int length = 1;
-        final byte[] deliveryTag = "0".getBytes();
-        Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
-        amqpsDeviceOperations.onLinkFlow(0);
-        new NonStrictExpectations()
-        {
-            {
-                mockSender.delivery(deliveryTag);
-                result = mockDelivery;
-                mockDelivery.hashCode();
-                result = new byte[1];
-            }
-        };
-
-        //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceOperations, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
-
-        //assert
-        int deliveryHash = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryHash");
-        assertTrue(deliveryHash == -1);
-        new Verifications()
-        {
-            {
-                mockSender.delivery(deliveryTag);
-                times = 0;
-                mockSender.send(msgData, offset, length);
-                times = 0;
-                mockSender.advance();
-                times = 0;
-                mockDelivery.hashCode();
-                times = 0;
             }
         };
     }
@@ -651,7 +619,6 @@ public class AmqpsDeviceOperationsTest
         final int length = 1;
         final byte[] deliveryTag = "0".getBytes();
         Deencapsulation.setField(amqpsDeviceOperations, "senderLink", mockSender);
-        amqpsDeviceOperations.onLinkFlow(100);
         new NonStrictExpectations()
         {
             {
@@ -1022,7 +989,7 @@ public class AmqpsDeviceOperationsTest
                 times = 2;
                 mockMessage.getCorrelationId();
                 result = correlationId;
-                times = 2;
+                times = 3;
                 mockMessage.getContentEncoding();
                 result = contentEncoding;
                 times = 2;
@@ -1191,20 +1158,5 @@ public class AmqpsDeviceOperationsTest
                 actualMessage.setProperty(AMQPS_APP_PROPERTY_PREFIX + userIdKey, userId.toString());
             }
         };
-    }
-
-    @Test
-    public void onLinkFlowSavesLinkCredit()
-    {
-        //arrange
-        int expectedLinkCredit = 2345;
-        AmqpsDeviceOperationsMock amqpsDeviceOperations = new AmqpsDeviceOperationsMock(mockDeviceClientConfig);
-
-        //act
-        amqpsDeviceOperations.onLinkFlow(expectedLinkCredit);
-
-        //assert
-        int actualLinkCredit = Deencapsulation.getField(amqpsDeviceOperations, "linkCredit");
-        assertEquals(expectedLinkCredit, actualLinkCredit);
     }
 }

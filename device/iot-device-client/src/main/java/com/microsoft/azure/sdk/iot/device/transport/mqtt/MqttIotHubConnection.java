@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
 
+@Slf4j
 public class MqttIotHubConnection implements IotHubTransportConnection, MqttMessageListener
 {
     /** The MQTT connection lock. */
@@ -45,8 +47,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private String connectionId;
 
     private IotHubListener listener;
-
-    private CustomLogger logger;
 
     //Messaging clients
     private MqttMessaging deviceMessaging;
@@ -90,7 +90,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.deviceMessaging = null;
             this.deviceMethod = null;
             this.deviceTwin = null;
-            this.logger = new CustomLogger(this.getClass());
         }
     }
 
@@ -109,6 +108,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_022: [If the list of device client configuration objects is larger than 1, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("Mqtt does not support Multiplexing");
         }
+
         synchronized (MQTT_CONNECTION_LOCK)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [If the MQTT connection is already open,
@@ -118,6 +118,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 return;
             }
 
+            this.log.debug("Opening MQTT connection...");
+
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
             try
@@ -125,6 +127,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 SSLContext sslContext = this.config.getAuthenticationProvider().getSSLContext();
                 if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
+                    this.log.trace("MQTT connection will use sas token based auth");
                     this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
@@ -134,6 +137,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                         //Codes_SRS_MQTTIOTHUBCONNECTION_34_027: [If this function is called while using websockets and x509 authentication, an UnsupportedOperationException shall be thrown.]
                         throw new UnsupportedOperationException("X509 authentication is not supported over MQTT_WS");
                     }
+
+                    this.log.trace("MQTT connection will use X509 certificate based auth");
 
                     this.iotHubUserPassword = null;
                 }
@@ -181,11 +186,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 this.deviceMessaging.start();
                 this.state = IotHubConnectionStatus.CONNECTED;
 
+                this.log.debug("MQTT connection opened successfully");
+
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_065: [If the connection opens successfully, this function shall notify the listener that connection was established.]
                 this.listener.onConnectionEstablished(this.connectionId);
             }
             catch (IOException e)
             {
+                this.log.error("Exception encountered while opening MQTT connection; closing connection", e);
                 this.state = IotHubConnectionStatus.DISCONNECTED;
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
                 // for any reason, the function shall throw a TransportException.]
@@ -218,6 +226,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             return;
         }
 
+        this.log.debug("Closing MQTT connection");
+
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [The function shall close the MQTT connection.]
         try
         {
@@ -240,78 +250,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
 
             this.state = IotHubConnectionStatus.DISCONNECTED;
+            this.log.debug("Successfully closed MQTT connection");
         }
         catch (TransportException e)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_021: [If a TransportException is encountered while closing the three clients, this function shall set this object's state to closed and then rethrow the exception.]
             this.state = IotHubConnectionStatus.DISCONNECTED;
+            this.log.error("Exception encountered while closing MQTT connection, connection state is unknown", e);
             throw e;
-        }
-    }
-
-    /**
-     * Sends an event message.
-     *
-     * @param message the event message.
-     *
-     * @return the status code from sending the event message.
-     *
-     * @throws IllegalStateException if the MqttIotHubConnection is not open
-     */
-    public IotHubStatusCode sendEvent(Message message) throws IllegalStateException
-    {
-        synchronized (MQTT_CONNECTION_LOCK)
-        {
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_010: [If the message is null or empty,
-            // the function shall return status code BAD_FORMAT.]
-            if (message == null || message.getBytes() == null ||
-                    (
-                            (message.getMessageType() != MessageType.DEVICE_TWIN
-                                    && message.getMessageType() != MessageType.DEVICE_METHODS)
-                                    && message.getBytes().length == 0))
-            {
-                return IotHubStatusCode.BAD_FORMAT;
-            }
-
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_013: [If the MQTT connection is closed,
-            // the function shall throw an IllegalStateException.]
-            if (this.state == IotHubConnectionStatus.DISCONNECTED)
-            {
-                throw new IllegalStateException("Cannot send event using a closed MQTT connection");
-            }
-
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_008: [The function shall send an event message
-            // to the IoT Hub given in the configuration.]
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_011: [If the message was successfully received by the service,
-            // the function shall return status code OK_EMPTY.]
-            IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
-
-            try
-            {
-                // Codes_SRS_MQTTIOTHUBCONNECTION_15_009: [The function shall send the message payload.]
-                if (message.getMessageType() == MessageType.DEVICE_METHODS)
-                {
-                    this.deviceMethod.start();
-                    this.deviceMethod.send((IotHubTransportMessage) message);
-                }
-                else if (message.getMessageType() == MessageType.DEVICE_TWIN)
-                {
-                    this.deviceTwin.start();
-                    this.deviceTwin.send((IotHubTransportMessage) message);
-                }
-                else
-                {
-                    this.deviceMessaging.send(message);
-                }
-            }
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_012: [If the message was not successfully
-            // received by the service, the function shall return status code ERROR.]
-            catch (Exception e)
-            {
-                result = IotHubStatusCode.ERROR;
-            }
-
-            return result;
         }
     }
 
@@ -327,17 +273,27 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_014: [The function shall attempt to consume a message
         // from various messaging clients.]
         IotHubTransportMessage message = this.deviceMethod.receive();
-        if (message == null)
+        if (message != null)
         {
-            message = deviceTwin.receive();
+            this.log.trace("Received MQTT device method message ({})", message);
+            return message;
         }
 
-        if (message == null)
+        message = deviceTwin.receive();
+        if (message != null)
         {
-            message = deviceMessaging.receive();
+            this.log.trace("Received MQTT device twin message ({})", message);
+            return message;
         }
 
-        return message;
+        message = deviceMessaging.receive();
+        if (message != null)
+        {
+            this.log.trace("Received MQTT device messaging message ({})", message);
+            return message;
+        }
+
+        return null;
     }
 
     @Override
@@ -394,15 +350,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             if (message.getMessageType() == DEVICE_METHODS)
             {
                 this.deviceMethod.start();
+                this.log.trace("Sending MQTT device method message ({})", message);
                 this.deviceMethod.send((IotHubTransportMessage) message);
             }
             else if (message.getMessageType() == DEVICE_TWIN)
             {
                 this.deviceTwin.start();
+                this.log.trace("Sending MQTT device twin message ({})", message);
                 this.deviceTwin.send((IotHubTransportMessage) message);
             }
             else
             {
+                this.log.trace("Sending MQTT device telemetry message ({})", message);
                 this.deviceMessaging.send(message);
             }
 
@@ -427,6 +386,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
 
         int messageId;
+        this.log.trace("Checking if MQTT layer can acknowledge the received message ({})", message);
         if (receivedMessagesToAcknowledge.containsKey(message))
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_052: [If this object has received the provided message from the service, this function shall retrieve the Mqtt messageId for that message.]
@@ -434,11 +394,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         else
         {
+            TransportException e = new TransportException(new IllegalArgumentException("Provided message cannot be acknowledged because it was already acknowledged or was never received from service"));
+            this.log.error("Mqtt layer could not acknowledge received message because it has no mapping to an outstanding mqtt message id ({})", message, e);
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_051: [If this object has not received the provided message from the service, this function shall throw a TransportException.]
-            throw new TransportException(new IllegalArgumentException("Provided message cannot be acknowledged because it was already acknowledged or was never received from service"));
+            throw e;
         }
 
         boolean ackSent;
+        this.log.trace("Sending MQTT ACK for a received message ({})", message);
         if (message.getMessageType() == DEVICE_METHODS)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_053: [If the provided message has message type DEVICE_METHODS, this function shall invoke the methods client to send the ack and return the result.]
@@ -460,6 +423,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         if (ackSent)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_056: [If the ack was sent successfully, this function shall remove the provided message from the saved map of messages to acknowledge.]
+            this.log.trace("MQTT ACK was sent for a received message so it has been removed from the messages to acknowledge list ({})", message);
             this.receivedMessagesToAcknowledge.remove(message);
         }
 
@@ -485,19 +449,19 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         catch (TransportException e)
         {
             this.listener.onMessageReceived(null, new TransportException("Failed to receive message from service", e));
-            this.logger.LogInfo("Encountered exception while receiving message from Iot Hub over MQTT");
-            this.logger.LogError(e);
+            this.log.error("Encountered exception while receiving message over MQTT", e);
         }
 
         if (transportMessage == null)
         {
             //Ack is not sent to service for this message because we cannot interpret the message. Service will likely re-send
             this.listener.onMessageReceived(null, new TransportException("Message sent from service could not be parsed"));
-            this.logger.LogInfo("Message arrived from IoT Hub that could not be parsed. That message has been ignored.");
+            this.log.warn("Received message that could not be parsed. That message has been ignored.");
         }
         else
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_059: [If a transport message is successfully received, this function shall save it in this object's map of messages to be acknowledged along with the provided messageId.]
+            this.log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
             this.receivedMessagesToAcknowledge.put(transportMessage, messageId);
 
             switch (transportMessage.getMessageType())

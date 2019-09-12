@@ -9,10 +9,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
@@ -259,15 +256,30 @@ public class AmqpsDeviceTwinTest
     @Test
     public void sendMessageAndGetDeliveryTagCallsSuper() throws IOException
     {
-        //arrange
+        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        final byte[] msgData = new byte[1];
+        final int offset = 0;
+        final int length = 1;
         byte[] deliveryTag = "0".getBytes();
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        new Expectations()
+        {
+            {
+                mockSession.sender(anyString);
+                result = mockSender;
+
+                mockSender.send(msgData, offset, length);
+                result = length;
+
+                mockSender.advance();
+                result = true;
+            }
+        };
+
         Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
-        amqpsDeviceTwin.onLinkFlow(100);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TWIN, deliveryTag, 0, 1, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TWIN, msgData, offset, length, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
         deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 

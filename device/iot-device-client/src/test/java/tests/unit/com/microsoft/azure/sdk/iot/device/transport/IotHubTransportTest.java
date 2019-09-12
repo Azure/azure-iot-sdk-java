@@ -50,9 +50,6 @@ public class IotHubTransportTest
     IotHubEventCallback mockedEventCallback;
 
     @Mocked
-    CustomLogger mockedLogger;
-
-    @Mocked
     ScheduledExecutorService mockedScheduledExecutorService;
 
     @Mocked
@@ -227,28 +224,6 @@ public class IotHubTransportTest
         };
     }
 
-    //Tests_SRS_IOTHUBTRANSPORT_34_008: [If this function is called with a non-null message and a non-null throwable, this function shall log an IllegalArgumentException.]
-    @Test
-    public void onMessageReceivedWithMessageAndExceptionOnlyLogsException()
-    {
-        //arrange
-        IotHubTransport transport = new IotHubTransport(mockedConfig);
-
-        //act
-        transport.onMessageReceived(mockedTransportMessage, mockedTransportException);
-
-        //assert
-        Queue<IotHubTransportPacket> receivedMessagesQueue = Deencapsulation.getField(transport, "receivedMessagesQueue");
-        assertTrue(receivedMessagesQueue.isEmpty());
-        new Verifications()
-        {
-            {
-                mockedLogger.LogError((IllegalArgumentException) any);
-                times = 1;
-            }
-        };
-    }
-
     //Tests_SRS_IOTHUBTRANSPORT_34_009: [If this function is called with a non-null message and a null exception, this function shall add that message to the receivedMessagesQueue.]
     @Test
     public void onMessageReceivedWithMessageAndNoExceptionAddsToQueue()
@@ -263,28 +238,6 @@ public class IotHubTransportTest
         Queue<IotHubTransportPacket> receivedMessagesQueue = Deencapsulation.getField(transport, "receivedMessagesQueue");
         assertEquals(1, receivedMessagesQueue.size());
         assertEquals(mockedTransportMessage, receivedMessagesQueue.poll());
-    }
-
-    //Tests_SRS_IOTHUBTRANSPORT_34_010: [If this function is called with a null message and a non-null throwable, this function shall log that exception.]
-    @Test
-    public void onMessageReceivedWithOnlyExceptionOnlyLogsException()
-    {
-        //arrange
-        IotHubTransport transport = new IotHubTransport(mockedConfig);
-
-        //act
-        transport.onMessageReceived(null, mockedTransportException);
-
-        //assert
-        Queue<IotHubTransportPacket> receivedMessagesQueue = Deencapsulation.getField(transport, "receivedMessagesQueue");
-        assertTrue(receivedMessagesQueue.isEmpty());
-        new Verifications()
-        {
-            {
-                mockedLogger.LogError(mockedTransportException);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_011: [If this function is called while the connection status is DISCONNECTED, this function shall do nothing.]

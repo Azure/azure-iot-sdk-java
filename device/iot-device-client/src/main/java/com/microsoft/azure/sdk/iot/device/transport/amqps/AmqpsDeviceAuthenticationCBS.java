@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthentication
 {
     private String PROP_KEY_STATUS_CODE = "status-code";
@@ -47,11 +49,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
 
     private long nextTag = 0;
 
-    private Integer queueLock = new Integer(1);
-
     private final DeviceClientConfig deviceClientConfig;
-
-    private CustomLogger logger;
 
     /**
      * This constructor creates an instance of AmqpsDeviceAuthenticationCBS class and initializes member variables
@@ -82,8 +80,12 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
 
         this.amqpProperties.put(Symbol.getSymbol(MessageProperty.CONNECTION_DEVICE_ID), deviceClientConfig.getDeviceId());
+    }
 
-        this.logger = new CustomLogger(this.getClass());
+    @Override
+    public String getLinkInstanceType()
+    {
+        return "cbs";
     }
 
     /**
@@ -102,6 +104,15 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         {
             // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_024: [The function shall set the message type to CBS authentication if the message is not null.]
             amqpsMessage.setAmqpsMessageType(MessageType.CBS_AUTHENTICATION);
+
+            if (amqpsMessage.getCorrelationId() != null)
+            {
+                this.log.debug("Received amqp message on cbs receiver link with link correlation id {} and message correlation id {}", this.linkCorrelationId, amqpsMessage.getCorrelationId());
+            }
+            else
+            {
+                this.log.debug("Received amqp message on cbs receiver link with link correlation id {}", this.linkCorrelationId);
+            }
         }
 
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_025: [The function shall return the message.]
@@ -113,40 +124,64 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
      *
      * @param amqpsMessage the message to evaluate.
      * @param authenticationCorrelationId the expected correlation ID.
-     * @return true if it is 200OK and correlationId matches, false otherwise.
+     * @return true if it is 200 OK and correlationId matches, false otherwise.
      */
     @Override
-    protected boolean authenticationMessageReceived(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
+    protected boolean handleAuthenticationMessage(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
     {
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_026: [The function shall return false if the amqpdMessage parameter is null or does not have Properties and Application properties.]
-        if ((amqpsMessage != null) && (amqpsMessage.getApplicationProperties() != null) && (amqpsMessage.getProperties() != null))
+        if (amqpsMessage != null)
         {
-            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_027: [The function shall read the correlationId property and compare it to the given correlationId and if they are different return false.]
-            Properties properties = amqpsMessage.getProperties();
-            Object correlationIdValue = properties.getCorrelationId();
-            if (correlationIdValue.equals(authenticationCorrelationId))
+            if (amqpsMessage.getApplicationProperties() != null && amqpsMessage.getProperties() != null)
             {
-                Map<String, Object> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
-
-                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_028: [The function shall read the application properties and if the status code property is not 200 return false.]
-                for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
+                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_027: [The function shall read the correlationId property and compare it to the given correlationId and if they are different return false.]
+                Properties properties = amqpsMessage.getProperties();
+                Object correlationIdValue = properties.getCorrelationId();
+                if (correlationIdValue.equals(authenticationCorrelationId))
                 {
-                    String propertyKey = entry.getKey();
-                    if (propertyKey.equals(PROP_KEY_STATUS_CODE) && entry.getValue() instanceof Integer)
-                    {
-                        int propertyValue = (int) entry.getValue();
-                        if (propertyValue == 200)
-                        {
-                            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_035: [If the correlationId and status code matches, this function will acknowledge the provided amqpsMessage.]
-                            amqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+                    Map<String, Object> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
 
-                            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_029: [The function shall return true If both the correlationID and status code matches.]
-                            return true;
+                    // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_028: [The function shall read the application properties and if the status code property is not 200 return false.]
+                    for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
+                    {
+                        String propertyKey = entry.getKey();
+                        if (propertyKey.equals(PROP_KEY_STATUS_CODE) && entry.getValue() instanceof Integer)
+                        {
+                            int propertyValue = (int) entry.getValue();
+                            if (propertyValue == 200)
+                            {
+                                this.log.debug("CBS authentication message was acknowledged with status 200, authentication for one cbs link pair was successful");
+                                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_035: [If the correlationId and status code matches, this function will acknowledge the provided amqpsMessage.]
+                                amqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
+
+                                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_029: [The function shall return true If both the correlationID and status code matches.]
+                                return true;
+                            }
+                            else
+                            {
+                                this.log.error("CBS authentication message was rejected with status {}, authentication has failed", propertyValue);
+                                return false;
+                            }
                         }
                     }
+
+                    log.warn("Could not handle authentication message because the received message did not contain a status code even though the correlation id was the expected value");
+                }
+                else
+                {
+                    log.trace("Could not handle authentication message because the received correlation id did not match the expected value");
                 }
             }
+            else
+            {
+                log.warn("Could not handle authentication message because it had no application properties or had no system properties");
+            }
         }
+        else
+        {
+            log.warn("Could not handle authentication message because it was null");
+        }
+
         return false;
     }
 
@@ -173,7 +208,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         }
         catch (IOException e)
         {
-            logger.LogDebug("setSslDomain has thrown exception: %s", e.getMessage());
+            log.error("setSslDomain has thrown an exception", e);
             throw new TransportException(e);
         }
         // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_014: [The function shall set the domain on the transport.]
@@ -191,6 +226,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
     @Override
     protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
     {
+        this.log.trace("authenticate called in AmqpsDeviceAuthenticationCBS");
         MessageImpl outgoingMessage = createCBSAuthenticationMessage(deviceClientConfig, correlationId);
         byte[] msgData = new byte[1024];
         int length;
@@ -219,32 +255,6 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         }
 
         this.sendMessageAndGetDeliveryTag(MessageType.CBS_AUTHENTICATION, msgData, 0, length, deliveryTag);
-    }
-
-    /**
-     * Search for a link using the given link name. 
-     * 
-     * @param linkName name (tag) of the link to find
-     *
-     * @return true is found, false otherwise
-     */
-    @Override
-    protected boolean onLinkRemoteOpen(String linkName)
-    {
-        if (linkName.equals(this.getSenderLinkTag()))
-        {
-            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_020: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
-            this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            return true;
-        }
-        else if (linkName.equals(this.getReceiverLinkTag()))
-        {
-            // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_021: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
-            this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            return true;
-        }
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_022: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
-        return false;
     }
 
     /**
@@ -291,8 +301,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         }
         catch (IOException e)
         {
-            logger.LogDebug("getRenewedSasToken has thrown exception: %s", e.getMessage());
-            outgoingMessage = null;
+            log.error("getRenewedSasToken has thrown exception while building new cbs authentication message", e);
             throw new TransportException(e);
         }
 

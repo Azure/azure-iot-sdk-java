@@ -6,7 +6,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 
 public class AmqpsConvertFromProtonReturnValue
 {
-    private Message message;
+    private IotHubTransportMessage message;
 
     private MessageCallback messageCallback;
 
@@ -19,7 +19,7 @@ public class AmqpsConvertFromProtonReturnValue
      * @param messageCallback the associated callback.
      * @param messageContext the associated user context.
      */
-    AmqpsConvertFromProtonReturnValue(Message message, MessageCallback messageCallback, Object messageContext)
+    AmqpsConvertFromProtonReturnValue(IotHubTransportMessage message, MessageCallback messageCallback, Object messageContext)
     {
         // Codes_SRS_AMQPSCONVERTFROMPROTONRETURNVALUE_12_001: [The constructor shall initialize message, messageCallback and messageContext private member variables with the given arguments.]
         this.message = message;
@@ -32,7 +32,7 @@ public class AmqpsConvertFromProtonReturnValue
      *
      * @return the message.
      */
-    Message getMessage()
+    IotHubTransportMessage getMessage()
     {
         // Codes_SRS_AMQPSCONVERTFROMPROTONRETURNVALUE_12_002: [The function shall return the current value of message private member.]
         return message;

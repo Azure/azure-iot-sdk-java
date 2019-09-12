@@ -6,6 +6,11 @@ package com.microsoft.azure.sdk.iot.device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Deprecated as of Device client version 1.18.0, sdk now calls SLF4J directly instead and will not be replacing this class
+ * with anything
+ */
+@Deprecated
 public class CustomLogger {
 
     private final Logger logger;

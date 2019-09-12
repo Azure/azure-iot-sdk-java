@@ -409,30 +409,6 @@ public class FileUploadTest
         };
     }
 
-    /* Tests_SRS_FILEUPLOAD_21_022: [If the received context is not type of `FileUploadInProgress`, the FileUploadStatusCallBack shall log a error and ignore the message.] */
-    @Test
-    public void callbackContextIsNotFileUploadInProgress(@Mocked final CustomLogger mockCustomLogger) throws IOException
-    {
-        // arrange
-        final Map<String, Object> context = new HashMap<>();
-        constructorExpectations();
-        FileUpload fileUpload = new FileUpload(mockConfig);
-        IotHubEventCallback testFileUploadStatusCallBack = Deencapsulation.newInnerInstance("FileUploadStatusCallBack", fileUpload);
-
-        //act
-        testFileUploadStatusCallBack.execute(IotHubStatusCode.OK_EMPTY, context);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockCustomLogger.LogError((String)any);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_FILEUPLOAD_21_023: [If the FileUploadStatusCallBack failed to delete the `FileUploadInProgress`, it shall log a error.] */
     @Test
     public void callbackDeleteFileUploadInProgressThrows(@Mocked final LinkedBlockingDeque<?> mockFileUploadInProgressQueue) throws IOException
     {

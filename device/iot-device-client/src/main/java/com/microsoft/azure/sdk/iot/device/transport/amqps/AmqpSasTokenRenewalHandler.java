@@ -5,23 +5,22 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.CustomLogger;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.Event;
 
+@Slf4j
 public class AmqpSasTokenRenewalHandler extends BaseHandler
 {
     AmqpsSessionManager amqpsSessionManager;
-    CustomLogger logger;
     DeviceClientConfig config;
+    private int retryPeriodMilliseconds = 5000;
 
     public AmqpSasTokenRenewalHandler(AmqpsSessionManager amqpsSessionManager, DeviceClientConfig config)
     {
         this.amqpsSessionManager = amqpsSessionManager;
-        this.logger = new CustomLogger(this.getClass());
         this.config = config;
     }
 
@@ -31,14 +30,26 @@ public class AmqpSasTokenRenewalHandler extends BaseHandler
         //add message to session manager queue
         try
         {
+            this.log.trace("AmqpSasTokenRenewalHandler OnTimerTask called, sending authentication message");
             amqpsSessionManager.authenticate();
+
+            //schedule next renewal to take place at some recommended percentage before the latest token expires
+            event.getReactor().schedule(this.config.getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal(), this);
         }
         catch (TransportException e)
         {
-            this.logger.LogError(e);
-        }
 
-        //schedule next renewal to take place at some recommended percentage before the latest token expires
-        event.getReactor().schedule(this.config.getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal(), this);
+            if (e.isRetryable())
+            {
+                this.log.warn("Failed to send authentication message, trying again in {} milliseconds", retryPeriodMilliseconds, e);
+
+                // if unable to send authentication message, try again sooner than normal
+                event.getReactor().schedule(retryPeriodMilliseconds, this);
+            }
+            else
+            {
+                this.log.error("Failed to send authentication message, unable to try again", e);
+            }
+        }
     }
 }

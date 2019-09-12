@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +48,7 @@ import java.nio.charset.StandardCharsets;
  *           |                     |                    |                    |
  * </p>
  */
+@Slf4j
 public final class FileUploadTask implements Runnable
 {
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
@@ -55,7 +57,6 @@ public final class FileUploadTask implements Runnable
     private static final String UTF_8_STRING = "UTF-8";
 
     private HttpsTransportManager httpsTransportManager;
-    private static CustomLogger logger;
 
     private String blobName;
     private InputStream inputStream;
@@ -122,8 +123,7 @@ public final class FileUploadTask implements Runnable
         this.userCallbackContext = userCallbackContext;
         this.httpsTransportManager = httpsTransportManager;
 
-        logger = new CustomLogger(this.getClass());
-        logger.LogInfo("HttpsFileUpload object is created successfully, method name is %s ", logger.getMethodName());
+        log.trace("HttpsFileUpload object is created successfully");
     }
 
     /**
@@ -144,7 +144,7 @@ public final class FileUploadTask implements Runnable
         catch (IOException | IllegalArgumentException | URISyntaxException | NullPointerException e) //Nobody will handel exception from this thread, so, convert it to an failed code in the user callback.
         {
             /* Codes_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */
-            logger.LogError("File upload failed to upload the stream to the blob. " + e.toString());
+            log.error("File upload failed to upload the stream to the blob", e);
             resultStatus = IotHubStatusCode.ERROR;
         }
 
@@ -162,7 +162,7 @@ public final class FileUploadTask implements Runnable
             }
             catch (StorageException | IOException | IllegalArgumentException e) //Nobody will handel exception from this thread, so, convert it to an failed code in the user callback.
             {
-                logger.LogError("File upload failed to upload the stream to the blob. " + e.toString());
+                log.error("File upload failed to upload the stream to the blob", e);
             /* Codes_SRS_FILEUPLOADTASK_21_030: [If the upload to blob failed, the run shall call the `userCallback` reporting an error status `ERROR`.] */
                 resultStatus = IotHubStatusCode.ERROR;
             /* Codes_SRS_FILEUPLOADTASK_21_022: [If the upload to blob failed, the run shall create a notification the IoT Hub with `isSuccess` equals false, `statusCode` equals -1.] */
@@ -268,7 +268,7 @@ public final class FileUploadTask implements Runnable
         catch (IllegalArgumentException |IOException | JsonIOException e) //Nobody will handel exception from this thread, so, convert it to an failed code in the user callback.
         {
             /* Codes_SRS_FILEUPLOADTASK_21_033: [If run failed to send the notification, it shall call the userCallback with the stratus `ERROR`, and abort the upload.] */
-            logger.LogError("File upload failed to report status to the iothub. " + e.toString());
+            log.error("File upload failed to report status to the iothub", e);
             responseStatus = IotHubStatusCode.ERROR;
         }
 

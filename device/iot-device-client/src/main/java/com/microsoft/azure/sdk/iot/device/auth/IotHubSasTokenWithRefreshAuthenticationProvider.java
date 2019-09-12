@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +15,7 @@ import java.net.URLEncoder;
 /**
  * Authentication method that uses a shared access signature token and allows for token refresh.
  */
+@Slf4j
 public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
     /**
@@ -83,6 +85,7 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
     {
         if (this.shouldRefreshToken(proactivelyRenew) || forceRenewal)
         {
+            log.debug("Renewing the internal sas token");
             // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_004: [This function shall invoke shouldRefreshSasToken, and if it should refresh, this function shall refresh the sas token.]
             this.refreshSasToken();
         }

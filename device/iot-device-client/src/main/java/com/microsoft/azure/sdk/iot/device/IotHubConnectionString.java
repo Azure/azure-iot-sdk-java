@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -15,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Parser for the Iothub connection string.
  */
+@Slf4j
 public class IotHubConnectionString
 {
     /** The hostName attribute name in a connection string. */
@@ -45,7 +47,6 @@ public class IotHubConnectionString
     private String sharedAccessToken = null;
     private String moduleId = null;
     private boolean isUsingX509 = false;
-    private CustomLogger logger = null;
     private String gatewayHostName = null;
 
     /**
@@ -121,9 +122,6 @@ public class IotHubConnectionString
 
         /* Codes_SRS_IOTHUB_CONNECTIONSTRING_21_012: [The constructor shall save the first part of the IoT Hub hostname as the value of `hubName`, hostname split by `.`.] */
         this.hubName = parseHubName(this.hostName);
-
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("IotHubConnectionString object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**
@@ -180,9 +178,6 @@ public class IotHubConnectionString
         {
             this.hostName = gatewayHostName;
         }
-
-        this.logger = new CustomLogger(this.getClass());
-        logger.LogInfo("IotHubConnectionString object is created successfully, method name is %s ", logger.getMethodName());
     }
 
     /**

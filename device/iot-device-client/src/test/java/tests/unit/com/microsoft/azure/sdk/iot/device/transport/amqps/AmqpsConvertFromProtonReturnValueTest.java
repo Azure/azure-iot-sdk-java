@@ -6,6 +6,8 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsConvertFromProtonReturnValue;
 import mockit.Deencapsulation;
 import mockit.Mocked;
@@ -26,6 +28,9 @@ public class AmqpsConvertFromProtonReturnValueTest
     @Mocked
     MessageCallback mockMessageCallback;
 
+    @Mocked
+    IotHubTransportMessage mockedIotHubTransportMessage;
+
     // Tests_SRS_AMQPSCONVERTFROMPROTONRETURNVALUE_12_001: [The constructor shall initialize message, messageCallback and messageContext private member variables with the given arguments.]
     @Test
     public void constructorInitializesAllMembers()
@@ -34,13 +39,13 @@ public class AmqpsConvertFromProtonReturnValueTest
         String messageContext = "expectedMessageContext";
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.newInstance(AmqpsConvertFromProtonReturnValue.class, mockMessage, mockMessageCallback, messageContext);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
+        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.newInstance(AmqpsConvertFromProtonReturnValue.class, mockedIotHubTransportMessage, mockMessageCallback, messageContext);
+        IotHubTransportMessage actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
         MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
         Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
 
         //assert
-        assertEquals(mockMessage, actualMessage);
+        assertEquals(mockedIotHubTransportMessage, actualMessage);
         assertEquals(mockMessageCallback, actualMessageCallback);
         assertEquals(messageContext, actualMessageContext);
     }
@@ -55,13 +60,13 @@ public class AmqpsConvertFromProtonReturnValueTest
         String messageContext = "expectedMessageContext";
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.newInstance(AmqpsConvertFromProtonReturnValue.class, mockMessage, mockMessageCallback, messageContext);
-        Message actualMessage = Deencapsulation.invoke(amqpsConvertFromProtonReturnValue, "getMessage");
+        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.newInstance(AmqpsConvertFromProtonReturnValue.class, mockedIotHubTransportMessage, mockMessageCallback, messageContext);
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsConvertFromProtonReturnValue, "getMessage");
         MessageCallback actualMessageCallback = Deencapsulation.invoke(amqpsConvertFromProtonReturnValue, "getMessageCallback");
         Object actualMessageContext = Deencapsulation.invoke(amqpsConvertFromProtonReturnValue, "getMessageContext");
 
         //assert
-        assertEquals(mockMessage, actualMessage);
+        assertEquals(mockedIotHubTransportMessage, actualMessage);
         assertEquals(mockMessageCallback, actualMessageCallback);
         assertEquals(messageContext, actualMessageContext);
     }

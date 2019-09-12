@@ -38,9 +38,6 @@ import static junit.framework.TestCase.assertNotNull;
 public class ModuleClientTest
 {
     @Mocked
-    CustomLogger mockedCustomLogger;
-
-    @Mocked
     DeviceClientConfig mockedDeviceClientConfig;
 
     @Mocked

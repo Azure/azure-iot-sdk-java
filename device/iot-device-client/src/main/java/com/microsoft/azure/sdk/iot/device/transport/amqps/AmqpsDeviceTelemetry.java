@@ -58,32 +58,6 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
     }
 
     /**
-     * Identify if the given link is owned by the operation
-     *
-     * @return true if the link is owned by the operation, false otherwise
-     */
-    @Override
-    protected boolean onLinkRemoteOpen(String linkName)
-    {
-        // Codes_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
-        if (linkName.equals(this.getSenderLinkTag()))
-        {
-            this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            return true;
-        }
-
-        // Codes_SRS_AMQPSDEVICETELEMETRY_12_027: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
-        if (linkName.equals(this.getReceiverLinkTag()))
-        {
-            this.amqpsRecvLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            return true;
-        }
-
-        // Codes_SRS_AMQPSDEVICETELEMETRY_12_028: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
-        return false;
-    }
-
-    /**
      * Sends the given message and returns with the delivery hash if the message type is telemetry
      *
      * @param msgData The binary array of the bytes to send
@@ -107,6 +81,12 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_006: [The function shall return an AmqpsSendReturnValue object with false and -1 if the message type is not DEVICE_TELEMETRY.]
             return new AmqpsSendReturnValue(false, -1);
         }
+    }
+
+    @Override
+    public String getLinkInstanceType()
+    {
+        return "telemetry";
     }
 
     /**
@@ -149,7 +129,7 @@ public final class AmqpsDeviceTelemetry extends AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_009: [The function shall create a new IoTHubMessage using the Proton message body.]
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_010: [**The function shall copy the correlationId, messageId, To and userId properties to the IotHubMessage properties.]
             // Codes_SRS_AMQPSDEVICETELEMETRY_12_011: [The function shall copy the Proton application properties to IoTHubMessage properties excluding the reserved property names.]
-            Message message = protonMessageToIoTHubMessage(amqpsMessage);
+            IotHubTransportMessage message = protonMessageToIoTHubMessage(amqpsMessage);
 
             MessageCallback messageCallback = deviceClientConfig.getDeviceTelemetryMessageCallback(message.getInputName());
             Object messageContext = deviceClientConfig.getDeviceTelemetryMessageContext(message.getInputName());
