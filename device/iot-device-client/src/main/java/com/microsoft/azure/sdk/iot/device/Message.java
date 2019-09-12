@@ -21,6 +21,8 @@ public class Message
 
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm:ss.SSSSSSS";
 
+    private static final String SECURITY_CLIENT_JSON_ENCODING = "application/json";
+
     // ----- Data Fields -----
 
     /**
@@ -146,6 +148,11 @@ public class Message
      */
     private ByteArrayInputStream bodyStream;
     private CustomLogger logger;
+
+    /**
+     * Security Client flag
+     */
+    boolean isSecurityClient;
 
     // ----- Constructors -----
 
@@ -322,6 +329,7 @@ public class Message
         this.ack = FeedbackStatusCodeEnum.none;
         this.properties = new ArrayList<>();
         this.logger = new CustomLogger(this.getClass());
+        this.isSecurityClient = false;
     }
 
     /**
@@ -641,5 +649,17 @@ public class Message
     {
         // Codes_SRS_MESSAGE_34_065: [The function shall save the provided creationTimeUTC.]
         this.creationTimeUTC = creationTimeUTC;
+    }
+
+    public void setAsSecurityMessage()
+    {
+        // Set the message as json encoding
+        this.contentEncoding = SECURITY_CLIENT_JSON_ENCODING;
+        this.isSecurityClient = true;
+    }
+
+    public boolean isSecurityMessage()
+    {
+        return this.isSecurityClient;
     }
 }

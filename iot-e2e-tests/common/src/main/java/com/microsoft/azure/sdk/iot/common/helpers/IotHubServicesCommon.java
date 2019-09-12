@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
@@ -27,6 +28,18 @@ public class IotHubServicesCommon
 
     //if error injection message has not taken effect after 1 minute, the test will timeout
     private final static long ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT = 1 * 60 * 1000;
+    private final static String TEST_ASC_SECURITY_MESSAGE = "{ \"AgentVersion\": \"0.0.1\", "
+            + "\"AgentId\" : \"{4C1B4747-E4C7-4681-B31D-4B39E390E7F8}\", "
+            + "\"MessageSchemaVersion\" : \"1.0\", \"Events\" : "
+            + " { \"EventType\": \"Security\", "
+            + "\"Category\" : \"Periodic\", "
+            + "\"Name\" : \"ListeningPorts\", "
+            + "\"IsEmpty\" : true, "
+            + "\"PayloadSchemaVersion\" : \"1.0\", "
+            + "\"Id\" : \"%s\", "
+            + "\"TimestampLocal\" : \"2012-04-23T18:25:43.511Z\", "
+            + "\"TimestampUTC\" : \"2012-04-23T18:25:43.511Z\" }, "
+            + "\"Payload\": { \"data\": \"test\" } } }";
 
     /*
      * method to send message over given DeviceClient
@@ -78,6 +91,36 @@ public class IotHubServicesCommon
                     Thread.sleep(interMessageDelay);
                 }
             }
+        }
+        finally
+        {
+            client.closeNow();
+        }
+    }
+
+    public static void sendSecurityMessages(InternalClient client,
+                                            IotHubClientProtocol protocol,
+                                            final long RETRY_MILLISECONDS,
+                                            final long SEND_TIMEOUT_MILLISECONDS,
+                                            List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException
+    {
+        try
+        {
+            client.open();
+            if (statusUpdates != null)
+            {
+                confirmOpenStabilized(statusUpdates, 120000, client);
+            }
+
+            // Send the initial message
+            MessageAndResult messageToSend = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
+            sendMessageAndWaitForResponse(client, messageToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+
+            // Send the security message
+            String event_uuid = UUID.randomUUID().toString();
+            MessageAndResult securityMessage = new MessageAndResult(new Message(String.format(TEST_ASC_SECURITY_MESSAGE, event_uuid)), IotHubStatusCode.OK_EMPTY);
+            securityMessage.message.setAsSecurityMessage();
+            sendSecurityMessageAndCheckResponse(client, securityMessage, event_uuid, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
         }
         finally
         {
@@ -299,6 +342,32 @@ public class IotHubServicesCommon
             if (messageAndResult.statusCode != null && messageSent.getCallbackStatusCode() != messageAndResult.statusCode)
             {
                 Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected " + messageAndResult.statusCode + " but received " + messageSent.getCallbackStatusCode(), client));
+            }
+        }
+        catch (Exception e)
+        {
+            Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: Exception encountered while sending and waiting on a message: " + e.getMessage(), client));
+        }
+    }
+
+    public static void sendSecurityMessageAndCheckResponse(InternalClient client, MessageAndResult messageAndResult, String eventId, long RETRY_MILLISECONDS, long TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    {
+        try
+        {
+            Success messageSent = new Success();
+            EventCallback callback = new EventCallback(messageAndResult.statusCode);
+            client.sendEventAsync(messageAndResult.message, callback, messageSent);
+
+            boolean messageFound = true;
+            long startTime = System.currentTimeMillis();
+            while (System.currentTimeMillis() - startTime > TIMEOUT_MILLISECONDS)
+            {
+                if (messageSent.wasCallbackFired())
+                {
+                    Assert.fail(buildExceptionMessage("Security message was received by IoTHub and should have been routed to ASC", client));
+                    break;
+                }
+                Thread.sleep(RETRY_MILLISECONDS);
             }
         }
         catch (Exception e)

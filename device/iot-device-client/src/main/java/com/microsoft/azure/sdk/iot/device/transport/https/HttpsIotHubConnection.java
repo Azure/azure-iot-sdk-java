@@ -34,6 +34,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     private static final String HTTPS_PROPERTY_IF_MATCH_TAG = "if-match";
     private static final String HTTPS_PROPERTY_ETAG_TAG = "etag";
 
+
     private IotHubListener listener;
 
     /** The HTTPS connection lock. */
@@ -115,6 +116,11 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             {
                 // Codes_SRS_HTTPSIOTHUBCONNECTION_34_075: [If the provided message has a creation time utc, this function shall set the request header to include that value with the key "iothub-contenttype".]
                 request.setHeaderField(MessageProperty.IOTHUB_CREATION_TIME_UTC, message.getCreationTimeUTCString());
+            }
+
+            if (message.isSecurityMessage())
+            {
+                request.setHeaderField(MessageProperty.IOTHUB_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
             }
 
             Map<String, String> systemProperties = httpsMessage.getSystemProperties();
