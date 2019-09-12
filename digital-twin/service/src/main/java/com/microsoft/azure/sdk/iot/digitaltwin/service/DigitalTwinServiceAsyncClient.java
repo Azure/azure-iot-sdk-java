@@ -11,13 +11,13 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnec
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.IotHubGatewayServiceAPIs20190701PreviewImpl;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfaces;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatchInterfacesValue;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.*;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
+import com.microsoft.rest.serializer.JacksonAdapter;
 import lombok.Builder;
+import lombok.NonNull;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -32,39 +32,41 @@ public final class DigitalTwinServiceAsyncClient {
     /***
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoTHub connection string
+     * @throws IOException This exception is thrown if the service connection string parsing fails
+     */
+    @Builder(builderMethodName = "buildFromConnectionString", builderClassName = "FromConnectionStringBuilder")
+    DigitalTwinServiceAsyncClient(@NonNull String connectionString) throws IOException {
+
+        ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
+        SasTokenProvider sasTokenProvider = serviceConnectionString.createSasTokenProvider();
+        String httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
+
+        init(sasTokenProvider, httpsEndpoint);
+    }
+
+    /***
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param sasTokenProvider The sas token provider to use for authorization
      * @param httpsEndpoint The https endpoint to connect to
-     * @param apiVersion The ServiceVersion for the service client to use
-     * @throws IOException This exception is thrown if the service connection string parsing fails
-     * @throws IllegalStateException This exception is thrown if expected paramters are not passed to the builder
      */
-    @Builder
-    DigitalTwinServiceAsyncClient(String connectionString, SasTokenProvider sasTokenProvider, String
-            httpsEndpoint, String apiVersion) throws IOException {
+    @Builder(builderMethodName = "buildFromSasProvider", builderClassName = "FromSasProviderBuilder")
+    DigitalTwinServiceAsyncClient(@NonNull SasTokenProvider sasTokenProvider, @NonNull String httpsEndpoint) {
+        init(sasTokenProvider, httpsEndpoint);
+    }
 
-        if (apiVersion == null) {
-            apiVersion = ServiceVersion.V2019_07_01_preview.getApiVersion();
-        }
-        if (sasTokenProvider != null && httpsEndpoint == null) {
-            throw new IllegalStateException("Please provide the Sas token provider and host https endpoint to connect to).");
-        }
-        if (connectionString != null) {
-            if (sasTokenProvider !=null || httpsEndpoint != null)
-                throw new IllegalStateException("Please provide either 'Service Connection String' or ('ServiceClientCredentails' and host https endpoint to connect to).");
-
-            ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
-            sasTokenProvider = serviceConnectionString.createSasTokenProvider();
-            httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
-        }
-
+    /***
+     * Private method to creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param sasTokenProvider The sas token provider to use for authorization
+     * @param httpsEndpoint The https endpoint to connect to
+     */
+    private void init(SasTokenProvider sasTokenProvider, String httpsEndpoint) {
         RestClient simpleRestClient = new RestClient.Builder().withBaseUrl(httpsEndpoint)
                                                               .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
                                                               .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
-                                                              .withSerializerAdapter(new CustomJsonAdapter())
+                                                              .withSerializerAdapter(new JacksonAdapter())
                                                               .build();
 
         IotHubGatewayServiceAPIs20190701PreviewImpl protocolLayerClient = new IotHubGatewayServiceAPIs20190701PreviewImpl(simpleRestClient);
-        protocolLayerClient.withApiVersion(apiVersion);
 
         this.digitalTwin = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
     }
@@ -139,9 +141,7 @@ public final class DigitalTwinServiceAsyncClient {
                             put(interfaceInstanceName, digitalTwinInterfacesPropertyPatch);
                         }}
                 );
-        String digitalTwinInterfacesPatchString = objectMapper.writeValueAsString(digitalTwinInterfacesPatch);
-
-        return this.digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatchString)
+        return this.digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
                                .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
 
                                    @Override
