@@ -14,8 +14,6 @@ public class StaticSasTokenProvider implements SasTokenProvider {
 
     @Override
     public String getSasToken() {
-
-        System.out.println("Should return token as is");
         return this.sharedAccessSignature;
     }
 }

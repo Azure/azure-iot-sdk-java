@@ -46,9 +46,6 @@ public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
 
     @Override
     public String getSasToken() {
-
-        System.out.println("Should verify if token is valid or should be refreshed");
-
         if (hasCachedTokenExpired()) {
             this.cachedSasToken = buildToken();
         }
