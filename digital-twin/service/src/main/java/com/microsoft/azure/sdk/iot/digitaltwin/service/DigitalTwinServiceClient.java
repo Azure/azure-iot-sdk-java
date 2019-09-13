@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.FUNC_MAP_TO_STRING;
+import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.nullToEmpty;
 
 public final class DigitalTwinServiceClient {
     private DigitalTwinsImpl digitalTwin;
@@ -24,11 +25,9 @@ public final class DigitalTwinServiceClient {
     /***
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoTHub connection string
-     * @throws IOException This exception is thrown if the service connection string parsing fails
      */
     @Builder(builderMethodName = "buildFromConnectionString", builderClassName = "FromConnectionStringBuilder")
-    DigitalTwinServiceClient(@NonNull String connectionString) throws IOException {
-
+    DigitalTwinServiceClient(@NonNull String connectionString) {
         DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient = DigitalTwinServiceAsyncClient.buildFromConnectionString()
                                                                                                    .connectionString(connectionString)
                                                                                                    .build();
@@ -42,7 +41,6 @@ public final class DigitalTwinServiceClient {
      */
     @Builder(builderMethodName = "buildFromSasProvider", builderClassName = "FromSasProviderBuilder")
     DigitalTwinServiceClient(@NonNull SasTokenProvider sasTokenProvider, @NonNull String httpsEndpoint) {
-
         DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient = DigitalTwinServiceAsyncClient.buildFromSasProvider()
                                                                                                    .sasTokenProvider(sasTokenProvider)
                                                                                                    .httpsEndpoint(httpsEndpoint)
@@ -55,7 +53,7 @@ public final class DigitalTwinServiceClient {
      * @param digitalTwinId The ID of the digital twin. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional
      * @return The state of the full digital twin, including all properties of all interface instances registered by that digital twin
      */
-    public DigitalTwin getDigitalTwin(String digitalTwinId) {
+    public DigitalTwin getDigitalTwin(@NonNull String digitalTwinId) {
         return new DigitalTwin(this.digitalTwin.getInterfaces(digitalTwinId));
     }
 
@@ -64,7 +62,7 @@ public final class DigitalTwinServiceClient {
      * @param modelId The model ID. Ex: &lt;example&gt;urn:contoso:TemperatureSensor:1&lt;/example&gt;
      * @return The DigitalTwin model definition
      */
-    public String getModel(String modelId) {
+    public String getModel(@NonNull String modelId) {
         return FUNC_MAP_TO_STRING.call(this.digitalTwin.getDigitalTwinModel(modelId));
     }
 
@@ -75,7 +73,7 @@ public final class DigitalTwinServiceClient {
      *               This query parameter ONLY applies to Capability model.
      * @return The DigitalTwin model definition
      */
-    public String getModel(String modelId, Boolean expand) {
+    public String getModel(@NonNull String modelId, @NonNull boolean expand) {
         return FUNC_MAP_TO_STRING.call(this.digitalTwin.getDigitalTwinModel(modelId, expand));
     }
 
@@ -101,14 +99,14 @@ public final class DigitalTwinServiceClient {
      * @return The updated state of the digital twin representation
      * @throws IOException Throws IOException if the json deserialization fails
      */
-    public DigitalTwin updateDigitalTwinProperties(String digitalTwinId, final String interfaceInstanceName, String propertyPatch) throws IOException {
+    public DigitalTwin updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String interfaceInstanceName, @NonNull String propertyPatch) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = objectMapper.readValue(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
+        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPatchInterfacesValue = objectMapper.readValue(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
 
         DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = new DigitalTwinInterfacesPatch()
                 .withInterfaces(
                         new HashMap<String, DigitalTwinInterfacesPatchInterfacesValue>() {{
-                            put(interfaceInstanceName, digitalTwinInterfacesPropertyPatch);
+                            put(interfaceInstanceName, digitalTwinInterfacesPatchInterfacesValue);
                         }}
                 );
 
@@ -120,11 +118,22 @@ public final class DigitalTwinServiceClient {
      * @param digitalTwinId The digital twin to invoke the command on
      * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
      * @param commandName The name of the command to be invoked
+     * @return The result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
+     */
+    public String invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName) {
+        return FUNC_MAP_TO_STRING.call(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, null));
+    }
+
+    /**
+     * Invoke a digital twin command on the given interface instance that is implemented by the given digital twin
+     * @param digitalTwinId The digital twin to invoke the command on
+     * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
+     * @param commandName The name of the command to be invoked
      * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
      * @return The result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
      */
-    public String invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument) {
-        return FUNC_MAP_TO_STRING.call(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument));
+    public String invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument) {
+        return FUNC_MAP_TO_STRING.call(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument)));
     }
 
     /**
@@ -137,8 +146,8 @@ public final class DigitalTwinServiceClient {
      * @param responseTimeoutInSeconds The response timeout in seconds
      * @return The result of the command invocation. Like the argument given, it must be UTF-8 encoded JSON bytes
      */
-    public String invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
-        return FUNC_MAP_TO_STRING.call(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds));
+    public String invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
+        return FUNC_MAP_TO_STRING.call(this.digitalTwin.invokeInterfaceCommand(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument), connectTimeoutInSeconds, responseTimeoutInSeconds));
     }
 
 }

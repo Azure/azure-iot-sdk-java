@@ -8,14 +8,14 @@
     <name>Azure IoT Sdk Java Digital Twin Service</name>
     <description>The Microsoft Azure IoT Digital Twin Service SDK for Java</description>
     <artifactId>iot-sdk-java-digital-twin-service</artifactId>
-    <version>1.0.0</version>
+    <version>${project-service-version}</version>
     <packaging>jar</packaging>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.microsoft.rest/client-runtime -->
         <dependency>
             <groupId>com.microsoft.rest</groupId>
             <artifactId>client-runtime</artifactId>
-            <version>1.6.12</version>
+            <version>${ms-rest-client-version}</version>
         </dependency>
     </dependencies>
 </project>
