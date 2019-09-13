@@ -5,6 +5,8 @@ package com.microsoft.azure.sdk.iot.digitaltwin.service.util;
 
 import rx.functions.Func1;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 public final class Tools {
 
     public static final Func1<Object, String> FUNC_MAP_TO_STRING = new Func1<Object, String>() {
@@ -22,4 +24,7 @@ public final class Tools {
 
     }
 
+    public static String nullToEmpty(String value) {
+        return value == null ? EMPTY : value;
+    }
 }

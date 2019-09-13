@@ -19,7 +19,7 @@ public class DigitalTwin {
     /**
      * Version of digital twin.
      */
-    private final Long version;
+    private final long version;
 
     public DigitalTwin(DigitalTwinInterfaces digitalTwinInterfaces) {
         this.interfaceInstances = digitalTwinInterfaces.interfaces();

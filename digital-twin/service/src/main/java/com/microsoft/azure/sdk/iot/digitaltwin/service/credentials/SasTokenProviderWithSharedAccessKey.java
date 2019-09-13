@@ -4,15 +4,14 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.service.util.Base64;
+import lombok.Builder;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@RequiredArgsConstructor
 public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
 
     /**
@@ -26,18 +25,20 @@ public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
     private static final String TOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
     private static final int DEFAULT_TOKEN_TIME_TO_LIVE_IN_SECS = 60 * 60;
 
-    @NonNull
-    private final String hostName;
-    @NonNull
-    private final String sharedAccessKeyName;
-    @NonNull
-    private final String sharedAccessKey;
+    private String hostName;
+    private String sharedAccessKeyName;
+    private String sharedAccessKey;
 
     private int timeToLiveInSecs;
     private String cachedSasToken;
     private long tokenExpiresOn;
 
-    public SasTokenProviderWithSharedAccessKey(String hostName, String sharedAccessKeyName, String sharedAccessKey, int timeToLiveInSecs) {
+    @Builder
+    SasTokenProviderWithSharedAccessKey(@NonNull String hostName, @NonNull String sharedAccessKeyName, @NonNull String sharedAccessKey, Integer timeToLiveInSecs) {
+        if (timeToLiveInSecs == null) {
+            timeToLiveInSecs = DEFAULT_TOKEN_TIME_TO_LIVE_IN_SECS;
+        }
+
         this.hostName = hostName;
         this.sharedAccessKeyName = sharedAccessKeyName;
         this.sharedAccessKey = sharedAccessKey;
@@ -97,9 +98,8 @@ public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
      * @return Seconds from now to expiry
      */
     private long tokenExpiresOn() {
-        int ttl = timeToLiveInSecs != 0 ? timeToLiveInSecs : DEFAULT_TOKEN_TIME_TO_LIVE_IN_SECS;
         long expiresOnDate = System.currentTimeMillis();
-        expiresOnDate += ttl * 1000;
+        expiresOnDate += timeToLiveInSecs * 1000;
         return expiresOnDate / 1000;
     }
 

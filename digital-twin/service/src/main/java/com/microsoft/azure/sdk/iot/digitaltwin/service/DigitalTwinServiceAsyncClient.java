@@ -11,7 +11,9 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceConnec
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.implementation.IotHubGatewayServiceAPIs20190701PreviewImpl;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.*;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfaces;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatchInterfacesValue;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.FUNC_MAP_TO_STRING;
+import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.nullToEmpty;
 
 public final class DigitalTwinServiceAsyncClient {
     DigitalTwinsImpl digitalTwin;
@@ -32,11 +35,9 @@ public final class DigitalTwinServiceAsyncClient {
     /***
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoTHub connection string
-     * @throws IOException This exception is thrown if the service connection string parsing fails
      */
     @Builder(builderMethodName = "buildFromConnectionString", builderClassName = "FromConnectionStringBuilder")
-    DigitalTwinServiceAsyncClient(@NonNull String connectionString) throws IOException {
-
+    DigitalTwinServiceAsyncClient(@NonNull String connectionString) {
         ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
         SasTokenProvider sasTokenProvider = serviceConnectionString.createSasTokenProvider();
         String httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
@@ -76,13 +77,13 @@ public final class DigitalTwinServiceAsyncClient {
      * @param digitalTwinId The ID of the digital twin. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional
      * @return The observable to the state of the full digital twin, including all properties of all interface instances registered by that digital twin
      */
-    public Observable<DigitalTwin> getDigitalTwin(String digitalTwinId) {
+    public Observable<DigitalTwin> getDigitalTwin(@NonNull String digitalTwinId) {
         return this.digitalTwin.getInterfacesAsync(digitalTwinId)
                 .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
 
                     @Override
-                    public DigitalTwin call(DigitalTwinInterfaces digitalTwin) {
-                        return new DigitalTwin(digitalTwin);
+                    public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
+                        return new DigitalTwin(digitalTwinInterfaces);
                     }
                 });
     }
@@ -92,7 +93,7 @@ public final class DigitalTwinServiceAsyncClient {
      * @param modelId The model ID. Ex: &lt;example&gt;urn:contoso:TemperatureSensor:1&lt;/example&gt;
      * @return The observable to the DigitalTwin model definition
      */
-    public Observable<String> getModel(String modelId) {
+    public Observable<String> getModel(@NonNull String modelId) {
         return this.digitalTwin.getDigitalTwinModelAsync(modelId)
                 .map(FUNC_MAP_TO_STRING);
     }
@@ -104,7 +105,7 @@ public final class DigitalTwinServiceAsyncClient {
      *               This query parameter ONLY applies to Capability model.
      * @return The observable to the DigitalTwin model definition
      */
-    public Observable<String> getModel(String modelId, Boolean expand) {
+    public Observable<String> getModel(@NonNull String modelId, @NonNull boolean expand) {
         return this.digitalTwin.getDigitalTwinModelAsync(modelId, expand)
                 .map(FUNC_MAP_TO_STRING);
     }
@@ -131,14 +132,14 @@ public final class DigitalTwinServiceAsyncClient {
      * @return The observable to the updated state  of the digital twin representation
      * @throws IOException Throws IOException if the json deserialization fails
      */
-    public Observable<DigitalTwin> updateDigitalTwinProperties(String digitalTwinId, final String interfaceInstanceName, String propertyPatch) throws IOException {
+    public Observable<DigitalTwin> updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String interfaceInstanceName, @NonNull String propertyPatch) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPropertyPatch = objectMapper.readValue(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
+        final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPatchInterfacesValue = objectMapper.readValue(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
 
         DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = new DigitalTwinInterfacesPatch()
                 .withInterfaces(
                         new HashMap<String, DigitalTwinInterfacesPatchInterfacesValue>() {{
-                            put(interfaceInstanceName, digitalTwinInterfacesPropertyPatch);
+                            put(interfaceInstanceName, digitalTwinInterfacesPatchInterfacesValue);
                         }}
                 );
         return this.digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
@@ -156,12 +157,25 @@ public final class DigitalTwinServiceAsyncClient {
      * @param digitalTwinId The digital twin to invoke the command on
      * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
      * @param commandName The name of the command to be invoked
+     * @return The observable to the result of the command invocation. Like the argument given, the result must be
+     * UTF-8 encoded JSON bytes
+     */
+    public Observable<String> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName) {
+        return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, null)
+                               .map(FUNC_MAP_TO_STRING);
+    }
+
+    /**
+     * Invoke a digital twin command on the given interface instance that is implemented by the given digital twin
+     * @param digitalTwinId The digital twin to invoke the command on
+     * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
+     * @param commandName The name of the command to be invoked
      * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
      * @return The observable to the result of the command invocation. Like the argument given, the result must be
      * UTF-8 encoded JSON bytes
      */
-    public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, String commandName, String argument) {
-        return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument)
+    public Observable<String> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument) {
+        return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument))
                 .map(FUNC_MAP_TO_STRING);
     }
 
@@ -176,8 +190,8 @@ public final class DigitalTwinServiceAsyncClient {
      * @return The observable to the result of the command invocation. Like the argument given, the result must be
      * UTF-8 encoded JSON bytes
      */
-    public Observable<String> invokeCommand(String digitalTwinId, String interfaceInstanceName, final String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
-        return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, argument, connectTimeoutInSeconds, responseTimeoutInSeconds)
+    public Observable<String> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
+        return this.digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument), connectTimeoutInSeconds, responseTimeoutInSeconds)
                 .map(FUNC_MAP_TO_STRING);
     }
 }
