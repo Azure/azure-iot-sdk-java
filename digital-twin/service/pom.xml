@@ -10,9 +10,6 @@
     <artifactId>iot-sdk-java-digital-twin-service</artifactId>
     <version>${project-service-version}</version>
     <packaging>jar</packaging>
-    <build>
-        <sourceDirectory>generated/src/main/java</sourceDirectory>
-    </build>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.microsoft.rest/client-runtime -->
         <dependency>
