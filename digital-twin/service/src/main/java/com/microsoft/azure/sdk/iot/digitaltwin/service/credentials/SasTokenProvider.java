@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.credentials;
 
+import java.io.IOException;
+
 public interface SasTokenProvider {
-    String getSasToken();
+    String getSasToken() throws IOException;
 }

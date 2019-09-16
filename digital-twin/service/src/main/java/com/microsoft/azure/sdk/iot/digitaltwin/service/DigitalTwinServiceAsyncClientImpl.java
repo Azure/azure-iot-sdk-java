@@ -55,11 +55,6 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
         init(sasTokenProvider, httpsEndpoint);
     }
 
-    /***
-     * Private method to creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
-     * @param sasTokenProvider The sas token provider to use for authorization
-     * @param httpsEndpoint The https endpoint to connect to
-     */
     private void init(SasTokenProvider sasTokenProvider, String httpsEndpoint) {
         RestClient simpleRestClient = new RestClient.Builder().withBaseUrl(httpsEndpoint)
                                                               .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
