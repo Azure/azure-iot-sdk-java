@@ -54,7 +54,7 @@ public final class IotHubRejectUri
     /**
      * Returns the string representation of the IoT Hub reject message URI.
      *
-     * @return the string representation of the IoT Hub reject mesage URI.
+     * @return the string representation of the IoT Hub reject message URI.
      */
     @Override
     public String toString()
