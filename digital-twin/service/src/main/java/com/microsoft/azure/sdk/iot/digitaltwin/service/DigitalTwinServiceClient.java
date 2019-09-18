@@ -28,7 +28,7 @@ public interface DigitalTwinServiceClient {
      *               This query parameter ONLY applies to Capability model.
      * @return The DigitalTwin model definition
      */
-    String getModel(@NonNull String modelId, @NonNull boolean expand);
+    String getModel(@NonNull String modelId, @NonNull Boolean expand);
 
     /**
      * Update one to many properties on one interface instance on one digital twin instance

@@ -30,6 +30,7 @@
         <module>device</module>
         <module>service</module>
         <module>sample</module>
+        <module>e2e-tests</module>
     </modules>
     <properties>
         <java-sdk-version>1.7</java-sdk-version>
@@ -50,6 +51,8 @@
         <project-device-version>1.0.0</project-device-version>
         <project-service-version>1.0.0</project-service-version>
         <project-sample-version>1.0.0</project-sample-version>
+        <project-e2e-tests-version>1.0.0</project-e2e-tests-version>
+        <project-sdk-service-client>1.17.1</project-sdk-service-client>
     </properties>
     <build>
         <plugins>

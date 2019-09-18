@@ -29,7 +29,7 @@ public interface DigitalTwinServiceAsyncClient {
      *               This query parameter ONLY applies to Capability model.
      * @return The observable to the DigitalTwin model definition
      */
-    Observable<String> getModel(@NonNull String modelId, @NonNull boolean expand);
+    Observable<String> getModel(@NonNull String modelId, @NonNull Boolean expand);
 
     /**
      * Update one to many properties on one interface instance on one digital twin instance
