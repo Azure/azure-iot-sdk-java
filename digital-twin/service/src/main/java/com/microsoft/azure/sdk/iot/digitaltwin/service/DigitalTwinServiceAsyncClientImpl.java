@@ -85,7 +85,7 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
     }
 
     @Override
-    public Observable<String> getModel(@NonNull String modelId, @NonNull boolean expand) {
+    public Observable<String> getModel(@NonNull String modelId, @NonNull Boolean expand) {
         return digitalTwin.getDigitalTwinModelAsync(modelId, expand)
                 .map(FUNC_MAP_TO_STRING);
     }
