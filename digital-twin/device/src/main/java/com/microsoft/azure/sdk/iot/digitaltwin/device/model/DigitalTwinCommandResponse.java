@@ -5,7 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
-/** Structure filled by the device application after processing a command on its interface and returned to the Digital Twin SDK. */
+/**
+ * Structure filled by the device application after processing a command on its interface and returned to the Digital Twin SDK.
+ */
 @Builder
 @Getter
 public class DigitalTwinCommandResponse {

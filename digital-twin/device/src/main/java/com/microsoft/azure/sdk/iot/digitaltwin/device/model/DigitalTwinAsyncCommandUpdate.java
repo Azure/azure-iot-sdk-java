@@ -4,11 +4,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
-/** Structure filled in by the device application when it is updating an asynchronous command's status. */
+/**
+ * Structure filled in by the device application when it is updating an asynchronous command's status.
+ */
 @Builder
 @Getter
 public class DigitalTwinAsyncCommandUpdate {
-    /** Status code to map back to the server. Roughly maps to HTTP status codes.*/
+    /**
+     * Status code to map back to the server. Roughly maps to HTTP status codes.
+     */
     @NonNull
     private Integer statusCode;
     /**
@@ -23,6 +27,8 @@ public class DigitalTwinAsyncCommandUpdate {
      */
     @NonNull
     private String requestId;
-    /** Payload that the device should send to the service. */
+    /**
+     * Payload that the device should send to the service.
+     */
     private String payload;
 }

@@ -27,9 +27,9 @@ public abstract class AbstractDigitalTwinInterfaceClient {
     public static final int STATUS_CODE_INVALID = 400;
     public static final int STATUS_CODE_PENDING = 202;
     public static final int STATUS_CODE_COMPLETED = 200;
-    private static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "\"Command is not implemented for interface instance [%s].\"";
+    static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "\"Command is not implemented for interface instance [%s].\"";
     /**
-     *   The interface instance name associated with this interface Id. For example, environmentalSensor.
+     * The interface instance name associated with this interface Id. For example, environmentalSensor.
      */
     private final String digitalTwinInterfaceInstanceName;
     /**
@@ -53,10 +53,11 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * The application is notified of success or failure of the send by passing in a callback <b>digitalTwinTelemetryConfirmationCallback</b>.
      * The application may invoke this function as many times as it wants, subject to the device's resource availability.  The application does NOT need to wait for each send's callback to arrive between sending.
      * The SDK will automatically attempt to retry the telemetry send on transient errors.
-     * @param telemetryName Name of the telemetry message to send.  This should match the model associated with this interface.
-     * @param payload Value of the telemetry data to send.  The schema must match the data specified in the model document.
+     *
+     * @param telemetryName                            Name of the telemetry message to send.  This should match the model associated with this interface.
+     * @param payload                                  Value of the telemetry data to send.  The schema must match the data specified in the model document.
      * @param digitalTwinTelemetryConfirmationCallback Callback be invoked when the telemetry message is successfully delivered or fails.
-     * @param context Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
+     * @param context                                  Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
      * @return if this async function is accepted or not.
      */
     protected final DigitalTwinClientResult sendTelemetryAsync(
@@ -64,15 +65,20 @@ public abstract class AbstractDigitalTwinInterfaceClient {
             @NonNull final String payload,
             @NonNull final DigitalTwinCallback digitalTwinTelemetryConfirmationCallback,
             final Object context) {
+        log.debug("Sending TelemetryAsync from interface instance={}, telemetryName={}", digitalTwinInterfaceInstanceName, telemetryName);
         if (digitalTwinDeviceClient == null) {
+            log.debug("Send TelemetryAsync from interface instance={}, telemetryName={} failed: not registered.", digitalTwinInterfaceInstanceName, telemetryName);
             return DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
         } else {
-            return digitalTwinDeviceClient.sendTelemetryAsync(
+            DigitalTwinClientResult digitalTwinClientResult = digitalTwinDeviceClient.sendTelemetryAsync(
                     digitalTwinInterfaceInstanceName,
                     telemetryName,
                     payload,
                     digitalTwinTelemetryConfirmationCallback,
-                    context);
+                    context
+            );
+            log.debug("Send TelemetryAsync from interface instance={}, telemetryName={} was {}.", digitalTwinInterfaceInstanceName, telemetryName, digitalTwinClientResult);
+            return digitalTwinClientResult;
         }
     }
 
@@ -89,24 +95,29 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * The application may call this function as many times as it wants, subject obviously to the device's resource availability, and does NOT need to wait for each send's callback to arrive between sending.
      * If this function is invoked multiple times on the same <b>propertyName</b>, the server has a last-writer wins algorithm and will not persist previous property values.
      * The SDK will automatically attempt to retry reporting properties on transient errors.
-     * @param digitalTwinReportProperties DigitalTwin properties to be reported.
+     *
+     * @param digitalTwinReportProperties                DigitalTwin properties to be reported.
      * @param digitalTwinReportedPropertyUpdatedCallback Callback be invoked when the property is successfully reported or fails.
-     * @param context Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
+     * @param context                                    Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
      * @return if this async function is accepted or not.
      */
     protected final DigitalTwinClientResult reportPropertiesAsync(
             @NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties,
             @NonNull final DigitalTwinCallback digitalTwinReportedPropertyUpdatedCallback,
             final Object context) {
+        log.debug("Reporting PropertiesAsync from interface instance={}", digitalTwinInterfaceInstanceName);
         if (digitalTwinDeviceClient == null) {
+            log.debug("Report PropertiesAsync from interface instance={} failed: not registered.", digitalTwinInterfaceInstanceName);
             return DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
         } else {
-            return digitalTwinDeviceClient.reportPropertiesAsync(
+            DigitalTwinClientResult digitalTwinClientResult = digitalTwinDeviceClient.reportPropertiesAsync(
                     digitalTwinInterfaceInstanceName,
                     digitalTwinReportProperties,
                     digitalTwinReportedPropertyUpdatedCallback,
                     context
             );
+            log.debug("Report PropertiesAsync from interface instance={} was {}.", digitalTwinInterfaceInstanceName, digitalTwinClientResult);
+            return digitalTwinClientResult;
         }
     }
 
@@ -114,9 +125,10 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * Sends an update of the status of a pending asynchronous command. Devices must return quickly while processing command execution in their {@link #onCommandReceived(DigitalTwinCommandRequest)} function.  Commands that take longer to run - such as running a diagnostic - may be modeled as "asynchronous" commands in the Digital Twin Definition Language.
      * The device application invokes this function to update the status of an asynchronous command.  This status could indicate a success, a fatal failure, or else that the command is still running and provide some simple progress.
      * Values specified in the {@link DigitalTwinAsyncCommandUpdate} - in particular {@link DigitalTwinAsyncCommandUpdate#getCommandName()} that initiated the command name and its {@link DigitalTwinAsyncCommandUpdate#getRequestId()} are specified in the initial command callback's passed in {@link DigitalTwinCommandRequest#getRequestId()}.
-     * @param digitalTwinAsyncCommandUpdate containing updates about the status to send to the server.
+     *
+     * @param digitalTwinAsyncCommandUpdate               containing updates about the status to send to the server.
      * @param digitalTwinUpdateAsyncCommandStatusCallback Callback be invoked when the async command update is successfully reported or fails.
-     * @param context Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
+     * @param context                                     Context passed to {@link DigitalTwinCallback#onResult(DigitalTwinClientResult, Object)} function when it is invoked.
      * @return if this async function is accepted or not.
      */
     protected final DigitalTwinClientResult updateAsyncCommandStatusAsync(
@@ -141,28 +153,32 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * it and invoke the callback.  The SDK will invoke this callback even if the property has not changed since any previous invocations, since the SDK does not
      * have a persistent cache of state. After this initial update, the SDK will also invoke this callback again whenever any properties change.
      * If multiple properties are available from the service simultaneously, this callback will be called once for each updated property.  There is no attempt to batch multiple properties into one call.
+     *
      * @param digitalTwinPropertyUpdate {@link DigitalTwinPropertyUpdate} structure filled in by the SDK with information about the updated property.
      */
     protected void onPropertyUpdate(@NonNull DigitalTwinPropertyUpdate digitalTwinPropertyUpdate) {
+        log.debug("OnPropertyUpdate is ignored since it's not implemented by interface instance {}", digitalTwinInterfaceInstanceName);
     }
 
     /**
      * Callback that is invoked by the Digital Twin SDK when a command is invoked from the service.
      * When a command arrives from the service for a particular interface, {@link DigitalTwinCommandRequest} specifies its callback signature.
+     *
      * @param digitalTwinCommandRequest {@link DigitalTwinCommandRequest} structure filled in by the SDK with information about the command.
      * @return {@link DigitalTwinCommandResponse} to be filled in by the application with the response code and payload to be returned to the service.
      */
     protected DigitalTwinCommandResponse onCommandReceived(@NonNull DigitalTwinCommandRequest digitalTwinCommandRequest) {
+        log.debug("OnCommandReceived returns {} since it's not implemented by interface instance {}", STATUS_CODE_NOT_IMPLEMENTED, digitalTwinInterfaceInstanceName);
         return DigitalTwinCommandResponse.builder()
-                .status(STATUS_CODE_PENDING)
-                .payload(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, digitalTwinInterfaceInstanceName))
-                .build();
+                                         .status(STATUS_CODE_NOT_IMPLEMENTED)
+                                         .payload(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, digitalTwinInterfaceInstanceName))
+                                         .build();
     }
 
     /**
      * Callback that is registration completed. Implementation shouldn't block or throw exception.
      */
     protected void onRegistered() {
-        log.debug("DigitalTwinInterfaceClient registered.");
+        log.debug("{} was registered.", digitalTwinInterfaceInstanceName);
     }
 }

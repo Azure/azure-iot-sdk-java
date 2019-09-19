@@ -1,4 +1,6 @@
-package com.microsoft.azure.sdk.iot.digitaltwin.device.model;
+package com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto;
+
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
 
 import java.util.List;
 

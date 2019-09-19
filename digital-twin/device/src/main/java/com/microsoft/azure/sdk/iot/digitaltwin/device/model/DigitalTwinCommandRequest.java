@@ -10,7 +10,9 @@ import lombok.NonNull;
 @Builder
 @Getter
 public class DigitalTwinCommandRequest {
-    /** Name of the command to execute on this interface. */
+    /**
+     * Name of the command to execute on this interface.
+     */
     @NonNull
     private final String commandName;
     /**
@@ -19,6 +21,8 @@ public class DigitalTwinCommandRequest {
      */
     @NonNull
     private final String requestId;
-    /** Raw payload of the request. */
+    /**
+     * Raw payload of the request.
+     */
     private String payload;
 }
