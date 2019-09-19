@@ -25,6 +25,7 @@ import rx.functions.Func1;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.FUNC_MAP_TO_STRING;
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.nullToEmpty;
@@ -69,25 +70,39 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
     @Override
     public Observable<DigitalTwin> getDigitalTwin(@NonNull String digitalTwinId) {
         return digitalTwin.getInterfacesAsync(digitalTwinId)
-                .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
+                          .filter(new Func1<DigitalTwinInterfaces, Boolean>() {
 
-                    @Override
-                    public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
-                        return digitalTwinInterfaces == null ? null : new DigitalTwin(digitalTwinInterfaces);
-                    }
-                });
+                              @Override
+                              public Boolean call(DigitalTwinInterfaces digitalTwinInterfaces) {
+                                  return digitalTwinInterfaces != null;
+                              }
+                          })
+                          .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
+
+                              @Override
+                              public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
+                                  return new DigitalTwin(digitalTwinInterfaces);
+                              }
+                          });
     }
 
     @Override
     public Observable<String> getModel(@NonNull String modelId) {
         return digitalTwin.getDigitalTwinModelAsync(modelId)
-                .map(FUNC_MAP_TO_STRING);
+                          .filter(new Func1<Object, Boolean>() {
+
+                              @Override
+                              public Boolean call(Object o) {
+                                  return o != null;
+                              }
+                          })
+                          .map(FUNC_MAP_TO_STRING);
     }
 
     @Override
-    public Observable<String> getModel(@NonNull String modelId, @NonNull Boolean expand) {
+    public Observable<String> getModel(@NonNull String modelId, boolean expand) {
         return digitalTwin.getDigitalTwinModelAsync(modelId, expand)
-                .map(FUNC_MAP_TO_STRING);
+                          .map(FUNC_MAP_TO_STRING);
     }
 
     @Override
@@ -102,30 +117,29 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
                         }}
                 );
         return digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
-                               .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
+                          .map(new Func1<DigitalTwinInterfaces, DigitalTwin>() {
 
-                                   @Override
-                                   public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
-                                       return new DigitalTwin(digitalTwinInterfaces);
-                                   }
-                               });
+                              @Override
+                              public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
+                                  return new DigitalTwin(digitalTwinInterfaces);
+                              }
+                          });
     }
 
     @Override
     public Observable<String> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName) {
-        return digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, null)
-                               .map(FUNC_MAP_TO_STRING);
+        return invokeCommand(digitalTwinId, interfaceInstanceName, commandName, null);
     }
 
     @Override
     public Observable<String> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument) {
         return digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument))
-                .map(FUNC_MAP_TO_STRING);
+                          .map(FUNC_MAP_TO_STRING);
     }
 
     @Override
     public Observable<String> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument, int connectTimeoutInSeconds, int responseTimeoutInSeconds) {
         return digitalTwin.invokeInterfaceCommandAsync(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument), connectTimeoutInSeconds, responseTimeoutInSeconds)
-                .map(FUNC_MAP_TO_STRING);
+                          .map(FUNC_MAP_TO_STRING);
     }
 }
