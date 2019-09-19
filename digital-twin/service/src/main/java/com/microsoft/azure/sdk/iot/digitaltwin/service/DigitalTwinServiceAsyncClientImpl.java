@@ -73,7 +73,7 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
 
                     @Override
                     public DigitalTwin call(DigitalTwinInterfaces digitalTwinInterfaces) {
-                        return new DigitalTwin(digitalTwinInterfaces);
+                        return digitalTwinInterfaces == null ? null : new DigitalTwin(digitalTwinInterfaces);
                     }
                 });
     }

@@ -113,8 +113,8 @@ public final class DigitalTwinDeviceClient {
 
     /**
      * Registers the specified {@link AbstractDigitalTwinInterfaceClient} with the DigitalTwin Service. It registers specified dtInterfaces with the Digital Twin Service.
-     * This registration occurs asynchronously. While registration is in progress, {@link AbstractDigitalTwinInterfaceClient}'s that are being registered nor will they be able to receive commands.
-     * It must not be called multiple times.  If a given Digital Twin device needs to have its handles re-registered, it needs to create a new one.
+     * This registration occurs asynchronously. While registration is in progress, {@link AbstractDigitalTwinInterfaceClient}'s that are being registered will not be able to receive commands.
+     * It must not be called multiple times.  If a given Digital Twin device needs to have it's handles re-registered, it needs to create a new one.
      * @param deviceCapabilityModelId Device Capability Model Id
      * @param digitalTwinInterfaceClients An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
      * @param digitalTwinInterfaceRegistrationCallback User specified callback that will be invoked on registration completion or failure. Callers should not begin sending Digital Twin telemetry until this callback is invoked.

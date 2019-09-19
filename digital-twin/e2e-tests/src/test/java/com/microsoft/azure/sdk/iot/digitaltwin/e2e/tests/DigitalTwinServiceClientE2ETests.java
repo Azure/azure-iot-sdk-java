@@ -17,7 +17,6 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,6 +30,7 @@ public class DigitalTwinServiceClientE2ETests {
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String MODEL_URN = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.MODEL_URN_ENV_VAR_NAME);
 
+    private static final String INVALID_MODEL_URN = "urn:invalid_namespace:invalid_name:1"; // Model ID format should contain a min of 4 segments [urn:namespace:name:version]
     private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientE2ETests_";
 
     private static String digitalTwinId;
@@ -55,6 +55,9 @@ public class DigitalTwinServiceClientE2ETests {
 
         deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(registeredDevice), IotHubClientProtocol.AMQPS);
         digitalTwinDeviceClient = new DigitalTwinDeviceClient(deviceClient);
+
+        // Register an existing interface -
+        // digitalTwinDeviceClient.registerInterfacesAsync();
     }
 
     @Test
@@ -67,7 +70,7 @@ public class DigitalTwinServiceClientE2ETests {
 
     @Test
     public void testGetModelInformationInvalidModelUrn() {
-        String modelString = digitalTwinServiceClient.getModel("invalidModelUrn");
+        String modelString = digitalTwinServiceClient.getModel(INVALID_MODEL_URN);
 
         assertThat(modelString).as("Verify invalid model URN returns null").isNull();
     }
@@ -83,22 +86,48 @@ public class DigitalTwinServiceClientE2ETests {
 
     @Test
     public void testGetAllDigitalTwinInterfacesInvalidDigitalTwinId() {
+        DigitalTwin digitalTwin = digitalTwinServiceClient.getDigitalTwin("invalidDigitalTwinId");
 
+        assertThat(digitalTwin).as("Verify invalid digital twin ID returns null DigitalTwin instance").isNull();
     }
 
     @Test
-    public void testUpdateDigitalTwinPropertiesValidUpdatePatch() {
+    public void testUpdateDigitalTwinPropertiesValidUpdatePatch() throws IOException {
+        String randomUuid = UUID.randomUUID().toString();
+        String interfaceInstanceName = "testInterfaceInstanceName";
+        String propertyName = "testPropertyName_";
+        String propertyValue = "testPropertyValue_".concat(randomUuid);
+        String propertyPatch = "{"
+                +"  \"properties\": {"
+                +"      \"" + propertyName + "\": {"
+                +"          \"desired\": {"
+                +"              \"value\": \"" + propertyValue + "\""
+                +"              }"
+                +"          }"
+                +"      }"
+                +"  }";
+        DigitalTwin digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch);
 
+        assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
+        assertThat(digitalTwin.getInterfaceInstances()).containsKey(interfaceInstanceName);
+        assertThat(digitalTwin.getInterfaceInstances().get(interfaceInstanceName).properties()).containsKey(propertyName);
+        assertThat(digitalTwin.getInterfaceInstances().get(interfaceInstanceName).properties().get(propertyName).desired().value()).isEqualTo(propertyValue);
     }
 
-    @Test
-    public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() {
-
-    }
-
-    @Test
-    public void testUpdateDigitalTwinPropertiesInvalidInterfaceInstanceName() {
-
+    @Test (expected = IOException.class)
+    public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() throws IOException {
+        String randomUuid = UUID.randomUUID().toString();
+        String interfaceInstanceName = "testInterfaceInstanceName";
+        String propertyName = "testPropertyName_";
+        String propertyValue = "testPropertyValue_".concat(randomUuid);
+        String propertyPatch = "{"
+                +"  \"properties\": {"
+                +"      \"" + propertyName + "\": {"
+                +"          \"desired\": \"" + propertyValue + "\""
+                +"          }"
+                +"      }"
+                +"  }";
+        DigitalTwin digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch);
     }
 
     @Test
