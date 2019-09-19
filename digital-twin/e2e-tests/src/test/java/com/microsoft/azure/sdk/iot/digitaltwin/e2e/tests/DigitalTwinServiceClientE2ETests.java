@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
+import com.microsoft.azure.sdk.iot.digitaltwin.sample.EnvironmentalSensor;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
@@ -15,33 +16,49 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.rest.RestException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 public class DigitalTwinServiceClientE2ETests {
 
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String MODEL_URN = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.MODEL_URN_ENV_VAR_NAME);
 
-    private static final String INVALID_MODEL_URN = "urn:invalid_namespace:invalid_name:1"; // Model ID format should contain a min of 4 segments [urn:namespace:name:version]
     private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientE2ETests_";
+
+    private static final String INVALID_MODEL_URN = "urn:invalid_namespace:invalid_name:1"; // Model ID format should contain a min of 4 segments [urn:namespace:name:version]
+    private static final String INVALID_DEVICE_ID = "test_inactive_device_id";
+    private static final String INVALID_INTERFACE_INSTANCE_NAME = "invalid_interface_instance_name";
+    private static final String INVALID_COMMAND_NAME = "invalid_command_name";
+    private static final String INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN = "Interface instance [%s] not found.";
+    private static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
+
+    // TODO: Define own interfaces - using interfaces from sample now
+    private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "sensor";
+    private static final String COMMAND_BLINK = "blink";
+    private static final String COMMAND_BLINK_DURATION = "10";
 
     private static String digitalTwinId;
     private static RegistryManager registryManager;
     private static DeviceClient deviceClient;
-    private static DigitalTwinDeviceClient digitalTwinDeviceClient;
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
 
     @BeforeClass
-    public static void setup() throws IOException, IotHubException, URISyntaxException {
+    public static void setup() throws IOException, IotHubException, URISyntaxException, InterruptedException {
         digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString()
                                                                .connectionString(IOTHUB_CONNECTION_STRING)
                                                                .build();
@@ -54,10 +71,20 @@ public class DigitalTwinServiceClientE2ETests {
         Device registeredDevice = registryManager.addDevice(device);
 
         deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(registeredDevice), IotHubClientProtocol.AMQPS);
-        digitalTwinDeviceClient = new DigitalTwinDeviceClient(deviceClient);
+        DigitalTwinDeviceClient digitalTwinDeviceClient = new DigitalTwinDeviceClient(deviceClient);
 
-        // Register an existing interface -
-        // digitalTwinDeviceClient.registerInterfacesAsync();
+        // TODO: Register an existing interface - define own interfaces - using interfaces from sample now
+        final CountDownLatch lock = new CountDownLatch(1);
+        final EnvironmentalSensor environmentalSensor = new EnvironmentalSensor(ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME);
+        digitalTwinDeviceClient.registerInterfacesAsync(
+                MODEL_URN,
+                singletonList(environmentalSensor),
+                (digitalTwinClientResult, context) -> {
+                    log.debug("Register interfaces {}.", digitalTwinClientResult);
+                    lock.countDown();
+                },
+                digitalTwinDeviceClient);
+        lock.await();
     }
 
     @Test
@@ -68,11 +95,9 @@ public class DigitalTwinServiceClientE2ETests {
         assertThat(modelString).contains(MODEL_URN);
     }
 
-    @Test
+    @Test (expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidModelUrn() {
         String modelString = digitalTwinServiceClient.getModel(INVALID_MODEL_URN);
-
-        assertThat(modelString).as("Verify invalid model URN returns null").isNull();
     }
 
     @Test
@@ -84,11 +109,9 @@ public class DigitalTwinServiceClientE2ETests {
         assertThat(digitalTwin.getInterfaceInstances().size()).isGreaterThanOrEqualTo(1);
     }
 
-    @Test
+    @Test (expected = NoSuchElementException.class)
     public void testGetAllDigitalTwinInterfacesInvalidDigitalTwinId() {
-        DigitalTwin digitalTwin = digitalTwinServiceClient.getDigitalTwin("invalidDigitalTwinId");
-
-        assertThat(digitalTwin).as("Verify invalid digital twin ID returns null DigitalTwin instance").isNull();
+        DigitalTwin digitalTwin = digitalTwinServiceClient.getDigitalTwin(INVALID_DEVICE_ID);
     }
 
     @Test
@@ -127,27 +150,40 @@ public class DigitalTwinServiceClientE2ETests {
                 +"          }"
                 +"      }"
                 +"  }";
+
         DigitalTwin digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch);
     }
 
     @Test
     public void testInvokeCommandOnActiveDevice() {
-
+        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME, COMMAND_BLINK, COMMAND_BLINK_DURATION);
     }
 
     @Test
-    public void testInvokeCommandOnInactiveDevice() {
+    public void testInvokeCommandInvalidInterfaceInstanceName() {
+        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, INVALID_INTERFACE_INSTANCE_NAME, COMMAND_BLINK, COMMAND_BLINK_DURATION);
 
+        assertThat(commandResponse).isEqualTo(String.format(INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN, INVALID_INTERFACE_INSTANCE_NAME));
+    }
+
+    @Test
+    public void testInvokeCommandInvalidCommandName() {
+        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME, INVALID_COMMAND_NAME, COMMAND_BLINK_DURATION);
+
+        assertThat(commandResponse).isEqualTo(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, INVALID_COMMAND_NAME, EnvironmentalSensor.ENVIRONMENTAL_SENSOR_INTERFACE_ID));
+    }
+
+    @Test (expected = RestException.class)
+    public void testInvokeCommandOnInactiveDevice() {
+        String commandResponse = digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME, COMMAND_BLINK, COMMAND_BLINK_DURATION);
     }
 
     @AfterClass
     public static void cleanup() throws IOException, IotHubException {
         deviceClient.closeNow();
+
         registryManager.removeDevice(digitalTwinId);
         registryManager.close();
-
-        // digital twin service client - close() ??
-        // digital twin device client - close() ??
     }
 
 }

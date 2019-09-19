@@ -49,7 +49,7 @@ public final class DigitalTwinServiceClientImpl implements DigitalTwinServiceCli
     }
 
     @Override
-    public String getModel(@NonNull String modelId, @NonNull Boolean expand) {
+    public String getModel(@NonNull String modelId, boolean expand) {
         return digitalTwinServiceAsyncClient.getModel(modelId, expand).toBlocking().single();
     }
 
