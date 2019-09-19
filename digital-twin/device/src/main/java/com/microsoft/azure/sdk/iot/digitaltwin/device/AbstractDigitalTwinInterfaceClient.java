@@ -160,7 +160,7 @@ public abstract class AbstractDigitalTwinInterfaceClient {
     }
 
     /**
-     * Callback that is registration completed. Implemetation shouldn't block or throw exception.
+     * Callback that is registration completed. Implementation shouldn't block or throw exception.
      */
     protected void onRegistered() {
         log.debug("DigitalTwinInterfaceClient registered.");
