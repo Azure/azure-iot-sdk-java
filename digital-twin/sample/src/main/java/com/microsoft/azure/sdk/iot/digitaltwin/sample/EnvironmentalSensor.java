@@ -1,6 +1,5 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.sample;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinCallback;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
@@ -14,9 +13,10 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.createJsonObject;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.deserialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static java.util.Collections.singletonList;
@@ -56,23 +56,24 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                                                             .propertyValue(String.valueOf(state))
                                                                             .build();
         return reportPropertiesAsync(
-            singletonList(reportProperty),
-            new DigitalTwinCallback() {
-                @Override
-                public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
-                    log.debug(
-                            "Report property: propertyName={}, reportedValue={}",
-                            PROPERTY_STATE,
-                            state
-                    );
-                }
-            },
-            this);
+                singletonList(reportProperty),
+                new DigitalTwinCallback() {
+                    @Override
+                    public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
+                        log.debug(
+                                "Report property: propertyName={}, reportedValue={}",
+                                PROPERTY_STATE,
+                                state
+                        );
+                    }
+                },
+                this
+        );
     }
 
     @Override
     public void onRegistered() {
-        log.debug("OnRegistered.");
+        super.onRegistered();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -87,7 +88,8 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                     public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
                                         log.debug("Temperature updated to {} is {}.", temperature, digitalTwinClientResult);
                                     }
-                                });
+                                }
+                        );
                         final double humidity = 100 * random.nextDouble();
                         updateHumidityAsync(
                                 humidity,
@@ -96,7 +98,8 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                     public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
                                         log.debug("Humidity updated to {} is {}.", humidity, digitalTwinClientResult);
                                     }
-                                });
+                                }
+                        );
                         Thread.sleep(30000);
                     } catch (Exception e) {
                         log.debug("Operation failed.", e);
@@ -114,7 +117,7 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
         log.debug(
                 "OnPropertyUpdate called: propertyName={}, reportedValue={}, desiredVersion={}, desiredValue={}",
                 propertyName,
-                digitalTwinPropertyUpdate.getReportedVersion(),
+                digitalTwinPropertyUpdate.getPropertyReported(),
                 desiredVersion,
                 propertyDesired
         );
@@ -206,16 +209,16 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
             @Override
             public void run() {
                 log.debug("Starting diagnostics...");
-                for (int i = 0; i< 100; i++) {
+                for (int i = 0; i < 100; i++) {
                     final int progressPercentage = i;
                     String progressMessage = String.format("Diagnostics progress %s%%...", progressPercentage);
                     log.debug(progressMessage);
                     DigitalTwinAsyncCommandUpdate asyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
-                                                                                       .commandName(COMMAND_RUN_DIAGNOSTICS)
-                                                                                       .statusCode(STATUS_CODE_PENDING)
-                                                                                       .requestId(requestId)
-                                                                                       .payload(progressMessage)
-                                                                                       .build();
+                                                                                                    .commandName(COMMAND_RUN_DIAGNOSTICS)
+                                                                                                    .statusCode(STATUS_CODE_PENDING)
+                                                                                                    .requestId(requestId)
+                                                                                                    .payload(progressMessage)
+                                                                                                    .build();
                     DigitalTwinCallback callback = new DigitalTwinCallback() {
                         @Override
                         public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
@@ -256,9 +259,9 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
         }).start();
     }
 
-    private String createBlinkResponse(String description) {
-        ObjectNode blinkResponse = createJsonObject();
+    private String createBlinkResponse(String description) throws IOException {
+        Map<String, String> blinkResponse = new HashMap<>();
         blinkResponse.put("description", description);
-        return blinkResponse.toString();
+        return serialize(blinkResponse);
     }
 }

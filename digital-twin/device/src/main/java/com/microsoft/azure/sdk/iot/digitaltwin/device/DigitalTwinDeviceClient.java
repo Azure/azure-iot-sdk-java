@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.device;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
@@ -13,19 +13,21 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncComm
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest.DigitalTwinCommandRequestBuilder;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandResponse;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinInterfaceRegistrationMessage;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinInterfaceRegistrationMessage.ModelInformation;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinInterfaceRegistrationMessage.ModelInformation.ModelInformationBuilder;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyUpdate.DigitalTwinPropertyUpdateBuilder;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinCommand;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinCommand.CommandRequest;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinInterfaceRegistrationMessage;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinInterfaceRegistrationMessage.ModelInformation;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinInterfaceRegistrationMessage.ModelInformation.ModelInformationBuilder;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.JsonRawValue;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,11 +47,9 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientRe
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.RegistrationStatus.REGISTERED;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.RegistrationStatus.REGISTERING;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.RegistrationStatus.UNREGISTERED;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinSdkInformation.DIGITAL_TWIN_SDK_INFORMATION_PROPERTIES;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.CommandJsonSerializer.deserializeCommandRequest;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinSdkInformation.DIGITAL_TWIN_SDK_INFORMATION_PROPERTIES;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.deserialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TelemetryJsonSerializer.serializeTelemetry;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.serializeReportProperty;
 import static java.util.Collections.singleton;
@@ -72,22 +72,21 @@ public final class DigitalTwinDeviceClient {
     private static final String DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_ID = "urn:azureiot:ModelDiscovery:ModelInformation:1";
     private static final String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE = "urn_azureiot_Client_SDKInformation";
     private static final String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_ID = "urn:azureiot:Client:SDKInformation:1";
-    private static final String PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE = "$.ifname";
     private static final String PROPERTY_DIGITAL_TWIN_INTERFACE_ID = "$.ifid";
-    private static final String PROPERTY_MESSAGE_SCHEMA = "$.schema";
-    private static final String PROPERTY_COMMAND_NAME = "iothub-command-name";
-    private static final String PROPERTY_REQUEST_ID = "iothub-command-request-id";
-    private static final String PROPERTY_STATUS = "iothub-command-statuscode";
     private static final String TOKEN_INTERFACE_INSTANCE_NAME = "interfaceInstanceName";
     private static final String TOKEN_COMMAND_NAME = "command";
+    private static final String DIGITAL_TWIN_MODEL_DISCOVERY_MESSAGE_SCHEMA = "modelInformation";
     private static final Pattern COMMAND_PARSER = Pattern.compile(String.format(
             "^\\%s(?<%s>.*)\\*(?<%s>.*)$",
             DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX,
             TOKEN_INTERFACE_INSTANCE_NAME,
             TOKEN_COMMAND_NAME
     ));
-
-    private static final String DIGITAL_TWIN_MODEL_DISCOVERY_MESSAGE_SCHEMA = "modelInformation";
+    static final String PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE = "$.ifname";
+    static final String PROPERTY_MESSAGE_SCHEMA = "$.schema";
+    static final String PROPERTY_COMMAND_NAME = "iothub-command-name";
+    static final String PROPERTY_REQUEST_ID = "iothub-command-request-id";
+    static final String PROPERTY_STATUS = "iothub-command-statuscode";
 
     private final DeviceClient deviceClient;
     private final Map<String, AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients;
@@ -102,7 +101,7 @@ public final class DigitalTwinDeviceClient {
      * Prior to invoking this function, applications *MUST* specify all options on the {@link DeviceClient} that are required.
      * Callers MUST NOT directly access {@link DeviceClient} after.
      *
-     * @param deviceClient  An {@link DeviceClient} that has been already created and bound to a specific connection string (or transport, or DPS handle, or whatever mechanism is preferred).
+     * @param deviceClient An {@link DeviceClient} that has been already created and bound to a specific connection string (or transport, or DPS handle, or whatever mechanism is preferred).
      */
     public DigitalTwinDeviceClient(@NonNull DeviceClient deviceClient) {
         this.deviceClient = deviceClient;
@@ -113,12 +112,13 @@ public final class DigitalTwinDeviceClient {
 
     /**
      * Registers the specified {@link AbstractDigitalTwinInterfaceClient} with the DigitalTwin Service. It registers specified dtInterfaces with the Digital Twin Service.
-     * This registration occurs asynchronously. While registration is in progress, {@link AbstractDigitalTwinInterfaceClient}'s that are being registered will not be able to receive commands.
-     * It must not be called multiple times.  If a given Digital Twin device needs to have it's handles re-registered, it needs to create a new one.
-     * @param deviceCapabilityModelId Device Capability Model Id
-     * @param digitalTwinInterfaceClients An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
+     * This registration occurs asynchronously. While registration is in progress, {@link AbstractDigitalTwinInterfaceClient}'s that are being registered nor will they be able to receive commands.
+     * It must not be called multiple times.  If a given Digital Twin device needs to have its handles re-registered, it needs to create a new one.
+     *
+     * @param deviceCapabilityModelId                  Device Capability Model Id
+     * @param digitalTwinInterfaceClients              An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
      * @param digitalTwinInterfaceRegistrationCallback User specified callback that will be invoked on registration completion or failure. Callers should not begin sending Digital Twin telemetry until this callback is invoked.
-     * @param context User context that is provided to the callback.
+     * @param context                                  User context that is provided to the callback.
      * @return if this async function is accepted or not
      */
     public DigitalTwinClientResult registerInterfacesAsync(
@@ -154,7 +154,7 @@ public final class DigitalTwinDeviceClient {
             @NonNull final String deviceCapabilityModelId,
             @NonNull final List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients,
             @NonNull final DigitalTwinCallback digitalTwinInterfaceRegistrationCallback,
-            final Object context) throws IOException {
+            final Object context) throws Exception {
         ModelInformationBuilder modelInformationBuilder = ModelInformation.builder();
         modelInformationBuilder.dcmId(deviceCapabilityModelId);
         for (AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient : digitalTwinInterfaceClients) {
@@ -187,7 +187,7 @@ public final class DigitalTwinDeviceClient {
                     log.debug("Getting DeviceTwin...");
                     deviceClient.getDeviceTwin();
                     log.debug("Get DeviceTwin succeed.");
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.debug("GetTwin failed.", e);
                     onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
                     return;
@@ -240,9 +240,10 @@ public final class DigitalTwinDeviceClient {
                             enableTwinCallback,
                             context,
                             twinPropertyCallBack,
-                            context);
+                            context
+                    );
                     log.debug("Start DeviceTwin succeed.");
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.debug("SubscribeTwin failed.", e);
                     onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
                 }
@@ -284,12 +285,8 @@ public final class DigitalTwinDeviceClient {
 
     private void onRegistrationFailed(@NonNull final DigitalTwinCallback digitalTwinInterfaceRegistrationCallback, final Object context) {
         synchronized (lock) {
-            if (registrationStatus == REGISTERING) {
-                digitalTwinInterfaceClients.clear();
-                registrationStatus = UNREGISTERED;
-            } else {
-                return;
-            }
+            digitalTwinInterfaceClients.clear();
+            registrationStatus = UNREGISTERED;
         }
         log.debug("Registration failed.");
         digitalTwinInterfaceRegistrationCallback.onResult(DIGITALTWIN_CLIENT_ERROR, context);
@@ -297,11 +294,7 @@ public final class DigitalTwinDeviceClient {
 
     private void onRegistrationSucceed(@NonNull final DigitalTwinCallback digitalTwinInterfaceRegistrationCallback, final Object context) {
         synchronized (lock) {
-            if (registrationStatus == REGISTERING) {
-                registrationStatus = REGISTERED;
-            } else {
-                return;
-            }
+            registrationStatus = REGISTERED;
         }
         log.debug("Registration succeed.");
         digitalTwinInterfaceRegistrationCallback.onResult(DIGITALTWIN_CLIENT_OK, context);
@@ -314,13 +307,16 @@ public final class DigitalTwinDeviceClient {
             @NonNull final DigitalTwinCallback digitalTwinTelemetryConfirmationCallback,
             final Object context) {
         try {
-            Message message = new Message(serializeTelemetry(telemetryName, payload));
+            log.debug("Sending TelemetryAsync...");
+            SimpleEntry body = new SimpleEntry<>(telemetryName, new JsonRawValue(payload));
+            Message message = new Message(serialize(body));
             message.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, digitalTwinInterfaceInstanceName);
             message.setProperty(PROPERTY_MESSAGE_SCHEMA, telemetryName);
             IotHubEventCallback telemetryCallback = createIotHubEventCallback(digitalTwinTelemetryConfirmationCallback);
             deviceClient.sendEventAsync(message, telemetryCallback, context);
+            log.debug("SendTelemetryAsync succeed.");
             return DIGITALTWIN_CLIENT_OK;
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.debug("SendTelemetryAsync failed.", e);
             return DIGITALTWIN_CLIENT_ERROR;
         }
@@ -332,11 +328,13 @@ public final class DigitalTwinDeviceClient {
             @NonNull final DigitalTwinCallback digitalTwinReportedPropertyUpdatedCallback,
             final Object context) {
         try {
+            log.debug("Reporting PropertiesAsync...");
             // TODO Known gap, SDK API with ambiguous Object
             Property property = serializeReportProperty(digitalTwinInterfaceInstanceName, digitalTwinReportProperties);
             deviceClient.sendReportedProperties(singleton(property));
             // TODO TODO Known gap, SDK API accepts no callback, there is no guarantee it's delivered
             digitalTwinReportedPropertyUpdatedCallback.onResult(DIGITALTWIN_CLIENT_OK, context);
+            log.debug("ReportPropertiesAsync succeed.");
         } catch (Exception e) {
             log.debug("ReportPropertyAsync failed.", e);
             digitalTwinReportedPropertyUpdatedCallback.onResult(DIGITALTWIN_CLIENT_ERROR, context);
@@ -349,14 +347,21 @@ public final class DigitalTwinDeviceClient {
             @NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate,
             @NonNull final DigitalTwinCallback digitalTwinUpdateAsyncCommandStatusCallback,
             final Object context) {
+        log.debug("Updating AsyncCommandStatus...");
         Message message = new Message(digitalTwinAsyncCommandUpdate.getPayload());
         message.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, digitalTwinInterfaceInstanceName);
         message.setProperty(PROPERTY_COMMAND_NAME, digitalTwinAsyncCommandUpdate.getCommandName());
         message.setProperty(PROPERTY_REQUEST_ID, digitalTwinAsyncCommandUpdate.getRequestId());
         message.setProperty(PROPERTY_STATUS, String.valueOf(digitalTwinAsyncCommandUpdate.getStatusCode()));
         IotHubEventCallback asyncCommandCallback = createIotHubEventCallback(digitalTwinUpdateAsyncCommandStatusCallback);
-        deviceClient.sendEventAsync(message, asyncCommandCallback, context);
-        return DIGITALTWIN_CLIENT_OK;
+        try {
+            deviceClient.sendEventAsync(message, asyncCommandCallback, context);
+            log.debug("UpdateAsyncCommandStatus succeed.");
+            return DIGITALTWIN_CLIENT_OK;
+        } catch (Exception e) {
+            log.debug("UpdateAsyncCommandStatus failed.", e);
+            return DIGITALTWIN_CLIENT_ERROR;
+        }
     }
 
     private void onDigitalTwinInterfaceClientRegistered(AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient) {
@@ -388,13 +393,17 @@ public final class DigitalTwinDeviceClient {
                     return new DeviceMethodData(INTERFACE_INSTANCE_NOT_FOUND_CODE, String.format(INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN, interfaceInstanceName));
                 }
                 DigitalTwinCommandRequestBuilder digitalTwinCommandRequestBuilder = DigitalTwinCommandRequest.builder()
-                        .commandName(componentMatcher.group(TOKEN_COMMAND_NAME));
+                                                                                                             .commandName(componentMatcher.group(TOKEN_COMMAND_NAME));
                 if (methodData instanceof byte[]) {
                     try {
-                        deserializeCommandRequest(digitalTwinCommandRequestBuilder, (byte[]) methodData);
-                        DigitalTwinCommandResponse digitalTwinCommandResponse = digitalTwinInterfaceClient.onCommandReceived(digitalTwinCommandRequestBuilder.build());
+                        DigitalTwinCommand digitalTwinCommand = deserialize((byte[]) methodData, DigitalTwinCommand.class);
+                        CommandRequest commandRequest = digitalTwinCommand.getCommandRequest();
+                        DigitalTwinCommandRequest digitalTwinCommandRequest = digitalTwinCommandRequestBuilder.requestId(commandRequest.getRequestId())
+                                                                                                              .payload(commandRequest.getValue().getRawJson())
+                                                                                                              .build();
+                        DigitalTwinCommandResponse digitalTwinCommandResponse = digitalTwinInterfaceClient.onCommandReceived(digitalTwinCommandRequest);
                         return new DeviceMethodData(digitalTwinCommandResponse.getStatus(), digitalTwinCommandResponse.getPayload());
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         return new DeviceMethodData(INVALID_METHOD_PAYLOAD_CODE, String.format(INVALID_METHOD_PAYLOAD_MESSAGE_PATTERN, e.getMessage()));
                     }
                 } else {
@@ -419,24 +428,21 @@ public final class DigitalTwinDeviceClient {
                 }
                 String payload = property.getValue().toString();
                 try {
-                    JsonNode node = deserialize(payload);
-                    if (node.isObject()) {
-                        Iterator<Entry<String, JsonNode>> fields = node.fields();
-                        while(fields.hasNext()) {
-                            Entry<String, JsonNode> field = fields.next();
-                            DigitalTwinPropertyUpdateBuilder propertyUpdateBuilder = DigitalTwinPropertyUpdate.builder()
-                                                                                                              .propertyName(field.getKey());
-                            if (!property.getIsReported()) {
-                                propertyUpdateBuilder.desiredVersion(property.getVersion())
-                                                     .propertyDesired(field.getValue().toString());
-                            }
-                            digitalTwinInterfaceClient.onPropertyUpdate(propertyUpdateBuilder.build());
+                    TypeReference<Map<String, JsonRawValue>> typeRef = new TypeReference<Map<String, JsonRawValue>>() {};
+                    Map<String, JsonRawValue> properties = deserialize(payload, typeRef);
+                    for (Entry<String, JsonRawValue> value : properties.entrySet()) {
+                        DigitalTwinPropertyUpdateBuilder propertyUpdateBuilder = DigitalTwinPropertyUpdate.builder()
+                                                                                                          .propertyName(value.getKey());
+                        if (property.getIsReported()) {
+                            propertyUpdateBuilder.propertyReported(value.getValue().getRawJson());
+                        } else {
+                            propertyUpdateBuilder.desiredVersion(property.getVersion())
+                                                 .propertyDesired(value.getValue().getRawJson());
                         }
-                    } else {
-                        log.debug("Property ignored: value is not complex type.");
+                        digitalTwinInterfaceClient.onPropertyUpdate(propertyUpdateBuilder.build());
                     }
-                } catch (IOException e) {
-                    log.debug("Property ignored: value is not JSON.");
+                } catch (Exception e) {
+                    log.debug("Property ignored: value is not JSON.", e);
                 }
             } else {
                 log.debug("Ignored none digital twin property[{}].", name);

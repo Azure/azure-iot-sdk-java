@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.digitaltwin.device.model;
+package com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
