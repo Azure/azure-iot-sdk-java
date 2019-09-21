@@ -20,5 +20,5 @@ public class DigitalTwinCommandResponse {
     /**
      * Response payload to send to server.
      */
-    private String payload;
+    private final String payload;
 }
