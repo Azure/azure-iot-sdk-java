@@ -24,5 +24,5 @@ public class DigitalTwinPropertyResponse {
     /**
      * Friendly description string of current status of update.
      */
-    private String statusDescription;
+    private final String statusDescription;
 }

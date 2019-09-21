@@ -10,9 +10,25 @@
     <artifactId>iot-sdk-java-digital-twin-device</artifactId>
     <version>${project-device-version}</version>
     <packaging>jar</packaging>
-    <properties>
-        <jackson-version>2.9.9</jackson-version>
-    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin-version}</version>
+                <configuration>
+                    <includeDependencySources>true</includeDependencySources>
+                    <show>protected</show>
+                    <sourcepath>${project.build.directory}/delombok</sourcepath>
+                    <excludePackageNames>
+                        com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto,com.microsoft.azure.sdk.iot.digitaltwin.device.serializer
+                    </excludePackageNames>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>

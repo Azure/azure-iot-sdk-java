@@ -14,21 +14,21 @@ public class DigitalTwinAsyncCommandUpdate {
      * Status code to map back to the server. Roughly maps to HTTP status codes.
      */
     @NonNull
-    private Integer statusCode;
+    private final Integer statusCode;
     /**
      * The command from the server that initiated the request that we are updating.
      * This comes from the structure {@link DigitalTwinCommandRequest#getCommandName()} passed to the device application's command callback handler.
      */
     @NonNull
-    private String commandName;
+    private final String commandName;
     /**
      * The requestId from the server that initiated the request that we are updating.
      * This comes from the structure {@link DigitalTwinCommandRequest#getRequestId()} ()} passed to the device application's command callback handler.
      */
     @NonNull
-    private String requestId;
+    private final String requestId;
     /**
      * Payload that the device should send to the service.
      */
-    private String payload;
+    private final String payload;
 }
