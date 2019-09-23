@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.device.serializer;
 
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyResponse;
@@ -10,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.ATTRIBUTE_STATUS_CODE;
@@ -19,7 +21,9 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinProp
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.serializeReportProperty;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -70,5 +74,22 @@ public class TwinPropertyJsonSerializerTest {
         assertThat(property2.get(ATTRIBUTE_STATUS_CODE).getAsInt()).isEqualTo(PROPERTY_RESPONSE.getStatusCode());
         assertThat(property2.get(ATTRIBUTE_STATUS_VERSION).getAsInt()).isEqualTo(PROPERTY_RESPONSE.getStatusVersion());
         assertThat(property2.get(ATTRIBUTE_STATUS_DESCRIPTION).getAsString()).isEqualTo(PROPERTY_RESPONSE.getStatusDescription());
+    }
+
+    @Test
+    public void serializeReportPropertyWithNullValueTest() {
+        DigitalTwinReportProperty propertyWithNullValue = mock(DigitalTwinReportProperty.class);
+        when(propertyWithNullValue.getPropertyName()).thenReturn(PROPERTY_NAME_1);
+        when(propertyWithNullValue.getPropertyValue()).thenReturn(null);
+        List<DigitalTwinReportProperty> reportProperties = singletonList(propertyWithNullValue);
+        Property property = serializeReportProperty(DIGITAL_TWIN_INTERFACE_INSTANCE, reportProperties);
+        assertThat(property.getKey()).isEqualTo(DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX + DIGITAL_TWIN_INTERFACE_INSTANCE);
+        assertThat(property.getValue()).isInstanceOf(JsonObject.class);
+        JsonObject value = (JsonObject) property.getValue();
+        assertThat(value.entrySet()).hasSameSizeAs(reportProperties);
+        JsonObject property1 = value.getAsJsonObject(PROPERTY_NAME_1);
+        assertThat(property1).isNotNull();
+        assertThat(property1.entrySet()).hasSize(1);
+        assertThat(property1.get(ATTRIBUTE_VALUE)).isEqualTo(JsonNull.INSTANCE);
     }
 }
