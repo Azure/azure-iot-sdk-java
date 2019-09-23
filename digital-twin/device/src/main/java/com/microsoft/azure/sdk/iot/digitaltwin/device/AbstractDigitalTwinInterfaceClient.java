@@ -67,7 +67,7 @@ public abstract class AbstractDigitalTwinInterfaceClient {
             final Object context) {
         log.debug("Sending TelemetryAsync from interface instance={}, telemetryName={}", digitalTwinInterfaceInstanceName, telemetryName);
         if (digitalTwinDeviceClient == null) {
-            log.debug("Send TelemetryAsync from interface instance={}, telemetryName={} failed: not registered.", digitalTwinInterfaceInstanceName, telemetryName);
+            log.debug("Send TelemetryAsync from interface instance={}, telemetryName={} failed: interface instance is not registered.", digitalTwinInterfaceInstanceName, telemetryName);
             return DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
         } else {
             DigitalTwinClientResult digitalTwinClientResult = digitalTwinDeviceClient.sendTelemetryAsync(
@@ -107,7 +107,7 @@ public abstract class AbstractDigitalTwinInterfaceClient {
             final Object context) {
         log.debug("Reporting PropertiesAsync from interface instance={}", digitalTwinInterfaceInstanceName);
         if (digitalTwinDeviceClient == null) {
-            log.debug("Report PropertiesAsync from interface instance={} failed: not registered.", digitalTwinInterfaceInstanceName);
+            log.debug("Report PropertiesAsync from interface instance={} failed: interface instance is not registered.", digitalTwinInterfaceInstanceName);
             return DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED;
         } else {
             DigitalTwinClientResult digitalTwinClientResult = digitalTwinDeviceClient.reportPropertiesAsync(
