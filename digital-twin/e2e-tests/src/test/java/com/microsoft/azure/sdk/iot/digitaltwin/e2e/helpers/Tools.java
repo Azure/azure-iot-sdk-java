@@ -3,13 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class Tools {
 
     public static String retrieveEnvironmentVariableValue(String environmentVariableName) {
         String environmentVariableValue = System.getenv().get(environmentVariableName);
-        if ((environmentVariableValue == null) || environmentVariableValue.isEmpty()) {
+        if (isBlank(environmentVariableValue)) {
             environmentVariableValue = System.getProperty(environmentVariableName);
-            if (environmentVariableValue == null || environmentVariableValue.isEmpty()) {
+            if (isBlank(environmentVariableValue)) {
                 throw new IllegalArgumentException("Environment variable is not set: " + environmentVariableName);
             }
         }

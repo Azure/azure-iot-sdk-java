@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
 import com.microsoft.azure.sdk.iot.digitaltwin.sample.EnvironmentalSensor;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.Property;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwin;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -95,6 +97,7 @@ public class DigitalTwinServiceClientE2ETests {
         assertThat(modelString).contains(MODEL_URN);
     }
 
+    // TODO: Autorest currently does not throw Exception for GET 404 status
     @Test (expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidModelUrn() {
         String modelString = digitalTwinServiceClient.getModel(INVALID_MODEL_URN);
@@ -109,6 +112,7 @@ public class DigitalTwinServiceClientE2ETests {
         assertThat(digitalTwin.getInterfaceInstances().size()).isGreaterThanOrEqualTo(1);
     }
 
+    // TODO: Autorest currently does not throw Exception for GET 404 status
     @Test (expected = NoSuchElementException.class)
     public void testGetAllDigitalTwinInterfacesInvalidDigitalTwinId() {
         DigitalTwin digitalTwin = digitalTwinServiceClient.getDigitalTwin(INVALID_DEVICE_ID);
@@ -118,7 +122,7 @@ public class DigitalTwinServiceClientE2ETests {
     public void testUpdateDigitalTwinPropertiesValidUpdatePatch() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String interfaceInstanceName = "testInterfaceInstanceName";
-        String propertyName = "testPropertyName_";
+        String propertyName = "testPropertyName_".concat(randomUuid);
         String propertyValue = "testPropertyValue_".concat(randomUuid);
         String propertyPatch = "{"
                 +"  \"properties\": {"
@@ -133,8 +137,9 @@ public class DigitalTwinServiceClientE2ETests {
 
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
         assertThat(digitalTwin.getInterfaceInstances()).containsKey(interfaceInstanceName);
-        assertThat(digitalTwin.getInterfaceInstances().get(interfaceInstanceName).properties()).containsKey(propertyName);
-        assertThat(digitalTwin.getInterfaceInstances().get(interfaceInstanceName).properties().get(propertyName).desired().value()).isEqualTo(propertyValue);
+        Map<String, Property> properties = digitalTwin.getInterfaceInstances().get(interfaceInstanceName).properties();
+        assertThat(properties).containsKey(propertyName);
+        assertThat(properties.get(propertyName).desired().value()).isEqualTo(propertyValue);
     }
 
     @Test (expected = IOException.class)
