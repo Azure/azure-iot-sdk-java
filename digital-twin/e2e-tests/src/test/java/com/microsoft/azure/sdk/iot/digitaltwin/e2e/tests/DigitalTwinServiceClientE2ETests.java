@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
-import com.microsoft.azure.sdk.iot.digitaltwin.sample.EnvironmentalSensor;
+import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.SimpleTestInterfaceInstance;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.Property;
@@ -48,10 +48,10 @@ public class DigitalTwinServiceClientE2ETests {
     private static final String INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN = "Interface instance [%s] not found.";
     private static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
 
-    // TODO: Define own interfaces - using interfaces from sample now
-    private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "sensor";
-    private static final String COMMAND_BLINK = "blink";
-    private static final String COMMAND_BLINK_DURATION = "10";
+    private static final String SIMPLE_TEST_INTERFACE_ID = "urn:contoso:azureiot:sdk:testinterface:1";
+    private static final String SIMPLE_TEST_INTERFACE_INSTANCE_NAME = "test_interface_1";
+    private static final String COMMAND_SYNC_COMMAND = "syncCommand";
+    private static final String COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE = "updatedFromCommandInvocation";
 
     private static String digitalTwinId;
     private static RegistryManager registryManager;
@@ -75,12 +75,11 @@ public class DigitalTwinServiceClientE2ETests {
         deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(registeredDevice), IotHubClientProtocol.AMQPS);
         DigitalTwinDeviceClient digitalTwinDeviceClient = new DigitalTwinDeviceClient(deviceClient);
 
-        // TODO: Register an existing interface - define own interfaces - using interfaces from sample now
         final CountDownLatch lock = new CountDownLatch(1);
-        final EnvironmentalSensor environmentalSensor = new EnvironmentalSensor(ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME);
+        final SimpleTestInterfaceInstance simpleTestInterfaceInstance = new SimpleTestInterfaceInstance(SIMPLE_TEST_INTERFACE_INSTANCE_NAME);
         digitalTwinDeviceClient.registerInterfacesAsync(
                 MODEL_URN,
-                singletonList(environmentalSensor),
+                singletonList(simpleTestInterfaceInstance),
                 (digitalTwinClientResult, context) -> {
                     log.debug("Register interfaces {}.", digitalTwinClientResult);
                     lock.countDown();
@@ -161,26 +160,26 @@ public class DigitalTwinServiceClientE2ETests {
 
     @Test
     public void testInvokeCommandOnActiveDevice() {
-        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME, COMMAND_BLINK, COMMAND_BLINK_DURATION);
+        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, SIMPLE_TEST_INTERFACE_INSTANCE_NAME, COMMAND_SYNC_COMMAND, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE);
     }
 
     @Test
     public void testInvokeCommandInvalidInterfaceInstanceName() {
-        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, INVALID_INTERFACE_INSTANCE_NAME, COMMAND_BLINK, COMMAND_BLINK_DURATION);
+        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, INVALID_INTERFACE_INSTANCE_NAME, COMMAND_SYNC_COMMAND, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE);
 
         assertThat(commandResponse).isEqualTo(String.format(INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN, INVALID_INTERFACE_INSTANCE_NAME));
     }
 
     @Test
     public void testInvokeCommandInvalidCommandName() {
-        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME, INVALID_COMMAND_NAME, COMMAND_BLINK_DURATION);
+        String commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, SIMPLE_TEST_INTERFACE_INSTANCE_NAME, INVALID_COMMAND_NAME, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE);
 
-        assertThat(commandResponse).isEqualTo(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, INVALID_COMMAND_NAME, EnvironmentalSensor.ENVIRONMENTAL_SENSOR_INTERFACE_ID));
+        assertThat(commandResponse).isEqualTo(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, INVALID_COMMAND_NAME, SIMPLE_TEST_INTERFACE_ID));
     }
 
     @Test (expected = RestException.class)
     public void testInvokeCommandOnInactiveDevice() {
-        String commandResponse = digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME, COMMAND_BLINK, COMMAND_BLINK_DURATION);
+        String commandResponse = digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, SIMPLE_TEST_INTERFACE_INSTANCE_NAME, COMMAND_SYNC_COMMAND, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE);
     }
 
     @AfterClass

@@ -39,6 +39,5 @@
             <artifactId>iot-service-client</artifactId>
             <version>${project-sdk-service-client}</version>
         </dependency>
-
     </dependencies>
 </project>
