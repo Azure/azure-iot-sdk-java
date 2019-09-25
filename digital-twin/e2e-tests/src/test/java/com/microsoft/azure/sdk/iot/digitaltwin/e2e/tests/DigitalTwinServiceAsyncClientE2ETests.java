@@ -75,7 +75,6 @@ public class DigitalTwinServiceAsyncClientE2ETests {
         deviceClient = new DeviceClient(registryManager.getDeviceConnectionString(registeredDevice), IotHubClientProtocol.AMQPS);
         DigitalTwinDeviceClient digitalTwinDeviceClient = new DigitalTwinDeviceClient(deviceClient);
 
-        // TODO: Register an existing interface - define own interfaces - using interfaces from sample now
         final CountDownLatch lock = new CountDownLatch(1);
         final SimpleTestInterfaceInstance simpleTestInterfaceInstance = new SimpleTestInterfaceInstance(SIMPLE_TEST_INTERFACE_INSTANCE_NAME);
         digitalTwinDeviceClient.registerInterfacesAsync(

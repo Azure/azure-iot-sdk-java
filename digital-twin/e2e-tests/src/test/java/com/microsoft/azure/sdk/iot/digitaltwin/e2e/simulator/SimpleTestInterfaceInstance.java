@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinCallback;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
@@ -23,9 +24,7 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
     private static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
     private static final String TELEMETRY_NAME_INTEGER = "telemetryWithIntegerValue";
     private static final String COMMAND_SYNC_COMMAND = "syncCommand";
-    private static final String COMMAND_SYNC_COMMAND_ANOTHER = "anotherSyncCommand";
     private static final String COMMAND_ASYNC_COMMAND = "asyncCommand";
-    private static final String COMMAND_ASYNC_COMMAND_ANOTHER = "anotherAsyncCommand";
     private static final String PROPERTY_NAME_WRITABLE = "writableProperty";
 
     public SimpleTestInterfaceInstance(@NonNull String digitalTwinInterfaceInstanceName) {
@@ -37,7 +36,7 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
         return sendTelemetryAsync(TELEMETRY_NAME_INTEGER, serialize(telemetryValue), operationCallback, this);
     }
 
-    public DigitalTwinClientResult updateWritableReportedProperty(String reportedPropertyValue) {
+    private DigitalTwinClientResult updateWritableReportedProperty(String reportedPropertyValue) {
         log.debug("Updating Writable Property = {}", reportedPropertyValue);
 
         DigitalTwinReportProperty digitalTwinReportProperty = DigitalTwinReportProperty.builder()
@@ -67,10 +66,16 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
                 payload);
         try{
             if (COMMAND_SYNC_COMMAND.equals(commandName)) {
-                updateWritableReportedProperty(payload);
+                DigitalTwinClientResult digitalTwinClientResult = updateWritableReportedProperty(payload);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
-                                                 .payload("Writeable property updated")
+                                                 .payload(String.format("Writeable property updated: %s", digitalTwinClientResult))
+                                                 .build();
+            } else if (COMMAND_ASYNC_COMMAND.equals(commandName)) {
+                runAsyncCommand(requestId, commandName);
+                return DigitalTwinCommandResponse.builder()
+                                                 .status(STATUS_CODE_PENDING)
+                                                 .payload(String.format("Running command: %s", commandName))
                                                  .build();
             } else {
                 String errorMessage = String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, commandName, SIMPLE_TEST_INTERFACE_ID);
@@ -88,5 +93,41 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
                                              .payload(e.getMessage())
                                              .build();
         }
+    }
+
+    private void runAsyncCommand(String requestId, String commandName) {
+        new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                String progressPercentage = String.format("Progress of %s: %d", commandName, i / 5 * 100);
+                log.debug(">> Executing Async task: {}", progressPercentage);
+
+                DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
+                                                                                                           .commandName(commandName)
+                                                                                                           .requestId(requestId)
+                                                                                                           .statusCode(STATUS_CODE_PENDING)
+                                                                                                           .payload(progressPercentage)
+                                                                                                           .build();
+                DigitalTwinCallback digitalTwinCallback = (digitalTwinClientResult, context) -> log.debug("Execute async command: {}; result: {}", progressPercentage, digitalTwinClientResult);
+                updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate, digitalTwinCallback, this);
+
+                try {
+                    Thread.sleep(10 * 1000);
+                }
+                catch (InterruptedException e) {
+                    log.error("Thread sleep was interrupted.", e);
+                }
+            }
+
+            DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
+                                                                                                       .commandName(commandName)
+                                                                                                       .requestId(requestId)
+                                                                                                       .statusCode(STATUS_CODE_COMPLETED)
+                                                                                                       .build();
+            DigitalTwinCallback digitalTwinCallback = (digitalTwinClientResult, context) -> log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);
+            updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate, digitalTwinCallback, this);
+
+            log.debug("Async command execution complete.");
+        }).start();
+
     }
 }
