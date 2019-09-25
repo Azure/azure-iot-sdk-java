@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
-import com.microsoft.azure.sdk.iot.digitaltwin.sample.EnvironmentalSensor;
+import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.SimpleTestInterfaceInstance;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.Property;
@@ -39,7 +39,7 @@ public class DigitalTwinServiceAsyncClientE2ETests {
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String MODEL_URN = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.MODEL_URN_ENV_VAR_NAME);
 
-    private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientE2ETests_";
+    private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceAsyncClientE2ETests_";
 
     private static final String INVALID_MODEL_URN = "urn:invalid_namespace:invalid_name:1"; // Model ID format should contain a min of 4 segments [urn:namespace:name:version]
     private static final String INVALID_DEVICE_ID = "test_inactive_device_id";
@@ -48,10 +48,10 @@ public class DigitalTwinServiceAsyncClientE2ETests {
     private static final String INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN = "Interface instance [%s] not found.";
     private static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
 
-    // TODO: Define own interfaces - using interfaces from sample now
-    private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "sensor";
-    private static final String COMMAND_BLINK = "blink";
-    private static final String COMMAND_BLINK_DURATION = "10";
+    private static final String SIMPLE_TEST_INTERFACE_ID = "urn:contoso:azureiot:sdk:testinterface:1";
+    private static final String SIMPLE_TEST_INTERFACE_INSTANCE_NAME = "test_interface_1";
+    private static final String COMMAND_SYNC_COMMAND = "syncCommand";
+    private static final String COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE = "updatedFromCommandInvocation";
 
     private static String digitalTwinId;
     private static RegistryManager registryManager;
@@ -77,10 +77,10 @@ public class DigitalTwinServiceAsyncClientE2ETests {
 
         // TODO: Register an existing interface - define own interfaces - using interfaces from sample now
         final CountDownLatch lock = new CountDownLatch(1);
-        final EnvironmentalSensor environmentalSensor = new EnvironmentalSensor(ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME);
+        final SimpleTestInterfaceInstance simpleTestInterfaceInstance = new SimpleTestInterfaceInstance(SIMPLE_TEST_INTERFACE_INSTANCE_NAME);
         digitalTwinDeviceClient.registerInterfacesAsync(
                 MODEL_URN,
-                singletonList(environmentalSensor),
+                singletonList(simpleTestInterfaceInstance),
                 (digitalTwinClientResult, context) -> {
                     log.debug("Register interfaces {}.", digitalTwinClientResult);
                     lock.countDown();
@@ -163,8 +163,9 @@ public class DigitalTwinServiceAsyncClientE2ETests {
     public void testInvokeCommandOnActiveDevice() {
         String commandResponse = digitalTwinServiceAsyncClient.invokeCommand(
                 digitalTwinId,
-                ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME,
-                COMMAND_BLINK, COMMAND_BLINK_DURATION).toBlocking().single();
+                SIMPLE_TEST_INTERFACE_INSTANCE_NAME,
+                COMMAND_SYNC_COMMAND,
+                COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE).toBlocking().single();
     }
 
     @Test
@@ -172,7 +173,8 @@ public class DigitalTwinServiceAsyncClientE2ETests {
         String commandResponse = digitalTwinServiceAsyncClient.invokeCommand(
                 digitalTwinId,
                 INVALID_INTERFACE_INSTANCE_NAME,
-                COMMAND_BLINK, COMMAND_BLINK_DURATION).toBlocking().single();
+                COMMAND_SYNC_COMMAND,
+                COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE).toBlocking().single();
 
         assertThat(commandResponse).isEqualTo(String.format(INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN, INVALID_INTERFACE_INSTANCE_NAME));
     }
@@ -181,20 +183,20 @@ public class DigitalTwinServiceAsyncClientE2ETests {
     public void testInvokeCommandInvalidCommandName() {
         String commandResponse = digitalTwinServiceAsyncClient.invokeCommand(
                 digitalTwinId,
-                ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME,
+                SIMPLE_TEST_INTERFACE_INSTANCE_NAME,
                 INVALID_COMMAND_NAME,
-                COMMAND_BLINK_DURATION).toBlocking().single();
+                COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE).toBlocking().single();
 
-        assertThat(commandResponse).isEqualTo(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, INVALID_COMMAND_NAME, EnvironmentalSensor.ENVIRONMENTAL_SENSOR_INTERFACE_ID));
+        assertThat(commandResponse).isEqualTo(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, INVALID_COMMAND_NAME, SIMPLE_TEST_INTERFACE_ID));
     }
 
     @Test (expected = RestException.class)
     public void testInvokeCommandOnInactiveDevice() {
         String commandResponse = digitalTwinServiceAsyncClient.invokeCommand(
                 INVALID_DEVICE_ID,
-                ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME,
-                COMMAND_BLINK,
-                COMMAND_BLINK_DURATION).toBlocking().single();
+                SIMPLE_TEST_INTERFACE_INSTANCE_NAME,
+                COMMAND_SYNC_COMMAND,
+                COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE).toBlocking().single();
     }
 
     @AfterClass
