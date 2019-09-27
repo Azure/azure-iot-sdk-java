@@ -3,11 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -37,6 +35,8 @@ public class HttpsConnection
 {
     /** The underlying HTTP/HTTPS connection. */
     private final HttpURLConnection connection;
+
+    private ProxySettings proxySettings;
 
     /**
      * The body. {@link HttpURLConnection} silently calls connect() when the output
@@ -84,26 +84,7 @@ public class HttpsConnection
         try
         {
             // Codes_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
-            if (proxySettings != null)
-            {
-                if (proxySettings.getUsername() != null && proxySettings.getPassword() != null)
-                {
-                    Authenticator authenticator = new Authenticator()
-                    {
-                        public PasswordAuthentication getPasswordAuthentication()
-                        {
-                            return (new PasswordAuthentication(proxySettings.getUsername(), proxySettings.getPassword()));
-                        }
-                    };
-                    Authenticator.setDefault(authenticator);
-                }
-
-                this.connection = (HttpURLConnection) url.openConnection(proxySettings.getProxy());
-            }
-            else
-            {
-                this.connection = (HttpURLConnection) url.openConnection();
-            }
+            this.connection = (HttpURLConnection) url.openConnection();
 
             // Codes_SRS_HTTPSCONNECTION_11_021: [The constructor shall set the HTTPS method to the given method.]
             this.connection.setRequestMethod(method.name());
@@ -113,6 +94,8 @@ public class HttpsConnection
             // Codes_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw a TransportException if the connection was unable to be opened.]
             throw HttpsConnection.buildTransportException(e);
         }
+
+        this.proxySettings = proxySettings;
     }
 
     /**
@@ -384,8 +367,15 @@ public class HttpsConnection
         }
         if (this.connection instanceof HttpsURLConnection)
         {
-            //Codes_SRS_HTTPSCONNECTION_25_024: [The function shall set the the SSL context with the given value.]
-            ((HttpsURLConnection)this.connection).setSSLSocketFactory(sslContext.getSocketFactory());
+            if (this.proxySettings != null)
+            {
+                ((HttpsURLConnection)this.connection).setSSLSocketFactory(new HttpProxySocketFactory(sslContext.getSocketFactory(), proxySettings));
+            }
+            else
+            {
+                //Codes_SRS_HTTPSCONNECTION_25_024: [The function shall set the the SSL context with the given value.]
+                ((HttpsURLConnection)this.connection).setSSLSocketFactory(sslContext.getSocketFactory());
+            }
         }
         else
         {
