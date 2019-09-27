@@ -50,6 +50,7 @@ public class MqttIotHubConnectionTest
     final String subscribeTopic = "devices/test-deviceId/messages/devicebound/#";
     final String expectedToken = "someToken";
     final byte[] expectedMessageBody = { 0x61, 0x62, 0x63 };
+    final String userAgentString = "some user agent string";
 
     @Mocked
     private ProductInfo mockedProductInfo;
@@ -301,7 +302,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, serverUri, deviceId, any, any, any);
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, any, any, null);
                 times = 1;
             }
         };
@@ -309,7 +310,7 @@ public class MqttIotHubConnectionTest
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
     @Test
-    public void openEstablishesWSConnectionUsingCorrectConfig() throws IOException, TransportException
+    public void openEstablishesWSConnectionUsingCorrectConfig(@Mocked final ProxySettings mockedProxySettings) throws IOException, TransportException
     {
         final String WS_RAW_PATH = "/$iothub/websocket";
         final String WS_QUERY = "?iothub-no-client-cert=true";
@@ -317,7 +318,7 @@ public class MqttIotHubConnectionTest
         final String serverUri = WS_SSLPrefix + iotHubHostName + WS_RAW_PATH + WS_QUERY;
 
         baseExpectations();
-        openExpectations();
+        openExpectations(mockedProxySettings);
 
         new NonStrictExpectations()
         {
@@ -328,6 +329,8 @@ public class MqttIotHubConnectionTest
                 result = expectedToken;
                 mockConfig.isUseWebsocket();
                 result = true;
+                mockConfig.getProxySettings();
+                result = mockedProxySettings;
             }
         };
 
@@ -350,7 +353,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-               Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, serverUri, deviceId, any, any, any);
+               Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, any, any, mockedProxySettings);
                times = 1;
             }
         };
@@ -379,7 +382,7 @@ public class MqttIotHubConnectionTest
         new StrictExpectations()
         {
             {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, serverUri, deviceId, any, any, mockSslContext);
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, any, mockSslContext, null);
                 result = new IOException();
             }
         };
@@ -427,7 +430,7 @@ public class MqttIotHubConnectionTest
         new StrictExpectations()
         {
             {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, any, any, any, any, mockSslContext);
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, any, any, any, any, mockSslContext, null);
                 result = mockedMqttConnection;
             }
         };
@@ -483,7 +486,7 @@ public class MqttIotHubConnectionTest
         new StrictExpectations()
         {
             {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, any, any, any, any, mockSslContext);
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, any, any, any, any, mockSslContext, null);
                 result = mockedMqttConnection;
             }
         };
@@ -531,7 +534,7 @@ public class MqttIotHubConnectionTest
     public void openDoesNothingIfAlreadyOpened() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -541,7 +544,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, any, any, any, any, any);
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, any, any, any, any, any, (ProxySettings) any);
                 maxTimes = 1;
             }
         };
@@ -552,7 +555,7 @@ public class MqttIotHubConnectionTest
     public void closeClosesMqttConnection() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
@@ -607,7 +610,7 @@ public class MqttIotHubConnectionTest
     {
         //arrange
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -670,7 +673,7 @@ public class MqttIotHubConnectionTest
     public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -700,7 +703,7 @@ public class MqttIotHubConnectionTest
     public void sendEventSendsMessageCorrectlyToIotHub() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         final byte[] msgBody = { 0x61, 0x62, 0x63 };
         new NonStrictExpectations()
@@ -734,7 +737,7 @@ public class MqttIotHubConnectionTest
     public void sendEventReturnsBadFormatIfMessageIsNull() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -750,7 +753,7 @@ public class MqttIotHubConnectionTest
     public void sendEventReturnsBadFormatIfMessageHasNullBody() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         final byte[] msgBody = null;
         new NonStrictExpectations()
@@ -839,7 +842,7 @@ public class MqttIotHubConnectionTest
     public void sendEventSendsDeviceTwinMessage(@Mocked final IotHubTransportMessage mockDeviceTwinMsg) throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         final byte[] msgBody = { 0x61, 0x62, 0x63 };
         new NonStrictExpectations()
@@ -879,7 +882,7 @@ public class MqttIotHubConnectionTest
     public void sendEventSendsDeviceMethodMessage(@Mocked final IotHubTransportMessage mockDeviceMethodMsg) throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
 
         final byte[] msgBody = { 0x61, 0x62, 0x63 };
         new NonStrictExpectations()
@@ -921,7 +924,7 @@ public class MqttIotHubConnectionTest
     public void receiveMessageSucceeds() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         new NonStrictExpectations()
         {
             {
@@ -963,7 +966,7 @@ public class MqttIotHubConnectionTest
     public void receiveDeviceTwinMessageSucceeds() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final byte[] expectedMessageBody = { 0x61, 0x62, 0x63 };
         new NonStrictExpectations()
         {
@@ -1004,7 +1007,7 @@ public class MqttIotHubConnectionTest
     public void receiveDeviceMethodMessageSucceeds() throws IOException, TransportException
     {
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final byte[] expectedMessageBody = { 0x61, 0x62, 0x63 };
         new NonStrictExpectations()
         {
@@ -1126,7 +1129,7 @@ public class MqttIotHubConnectionTest
                 mockConfig.getProductInfo();
                 result = mockedProductInfo;
                 mockedProductInfo.getUserAgentString();
-                result = "someUserAgentString";
+                result = userAgentString;
             }
         };
 
@@ -1140,7 +1143,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, anyString, anyString, expectedUserName, anyString, any);
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, anyString, anyString, expectedUserName, anyString, any, null);
                 times = 1;
             }
         };
@@ -1218,7 +1221,7 @@ public class MqttIotHubConnectionTest
     {
         //arrange
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -1236,7 +1239,7 @@ public class MqttIotHubConnectionTest
     {
         //arrange
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -1252,7 +1255,7 @@ public class MqttIotHubConnectionTest
     {
         //arrange
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -1270,7 +1273,7 @@ public class MqttIotHubConnectionTest
     {
         //arrange
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -1325,7 +1328,7 @@ public class MqttIotHubConnectionTest
     {
         //arrange
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -1378,7 +1381,7 @@ public class MqttIotHubConnectionTest
     {
         //arrange
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         final IotHubMessageResult expectedResult = IotHubMessageResult.COMPLETE;
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
@@ -1435,7 +1438,7 @@ public class MqttIotHubConnectionTest
         final int expectedMessageId = 2000;
         final Object callbackContext = new Object();
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
@@ -1485,7 +1488,7 @@ public class MqttIotHubConnectionTest
         final int expectedMessageId = 2000;
         final Object callbackContext = new Object();
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
@@ -1524,7 +1527,7 @@ public class MqttIotHubConnectionTest
         final int expectedMessageId = 2000;
         final Object callbackContext = new Object();
         baseExpectations();
-        openExpectations();
+        openExpectations(null);
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         connection.setListener(mockedIotHubListener);
         connection.open(mockedQueue, mockedScheduledExecutorService);
@@ -1596,7 +1599,7 @@ public class MqttIotHubConnectionTest
                 result = mockedProductInfo;
 
                 mockedProductInfo.getUserAgentString();
-                result = "some user agent string";
+                result = "someUserAgentString";
 
                 mockedMessage.getBytes();
                 result = expectedMessageBody;
@@ -1607,12 +1610,12 @@ public class MqttIotHubConnectionTest
         };
     }
 
-    private void openExpectations() throws TransportException
+    private void openExpectations(final ProxySettings proxySettings) throws TransportException
     {
         new NonStrictExpectations()
         {
             {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class}, anyString, anyString, anyString, anyString, any);
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, anyString, anyString, anyString, anyString, any, proxySettings);
                 result = mockedMqttConnection;
                 new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean, (Map) any);
                 result = mockDeviceMessaging;

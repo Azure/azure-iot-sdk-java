@@ -759,14 +759,9 @@ public class InternalClient
         }
 
         IotHubClientProtocol protocol = this.deviceIO.getProtocol();
-        if (protocol != HTTPS && protocol != AMQPS_WS)
+        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS)
         {
-            throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS or AMQPS_WS");
-        }
-
-        if (protocol == AMQPS_WS && proxySettings.getUsername() != null)
-        {
-            throw new IllegalArgumentException("Use of username/password authentication is not supported for AMQPS_WS proxies");
+            throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
         }
 
         this.config.setProxy(proxySettings);

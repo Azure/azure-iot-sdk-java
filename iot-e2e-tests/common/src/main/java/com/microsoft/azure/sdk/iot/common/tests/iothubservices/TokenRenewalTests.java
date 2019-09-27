@@ -38,7 +38,6 @@ public class TokenRenewalTests extends IntegrationTest
     protected static ProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8898;
-
     private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
     private static final Integer RETRY_MILLISECONDS = 100;
 
@@ -177,7 +176,7 @@ public class TokenRenewalTests extends IntegrationTest
         for (IotHubClientProtocol protocol: IotHubClientProtocol.values())
         {
             clients.add(createDeviceClient(protocol));
-            if (protocol == HTTPS)
+            if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
                 InternalClient client = createDeviceClient(protocol);
                 ProxySettings proxySettings = new ProxySettings(testProxy);

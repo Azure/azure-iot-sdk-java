@@ -2650,12 +2650,6 @@ public class InternalClientTest
         setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.AMQPS);
     }
 
-    @Test (expected = IllegalArgumentException.class)
-    public void setProxyThrowsIfClientIsUsingMQTTWS()
-    {
-        setProxyThrowsIfClientUsingUnsupportedProtocol(IotHubClientProtocol.MQTT_WS);
-    }
-
     private void setProxyThrowsIfClientUsingUnsupportedProtocol(final IotHubClientProtocol protocol)
     {
         //arrange
