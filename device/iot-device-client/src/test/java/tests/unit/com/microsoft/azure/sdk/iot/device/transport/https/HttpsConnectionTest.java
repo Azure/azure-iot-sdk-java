@@ -4,16 +4,17 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
-import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
+import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
 import mockit.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
@@ -63,31 +64,6 @@ public class HttpsConnectionTest
                 mockUrl.openConnection();
             }
         };
-    }
-
-    @Test
-    public void constructorOpensConnectionWithProxy(@Mocked final Proxy mockProxy) throws IOException, TransportException
-    {
-        final HttpsMethod httpsMethod = HttpsMethod.PUT;
-        final String expectedProxyHostname = "127.0.0.1";
-        final int expectedProxyPort = 8888;
-        final InetSocketAddress inetSocketAddress = new InetSocketAddress(expectedProxyHostname, expectedProxyPort);
-        new Expectations()
-        {
-            {
-                mockUrl.getProtocol();
-                result = "https";
-
-                mockProxySettings.getProxy();
-                result = mockProxy;
-
-                mockUrl.openConnection(mockProxy);
-                result = mockUrlConn;
-            }
-        };
-
-        // act
-        new HttpsConnection(mockUrl, httpsMethod, mockProxySettings);
     }
 
     // Tests_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw a TransportException if the connection was unable to be opened.]
@@ -380,6 +356,38 @@ public class HttpsConnectionTest
         {
             {
                 mockUrlConn.setSSLSocketFactory(mockedContext.getSocketFactory());
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void setSSLContextSetsContextWithProxy(@Mocked final SSLContext mockedContext, @Mocked final SSLSocketFactory mockedSocketFactory, @Mocked final HttpProxySocketFactory mockedHttpProxySocketFactory) throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+                mockedContext.getSocketFactory();
+                result = mockedSocketFactory;
+                new HttpProxySocketFactory(mockedSocketFactory, mockProxySettings);
+                result = mockedHttpProxySocketFactory;
+            }
+        };
+        final HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod, mockProxySettings);
+
+        Deencapsulation.invoke(conn, "setSSLContext", mockedContext);
+
+        new Verifications()
+        {
+            {
+                mockUrlConn.setSSLSocketFactory(mockedHttpProxySocketFactory);
                 times = 1;
             }
         };
