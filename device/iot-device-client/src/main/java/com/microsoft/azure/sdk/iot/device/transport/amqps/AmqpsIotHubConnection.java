@@ -4,6 +4,8 @@
  */
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
+import com.microsoft.azure.proton.transport.proxy.ProxyAuthenticationType;
+import com.microsoft.azure.proton.transport.proxy.ProxyConfiguration;
 import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
@@ -575,7 +577,22 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private void addProxyLayer(Transport transport, String hostName)
     {
-        final ProxyImpl proxy = new ProxyImpl();
+        ProxySettings proxySettings = this.deviceClientConfig.getProxySettings();
+
+        ProxyImpl proxy;
+
+        if (proxySettings.getUsername() != null && proxySettings.getPassword() != null)
+        {
+            log.trace("Adding proxy username and password to amqp proxy configuration");
+            ProxyConfiguration proxyConfiguration = new ProxyConfiguration(ProxyAuthenticationType.BASIC, proxySettings.getProxy(), proxySettings.getUsername(), new String(proxySettings.getPassword()));
+            proxy = new ProxyImpl(proxyConfiguration);
+        }
+        else
+        {
+            log.trace("No proxy username and password will be used amqp proxy configuration");
+            proxy = new ProxyImpl();
+        }
+
         final ProxyHandler proxyHandler = new ProxyHandlerImpl();
         proxy.configure(hostName, null, proxyHandler, transport);
         ((TransportInternal) transport).addTransportLayer(proxy);
