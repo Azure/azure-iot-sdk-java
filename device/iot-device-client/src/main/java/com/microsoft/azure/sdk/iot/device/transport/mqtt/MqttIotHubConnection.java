@@ -145,7 +145,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
                 //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
                 // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding
-                String clientUserAgentIdentifier = "DeviceClientType=" + URLEncoder.encode(this.config.getProductInfo().getUserAgentString(), "UTF-8").replaceAll("\\+", "%20");
+                String userAgentString = this.config.getProductInfo().getUserAgentString();
+                String clientUserAgentIdentifier = "DeviceClientType=" + URLEncoder.encode(userAgentString, "UTF-8").replaceAll("\\+", "%20");
                 String clientId = this.config.getDeviceId();
 
                 String moduleId = this.config.getModuleId();
@@ -167,14 +168,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
                     final String wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + WEBSOCKET_QUERY ;
                     mqttConnection = new MqttConnection(wsServerUri,
-                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext);
+                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext, this.config.getProxySettings());
                 }
                 else
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
                     final String serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
                     mqttConnection = new MqttConnection(serverUri,
-                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext);
+                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext, null);
                 }
 
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]

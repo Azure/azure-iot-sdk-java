@@ -167,7 +167,7 @@ public class SendMessagesCommon extends IntegrationTest
                                     {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
 
                                     //sas token device client, with proxy
-                                    //{MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
+                                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
                                     {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
 
                                     //x509 device client, with proxy
@@ -191,7 +191,7 @@ public class SendMessagesCommon extends IntegrationTest
                                         {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
 
                                         //sas token module client, with proxy
-                                        //{MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
+                                        {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
                                         {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true}
                                 }
                 ));

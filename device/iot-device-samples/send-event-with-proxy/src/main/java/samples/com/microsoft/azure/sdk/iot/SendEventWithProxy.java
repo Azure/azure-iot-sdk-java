@@ -76,7 +76,7 @@ public class SendEventWithProxy
      * @param args
      * args[0] = IoT Hub or Edge Hub connection string
      * args[1] = number of messages to send
-     * args[2] = protocol (optional, one of 'https' or 'amqps_ws')
+     * args[2] = protocol (optional, one of 'https', 'mqtt_ws' or 'amqps_ws')
      * args[3] = proxy host name ie: "127.0.0.1", "localhost", etc.
      * args[4] = proxy port number ie "8888", "3128", etc
      * args[5] = (optional) proxy username
@@ -95,7 +95,7 @@ public class SendEventWithProxy
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
                             + "2. [number of requests to send]\n"
-                            + "3. (https | amqps_ws)\n"
+                            + "3. (https | amqps_ws | mqtt_ws)\n"
                             + "4. proxy hostname (ie: '127.0.0.1', 'localhost', etc.)\n"
                             + "5. proxy port number\n"
                             + "6. (optional) username for the proxy \n"
@@ -119,25 +119,25 @@ public class SendEventWithProxy
         }
         IotHubClientProtocol protocol;
         String protocolStr = args[2];
-        if (protocolStr.toLowerCase().equals("https"))
+        if (protocolStr.equalsIgnoreCase("https"))
         {
             protocol = IotHubClientProtocol.HTTPS;
         }
-        else if (protocolStr.toLowerCase().equals("amqps"))
+        else if (protocolStr.equalsIgnoreCase("amqps"))
         {
             throw new UnsupportedOperationException("AMQPS does not have proxy support");
         }
-        else if (protocolStr.toLowerCase().equals("mqtt"))
+        else if (protocolStr.equalsIgnoreCase("mqtt"))
         {
             throw new UnsupportedOperationException("MQTT does not have proxy support");
         }
-        else if (protocolStr.toLowerCase().equals("amqps_ws"))
+        else if (protocolStr.equalsIgnoreCase("amqps_ws"))
         {
             protocol = IotHubClientProtocol.AMQPS_WS;
         }
-        else if (protocolStr.toLowerCase().equals("mqtt_ws"))
+        else if (protocolStr.equalsIgnoreCase("mqtt_ws"))
         {
-            throw new UnsupportedOperationException("MQTT_WS does not have proxy support");
+            protocol = IotHubClientProtocol.MQTT_WS;
         }
         else
         {
@@ -146,7 +146,7 @@ public class SendEventWithProxy
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
                             + "2. [number of requests to send]\n"
-                            + "3. (https | amqps_ws)\n"
+                            + "3. (https | amqps_ws | mqtt_ws)\n"
                             + "4. proxy hostname (ie: '127.0.0.1', 'localhost', etc.)\n"
                             + "5. proxy port number\n"
                             + "6. (optional) username for the proxy \n"
@@ -172,6 +172,11 @@ public class SendEventWithProxy
         {
             proxyUsername = args[5];
             proxyPassword = args[6].toCharArray();
+        }
+        else
+        {
+            proxyUsername = null;
+            proxyPassword = null;
         }
 
         System.out.println("Successfully read input parameters.");
@@ -216,6 +221,7 @@ public class SendEventWithProxy
         // Wait for IoT Hub to respond.
         try
         {
+            System.out.println("Waiting 10 seconds for all responses to return...");
             Thread.sleep(10000);
         }
         catch (InterruptedException e)

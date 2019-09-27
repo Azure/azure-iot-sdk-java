@@ -5,14 +5,17 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
+import java.net.Proxy;
+import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MqttConnection
@@ -21,7 +24,6 @@ public class MqttConnection
     private MqttConnectOptions connectionOptions = null;
     private ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
     private Object mqttLock;
-    private MqttCallback mqttCallback;
 
     //mqtt connection options
     private static final int KEEP_ALIVE_INTERVAL = 230;
@@ -39,13 +41,13 @@ public class MqttConnection
      * @param clientId Client Id to connect to
      * @param userName Username
      * @param password password
-     * @param iotHubSSLContext SSLContext for the connection
+     * @param sslContext SSLContext for the connection
      * @throws IllegalArgumentException is thrown if any of the parameters are null or empty
      * @throws TransportException when Mqtt async client cannot be instantiated
      */
-    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext iotHubSSLContext) throws TransportException, IllegalArgumentException
+    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext sslContext, ProxySettings proxySettings) throws TransportException, IllegalArgumentException, UnknownHostException
     {
-        if (serverURI == null || clientId == null || userName == null || iotHubSSLContext == null)
+        if (serverURI == null || clientId == null || userName == null || sslContext == null)
         {
             //Codes_SRS_MQTTCONNECTION_25_001: [The constructor shall throw IllegalArgumentException if any of the input parameters are null other than password.]
             throw new IllegalArgumentException("ServerURI, clientId, and userName may not be null or empty");
@@ -63,7 +65,7 @@ public class MqttConnection
             this.mqttAsyncClient = new MqttAsyncClient(serverURI, clientId, new MemoryPersistence());
             this.mqttAsyncClient.setManualAcks(true);
             this.connectionOptions = new MqttConnectOptions();
-            this.updateConnectionOptions(userName, password, iotHubSSLContext);
+            this.updateConnectionOptions(userName, password, sslContext, proxySettings);
         }
         catch (MqttException e)
         {
@@ -84,13 +86,31 @@ public class MqttConnection
      * @param userName the user name for the mqtt broker connection.
      * @param userPassword the user password for the mqtt broker connection.
      */
-    private void updateConnectionOptions(String userName, String userPassword, SSLContext iotHubSSLContext)
+    private void updateConnectionOptions(String userName, String userPassword, SSLContext iotHubSSLContext, ProxySettings proxySettings) throws UnknownHostException
     {
         this.connectionOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
         this.connectionOptions.setCleanSession(SET_CLEAN_SESSION);
         this.connectionOptions.setMqttVersion(MQTT_VERSION);
         this.connectionOptions.setUserName(userName);
-        this.connectionOptions.setSocketFactory(iotHubSSLContext.getSocketFactory());
+        if (proxySettings != null)
+        {
+            if (proxySettings.getProxy().type() == Proxy.Type.SOCKS)
+            {
+                this.connectionOptions.setSocketFactory(new Socks5SocketFactory(proxySettings.getHostname(), proxySettings.getPort()));
+            }
+            else if (proxySettings.getProxy().type() == Proxy.Type.HTTP)
+            {
+                this.connectionOptions.setSocketFactory(new HttpProxySocketFactory(iotHubSSLContext.getSocketFactory(), proxySettings));
+            }
+            else
+            {
+                throw new IllegalArgumentException("Proxy settings must be configured to use either SOCKS or HTTP");
+            }
+        }
+        else
+        {
+            this.connectionOptions.setSocketFactory(iotHubSSLContext.getSocketFactory());
+        }
 
         if (userPassword != null && !userPassword.isEmpty())
         {
@@ -112,7 +132,6 @@ public class MqttConnection
         }
 
         //Codes_SRS_MQTTCONNECTION_25_005: [This method shall set the callback for Mqtt.]
-        this.mqttCallback = mqttCallback;
         this.getMqttAsyncClient().setCallback(mqttCallback);
     }
 

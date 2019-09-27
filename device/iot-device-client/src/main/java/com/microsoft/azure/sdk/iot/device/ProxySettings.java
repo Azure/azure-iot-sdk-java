@@ -32,10 +32,21 @@ public class ProxySettings
 
         if (proxy.type() == Type.DIRECT)
         {
-            throw new IllegalArgumentException("Proxy cannot be configured to be DIRECT");
+            throw new IllegalArgumentException("Proxy settings cannot be configured to be DIRECT");
         }
 
         this.proxy = proxy;
+
+        if (username != null && username.isEmpty())
+        {
+            throw new IllegalArgumentException("Username cannot be an empty string");
+        }
+
+        if (password != null && password.length == 0)
+        {
+            throw new IllegalArgumentException("Password cannot be an empty string");
+        }
+
         this.username = username;
         this.password = password;
     }
@@ -91,11 +102,17 @@ public class ProxySettings
         }
     }
 
+    /**
+     * @return the saved proxy username
+     */
     public String getUsername()
     {
         return this.username;
     }
 
+    /**
+     * @return the saved proxy password
+     */
     public char[] getPassword()
     {
         return this.password;

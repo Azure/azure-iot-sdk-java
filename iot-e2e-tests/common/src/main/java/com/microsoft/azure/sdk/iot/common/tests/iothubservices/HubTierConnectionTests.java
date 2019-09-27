@@ -166,11 +166,10 @@ public class HubTierConnectionTests extends IntegrationTest
                     {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, false},
 
                     //x509 device client
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, publicKeyCert, privateKey, x509Thumbprint, false}
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, publicKeyCert, privateKey, x509Thumbprint, false},
 
                     //sas token device client, with proxy
-                    //Commented out until AMQP supports proxies
-                    //{new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, true}}
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, true}
                 }
         ));
 
