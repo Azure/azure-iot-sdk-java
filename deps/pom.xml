@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.microsoft.azure</groupId>
             <artifactId>qpid-proton-j-extensions</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
