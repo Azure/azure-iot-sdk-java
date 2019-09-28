@@ -1,17 +1,20 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
-import com.microsoft.azure.sdk.iot.common.helpers.Tools;
-import com.microsoft.azure.sdk.iot.common.jproxy.ProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.BaseDevice;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -19,11 +22,10 @@ import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static junit.framework.TestCase.fail;
@@ -39,9 +41,11 @@ public class HubTierConnectionTests extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected static String iotHubConnectionString = "";
-    protected static ProxyServer proxyServer;
+    protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8897;
+    protected static final String testProxyUser = "proxyUsername";
+    protected static final char[] testProxyPass = "1234".toCharArray();
 
     protected static String hostName;
 
@@ -71,28 +75,16 @@ public class HubTierConnectionTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = ProxyServer.create(testProxyHostname, testProxyPort);
-        try
-        {
-            proxyServer.start(ex -> {});
-        }
-        catch (IOException e)
-        {
-            fail("Failed to start the test proxy");
-        }
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+                .withPort(testProxyPort)
+                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
+                .start();
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        try
-        {
-            proxyServer.stop();
-        }
-        catch (IOException e)
-        {
-            fail("Failed to stop the test proxy");
-        }
+        proxyServer.stop();
     }
 
     @Before
@@ -101,7 +93,7 @@ public class HubTierConnectionTests extends IntegrationTest
         if (testInstance.useHttpProxy)
         {
             Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            testInstance.client.setProxySettings(new ProxySettings(testProxy));
+            testInstance.client.setProxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
         }
     }
 

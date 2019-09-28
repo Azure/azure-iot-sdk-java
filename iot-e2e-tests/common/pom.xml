@@ -68,6 +68,19 @@
             <version>1.1.3</version>
             <scope>compile</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.littleshoot/littleproxy -->
+        <dependency>
+            <groupId>org.littleshoot</groupId>
+            <artifactId>littleproxy</artifactId>
+            <version>1.1.2</version>
+            <exclusions>
+                <!--Littleproxy is Android compatible except for this dependency. Luckily, we don't need this dependency for our tests-->
+                <exclusion>
+                    <groupId>com.barchart.udt</groupId>
+                    <artifactId>barchart-udt-bundle</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
