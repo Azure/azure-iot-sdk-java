@@ -10,6 +10,21 @@
     <artifactId>iot-sdk-java-digital-twin-service</artifactId>
     <version>${project-service-version}</version>
     <packaging>jar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin-version}</version>
+                <configuration>
+                    <includeDependencySources>true</includeDependencySources>
+                    <show>protected</show>
+                    <sourcepath>${project.build.directory}/delombok</sourcepath>
+                    <excludePackageNames>com.microsoft.azure.sdk.iot.digitaltwin.service.util</excludePackageNames>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.microsoft.rest/client-runtime -->
         <dependency>

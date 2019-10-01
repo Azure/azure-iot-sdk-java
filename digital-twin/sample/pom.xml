@@ -5,7 +5,7 @@
         <artifactId>iot-sdk-java-digital-twin</artifactId>
         <version>1.0.0</version>
     </parent>
-    <digitalTwinName>Azure IoT Sdk Java Digital Twin Sample</digitalTwinName>
+    <name>Azure IoT Sdk Java Digital Twin Sample</name>
     <description>Azure IoT Sdk Java Digital Twin Sample</description>
     <artifactId>iot-sdk-java-digital-twin-sample</artifactId>
     <version>${project-sample-version}</version>

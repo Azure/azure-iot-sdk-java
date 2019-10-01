@@ -1,5 +1,9 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.digitaltwin.device.serializer;
 
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -13,11 +17,11 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSeri
 
 public final class TwinPropertyJsonSerializer {
     public static final String DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX = "$iotin:";
-    private static final String ATTRIBUTE_VALUE = "value";
-    private static final String ATTRIBUTE_STATUS_CODE = "sc";
-    private static final String ATTRIBUTE_STATUS_VERSION = "sv";
-    private static final String ATTRIBUTE_STATUS_DESCRIPTION = "sd";
     private static final JsonParser JSON_PARSER = new JsonParser();
+    static final String ATTRIBUTE_VALUE = "value";
+    static final String ATTRIBUTE_STATUS_CODE = "sc";
+    static final String ATTRIBUTE_STATUS_VERSION = "sv";
+    static final String ATTRIBUTE_STATUS_DESCRIPTION = "sd";
 
     private TwinPropertyJsonSerializer() {
     }
@@ -29,7 +33,11 @@ public final class TwinPropertyJsonSerializer {
         JsonObject propertiesNode = new JsonObject();
         for (DigitalTwinReportProperty reportProperty : reportProperties) {
             JsonObject propertyNode = new JsonObject();
-            propertyNode.add(ATTRIBUTE_VALUE, JSON_PARSER.parse(reportProperty.getPropertyValue()));
+            if (isNotEmpty(reportProperty.getPropertyValue())) {
+                propertyNode.add(ATTRIBUTE_VALUE, JSON_PARSER.parse(reportProperty.getPropertyValue()));
+            } else {
+                propertyNode.add(ATTRIBUTE_VALUE, JsonNull.INSTANCE);
+            }
             DigitalTwinPropertyResponse propertyResponse = reportProperty.getPropertyResponse();
             if (propertyResponse != null) {
                 propertyNode.addProperty(ATTRIBUTE_STATUS_CODE, propertyResponse.getStatusCode());
