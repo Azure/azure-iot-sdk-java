@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Digital Twin Sample Application</string>
+    <string name="property_name">Name</string>
+    <string name="property_brightness">Brightness</string>
+    <string name="property_temperature">Temperature</string>
+    <string name="property_humidity">Humidity</string>
+    <string name="status_connectivity">Connectivity</string>
+    <string name="status_registration">Registration</string>
+    <string name="status_onoff">On/Off</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_unregistered">Unregistered</string>
+    <string name="status_on">ON</string>
+    <string name="action_blinking">Blink</string>
+</resources>

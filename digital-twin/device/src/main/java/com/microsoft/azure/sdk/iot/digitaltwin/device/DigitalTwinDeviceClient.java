@@ -76,14 +76,10 @@ public final class DigitalTwinDeviceClient {
     private static final String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE = "urn_azureiot_Client_SDKInformation";
     private static final String DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_ID = "urn:azureiot:Client:SDKInformation:1";
     private static final String PROPERTY_DIGITAL_TWIN_INTERFACE_ID = "$.ifid";
-    private static final String TOKEN_INTERFACE_INSTANCE_NAME = "interfaceInstanceName";
-    private static final String TOKEN_COMMAND_NAME = "command";
     private static final String DIGITAL_TWIN_MODEL_DISCOVERY_MESSAGE_SCHEMA = "modelInformation";
     private static final Pattern COMMAND_PARSER = Pattern.compile(String.format(
-            "^\\%s(?<%s>.*)\\*(?<%s>.*)$",
-            DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX,
-            TOKEN_INTERFACE_INSTANCE_NAME,
-            TOKEN_COMMAND_NAME
+            "^\\%s(.+)\\*(.+)$",
+            DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX
     ));
     static final String PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE = "$.ifname";
     static final String PROPERTY_MESSAGE_SCHEMA = "$.schema";
@@ -390,13 +386,13 @@ public final class DigitalTwinDeviceClient {
         public DeviceMethodData call(String methodName, Object methodData, Object context) {
             Matcher componentMatcher = COMMAND_PARSER.matcher(methodName);
             if (componentMatcher.matches()) {
-                String interfaceInstanceName = componentMatcher.group(TOKEN_INTERFACE_INSTANCE_NAME);
+                String interfaceInstanceName = componentMatcher.group(1);
                 AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient = digitalTwinInterfaceClients.get(interfaceInstanceName);
                 if (digitalTwinInterfaceClient == null) {
                     return new DeviceMethodData(INTERFACE_INSTANCE_NOT_FOUND_CODE, String.format(INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN, interfaceInstanceName));
                 }
                 DigitalTwinCommandRequestBuilder digitalTwinCommandRequestBuilder = DigitalTwinCommandRequest.builder()
-                                                                                                             .commandName(componentMatcher.group(TOKEN_COMMAND_NAME));
+                                                                                                             .commandName(componentMatcher.group(2));
                 if (methodData instanceof byte[]) {
                     try {
                         DigitalTwinCommand digitalTwinCommand = deserialize((byte[]) methodData, DigitalTwinCommand.class);
