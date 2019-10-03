@@ -3,15 +3,15 @@
 ## Overview
 
 This is a quick tutorial with the steps to update an individualEnrollment in the Microsoft Azure IoT Hub 
-Device Provisioning Service using the [ProvisioningServiceClient](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client)
+Device Provisioning Service using the [ProvisioningServiceClient](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable)
 on the java SDK.
 
 All the artifacts that you need to execute this sample are ready to be built and executed on this sample.
 
 ## References
 
-[Provisioning service client - documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client)  
-[Provisioning service client - source code](https://github.com/Azure/azure-iot-sdk-java-dps/tree/master/provisioning/provisioning-service-client)
+[Provisioning service client - documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable)
+[Provisioning service client - source code](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client)
 
 ## How to run the samples on Linux or Windows
 

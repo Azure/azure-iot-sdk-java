@@ -3,15 +3,15 @@
 ## Overview
 
 This is a quick tutorial with the steps to create, get, query, and delete an EnrollmentGroup in the Microsoft Azure IoT 
-Hub Device Provisioning Service using the [Provisioning Service Client](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client)
+Hub Device Provisioning Service using the [Provisioning Service Client](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable)
 on the java SDK.
 
 All the artifacts that you need to execute this sample are ready to be built and executed on this sample.
 
 ## References
 
-[Provisioning service client documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client)
-[Provisioning service client source code](https://github.com/Azure/azure-iot-sdk-java-dps/tree/master/provisioning/provisioning-service-client)
+[Provisioning service client documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable)
+[Provisioning service client source code](https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client)
 
 ## How to run the samples on Linux or Windows
 
@@ -221,7 +221,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     ```java
     public static void main(String[] args) throws ProvisioningServiceClientException
     ```
-15. Create a new instance of the [ProvisioningServiceClient](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client)
+15. Create a new instance of the [ProvisioningServiceClient](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable)
      replacing the `System.out.println( "Hello World!" );` by:
     ```java
      System.out.println("Beginning my sample for the Provisioning Service Client!");
@@ -250,7 +250,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         enrollmentGroup.setIotHubHostName("[Host name].azure-devices.net");    // Optional, remove if you don't need. Must fit the linked IoT Hub.
         enrollmentGroup.setProvisioningStatus(ProvisioningStatus.ENABLED);     // Optional, remove if you don't need.
         ```
-    3. Now, call the [createOrUpdateEnrollmentGroup](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createorupdateenrollmentgroup#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createOrUpdateEnrollmentGroup_EnrollmentGroup_) 
+    3. Now, call the [createOrUpdateEnrollmentGroup](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient.createorupdateenrollmentgroup?view=azure-java-stable#com_microsoft_azure_sdk_iot_provisioning_service_ProvisioningServiceClient_createOrUpdateEnrollmentGroup_EnrollmentGroup_)
         on the ProvisioningServiceClient to create a new enrollmentGroup.
         ```java
         // *************************************** Create a new enrollment group ***************************************
@@ -298,7 +298,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     3. Delete the EnrollmentGroup using the Portal, or create a new certificate for the next test.
 19. Check the created enrollmentGroup information in your **App**. You can consult using 2 ProvisioningServiceClient APIs, 
     `get` and `query`.
-    1. Use the [getEnrollmentGroup](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.getenrollmentgroup#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_getEnrollmentGroup_String_) 
+    1. Use the [getEnrollmentGroup](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable.getenrollmentgroup#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_getEnrollmentGroup_String_)
         to **get** an specific enrollmentGroup using the EnrollmentGroupId. Add the following code.
         ```java
         // **************************************** Get info of enrollmentGroup ****************************************
@@ -306,7 +306,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         EnrollmentGroup getResult = provisioningServiceClient.getEnrollmentGroup(enrollmentGroupId);
         System.out.println(getResult);
         ```
-    2. Use the [createEnrollmentGroupQuery](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.createenrollmentgroupquery#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createEnrollmentGroupQuery_QuerySpecification_) 
+    2. Use the [createEnrollmentGroupQuery](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable.createenrollmentgroupquery#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_createEnrollmentGroupQuery_QuerySpecification_)
        to create a **query** for the enrollmentGroups in the provisioning service. The [QuerySpecificationBuilder](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification_Builder)
        will help you to create a correct [QuerySpecification](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.configs._Query_Specification).
        For this sample, we will query all **`"*"`** enrollmentGroups is the provisioning service.
@@ -326,7 +326,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
         }
         ```
 20. Delete the enrollmentGroup from the provisioning service. You can delete the enrollmentGroup adding the following 
-    code that invokes the API [deleteEnrollmentGroup](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service._Provisioning_Service_Client.deleteenrollmentgroup#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_deleteEnrollmentGroup_String_):
+    code that invokes the API [deleteEnrollmentGroup](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.service.provisioningserviceclient?view=azure-java-stable.deleteenrollmentgroup#com_microsoft_azure_sdk_iot_provisioning_service__Provisioning_Service_Client_deleteEnrollmentGroup_String_):
     ```java
     // ************************************** Delete info of enrollmentGroup ***************************************
     System.out.println("\nDelete the enrollmentGroup...");
