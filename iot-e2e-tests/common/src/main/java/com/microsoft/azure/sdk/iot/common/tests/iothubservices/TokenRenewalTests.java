@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
-import com.microsoft.azure.sdk.iot.common.jproxy.ProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -18,6 +17,8 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -29,15 +30,17 @@ import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
 
 public class TokenRenewalTests extends IntegrationTest
 {
     protected static String iotHubConnectionString;
     private static RegistryManager registryManager;
-    protected static ProxyServer proxyServer;
+    protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8898;
+    protected static final String testProxyUser = "proxyUsername";
+    protected static final char[] testProxyPass = "1234".toCharArray();
+
     private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
     private static final Integer RETRY_MILLISECONDS = 100;
 
@@ -49,28 +52,16 @@ public class TokenRenewalTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = ProxyServer.create(testProxyHostname, testProxyPort);
-        try
-        {
-            proxyServer.start(ex -> {});
-        }
-        catch (IOException e)
-        {
-            fail("Failed to start the test proxy");
-        }
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+                .withPort(testProxyPort)
+                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
+                .start();
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        try
-        {
-            proxyServer.stop();
-        }
-        catch (IOException e)
-        {
-            fail("Failed to stop the test proxy");
-        }
+        proxyServer.stop();
     }
 
     /**
@@ -179,7 +170,7 @@ public class TokenRenewalTests extends IntegrationTest
             if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
                 InternalClient client = createDeviceClient(protocol);
-                ProxySettings proxySettings = new ProxySettings(testProxy);
+                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
                 client.setProxySettings(proxySettings);
                 clients.add(client);
             }

@@ -93,7 +93,7 @@ public class ProxiedSSLSocket extends SSLSocket
         String proxyConnectMessage;
         if (this.proxyUsername != null && this.proxyPassword != null)
         {
-            String base64EncodedCredentials = Base64.encodeBase64String(String.format("%s:%s", this.proxyUsername, new String(this.proxyPassword)).getBytes(byteEncoding));
+            String base64EncodedCredentials = new String(Base64.encodeBase64(String.format("%s:%s", this.proxyUsername, new String(this.proxyPassword)).getBytes(byteEncoding)));
             proxyConnectMessage = String.format("CONNECT %s %s\r\nHost: %s\r\nProxy-Authorization: Basic %s\r\n\r\n", hostWithPort, HTTP_VERSION_1_1, hostWithPort, base64EncodedCredentials);
         }
         else

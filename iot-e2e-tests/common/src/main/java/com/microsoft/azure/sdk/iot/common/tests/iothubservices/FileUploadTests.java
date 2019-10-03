@@ -7,12 +7,13 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices;
 
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.*;
-import com.microsoft.azure.sdk.iot.common.jproxy.ProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.*;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -65,9 +66,11 @@ public class FileUploadTests extends IntegrationTest
     private static String privateKeyCertificate;
     private static String x509Thumbprint;
 
-    protected static ProxyServer proxyServer;
+    protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8897;
+    protected static final String testProxyUser = "proxyUsername";
+    protected static final char[] testProxyPass = "1234".toCharArray();
 
     static Set<FileUploadNotification> activeFileUploadNotifications = new ConcurrentSkipListSet<>(new Comparator<FileUploadNotification>()
     {
@@ -321,28 +324,16 @@ public class FileUploadTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = ProxyServer.create(testProxyHostname, testProxyPort);
-        try
-        {
-            proxyServer.start(ex -> {});
-        }
-        catch (IOException e)
-        {
-            fail("Failed to start the test proxy");
-        }
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+                .withPort(testProxyPort)
+                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
+                .start();
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        try
-        {
-            proxyServer.stop();
-        }
-        catch (IOException e)
-        {
-            fail("Failed to stop the test proxy");
-        }
+        proxyServer.stop();
     }
 
     private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException
@@ -374,7 +365,7 @@ public class FileUploadTests extends IntegrationTest
         if (testInstance.withProxy)
         {
             Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            deviceClient.setProxySettings(new ProxySettings(testProxy));
+            deviceClient.setProxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
         }
 
         Thread.sleep(5000);

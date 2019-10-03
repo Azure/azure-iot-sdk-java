@@ -5,11 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.common.setup;
 
-import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
-import com.microsoft.azure.sdk.iot.common.jproxy.ProxyServer;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -18,6 +17,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -80,9 +81,11 @@ public class SendMessagesCommon extends IntegrationTest
     protected static final Integer NUM_MESSAGES_PER_CONNECTION = 6;
 
     protected static RegistryManager registryManager;
-    protected static ProxyServer proxyServer;
+    protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8899;
+    protected static final String testProxyUser = "proxyUsername";
+    protected static final char[] testProxyPass = "1234".toCharArray();
 
     public SendMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
     {
@@ -106,28 +109,16 @@ public class SendMessagesCommon extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = ProxyServer.create(testProxyHostname, testProxyPort);
-        try
-        {
-            proxyServer.start(ex -> {});
-        }
-        catch (IOException e)
-        {
-            fail("Failed to start the test proxy");
-        }
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+                .withPort(testProxyPort)
+                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
+                .start();
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        try
-        {
-            proxyServer.stop();
-        }
-        catch (IOException e)
-        {
-            fail("Failed to stop the test proxy");
-        }
+        proxyServer.stop();
     }
 
     protected static Collection inputsCommon() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
@@ -197,7 +188,6 @@ public class SendMessagesCommon extends IntegrationTest
                 ));
             }
         }
-
 
         Thread.sleep(2000);
 
@@ -291,7 +281,7 @@ public class SendMessagesCommon extends IntegrationTest
             if (this.useHttpProxy)
             {
                 Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                ProxySettings proxySettings = new ProxySettings(testProxy);
+                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
                 this.client.setProxySettings(proxySettings);
             }
 
