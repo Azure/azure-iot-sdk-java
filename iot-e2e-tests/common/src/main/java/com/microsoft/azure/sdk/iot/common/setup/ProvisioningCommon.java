@@ -463,7 +463,7 @@ public class ProvisioningCommon extends IntegrationTest
             if (testInstance.attestationType == AttestationType.TPM)
             {
                 securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
-                Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+                Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
             }
             else if (testInstance.attestationType == AttestationType.X509)
@@ -510,10 +510,10 @@ public class ProvisioningCommon extends IntegrationTest
 
     public static byte[] ComputeDerivedSymmetricKey(String masterKey, String registrationId) throws InvalidKeyException, NoSuchAlgorithmException
     {
-        byte[] masterKeyBytes = com.microsoft.azure.sdk.iot.deps.util.Base64.decodeBase64Local(masterKey.getBytes(StandardCharsets.UTF_8));
+        byte[] masterKeyBytes = com.microsoft.azure.sdk.iot.deps.util.Base64.decodeBase64(masterKey.getBytes(StandardCharsets.UTF_8));
         SecretKeySpec secretKey = new SecretKeySpec(masterKeyBytes, HMAC_SHA256);
         Mac hMacSha256 = Mac.getInstance(HMAC_SHA256);
         hMacSha256.init(secretKey);
-        return com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(hMacSha256.doFinal(registrationId.getBytes()));
+        return com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64(hMacSha256.doFinal(registrationId.getBytes()));
     }
 }

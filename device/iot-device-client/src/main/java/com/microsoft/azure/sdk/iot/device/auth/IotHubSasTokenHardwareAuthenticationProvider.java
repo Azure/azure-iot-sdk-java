@@ -159,7 +159,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
                 throw new IOException("Security provider could not sign data successfully");
             }
 
-            byte[] base64Signature = Base64.encodeBase64Local(token);
+            byte[] base64Signature = Base64.encodeBase64(token);
             String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), ENCODING_FORMAT_NAME);
             return String.format(SASTOKEN_FORMAT, encodedTokenScope, base64UrlEncodedSignature, expiryTimeUTC);
         }

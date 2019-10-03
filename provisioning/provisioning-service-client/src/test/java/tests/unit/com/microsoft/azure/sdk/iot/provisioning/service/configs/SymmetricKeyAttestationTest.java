@@ -16,8 +16,8 @@ public class SymmetricKeyAttestationTest
     private static final String SECONDARY_KEY_TEXT = "validSecondaryKey";
     private static final String EMPTY_KEY = "";
 
-    private static final String VALID_PRIMARY_KEY = Base64.encodeBase64StringLocal(PRIMARY_KEY_TEXT.getBytes());
-    private static final String VALID_SECONDARY_KEY = Base64.encodeBase64StringLocal(SECONDARY_KEY_TEXT.getBytes());
+    private static final String VALID_PRIMARY_KEY = Base64.encodeBase64String(PRIMARY_KEY_TEXT.getBytes());
+    private static final String VALID_SECONDARY_KEY = Base64.encodeBase64String(SECONDARY_KEY_TEXT.getBytes());
 
     /* SRS_SYMMETRIC_KEY_ATTESTATION_44_001: [The constructor shall store the provided primary key.] */
     /* SRS_SYMMETRIC_KEY_ATTESTATION_44_002: [The constructor shall store the provided secondary key.] */

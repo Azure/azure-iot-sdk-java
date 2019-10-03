@@ -68,7 +68,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -120,7 +120,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -157,7 +157,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 result = tokenBytes;
                 times = 2;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -196,7 +196,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 result = tokenBytes;
                 times = 2;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -234,7 +234,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 result = tokenBytes;
                 times = 2;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -352,7 +352,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -494,7 +494,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -533,7 +533,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                Base64.encodeBase64Local((byte[]) any);
+                Base64.encodeBase64((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);

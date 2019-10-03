@@ -112,11 +112,11 @@ public class X509CertificateGenerator
 
     private static String getPrivateKeyPem(PrivateKey privateKey)
     {
-        return PRIVATE_KEY_HEADER + Base64.encodeBase64StringLocal(privateKey.getEncoded()) + PRIVATE_KEY_FOOTER;
+        return PRIVATE_KEY_HEADER + Base64.encodeBase64String(privateKey.getEncoded()) + PRIVATE_KEY_FOOTER;
     }
 
     private static String getPublicCertificatePem(X509Certificate certificate) throws CertificateEncodingException {
-        return PUBLIC_CERT_HEADER + Base64.encodeBase64StringLocal(certificate.getEncoded()) + PUBLIC_CERT_FOOTER;
+        return PUBLIC_CERT_HEADER + Base64.encodeBase64String(certificate.getEncoded()) + PUBLIC_CERT_FOOTER;
     }
 
     /**

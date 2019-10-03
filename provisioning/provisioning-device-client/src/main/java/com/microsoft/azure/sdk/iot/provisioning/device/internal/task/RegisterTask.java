@@ -167,14 +167,14 @@ public class RegisterTask implements Callable
         else if (securityProvider instanceof SecurityProviderSymmetricKey)
         {
             SecurityProviderSymmetricKey securityProviderSymmetricKey = (SecurityProviderSymmetricKey)securityProvider;
-            token = securityProviderSymmetricKey.HMACSignData(value.getBytes(StandardCharsets.UTF_8.displayName()), Base64.decodeBase64Local(securityProviderSymmetricKey.getSymmetricKey()));
+            token = securityProviderSymmetricKey.HMACSignData(value.getBytes(StandardCharsets.UTF_8.displayName()), Base64.decodeBase64(securityProviderSymmetricKey.getSymmetricKey()));
         }
 
         if (token == null || token.length == 0)
         {
             throw new ProvisioningDeviceSecurityException("Security client could not sign data successfully");
         }
-        byte[] base64Signature = Base64.encodeBase64Local(token);
+        byte[] base64Signature = Base64.encodeBase64(token);
         String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), StandardCharsets.UTF_8.displayName());
 
         //SRS_RegisterTask_25_015: [ If the provided security client is for Key then, this method shall build the SasToken of the format SharedAccessSignature sr=<tokenScope>&sig=<signature>&se=<expiryTime>&skn= and save it to authorization]

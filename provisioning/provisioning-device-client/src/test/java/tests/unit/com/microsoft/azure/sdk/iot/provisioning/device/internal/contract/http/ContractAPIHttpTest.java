@@ -255,7 +255,7 @@ public class ContractAPIHttpTest
                 result = mockedTpmRegistrationResultParser;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
                 result = "some auth key";
-                Base64.decodeBase64Local((byte[]) any);
+                Base64.decodeBase64((byte[]) any);
                 result = new byte[]{};
                 new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;

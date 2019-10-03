@@ -46,7 +46,7 @@ public class SignRequest
     public void setData(byte[] data)
     {
         // Codes_SRS_HTTPHSMSIGNREQUEST_34_003: [This function shall save the provided data after base64 encoding it.]
-        this.data = Base64.encodeBase64StringLocal(data);
+        this.data = Base64.encodeBase64String(data);
     }
 
     public void setAlgo(Mac algo)

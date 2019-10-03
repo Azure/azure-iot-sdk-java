@@ -223,7 +223,7 @@ public class ProvisioningTask implements Callable
 
                         //Codes_SRS_ProvisioningTask_34_016: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
                         String authenticationKey = registrationStatus.getTpm().getAuthenticationKey();
-                        ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(Base64.decodeBase64Local(authenticationKey.getBytes()));
+                        ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(Base64.decodeBase64(authenticationKey.getBytes()));
                     }
                     this.invokeRegistrationCallback(registrationInfo, null);
                     isContinue = false;

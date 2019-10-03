@@ -9,10 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 
 public class IotHubX509SoftwareAuthenticationProvider extends IotHubAuthenticationProvider
@@ -60,7 +57,7 @@ public class IotHubX509SoftwareAuthenticationProvider extends IotHubAuthenticati
             //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_005: [This function shall return the saved IotHubSSLContext.]
             return this.iotHubSSLContext.getSSLContext();
         }
-        catch (CertificateException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyManagementException | KeyStoreException e)
+        catch (GeneralSecurityException e)
         {
             //Codes_SRS_IOTHUBX509SOFTWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
             throw new IOException(e);
@@ -78,7 +75,7 @@ public class IotHubX509SoftwareAuthenticationProvider extends IotHubAuthenticati
      * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      * @throws NoSuchAlgorithmException if the default SSL Context cannot be created
      */
-    private IotHubSSLContext generateSSLContext() throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, UnrecoverableKeyException
+    private IotHubSSLContext generateSSLContext() throws IOException, GeneralSecurityException
     {
         if (this.iotHubTrustedCert != null)
         {

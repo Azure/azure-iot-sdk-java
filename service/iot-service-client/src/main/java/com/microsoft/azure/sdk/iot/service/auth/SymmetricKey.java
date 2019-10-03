@@ -35,8 +35,8 @@ public class SymmetricKey
         {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(encryptionMethod);
             keyGenerator.init(new SecureRandom());
-            this.primaryKey = Base64.encodeBase64StringLocal(keyGenerator.generateKey().getEncoded());
-            this.secondaryKey = Base64.encodeBase64StringLocal(keyGenerator.generateKey().getEncoded());
+            this.primaryKey = Base64.encodeBase64String(keyGenerator.generateKey().getEncoded());
+            this.secondaryKey = Base64.encodeBase64String(keyGenerator.generateKey().getEncoded());
         }
         catch (NoSuchAlgorithmException e)
         {

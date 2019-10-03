@@ -47,7 +47,7 @@ public class SignRequestTest
                 mockedMac.getAlgorithm();
                 result = expectedAlgoString;
 
-                Base64.encodeBase64StringLocal(expectedData);
+                Base64.encodeBase64String(expectedData);
                 result = expectedEncodedData;
             }
         };

@@ -20,13 +20,13 @@ public class SignatureJVMRunner extends IntegrationTest
     {
         String resourceUri =
                 "sdktesthub.private.azure-devices-int.net/devices/test8";
-        String deviceKey = Base64.encodeBase64StringLocal("someKey".getBytes());
+        String deviceKey = Base64.encodeBase64String("someKey".getBytes());
         long expiryTime = 1462333672;
 
         String testSig =
                 new Signature(resourceUri, expiryTime, deviceKey).toString();
 
-        String sigEncoded = new String(Base64.encodeBase64Local(testSig.getBytes()));
+        String sigEncoded = new String(Base64.encodeBase64(testSig.getBytes()));
 
         assertEquals("bXVROU55OUJZZXJ0b1VZJTJCdHlpc0lHMTZiNjdwOFFIckRlZlhBNFYxcUxNJTNE", sigEncoded);
     }

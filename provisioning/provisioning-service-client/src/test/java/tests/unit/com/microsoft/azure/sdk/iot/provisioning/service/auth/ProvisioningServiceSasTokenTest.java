@@ -51,7 +51,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = Base64.encodeBase64StringLocal("key".getBytes());
+        String sharedAccessKey = Base64.encodeBase64String("key".getBytes());
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
@@ -67,7 +67,7 @@ public class ProvisioningServiceSasTokenTest
             {
                 urlEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 system.currentTimeMillis();
-                Base64.decodeBase64Local(sharedAccessKey.getBytes(charset));
+                Base64.decodeBase64(sharedAccessKey.getBytes(charset));
                 byte[] body = { 1 };
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
                 mac.getInstance(cryptoProvider);
@@ -91,7 +91,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = Base64.encodeBase64StringLocal("key".getBytes());
+        String sharedAccessKey = Base64.encodeBase64String("key".getBytes());
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
 
@@ -114,7 +114,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = Base64.encodeBase64StringLocal("key".getBytes());
+        String sharedAccessKey = Base64.encodeBase64String("key".getBytes());
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         // Act
