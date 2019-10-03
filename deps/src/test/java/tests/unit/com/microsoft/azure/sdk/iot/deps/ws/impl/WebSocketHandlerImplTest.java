@@ -98,7 +98,7 @@ public class WebSocketHandlerImplTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = Base64.decodeBase64Local(keyBase64.getBytes());
+                    byte[] decoded = Base64.decodeBase64(keyBase64.getBytes());
 
                     if (decoded.length == 16)
                     {

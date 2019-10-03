@@ -201,7 +201,7 @@ public class WebSocketUpgrade
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(key);
 
-        return Base64.encodeBase64StringLocal(key).trim();
+        return Base64.encodeBase64String(key).trim();
     }
 
     public String createUpgradeRequest()
@@ -301,7 +301,7 @@ public class WebSocketUpgrade
                     break;
                 }
 
-                String expectedKey = Base64.encodeBase64StringLocal(messageDigest.digest((this._webSocketKey + RFC_GUID).getBytes())).trim();
+                String expectedKey = Base64.encodeBase64String(messageDigest.digest((this._webSocketKey + RFC_GUID).getBytes())).trim();
 
                 if (line.contains(expectedKey))
                 {

@@ -174,6 +174,7 @@ public final class Base64
      * @return an array of bytes with the original values
      * @throws IllegalArgumentException if the provided base64 values are null, or do not fits the required length
      */
+    @Deprecated
     public static byte[] decodeBase64Local(final byte[] base64Values) throws IllegalArgumentException
     {
         /* Codes_SRS_BASE64_21_002: [If the `base64Values` is null, the decodeBase64Local shall throw IllegalArgumentException.] */
@@ -239,6 +240,7 @@ public final class Base64
      * @return an array of base64 encoded values
      * @throws IllegalArgumentException if the provided base64 values are null, or do not fits the required length
      */
+    @Deprecated
     public static byte[] encodeBase64Local(byte[] dataValues) throws IllegalArgumentException
     {
         /* Codes_SRS_BASE64_21_006: [If the `dataValues` is null, the encodeBase64Local shall throw IllegalArgumentException.] */
@@ -265,6 +267,7 @@ public final class Base64
      * @return a string with the base64 encoded values
      * @throws IllegalArgumentException if the provided base64 values are null, or do not fits the required length
      */
+    @Deprecated
     public static String encodeBase64StringLocal(byte[] dataValues) throws IllegalArgumentException
     {
         /* Codes_SRS_BASE64_21_009: [If the `dataValues` is null, the encodeBase64StringLocal shall throw IllegalArgumentException.] */
@@ -281,6 +284,36 @@ public final class Base64
 
         /* Codes_SRS_BASE64_21_008: [The encodeBase64StringLocal shall encoded the provided `dataValues` in a string using the Base64 format define in the RFC2045.] */
         return new String(encodeBase64Internal(dataValues));
+    }
+
+    /**
+     * Delegates base64 decoding to apache commons
+     * @param base64Values the values to decode
+     * @return the decoded values
+     */
+    public static byte[] decodeBase64(final byte[] base64Values)
+    {
+        return org.apache.commons.codec.binary.Base64.decodeBase64(base64Values);
+    }
+
+    /**
+     * Delegates base64 encoding to apache commons
+     * @param dataValues the values to encode
+     * @return the encoded bytes
+     */
+    public static byte[] encodeBase64(byte[] dataValues)
+    {
+        return org.apache.commons.codec.binary.Base64.encodeBase64(dataValues);
+    }
+
+    /**
+     * Delegates base64 encoding to apache commons
+     * @param dataValues the values to encode
+     * @return a string created from the encoded bytes
+     */
+    public static String encodeBase64String(byte[] dataValues)
+    {
+        return new String(org.apache.commons.codec.binary.Base64.encodeBase64(dataValues));
     }
 
     private static byte[] encodeBase64Internal(byte[] dataValues) throws IllegalArgumentException
