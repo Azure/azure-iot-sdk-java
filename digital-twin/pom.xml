@@ -40,6 +40,7 @@
         <maven-javadoc-plugin-version>3.1.1</maven-javadoc-plugin-version>
         <iot-device-client-version>1.19.0</iot-device-client-version>
         <jackson-version>2.9.9</jackson-version>
+        <rxjava3-version>3.0.0-RC3</rxjava3-version>
         <lombok-version>1.18.4</lombok-version>
         <lombok-plugin-version>1.18.8.1</lombok-plugin-version>
         <slf4j-version>1.7.25</slf4j-version>
@@ -51,7 +52,7 @@
         <testng-version>6.14.3</testng-version>
         <build-helper-version>3.0.0</build-helper-version>
         <ms-rest-client-version>1.6.12</ms-rest-client-version>
-        <project-device-version>1.0.0</project-device-version>
+        <project-device-version>1.0.1</project-device-version>
         <project-service-version>1.0.0</project-service-version>
         <project-sample-version>1.0.0</project-sample-version>
         <project-e2e-tests-version>1.0.0</project-e2e-tests-version>

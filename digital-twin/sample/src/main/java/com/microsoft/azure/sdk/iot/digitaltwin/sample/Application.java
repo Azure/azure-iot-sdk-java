@@ -7,12 +7,10 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinCallback;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
@@ -44,17 +42,8 @@ public class Application {
                                                                      .totalMemory(16e9)
                                                                      .totalStorage(1e12)
                                                                      .build();
-        digitalTwinDeviceClient.registerInterfacesAsync(
-                DCM_ID,
-                asList(deviceInformation, environmentalSensor),
-                new DigitalTwinCallback() {
-                    @Override
-                    public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
-                        log.debug("Register interfaces {}.", digitalTwinClientResult);
-                    }
-                },
-                digitalTwinDeviceClient
-        );
+        DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor)).blockingSingle();
+        log.debug("Register interfaces {}.", result);
         Thread.sleep(100000);
     }
 

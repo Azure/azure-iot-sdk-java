@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinCallback;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
 
@@ -17,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Consumer;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,18 +82,24 @@ public class DeviceInformation extends AbstractDigitalTwinInterfaceClient {
             List<DigitalTwinReportProperty> reportProperties = new ArrayList<>();
             for (Entry<String, ValueNode> entry : properties.entrySet()) {
                 DigitalTwinReportProperty property = DigitalTwinReportProperty.builder()
-                                                                              .propertyName(entry.getKey())
-                                                                              .propertyValue(entry.getValue().toString())
-                                                                              .build();
+                        .propertyName(entry.getKey())
+                        .propertyValue(entry.getValue().toString())
+                        .build();
                 reportProperties.add(property);
             }
-            DigitalTwinCallback reportDeviceInfoCallback = new DigitalTwinCallback() {
-                @Override
-                public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
-                    log.debug("Report device information was {}.", digitalTwinClientResult);
-                }
-            };
-            reportPropertiesAsync(reportProperties, reportDeviceInfoCallback, this);
+            Disposable reportPropertiesProcess = reportPropertiesAsync(reportProperties)
+                    .subscribe(new Consumer<DigitalTwinClientResult>() {
+                        @Override
+                        public void accept(DigitalTwinClientResult result) {
+                            log.debug("Report device information was {}", result);
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) {
+                            log.debug("Report device information failed.", throwable);
+                        }
+                    });
+            log.debug("Once application quit, should dispose {}.", reportPropertiesProcess);
         }
     }
 }

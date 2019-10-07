@@ -25,6 +25,13 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinInter
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinInterfaceRegistrationMessage.ModelInformation;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.DigitalTwinInterfaceRegistrationMessage.ModelInformation.ModelInformationBuilder;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.JsonRawValue;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.FlowableEmitter;
+import io.reactivex.rxjava3.core.FlowableOnSubscribe;
+import io.reactivex.rxjava3.functions.Action;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.functions.Supplier;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,6 +62,7 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSeri
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.serializeReportProperty;
+import static io.reactivex.rxjava3.core.BackpressureStrategy.BUFFER;
 import static java.util.Collections.singleton;
 import static lombok.AccessLevel.PACKAGE;
 
@@ -114,253 +122,255 @@ public final class DigitalTwinDeviceClient {
      * This registration occurs asynchronously. While registration is in progress, {@link AbstractDigitalTwinInterfaceClient}'s that are being registered nor will they be able to receive commands.
      * It must not be called multiple times.  If a given Digital Twin device needs to have its handles re-registered, it needs to create a new one.
      *
-     * @param deviceCapabilityModelId                  Device Capability Model Id
-     * @param digitalTwinInterfaceClients              An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
-     * @param digitalTwinInterfaceRegistrationCallback User specified callback that will be invoked on registration completion or failure. Callers should not begin sending Digital Twin telemetry until this callback is invoked.
-     * @param context                                  User context that is provided to the callback.
+     * @param deviceCapabilityModelId     Device Capability Model Id
+     * @param digitalTwinInterfaceClients An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
      * @return if this async function is accepted or not
      */
-    public DigitalTwinClientResult registerInterfacesAsync(
-            @NonNull final String deviceCapabilityModelId,
-            @NonNull final List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients,
-            @NonNull final DigitalTwinCallback digitalTwinInterfaceRegistrationCallback,
-            final Object context) {
+    public Flowable<DigitalTwinClientResult> registerInterfacesAsync(@NonNull final String deviceCapabilityModelId,
+            @NonNull final List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients) {
         synchronized (lock) {
             if (registrationStatus == REGISTERING) {
-                return DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING;
+                return Flowable.just(DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING);
             } else if (registrationStatus == REGISTERED) {
-                return DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED;
+                return Flowable.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
             } else {
                 registrationStatus = REGISTERING;
             }
         }
-        // TODO SDK missing async open function, starting new thread to handle async
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    registerInterfaces(deviceCapabilityModelId, digitalTwinInterfaceClients, digitalTwinInterfaceRegistrationCallback, context);
-                } catch (Exception e) {
-                    log.debug("RegisterInterfaces failed.", e);
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                }
-            }
-        }).start();
-        return DIGITALTWIN_CLIENT_OK;
+
+        return connectAsync(deviceClient)
+                .flatMap(new Function<DigitalTwinClientResult, Flowable<DigitalTwinClientResult>>() {
+                    @Override
+                    public Flowable<DigitalTwinClientResult> apply(DigitalTwinClientResult result) {
+                        return sendRegistrationMessageAsync(deviceCapabilityModelId, digitalTwinInterfaceClients);
+                    }
+                }).flatMap(new Function<DigitalTwinClientResult, Flowable<DigitalTwinClientResult>>() {
+                    @Override
+                    public Flowable<DigitalTwinClientResult> apply(DigitalTwinClientResult result) {
+                        if (result == DIGITALTWIN_CLIENT_OK) {
+                            return subscribeCommandAsync();
+                        } else {
+                            return Flowable.just(result);
+                        }
+                    }
+                }).flatMap(new Function<DigitalTwinClientResult, Flowable<DigitalTwinClientResult>>() {
+                    @Override
+                    public Flowable<DigitalTwinClientResult> apply(DigitalTwinClientResult result) {
+                        if (result == DIGITALTWIN_CLIENT_OK) {
+                            return subscribeTwinAsync();
+                        } else {
+                            return Flowable.just(result);
+                        }
+                    }
+                }).flatMap(new Function<DigitalTwinClientResult, Flowable<DigitalTwinClientResult>>() {
+                    @Override
+                    public Flowable<DigitalTwinClientResult> apply(DigitalTwinClientResult result) {
+                        if (result == DIGITALTWIN_CLIENT_OK) {
+                            return reportSdkInformationAsync();
+                        } else {
+                            return Flowable.just(result);
+                        }
+                    }
+                }).map(new Function<DigitalTwinClientResult, DigitalTwinClientResult>() {
+                    @Override
+                    public DigitalTwinClientResult apply(DigitalTwinClientResult result) throws Throwable {
+                        if (result == DIGITALTWIN_CLIENT_OK) {
+                            return getTwinAsync();
+                        } else {
+                            return result;
+                        }
+                    }
+                }).map(new Function<DigitalTwinClientResult, DigitalTwinClientResult>() {
+                    @Override
+                    public DigitalTwinClientResult apply(DigitalTwinClientResult result) {
+                        if (result == DIGITALTWIN_CLIENT_OK) {
+                            return notifyComponents(digitalTwinInterfaceClients);
+                        } else {
+                            return result;
+                        }
+                    }
+                }).map(new Function<DigitalTwinClientResult, DigitalTwinClientResult>() {
+                    @Override
+                    public DigitalTwinClientResult apply(DigitalTwinClientResult result) {
+                        return onRegistrationResult(result);
+                    }
+                }).doOnError(new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) {
+                        onRegistrationResult(DIGITALTWIN_CLIENT_ERROR);
+                    }
+                }).doOnCancel(new Action() {
+                    @Override
+                    public void run() {
+                        onRegistrationResult(DIGITALTWIN_CLIENT_ERROR);
+                    }
+                });
     }
 
-    private void registerInterfaces(
-            @NonNull final String deviceCapabilityModelId,
-            @NonNull final List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients,
-            @NonNull final DigitalTwinCallback digitalTwinInterfaceRegistrationCallback,
-            final Object context) throws Exception {
-        ModelInformationBuilder modelInformationBuilder = ModelInformation.builder();
-        modelInformationBuilder.dcmId(deviceCapabilityModelId);
-        for (AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient : digitalTwinInterfaceClients) {
-            String interfaceInstanceName = digitalTwinInterfaceClient.getDigitalTwinInterfaceInstanceName();
-            String interfaceId = digitalTwinInterfaceClient.getDigitalTwinInterfaceId();
-            modelInformationBuilder.interfaceInstance(interfaceInstanceName, interfaceId);
-            this.digitalTwinInterfaceClients.put(interfaceInstanceName, digitalTwinInterfaceClient);
-        }
-        ModelInformation modelInformation = modelInformationBuilder.interfaceInstance(DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_INSTANCE, DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_ID)
-                                                                   .interfaceInstance(DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE, DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_ID)
-                                                                   .build();
-        String payload = serialize(new DigitalTwinInterfaceRegistrationMessage(modelInformation));
-        Message registerInterfacesMessage = new Message(payload);
-        registerInterfacesMessage.setMessageType(DEVICE_TELEMETRY);
-        registerInterfacesMessage.setProperty(PROPERTY_MESSAGE_SCHEMA, DIGITAL_TWIN_MODEL_DISCOVERY_MESSAGE_SCHEMA);
-        registerInterfacesMessage.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_INSTANCE);
-        registerInterfacesMessage.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_ID, DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_ID);
-        log.debug("Connecting device client...");
-        deviceClient.open();
-        final AtomicBoolean twinEnabled = new AtomicBoolean();
-        final DigitalTwinCallback reportSdkInformationCallback = new DigitalTwinCallback() {
+    private Flowable<DigitalTwinClientResult> connectAsync(final DeviceClient deviceClient) {
+        return Flowable.fromSupplier(new Supplier<DigitalTwinClientResult>() {
             @Override
-            public void onResult(DigitalTwinClientResult result, Object context) {
-                log.debug("ReportSdkInformation finished with code: {}.", result);
-                if (result != DIGITALTWIN_CLIENT_OK) {
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                    return;
-                }
-                try {
-                    log.debug("Getting DeviceTwin...");
-                    deviceClient.getDeviceTwin();
-                    log.debug("Get DeviceTwin succeed.");
-                } catch (Exception e) {
-                    log.debug("GetTwin failed.", e);
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                    return;
-                }
-                try {
-                    log.debug("Notifying interface instances...");
-                    for (AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient : digitalTwinInterfaceClients) {
-                        onDigitalTwinInterfaceClientRegistered(digitalTwinInterfaceClient);
-                    }
-                    log.debug("Notify interface instances succeed.");
-                    onRegistrationSucceed(digitalTwinInterfaceRegistrationCallback, context);
-                } catch (Exception e) {
-                    log.debug("Notify DigitalTwinInterfaceClient registered failed.", e);
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                }
+            public DigitalTwinClientResult get() throws Throwable {
+                log.debug("Connecting device client...");
+                deviceClient.open();
+                log.debug("Device client connected.");
+                return DIGITALTWIN_CLIENT_OK;
             }
-        };
-        final IotHubEventCallback enableTwinCallback = new IotHubEventCallback() {
+        });
+    }
+
+    private Flowable<DigitalTwinClientResult> sendRegistrationMessageAsync(final String deviceCapabilityModelId, final List<? extends AbstractDigitalTwinInterfaceClient> components) {
+        return Flowable.create(new FlowableOnSubscribe<DigitalTwinClientResult>() {
             @Override
-            public void execute(IotHubStatusCode iotHubStatusCode, Object callbackContext) {
-                if (twinEnabled.compareAndSet(false, true)) {
-                    log.debug("SubscribeTwin finished with code: {}.", iotHubStatusCode);
-                    if (isFailure(iotHubStatusCode)) {
-                        log.debug("SubscribeTwin failed with code: {}.", iotHubStatusCode);
-                        onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                        return;
-                    }
-                    log.debug("Reporting SdkInformation...");
-                    reportPropertiesAsync(
-                            DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE,
-                            DIGITAL_TWIN_SDK_INFORMATION_PROPERTIES,
-                            reportSdkInformationCallback,
-                            context
-                    );
+            public void subscribe(FlowableEmitter<DigitalTwinClientResult> emitter) throws Throwable {
+                ModelInformationBuilder modelInformationBuilder = ModelInformation.builder();
+                modelInformationBuilder.dcmId(deviceCapabilityModelId);
+                for (AbstractDigitalTwinInterfaceClient component : components) {
+                    String interfaceInstanceName = component.getDigitalTwinInterfaceInstanceName();
+                    String interfaceId = component.getDigitalTwinInterfaceId();
+                    modelInformationBuilder.interfaceInstance(interfaceInstanceName, interfaceId);
+                    digitalTwinInterfaceClients.put(interfaceInstanceName, component);
                 }
+                ModelInformation modelInformation = modelInformationBuilder.interfaceInstance(DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_INSTANCE, DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_ID)
+                                                                           .interfaceInstance(DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE, DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_ID)
+                                                                           .build();
+                String payload = serialize(new DigitalTwinInterfaceRegistrationMessage(modelInformation));
+                Message registerInterfacesMessage = new Message(payload);
+                registerInterfacesMessage.setMessageType(DEVICE_TELEMETRY);
+                registerInterfacesMessage.setProperty(PROPERTY_MESSAGE_SCHEMA, DIGITAL_TWIN_MODEL_DISCOVERY_MESSAGE_SCHEMA);
+                registerInterfacesMessage.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_INSTANCE);
+                registerInterfacesMessage.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_ID, DIGITAL_TWIN_MODEL_DISCOVERY_INTERFACE_ID);
+                log.debug("Sending registration message...");
+                deviceClient.sendEventAsync(registerInterfacesMessage, createIotHubEventCallback(emitter), emitter);
             }
-        };
-        final IotHubEventCallback enableCommandCallback = new IotHubEventCallback() {
+        }, BUFFER);
+    }
+
+    private Flowable<DigitalTwinClientResult> subscribeCommandAsync() {
+        return Flowable.create(new FlowableOnSubscribe<DigitalTwinClientResult>() {
             @Override
-            public void execute(IotHubStatusCode iotHubStatusCode, Object callbackContext) {
-                log.debug("SubscribeCommand finished with code: {}.", iotHubStatusCode);
-                if (isFailure(iotHubStatusCode)) {
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                    return;
-                }
-                TwinPropertyCallBack twinPropertyCallBack = new DigitalTwinPropertyDispatcher();
-                try {
-                    log.debug("Subscribing Twin...");
-                    deviceClient.startDeviceTwin(
-                            enableTwinCallback,
-                            context,
-                            twinPropertyCallBack,
-                            context
-                    );
-                    log.debug("Start DeviceTwin succeed.");
-                } catch (Exception e) {
-                    log.debug("SubscribeTwin failed.", e);
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                }
-            }
-        };
-        final IotHubEventCallback registrationMessageSendingCallback = new IotHubEventCallback() {
-            @Override
-            public void execute(IotHubStatusCode iotHubStatusCode, Object o) {
-                log.debug("RegistrationMessageSending finished with code: {}.", iotHubStatusCode);
-                if (isFailure(iotHubStatusCode)) {
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                    return;
-                }
+            public void subscribe(FlowableEmitter<DigitalTwinClientResult> emitter) throws Throwable {
+                log.debug("Subscribing command...");
                 DeviceMethodCallback deviceMethodCallback = new DigitalTwinCommandDispatcher();
-                try {
-                    log.debug("Subscribing command...");
-                    deviceClient.subscribeToDeviceMethod(
-                            deviceMethodCallback,
-                            context,
-                            enableCommandCallback,
-                            context
-                    );
-                } catch (Exception e) {
-                    log.error("SubscribeCommand failed.", e);
-                    onRegistrationFailed(digitalTwinInterfaceRegistrationCallback, context);
-                }
+                deviceClient.subscribeToDeviceMethod(
+                        deviceMethodCallback,
+                        emitter,
+                        createIotHubEventCallback(emitter),
+                        emitter
+                );
             }
-        };
-        deviceClient.sendEventAsync(
-                registerInterfacesMessage,
-                registrationMessageSendingCallback,
-                context
+        }, BUFFER);
+    }
+
+    private Flowable<DigitalTwinClientResult> subscribeTwinAsync() {
+        return Flowable.create(new FlowableOnSubscribe<DigitalTwinClientResult>() {
+            @Override
+            public void subscribe(FlowableEmitter<DigitalTwinClientResult> emitter) throws Throwable {
+                log.debug("Subscribing twin...");
+                TwinPropertyCallBack twinPropertyCallBack = new DigitalTwinPropertyDispatcher();
+                deviceClient.startDeviceTwin(
+                        createIotHubEventCallback(emitter),
+                        emitter,
+                        twinPropertyCallBack,
+                        emitter
+                );
+            }
+        }, BUFFER);
+    }
+
+    private Flowable<DigitalTwinClientResult> reportSdkInformationAsync() {
+        return reportPropertiesAsync(
+                DIGITAL_TWIN_SDK_INFORMATION_INTERFACE_INSTANCE,
+                DIGITAL_TWIN_SDK_INFORMATION_PROPERTIES
         );
     }
 
-    private boolean isFailure(IotHubStatusCode statusCode) {
-        return statusCode != OK && statusCode != OK_EMPTY;
-    }
-
-    private void onRegistrationFailed(@NonNull final DigitalTwinCallback digitalTwinInterfaceRegistrationCallback, final Object context) {
-        synchronized (lock) {
-            digitalTwinInterfaceClients.clear();
-            registrationStatus = UNREGISTERED;
-        }
-        log.debug("Registration failed.");
-        digitalTwinInterfaceRegistrationCallback.onResult(DIGITALTWIN_CLIENT_ERROR, context);
-    }
-
-    private void onRegistrationSucceed(@NonNull final DigitalTwinCallback digitalTwinInterfaceRegistrationCallback, final Object context) {
-        synchronized (lock) {
-            registrationStatus = REGISTERED;
-        }
-        log.debug("Registration succeed.");
-        digitalTwinInterfaceRegistrationCallback.onResult(DIGITALTWIN_CLIENT_OK, context);
-    }
-
-    DigitalTwinClientResult sendTelemetryAsync(
-            @NonNull final String digitalTwinInterfaceInstanceName,
-            @NonNull final String telemetryName,
-            @NonNull final String payload,
-            @NonNull final DigitalTwinCallback digitalTwinTelemetryConfirmationCallback,
-            final Object context) {
-        try {
-            log.debug("Sending TelemetryAsync...");
-            SimpleEntry body = new SimpleEntry<>(telemetryName, new JsonRawValue(payload));
-            Message message = new Message(serialize(body));
-            message.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, digitalTwinInterfaceInstanceName);
-            message.setProperty(PROPERTY_MESSAGE_SCHEMA, telemetryName);
-            IotHubEventCallback telemetryCallback = createIotHubEventCallback(digitalTwinTelemetryConfirmationCallback);
-            deviceClient.sendEventAsync(message, telemetryCallback, context);
-            log.debug("SendTelemetryAsync succeed.");
-            return DIGITALTWIN_CLIENT_OK;
-        } catch (Exception e) {
-            log.debug("SendTelemetryAsync failed.", e);
-            return DIGITALTWIN_CLIENT_ERROR;
-        }
-    }
-
-    DigitalTwinClientResult reportPropertiesAsync(
-            @NonNull final String digitalTwinInterfaceInstanceName,
-            @NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties,
-            @NonNull final DigitalTwinCallback digitalTwinReportedPropertyUpdatedCallback,
-            final Object context) {
-        try {
-            log.debug("Reporting PropertiesAsync...");
-            // TODO Known gap, SDK API with ambiguous Object
-            Property property = serializeReportProperty(digitalTwinInterfaceInstanceName, digitalTwinReportProperties);
-            deviceClient.sendReportedProperties(singleton(property));
-            // TODO TODO Known gap, SDK API accepts no callback, there is no guarantee it's delivered
-            digitalTwinReportedPropertyUpdatedCallback.onResult(DIGITALTWIN_CLIENT_OK, context);
-            log.debug("ReportPropertiesAsync succeed.");
-        } catch (Exception e) {
-            log.debug("ReportPropertyAsync failed.", e);
-            digitalTwinReportedPropertyUpdatedCallback.onResult(DIGITALTWIN_CLIENT_ERROR, context);
-        }
+    private DigitalTwinClientResult getTwinAsync() throws Throwable {
+        log.debug("Getting DeviceTwin...");
+        deviceClient.getDeviceTwin();
         return DIGITALTWIN_CLIENT_OK;
     }
 
-    DigitalTwinClientResult updateAsyncCommandStatusAsync(
-            @NonNull final String digitalTwinInterfaceInstanceName,
-            @NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate,
-            @NonNull final DigitalTwinCallback digitalTwinUpdateAsyncCommandStatusCallback,
-            final Object context) {
-        log.debug("Updating AsyncCommandStatus...");
-        Message message = new Message(digitalTwinAsyncCommandUpdate.getPayload());
-        message.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, digitalTwinInterfaceInstanceName);
-        message.setProperty(PROPERTY_COMMAND_NAME, digitalTwinAsyncCommandUpdate.getCommandName());
-        message.setProperty(PROPERTY_REQUEST_ID, digitalTwinAsyncCommandUpdate.getRequestId());
-        message.setProperty(PROPERTY_STATUS, String.valueOf(digitalTwinAsyncCommandUpdate.getStatusCode()));
-        IotHubEventCallback asyncCommandCallback = createIotHubEventCallback(digitalTwinUpdateAsyncCommandStatusCallback);
-        try {
-            deviceClient.sendEventAsync(message, asyncCommandCallback, context);
-            log.debug("UpdateAsyncCommandStatus succeed.");
-            return DIGITALTWIN_CLIENT_OK;
-        } catch (Exception e) {
-            log.debug("UpdateAsyncCommandStatus failed.", e);
-            return DIGITALTWIN_CLIENT_ERROR;
+    private DigitalTwinClientResult notifyComponents(@NonNull List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients) {
+        log.debug("Notifying interface instances...");
+        for (AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient : digitalTwinInterfaceClients) {
+            onDigitalTwinInterfaceClientRegistered(digitalTwinInterfaceClient);
         }
+        log.debug("Notify interface instances succeed.");
+        return DIGITALTWIN_CLIENT_OK;
+    }
+
+    private static boolean isSuccess(IotHubStatusCode statusCode) {
+        return statusCode == OK || statusCode == OK_EMPTY;
+    }
+
+    private DigitalTwinClientResult onRegistrationResult(DigitalTwinClientResult result) {
+        synchronized (lock) {
+            if (result != DIGITALTWIN_CLIENT_OK) {
+                log.debug("Registration failed.");
+                digitalTwinInterfaceClients.clear();
+                registrationStatus = UNREGISTERED;
+            } else {
+                log.debug("Registration succeed.");
+                registrationStatus = REGISTERED;
+            }
+        }
+        return result;
+    }
+
+    Flowable<DigitalTwinClientResult> sendTelemetryAsync(
+            @NonNull final String digitalTwinInterfaceInstanceName,
+            @NonNull final String telemetryName,
+            @NonNull final String payload) {
+        return Flowable.create(new FlowableOnSubscribe<DigitalTwinClientResult>() {
+            @Override
+            public void subscribe(FlowableEmitter<DigitalTwinClientResult> emitter) throws Throwable {
+                log.debug("Sending TelemetryAsync...");
+                SimpleEntry body = new SimpleEntry<>(telemetryName, new JsonRawValue(payload));
+                Message message = new Message(serialize(body));
+                message.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, digitalTwinInterfaceInstanceName);
+                message.setProperty(PROPERTY_MESSAGE_SCHEMA, telemetryName);
+                IotHubEventCallback callback = createIotHubEventCallback(emitter);
+                deviceClient.sendEventAsync(message, callback, callback);
+                log.debug("SendTelemetryAsync succeed.");
+            }
+        }, BUFFER);
+    }
+
+    Flowable<DigitalTwinClientResult> reportPropertiesAsync(
+            @NonNull final String digitalTwinInterfaceInstanceName,
+            @NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties) {
+        return Flowable.create(new FlowableOnSubscribe<DigitalTwinClientResult>() {
+            @Override
+            public void subscribe(FlowableEmitter<DigitalTwinClientResult> emitter) throws Throwable {
+                log.debug("Reporting PropertiesAsync...");
+                // TODO Known gap, SDK API with ambiguous Object
+                Property property = serializeReportProperty(digitalTwinInterfaceInstanceName, digitalTwinReportProperties);
+                deviceClient.sendReportedProperties(singleton(property));
+                // TODO TODO Known gap, SDK API accepts no callback, there is no guarantee it's delivered
+                log.debug("ReportPropertiesAsync succeed.");
+                notifyEmitter(emitter, DIGITALTWIN_CLIENT_OK);
+            }
+        }, BUFFER);
+    }
+
+    Flowable<DigitalTwinClientResult> updateAsyncCommandStatusAsync(
+            @NonNull final String digitalTwinInterfaceInstanceName,
+            @NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate) {
+        return Flowable.create(new FlowableOnSubscribe<DigitalTwinClientResult>() {
+            @Override
+            public void subscribe(FlowableEmitter<DigitalTwinClientResult> emitter) throws Throwable {
+                log.debug("Updating AsyncCommandStatus...");
+                Message message = new Message(digitalTwinAsyncCommandUpdate.getPayload());
+                message.setProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE, digitalTwinInterfaceInstanceName);
+                message.setProperty(PROPERTY_COMMAND_NAME, digitalTwinAsyncCommandUpdate.getCommandName());
+                message.setProperty(PROPERTY_REQUEST_ID, digitalTwinAsyncCommandUpdate.getRequestId());
+                message.setProperty(PROPERTY_STATUS, String.valueOf(digitalTwinAsyncCommandUpdate.getStatusCode()));
+                IotHubEventCallback asyncCommandCallback = createIotHubEventCallback(emitter);
+                deviceClient.sendEventAsync(message, asyncCommandCallback, asyncCommandCallback);
+                log.debug("UpdateAsyncCommandStatus succeed.");
+            }
+        }, BUFFER);
     }
 
     private void onDigitalTwinInterfaceClientRegistered(AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient) {
@@ -368,17 +378,24 @@ public final class DigitalTwinDeviceClient {
         digitalTwinInterfaceClient.onRegistered();
     }
 
-    private static IotHubEventCallback createIotHubEventCallback(final DigitalTwinCallback digitalTwinCallback) {
+    private static IotHubEventCallback createIotHubEventCallback(final FlowableEmitter<DigitalTwinClientResult> emitter) {
         return new IotHubEventCallback() {
             @Override
-            public void execute(IotHubStatusCode iotHubStatusCode, Object context) {
-                if (iotHubStatusCode == OK || iotHubStatusCode == OK_EMPTY) {
-                    digitalTwinCallback.onResult(DIGITALTWIN_CLIENT_OK, context);
+            public void execute(IotHubStatusCode statusCode, Object context) {
+                if (isSuccess(statusCode)) {
+                    notifyEmitter(emitter, DIGITALTWIN_CLIENT_OK);
                 } else {
-                    digitalTwinCallback.onResult(DIGITALTWIN_CLIENT_ERROR, context);
+                    notifyEmitter(emitter, DIGITALTWIN_CLIENT_ERROR);
                 }
             }
         };
+    }
+
+    private static void notifyEmitter(FlowableEmitter<DigitalTwinClientResult> emitter, DigitalTwinClientResult result) {
+        if (!emitter.isCancelled()) {
+            emitter.onNext(result);
+            emitter.onComplete();
+        }
     }
 
     private class DigitalTwinCommandDispatcher implements DeviceMethodCallback {
