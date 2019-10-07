@@ -14,10 +14,10 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinCallback;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 
+import io.reactivex.rxjava3.functions.Consumer;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
@@ -26,7 +26,7 @@ import static java.util.Arrays.asList;
 @Slf4j
 public class MainActivity extends AppCompatActivity implements UiHandler {
 
-    private static final String CONNECTION_STRING = "[YOUR_DIGITAL_TWIN_DEVICE_CONNECTION_STRING]";
+    private static final String CONNECTION_STRING = "YOUR_DIGITAL_TWIN_DEVICE_CONNECTION_STRING";
     private static final String DCM_ID = "urn:azureiot:samplemodel:1";
     private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "sensor";
     private TextView nameView;
@@ -74,24 +74,25 @@ public class MainActivity extends AppCompatActivity implements UiHandler {
                     .totalStorage(1e12)
                     .build();
             registrationView.setText("Registering...");
-            digitalTwinDeviceClient.registerInterfacesAsync(
-                    DCM_ID,
-                    asList(deviceInformation, environmentalSensor),
-                    new DigitalTwinCallback() {
-                        @Override
-                        public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
-                            log.debug("Register interfaces {}.", digitalTwinClientResult);
-                            if (digitalTwinClientResult == DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK) {
-                                updateRegistrationStatus("Registered");
-                            } else {
-                                updateRegistrationStatus("Register Failed");
-                            }
-                        }
-                    },
-                    digitalTwinDeviceClient
-            );
+            digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor)).subscribe(new Consumer<DigitalTwinClientResult>() {
+                @Override
+                public void accept(DigitalTwinClientResult digitalTwinClientResult) {
+                    log.debug("Register interfaces {}.", digitalTwinClientResult);
+                    if (digitalTwinClientResult == DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK) {
+                        updateRegistrationStatus("Registered");
+                    } else {
+                        updateRegistrationStatus("Register Failed");
+                    }
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) {
+                    log.debug("Register interfaces failed.", throwable);
+                    updateRegistrationStatus("Register Failed");
+                }
+            });
         } catch (Exception e) {
-            log.error("Unable to start DigitalTwinDeviceClient", e);
+            log.error("Create device client failed", e);
         }
     }
 
