@@ -8,8 +8,10 @@ package com.microsoft.azure.sdk.iot.common.helpers;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
@@ -75,7 +77,7 @@ public class DeviceTestManager
         deviceEmulator.tearDown();
     }
 
-    public void restartDevice(String connectionString, IotHubClientProtocol protocol, String publicCert, String privateKey) throws InterruptedException, IOException, URISyntaxException, ModuleClientException
+    public void restartDevice(String connectionString, IotHubClientProtocol protocol, String publicCert, String privateKey) throws InterruptedException, IOException, URISyntaxException, ModuleClientException, GeneralSecurityException
     {
         deviceEmulator.tearDown();
 
@@ -87,7 +89,8 @@ public class DeviceTestManager
             }
             else
             {
-                this.client = new DeviceClient(connectionString, protocol, publicCert, false, privateKey, false);
+                SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicCert, privateKey);
+                this.client = new DeviceClient(connectionString, protocol, sslContext);
             }
         }
         else if (this.client instanceof ModuleClient)

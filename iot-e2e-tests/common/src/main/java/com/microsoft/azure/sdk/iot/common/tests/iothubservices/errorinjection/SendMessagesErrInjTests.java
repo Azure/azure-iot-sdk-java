@@ -19,8 +19,10 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate;
@@ -281,7 +283,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         testInstance.client.setRetryPolicy(new ExponentialBackoffWithJitter());
     }
 
-    private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
+    private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         // Arrange
         // This test case creates a device instead of re-using the one in this.testInstance due to state changes
@@ -293,6 +295,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         Device targetDevice;
         Module targetModule;
         InternalClient client;
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(testInstance.publicKeyCert, testInstance.privateKey);
         if (this.testInstance.clientType == ClientType.DEVICE_CLIENT)
         {
             if (this.testInstance.authenticationType == SELF_SIGNED)
@@ -300,7 +303,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 targetDevice = Device.createDevice(deviceId, SELF_SIGNED);
                 targetDevice.setThumbprintFinal(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
                 Tools.addDeviceWithRetry(registryManager, targetDevice);
-                client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
+                client = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice), this.testInstance.protocol, sslContext);
             }
             else
             {
@@ -319,7 +322,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 targetModule.setThumbprint(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
                 Tools.addDeviceWithRetry(registryManager, targetDevice);
                 Tools.addModuleWithRetry(registryManager, targetModule);
-                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice, targetModule), this.testInstance.protocol, testInstance.publicKeyCert, false, testInstance.privateKey, false);
+                client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, targetDevice, targetModule), this.testInstance.protocol, sslContext);
             }
             else
             {

@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -187,6 +188,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             device = Tools.addDeviceWithRetry(registryManager, device);
             deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
 
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 if (authenticationType == SAS)
@@ -198,7 +200,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 else if (authenticationType == SELF_SIGNED)
                 {
                     //x509 device client
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, publicKeyCert, false, privateKey, false);
+                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, sslContext);
                     this.identity = deviceX509;
                 }
                 else
@@ -219,7 +221,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 {
                     //x509 module client
                     moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
-                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, publicKeyCert, false, privateKey, false);
+                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, sslContext);
                     this.identity = moduleX509;
                 }
                 else

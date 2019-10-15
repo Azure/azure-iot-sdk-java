@@ -15,6 +15,7 @@ import org.junit.*;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
+import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -336,7 +338,7 @@ public class FileUploadTests extends IntegrationTest
         proxyServer.stop();
     }
 
-    private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException
+    private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException, GeneralSecurityException
     {
         DeviceClient deviceClient;
         if (testInstance.authenticationType == AuthenticationType.SAS)
@@ -355,7 +357,8 @@ public class FileUploadTests extends IntegrationTest
             scDevicex509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
             scDevicex509 = Tools.addDeviceWithRetry(registryManager, scDevicex509);
 
-            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevicex509), protocol, publicKeyCertificate, false, privateKeyCertificate, false);
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificate, privateKeyCertificate);
+            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevicex509), protocol, sslContext);
         }
         else
         {
@@ -400,7 +403,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFileZeroLength() throws URISyntaxException, IOException, InterruptedException, IotHubException
+    public void uploadToBlobAsyncSingleFileZeroLength() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
     {
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
@@ -420,7 +423,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFile() throws URISyntaxException, IOException, InterruptedException, IotHubException
+    public void uploadToBlobAsyncSingleFile() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
     {
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
@@ -442,7 +445,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException, IotHubException
+    public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException, IotHubException, GeneralSecurityException
     {
         if (testInstance.withProxy)
         {

@@ -16,6 +16,7 @@ import org.junit.*;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -148,6 +149,7 @@ public class HubTierConnectionTests extends IntegrationTest
         Tools.addDeviceWithRetry(registryManager, deviceX509);
 
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
 
         List inputs = new ArrayList();
         inputs.addAll(Arrays.asList(
@@ -158,7 +160,7 @@ public class HubTierConnectionTests extends IntegrationTest
                     {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, false},
 
                     //x509 device client
-                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, publicKeyCert, false, privateKey, false), AMQPS, deviceX509, SELF_SIGNED, publicKeyCert, privateKey, x509Thumbprint, false},
+                    {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, sslContext), AMQPS, deviceX509, SELF_SIGNED, publicKeyCert, privateKey, x509Thumbprint, false},
 
                     //sas token device client, with proxy
                     {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, true}
