@@ -21,6 +21,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.TestCase;
 import org.junit.*;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -179,7 +180,8 @@ public class DeviceMethodCommon extends IntegrationTest
                 else if (authenticationType == SELF_SIGNED)
                 {
                     //x509 device client
-                    DeviceClient deviceClientX509 = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, publicKeyCert, false, privateKey, false);
+                    SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+                    DeviceClient deviceClientX509 = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, sslContext);
                     this.deviceTestManager = new DeviceTestManager(deviceClientX509);
                     this.identity = deviceX509;
                 }

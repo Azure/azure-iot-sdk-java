@@ -25,6 +25,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -207,7 +208,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, NoSuchAlgorithmException, URISyntaxException, ModuleClientException
+    protected void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         devicesUnderTest = new DeviceState[numberOfDevices];
 
@@ -235,7 +236,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void setUpTwin(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException, ModuleClientException
+    protected void setUpTwin(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         // set up twin on DeviceClient
         if (internalClient == null)
@@ -256,23 +257,18 @@ public class DeviceTwinCommon extends IntegrationTest
             }
             else if (this.testInstance.authenticationType == SELF_SIGNED)
             {
+                SSLContext sslContext = SSLContextBuilder.buildSSLContext(testInstance.publicKeyCert, testInstance.privateKey);
                 if (this.testInstance.clientType == ClientType.DEVICE_CLIENT)
                 {
                     internalClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceUnderTest.sCDeviceForRegistryManager),
                             this.testInstance.protocol,
-                            testInstance.publicKeyCert,
-                            false,
-                            testInstance.privateKey,
-                            false);
+                            sslContext);
                 }
                 else
                 {
                     internalClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceState.sCDeviceForRegistryManager, deviceState.sCModuleForRegistryManager),
                             this.testInstance.protocol,
-                            testInstance.publicKeyCert,
-                            false,
-                            testInstance.privateKey,
-                            false);
+                            sslContext);
                 }
             }
             internalClient.open();
@@ -436,7 +432,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         deviceUnderTest = new DeviceState();
         this.testInstance.uuid = UUID.randomUUID().toString();

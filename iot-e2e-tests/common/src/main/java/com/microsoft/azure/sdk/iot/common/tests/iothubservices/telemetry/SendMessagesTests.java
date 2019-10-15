@@ -162,4 +162,24 @@ public class SendMessagesTests extends SendMessagesCommon
 
         IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
     }
+
+    @Test
+    public void sendMessagesWithCustomSSLContextAndSasAuth() throws Exception
+    {
+        if (testInstance.authenticationType != SAS)
+        {
+            //only testing sas based auth with custom ssl context here
+            return;
+        }
+
+        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
+        {
+            //mqtt_ws does not support x509 auth currently
+            return;
+        }
+
+        this.testInstance.setup(SSLContextBuilder.buildSSLContext());
+
+        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
 }
