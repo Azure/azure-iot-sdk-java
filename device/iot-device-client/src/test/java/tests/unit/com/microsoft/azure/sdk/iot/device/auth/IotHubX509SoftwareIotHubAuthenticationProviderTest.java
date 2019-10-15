@@ -11,10 +11,7 @@ import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -25,8 +22,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for IotHubX509SoftwareAuthenticationProvider.java
@@ -76,6 +72,25 @@ public class IotHubX509SoftwareIotHubAuthenticationProviderTest
                 times = 1;
             }
         };
+    }
+
+    @Test
+    public void constructorSuccessWithSSLContext()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                new IotHubSSLContext(mockSSLContext);
+                result = mockIotHubSSLContext;
+            }
+        };
+
+        //act
+        IotHubX509SoftwareAuthenticationProvider provider = new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, mockSSLContext);
+
+        //assert
+        assertNull(Deencapsulation.getField(provider, "iotHubX509"));
     }
 
     //Tests_SRS_IOTHUBX509AUTHENTICATION_34_002: [This constructor will create and save an IotHubX509 object using the provided public key certificate and private key.]

@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import mockit.*;
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOError;
 import java.io.IOException;
 import java.io.InputStream;
@@ -183,6 +184,40 @@ public class DeviceClientTest
 
                 TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
                 assertNull(transportClient);
+            }
+        };
+    }
+
+    @Test
+    public void constructorWithSSLContextSuccess(@Mocked final SSLContext mockedSSLContext) throws URISyntaxException
+    {
+        // arrange
+        final String connString =
+                "HostName=iothub.device.com;deviceId=testdevice;x509=true";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
+
+        new Expectations()
+        {
+            {
+                new IotHubConnectionString(connString);
+                result = mockIotHubConnectionString;
+            }
+        };
+
+        // act
+        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext);
+
+        // assert
+        new Verifications()
+        {
+            {
+                IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
+                assertEquals(SINGLE_CLIENT, ioTHubConnectionType);
+
+                TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
+                assertNull(transportClient);
+
+                new DeviceClientConfig(mockIotHubConnectionString, mockedSSLContext);
             }
         };
     }
