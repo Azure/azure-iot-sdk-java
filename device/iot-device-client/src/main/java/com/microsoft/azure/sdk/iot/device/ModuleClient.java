@@ -22,6 +22,7 @@ import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -112,6 +113,25 @@ public class ModuleClient extends InternalClient
 
         //Codes_SRS_MODULECLIENT_34_008: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
         //Codes_SRS_MODULECLIENT_34_009: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
+        commonConstructorVerifications(protocol, this.getConfig());
+    }
+
+
+    /**
+     * Create a module client instance that uses the provided SSLContext for SSL negotiation.
+     *
+     * @param connectionString The connection string for the edge module to connect to. May be an x509 connection string
+     *                         or a SAS connection string. If it is an x509 connection string, the provided SSLContext will be
+     *                         used for x509 authentication
+     * @param protocol The protocol to communicate with
+     * @param sslContext the ssl context that will be used during authentication. If the provided connection string does not contain
+     *                   SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
+     *                   does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     */
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, SSLContext sslContext) throws ModuleClientException, URISyntaxException
+    {
+        super(new IotHubConnectionString(connectionString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());
     }
 

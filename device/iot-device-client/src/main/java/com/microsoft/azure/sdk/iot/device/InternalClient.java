@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -64,6 +65,15 @@ public class InternalClient
 
         // Codes_SRS_INTERNALCLIENT_34_080: [This function shall save a new DeviceIO instance using the created config and the provided send/receive periods.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+    }
+
+    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext, long sendPeriodMillis, long receivePeriod)
+    {
+        commonConstructorVerification(iotHubConnectionString, protocol);
+
+        this.config = new DeviceClientConfig(iotHubConnectionString, sslContext);
+        this.config.setProtocol(protocol);
+        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
     }
 
     InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException, IOException

@@ -30,6 +30,35 @@ public abstract class IotHubAuthenticationProvider
     protected String iotHubTrustedCert;
     protected String pathToIotHubTrustedCert;
 
+    public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
+    {
+        if (hostname == null || hostname.isEmpty())
+        {
+            // Codes_SRS_AUTHENTICATIONPROVIDER_34_006: [If the provided hostname is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("hostname cannot be null");
+        }
+
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            // Codes_SRS_AUTHENTICATIONPROVIDER_34_007: [If the provided device id is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("deviceId cannot be null");
+        }
+
+        // Codes_SRS_AUTHENTICATIONPROVIDER_34_001: [The constructor shall save the provided hostname, gatewayhostname, deviceid and moduleid.]
+        this.hostname = hostname;
+        this.gatewayHostname = gatewayHostname;
+        this.deviceId = deviceId;
+        this.moduleId = moduleId;
+    }
+
+    public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
+    {
+        this(hostname, gatewayHostname, deviceId, moduleId);
+
+        this.sslContextNeedsUpdate = false;
+        this.iotHubSSLContext = new IotHubSSLContext(sslContext);
+    }
+
     public SSLContext getSSLContext() throws IOException
     {
         try
@@ -81,27 +110,6 @@ public abstract class IotHubAuthenticationProvider
 
         // Codes_SRS_AUTHENTICATIONPROVIDER_34_064: [This function shall save the provided pathToIotHubTrustedCert.]
         this.iotHubTrustedCert = certificate;
-    }
-
-    public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
-    {
-        if (hostname == null || hostname.isEmpty())
-        {
-            // Codes_SRS_AUTHENTICATIONPROVIDER_34_006: [If the provided hostname is null, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("hostname cannot be null");
-        }
-
-        if (deviceId == null || deviceId.isEmpty())
-        {
-            // Codes_SRS_AUTHENTICATIONPROVIDER_34_007: [If the provided device id is null, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("deviceId cannot be null");
-        }
-
-        // Codes_SRS_AUTHENTICATIONPROVIDER_34_001: [The constructor shall save the provided hostname, gatewayhostname, deviceid and moduleid.]
-        this.hostname = hostname;
-        this.gatewayHostname = gatewayHostname;
-        this.deviceId = deviceId;
-        this.moduleId = moduleId;
     }
 
     /**

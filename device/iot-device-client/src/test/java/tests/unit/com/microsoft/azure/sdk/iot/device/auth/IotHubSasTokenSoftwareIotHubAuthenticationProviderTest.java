@@ -77,6 +77,41 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         assertEquals(expectedSasToken, actualSasToken.toString());
     }
 
+    @Test
+    public void constructorSavesArgumentsWithSSLContext()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, anyString, anyString, anyString, anyString, anyString, anyLong);
+                result = mockSasToken;
+
+                mockSasToken.toString();
+                result = expectedSasToken;
+
+                new IotHubSSLContext(mockSSLContext);
+                result = mockIotHubSSLContext;
+            }
+        };
+
+        //act
+        IotHubSasTokenSoftwareAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken, mockSSLContext);
+
+        //assert
+        String actualDeviceId = sasAuth.getDeviceId();
+        String actualModuleId = sasAuth.getModuleId();
+        String actualHostName = sasAuth.getHostname();
+        String actualDeviceKey = Deencapsulation.getField(sasAuth, "deviceKey");
+        IotHubSasToken actualSasToken = Deencapsulation.getField(sasAuth, "sasToken");
+
+        assertEquals(expectedDeviceId, actualDeviceId);
+        assertEquals(expectedModuleId, actualModuleId);
+        assertEquals(expectedHostname, actualHostName);
+        assertEquals(expectedDeviceKey, actualDeviceKey);
+        assertEquals(expectedSasToken, actualSasToken.toString());
+    }
+
     //Tests_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_003: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
     @Test
     public void overloadedConstructorSavesArguments()

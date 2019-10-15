@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,20 +86,8 @@ public final class DeviceClientConfig
      */
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
     {
-        // Codes_SRS_DEVICECLIENTCONFIG_21_034: [If the provided `iotHubConnectionString` is null,
-        // the constructor shall throw IllegalArgumentException.]
-        if(iotHubConnectionString == null)
-        {
-            throw new IllegalArgumentException("connection string cannot be null");
-        }
-
-        if (iotHubConnectionString.isUsingX509())
-        {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_076: [If the provided `iotHubConnectionString` uses x509 authentication, the constructor shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key instead");
-        }
-
-        this.useWebsocket = false;
+        commonConstructorSetup(iotHubConnectionString);
+        assertConnectionStringIsNotX509(iotHubConnectionString);
 
         this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                 iotHubConnectionString.getHostName(),
@@ -108,8 +97,7 @@ public final class DeviceClientConfig
                 iotHubConnectionString.getSharedAccessKey(),
                 iotHubConnectionString.getSharedAccessToken());
 
-        //Codes_SRS_DEVICECLIENTCONFIG_34_041: [This function shall save a new default product info.]
-        this.productInfo = new ProductInfo();
+        log.debug("Device configured to use software based SAS authentication provider");
     }
 
     public DeviceClientConfig(IotHubAuthenticationProvider authenticationProvider) throws IllegalArgumentException
@@ -120,9 +108,7 @@ public final class DeviceClientConfig
         }
 
         this.authenticationProvider = authenticationProvider;
-
         this.useWebsocket = false;
-
         this.productInfo = new ProductInfo();
     }
 
@@ -137,22 +123,8 @@ public final class DeviceClientConfig
      */
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate)
     {
-        if(iotHubConnectionString == null)
-        {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
-            throw new IllegalArgumentException("connection string cannot be null");
-        }
-
-        if (!iotHubConnectionString.isUsingX509())
-        {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
-            throw new IllegalArgumentException("Cannot use this constructor for connection strings that don't use x509 authentication.");
-        }
-
-        //Codes_SRS_DEVICECLIENTCONFIG_34_042: [This function shall save a new default product info.]
-        this.productInfo = new ProductInfo();
-
-        this.useWebsocket = false;
+        commonConstructorSetup(iotHubConnectionString);
+        assertConnectionStringIsX509(iotHubConnectionString);
 
         //Codes_SRS_DEVICECLIENTCONFIG_34_069: [This function shall generate a new SSLContext and set this to using X509 authentication.]
         this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
@@ -162,7 +134,37 @@ public final class DeviceClientConfig
                 iotHubConnectionString.getModuleId(),
                 publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
 
-        log.trace("DeviceClientConfig object is created successfully");
+        log.debug("Device configured to use software based x509 authentication provider");
+    }
+
+    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
+    {
+        commonConstructorSetup(iotHubConnectionString);
+
+        if (iotHubConnectionString.isUsingX509())
+        {
+            this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
+                    iotHubConnectionString.getHostName(),
+                    iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getDeviceId(),
+                    iotHubConnectionString.getModuleId(),
+                    sslContext);
+
+            log.debug("Device configured to use software based x509 authentication provider with custom SSLContext");
+        }
+        else
+        {
+            this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
+                    iotHubConnectionString.getHostName(),
+                    iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getDeviceId(),
+                    iotHubConnectionString.getModuleId(),
+                    iotHubConnectionString.getSharedAccessKey(),
+                    iotHubConnectionString.getSharedAccessToken(),
+                    sslContext);
+
+            log.debug("Device configured to use software based SAS authentication provider with custom SSLContext");
+        }
     }
 
     /**
@@ -173,11 +175,7 @@ public final class DeviceClientConfig
      */
     DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws IOException
     {
-        if (connectionString == null)
-        {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
-            throw new IllegalArgumentException("The provided connection string cannot be null");
-        }
+        commonConstructorSetup(connectionString);
 
         if (securityProvider == null)
         {
@@ -220,11 +218,33 @@ public final class DeviceClientConfig
             //Codes_SRS_DEVICECLIENTCONFIG_34_084: [If the provided security provider is neither a SecurityProviderX509 instance nor a SecurityProviderTpm instance, this function shall throw an UnsupportedOperationException.]
             throw new UnsupportedOperationException("The provided security provider is not supported.");
         }
+    }
 
-        this.useWebsocket = false;
+    private void commonConstructorSetup(IotHubConnectionString iotHubConnectionString)
+    {
+        if (iotHubConnectionString == null)
+        {
+            throw new IllegalArgumentException("connection string cannot be null");
+        }
 
-        //Codes_SRS_DEVICECLIENTCONFIG_34_043: [This function shall save a new default product info.]
         this.productInfo = new ProductInfo();
+        this.useWebsocket = false;
+    }
+
+    private void assertConnectionStringIsX509(IotHubConnectionString iotHubConnectionString)
+    {
+        if (!iotHubConnectionString.isUsingX509())
+        {
+            throw new IllegalArgumentException("Cannot use this constructor for connection strings that don't use x509 authentication.");
+        }
+    }
+
+    private void assertConnectionStringIsNotX509(IotHubConnectionString iotHubConnectionString)
+    {
+        if (iotHubConnectionString.isUsingX509())
+        {
+            throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key or takes an SSLContext instance instead");
+        }
     }
 
     public IotHubClientProtocol getProtocol()

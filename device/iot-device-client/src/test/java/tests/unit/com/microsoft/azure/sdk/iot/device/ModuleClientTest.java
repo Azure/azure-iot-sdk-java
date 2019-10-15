@@ -7,7 +7,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
@@ -20,6 +19,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.*;
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -161,6 +161,31 @@ public class ModuleClientTest
         //assert
         assertNotNull(client.getConfig());
         assertNotNull(Deencapsulation.getField(client, "deviceIO"));
+    }
+
+    @Test
+    public void constructorWithSSLContextSuccess(@Mocked final SSLContext mockedSSLContext) throws URISyntaxException, ModuleClientException {
+        // arrange
+        final String connString =
+                "HostName=iothub.device.com;deviceId=testdevice;ModuleId=testmodule;x509=true";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
+
+        new Expectations()
+        {
+            {
+                new IotHubConnectionString(connString);
+                result = mockedIotHubConnectionString;
+
+                new DeviceClientConfig(mockedIotHubConnectionString, mockedSSLContext);
+                result = mockedDeviceClientConfig;
+
+                mockedDeviceClientConfig.getModuleId();
+                result = "some module id";
+            }
+        };
+
+        // act
+        final ModuleClient client = new ModuleClient(connString, protocol, mockedSSLContext);
     }
 
     //Tests_SRS_MODULECLIENT_34_001: [If the provided outputName is null or empty, this function shall throw an IllegalArgumentException.]

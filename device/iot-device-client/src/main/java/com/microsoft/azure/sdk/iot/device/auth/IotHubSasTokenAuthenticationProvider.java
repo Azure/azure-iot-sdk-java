@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.SSLContext;
@@ -40,6 +39,11 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
     public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
     {
         super(hostname, gatewayHostname, deviceId, moduleId);
+    }
+
+    public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
+    {
+        super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
     }
 
     public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, long tokenValidSecs, int timeBufferPercentage)

@@ -652,6 +652,78 @@ public class DeviceClientConfigTest
         new DeviceClientConfig(mockIotHubConnectionString, "", false, "", false);
     }
 
+    @Test
+    public void constructorWithSSLContextBuildsX509SoftwareAuthenticationProvider(@Mocked final SSLContext mockSSLContext)
+    {
+        final String hostname = "hostname";
+        final String gatewayhostname = "gatewayhostname";
+        final String deviceId = "deviceId";
+        final String moduleId = "moduleId";
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.isUsingX509();
+                result = true;
+
+                mockIotHubConnectionString.getHostName();
+                result = hostname;
+
+                mockIotHubConnectionString.getGatewayHostName();
+                result = gatewayhostname;
+
+                mockIotHubConnectionString.getDeviceId();
+                result = deviceId;
+
+                mockIotHubConnectionString.getModuleId();
+                result = moduleId;
+
+                new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayhostname, deviceId, moduleId, mockSSLContext);
+            }
+        };
+
+        new DeviceClientConfig(mockIotHubConnectionString, mockSSLContext);
+    }
+
+    @Test
+    public void constructorWithSSLContextBuildsSasSoftwareAuthenticationProvider(@Mocked final SSLContext mockSSLContext)
+    {
+        final String hostname = "hostname";
+        final String gatewayhostname = "gatewayhostname";
+        final String deviceId = "deviceId";
+        final String moduleId = "moduleId";
+        final String sharedAccessKey = "sharedAccessKey";
+        final String sharedAccessToken = "sharedAccessToken";
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.isUsingX509();
+                result = false;
+
+                mockIotHubConnectionString.getHostName();
+                result = hostname;
+
+                mockIotHubConnectionString.getGatewayHostName();
+                result = gatewayhostname;
+
+                mockIotHubConnectionString.getDeviceId();
+                result = deviceId;
+
+                mockIotHubConnectionString.getModuleId();
+                result = moduleId;
+
+                mockIotHubConnectionString.getSharedAccessKey();
+                result = sharedAccessKey;
+
+                mockIotHubConnectionString.getSharedAccessToken();
+                result = sharedAccessToken;
+
+                new IotHubSasTokenSoftwareAuthenticationProvider(hostname, gatewayhostname, deviceId, moduleId, sharedAccessKey, sharedAccessToken, mockSSLContext);
+            }
+        };
+
+        new DeviceClientConfig(mockIotHubConnectionString, mockSSLContext);
+    }
+
     // Tests_SRS_DEVICECLIENTCONFIG_12_002: [If the authentication type is X509 the constructor shall throw an IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorWithX509AuthThrows(@Mocked final IotHubConnectionString mockIotHubConnectionString) throws IOException

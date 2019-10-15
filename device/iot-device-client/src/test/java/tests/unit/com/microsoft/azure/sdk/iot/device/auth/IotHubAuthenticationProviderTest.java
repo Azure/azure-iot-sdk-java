@@ -7,11 +7,9 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import mockit.Deencapsulation;
-import mockit.Mocked;
-import mockit.NonStrictExpectations;
-import mockit.Verifications;
+import mockit.*;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -20,6 +18,8 @@ import java.security.cert.CertificateException;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 public class IotHubAuthenticationProviderTest
 {
@@ -40,6 +40,11 @@ public class IotHubAuthenticationProviderTest
         {
             super(hostname, gatewayHostname, deviceId, moduleId);
         }
+
+        public IotHubAuthenticationProviderMock(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
+        {
+            super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
+        }
     }
 
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_001: [The constructor shall save the provided hostname, gatewayhostname, deviceid and moduleid.]
@@ -50,6 +55,30 @@ public class IotHubAuthenticationProviderTest
         IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
         
         //assert
+        assertEquals(expectedHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "hostname"));
+        assertEquals(expectedGatewayHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "gatewayHostname"));
+        assertEquals(expectedDeviceId, Deencapsulation.getField(iotHubAuthenticationProvider, "deviceId"));
+        assertEquals(expectedModuleId, Deencapsulation.getField(iotHubAuthenticationProvider, "moduleId"));
+    }
+
+
+    @Test
+    public void constructorSuccessWithSSLContext()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                new IotHubSSLContext(mockedSSLContext);
+                result = mockedIotHubSSLContext;
+            }
+        };
+
+        //act
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockedSSLContext);
+
+        //assert
+        assertFalse((boolean) Deencapsulation.getField(iotHubAuthenticationProvider, "sslContextNeedsUpdate"));
         assertEquals(expectedHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "hostname"));
         assertEquals(expectedGatewayHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "gatewayHostname"));
         assertEquals(expectedDeviceId, Deencapsulation.getField(iotHubAuthenticationProvider, "deviceId"));
