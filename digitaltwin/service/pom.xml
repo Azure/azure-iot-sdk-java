@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-sdk-java-digital-twin-service</artifactId>
-    <version>1.0.0-preview-000</version>
+    <version>1.0.0-alpha-000</version>
     <name>IoT Hub Digital Twin Service</name>
     <packaging>pom</packaging>
     <developers>
