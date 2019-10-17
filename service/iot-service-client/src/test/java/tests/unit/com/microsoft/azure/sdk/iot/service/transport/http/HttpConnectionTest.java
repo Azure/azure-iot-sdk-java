@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -393,11 +394,12 @@ public class HttpConnectionTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_014: [The function shall read from the input stream (response stream) and return the response.]
     @Test
-    public void readInputCompletelyReadsInputStream(@Mocked final InputStream mockIs) throws IOException
+    public void readInputCompletelyReadsInputStream() throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         byte[] expectedResponse = { 1, 2, 3 };
+        InputStream is = new ByteArrayInputStream(expectedResponse);
         new NonStrictExpectations()
         {
             {
@@ -408,9 +410,7 @@ public class HttpConnectionTest
                 mockUrlConn.getRequestMethod();
                 result = httpsMethod.name();
                 mockUrlConn.getInputStream();
-                result = mockIs;
-                mockIs.read();
-                returns(1, 2, 3, -1);
+                result = is;
             }
         };
         HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
@@ -427,7 +427,6 @@ public class HttpConnectionTest
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
-        byte[] expectedResponse = { 1, 2, 3 };
         new NonStrictExpectations()
         {
             {
@@ -439,7 +438,7 @@ public class HttpConnectionTest
                 result = httpsMethod.name();
                 mockUrlConn.getInputStream();
                 result = mockIs;
-                mockIs.read();
+                mockIs.read(withInstanceOf(byte[].class));
                 result = new TransportException("This is a test exception");
             }
         };
@@ -495,10 +494,11 @@ public class HttpConnectionTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_016: [The function shall close the input stream after it has been completely read.]
     @Test
-    public void readInputClosesInputStream(@Mocked final InputStream mockIs) throws IOException
+    public void readInputClosesInputStream() throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
+        InputStream is = new ByteArrayInputStream(new byte[0]);
         new NonStrictExpectations()
         {
             {
@@ -509,31 +509,25 @@ public class HttpConnectionTest
                 mockUrlConn.getRequestMethod();
                 result = httpsMethod.name();
                 mockUrlConn.getInputStream();
-                result = mockIs;
-                mockIs.read();
-                result = -1;
+                result = is;
             }
         };
         HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
         // Act
-        conn.readInput();
+        byte[] bytes = conn.readInput();
         // Assert
-        new Verifications()
-        {
-            {
-                mockIs.close();
-            }
-        };
+        assertThat(bytes.length, is(0));;
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_017: [The function shall read from the error stream and return the response.]
     @Test
-    public void readErrorCompletelyReadsErrorStream(@Mocked final InputStream mockIs) throws IOException
+    public void readErrorCompletelyReadsErrorStream() throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         byte[] expectedError = { 1, 2, 3 };
+        InputStream is = new ByteArrayInputStream(expectedError);
         new NonStrictExpectations()
         {
             {
@@ -544,9 +538,7 @@ public class HttpConnectionTest
                 mockUrlConn.getRequestMethod();
                 result = httpsMethod.name();
                 mockUrlConn.getErrorStream();
-                result = mockIs;
-                mockIs.read();
-                returns(1, 2, 3, -1);
+                result = is;
             }
         };
         HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
@@ -563,7 +555,6 @@ public class HttpConnectionTest
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
-        byte[] expectedError = { 1, 2, 3 };
         new NonStrictExpectations()
         {
             {
@@ -575,7 +566,7 @@ public class HttpConnectionTest
                 result = httpsMethod.name();
                 mockUrlConn.getErrorStream();
                 result = mockIs;
-                mockIs.read();
+                mockIs.read(withInstanceOf(byte[].class));
                 result = new TransportException("This is a test exception");
             }
         };
@@ -658,10 +649,11 @@ public class HttpConnectionTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_019: [The function shall close the error stream after it has been completely read.]
     @Test
-    public void readErrorClosesErrorStream(@Mocked final InputStream mockIs) throws IOException
+    public void readErrorClosesErrorStream() throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
+        InputStream is = new ByteArrayInputStream(new byte[0]);
         new NonStrictExpectations()
         {
             {
@@ -672,27 +664,20 @@ public class HttpConnectionTest
                 mockUrlConn.getRequestMethod();
                 result = httpsMethod.name();
                 mockUrlConn.getErrorStream();
-                result = mockIs;
-                mockIs.read();
-                result = -1;
+                result = is;
             }
         };
         HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
         conn.connect();
         // Act
-        conn.readError();
+        byte[] bytes = conn.readError();
         // Assert
-        new Verifications()
-        {
-            {
-                mockIs.close();
-            }
-        };
+        assertThat(bytes.length, is(0));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_020: [The function shall return the response status code.]
     @Test
-    public void getResponseStatusReturnsResponseStatus(@Mocked final InputStream mockIs) throws IOException
+    public void getResponseStatusReturnsResponseStatus() throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
@@ -722,7 +707,7 @@ public class HttpConnectionTest
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_021: [The function shall throw an IOException if no response was received.]
     // Assert
     @Test(expected = IOException.class)
-    public void getResponseStatusFailsIfDidNotReceiveResponse(@Mocked final InputStream mockIs) throws IOException
+    public void getResponseStatusFailsIfDidNotReceiveResponse() throws IOException
     {
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;

@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URL;
@@ -19,6 +20,7 @@ import java.util.Map;
 /**
  * Set of common operations for Twin and Method.
  */
+@Slf4j
 public class DeviceOperations
 {
     /**
@@ -94,6 +96,8 @@ public class DeviceOperations
             throw new IOException("Illegal sasToken null or empty");
         }
 
+         log.debug("Before request: url={}, method={}", url, method);
+
         /* Codes_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
         HttpRequest request = new HttpRequest(url, method, payload);
 
@@ -133,6 +137,7 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
         HttpResponse response = request.send();
 
+        log.debug("After request: url={}, method={}", url, method);
         /* Codes_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
         IotHubExceptionManager.httpResponseVerification(response);
         

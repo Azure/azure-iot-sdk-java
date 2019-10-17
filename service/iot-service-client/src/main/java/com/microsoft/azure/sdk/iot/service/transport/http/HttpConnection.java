@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.http;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 public class HttpConnection
 {
+    private static final int BLOCK_SIZE = 1024;
     /** The underlying HTTPS connection. */
     protected final HttpsURLConnection connection;
 
@@ -283,23 +285,21 @@ public class HttpConnection
     protected static byte[] readInputStream(InputStream stream)
             throws IOException
     {
-        ArrayList<Byte> byteBuffer = new ArrayList<>();
-        int nextByte = -1;
-        // read(byte[]) reads the byte into the buffer and returns the number
-        // of bytes read, or -1 if the end of the stream has been reached.
-        while ((nextByte = stream.read()) > -1)
+        byte[] data = new byte[BLOCK_SIZE];
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        int len;
+        try
         {
-            byteBuffer.add((byte) nextByte);
+            while((len = stream.read(data)) != -1)
+            {
+                os.write(data, 0, len);
+            }
+            return os.toByteArray();
         }
-
-        int bufferSize = byteBuffer.size();
-        byte[] byteArray = new byte[bufferSize];
-        for (int i = 0; i < bufferSize; ++i)
-        {
-            byteArray[i] = byteBuffer.get(i);
+        finally {
+            stream.close();
+            os.close();
         }
-
-        return byteArray;
     }
 
     protected HttpConnection()

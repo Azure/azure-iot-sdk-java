@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,6 +19,7 @@ import java.util.Date;
 /**
  * DeviceMethod enables service client to directly invoke methods on various devices from service client.
  */
+@Slf4j
 public class DeviceMethod
 {
     private IotHubConnectionString iotHubConnectionString = null;
@@ -134,6 +136,7 @@ public class DeviceMethod
      */
     private synchronized MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
+        log.debug("Before invoke: url={}, methodName={}, connectTimeout={} seconds, responseTimeout={} seconds", url, methodName, connectTimeoutInSeconds, responseTimeoutInSeconds);
         /* Codes_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided responseTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_007: [The invoke shall throw IllegalArgumentException if the provided connectTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_014: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
@@ -178,6 +181,7 @@ public class DeviceMethod
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
 
+        log.debug("After invoke: url={}, methodName={}, connectTimeout={} seconds, responseTimeout={} seconds", url, methodName, connectTimeoutInSeconds, responseTimeoutInSeconds);
         /* Codes_SRS_DEVICEMETHOD_21_015: [If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.] */
         return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
     }

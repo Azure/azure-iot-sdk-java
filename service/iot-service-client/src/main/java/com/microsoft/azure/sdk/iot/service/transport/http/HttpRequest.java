@@ -6,12 +6,14 @@
 package com.microsoft.azure.sdk.iot.service.transport.http;
 
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class HttpRequest
 {
     /** The underlying HTTPS connection stream. */
@@ -36,6 +38,7 @@ public class HttpRequest
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
         this.connection = new HttpConnection(url, method);
+        log.debug("Created connection: url={}, method={}, connection={}", url, method, connection);
         this.connection.setRequestHeader("User-Agent", TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);
@@ -51,16 +54,19 @@ public class HttpRequest
      */
     public HttpResponse send() throws IOException
     {
-        int responseStatus = -1;
+        log.debug("Before sending request: ");
+        int responseStatus;
         byte[] responseBody = new byte[0];
         byte[] errorReason = new byte[0];
         Map<String, List<String>> headerFields;
         try
         {
+            log.debug("Opening connection {}", connection);
             // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_005: [The function shall send an HTTPS request as formatted in the constructor.]
             this.connection.connect();
-
+            log.debug("Connection {} connected.", connection);
             responseStatus = this.connection.getResponseStatus();
+            log.debug("Connection {} status={}.", connection, responseStatus);
             headerFields = this.connection.getResponseHeaders();
             responseBody = this.connection.readInput();
         }
@@ -68,6 +74,7 @@ public class HttpRequest
         // connection or by a bad status code.
         catch (IOException e)
         {
+            log.debug("Connection {} failed.", connection, e);
             // If the IOException was caused by a bad status code in the
             // response, then getResponseStatus() returns a valid status code.
             // Otherwise, a connection could not be established and
