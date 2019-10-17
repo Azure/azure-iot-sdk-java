@@ -27,7 +27,7 @@ public class DeviceOperations
      *  Values for Http header
      */
     private static final String AUTHORIZATION = "authorization";
-    private static final String REQUEST_ID = "Request-Id";
+    public static final String REQUEST_ID = "Request-Id";
     private static final String USER_AGENT = "User-Agent";
     private static final String ACCEPT = "Accept";
     private static final String ACCEPT_VALUE = "application/json";
@@ -96,7 +96,7 @@ public class DeviceOperations
             throw new IOException("Illegal sasToken null or empty");
         }
 
-         log.debug("Before request: url={}, method={}", url, method);
+         log.debug("Before request: requestId={}, url={}, method={}", requestId, url, method);
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
         HttpRequest request = new HttpRequest(url, method, payload);
@@ -137,7 +137,7 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
         HttpResponse response = request.send();
 
-        log.debug("After request: url={}, method={}", url, method);
+        log.debug("After request: requestId={}, url={}, method={}", requestId, url, method);
         /* Codes_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
         IotHubExceptionManager.httpResponseVerification(response);
         

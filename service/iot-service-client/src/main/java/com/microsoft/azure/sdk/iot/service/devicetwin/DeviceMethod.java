@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * DeviceMethod enables service client to directly invoke methods on various devices from service client.
@@ -22,11 +23,11 @@ import java.util.Date;
 @Slf4j
 public class DeviceMethod
 {
-    private IotHubConnectionString iotHubConnectionString = null;
-    private Integer requestId = 0;
     private static final int DEFAULT_RESPONSE_TIMEOUT = 30; // default response timeout is 30 seconds
     private static final int DEFAULT_CONNECT_TIMEOUT = 0;
     private static final int THOUSAND_MS = 1000;
+    private IotHubConnectionString iotHubConnectionString;
+    private AtomicInteger index;
     /**
      * Create a DeviceMethod instance from the information in the connection string.
      *
@@ -47,7 +48,7 @@ public class DeviceMethod
 
         /* Codes_SRS_DEVICEMETHOD_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
         deviceMethod.iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-
+        deviceMethod.index = new AtomicInteger(0);
         return deviceMethod;
     }
 
@@ -136,7 +137,6 @@ public class DeviceMethod
      */
     private synchronized MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
-        log.debug("Before invoke: url={}, methodName={}, connectTimeout={} seconds, responseTimeout={} seconds", url, methodName, connectTimeoutInSeconds, responseTimeoutInSeconds);
         /* Codes_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided responseTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_007: [The invoke shall throw IllegalArgumentException if the provided connectTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_014: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
@@ -175,13 +175,16 @@ public class DeviceMethod
                
         /* Codes_SRS_DEVICEMETHOD_21_009: [The invoke shall send the created request and get the response using the HttpRequester.] */
         /* Codes_SRS_DEVICEMETHOD_21_010: [The invoke shall create a new HttpRequest with http method as `POST`.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), timeoutInMs);
+        String requestId = String.valueOf(index.getAndIncrement());
+
+        log.debug("Before invoke: requestId={}, url={}, methodName={}, connectTimeout={} seconds, responseTimeout={} seconds", requestId, url, methodName, connectTimeoutInSeconds, responseTimeoutInSeconds);
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), requestId, timeoutInMs);
 
         /* Codes_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.MethodParser`.] */
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
 
-        log.debug("After invoke: url={}, methodName={}, connectTimeout={} seconds, responseTimeout={} seconds", url, methodName, connectTimeoutInSeconds, responseTimeoutInSeconds);
+        log.debug("After invoke: requestId={}.", requestId);
         /* Codes_SRS_DEVICEMETHOD_21_015: [If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.] */
         return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
     }

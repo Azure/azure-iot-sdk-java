@@ -13,6 +13,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import static com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations.REQUEST_ID;
+
 @Slf4j
 public class HttpRequest
 {
@@ -106,6 +108,9 @@ public class HttpRequest
     {
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_009: [The function shall set the header field with the given name to the given value.]
         this.connection.setRequestHeader(field, value);
+        if (REQUEST_ID.equals(field)) {
+            log.debug("RequestId of connection {} is {}.", connection, value);
+        }
         return this;
     }
 
