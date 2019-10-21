@@ -32,6 +32,7 @@ public class IotHubTransport implements IotHubListener
     private static final int MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
     private volatile IotHubConnectionStatus connectionStatus;
     private IotHubTransportConnection iotHubTransportConnection;
+    private TransportConnectionListener transportConnectionListener;
 
     /* Messages waiting to be sent to the IoT Hub. */
     private final Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
@@ -73,7 +74,7 @@ public class IotHubTransport implements IotHubListener
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
      * @throws IllegalArgumentException if defaultConfig is null
      */
-    public IotHubTransport(DeviceClientConfig defaultConfig) throws IllegalArgumentException
+    public IotHubTransport(DeviceClientConfig defaultConfig, TransportConnectionListener transportConnectionListener) throws IllegalArgumentException
     {
         if (defaultConfig == null)
         {
@@ -84,6 +85,8 @@ public class IotHubTransport implements IotHubListener
 
         //Codes_SRS_IOTHUBTRANSPORT_34_001: [The constructor shall save the default config.]
         this.defaultConfig = defaultConfig;
+
+        this.transportConnectionListener = transportConnectionListener;
 
         //Codes_SRS_IOTHUBTRANSPORT_34_003: [The constructor shall set the connection status as DISCONNECTED and the
         // current retry attempt to 0.]
@@ -220,6 +223,8 @@ public class IotHubTransport implements IotHubListener
             //Codes_SRS_IOTHUBTRANSPORT_34_014: [If the provided connectionId is associated with the current connection, This function shall invoke updateStatus with status CONNECTED, change
             // reason CONNECTION_OK and a null throwable.]
             this.updateStatus(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, null);
+
+            this.transportConnectionListener.onTransportConnectionRecovered();
         }
     }
 
@@ -287,6 +292,11 @@ public class IotHubTransport implements IotHubListener
      */
     public void close(IotHubConnectionStatusChangeReason reason, Throwable cause) throws DeviceClientException
     {
+        if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED)
+        {
+            return;
+        }
+
         if (reason == null)
         {
             //Codes_SRS_IOTHUBTRANSPORT_34_026: [If the supplied reason is null, this function shall throw an
@@ -793,6 +803,8 @@ public class IotHubTransport implements IotHubListener
                 // stop, this function shall invoke close with RETRY_EXPIRED and the last transportException.]
                 this.log.debug("Reconnection was abandoned due to the retry policy");
                 this.close(IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException);
+                this.transportConnectionListener.onTransportConnectionLost();
+
             }
             else if (this.hasOperationTimedOut(this.reconnectionAttemptStartTimeMillis))
             {
@@ -802,6 +814,7 @@ public class IotHubTransport implements IotHubListener
                 this.close(
                         IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
                         new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
+                this.transportConnectionListener.onTransportConnectionLost();
             }
             else if (transportException != null && !transportException.isRetryable())
             {
@@ -809,6 +822,7 @@ public class IotHubTransport implements IotHubListener
                 // encountered, this function shall invoke close with that terminal exception.]
                 this.log.error("Reconnection was abandoned due to encountering a non-retryable exception", transportException);
                 this.close(this.exceptionToStatusChangeReason(transportException), transportException);
+                this.transportConnectionListener.onTransportConnectionLost();
             }
         }
         catch (DeviceClientException ex)

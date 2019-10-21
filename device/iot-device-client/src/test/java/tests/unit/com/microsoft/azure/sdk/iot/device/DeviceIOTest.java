@@ -69,7 +69,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new IotHubTransport(mockConfig);
+                new IotHubTransport(mockConfig, (TransportConnectionListener) any);
                 result = mockedTransport;
             }
         };
@@ -129,7 +129,6 @@ public class DeviceIOTest
                 mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
 
         // assert
-        assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
         assertEquals(protocol, Deencapsulation.getField(deviceIO, "protocol"));
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
         assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
@@ -179,7 +178,6 @@ public class DeviceIOTest
 
 
         // assert
-        assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
         assertEquals(protocol, Deencapsulation.getField(deviceIO, "protocol"));
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
         assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
@@ -215,7 +213,6 @@ public class DeviceIOTest
                 mockConfig, SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_HTTPS);
 
         // assert
-        assertEquals(mockConfig, Deencapsulation.getField(deviceIO, "config"));
         assertEquals(protocol, Deencapsulation.getField(deviceIO, "protocol"));
         assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
         assertEquals(SEND_PERIOD_MILLIS, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
@@ -973,4 +970,43 @@ public class DeviceIOTest
             }
         };
     }
+
+    @Test
+    public void onTransportConnectionLostCallsClose() throws DeviceClientException
+    {
+        DeviceIO deviceIO = newDeviceIO();
+        Deencapsulation.invoke(deviceIO, "open");
+
+        new Expectations()
+        {
+            {
+                mockedTransport.close((IotHubConnectionStatusChangeReason) any, (Throwable) any);
+                times = 0;
+            }
+        };
+
+        deviceIO.onTransportConnectionLost();
+
+        assertEquals("CLOSED", Deencapsulation.getField(deviceIO, "state").toString());
+    }
+
+    @Test
+    public void onTransportConnectionRecoveredCallsOpen() throws DeviceClientException
+    {
+        DeviceIO deviceIO = newDeviceIO();
+        Deencapsulation.invoke(deviceIO, "close");
+
+        new Expectations()
+        {
+            {
+                mockedTransport.open((Collection<DeviceClientConfig>) any);
+                times = 0;
+            }
+        };
+
+        deviceIO.onTransportConnectionRecovered();
+
+        assertEquals("OPEN", Deencapsulation.getField(deviceIO, "state").toString());
+    }
 }
+

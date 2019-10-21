@@ -281,6 +281,68 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         testInstance.client.setRetryPolicy(new ExponentialBackoffWithJitter());
     }
 
+    @Test
+    public void clientCanReopenAfterDisconnectionEvent() throws Exception
+    {
+        if (testInstance.protocol == HTTPS || testInstance.useHttpProxy)
+        {
+            return;
+        }
+
+        this.testInstance.setup();
+
+        this.testInstance.client.setRetryPolicy(new NoRetry());
+
+        this.testInstance.client.open();
+
+        Message tcpConnectionDropErrorInjectionMessageUnrecoverable = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 5);
+        sendMessagesExpectingUnrecoverableConnectionLossAndTimeout(testInstance.client, testInstance.protocol, tcpConnectionDropErrorInjectionMessageUnrecoverable, testInstance.authenticationType);
+
+        testInstance.client.open();
+
+        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+
+        testInstance.client.closeNow();
+    }
+
+    @Test
+    public void clientCanReopenAfterDisconnectionEventUsingApplicationLevelRetryInConnectionStatusCallback() throws Exception
+    {
+        if (testInstance.protocol == HTTPS || testInstance.useHttpProxy)
+        {
+            return;
+        }
+
+        this.testInstance.setup();
+
+        Message tcpConnectionDropErrorInjectionMessageUnrecoverable = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 5);
+        IotHubServicesCommon.sendMessagesExpectingRecoverableConnectionLossAndRecoversUsingConnectionStatusCallback(testInstance.client, testInstance.protocol, tcpConnectionDropErrorInjectionMessageUnrecoverable, testInstance.authenticationType);
+
+        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+
+        testInstance.client.closeNow();
+    }
+
+    @Test
+    public void clientCanReopenAndSendMessagesAfterClosing() throws Exception
+    {
+        if (testInstance.useHttpProxy)
+        {
+            return;
+        }
+
+        int maxTimesToCloseAndReopen = 5;
+
+        this.testInstance.setup();
+
+        for (int i = 0; i < maxTimesToCloseAndReopen; i++)
+        {
+            this.testInstance.client.open();
+            IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+            testInstance.client.closeNow();
+        }
+    }
+
     private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException
     {
         // Arrange

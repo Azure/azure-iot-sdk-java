@@ -135,6 +135,8 @@ public class TransportClient
             this.deviceIO = null;
         }
 
+        this.transportClientState = TransportClientState.CLOSED;
+
         log.info("Transport client closed successfully");
     }
 
