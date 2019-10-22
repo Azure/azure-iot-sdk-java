@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
  * The task scheduler for sending and receiving messages for the Device Client
  */
 @Slf4j
-public final class DeviceIO
+public final class DeviceIO  implements TransportConnectionListener
 {
     /** The state of the IoT Hub client's connection with the IoT Hub. */
     protected enum IotHubClientState
@@ -79,16 +79,16 @@ public final class DeviceIO
     private long sendPeriodInMilliseconds;
     private long receivePeriodInMilliseconds;
 
-    private IotHubTransport transport;
-    private DeviceClientConfig config;
+    private final IotHubTransport transport;
     private IotHubSendTask sendTask = null;
     private IotHubReceiveTask receiveTask = null;
-    private IotHubClientProtocol protocol = null;
+    private final IotHubClientProtocol protocol;
 
     private ScheduledExecutorService taskScheduler;
     private IotHubClientState state;
+    private final Object stateLock = new Object();
 
-    private List<DeviceClientConfig> deviceClientConfigs = new LinkedList<>();
+    private List<DeviceClientConfig> deviceClientConfigs = new ArrayList<>();
 
     /**
      * Constructor that takes a connection string as an argument.
@@ -110,23 +110,17 @@ public final class DeviceIO
 
         /* Codes_SRS_DEVICE_IO_21_001: [The constructor shall store the provided protocol and config information.] */
         deviceClientConfigs.add(config);
-        this.config = config;
-        this.protocol = this.config.getProtocol();
-
-        /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
-        this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
-        /* Codes_SRS_DEVICE_IO_21_038: [The constructor shall initialize the `receivePeriodInMilliseconds` with default value of each protocol.] */
-        this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
+        this.protocol = config.getProtocol();
 
         /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubClientState.CLOSED;
 
         if (protocol == IotHubClientProtocol.AMQPS_WS || protocol == IotHubClientProtocol.MQTT_WS)
         {
-            this.config.setUseWebsocket(true);
+            config.setUseWebsocket(true);
         }
 
-        this.transport = new IotHubTransport(config);
+        this.transport = new IotHubTransport(config, this);
 
         /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
@@ -145,26 +139,37 @@ public final class DeviceIO
      */
     void open() throws IOException
     {
-        /* Codes_SRS_DEVICE_IO_21_007: [If the client is already open, the open shall do nothing.] */
-        if (this.state == IotHubClientState.OPEN)
-        {
-            return;
-        }
+        open(true);
+    }
 
-        /* Codes_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
-        /* Codes_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
-        try
+    void open(boolean openTransport) throws IOException
+    {
+        synchronized (stateLock)
         {
-            this.transport.open(deviceClientConfigs);
-        }
-        catch (DeviceClientException e)
-        {
-            throw new IOException("Could not open the connection", e);
-        }
+            /* Codes_SRS_DEVICE_IO_21_007: [If the client is already open, the open shall do nothing.] */
+            if (this.state == IotHubClientState.OPEN)
+            {
+                return;
+            }
 
-        /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
-        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
-        commonOpenSetup();
+            if (openTransport)
+            {
+                /* Codes_SRS_DEVICE_IO_21_012: [The open shall open the transport to communicate with an IoT Hub.] */
+                /* Codes_SRS_DEVICE_IO_21_015: [If an error occurs in opening the transport, the open shall throw an IOException.] */
+                try
+                {
+                    this.transport.open(deviceClientConfigs);
+                }
+                catch (DeviceClientException e)
+                {
+                    throw new IOException("Could not open the connection", e);
+                }
+            }
+
+            /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
+            /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
+            commonOpenSetup();
+        }
     }
 
     /**
@@ -215,26 +220,37 @@ public final class DeviceIO
      */
     public void close() throws IOException
     {
-        /* Codes_SRS_DEVICE_IO_21_017: [The close shall finish all ongoing tasks.] */
-        /* Codes_SRS_DEVICE_IO_21_018: [The close shall cancel all recurring tasks.] */
-        if (taskScheduler != null)
-        {
-            this.taskScheduler.shutdown();
-        }
+        close(true);
+    }
 
-        /* Codes_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
-        try
+    void close(boolean closeTransport) throws IOException
+    {
+        synchronized (stateLock)
         {
-            this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
-        }
-        catch (DeviceClientException e)
-        {
+            /* Codes_SRS_DEVICE_IO_21_017: [The close shall finish all ongoing tasks.] */
+            /* Codes_SRS_DEVICE_IO_21_018: [The close shall cancel all recurring tasks.] */
+            if (taskScheduler != null)
+            {
+                this.taskScheduler.shutdown();
+            }
+
+            if (closeTransport)
+            {
+                /* Codes_SRS_DEVICE_IO_21_019: [The close shall close the transport.] */
+                try
+                {
+                    this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
+                }
+                catch (DeviceClientException e)
+                {
+                    this.state = IotHubClientState.CLOSED;
+                    throw new IOException(e);
+                }
+            }
+
+            /* Codes_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
             this.state = IotHubClientState.CLOSED;
-            throw new IOException(e);
         }
-
-        /* Codes_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
-        this.state = IotHubClientState.CLOSED;
     }
 
     /**
@@ -428,5 +444,19 @@ public final class DeviceIO
     {
         //Codes_SRS_DEVICE_IO_34_020: [This function shall register the callback with the transport.]
         this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext);
+    }
+
+    @Override
+    public void onTransportConnectionLost()
+    {
+        try
+        {
+            //only close the device io layer, not the transport layer. The transport layer is already closed when this method is called
+            this.close(false);
+        }
+        catch (IOException e)
+        {
+            log.warn("Encountered an exception while closing device IO layer due to transport disconnection event", e);
+        }
     }
 }
