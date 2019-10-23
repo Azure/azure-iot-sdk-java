@@ -8,12 +8,12 @@ package com.microsoft.azure.sdk.iot.common.helpers;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Assert;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -318,6 +318,76 @@ public class IotHubServicesCommon
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED));
 
         client.closeNow();
+    }
+
+    public static void sendMessagesExpectingRecoverableConnectionLossAndRecoversUsingConnectionStatusCallback(InternalClient client,
+                                                                                  IotHubClientProtocol protocol,
+                                                                                  Message errorInjectionMessage,
+                                                                                  AuthenticationType authType) throws IOException, InterruptedException
+    {
+        final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
+        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
+        {
+            @Override
+            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+            {
+                statusUpdates.add(new Pair<>(status, throwable));
+
+                if (status == IotHubConnectionStatus.DISCONNECTED)
+                {
+                    new Thread(() ->
+                    {
+                        boolean connectionReopened = false;
+                        while (!connectionReopened)
+                        {
+                            try
+                            {
+                                Thread.sleep(200);
+                                client.open();
+                                connectionReopened = true;
+                            }
+                            catch (Exception e)
+                            {
+                                //ignore, try again
+                            }
+                        }
+                    }).start();
+                }
+            }
+        }, new Object());
+
+        client.setRetryPolicy(new NoRetry());
+
+        client.open();
+
+        client.sendEventAsync(errorInjectionMessage, new EventCallback(null), new Success());
+
+        //remove the initial CONNECTED event so that the next one is the only CONNECTED event in the list
+        statusUpdates.remove(0);
+
+        long startTime = System.currentTimeMillis();
+        while (!(actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING) && actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED)))
+        {
+            Thread.sleep(500);
+
+            if (System.currentTimeMillis() - startTime > 30 * 1000)
+            {
+                break;
+            }
+        }
+
+        while (!(actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.CONNECTED)))
+        {
+            Thread.sleep(500);
+
+            if (System.currentTimeMillis() - startTime > 30 * 1000)
+            {
+                break;
+            }
+        }
+
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected but retrying.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.CONNECTED));
     }
 
     public static void sendMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)

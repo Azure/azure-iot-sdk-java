@@ -32,6 +32,7 @@ public class IotHubTransport implements IotHubListener
     private static final int MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
     private volatile IotHubConnectionStatus connectionStatus;
     private IotHubTransportConnection iotHubTransportConnection;
+    private TransportConnectionListener transportConnectionListener;
 
     /* Messages waiting to be sent to the IoT Hub. */
     private final Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
@@ -73,7 +74,7 @@ public class IotHubTransport implements IotHubListener
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
      * @throws IllegalArgumentException if defaultConfig is null
      */
-    public IotHubTransport(DeviceClientConfig defaultConfig) throws IllegalArgumentException
+    public IotHubTransport(DeviceClientConfig defaultConfig, TransportConnectionListener transportConnectionListener) throws IllegalArgumentException
     {
         if (defaultConfig == null)
         {
@@ -84,6 +85,8 @@ public class IotHubTransport implements IotHubListener
 
         //Codes_SRS_IOTHUBTRANSPORT_34_001: [The constructor shall save the default config.]
         this.defaultConfig = defaultConfig;
+
+        this.transportConnectionListener = transportConnectionListener;
 
         //Codes_SRS_IOTHUBTRANSPORT_34_003: [The constructor shall set the connection status as DISCONNECTED and the
         // current retry attempt to 0.]
@@ -190,7 +193,7 @@ public class IotHubTransport implements IotHubListener
             {
                 //Codes_SRS_IOTHUBTRANSPORT_34_011: [If this function is called while the connection status is DISCONNECTED,
                 // this function shall do nothing.]
-                this.log.trace("OnConnectionLost was fired, but connection is already disocnnected. Ignoring...");
+                this.log.trace("OnConnectionLost was fired, but connection is already disconnected. Ignoring...");
                 return;
             }
 
@@ -220,6 +223,8 @@ public class IotHubTransport implements IotHubListener
             //Codes_SRS_IOTHUBTRANSPORT_34_014: [If the provided connectionId is associated with the current connection, This function shall invoke updateStatus with status CONNECTED, change
             // reason CONNECTION_OK and a null throwable.]
             this.updateStatus(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, null);
+
+            this.transportConnectionListener.onTransportConnectionOpened();
         }
     }
 
@@ -287,6 +292,11 @@ public class IotHubTransport implements IotHubListener
      */
     public void close(IotHubConnectionStatusChangeReason reason, Throwable cause) throws DeviceClientException
     {
+        if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED)
+        {
+            return;
+        }
+
         if (reason == null)
         {
             //Codes_SRS_IOTHUBTRANSPORT_34_026: [If the supplied reason is null, this function shall throw an
@@ -319,6 +329,8 @@ public class IotHubTransport implements IotHubListener
         //Codes_SRS_IOTHUBTRANSPORT_34_025: [This function shall invoke updateStatus with status DISCONNECTED and the
         // supplied reason and cause.]
         this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
+
+        this.transportConnectionListener.onTransportConnectionClosed();
 
         log.info("Client connection closed successfully");
     }
@@ -539,6 +551,11 @@ public class IotHubTransport implements IotHubListener
         this.connectionStatusChangeCallbackContext = callbackContext;
     }
 
+    public boolean isConnected()
+    {
+        return this.connectionStatus == IotHubConnectionStatus.CONNECTED;
+    }
+
     /**
      * Moves all packets from waiting queue and in progress map into callbacks queue with status MESSAGE_CANCELLED_ONCLOSE
      */
@@ -705,10 +722,6 @@ public class IotHubTransport implements IotHubListener
 
         //Codes_SRS_IOTHUBTRANSPORT_34_039: [This function shall open the iotHubTransportConnection object with the saved list of configs.]
         this.iotHubTransportConnection.open(this.deviceClientConfigs, scheduledExecutorService);
-
-        //Codes_SRS_IOTHUBTRANSPORT_34_040: [This function shall invoke the method updateStatus with status CONNECTED,
-        // reason CONNECTION_OK, and a null throwable.]
-        this.updateStatus(IotHubConnectionStatus.CONNECTED, IotHubConnectionStatusChangeReason.CONNECTION_OK, null);
     }
 
     /**

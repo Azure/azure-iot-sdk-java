@@ -230,6 +230,28 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
+    public void sendMessagesAfterClosingAndReopeningTransportClient() throws URISyntaxException, IOException, InterruptedException
+    {
+        testInstance.transportClient.open();
+
+        for (int i = 0; i < testInstance.clientArrayList.size(); i++)
+        {
+            sendMessagesMultiplex(testInstance.clientArrayList.get(i), IotHubClientProtocol.AMQPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        }
+
+        testInstance.transportClient.closeNow();
+
+        testInstance.transportClient.open();
+
+        for (int i = 0; i < testInstance.clientArrayList.size(); i++)
+        {
+            sendMessagesMultiplex(testInstance.clientArrayList.get(i), IotHubClientProtocol.AMQPS, NUM_MESSAGES_PER_CONNECTION, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS);
+        }
+
+        testInstance.transportClient.closeNow();
+    }
+
+    @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void receiveMessagesIncludingProperties() throws Exception
     {

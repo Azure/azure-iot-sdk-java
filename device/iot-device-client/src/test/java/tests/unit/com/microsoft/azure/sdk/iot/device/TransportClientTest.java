@@ -197,6 +197,7 @@ public class TransportClientTest
         IotHubClientProtocol iotHubClientProtocol = IotHubClientProtocol.AMQPS;
         final TransportClient transportClient = new TransportClient(iotHubClientProtocol);
         Deencapsulation.setField(transportClient, "deviceIO", mockDeviceIO);
+        Deencapsulation.setField(transportClient, "transportClientState", TransportClient.TransportClientState.OPENED);
 
         // act
         transportClient.closeNow();
@@ -207,6 +208,9 @@ public class TransportClientTest
 
         DeviceIO deviceIO = Deencapsulation.getField(transportClient, "deviceIO");
         assertNull(deviceIO);
+
+        TransportClient.TransportClientState state = Deencapsulation.getField(transportClient, "transportClientState");
+        assertEquals(TransportClient.TransportClientState.CLOSED, state);
 
         new Verifications()
         {

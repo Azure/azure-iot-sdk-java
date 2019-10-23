@@ -294,7 +294,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     @Override
     public void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService)
     {
-
+        this.listener.onConnectionEstablished(this.getConnectionId());
     }
 
     @Override
