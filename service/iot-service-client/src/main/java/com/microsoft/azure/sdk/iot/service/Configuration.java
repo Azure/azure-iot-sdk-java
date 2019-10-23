@@ -111,6 +111,15 @@ public class Configuration
     }
 
     /**
+     * Set the configuration metrics of this object
+     * @param metrics the metrics to set
+     */
+    public void setMetrics(ConfigurationMetrics metrics)
+    {
+        this.metrics = metrics;
+    }
+
+    /**
      * Specifies the configuration content
      */
     protected ConfigurationContent content;

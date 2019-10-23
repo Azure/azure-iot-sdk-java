@@ -1,17 +1,14 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.*;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Configuration;
-import com.microsoft.azure.sdk.iot.service.ConfigurationContent;
 import com.microsoft.azure.sdk.iot.service.ConfigurationMetrics;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import mockit.Deencapsulation;
 import mockit.Mocked;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -191,5 +188,15 @@ public class ConfigurationTest
         assertEquals(new Long(100), configurationCA.getMetrics().getResults().get("resultKey"));
         assertEquals("squeryVal", configurationCA.getSystemMetrics().getQueries().get("squeryKey"));
         assertEquals(new Long(101), configurationCA.getSystemMetrics().getResults().get("sresultKey"));
+    }
+
+    @Test
+    public void canSetConfigurationMetrics(@Mocked final ConfigurationMetrics mockedConfigurationMetrics)
+    {
+        Configuration configuration = new Configuration("asdf");
+
+        configuration.setMetrics(mockedConfigurationMetrics);
+
+        Assert.assertEquals(mockedConfigurationMetrics, configuration.getMetrics());
     }
 }
