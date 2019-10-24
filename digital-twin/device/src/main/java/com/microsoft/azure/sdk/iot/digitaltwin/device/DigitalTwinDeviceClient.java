@@ -28,6 +28,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto.JsonRawValue;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableEmitter;
 import io.reactivex.rxjava3.core.FlowableOnSubscribe;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.functions.Function;
@@ -41,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,11 +71,11 @@ import static lombok.AccessLevel.PACKAGE;
  */
 @Slf4j
 public final class DigitalTwinDeviceClient {
-    private static final int NONE_DIGITAL_TWIN_COMMAND_CODE = STATUS_CODE_NOT_IMPLEMENTED;
+    private static final int NON_DIGITAL_TWIN_COMMAND_CODE = STATUS_CODE_NOT_IMPLEMENTED;
     private static final int INTERFACE_INSTANCE_NOT_FOUND_CODE = STATUS_CODE_NOT_IMPLEMENTED;
     private static final int INVALID_COMMAND_PAYLOAD_CODE = STATUS_CODE_INVALID;
     private static final int INVALID_METHOD_PAYLOAD_CODE = STATUS_CODE_INVALID;
-    private static final String NONE_DIGITAL_TWIN_COMMAND_MESSAGE_PATTERN = "\"None digital twin command [%s].\"";
+    private static final String NON_DIGITAL_TWIN_COMMAND_MESSAGE_PATTERN = "\"Non digital twin command [%s].\"";
     private static final String INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN = "\"Interface instance [%s] not found.\"";
     private static final String INVALID_METHOD_PAYLOAD_MESSAGE_PATTERN = "\"Invalid method payload: %s.\"";
     private static final String INVALID_METHOD_PAYLOAD_TYPE_MESSAGE = "\"Method data is not byte array.\"";
@@ -126,13 +126,13 @@ public final class DigitalTwinDeviceClient {
      * @param digitalTwinInterfaceClients An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
      * @return if this async function is accepted or not
      */
-    public Flowable<DigitalTwinClientResult> registerInterfacesAsync(@NonNull final String deviceCapabilityModelId,
+    public Single<DigitalTwinClientResult> registerInterfacesAsync(@NonNull final String deviceCapabilityModelId,
             @NonNull final List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients) {
         synchronized (lock) {
             if (registrationStatus == REGISTERING) {
-                return Flowable.just(DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING);
+                return Single.just(DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING);
             } else if (registrationStatus == REGISTERED) {
-                return Flowable.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
+                return Single.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
             } else {
                 registrationStatus = REGISTERING;
             }
@@ -204,7 +204,8 @@ public final class DigitalTwinDeviceClient {
                     public void run() {
                         onRegistrationResult(DIGITALTWIN_CLIENT_ERROR);
                     }
-                });
+                })
+                .singleOrError();
     }
 
     private Flowable<DigitalTwinClientResult> connectAsync(final DeviceClient deviceClient) {
@@ -426,7 +427,7 @@ public final class DigitalTwinDeviceClient {
                     return new DeviceMethodData(INVALID_COMMAND_PAYLOAD_CODE, INVALID_METHOD_PAYLOAD_TYPE_MESSAGE);
                 }
             } else {
-                return new DeviceMethodData(NONE_DIGITAL_TWIN_COMMAND_CODE, String.format(NONE_DIGITAL_TWIN_COMMAND_MESSAGE_PATTERN, methodName));
+                return new DeviceMethodData(NON_DIGITAL_TWIN_COMMAND_CODE, String.format(NON_DIGITAL_TWIN_COMMAND_MESSAGE_PATTERN, methodName));
             }
         }
     }
@@ -461,7 +462,7 @@ public final class DigitalTwinDeviceClient {
                     log.debug("Property ignored: value is not JSON.", e);
                 }
             } else {
-                log.debug("Ignored none digital twin property[{}].", name);
+                log.debug("Ignored non digital twin property[{}].", name);
             }
         }
     }
