@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback {
+public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnectionStatusChangeCallback {
     @Override
     public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
         log.debug("### Connection status change reported: status={}, reason={}", status, statusChangeReason);
