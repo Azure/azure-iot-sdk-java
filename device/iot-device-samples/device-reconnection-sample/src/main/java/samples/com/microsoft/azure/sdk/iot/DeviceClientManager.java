@@ -15,7 +15,7 @@ public class DeviceClientManager {
 
     DeviceClientManager(DeviceClient deviceClient) {
         this.client = deviceClient;
-        this.client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), this);
+        this.client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackHandler(), this);
     }
 
     void connect() {
@@ -28,6 +28,13 @@ public class DeviceClientManager {
             }
             catch (Exception ex) {
                 log.error("[connect] - Exception thrown while opening DeviceClient instance.");
+                ex.printStackTrace();
+            }
+            try {
+                log.debug("[connect] - Sleeping for 10 secs before attempting another open()");
+                Thread.sleep(10 * 1000);
+            } catch (InterruptedException ex) {
+                log.error("[connect] - Exception in thread sleep");
                 ex.printStackTrace();
             }
         }
@@ -46,26 +53,7 @@ public class DeviceClientManager {
             connecting = true;
         }
 
-        while(true) {
-            log.debug("[reconnect] - Opening the device client instance...");
-            try {
-                client.open();
-                log.debug("[reconnect] - DeviceClient Connected");
-                break;
-            } catch (Exception e) {
-                log.error("[reconnect] - Exception thrown while reconnecting device client; retrying...");
-                e.printStackTrace();
-                disconnect();
-                try {
-                    log.debug("[reconnect] - Sleeping for 10 secs before attempting another open()");
-                    Thread.sleep(10 * 1000);
-                } catch (InterruptedException ex) {
-                    log.error("[reconnect] - Exception in thread sleep");
-                    ex.printStackTrace();
-                }
-            }
-        }
-
+        connect();
         synchronized(lock) {
             connecting = false;
         }

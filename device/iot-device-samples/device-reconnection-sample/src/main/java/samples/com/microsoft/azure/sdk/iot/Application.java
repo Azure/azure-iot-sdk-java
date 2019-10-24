@@ -33,7 +33,7 @@ public class Application {
     private static final int DEVICE_OPERATION_TIMEOUT_IN_MINUTES = 2;
     private static final int numRequests = 20;
     private static final int MAX_APPLICATION_RUN_DURATION_IN_MINUTES = 5;
-    private static final int SLEEP_DURATION_IN_SECS = 30;
+    private static final int SLEEP_DURATION_IN_SECS = 60;
     private static AtomicBoolean stopRunning = new AtomicBoolean(false);
 
     static boolean reconnectIndefinitely = true;
@@ -65,7 +65,7 @@ public class Application {
         log.debug("Setting method handler...");
         deviceClientManager.subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
-        System.out.println("Start device Twin and get remaining properties...");
+        log.debug("Start device Twin and get remaining properties...");
         // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
         Succeed.set(false);
         client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
