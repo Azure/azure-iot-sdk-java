@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRe
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -58,17 +59,17 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      *
      * @return Result of this async function.
      */
-    protected final Flowable<DigitalTwinClientResult> sendTelemetryAsync(@NonNull final String telemetryName, @NonNull final String payload) {
+    protected final Single<DigitalTwinClientResult> sendTelemetryAsync(@NonNull final String telemetryName, @NonNull final String payload) {
         if (digitalTwinDeviceClient == null) {
             log.debug("Send TelemetryAsync from interface instance={}, telemetryName={} failed: interface instance is not registered.", digitalTwinInterfaceInstanceName, telemetryName);
-            return Flowable.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
+            return Single.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
         } else {
             log.debug("Sending TelemetryAsync from interface instance={}, telemetryName={}...", digitalTwinInterfaceInstanceName, telemetryName);
             return digitalTwinDeviceClient.sendTelemetryAsync(
                     digitalTwinInterfaceInstanceName,
                     telemetryName,
                     payload
-            );
+            ).singleOrError();
         }
     }
 
@@ -89,17 +90,17 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * @param digitalTwinReportProperties DigitalTwin properties to be reported.
      * @return Result of this async function.
      */
-    protected final Flowable<DigitalTwinClientResult> reportPropertiesAsync(@NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties) {
+    protected final Single<DigitalTwinClientResult> reportPropertiesAsync(@NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties) {
         log.debug("Reporting PropertiesAsync from interface instance={}", digitalTwinInterfaceInstanceName);
         if (digitalTwinDeviceClient == null) {
             log.debug("Report PropertiesAsync from interface instance={} failed: interface instance is not registered.", digitalTwinInterfaceInstanceName);
-            return Flowable.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
+            return Single.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
         } else {
             log.debug("Reporting Properties from interface instance={}.", digitalTwinInterfaceInstanceName);
             return digitalTwinDeviceClient.reportPropertiesAsync(
                     digitalTwinInterfaceInstanceName,
                     digitalTwinReportProperties
-            );
+            ).singleOrError();
         }
     }
 
@@ -111,15 +112,15 @@ public abstract class AbstractDigitalTwinInterfaceClient {
      * @param digitalTwinAsyncCommandUpdate containing updates about the status to send to the server.
      * @return Result of this async function.
      */
-    protected final Flowable<DigitalTwinClientResult> updateAsyncCommandStatusAsync(@NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate) {
+    protected final Single<DigitalTwinClientResult> updateAsyncCommandStatusAsync(@NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate) {
         if (digitalTwinDeviceClient == null) {
-            return Flowable.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
+            return Single.just(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
         } else {
             log.debug("Updating async command status from interface instance={}.", digitalTwinInterfaceInstanceName);
             return digitalTwinDeviceClient.updateAsyncCommandStatusAsync(
                     digitalTwinInterfaceInstanceName,
                     digitalTwinAsyncCommandUpdate
-            );
+            ).singleOrError();
         }
     }
 

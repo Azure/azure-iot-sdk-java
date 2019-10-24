@@ -74,7 +74,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
     public void sendTelemetryAsyncTest() {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
         testee.onRegistered();
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD));
     }
@@ -85,7 +85,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
         testee.onRegistered();
         when(digitalTwinDeviceClient.sendTelemetryAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD)))
                 .thenReturn(Flowable.just(DIGITALTWIN_CLIENT_ERROR));
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
         verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD));
     }
@@ -100,7 +100,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
         try {
             DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD)
                                                                     .doOnError(errorConsumer)
-                                                                    .blockingSingle();
+                                                                    .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
@@ -112,7 +112,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
 
     @Test
     public void sendTelemetryAsyncWithoutRegisterTest() {
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
         verify(digitalTwinDeviceClient, never()).sendTelemetryAsync(anyString(), anyString(), anyString());
     }
@@ -121,7 +121,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
     public void reportPropertiesAsyncTest() {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
         testee.onRegistered();
-        DigitalTwinClientResult digitalTwinClientResult = testee.reportPropertiesAsync(properties).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.reportPropertiesAsync(properties).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(digitalTwinDeviceClient).reportPropertiesAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(properties));
     }
@@ -131,7 +131,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
         testee.onRegistered();
         when(digitalTwinDeviceClient.reportPropertiesAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(properties))).thenReturn(Flowable.just(DIGITALTWIN_CLIENT_ERROR));
-        DigitalTwinClientResult digitalTwinClientResult = testee.reportPropertiesAsync(properties).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.reportPropertiesAsync(properties).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
         verify(digitalTwinDeviceClient).reportPropertiesAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(properties));
     }
@@ -146,7 +146,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
         try {
             DigitalTwinClientResult digitalTwinClientResult = testee.reportPropertiesAsync(properties)
                                                                     .doOnError(errorConsumer)
-                                                                    .blockingSingle();
+                                                                    .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
@@ -158,7 +158,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
 
     @Test
     public void reportPropertiesAsyncWithoutRegisterTest() throws InterruptedException {
-        DigitalTwinClientResult digitalTwinClientResult = testee.reportPropertiesAsync(properties).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.reportPropertiesAsync(properties).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
         Thread.sleep(OPERATION_LATENCY);
         verify(digitalTwinDeviceClient, never()).reportPropertiesAsync(anyString(), anyListOf(DigitalTwinReportProperty.class));
@@ -168,7 +168,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
     public void updateAsyncCommandStatusAsyncTest() throws InterruptedException {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
         testee.onRegistered();
-        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(asyncCommandUpdate).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(asyncCommandUpdate).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
         Thread.sleep(OPERATION_LATENCY);
         verify(digitalTwinDeviceClient).updateAsyncCommandStatusAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(asyncCommandUpdate));
@@ -180,7 +180,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
         testee.onRegistered();
         when(digitalTwinDeviceClient.updateAsyncCommandStatusAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(asyncCommandUpdate)))
                 .thenReturn(Flowable.just(DIGITALTWIN_CLIENT_ERROR));
-        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(asyncCommandUpdate).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(asyncCommandUpdate).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
         verify(digitalTwinDeviceClient).updateAsyncCommandStatusAsync(eq(DIGITAL_TWIN_INTERFACE_INSTANCE), eq(asyncCommandUpdate));
     }
@@ -195,7 +195,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
         try {
             DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(asyncCommandUpdate)
                                                                     .doOnError(errorConsumer)
-                                                                    .blockingSingle();
+                                                                    .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
@@ -207,7 +207,7 @@ public class AbstractDigitalTwinInterfaceClientTest {
 
     @Test
     public void updateAsyncCommandStatusAsyncWithoutRegisterTest() throws InterruptedException {
-        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(asyncCommandUpdate).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(asyncCommandUpdate).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED);
         Thread.sleep(OPERATION_LATENCY);
         verify(digitalTwinDeviceClient, never()).updateAsyncCommandStatusAsync(anyString(), any(DigitalTwinAsyncCommandUpdate.class));

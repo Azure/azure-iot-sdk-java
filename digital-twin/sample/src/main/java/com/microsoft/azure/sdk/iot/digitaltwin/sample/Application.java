@@ -42,7 +42,7 @@ public class Application {
                                                                      .totalMemory(16e9)
                                                                      .totalStorage(1e12)
                                                                      .build();
-        DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor)).blockingSingle();
+        DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor)).blockingGet();
         log.debug("Register interfaces {}.", result);
         Thread.sleep(100000);
     }

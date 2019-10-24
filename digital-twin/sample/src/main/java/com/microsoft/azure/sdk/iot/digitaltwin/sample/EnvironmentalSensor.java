@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyR
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.functions.BooleanSupplier;
@@ -49,17 +50,17 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
         super(digitalTwinInterfaceInstanceName, ENVIRONMENTAL_SENSOR_INTERFACE_ID);
     }
 
-    public Flowable<DigitalTwinClientResult> updateTemperatureAsync(double temperature) throws IOException {
+    public Single<DigitalTwinClientResult> updateTemperatureAsync(double temperature) throws IOException {
         log.debug("Temperature changed to {}.", temperature);
         return sendTelemetryAsync(TELEMETRY_NAME_TEMPERATURE, serialize(temperature));
     }
 
-    public Flowable<DigitalTwinClientResult> updateHumidityAsync(double humidity) throws IOException {
+    public Single<DigitalTwinClientResult> updateHumidityAsync(double humidity) throws IOException {
         log.debug("Humidity changed to {}.", humidity);
         return sendTelemetryAsync(TELEMETRY_NAME_HUMIDITY, serialize(humidity));
     }
 
-    public Flowable<DigitalTwinClientResult> updateStatusAsync(final boolean state) {
+    public Single<DigitalTwinClientResult> updateStatusAsync(final boolean state) {
         log.debug("EnvironmentalSensor state is changed to {}.", state);
         DigitalTwinReportProperty reportProperty = DigitalTwinReportProperty.builder()
                                                                             .propertyName(PROPERTY_STATE)
@@ -72,19 +73,19 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
     public void onRegistered() {
         super.onRegistered();
         final Random random = new Random();
-        Disposable temperatureReportProcess= Flowable.just(random)
+        Disposable temperatureReportProcess = Single.just(random)
                                                     .delay(10, SECONDS)
                                                     .map(new Function<Random, Double>() {
                                                         @Override
                                                         public Double apply(Random random) {
                                                             return random.nextDouble() * 100;
                                                         }
-                                                    }).flatMap(new Function<Double, Flowable<DigitalTwinClientResult>>() {
-                                                        @Override
-                                                        public Flowable<DigitalTwinClientResult> apply(Double temperature) throws IOException {
-                                                            return updateTemperatureAsync(temperature);
-                                                        }
-                                                    }).repeat()
+                                                    }).flatMap(new Function<Double, Single<DigitalTwinClientResult>>() {
+                    @Override
+                    public Single<DigitalTwinClientResult> apply(Double temperature) throws IOException {
+                        return updateTemperatureAsync(temperature);
+                    }
+                }).repeat()
                                                     .subscribe(new Consumer<DigitalTwinClientResult>() {
                                                         @Override
                                                         public void accept(DigitalTwinClientResult result) {
@@ -96,30 +97,30 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                                             log.debug("Update temperature failed.", throwable);
                                                         }
                                                     });
-        Disposable humidityReportProcess = Flowable.just(random)
-                                              .delay(10, SECONDS)
-                                              .map(new Function<Random, Double>() {
-                                                  @Override
-                                                  public Double apply(Random random) {
-                                                      return random.nextDouble() * 100;
-                                                  }
-                                              }).flatMap(new Function<Double, Flowable<DigitalTwinClientResult>>() {
-                                                  @Override
-                                                  public Flowable<DigitalTwinClientResult> apply(Double humidity) throws IOException {
-                                                      return updateHumidityAsync(humidity);
-                                                  }
-                                              }).repeat()
-                                               .subscribe(new Consumer<DigitalTwinClientResult>() {
-                                                   @Override
-                                                   public void accept(DigitalTwinClientResult result) {
-                                                       log.debug("Update humidity was {}", result);
-                                                   }
-                                               }, new Consumer<Throwable>() {
-                                                   @Override
-                                                   public void accept(Throwable throwable) {
-                                                       log.debug("Update humidity failed.", throwable);
-                                                   }
-                                               });
+        Disposable humidityReportProcess = Single.just(random)
+                                                 .delay(10, SECONDS)
+                                                 .map(new Function<Random, Double>() {
+                                                     @Override
+                                                     public Double apply(Random random) {
+                                                         return random.nextDouble() * 100;
+                                                     }
+                                                 }).flatMap(new Function<Double, Single<DigitalTwinClientResult>>() {
+                    @Override
+                    public Single<DigitalTwinClientResult> apply(Double humidity) throws IOException {
+                        return updateHumidityAsync(humidity);
+                    }
+                }).repeat()
+                                                 .subscribe(new Consumer<DigitalTwinClientResult>() {
+                                                     @Override
+                                                     public void accept(DigitalTwinClientResult result) {
+                                                         log.debug("Update humidity was {}", result);
+                                                     }
+                                                 }, new Consumer<Throwable>() {
+                                                     @Override
+                                                     public void accept(Throwable throwable) {
+                                                         log.debug("Update humidity failed.", throwable);
+                                                     }
+                                                 });
         log.debug("Once application quit, should dispose {} and {}.", temperatureReportProcess, humidityReportProcess);
     }
 
@@ -147,17 +148,17 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                                                                     .propertyResponse(propertyResponse)
                                                                                     .build();
                 Disposable reportPropertiesProcess = reportPropertiesAsync(singletonList(reportProperty))
-                                                        .subscribe(new Consumer<DigitalTwinClientResult>() {
-                                                            @Override
-                                                            public void accept(DigitalTwinClientResult result) {
-                                                                log.debug("Report property: propertyName={}, reportedValue={}, desiredVersion={} was {}", propertyName, propertyDesired, desiredVersion, result);
-                                                            }
-                                                        }, new Consumer<Throwable>() {
-                                                            @Override
-                                                            public void accept(Throwable throwable) {
-                                                                log.debug("Report property: propertyName={}, reportedValue={}, desiredVersion={} failed.", propertyName, propertyDesired, desiredVersion, throwable);
-                                                            }
-                                                        });
+                        .subscribe(new Consumer<DigitalTwinClientResult>() {
+                            @Override
+                            public void accept(DigitalTwinClientResult result) {
+                                log.debug("Report property: propertyName={}, reportedValue={}, desiredVersion={} was {}", propertyName, propertyDesired, desiredVersion, result);
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable throwable) {
+                                log.debug("Report property: propertyName={}, reportedValue={}, desiredVersion={} failed.", propertyName, propertyDesired, desiredVersion, throwable);
+                            }
+                        });
                 log.debug("Once application quit, should dispose {}.", reportPropertiesProcess);
             }
         } else {
@@ -219,32 +220,32 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
     private Flowable<DigitalTwinClientResult> runDiagnosticsAsync(final String requestId) {
         log.debug("Starting diagnostics...");
         final AtomicInteger percentage = new AtomicInteger();
-        return Flowable.just(requestId)
-                       .map(new Function<String, DigitalTwinAsyncCommandUpdate>() {
-                           @Override
-                           public DigitalTwinAsyncCommandUpdate apply(String s) {
-                               final int progressPercentage = percentage.incrementAndGet();
-                               String progressMessage = String.format("Diagnostics progress %s%%...", progressPercentage);
-                               log.debug(progressMessage);
-                               return DigitalTwinAsyncCommandUpdate.builder()
-                                                                   .commandName(COMMAND_RUN_DIAGNOSTICS)
-                                                                   .statusCode(STATUS_CODE_PENDING)
-                                                                   .requestId(requestId)
-                                                                   .payload(progressMessage)
-                                                                   .build();
-                           }
-                       }).flatMap(new Function<DigitalTwinAsyncCommandUpdate, Flowable<DigitalTwinClientResult>>() {
+        return Single.just(requestId)
+                     .map(new Function<String, DigitalTwinAsyncCommandUpdate>() {
+                         @Override
+                         public DigitalTwinAsyncCommandUpdate apply(String s) {
+                             final int progressPercentage = percentage.incrementAndGet();
+                             String progressMessage = String.format("Diagnostics progress %s%%...", progressPercentage);
+                             log.debug(progressMessage);
+                             return DigitalTwinAsyncCommandUpdate.builder()
+                                                                 .commandName(COMMAND_RUN_DIAGNOSTICS)
+                                                                 .statusCode(STATUS_CODE_PENDING)
+                                                                 .requestId(requestId)
+                                                                 .payload(progressMessage)
+                                                                 .build();
+                         }
+                     }).flatMap(new Function<DigitalTwinAsyncCommandUpdate, Single<DigitalTwinClientResult>>() {
                     @Override
-                    public Flowable<DigitalTwinClientResult> apply(DigitalTwinAsyncCommandUpdate asyncCommandUpdate) {
+                    public Single<DigitalTwinClientResult> apply(DigitalTwinAsyncCommandUpdate asyncCommandUpdate) {
                         return updateAsyncCommandStatusAsync(asyncCommandUpdate);
                     }
                 }).delay(10, SECONDS)
-                       .repeatUntil(new BooleanSupplier() {
-                           @Override
-                           public boolean getAsBoolean() {
-                               return percentage.get() >= 100;
-                           }
-                       }).doOnComplete(new Action() {
+                     .repeatUntil(new BooleanSupplier() {
+                         @Override
+                         public boolean getAsBoolean() {
+                             return percentage.get() >= 100;
+                         }
+                     }).doOnComplete(new Action() {
                     @Override
                     public void run() {
                         log.debug("Diagnostics async completed.");
