@@ -3,7 +3,6 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -22,7 +21,7 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
 
         final DeviceClientManager clientManager = (DeviceClientManager) callbackContext;
 
-        switch(status) {
+        switch (status) {
             case CONNECTED:
                 switch (statusChangeReason) {
                     case CONNECTION_OK:
@@ -93,5 +92,4 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
                 }
         }
     }
-
 }
