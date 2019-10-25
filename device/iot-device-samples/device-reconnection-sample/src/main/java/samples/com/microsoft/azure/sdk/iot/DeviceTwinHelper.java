@@ -13,17 +13,12 @@ public class DeviceTwinHelper {
     static AtomicBoolean Succeed = new AtomicBoolean(false);
     static String TwinPropertyKey = "HomeTemp(F)";
 
-    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
-    {
+    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback {
         @Override
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
-            {
+        public void execute(IotHubStatusCode status, Object context) {
+            if ((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY)) {
                 Succeed.set(true);
-            }
-            else
-            {
+            } else {
                 Succeed.set(false);
             }
             log.debug("IoT Hub responded to device twin operation with status {}", status.name());

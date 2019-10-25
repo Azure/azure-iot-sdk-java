@@ -33,12 +33,12 @@ public class DeviceClientManager {
             try {
                 log.debug("[connect] - Sleeping for 10 secs before attempting another open()");
                 Thread.sleep(10 * 1000);
-            } catch (InterruptedException ex) {
+            }
+            catch (InterruptedException ex) {
                 log.error("[connect] - Exception in thread sleep");
                 ex.printStackTrace();
             }
         }
-
     }
 
     void reconnect() {
@@ -54,7 +54,7 @@ public class DeviceClientManager {
         }
 
         connect();
-        synchronized(lock) {
+        synchronized (lock) {
             connecting = false;
         }
     }

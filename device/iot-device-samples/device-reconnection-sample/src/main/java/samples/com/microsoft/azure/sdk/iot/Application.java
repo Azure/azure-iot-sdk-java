@@ -28,7 +28,7 @@ import static samples.com.microsoft.azure.sdk.iot.TelemetryHelper.composeMessage
 
 @Slf4j
 public class Application {
-    private static final String deviceConnectionString = "<FILL_IN_DEVICE_CONNECTION_STRING_HERE>";
+    private static final String deviceConnectionString = System.getenv("DEVICE_CONNECTION_STRING");
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
     private static final int DEVICE_OPERATION_TIMEOUT_IN_MINUTES = 2;
     private static final int numRequests = 20;
@@ -69,11 +69,10 @@ public class Application {
         // Properties already set in the Service will shows up in the generic onProperty callback, with value and version.
         Succeed.set(false);
         client.startDeviceTwin(new DeviceTwinStatusCallBack(), null, new onProperty(), null);
-        do
-        {
+        do {
             Thread.sleep(1000);
         }
-        while(!Succeed.get());
+        while (! Succeed.get());
 
         log.debug("Subscribe to Desired properties on device Twin: PropertyKey={}...", TwinPropertyKey);
         Map<Property, Pair<TwinPropertyCallBack, Object>> propertyPairMap =
@@ -134,7 +133,8 @@ public class Application {
             try {
                 log.debug("Sleeping for {} secs before sending the next property update.", SLEEP_DURATION_IN_SECS);
                 Thread.sleep(SLEEP_DURATION_IN_SECS * 1000);
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e) {
                 log.error("Exception thrown while sleeping...");
                 e.printStackTrace();
             }
@@ -158,11 +158,11 @@ public class Application {
             try {
                 log.debug("Sleeping for {} secs before sending next message.", SLEEP_DURATION_IN_SECS);
                 Thread.sleep(SLEEP_DURATION_IN_SECS * 1000);
-            } catch (InterruptedException e) {
+            }
+            catch (InterruptedException e) {
                 log.error("Exception thrown while sleeping...");
                 e.printStackTrace();
             }
         }
     }
-
 }
