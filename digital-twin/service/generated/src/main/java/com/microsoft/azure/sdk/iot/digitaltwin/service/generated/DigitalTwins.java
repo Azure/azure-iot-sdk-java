@@ -9,7 +9,6 @@ package com.microsoft.azure.sdk.iot.digitaltwin.service.generated;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinGetDigitalTwinModelHeaders;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinGetInterfaceHeaders;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinGetInterfacesHeaders;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfaces;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInterfacesPatch;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinInvokeInterfaceCommandHeaders;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.generated.models.DigitalTwinUpdateInterfacesHeaders;
@@ -32,9 +31,9 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @throws RestException thrown if the request is rejected by server
      * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the DigitalTwinInterfaces object if successful.
+     * @return the Object object if successful.
      */
-    DigitalTwinInterfaces getInterfaces(String digitalTwinId);
+    Object getInterfaces(String digitalTwinId);
 
     /**
      * Gets the list of interfaces.
@@ -44,25 +43,25 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceFuture} object
      */
-    ServiceFuture<DigitalTwinInterfaces> getInterfacesAsync(String digitalTwinId, final ServiceCallback<DigitalTwinInterfaces> serviceCallback);
+    ServiceFuture<Object> getInterfacesAsync(String digitalTwinId, final ServiceCallback<Object> serviceCallback);
 
     /**
      * Gets the list of interfaces.
      *
      * @param digitalTwinId Digital Twin ID. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional.
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<DigitalTwinInterfaces> getInterfacesAsync(String digitalTwinId);
+    Observable<Object> getInterfacesAsync(String digitalTwinId);
 
     /**
      * Gets the list of interfaces.
      *
      * @param digitalTwinId Digital Twin ID. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional.
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<ServiceResponseWithHeaders<DigitalTwinInterfaces, DigitalTwinGetInterfacesHeaders>> getInterfacesWithServiceResponseAsync(String digitalTwinId);
+    Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetInterfacesHeaders>> getInterfacesWithServiceResponseAsync(String digitalTwinId);
 
     /**
      * Updates desired properties of multiple interfaces.
@@ -73,9 +72,9 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @throws RestException thrown if the request is rejected by server
      * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the DigitalTwinInterfaces object if successful.
+     * @return the Object object if successful.
      */
-    DigitalTwinInterfaces updateInterfaces(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo);
+    Object updateInterfaces(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo);
 
     /**
      * Updates desired properties of multiple interfaces.
@@ -87,7 +86,7 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceFuture} object
      */
-    ServiceFuture<DigitalTwinInterfaces> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, final ServiceCallback<DigitalTwinInterfaces> serviceCallback);
+    ServiceFuture<Object> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, final ServiceCallback<Object> serviceCallback);
 
     /**
      * Updates desired properties of multiple interfaces.
@@ -96,9 +95,9 @@ public interface DigitalTwins {
      * @param digitalTwinId Digital Twin ID. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional.
      * @param interfacesPatchInfo Multiple interfaces desired properties to update.
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<DigitalTwinInterfaces> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo);
+    Observable<Object> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo);
 
     /**
      * Updates desired properties of multiple interfaces.
@@ -107,9 +106,9 @@ public interface DigitalTwins {
      * @param digitalTwinId Digital Twin ID. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional.
      * @param interfacesPatchInfo Multiple interfaces desired properties to update.
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<ServiceResponseWithHeaders<DigitalTwinInterfaces, DigitalTwinUpdateInterfacesHeaders>> updateInterfacesWithServiceResponseAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo);
+    Observable<ServiceResponseWithHeaders<Object, DigitalTwinUpdateInterfacesHeaders>> updateInterfacesWithServiceResponseAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo);
     /**
      * Updates desired properties of multiple interfaces.
                  Example URI: "digitalTwins/{digitalTwinId}/interfaces".
@@ -120,9 +119,9 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @throws RestException thrown if the request is rejected by server
      * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the DigitalTwinInterfaces object if successful.
+     * @return the Object object if successful.
      */
-    DigitalTwinInterfaces updateInterfaces(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch);
+    Object updateInterfaces(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch);
 
     /**
      * Updates desired properties of multiple interfaces.
@@ -135,7 +134,7 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceFuture} object
      */
-    ServiceFuture<DigitalTwinInterfaces> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch, final ServiceCallback<DigitalTwinInterfaces> serviceCallback);
+    ServiceFuture<Object> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch, final ServiceCallback<Object> serviceCallback);
 
     /**
      * Updates desired properties of multiple interfaces.
@@ -145,9 +144,9 @@ public interface DigitalTwins {
      * @param interfacesPatchInfo Multiple interfaces desired properties to update.
      * @param ifMatch the String value
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<DigitalTwinInterfaces> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch);
+    Observable<Object> updateInterfacesAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch);
 
     /**
      * Updates desired properties of multiple interfaces.
@@ -157,9 +156,9 @@ public interface DigitalTwins {
      * @param interfacesPatchInfo Multiple interfaces desired properties to update.
      * @param ifMatch the String value
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<ServiceResponseWithHeaders<DigitalTwinInterfaces, DigitalTwinUpdateInterfacesHeaders>> updateInterfacesWithServiceResponseAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch);
+    Observable<ServiceResponseWithHeaders<Object, DigitalTwinUpdateInterfacesHeaders>> updateInterfacesWithServiceResponseAsync(String digitalTwinId, DigitalTwinInterfacesPatch interfacesPatchInfo, String ifMatch);
 
     /**
      * Gets the interface of given interfaceId.
@@ -170,9 +169,9 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @throws RestException thrown if the request is rejected by server
      * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
-     * @return the DigitalTwinInterfaces object if successful.
+     * @return the Object object if successful.
      */
-    DigitalTwinInterfaces getInterface(String digitalTwinId, String interfaceName);
+    Object getInterface(String digitalTwinId, String interfaceName);
 
     /**
      * Gets the interface of given interfaceId.
@@ -184,7 +183,7 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceFuture} object
      */
-    ServiceFuture<DigitalTwinInterfaces> getInterfaceAsync(String digitalTwinId, String interfaceName, final ServiceCallback<DigitalTwinInterfaces> serviceCallback);
+    ServiceFuture<Object> getInterfaceAsync(String digitalTwinId, String interfaceName, final ServiceCallback<Object> serviceCallback);
 
     /**
      * Gets the interface of given interfaceId.
@@ -193,9 +192,9 @@ public interface DigitalTwins {
      * @param digitalTwinId Digital Twin ID. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional.
      * @param interfaceName The interface name.
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<DigitalTwinInterfaces> getInterfaceAsync(String digitalTwinId, String interfaceName);
+    Observable<Object> getInterfaceAsync(String digitalTwinId, String interfaceName);
 
     /**
      * Gets the interface of given interfaceId.
@@ -204,9 +203,9 @@ public interface DigitalTwins {
      * @param digitalTwinId Digital Twin ID. Format of digitalTwinId is DeviceId[~ModuleId]. ModuleId is optional.
      * @param interfaceName The interface name.
      * @throws IllegalArgumentException thrown if parameters fail the validation
-     * @return the observable to the DigitalTwinInterfaces object
+     * @return the observable to the Object object
      */
-    Observable<ServiceResponseWithHeaders<DigitalTwinInterfaces, DigitalTwinGetInterfaceHeaders>> getInterfaceWithServiceResponseAsync(String digitalTwinId, String interfaceName);
+    Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetInterfaceHeaders>> getInterfaceWithServiceResponseAsync(String digitalTwinId, String interfaceName);
 
     /**
      * Returns a DigitalTwin model definition for the given id.
@@ -316,13 +315,12 @@ public interface DigitalTwins {
      * @param digitalTwinId the String value
      * @param interfaceName the String value
      * @param commandName the String value
-     * @param payload the Object value
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @throws RestException thrown if the request is rejected by server
      * @throws RuntimeException all other wrapped checked exceptions if the request fails to be sent
      * @return the Object object if successful.
      */
-    Object invokeInterfaceCommand(String digitalTwinId, String interfaceName, String commandName, Object payload);
+    Object invokeInterfaceCommand(String digitalTwinId, String interfaceName, String commandName);
 
     /**
      * Invoke a digital twin interface command.
@@ -331,12 +329,11 @@ public interface DigitalTwins {
      * @param digitalTwinId the String value
      * @param interfaceName the String value
      * @param commandName the String value
-     * @param payload the Object value
      * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceFuture} object
      */
-    ServiceFuture<Object> invokeInterfaceCommandAsync(String digitalTwinId, String interfaceName, String commandName, Object payload, final ServiceCallback<Object> serviceCallback);
+    ServiceFuture<Object> invokeInterfaceCommandAsync(String digitalTwinId, String interfaceName, String commandName, final ServiceCallback<Object> serviceCallback);
 
     /**
      * Invoke a digital twin interface command.
@@ -345,11 +342,10 @@ public interface DigitalTwins {
      * @param digitalTwinId the String value
      * @param interfaceName the String value
      * @param commandName the String value
-     * @param payload the Object value
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the observable to the Object object
      */
-    Observable<Object> invokeInterfaceCommandAsync(String digitalTwinId, String interfaceName, String commandName, Object payload);
+    Observable<Object> invokeInterfaceCommandAsync(String digitalTwinId, String interfaceName, String commandName);
 
     /**
      * Invoke a digital twin interface command.
@@ -358,11 +354,10 @@ public interface DigitalTwins {
      * @param digitalTwinId the String value
      * @param interfaceName the String value
      * @param commandName the String value
-     * @param payload the Object value
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the observable to the Object object
      */
-    Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeInterfaceCommandHeaders>> invokeInterfaceCommandWithServiceResponseAsync(String digitalTwinId, String interfaceName, String commandName, Object payload);
+    Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeInterfaceCommandHeaders>> invokeInterfaceCommandWithServiceResponseAsync(String digitalTwinId, String interfaceName, String commandName);
     /**
      * Invoke a digital twin interface command.
      * Invoke a digital twin interface command.

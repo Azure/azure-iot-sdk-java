@@ -33,7 +33,7 @@
           "200": {
             "description": "Returns a collection of interface objects",
             "schema": {
-              "$ref": "#/definitions/DigitalTwinInterfaces"
+              "type": "object"
             },
             "headers": {
               "ETag": {
@@ -84,7 +84,7 @@
           "200": {
             "description": "Returns multiple interfaces",
             "schema": {
-              "$ref": "#/definitions/DigitalTwinInterfaces"
+              "type": "object"
             },
             "headers": {
               "ETag": {
@@ -127,7 +127,7 @@
           "200": {
             "description": "Returns interface object of given id",
             "schema": {
-              "$ref": "#/definitions/DigitalTwinInterfaces"
+              "type": "object"
             },
             "headers": {
               "ETag": {
@@ -219,7 +219,7 @@
           {
             "name": "payload",
             "in": "body",
-            "required": true,
+            "required": false,
             "schema": {
               "description": "The Request Payload",
               "type": "object"
