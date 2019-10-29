@@ -118,13 +118,14 @@ public final class DigitalTwinDeviceClient {
     }
 
     /**
-     * Registers the specified {@link AbstractDigitalTwinInterfaceClient} with the DigitalTwin Service. It registers specified dtInterfaces with the Digital Twin Service.
-     * This registration occurs asynchronously. While registration is in progress, {@link AbstractDigitalTwinInterfaceClient}'s that are being registered nor will they be able to receive commands.
-     * It must not be called multiple times.  If a given Digital Twin device needs to have its handles re-registered, it needs to create a new one.
+     * Registers the specified {@link AbstractDigitalTwinInterfaceClient} with the DigitalTwin Service.
+     * The call occurs asynchronously. While registration is in progress, {@link AbstractDigitalTwinInterfaceClient}'s that are being registered will not be able to report properties nor receive commands.
+     * The call returns immediately. The application can either subscribe to handle the result or block to get the result.
+     * It must not be called multiple times.  If a given Digital Twin device needs to have its handles re-registered, it needs to create a new DigitalTwinDeviceClient instance.
      *
      * @param deviceCapabilityModelId     Device Capability Model Id
      * @param digitalTwinInterfaceClients An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
-     * @return if this async function is accepted or not
+     * @return Result of this async function.
      */
     public Single<DigitalTwinClientResult> registerInterfacesAsync(@NonNull final String deviceCapabilityModelId,
             @NonNull final List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients) {
@@ -206,6 +207,20 @@ public final class DigitalTwinDeviceClient {
                     }
                 })
                 .singleOrError();
+    }
+
+    /**
+     * Registers the specified {@link AbstractDigitalTwinInterfaceClient} with the DigitalTwin Service.
+     * The call will be blocked and will return the result once registration is processed.
+     * It must not be called multiple times. If a given Digital Twin device needs to have its handles re-registered, it needs to create a new DigitalTwinDeviceClient instance.
+     *
+     * @param deviceCapabilityModelId     Device Capability Model Id
+     * @param digitalTwinInterfaceClients An list of {@link AbstractDigitalTwinInterfaceClient}s to register with the service.
+     * @return Result of this sync function.
+     */
+    public DigitalTwinClientResult registerInterfaces(@NonNull final String deviceCapabilityModelId,
+            @NonNull final List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients) {
+        return registerInterfacesAsync(deviceCapabilityModelId, digitalTwinInterfaceClients).blockingGet();
     }
 
     private Flowable<DigitalTwinClientResult> connectAsync(final DeviceClient deviceClient) {

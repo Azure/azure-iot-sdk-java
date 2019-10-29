@@ -170,7 +170,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfacesTest() {
+    public void registerInterfacesAsyncTest() {
         Single<DigitalTwinClientResult> single = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
         assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERING);
         DigitalTwinClientResult digitalTwinClientResult = single.blockingGet();
@@ -183,7 +183,18 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceTwicePendingTest() {
+    public void registerInterfacesTest() {
+        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfaces(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
+        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        verify(digitalTwinInterfaceClient1).setDigitalTwinDeviceClient(eq(testee));
+        verify(digitalTwinInterfaceClient2).setDigitalTwinDeviceClient(eq(testee));
+        verify(digitalTwinInterfaceClient1).onRegistered();
+        verify(digitalTwinInterfaceClient2).onRegistered();
+    }
+
+    @Test
+    public void registerInterfacesAsyncTwicePendingTest() {
         Single<DigitalTwinClientResult> single = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
         assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERING);
         DigitalTwinClientResult digitalTwinClientResult2 = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
@@ -195,7 +206,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceTwiceAfterTest() {
+    public void registerInterfacesAsyncTwiceAfterTest() {
         Single<DigitalTwinClientResult> single = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
         assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERING);
         DigitalTwinClientResult digitalTwinClientResult = single.blockingGet();
@@ -207,7 +218,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceOpenThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncOpenThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("OpenThrowException");
         doAnswer(new Answer() {
             @Override
@@ -237,7 +248,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceSendRegistrationMessageFailedTest() throws IOException {
+    public void registerInterfacesAsyncSendRegistrationMessageFailedTest() throws IOException {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -270,7 +281,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceSendRegistrationMessageThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncSendRegistrationMessageThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("SendRegistrationMessageThrowException");
         doAnswer(new Answer() {
             @Override
@@ -300,7 +311,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceCommandSubscriptionFailedTest() throws IOException {
+    public void registerInterfacesAsyncCommandSubscriptionFailedTest() throws IOException {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -332,7 +343,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceCommandSubscriptionThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncCommandSubscriptionThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("CommandSubscriptionThrowException");
         doAnswer(new Answer() {
             @Override
@@ -362,7 +373,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceTwinSubscriptionFailedTest() throws IOException {
+    public void registerInterfacesAsyncTwinSubscriptionFailedTest() throws IOException {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -394,7 +405,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceTwinSubscriptionThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncTwinSubscriptionThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("TwinSubscriptionThrowException");
         doAnswer(new Answer() {
             @Override
@@ -424,7 +435,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceReportSdkInformationThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncReportSdkInformationThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("ReportSdkInformationThrowException");
         doAnswer(new Answer() {
             @Override
@@ -454,7 +465,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceGetTwinThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncGetTwinThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("GetTwinThrowException");
         doAnswer(new Answer() {
             @Override
@@ -483,7 +494,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceOnRegistered1ThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncOnRegistered1ThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("InterfaceClient1OnRegisteredThrowExceptionThrowException");
         doAnswer(new Answer() {
             @Override
@@ -509,7 +520,7 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfaceOnRegistered2ThrowExceptionTest() throws Throwable {
+    public void registerInterfacesAsyncOnRegistered2ThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("InterfaceClient2OnRegisteredThrowExceptionThrowException");
         doAnswer(new Answer() {
             @Override
