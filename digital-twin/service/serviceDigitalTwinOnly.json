@@ -33,7 +33,7 @@
           "200": {
             "description": "Returns a collection of interface objects",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/DigitalTwinInterfaces"
             },
             "headers": {
               "ETag": {
@@ -84,7 +84,7 @@
           "200": {
             "description": "Returns multiple interfaces",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/DigitalTwinInterfaces"
             },
             "headers": {
               "ETag": {
@@ -127,7 +127,7 @@
           "200": {
             "description": "Returns interface object of given id",
             "schema": {
-              "type": "object"
+              "$ref": "#/definitions/DigitalTwinInterfaces"
             },
             "headers": {
               "ETag": {

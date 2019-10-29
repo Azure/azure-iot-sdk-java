@@ -3,17 +3,23 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
+import rx.Observable;
 import rx.functions.Func1;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public final class Tools {
 
-    public static final Func1<Object, String> FUNC_MAP_TO_STRING = new Func1<Object, String>() {
-
-        @Override
-        public String call(Object object) {
-            return object == null ? null : object.toString();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    public static final Func1<Object, Observable<String>> FUNC_MAP_TO_JSON_STRING = object -> {
+        try {
+            return Observable.just(objectMapper.writeValueAsString(object));
+        }
+        catch (JsonProcessingException e) {
+            return Observable.error(e);
         }
     };
 
@@ -26,5 +32,17 @@ public final class Tools {
 
     public static String nullToEmpty(String value) {
         return value == null ? EMPTY : value;
+    }
+
+    public static String createPropertyPatch(@NonNull String propertyName, @NonNull String propertyValue) {
+        return "{"
+                +"  \"properties\": {"
+                +"      \"" + propertyName + "\": {"
+                +"          \"desired\": {"
+                +"              \"value\": \"" + propertyValue + "\""
+                +"            }"
+                +"        }"
+                +"    }"
+                +"}";
     }
 }
