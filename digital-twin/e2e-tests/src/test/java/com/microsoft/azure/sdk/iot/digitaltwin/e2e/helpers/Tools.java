@@ -7,6 +7,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Tools {
 
+    private static final String INTERFACE_ID_DELIMITER = ":";
+
     public static String retrieveEnvironmentVariableValue(String environmentVariableName) {
         String environmentVariableValue = System.getenv().get(environmentVariableName);
         if (isBlank(environmentVariableValue)) {
@@ -17,5 +19,11 @@ public class Tools {
         }
 
         return environmentVariableValue;
+    }
+
+    // Interface ID is in the format: [urn:namespace:name:version]
+    public static String retrieveInterfaceNameFromInterfaceId(String interfaceId) {
+        String[] interfaceIdParts = interfaceId.split(INTERFACE_ID_DELIMITER);
+        return interfaceIdParts[interfaceIdParts.length - 2];
     }
 }

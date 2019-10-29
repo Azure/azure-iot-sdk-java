@@ -4,12 +4,13 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinCallback;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,39 +20,55 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSeri
 import static java.util.Collections.singletonList;
 
 @Slf4j
-public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceClient {
-    private static final String SIMPLE_TEST_INTERFACE_ID = "urn:contoso:azureiot:sdk:testinterface:1";
-    private static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
-    private static final String TELEMETRY_NAME_INTEGER = "telemetryWithIntegerValue";
-    private static final String COMMAND_SYNC_COMMAND = "syncCommand";
-    private static final String COMMAND_ASYNC_COMMAND = "asyncCommand";
-    private static final String PROPERTY_NAME_WRITABLE = "writableProperty";
+public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
+    public static final String TEST_INTERFACE_ID = "urn:contoso:azureiot:sdk:testinterface2:2";
+    public static final String TELEMETRY_NAME_INTEGER = "telemetryWithIntegerValue";
+    public static final String TELEMETRY_NAME_LONG = "telemetryWithLongValue";
+    public static final String TELEMETRY_NAME_DOUBLE = "telemetryWithDoubleValue";
+    public static final String TELEMETRY_NAME_FLOAT = "telemetryWithFloatValue";
+    public static final String TELEMETRY_NAME_BOOLEAN = "telemetryWithBooleanValue";
+    public static final String TELEMETRY_NAME_STRING = "telemetryWithStringValue";
+    public static final String TELEMETRY_NAME_DATE = "telemetryWithDateValue";
+    public static final String TELEMETRY_NAME_TIME = "telemetryWithTimeValue";
+    public static final String TELEMETRY_NAME_DATETIME = "telemetryWithDateTimeValue";
+    public static final String TELEMETRY_NAME_DURATION = "telemetryWithDurationValue";
+    public static final String TELEMETRY_NAME_ARRAY = "telemetryWithIntegerArrayValue";
+    public static final String TELEMETRY_NAME_MAP = "telemetryWithMapValue";
+    public static final String TELEMETRY_NAME_ENUM = "telemetryWithEnumValue";
+    public static final String TELEMETRY_NAME_COMPLEX_OBJECT = "telemetryWithComplexValueComplexObject";
+    public static final String TELEMETRY_NAME_COMPLEX_VALUE = "telemetryWithComplexValue";
+    public static final String COMMAND_SYNC_COMMAND = "syncCommand";
+    public static final String COMMAND_ASYNC_COMMAND = "asyncCommand";
+    public static final String COMMAND_ANOTHER_SYNC_COMMAND = "anotherSyncCommand";
+    public static final String COMMAND_ANOTHER_ASYNC_COMMAND = "anotherAsyncCommand";
+    public static final String PROPERTY_NAME_WRITABLE = "writableProperty";
+    public static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
 
-    public SimpleTestInterfaceInstance(@NonNull String digitalTwinInterfaceInstanceName) {
-        super(digitalTwinInterfaceInstanceName, SIMPLE_TEST_INTERFACE_ID);
+    private static String interfaceInstanceName;
+
+    public TestInterfaceInstance2(@NonNull String digitalTwinInterfaceInstanceName) {
+        super(digitalTwinInterfaceInstanceName, TEST_INTERFACE_ID);
+        interfaceInstanceName = digitalTwinInterfaceInstanceName;
     }
 
-    public DigitalTwinClientResult sendIntegerTelemetry(int telemetryValue, @NonNull DigitalTwinCallback operationCallback) throws IOException {
-        log.debug("Telemetry value sent: {}.", telemetryValue);
-        return sendTelemetryAsync(TELEMETRY_NAME_INTEGER, serialize(telemetryValue), operationCallback, this);
+    @Override
+    public void onRegistered() {
+        log.debug("Interface Instance registered with name: {}", interfaceInstanceName);
     }
 
-    private DigitalTwinClientResult updateWritableReportedProperty(String reportedPropertyValue) {
+    public Single<DigitalTwinClientResult> sendTelemetry(@NonNull String telemetryName, @NonNull Object telemetryValue) throws IOException {
+        log.debug("Telemetry value sent: telemetryName={}; telemetryValue={}", telemetryName, telemetryValue);
+        return sendTelemetryAsync(telemetryName, serialize(telemetryValue));
+    }
+
+    private Single<DigitalTwinClientResult> updateWritableReportedProperty(String reportedPropertyValue) {
         log.debug("Updating Writable Property = {}", reportedPropertyValue);
 
         DigitalTwinReportProperty digitalTwinReportProperty = DigitalTwinReportProperty.builder()
                                                                                        .propertyName(PROPERTY_NAME_WRITABLE)
                                                                                        .propertyValue(reportedPropertyValue)
                                                                                        .build();
-        return reportPropertiesAsync(singletonList(digitalTwinReportProperty),
-                new DigitalTwinCallback() {
-
-                    @Override
-                    public void onResult(DigitalTwinClientResult digitalTwinClientResult, Object context) {
-                        log.debug("Reported property update: propertyName={}, reportedValue={}", PROPERTY_NAME_WRITABLE, reportedPropertyValue);
-                    }
-                },
-                this);
+        return reportPropertiesAsync(singletonList(digitalTwinReportProperty));
     }
 
     @Override
@@ -66,10 +83,10 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
                 payload);
         try{
             if (COMMAND_SYNC_COMMAND.equals(commandName)) {
-                DigitalTwinClientResult digitalTwinClientResult = updateWritableReportedProperty(payload);
+                DigitalTwinClientResult digitalTwinClientResult = updateWritableReportedProperty(payload).blockingGet();
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
-                                                 .payload(String.format("Writeable property updated: %s", digitalTwinClientResult))
+                                                 .payload(String.format("Writable property updated: %s", digitalTwinClientResult))
                                                  .build();
             } else if (COMMAND_ASYNC_COMMAND.equals(commandName)) {
                 runAsyncCommand(requestId, commandName);
@@ -78,7 +95,7 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
                                                  .payload(String.format("Running command: %s", commandName))
                                                  .build();
             } else {
-                String errorMessage = String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, commandName, SIMPLE_TEST_INTERFACE_ID);
+                String errorMessage = String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, commandName, TEST_INTERFACE_ID);
                 log.debug(errorMessage);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_NOT_IMPLEMENTED)
@@ -107,8 +124,8 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
                                                                                                            .statusCode(STATUS_CODE_PENDING)
                                                                                                            .payload(progressPercentage)
                                                                                                            .build();
-                DigitalTwinCallback digitalTwinCallback = (digitalTwinClientResult, context) -> log.debug("Execute async command: {}; result: {}", progressPercentage, digitalTwinClientResult);
-                updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate, digitalTwinCallback, this);
+                DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
+                log.debug("Execute async command: {}; result: {}", progressPercentage, digitalTwinClientResult);
 
                 try {
                     Thread.sleep(10 * 1000);
@@ -123,8 +140,8 @@ public class SimpleTestInterfaceInstance extends AbstractDigitalTwinInterfaceCli
                                                                                                        .requestId(requestId)
                                                                                                        .statusCode(STATUS_CODE_COMPLETED)
                                                                                                        .build();
-            DigitalTwinCallback digitalTwinCallback = (digitalTwinClientResult, context) -> log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);
-            updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate, digitalTwinCallback, this);
+            DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
+            log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);
 
             log.debug("Async command execution complete.");
         }).start();
