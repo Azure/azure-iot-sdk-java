@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.mock.SerializableMode;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import retrofit2.Retrofit;
@@ -38,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.withSettings;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 @RunWith(PowerMockRunner.class)
@@ -75,6 +73,18 @@ public class DigitalTwinServiceAsyncClientImplTest {
         DigitalTwinServiceAsyncClientImpl serviceAsyncClient = DigitalTwinServiceAsyncClientImpl.buildFromConnectionString()
                                                                                                 .connectionString(IOTHUB_CONNECTION_STRING)
                                                                                                 .build();
+
+        // assert
+        assertThat(serviceAsyncClient).isNotNull();
+    }
+
+    @Test
+    public void buildServiceAsyncClintWithConnectionStringSasToken() {
+        // act
+        String connectionStringWithSasToken = "HostName=abc.azure-devices.net;SharedAccessSignature=SharedAccessSignature sr=IOTHUBURI&sig=SIGNATURE&se=EXPIRY&skn=SHAREDACCESSKEYNAME";
+        DigitalTwinServiceAsyncClientImpl serviceAsyncClient = DigitalTwinServiceAsyncClientImpl.buildFromConnectionString()
+                .connectionString(connectionStringWithSasToken)
+                .build();
 
         // assert
         assertThat(serviceAsyncClient).isNotNull();
