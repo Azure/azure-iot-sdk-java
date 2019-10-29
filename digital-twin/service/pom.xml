@@ -14,13 +14,11 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-javadoc-plugin-version}</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin-version}</version>
                 <configuration>
-                    <includeDependencySources>true</includeDependencySources>
-                    <show>protected</show>
-                    <sourcepath>${project.build.directory}/delombok</sourcepath>
-                    <excludePackageNames>com.microsoft.azure.sdk.iot.digitaltwin.service.util</excludePackageNames>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>

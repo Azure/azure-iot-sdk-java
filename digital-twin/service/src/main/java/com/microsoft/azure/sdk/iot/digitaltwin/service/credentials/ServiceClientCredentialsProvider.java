@@ -22,15 +22,12 @@ public class ServiceClientCredentialsProvider implements ServiceClientCredential
 
     @Override
     public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
-        Interceptor authenticationInterceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                Request authenticatedRequest = request.newBuilder()
-                                                      .header(AUTHORIZATION, sasTokenProvider.getSasToken())
-                                                      .build();
-                return chain.proceed(authenticatedRequest);
-            }
+        Interceptor authenticationInterceptor = chain -> {
+            Request request = chain.request();
+            Request authenticatedRequest = request.newBuilder()
+                                                  .header(AUTHORIZATION, sasTokenProvider.getSasToken())
+                                                  .build();
+            return chain.proceed(authenticatedRequest);
         };
         clientBuilder.interceptors().add(authenticationInterceptor);
     }
