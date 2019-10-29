@@ -21,9 +21,9 @@ public class ServiceConnectionString {
     private String sharedAccessSignature;
 
     @Builder
-    ServiceConnectionString(@NonNull String hostName, @NonNull String httpsEndpoint, @NonNull String sharedAccessKeyName, String sharedAccessKey, String sharedAccessSignature) {
-        if (sharedAccessKey != null && sharedAccessSignature != null) {
-            throw new IllegalArgumentException("Specify either sharedAccessKey or sharedAccessSignature");
+    ServiceConnectionString(@NonNull String hostName, @NonNull String httpsEndpoint, String sharedAccessKeyName, String sharedAccessKey, String sharedAccessSignature) {
+        if (!validInput(sharedAccessKeyName, sharedAccessKey, sharedAccessSignature)) {
+            throw new IllegalArgumentException("Specify either both the sharedAccessKey and sharedAccessKeyName, or sharedAccessSignature");
         }
 
         this.hostName = hostName;
@@ -42,6 +42,14 @@ public class ServiceConnectionString {
                                                       .sharedAccessKeyName(sharedAccessKeyName)
                                                       .sharedAccessKey(sharedAccessKey)
                                                       .build();
+        }
+    }
+
+    private boolean validInput(String sharedAccessKeyName, String sharedAccessKey, String sharedAccessSignature) {
+        if (sharedAccessSignature == null) {
+            return sharedAccessKey != null && sharedAccessKeyName != null;
+        } else {
+            return sharedAccessKey == null && sharedAccessKeyName == null;
         }
     }
 }
