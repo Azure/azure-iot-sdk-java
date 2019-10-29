@@ -28,9 +28,13 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter(PROTECTED)
 @Slf4j
 public abstract class AbstractDigitalTwinInterfaceClient {
+    /** Indicates the function or command is not implemented. */
     public static final int STATUS_CODE_NOT_IMPLEMENTED = 404;
+    /** Indicates the content is in a bad format or with invalid values. */
     public static final int STATUS_CODE_INVALID = 400;
+    /** Indicates the content or operation is accepted and an async process is started. */
     public static final int STATUS_CODE_PENDING = 202;
+    /** Indicates the content or operation is successfully completed. */
     public static final int STATUS_CODE_COMPLETED = 200;
     static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "\"Command is not implemented for interface instance [%s].\"";
     /**
@@ -52,9 +56,8 @@ public abstract class AbstractDigitalTwinInterfaceClient {
 
     /**
      * Sends a Digital Twin telemetry message to the server.
-     * The device application calls this function to send telemetry to the server.  The call returns immediately and puts the data to send on a pending queue the SDK manages.
-     * The application is notified of success or failure of the send by passing in a callback <b>digitalTwinTelemetryConfirmationCallback</b>.
-     * The application may invoke this function as many times as it wants, subject to the device's resource availability.  The application does NOT need to wait for each send's callback to arrive between sending.
+     * The device application calls this function to send telemetry to the server.  The call returns immediately and puts the data to send on a pending queue that the SDK manages. The application can either subscribe to handle the result or block to get the result.
+     * The application may invoke this function as many times as it wants, subject to the device's resource availability. The application does NOT need to wait for each send to finish.
      * The SDK will automatically attempt to retry the telemetry send on transient errors.
      *
      * @return Result of this async function.
@@ -74,18 +77,29 @@ public abstract class AbstractDigitalTwinInterfaceClient {
     }
 
     /**
+     * Sends a Digital Twin telemetry message to the server.
+     * The device application calls this function to send telemetry to the server. The call will be blocked and will return the result once telemetry is processed.
+     * The SDK will automatically attempt to retry the telemetry send on transient errors.
+     *
+     * @return Result of this sync function.
+     */
+    protected final DigitalTwinClientResult sendTelemetry(@NonNull final String telemetryName, @NonNull final String payload) {
+        return sendTelemetryAsync(telemetryName, payload).blockingGet();
+    }
+
+    /**
      * Sends a Digital Twin property to the server. There are two types of properties that can be modeled in the Digital Twin Definition Language (DTDL).
      * They are either configurable from the server (referred to as "writable" in the Digital Twin Definition Language). An example is a thermostat exposing its desired temperature setting.  In this case, the device also can indicate whether it has accepted the property or whether it has failed (setting the temperature above some firmware limit, for instance).
      * The other class of properties are not configurable/"writable" from the service application's perspective. Only the device can set these properties. An example is the device's manufacturer in the DeviceInformation interface.
      * Configurable properties are tied to receive updates from the server via {@link #onPropertyUpdate(DigitalTwinPropertyUpdate)}.
-     * Both classes of properties use this function to report the status of the property; e.g. whether the temperature was accepted in the thermostat example or simple the value of the manufacturer for DeviceInformation.
+     * Both classes of properties use this function to report the status of the property; e.g. whether the temperature was accepted in the thermostat example or simply the value of the manufacturer for DeviceInformation.
      * The only difference is that the configurable property must fill in the <b>digitalTwinPropertyResponse</b> parameter so the server knows additional status/server version/etc. of the property.
-     * This function may be invoked at any time after the interface has been successfully registered and before the interface handle is destroyed.
+     * This function may be invoked at any time after the interface has been successfully registered.
      * It may be invoked on {@link #onPropertyUpdate(DigitalTwinPropertyUpdate)} function though it does not have to be.
-     * The call returns immediately and the puts the data to send on a pending queue that the SDK manages. The application is notified of success or failure of the send by passing in a callback <b>digitalTwinReportedPropertyUpdatedCallback</b>.
-     * The application may call this function as many times as it wants, subject obviously to the device's resource availability, and does NOT need to wait for each send's callback to arrive between sending.
+     * The call returns immediately and the puts the data to send on a pending queue that the SDK manages. The application can either subscribe to handle the result or block to get the result.
+     * The application may call this function as many times as it wants, subject to the device's resource availability, and does NOT need to wait for each send to finish.
      * If this function is invoked multiple times on the same <b>propertyName</b>, the server has a last-writer wins algorithm and will not persist previous property values.
-     * The SDK will automatically attempt to retry reporting properties on transient errors.
+     * The SDK will automatically attempt to retry on transient errors.
      *
      * @param digitalTwinReportProperties DigitalTwin properties to be reported.
      * @return Result of this async function.
@@ -105,9 +119,32 @@ public abstract class AbstractDigitalTwinInterfaceClient {
     }
 
     /**
+     * Sends a Digital Twin property to the server. There are two types of properties that can be modeled in the Digital Twin Definition Language (DTDL).
+     * They are either configurable from the server (referred to as "writable" in the Digital Twin Definition Language). An example is a thermostat exposing its desired temperature setting.  In this case, the device also can indicate whether it has accepted the property or whether it has failed (setting the temperature above some firmware limit, for instance).
+     * The other class of properties are not configurable/"writable" from the service application's perspective. Only the device can set these properties. An example is the device's manufacturer in the DeviceInformation interface.
+     * Configurable properties are tied to receive updates from the server via {@link #onPropertyUpdate(DigitalTwinPropertyUpdate)}.
+     * Both classes of properties use this function to report the status of the property; e.g. whether the temperature was accepted in the thermostat example or simply the value of the manufacturer for DeviceInformation.
+     * The only difference is that the configurable property must fill in the <b>digitalTwinPropertyResponse</b> parameter so the server knows additional status/server version/etc. of the property.
+     * This function may be invoked at any time after the interface has been successfully registered.
+     * It may be invoked on {@link #onPropertyUpdate(DigitalTwinPropertyUpdate)} function though it does not have to be.
+     * The call will be blocked and will return the result once the reported property is processed.
+     * If this function is invoked multiple times on the same <b>propertyName</b>, the server has a last-writer wins algorithm and will not persist previous property values.
+     * The SDK will automatically attempt to retry on transient errors.
+     *
+     * @param digitalTwinReportProperties DigitalTwin properties to be reported.
+     * @return Result of this sync function.
+     */
+    protected final DigitalTwinClientResult reportProperties(@NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties) {
+        return reportPropertiesAsync(digitalTwinReportProperties).blockingGet();
+    }
+
+    /**
      * Sends an update of the status of a pending asynchronous command. Devices must return quickly while processing command execution in their {@link #onCommandReceived(DigitalTwinCommandRequest)} function.  Commands that take longer to run - such as running a diagnostic - may be modeled as "asynchronous" commands in the Digital Twin Definition Language.
      * The device application invokes this function to update the status of an asynchronous command.  This status could indicate a success, a fatal failure, or else that the command is still running and provide some simple progress.
      * Values specified in the {@link DigitalTwinAsyncCommandUpdate} - in particular {@link DigitalTwinAsyncCommandUpdate#getCommandName()} that initiated the command name and its {@link DigitalTwinAsyncCommandUpdate#getRequestId()} are specified in the initial command callback's passed in {@link DigitalTwinCommandRequest#getRequestId()}.
+     * The call returns immediately and the puts the data to send on a pending queue that the SDK manages. The application can either subscribe to handle the result or block to get the result.
+     * The application may call this function as many times as it wants, subject to the device's resource availability, and does NOT need to wait for each send to finish.
+     * The SDK will automatically attempt to retry on transient errors.
      *
      * @param digitalTwinAsyncCommandUpdate containing updates about the status to send to the server.
      * @return Result of this async function.
@@ -122,6 +159,20 @@ public abstract class AbstractDigitalTwinInterfaceClient {
                     digitalTwinAsyncCommandUpdate
             ).singleOrError();
         }
+    }
+
+    /**
+     * Sends an update of the status of a pending asynchronous command. Devices must return quickly while processing command execution in their {@link #onCommandReceived(DigitalTwinCommandRequest)} function.  Commands that take longer to run - such as running a diagnostic - may be modeled as "asynchronous" commands in the Digital Twin Definition Language.
+     * The device application invokes this function to update the status of an asynchronous command.  This status could indicate a success, a fatal failure, or else that the command is still running and provide some simple progress.
+     * Values specified in the {@link DigitalTwinAsyncCommandUpdate} - in particular {@link DigitalTwinAsyncCommandUpdate#getCommandName()} that initiated the command name and its {@link DigitalTwinAsyncCommandUpdate#getRequestId()} are specified in the initial command callback's passed in {@link DigitalTwinCommandRequest#getRequestId()}.
+     * The call will be blocked and will return the result once command status updated is processed.
+     * The SDK will automatically attempt to retry reporting properties on transient errors.
+     *
+     * @param digitalTwinAsyncCommandUpdate containing updates about the status to send to the server.
+     * @return Result of this async function.
+     */
+    protected final DigitalTwinClientResult updateAsyncCommandStatus(@NonNull final DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate) {
+        return updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
     }
 
     /**
@@ -153,7 +204,7 @@ public abstract class AbstractDigitalTwinInterfaceClient {
     }
 
     /**
-     * Callback that is registration completed. Implementation shouldn't block or throw exception.
+     * Called once registration is completed. Implementation shouldn't block or throw exception.
      */
     protected void onRegistered() {
         log.debug("{} was registered.", digitalTwinInterfaceInstanceName);
