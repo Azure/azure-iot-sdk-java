@@ -29,7 +29,7 @@ import static samples.com.microsoft.azure.sdk.iot.TelemetryHelper.composeMessage
 @Slf4j
 public class Application {
     private static final String deviceConnectionString = System.getenv("DEVICE_CONNECTION_STRING");
-    private static final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+    private static final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS; // Can be configured to use any protocol from  HTTPS, AMQPS, MQTT, AMQPS_WS, MQTT_WS
     private static final int DEVICE_OPERATION_TIMEOUT_IN_MINUTES = 2;
     private static final int numRequests = 20;
     private static final int MAX_APPLICATION_RUN_DURATION_IN_MINUTES = 5;

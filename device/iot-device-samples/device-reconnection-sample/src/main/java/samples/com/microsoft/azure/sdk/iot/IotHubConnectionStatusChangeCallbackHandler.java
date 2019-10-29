@@ -15,8 +15,8 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
         log.debug("### Connection status change reported: status={}, reason={}", status, statusChangeReason);
 
         if (throwable != null) {
-            log.debug("Throwable: {}", throwable.getMessage());
-            throwable.printStackTrace();
+            log.warn("Connection status callback executed with a throwable");
+            log.warn("Throwable: {}", throwable);
         }
 
         final DeviceClientManager clientManager = (DeviceClientManager) callbackContext;
@@ -58,10 +58,10 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
                         return;
                     case BAD_CREDENTIAL:
                     case EXPIRED_SAS_TOKEN:
-                        log.debug("### The supplied credentials were invalid. Fix the input and create a new device client instance.");
+                        log.warn("### The supplied credentials were invalid. Fix the input and create a new device client instance.");
                         return;
                     case RETRY_EXPIRED:
-                        log.debug("### The DeviceClient has been disconnected because the retry policy expired. Can be reopened by closing and then opening the instance.");
+                        log.warn("### The DeviceClient has been disconnected because the retry policy expired. Can be reopened by closing and then opening the instance.");
                         if (Application.reconnectIndefinitely) {
                             new Thread(new Runnable() {
 
@@ -73,8 +73,8 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
                         }
                         return;
                     case COMMUNICATION_ERROR:
-                        log.debug("### The DeviceClient has been disconnected due to a non-retryable exception. Inspect the throwable for details.");
-                        log.debug("### The DeviceClient can be reopened by closing and then opening the instance.");
+                        log.warn("### The DeviceClient has been disconnected due to a non-retryable exception. Inspect the throwable for details.");
+                        log.warn("### The DeviceClient can be reopened by closing and then opening the instance.");
                         if (Application.reconnectIndefinitely) {
                             new Thread(new Runnable() {
 
