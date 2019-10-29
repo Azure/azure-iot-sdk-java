@@ -39,5 +39,10 @@
             <artifactId>iot-service-client</artifactId>
             <version>${project-sdk-service-client}</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>azure-eventhubs</artifactId>
+            <version>${azure-eventhubs-version}</version>
+        </dependency>
     </dependencies>
 </project>
