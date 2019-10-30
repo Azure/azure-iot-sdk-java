@@ -60,7 +60,7 @@ public class DigitalTwinTelemetryE2ETests {
     private static final String TELEMETRY_PAYLOAD_PATTERN = "{\"%s\":%s}";
 
     private static EventHubListener eventHubListener;
-    private static TestInterfaceInstance2 testInterfaceInstance2;
+    private TestInterfaceInstance2 testInterfaceInstance2;
     private String deviceId;
     private TestDigitalTwinDevice testDevice;
 
