@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
@@ -11,28 +12,33 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 
-@Getter
-public class TestDevice {
+public class TestDigitalTwinDevice {
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
 
     private String deviceId;
     private DeviceClient deviceClient;
+    @Getter
     private DigitalTwinDeviceClient digitalTwinDeviceClient;
 
-    public TestDevice(String deviceId) throws IotHubException, IOException, URISyntaxException {
+    public TestDigitalTwinDevice(@NonNull String deviceId, @NonNull IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+        if (!protocol.equals(MQTT) && !protocol.equals(MQTT_WS)) {
+            throw new IllegalArgumentException("Supported protocols for DigitalTwin are MQTT, MQTT_WS");
+        }
         this.deviceId = deviceId;
-        this.deviceClient = createDeviceClient();
+        this.deviceClient = createDeviceClient(protocol);
         this.digitalTwinDeviceClient = createDigitalTwinDeviceClient();
     }
 
-    private DeviceClient createDeviceClient() throws IOException, IotHubException, URISyntaxException {
+    private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
 
         Device device = Device.createDevice(deviceId, SAS);
@@ -40,7 +46,7 @@ public class TestDevice {
         String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
         registryManager.close();
 
-        return new DeviceClient(deviceConnectionString, MQTT);
+        return new DeviceClient(deviceConnectionString, protocol);
     }
 
     private DigitalTwinDeviceClient createDigitalTwinDeviceClient() {
