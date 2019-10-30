@@ -9,6 +9,8 @@ import lombok.NonNull;
 import rx.Observable;
 import rx.functions.Func1;
 
+import java.util.Map;
+
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public final class Tools {
@@ -34,15 +36,20 @@ public final class Tools {
         return value == null ? EMPTY : value;
     }
 
-    public static String createPropertyPatch(@NonNull String propertyName, @NonNull String propertyValue) {
-        return "{"
-                +"  \"properties\": {"
-                +"      \"" + propertyName + "\": {"
-                +"          \"desired\": {"
-                +"              \"value\": \"" + propertyValue + "\""
-                +"            }"
-                +"        }"
-                +"    }"
-                +"}";
+    private static String createSinglePropertyPatch(@NonNull String propertyName, @NonNull String propertyValue) {
+        return "\"" + propertyName + "\": {"
+                +"      \"desired\": {"
+                +"          \"value\": \"" + propertyValue + "\""
+                +"      }"
+                +"  }";
+    }
+
+    public static String createPropertyPatch(Map<String, String> propertiesMap) {
+        StringBuilder propertyPatch = new StringBuilder();
+        for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+            propertyPatch.append(createSinglePropertyPatch(entry.getKey(), entry.getValue()));
+        }
+
+        return "{ \"properties\": {" + propertyPatch + "} }";
     }
 }

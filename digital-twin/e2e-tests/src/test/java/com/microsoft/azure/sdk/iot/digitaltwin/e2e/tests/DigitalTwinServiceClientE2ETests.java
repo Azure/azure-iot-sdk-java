@@ -3,11 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDevice;
+import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
@@ -22,10 +23,12 @@ import java.net.URISyntaxException;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.createPropertyPatch;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,10 +51,10 @@ public class DigitalTwinServiceClientE2ETests {
 
     private static final String COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE = "updatedFromCommandInvocation";
 
-    private String digitalTwinId;
-    private TestDevice testDevice;
-
     private static DigitalTwinServiceClient digitalTwinServiceClient;
+    private String digitalTwinId;
+    private TestDigitalTwinDevice testDevice;
+
 
     @BeforeAll
     public static void setUp() {
@@ -63,7 +66,7 @@ public class DigitalTwinServiceClientE2ETests {
     @BeforeEach
     public void setUpTest() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDevice(digitalTwinId);
+        testDevice = new TestDigitalTwinDevice(digitalTwinId, MQTT);
     }
 
     @Test
@@ -117,7 +120,7 @@ public class DigitalTwinServiceClientE2ETests {
         String interfaceInstanceName = "testInterfaceInstanceName";
         String propertyName = "testPropertyName_".concat(randomUuid);
         String propertyValue = "testPropertyValue_".concat(randomUuid);
-        String propertyPatch = createPropertyPatch(propertyName, propertyValue);
+        String propertyPatch = createPropertyPatch(singletonMap(propertyName, propertyValue));
         String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch);
 
         assertAll("Updated DigitalTwin does not have the expected properties",
