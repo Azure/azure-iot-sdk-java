@@ -26,7 +26,7 @@ import static java.util.Collections.synchronizedList;
 @Slf4j
 public class EventHubListener {
     private static final String EVENTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.EVENT_HUB_CONNECTION_STRING_VAR_NAME);
-    private static final int LOOKBACK_TIME_IN_SECONDS = 30;;
+    private static final int LOOKBACK_TIME_IN_SECONDS = 30;
     private static final int RECEIVE_EVENTS_FOR_SECONDS = 60;
     private static final int OPERATION_TIMEOUT_IN_SECONDS = 5;
     private static final int MAX_EVENTS_RECEIVED_PER_CALL = 100;
