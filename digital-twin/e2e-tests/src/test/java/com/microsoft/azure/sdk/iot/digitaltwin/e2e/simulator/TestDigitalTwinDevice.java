@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -21,12 +22,13 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 
+@Slf4j
+@Getter
 public class TestDigitalTwinDevice {
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
 
     private String deviceId;
     private DeviceClient deviceClient;
-    @Getter
     private DigitalTwinDeviceClient digitalTwinDeviceClient;
 
     public TestDigitalTwinDevice(@NonNull String deviceId, @NonNull IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
@@ -36,6 +38,7 @@ public class TestDigitalTwinDevice {
         this.deviceId = deviceId;
         this.deviceClient = createDeviceClient(protocol);
         this.digitalTwinDeviceClient = createDigitalTwinDeviceClient();
+        log.debug("Created device: {}", deviceId);
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {

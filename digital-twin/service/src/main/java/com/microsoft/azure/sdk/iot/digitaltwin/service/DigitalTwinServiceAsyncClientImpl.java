@@ -115,7 +115,7 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
         return digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument), null, null)
                 .map(responseWithHeaders -> {
                     DigitalTwinInvokeInterfaceCommandHeaders invokeInterfaceCommandHeaders = responseWithHeaders.headers();
-                    return new DigitalTwinCommandResponse(invokeInterfaceCommandHeaders.xMsCommandStatuscode(), invokeInterfaceCommandHeaders.xMsRequestId(), responseWithHeaders.body().toString());
+                    return new DigitalTwinCommandResponse(invokeInterfaceCommandHeaders.xMsCommandStatuscode(), invokeInterfaceCommandHeaders.xMsRequestId(), Objects.toString(responseWithHeaders.body()));
                 });
     }
 }
