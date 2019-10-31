@@ -230,6 +230,7 @@ public class AmqpsSessionDeviceOperation
         }
         else
         {
+            log.trace("Attempted to send a message while state was not AUTHENTICATED, returning delivery tag of -1 ({})", message);
             return -1;
         }
     }

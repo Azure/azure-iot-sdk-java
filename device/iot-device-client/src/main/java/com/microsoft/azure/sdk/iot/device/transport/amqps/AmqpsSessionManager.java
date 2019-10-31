@@ -302,6 +302,8 @@ public class AmqpsSessionManager
                     break;
                 }
             }
+
+            log.trace("Attempt to send message over amqp failed because no session handled it ({})", message);
         }
 
         return deliveryTag;
