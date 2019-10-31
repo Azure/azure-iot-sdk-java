@@ -168,7 +168,7 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
 
     @Override
     protected DigitalTwinCommandResponse onCommandReceived(DigitalTwinCommandRequest digitalTwinCommandRequest) {
-        String commandName = digitalTwinCommandRequest.getCommandName();
+        final String commandName = digitalTwinCommandRequest.getCommandName();
         String requestId = digitalTwinCommandRequest.getRequestId();
         String payload = digitalTwinCommandRequest.getPayload();
         log.debug(
@@ -178,13 +178,19 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                 payload
         );
         try {
+            Consumer<DigitalTwinClientResult> onSuccess = new Consumer<DigitalTwinClientResult>() {
+                @Override
+                public void accept(DigitalTwinClientResult result) {
+                    log.debug("Command {} result is {}.", commandName, result);
+                }
+            };
             if (COMMAND_TURN_ON.equals(commandName)) {
-                updateStatusAsync(true);
+                updateStatusAsync(true).subscribe(onSuccess);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
                                                  .build();
             } else if (COMMAND_TURN_OFF.equals(commandName)) {
-                updateStatusAsync(false);
+                updateStatusAsync(false).subscribe(onSuccess);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
                                                  .build();
@@ -197,7 +203,7 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
                                                  .payload(createBlinkResponse(responsePayload))
                                                  .build();
             } else if (COMMAND_RUN_DIAGNOSTICS.equals(commandName)) {
-                runDiagnosticsAsync(requestId);
+                runDiagnosticsAsync(requestId).subscribe(onSuccess);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
                                                  .build();
