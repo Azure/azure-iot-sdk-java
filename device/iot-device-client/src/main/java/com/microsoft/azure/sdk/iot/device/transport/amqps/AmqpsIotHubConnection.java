@@ -429,6 +429,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // credit, the function shall return -1.]
         if (this.state == IotHubConnectionStatus.DISCONNECTED || protonReturnValue == null)
         {
+            log.trace("Amqp connection is disconnected, rejecting attempt to send message with delivery tag -1");
             deliveryTag = -1;
         }
         else
@@ -606,6 +607,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onConnectionUnbound(Event event)
     {
+        log.trace("onConnectionUnbound event fired by proton, setting AMQP connection state to DISCONNECTED");
         // Codes_SRS_AMQPSIOTHUBCONNECTION_12_010: [The function sets the state to closed.]
         this.state = IotHubConnectionStatus.DISCONNECTED;
     }
@@ -895,6 +897,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         this.amqpsSessionManager.onLinkRemoteClose(event.getLink());
 
+        log.trace("onLinkRemoteClose fired by proton, setting AMQP connection state as DISCONNECTED");
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_061 [If the provided event object's transport holds a remote error condition object, this function shall report the associated TransportException to this object's listeners.]
