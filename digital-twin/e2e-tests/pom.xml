@@ -31,6 +31,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit5-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-sdk-java-digital-twin-device</artifactId>
             <version>${project-device-version}</version>

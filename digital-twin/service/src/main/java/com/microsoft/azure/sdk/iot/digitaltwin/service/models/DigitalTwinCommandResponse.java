@@ -11,7 +11,6 @@ import lombok.NonNull;
 @AllArgsConstructor
 public class DigitalTwinCommandResponse {
 
-    @NonNull
     private final int status;
     @NonNull
     private final String requestId;

@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncComm
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
-import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -37,10 +36,10 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
     public static final String TELEMETRY_NAME_ENUM = "telemetryWithEnumValue";
     public static final String TELEMETRY_NAME_COMPLEX_OBJECT = "telemetryWithComplexValueComplexObject";
     public static final String TELEMETRY_NAME_COMPLEX_VALUE = "telemetryWithComplexValue";
-    public static final String COMMAND_SYNC_COMMAND = "syncCommand";
-    public static final String COMMAND_ASYNC_COMMAND = "asyncCommand";
-    public static final String COMMAND_ANOTHER_SYNC_COMMAND = "anotherSyncCommand";
-    public static final String COMMAND_ANOTHER_ASYNC_COMMAND = "anotherAsyncCommand";
+    public static final String SYNC_COMMAND_WITH_PAYLOAD = "syncCommand";
+    public static final String SYNC_COMMAND_WITHOUT_PAYLOAD = "anotherSyncCommand";
+    public static final String ASYNC_COMMAND_WITH_PAYLOAD = "asyncCommand";
+    public static final String ASYNC_COMMAND_WITHOUT_PAYLOAD = "anotherAsyncCommand";
     public static final String PROPERTY_NAME_WRITABLE = "writableProperty";
     public static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
 
@@ -61,7 +60,7 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
         return sendTelemetryAsync(telemetryName, serialize(telemetryValue));
     }
 
-    private Single<DigitalTwinClientResult> updateWritableReportedProperty(String reportedPropertyValue) {
+    public Single<DigitalTwinClientResult> updateWritableReportedProperty(String reportedPropertyValue) {
         log.debug("Updating Writable Property = {}", reportedPropertyValue);
 
         DigitalTwinReportProperty digitalTwinReportProperty = DigitalTwinReportProperty.builder()
@@ -82,17 +81,26 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                 requestId,
                 payload);
         try{
-            if (COMMAND_SYNC_COMMAND.equals(commandName)) {
-                DigitalTwinClientResult digitalTwinClientResult = updateWritableReportedProperty(payload).blockingGet();
+            if (SYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
-                                                 .payload(String.format("Writable property updated: %s", digitalTwinClientResult))
+                                                 .payload(payload)
                                                  .build();
-            } else if (COMMAND_ASYNC_COMMAND.equals(commandName)) {
+            } else if (SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
+                return DigitalTwinCommandResponse.builder()
+                                                 .status(STATUS_CODE_COMPLETED)
+                                                 .build();
+            } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
                 runAsyncCommand(requestId, commandName);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_PENDING)
-                                                 .payload(String.format("Running command: %s", commandName))
+                                                 .payload(payload)
+                                                 .build();
+            } else if (ASYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
+                runAsyncCommand(requestId, commandName);
+                return DigitalTwinCommandResponse.builder()
+                                                 .status(STATUS_CODE_PENDING)
+                                                 .payload(payload)
                                                  .build();
             } else {
                 String errorMessage = String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, commandName, TEST_INTERFACE_ID);
@@ -114,8 +122,8 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
 
     private void runAsyncCommand(String requestId, String commandName) {
         new Thread(() -> {
-            for (int i = 0; i < 5; i++) {
-                String progressPercentage = String.format("Progress of %s: %d", commandName, i / 5 * 100);
+            for (int i = 1; i <= 5; i++) {
+                String progressPercentage = String.format("Progress of %s: %d", commandName, i * 100 / 5);
                 log.debug(">> Executing Async task: {}", progressPercentage);
 
                 DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
@@ -128,7 +136,7 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                 log.debug("Execute async command: {}; result: {}", progressPercentage, digitalTwinClientResult);
 
                 try {
-                    Thread.sleep(10 * 1000);
+                    Thread.sleep(1000);
                 }
                 catch (InterruptedException e) {
                     log.error("Thread sleep was interrupted.", e);
@@ -139,6 +147,7 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                                                                                                        .commandName(commandName)
                                                                                                        .requestId(requestId)
                                                                                                        .statusCode(STATUS_CODE_COMPLETED)
+                                                                                                       .payload("COMPLETED")
                                                                                                        .build();
             DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
             log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);

@@ -3,20 +3,18 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
-import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.RestException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -25,9 +23,9 @@ import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.SYNC_COMMAND_WITH_PAYLOAD;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TEST_INTERFACE_ID;
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.createPropertyPatch;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -42,19 +40,12 @@ public class DigitalTwinServiceClientE2ETests {
     private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientE2ETests_";
 
     private static final String INVALID_MODEL_URN = "urn:invalidNamespace:invalidModelName:1"; // Model ID format should contain a min of 4 segments [urn:namespace:name:version]
-    private static final String INVALID_INTERFACE_URN = "urn:invalidNamespace:invalidInterfaceName:1"; // Model ID format should contain a min of 4 segments [urn:namespace:name:version]
+    private static final String INVALID_INTERFACE_URN = "urn:invalidNamespace:invalidInterfaceName:1"; // Interface ID format should contain a min of 4 segments [urn:namespace:name:version]
     private static final String INVALID_DEVICE_ID = "InvalidDevice";
-    private static final String INVALID_INTERFACE_INSTANCE_NAME = "invalidInterfaceInstanceName";
-    private static final String INVALID_COMMAND_NAME = "invalidCommandName";
-    private static final String INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN = "Interface instance [%s] not found.";
-    private static final int STATUS_NOT_FOUND = 404;
-
-    private static final String COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE = "updatedFromCommandInvocation";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
-
 
     @BeforeAll
     public static void setUp() {
@@ -146,58 +137,11 @@ public class DigitalTwinServiceClientE2ETests {
         assertThrows(IOException.class, () -> digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch));
     }
 
-    @Test
-    public void testInvokeCommandOnOnlineDevice() {
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        log.debug("Register interfaces: {} = {}.", TEST_INTERFACE_INSTANCE_NAME, registrationResult);
-
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, COMMAND_SYNC_COMMAND, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE);
-
-        assertAll("Command is not invoked",
-                () -> assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull(),
-                () -> assertThat(commandResponse.getStatus()).as("Verify Command Invocation Response Status").isNotNull(),
-                () -> assertThat(commandResponse.getRequestId()).as("Verify Command Invocation Response RequestId").isNotNull());
-    }
-
-    @Test
-    public void testInvokeCommandInvalidInterfaceInstanceName() {
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        log.debug("Register interfaces: {} = {}.", TEST_INTERFACE_INSTANCE_NAME, registrationResult);
-
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, INVALID_INTERFACE_INSTANCE_NAME, COMMAND_SYNC_COMMAND, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE);
-
-        assertAll("Expected command response is not returned for invalid interface name",
-                () -> assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull(),
-                () -> assertThat(commandResponse.getStatus()).isEqualTo(STATUS_NOT_FOUND),
-                () -> assertThat(commandResponse.getPayload()).isEqualTo(String.format(INTERFACE_INSTANCE_NOT_FOUND_MESSAGE_PATTERN, INVALID_INTERFACE_INSTANCE_NAME)));
-    }
-
-    @Test
-    public void testInvokeCommandInvalidCommandName() {
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        log.debug("Register interfaces: {} = {}.", TEST_INTERFACE_INSTANCE_NAME, registrationResult);
-
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, INVALID_COMMAND_NAME, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE);
-
-        assertAll("Expected command response is not returned for invalid command name",
-                () -> assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull(),
-                () -> assertThat(commandResponse.getStatus()).isEqualTo(STATUS_NOT_FOUND),
-                () -> assertThat(commandResponse.getPayload()).isEqualTo(String.format(COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN, INVALID_COMMAND_NAME, TestInterfaceInstance2.TEST_INTERFACE_ID)));
-    }
-
     // Service throws a 404 Not Found
     @Test
     public void testInvokeCommandOnInvalidDevice() {
-        assertThrows(RestException.class, () -> digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_INTERFACE_INSTANCE_NAME, COMMAND_SYNC_COMMAND, COMMAND_WRITABLE_PROPERTY_UPDATE_VALUE));
+        String samplePayload = "samplePayload";
+        assertThrows(RestException.class, () -> digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITH_PAYLOAD, samplePayload));
     }
 
     @AfterEach
