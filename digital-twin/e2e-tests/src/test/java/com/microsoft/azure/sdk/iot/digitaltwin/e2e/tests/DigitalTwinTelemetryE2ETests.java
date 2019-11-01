@@ -73,11 +73,7 @@ public class DigitalTwinTelemetryE2ETests {
     public void testSendTelemetry(IotHubClientProtocol protocol, String telemetryName, Object telemetryValue) throws IOException, URISyntaxException, IotHubException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
 
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", telemetryName, telemetryValue);
         DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance2.sendTelemetry(telemetryName, telemetryValue).blockingGet();
@@ -93,11 +89,7 @@ public class DigitalTwinTelemetryE2ETests {
     public void testSendIncompatibleSchemaTelemetry(IotHubClientProtocol protocol) throws IOException, URISyntaxException, IotHubException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
 
         DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, nextBoolean()).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR);
@@ -108,14 +100,9 @@ public class DigitalTwinTelemetryE2ETests {
     public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetry(IotHubClientProtocol protocol) throws IOException, URISyntaxException, IotHubException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
 
         List<Integer> telemetryList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed().collect(Collectors.toList());
-
         Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
                 .parallel()
                 .runOn(Schedulers.io())
@@ -123,7 +110,7 @@ public class DigitalTwinTelemetryE2ETests {
                 .sequential()
                 .blockingSubscribe();
 
-        for(int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
+        for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             String expectedPayload = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryList.get(i)));
             assertThat(eventHubListener.verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
         }
@@ -134,11 +121,7 @@ public class DigitalTwinTelemetryE2ETests {
     public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetry(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
 
         int intTelemetry = nextInt();
         boolean booleanTelemetry = nextBoolean();
@@ -204,6 +187,16 @@ public class DigitalTwinTelemetryE2ETests {
                 Arguments.of(MQTT_WS, TELEMETRY_NAME_COMPLEX_VALUE, telemetryComplexValue),
                 Arguments.of(MQTT_WS, TELEMETRY_NAME_COMPLEX_OBJECT, telemetryComplexObject)
         );
+    }
+
+    private TestInterfaceInstance2 registerAndReturnDigitalTwinInterface(TestDigitalTwinDevice testDevice) {
+        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
+
+        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
+        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
+        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+
+        return testInterfaceInstance;
     }
 
     @AfterEach
