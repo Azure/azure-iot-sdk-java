@@ -18,7 +18,6 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientI
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -78,9 +77,7 @@ public class DigitalTwinCommandE2ETests {
     public void testDeviceClientReceivesSyncCommandWithPayloadAndResponds(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
@@ -96,9 +93,7 @@ public class DigitalTwinCommandE2ETests {
     public void testDeviceClientReceivesSyncCommandWithoutPayloadAndResponds(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
@@ -113,9 +108,7 @@ public class DigitalTwinCommandE2ETests {
     public void testDeviceClientReceivesAsyncCommandWithPayloadAndResponds(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
@@ -135,9 +128,7 @@ public class DigitalTwinCommandE2ETests {
     public void testDeviceClientReceivesAsyncCommandWithoutPayloadAndResponds(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD);
 
@@ -156,9 +147,7 @@ public class DigitalTwinCommandE2ETests {
     public void testInvokeCommandInvalidInterfaceInstanceName(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, INVALID_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
@@ -174,9 +163,7 @@ public class DigitalTwinCommandE2ETests {
     public void testInvokeCommandInvalidCommandName(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, INVALID_COMMAND_NAME);
 
@@ -222,12 +209,10 @@ public class DigitalTwinCommandE2ETests {
     public void testSyncCommandInvocationMultithreaded(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
-                                                   .map(Object::toString)
+                                                   .map(Object :: toString)
                                                    .collect(Collectors.toList());
         List<DigitalTwinCommandResponse> commandResponses = Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
                                                                     .parallel()
@@ -254,13 +239,11 @@ public class DigitalTwinCommandE2ETests {
     public void testAsyncCommandInvocationMultithreaded(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-
-        DigitalTwinClientResult registrationResult = registerDigitalTwinInterface(testDevice).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        registerDigitalTwinInterface(testDevice);
 
         List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
-                                                  .map(Object::toString)
-                                                  .collect(Collectors.toList());
+                                                   .map(Object :: toString)
+                                                   .collect(Collectors.toList());
         List<DigitalTwinCommandResponse> commandResponses = Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
                                                                     .parallel()
                                                                     .runOn(Schedulers.io())
@@ -292,10 +275,11 @@ public class DigitalTwinCommandE2ETests {
         testDevice.closeAndDeleteDevice();
     }
 
-    private Single<DigitalTwinClientResult> registerDigitalTwinInterface(TestDigitalTwinDevice testDevice) {
+    private void registerDigitalTwinInterface(TestDigitalTwinDevice testDevice) {
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        return digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance));
+        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
+        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
     }
 }

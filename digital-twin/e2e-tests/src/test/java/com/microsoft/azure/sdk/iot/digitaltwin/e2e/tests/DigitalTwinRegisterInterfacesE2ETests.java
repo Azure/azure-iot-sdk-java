@@ -58,8 +58,8 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     @BeforeAll
     public static void setUp() {
         digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString()
-                                                                .connectionString(IOTHUB_CONNECTION_STRING)
-                                                                .build();
+                                                               .connectionString(IOTHUB_CONNECTION_STRING)
+                                                               .build();
     }
 
     @ParameterizedTest(name = "{index}: MRegister single interface: protocol = {0}")
@@ -75,7 +75,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned" ,
+        assertAll("Expected DigitalTwin is not returned",
                 () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
                 () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
     }
@@ -94,7 +94,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned" ,
+        assertAll("Expected DigitalTwin is not returned",
                 () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
                 () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_1, TestInterfaceInstance1.TEST_INTERFACE_ID)),
                 () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
@@ -113,7 +113,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned" ,
+        assertAll("Expected DigitalTwin is not returned",
                 () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
                 () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
 
@@ -162,7 +162,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned" ,
+        assertAll("Expected DigitalTwin is not returned",
                 () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
                 () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
 
@@ -220,5 +220,4 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     public void tearDownTest() throws IOException, IotHubException {
         testDevice.closeAndDeleteDevice();
     }
-
 }
