@@ -5,15 +5,14 @@ package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandResponse;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.*;
 import io.reactivex.rxjava3.core.Single;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static java.util.Collections.singletonList;
@@ -41,13 +40,18 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
     public static final String ASYNC_COMMAND_WITH_PAYLOAD = "asyncCommand";
     public static final String ASYNC_COMMAND_WITHOUT_PAYLOAD = "anotherAsyncCommand";
     public static final String PROPERTY_NAME_WRITABLE = "writableProperty";
+    public static final String PROPERTY_NAME_2_WRITABLE = "anotherWritableProperty";
+    public static final String PROPERTY_NAME_READONLY = "readOnlyProperty";
     public static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
+    private static final int MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS = 30;
 
     private static String interfaceInstanceName;
+    private Map<String, String> propertyUpdatesReceived;
 
     public TestInterfaceInstance2(@NonNull String digitalTwinInterfaceInstanceName) {
         super(digitalTwinInterfaceInstanceName, TEST_INTERFACE_ID);
         interfaceInstanceName = digitalTwinInterfaceInstanceName;
+        propertyUpdatesReceived = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -60,18 +64,41 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
         return sendTelemetryAsync(telemetryName, serialize(telemetryValue));
     }
 
-    public Single<DigitalTwinClientResult> updateWritableReportedProperty(String reportedPropertyValue) {
-        log.debug("Updating Writable Property = {}", reportedPropertyValue);
+    public Single<DigitalTwinClientResult> updatePropertyFromDevice(String propertyName, String propertyValue) {
+        log.debug("Updating property: propertyName={}, propertyValue={}", propertyName, propertyValue);
 
         DigitalTwinReportProperty digitalTwinReportProperty = DigitalTwinReportProperty.builder()
-                                                                                       .propertyName(PROPERTY_NAME_WRITABLE)
-                                                                                       .propertyValue(reportedPropertyValue)
+                                                                                       .propertyName(propertyName)
+                                                                                       .propertyValue(propertyValue)
                                                                                        .build();
         return reportPropertiesAsync(singletonList(digitalTwinReportProperty));
     }
 
     @Override
-    protected  DigitalTwinCommandResponse onCommandReceived(DigitalTwinCommandRequest digitalTwinCommandRequest) {
+    protected void onPropertyUpdate(@NonNull DigitalTwinPropertyUpdate digitalTwinPropertyUpdate) {
+        log.debug("OnPropertyUpdate was received: ");
+        log.debug("getPropertyName: {}", digitalTwinPropertyUpdate.getPropertyName());
+        log.debug("getPropertyReported: {}", digitalTwinPropertyUpdate.getPropertyReported());
+        log.debug("getPropertyDesired: {}", digitalTwinPropertyUpdate.getPropertyDesired());
+        log.debug("getDesiredVersion: {}", digitalTwinPropertyUpdate.getDesiredVersion());
+        propertyUpdatesReceived.put(digitalTwinPropertyUpdate.getPropertyName(), digitalTwinPropertyUpdate.getPropertyDesired());
+    }
+
+    public boolean verifyIfPropertyUpdateWasReceived(String expectedPropertyName, String expectedValue) {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() < startTime + MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS) {
+            if (propertyUpdatesReceived.entrySet().stream()
+                                       .anyMatch(stringStringEntry -> stringStringEntry.getKey().equals(expectedPropertyName) && stringStringEntry.getValue().equals(expectedValue))) {
+                return true;
+            }
+        }
+
+        log.debug("Timed out before received property update: propertyName={}, propertyValue={}", expectedPropertyName, expectedValue);
+        return false;
+    }
+
+    @Override
+    protected DigitalTwinCommandResponse onCommandReceived(DigitalTwinCommandRequest digitalTwinCommandRequest) {
         String commandName = digitalTwinCommandRequest.getCommandName();
         String requestId = digitalTwinCommandRequest.getRequestId();
         String payload = digitalTwinCommandRequest.getPayload();
@@ -80,7 +107,7 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                 commandName,
                 requestId,
                 payload);
-        try{
+        try {
             if (SYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
@@ -110,8 +137,8 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                                                  .payload(errorMessage)
                                                  .build();
             }
-
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             log.debug("OnCommandReceived failed.", e);
             return DigitalTwinCommandResponse.builder()
                                              .status(500)
@@ -154,6 +181,5 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
 
             log.debug("Async command execution complete.");
         }).start();
-
     }
 }

@@ -93,7 +93,7 @@ public class DigitalTwinServiceClientE2ETests {
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
 
         // Assert that returned digital twin contains the default interface implemented by all devices
-        assertAll("Expected DigitalTwin is not returned" ,
+        assertAll("Expected DigitalTwin is not returned",
                 () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
                 () -> assertThat(digitalTwin).contains("\"urn_azureiot_ModelDiscovery_DigitalTwin\""),
                 () -> assertThat(digitalTwin).contains("\"version\":1"));
@@ -127,12 +127,12 @@ public class DigitalTwinServiceClientE2ETests {
         String propertyName = "testPropertyName_";
         String propertyValue = "testPropertyValue_".concat(randomUuid);
         String propertyPatch = "{"
-                +"  \"properties\": {"
-                +"      \"" + propertyName + "\": {"
-                +"          \"desired\": \"" + propertyValue + "\""
-                +"          }"
-                +"      }"
-                +"  }";
+                + "  \"properties\": {"
+                + "      \"" + propertyName + "\": {"
+                + "          \"desired\": \"" + propertyValue + "\""
+                + "          }"
+                + "      }"
+                + "  }";
 
         assertThrows(IOException.class, () -> digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch));
     }
