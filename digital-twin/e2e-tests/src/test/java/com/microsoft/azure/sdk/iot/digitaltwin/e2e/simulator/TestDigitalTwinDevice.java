@@ -56,12 +56,15 @@ public class TestDigitalTwinDevice {
         return new DigitalTwinDeviceClient(deviceClient);
     }
 
-    public void closeAndDeleteDevice() throws IOException, IotHubException {
-        deviceClient.closeNow();
+    public void closeAndDeleteDevice(){
+        try {
+            deviceClient.closeNow();
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
-        registryManager.removeDevice(deviceId);
-        registryManager.close();
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+            registryManager.removeDevice(deviceId);
+            registryManager.close();
+        } catch (Exception ex) {
+            log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
+        }
     }
-
 }

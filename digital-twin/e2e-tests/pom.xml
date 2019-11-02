@@ -5,7 +5,7 @@
         <artifactId>iot-sdk-java-digital-twin</artifactId>
         <version>1.0.0</version>
     </parent>
-    <digitalTwinName>Azure IoT Sdk Java Digital Twin E2E Tests</digitalTwinName>
+    <name>Azure IoT Sdk Java Digital Twin E2E Tests</name>
     <description>Azure IoT Sdk Java Digital Twin E2E Tests</description>
     <artifactId>iot-sdk-java-digital-twin-e2e-tests</artifactId>
     <version>${project-e2e-tests-version}</version>
@@ -24,18 +24,6 @@
         </plugins>
     </build>
     <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit5-version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit5-version}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-sdk-java-digital-twin-device</artifactId>
