@@ -271,7 +271,7 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @AfterEach
-    public void tearDownTest() throws IOException, IotHubException {
+    public void tearDownTest() {
         testDevice.closeAndDeleteDevice();
     }
 
