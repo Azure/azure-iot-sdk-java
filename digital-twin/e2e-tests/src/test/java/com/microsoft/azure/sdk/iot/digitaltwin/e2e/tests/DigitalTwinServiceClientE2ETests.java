@@ -106,21 +106,6 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     @Test
-    public void testUpdateDigitalTwinPropertiesValidUpdatePatch() throws IOException {
-        String randomUuid = UUID.randomUUID().toString();
-        String interfaceInstanceName = "testInterfaceInstanceName";
-        String propertyName = "testPropertyName_".concat(randomUuid);
-        String propertyValue = "testPropertyValue_".concat(randomUuid);
-        String propertyPatch = createPropertyPatch(singletonMap(propertyName, propertyValue));
-        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch);
-
-        assertAll("Updated DigitalTwin does not have the expected properties",
-                () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
-                () -> assertThat(digitalTwin).contains(interfaceInstanceName),
-                () -> assertThat(digitalTwin).contains(String.format("\"%s\":{\"reported\":null,\"desired\":{\"value\":\"%s\"}}", propertyName, propertyValue)));
-    }
-
-    @Test
     public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() {
         String randomUuid = UUID.randomUUID().toString();
         String interfaceInstanceName = "testInterfaceInstanceName";
@@ -145,7 +130,7 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     @AfterEach
-    public void tearDownTest() throws IOException, IotHubException {
+    public void tearDownTest() {
         testDevice.closeAndDeleteDevice();
     }
 }
