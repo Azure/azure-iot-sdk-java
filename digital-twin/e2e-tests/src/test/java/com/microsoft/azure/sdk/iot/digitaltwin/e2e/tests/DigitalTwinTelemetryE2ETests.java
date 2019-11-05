@@ -3,7 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
-import com.microsoft.azure.eventhubs.EventHubException;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
@@ -17,7 +16,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -32,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +37,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubListener.verifyThatMessageWasReceived;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -57,20 +55,13 @@ public class DigitalTwinTelemetryE2ETests {
     private static final int MAX_THREADS_MULTITHREADED_TEST = 5;
     private static final String TELEMETRY_PAYLOAD_PATTERN = "{\"%s\":%s}";
 
-    private static EventHubListener eventHubListener;
     private TestInterfaceInstance2 testInterfaceInstance2;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
-    @BeforeAll
-    public static void setUp() throws InterruptedException, ExecutionException, EventHubException, IOException {
-        eventHubListener = EventHubListener.getInstance();
-        eventHubListener.startReceivingEvents();
-    }
-
     @ParameterizedTest(name = "{index}: Telemetry Test: protocol = {0} telemetry name = {1}, telemetry value = {2}")
     @MethodSource("telemetryTestDifferentSchemaParameters")
-    public void testSendTelemetry(IotHubClientProtocol protocol, String telemetryName, Object telemetryValue) throws IOException, URISyntaxException, IotHubException {
+    public void testSendTelemetry(IotHubClientProtocol protocol, String telemetryName, Object telemetryValue) throws IOException, URISyntaxException, IotHubException, InterruptedException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
@@ -80,7 +71,7 @@ public class DigitalTwinTelemetryE2ETests {
         log.debug("Telemetry operation result: {}", digitalTwinClientResult);
 
         String expectedPayload = String.format(TELEMETRY_PAYLOAD_PATTERN, telemetryName, serialize(telemetryValue));
-        assertThat(eventHubListener.verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
+        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
     }
 
     @Disabled("Disabled until Service starts validating the telemetry payload with telemetry schema.")
@@ -97,7 +88,7 @@ public class DigitalTwinTelemetryE2ETests {
 
     @ParameterizedTest(name = "{index}: Multiple Threads send Telemetry: protocol = {0}")
     @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetry(IotHubClientProtocol protocol) throws IOException, URISyntaxException, IotHubException {
+    public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetry(IotHubClientProtocol protocol) throws IOException, URISyntaxException, IotHubException, InterruptedException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
@@ -112,13 +103,13 @@ public class DigitalTwinTelemetryE2ETests {
 
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             String expectedPayload = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryList.get(i)));
-            assertThat(eventHubListener.verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
+            assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
         }
     }
 
     @ParameterizedTest(name = "{index}: Multiple Threads send Telemetry: protocol = {0}")
     @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetry(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetry(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException, InterruptedException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
@@ -136,9 +127,9 @@ public class DigitalTwinTelemetryE2ETests {
                 .blockingSubscribe();
 
         String expectedPayloadResult1 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(intTelemetry));
-        assertThat(eventHubListener.verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult1)).as("Verify EventHub received the sent telemetry").isTrue();
+        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult1)).as("Verify EventHub received the sent telemetry").isTrue();
         String expectedPayloadResult2 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_BOOLEAN, serialize(booleanTelemetry));
-        assertThat(eventHubListener.verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult2)).as("Verify EventHub received the sent telemetry").isTrue();
+        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult2)).as("Verify EventHub received the sent telemetry").isTrue();
     }
 
     private static Stream<Arguments> telemetryTestDifferentSchemaParameters() {

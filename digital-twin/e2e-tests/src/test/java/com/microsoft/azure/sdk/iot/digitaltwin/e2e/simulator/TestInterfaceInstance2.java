@@ -43,6 +43,8 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
     public static final String PROPERTY_NAME_2_WRITABLE = "anotherWritableProperty";
     public static final String PROPERTY_NAME_READONLY = "readOnlyProperty";
     public static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
+    private static final String ASYNC_COMMAND_PROGRESS_MESSAGE_FORMAT = "Progress of %s [%s]: %d";
+    private static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [%s]: COMPLETED";
     private static final int MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS = 30;
 
     private static String interfaceInstanceName;
@@ -118,13 +120,13 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                                                  .status(STATUS_CODE_COMPLETED)
                                                  .build();
             } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
-                runAsyncCommand(requestId, commandName);
+                runAsyncCommand(requestId, commandName, payload);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_PENDING)
                                                  .payload(payload)
                                                  .build();
             } else if (ASYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
-                runAsyncCommand(requestId, commandName);
+                runAsyncCommand(requestId, commandName, payload);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_PENDING)
                                                  .payload(payload)
@@ -147,10 +149,10 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
         }
     }
 
-    private void runAsyncCommand(String requestId, String commandName) {
+    private void runAsyncCommand(String requestId, String commandName, String payload) {
         new Thread(() -> {
             for (int i = 1; i <= 5; i++) {
-                String progressPercentage = String.format("Progress of %s: %d", commandName, i * 100 / 5);
+                String progressPercentage = String.format(ASYNC_COMMAND_PROGRESS_MESSAGE_FORMAT, commandName, payload, i * 100 / 5);
                 log.debug(">> Executing Async task: {}", progressPercentage);
 
                 DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
@@ -170,11 +172,12 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                 }
             }
 
+            String payloadMessage = String.format(ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT, commandName, payload);
             DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
                                                                                                        .commandName(commandName)
                                                                                                        .requestId(requestId)
                                                                                                        .statusCode(STATUS_CODE_COMPLETED)
-                                                                                                       .payload("COMPLETED")
+                                                                                                       .payload(payloadMessage)
                                                                                                        .build();
             DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
             log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);
