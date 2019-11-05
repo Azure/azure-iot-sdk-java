@@ -41,7 +41,8 @@ Note that the samples for Windows and Linux use Maven.
     ```
     1. Please obtain details of IdScope and globalEndpoint from the [portal][azure-portal] where you have created your service. Follow instructions in step <11> to retreive this information from portal.
     2. You can choose one of available protocols [HTTPS, AMQP, MQTT, AMQP_WS, MQTT_WS] for registration.
-    3. Obtain the certificates following instructions from [X509 Certificate Generator][x509-cert-generator]. If you are trying Group Enrollment then you will need to add signerCertificates to the Collection.
+    3. Obtain the certificates following instructions from [X509 Certificate Generator][x509-cert-generator]. If you are trying Group Enrollment then you will need to add signerCertificates to the Collection.  You can add the signerCertificates in main() just before instantiating SecurityProviderX509Cert:
+    signerCertificates.add("<Your Signer/intermediate Certificate Here>");
 
 5. In a command line, build your sample:
     ```
