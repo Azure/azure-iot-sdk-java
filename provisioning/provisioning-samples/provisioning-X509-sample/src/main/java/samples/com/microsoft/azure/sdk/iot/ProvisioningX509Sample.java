@@ -76,6 +76,9 @@ public class ProvisioningX509Sample
         {
             ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
+            // For group enrollment uncomment this line
+            //signerCertificates.add("<Your Signer/intermediate Certificate Here>");
+            
             SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
             provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
                                                                        securityProviderX509);
