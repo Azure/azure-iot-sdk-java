@@ -9,6 +9,7 @@ import java.io.IOException;
 @Slf4j
 public class DeviceClientManager {
     private static final Object lock = new Object();
+    private static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 10;
     private static boolean connecting;
     @Delegate
     private DeviceClient client;
@@ -27,16 +28,14 @@ public class DeviceClientManager {
                 break;
             }
             catch (Exception ex) {
-                log.error("[connect] - Exception thrown while opening DeviceClient instance.");
-                ex.printStackTrace();
+                log.error("[connect] - Exception thrown while opening DeviceClient instance: ", ex);
             }
             try {
                 log.debug("[connect] - Sleeping for 10 secs before attempting another open()");
-                Thread.sleep(10 * 1000);
+                Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
             }
             catch (InterruptedException ex) {
-                log.error("[connect] - Exception in thread sleep");
-                ex.printStackTrace();
+                log.error("[connect] - Exception in thread sleep: ", ex);
             }
         }
     }
@@ -65,8 +64,7 @@ public class DeviceClientManager {
             client.closeNow();
         }
         catch (IOException e) {
-            log.error("[disconnect] - Exception thrown while closing DeviceClient instance.");
-            e.printStackTrace();
+            log.error("[disconnect] - Exception thrown while closing DeviceClient instance: ", e);
         }
     }
 }

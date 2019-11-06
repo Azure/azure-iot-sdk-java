@@ -16,7 +16,7 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
 
         if (throwable != null) {
             log.warn("Connection status callback executed with a throwable");
-            log.warn("Throwable: {}", throwable);
+            log.warn("Throwable: ", throwable);
         }
 
         final DeviceClientManager clientManager = (DeviceClientManager) callbackContext;
@@ -34,7 +34,7 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
                     case RETRY_EXPIRED:
                     case CLIENT_CLOSE:
                     default:
-                        throw new IllegalStateException(String.format("### DeviceClient cannot be %s with reason %s", status, statusChangeReason));
+                        log.error("### DeviceClient cannot be {} with reason {}", status, statusChangeReason);
                 }
             case DISCONNECTED_RETRYING:
                 switch (statusChangeReason) {
@@ -49,7 +49,7 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
                     case RETRY_EXPIRED:
                     case CLIENT_CLOSE:
                     default:
-                        throw new IllegalStateException(String.format("### DeviceClient cannot be %s with reason %s", status, statusChangeReason));
+                        log.error("### DeviceClient cannot be {} with reason {}", status, statusChangeReason);
                 }
             case DISCONNECTED:
                 switch (statusChangeReason) {
@@ -63,33 +63,31 @@ public class IotHubConnectionStatusChangeCallbackHandler implements IotHubConnec
                     case RETRY_EXPIRED:
                         log.warn("### The DeviceClient has been disconnected because the retry policy expired. Can be reopened by closing and then opening the instance.");
                         if (Application.reconnectIndefinitely) {
-                            new Thread(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    clientManager.reconnect();
-                                }
-                            }).start();
+                            recoverDeviceClient(clientManager);
                         }
                         return;
                     case COMMUNICATION_ERROR:
                         log.warn("### The DeviceClient has been disconnected due to a non-retryable exception. Inspect the throwable for details.");
                         log.warn("### The DeviceClient can be reopened by closing and then opening the instance.");
                         if (Application.reconnectIndefinitely) {
-                            new Thread(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    clientManager.reconnect();
-                                }
-                            }).start();
+                            recoverDeviceClient(clientManager);
                         }
                         return;
                     case CONNECTION_OK:
                     case NO_NETWORK:
                     default:
-                        throw new IllegalStateException(String.format("### DeviceClient cannot be %s with reason %s", status, statusChangeReason));
+                        log.error("### DeviceClient cannot be {} with reason {}", status, statusChangeReason);
                 }
         }
+    }
+
+    private void recoverDeviceClient(final DeviceClientManager clientManager) {
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                clientManager.reconnect();
+            }
+        }).start();
     }
 }
