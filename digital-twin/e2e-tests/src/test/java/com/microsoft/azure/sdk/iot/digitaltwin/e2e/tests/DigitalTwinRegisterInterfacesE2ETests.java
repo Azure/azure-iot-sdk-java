@@ -31,10 +31,14 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.*;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubListener.verifyThatMessageWasReceived;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TELEMETRY_NAME_INTEGER;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TEST_INTERFACE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.RandomUtils.nextInt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -147,32 +151,6 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         // Once registration completes successfully, the first call will return "DIGITALTWIN_CLIENT_OK".
         assertThat(registrationResults.get(0)).isEqualTo(DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING);
         assertThat(registrationResults.get(1)).isEqualTo(DIGITALTWIN_CLIENT_OK);
-    }
-
-    @ParameterizedTest(name = "{index}: Re-register interface after device client close: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterInterfaceAfterDeviceClientClose(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-
-        // assert that the registered interface is returned in the DigitalTwin
-        String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned",
-                () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
-                () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
-
-        // close the device client instance
-        testDevice.getDeviceClient().closeNow();
-
-        // Re-register another interface
-        testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
-        DigitalTwinClientResult registrationResult2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1)).blockingGet();
-        assertThat(registrationResult2).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
     }
 
     // No error thrown, unpublished interface registered
