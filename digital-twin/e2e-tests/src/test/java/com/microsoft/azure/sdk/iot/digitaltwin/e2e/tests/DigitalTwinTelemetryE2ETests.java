@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
@@ -130,6 +131,36 @@ public class DigitalTwinTelemetryE2ETests {
         assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult1)).as("Verify EventHub received the sent telemetry").isTrue();
         String expectedPayloadResult2 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_BOOLEAN, serialize(booleanTelemetry));
         assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult2)).as("Verify EventHub received the sent telemetry").isTrue();
+    }
+
+    @ParameterizedTest(name = "{index}: Test telemetry operation after client close and re-open: protocol = {0}")
+    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
+    public void testTelemetryOperationAfterClientCloseAndOpen(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException, InterruptedException {
+        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
+        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
+        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
+
+        int telemetryValue1 = nextInt();
+        log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue1);
+        DigitalTwinClientResult digitalTwinClientResult1 = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue1).blockingGet();
+        log.debug("Telemetry operation result: {}", digitalTwinClientResult1);
+
+        String expectedPayload1 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue1));
+        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload1)).as("Verify EventHub received the sent telemetry").isTrue();
+
+        // close the device client
+        testDevice.getDeviceClient().closeNow();
+
+        // re-open the client and send telemetry
+        testDevice.getDeviceClient().open();
+
+        int telemetryValue2 = nextInt();
+        log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue2);
+        DigitalTwinClientResult digitalTwinClientResult2 = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue2).blockingGet();
+        log.debug("Telemetry operation result: {}", digitalTwinClientResult2);
+
+        String expectedPayload2 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue2));
+        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload2)).as("Verify EventHub received the sent telemetry").isTrue();
     }
 
     private static Stream<Arguments> telemetryTestDifferentSchemaParameters() {
