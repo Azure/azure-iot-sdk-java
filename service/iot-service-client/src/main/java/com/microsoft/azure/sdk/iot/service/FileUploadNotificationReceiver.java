@@ -75,6 +75,8 @@ public class FileUploadNotificationReceiver extends Receiver
     /**
      * Receive FileUploadNotification with default timeout
      *
+     * QoS for receiving file upload notifications is at least once
+     *
      * @return The received FileUploadNotification object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
@@ -87,6 +89,9 @@ public class FileUploadNotificationReceiver extends Receiver
 
     /**
      * Receive FileUploadNotification with specific timeout
+     *
+     * QoS for receiving file upload notifications is at least once
+     *
      * @param timeoutMs The timeout in milliseconds
      * @return The received FileUploadNotification object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
@@ -152,6 +157,8 @@ public class FileUploadNotificationReceiver extends Receiver
     /**
      * Async wrapper for receive() operation with default timeout
      *
+     * QoS for receiving file upload notifications is at least once
+     *
      * @return The future object for the requested operation
      */
     @Override
@@ -163,6 +170,8 @@ public class FileUploadNotificationReceiver extends Receiver
 
     /**
      * Async wrapper for receive() operation with specific timeout
+     *
+     * QoS for receiving file upload notifications is at least once
      *
      * @return The future object for the requested operation
      */
