@@ -10,11 +10,10 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.RestException;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -25,15 +24,10 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.SYNC_COMMAND_WITH_PAYLOAD;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TEST_INTERFACE_ID;
-import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.createPropertyPatch;
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@Slf4j
 public class DigitalTwinServiceClientE2ETests {
-    private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
+    private static final String IOT_HUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String DCM_ID = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.DCM_ID_ENV_VAR_NAME);
     private static final String TEST_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
 
@@ -47,14 +41,14 @@ public class DigitalTwinServiceClientE2ETests {
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
-    @BeforeAll
+    @BeforeClass
     public static void setUp() {
         digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString()
-                                                               .connectionString(IOTHUB_CONNECTION_STRING)
+                                                               .connectionString(IOT_HUB_CONNECTION_STRING)
                                                                .build();
     }
 
-    @BeforeEach
+    @Before
     public void setUpTest() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, MQTT);
@@ -77,15 +71,15 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
-    @Test
+    @Test (expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidModelUrn() {
-        assertThrows(NoSuchElementException.class, () -> digitalTwinServiceClient.getModel(INVALID_MODEL_URN));
+        digitalTwinServiceClient.getModel(INVALID_MODEL_URN);
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
-    @Test
+    @Test (expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidInterfaceUrn() {
-        assertThrows(NoSuchElementException.class, () -> digitalTwinServiceClient.getModel(INVALID_INTERFACE_URN));
+        digitalTwinServiceClient.getModel(INVALID_INTERFACE_URN);
     }
 
     @Test
@@ -93,20 +87,19 @@ public class DigitalTwinServiceClientE2ETests {
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
 
         // Assert that returned digital twin contains the default interface implemented by all devices
-        assertAll("Expected DigitalTwin is not returned",
-                () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
-                () -> assertThat(digitalTwin).contains("\"urn_azureiot_ModelDiscovery_DigitalTwin\""),
-                () -> assertThat(digitalTwin).contains("\"version\":1"));
+        assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
+        assertThat(digitalTwin).contains("\"urn_azureiot_ModelDiscovery_DigitalTwin\"");
+        assertThat(digitalTwin).contains("\"version\":1");
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
-    @Test
+    @Test (expected = NoSuchElementException.class)
     public void testGetAllDigitalTwinInterfacesInvalidDigitalTwinId() {
-        assertThrows(NoSuchElementException.class, () -> digitalTwinServiceClient.getDigitalTwin(INVALID_DEVICE_ID));
+        digitalTwinServiceClient.getDigitalTwin(INVALID_DEVICE_ID);
     }
 
-    @Test
-    public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() {
+    @Test (expected = IOException.class)
+    public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String interfaceInstanceName = "testInterfaceInstanceName";
         String propertyName = "testPropertyName_";
@@ -119,17 +112,17 @@ public class DigitalTwinServiceClientE2ETests {
                 + "      }"
                 + "  }";
 
-        assertThrows(IOException.class, () -> digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch));
+        digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch);
     }
 
     // Service throws a 404 Not Found
-    @Test
+    @Test (expected = RestException.class)
     public void testInvokeCommandOnInvalidDevice() {
         String samplePayload = "samplePayload";
-        assertThrows(RestException.class, () -> digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITH_PAYLOAD, samplePayload));
+        digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITH_PAYLOAD, samplePayload);
     }
 
-    @AfterEach
+    @After
     public void tearDownTest() {
         testDevice.closeAndDeleteDevice();
     }

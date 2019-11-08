@@ -25,7 +25,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 @Slf4j
 @Getter
 public class TestDigitalTwinDevice {
-    private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
+    private static final String IOT_HUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
 
     private String deviceId;
     private DeviceClient deviceClient;
@@ -42,7 +42,7 @@ public class TestDigitalTwinDevice {
     }
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(IOT_HUB_CONNECTION_STRING);
 
         Device device = Device.createDevice(deviceId, SAS);
         Device registeredDevice = registryManager.addDevice(device);
@@ -60,7 +60,7 @@ public class TestDigitalTwinDevice {
         try {
             deviceClient.closeNow();
 
-            RegistryManager registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(IOT_HUB_CONNECTION_STRING);
             registryManager.removeDevice(deviceId);
             registryManager.close();
         } catch (Exception ex) {
