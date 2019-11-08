@@ -18,32 +18,32 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.*;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubListener.verifyThatMessageWasReceived;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TELEMETRY_NAME_INTEGER;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TEST_INTERFACE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.RandomUtils.nextInt;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
+@RunWith(Parameterized.class)
 public class DigitalTwinRegisterInterfacesE2ETests {
-    private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
+    private static final String IOT_HUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String DCM_ID = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.DCM_ID_ENV_VAR_NAME);
     private static final String TEST_INTERFACE_INSTANCE_NAME_1 = retrieveInterfaceNameFromInterfaceId(TestInterfaceInstance1.TEST_INTERFACE_ID);
     private static final String TEST_INTERFACE_INSTANCE_NAME_2 = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
@@ -51,7 +51,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     private static final String INVALID_INTERFACE_INSTANCE_NAME = "invalidInterfaceInstanceName";
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinRegisterInterfacesE2ETests_";
-    private static final String DIGITALTWIN_INTERFACE_PATTERN = "\"%s\":\"%s\"";
+    private static final String DIGITAL_TWIN_INTERFACE_PATTERN = "\"%s\":\"%s\"";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private String digitalTwinId;
@@ -59,16 +59,26 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     private TestInterfaceInstance1 testInterfaceInstance1;
     private TestInterfaceInstance2 testInterfaceInstance2;
 
-    @BeforeAll
+    @Parameterized.Parameter(0)
+    public IotHubClientProtocol protocol;
+
+    @Parameterized.Parameters(name = "{index}: Register interfaces Test: protocol={0}")
+    public static Collection<Object[]> data() {
+        return asList(new Object[][] {
+                {MQTT},
+                {MQTT_WS},
+        });
+    }
+
+    @BeforeClass
     public static void setUp() {
         digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString()
-                                                               .connectionString(IOTHUB_CONNECTION_STRING)
+                                                               .connectionString(IOT_HUB_CONNECTION_STRING)
                                                                .build();
     }
 
-    @ParameterizedTest(name = "{index}: MRegister single interface: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterSingleInterfaceSuccess(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @Test
+    public void testRegisterSingleInterfaceSuccess() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -79,14 +89,12 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned",
-                () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
-                () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
+        assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID));
     }
 
-    @ParameterizedTest(name = "{index}: Register multiple interfaces: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterMultipleInterfacesSuccess(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @Test
+    public void testRegisterMultipleInterfacesSuccess() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -98,15 +106,13 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned",
-                () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
-                () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_1, TestInterfaceInstance1.TEST_INTERFACE_ID)),
-                () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
+        assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_1, TestInterfaceInstance1.TEST_INTERFACE_ID));
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID));
     }
 
-    @ParameterizedTest(name = "{index}: Register interfaces multiple times sequentially: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterInterfacesMultipleTimesSequentially(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @Test
+    public void testRegisterInterfacesMultipleTimesSequentially() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -117,18 +123,16 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
-        assertAll("Expected DigitalTwin is not returned",
-                () -> assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull(),
-                () -> assertThat(digitalTwin).contains(String.format(DIGITALTWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID)));
+        assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID));
 
         testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
         DigitalTwinClientResult registrationResult2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1)).blockingGet();
         assertThat(registrationResult2).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
     }
 
-    @ParameterizedTest(name = "{index}: Register interfaces multiple times in parallel: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterInterfacesMultipleTimesInParallel(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @Test
+    public void testRegisterInterfacesMultipleTimesInParallel() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -154,10 +158,9 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     }
 
     // No error thrown, unpublished interface registered
-    @Disabled("Disabled until service validates and throws exception")
-    @ParameterizedTest(name = "{index}: Register unpublished interface: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterInterfaceNotPublishedInRepository(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @Ignore("Disabled until service validates and throws exception")
+    @Test
+    public void testRegisterInterfaceNotPublishedInRepository() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -168,10 +171,9 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     }
 
     // No error thrown, interface registered with the invalid name
-    @Disabled("Disabled until service validates and throws exception")
-    @ParameterizedTest(name = "{index}: Register interface with incorrect instance name: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterInterfaceWithDifferentInstanceName(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @Ignore("Disabled until service validates and throws exception")
+    @Test
+    public void testRegisterInterfaceWithDifferentInstanceName() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -182,10 +184,9 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     }
 
     // No error thrown, no interface registered
-    @Disabled("Disabled until service validates and throws exception")
-    @ParameterizedTest(name = "{index}: Register interface with incorrect instance name: protocol = {0}")
-    @EnumSource(value = IotHubClientProtocol.class, names = {"MQTT", "MQTT_WS"})
-    public void testRegisterEmptyListOfInterfaces(IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @Ignore("Disabled until service validates and throws exception")
+    @Test
+    public void testRegisterEmptyListOfInterfaces() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -194,7 +195,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
     }
 
-    @AfterEach
+    @After
     public void tearDownTest() {
         testDevice.closeAndDeleteDevice();
     }
