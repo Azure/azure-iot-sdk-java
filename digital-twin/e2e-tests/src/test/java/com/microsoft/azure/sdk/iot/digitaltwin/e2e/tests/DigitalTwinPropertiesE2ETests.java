@@ -15,10 +15,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientI
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -77,12 +74,19 @@ public class DigitalTwinPropertiesE2ETests {
                                                                .build();
     }
 
-    @Test
-    public void testUpdateSingleWritablePropertyFromService() throws IOException, URISyntaxException, IotHubException {
+    @Before
+    public void setUpTest() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance = registerAndReturnDigitalTwinInterface(testDevice);
+        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
+        testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
+        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
+        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+    }
+
+    @Test
+    public void testUpdateSingleWritablePropertyFromService() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
@@ -97,11 +101,7 @@ public class DigitalTwinPropertiesE2ETests {
     }
 
     @Test
-    public void testUpdateMultipleWritablePropertyFromService() throws IOException, URISyntaxException, IotHubException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testUpdateMultipleWritablePropertyFromService() throws IOException {
         String propertyValue1 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         String propertyValue2 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         Map<String, String> propertyValues = new HashMap<String, String>() {{ put(PROPERTY_NAME_WRITABLE, propertyValue1); put(PROPERTY_NAME_2_WRITABLE, propertyValue2); }};
@@ -121,11 +121,7 @@ public class DigitalTwinPropertiesE2ETests {
     }
 
     @Test
-    public void testUpdateWritablePropertyFromServiceMultithreaded() throws IOException, URISyntaxException, IotHubException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testUpdateWritablePropertyFromServiceMultithreaded() {
         List<String> payloadValueList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
                                                     .map(Object :: toString)
                                                     .collect(Collectors.toList());
@@ -163,11 +159,7 @@ public class DigitalTwinPropertiesE2ETests {
     }
 
     @Test
-    public void testUpdateSinglePropertyFromServiceUnknownInterfaceName() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testUpdateSinglePropertyFromServiceUnknownInterfaceName() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
@@ -179,11 +171,7 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Ignore("Disabled until service validates and throws exception")
     @Test
-    public void testUpdateSingleWritablePropertyFromServiceUnknownPropertyName() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testUpdateSingleWritablePropertyFromServiceUnknownPropertyName() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(UNKNOWN_PROPERTY_NAME, propertyValue));
@@ -195,11 +183,7 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Ignore("Disabled until service validates and throws exception")
     @Test
-    public void testUpdateSingleReadonlyPropertyFromService() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testUpdateSingleReadonlyPropertyFromService() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_READONLY, propertyValue));
@@ -214,25 +198,11 @@ public class DigitalTwinPropertiesE2ETests {
     }
 
     @Test
-    public void testUpdateSingleWritablePropertyFromDevice() throws IOException, URISyntaxException, IotHubException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testUpdateSingleWritablePropertyFromDevice() {
         String propertyValue = DEVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         DigitalTwinClientResult updateResult = testInterfaceInstance.updatePropertyFromDevice(PROPERTY_NAME_WRITABLE, propertyValue).blockingGet();
 
         assertThat(updateResult).as("Verify that device sent the property update to service").isEqualTo(DIGITALTWIN_CLIENT_OK);
-    }
-
-    private TestInterfaceInstance2 registerAndReturnDigitalTwinInterface(TestDigitalTwinDevice testDevice) {
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-
-        return testInterfaceInstance;
     }
 
     @After
