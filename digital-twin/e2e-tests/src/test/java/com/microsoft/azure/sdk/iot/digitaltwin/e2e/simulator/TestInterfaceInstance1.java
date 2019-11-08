@@ -28,6 +28,8 @@ public class TestInterfaceInstance1 extends AbstractDigitalTwinInterfaceClient {
     public static final String ASYNC_COMMAND_WITHOUT_PAYLOAD = "anotherAsyncCommand";
     public static final String PROPERTY_NAME_WRITABLE = "writableProperty";
     private static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
+    private static final String ASYNC_COMMAND_PROGRESS_MESSAGE_FORMAT = "Progress of %s [%s]: %d";
+    private static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [%s]: COMPLETED";
 
     private static String interfaceInstanceName;
 
@@ -67,23 +69,13 @@ public class TestInterfaceInstance1 extends AbstractDigitalTwinInterfaceClient {
                 requestId,
                 payload);
         try{
-            if (SYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
+            if (SYNC_COMMAND_WITH_PAYLOAD.equals(commandName) || SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
                                                  .payload(payload)
                                                  .build();
-            } else if (SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
-                return DigitalTwinCommandResponse.builder()
-                                                 .status(STATUS_CODE_COMPLETED)
-                                                 .build();
-            } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
-                runAsyncCommand(requestId, commandName);
-                return DigitalTwinCommandResponse.builder()
-                                                 .status(STATUS_CODE_PENDING)
-                                                 .payload(String.format("Running command: %s", commandName))
-                                                 .build();
-            }  else if (ASYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
-                runAsyncCommand(requestId, commandName);
+            } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName) || SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
+                runAsyncCommand(requestId, commandName, payload);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_PENDING)
                                                  .payload(payload)
@@ -106,10 +98,10 @@ public class TestInterfaceInstance1 extends AbstractDigitalTwinInterfaceClient {
         }
     }
 
-    private void runAsyncCommand(String requestId, String commandName) {
+    private void runAsyncCommand(String requestId, String commandName, String payload) {
         new Thread(() -> {
-            for (int i = 0; i < 5; i++) {
-                String progressPercentage = String.format("Progress of %s: %d", commandName, i * 100 / 5);
+            for (int i = 1; i <= 5; i++) {
+                String progressPercentage = String.format(ASYNC_COMMAND_PROGRESS_MESSAGE_FORMAT, commandName, payload, i * 100 / 5);
                 log.debug(">> Executing Async task: {}", progressPercentage);
 
                 DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
@@ -129,17 +121,17 @@ public class TestInterfaceInstance1 extends AbstractDigitalTwinInterfaceClient {
                 }
             }
 
+            String payloadMessage = String.format(ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT, commandName, payload);
             DigitalTwinAsyncCommandUpdate digitalTwinAsyncCommandUpdate = DigitalTwinAsyncCommandUpdate.builder()
                                                                                                        .commandName(commandName)
                                                                                                        .requestId(requestId)
                                                                                                        .statusCode(STATUS_CODE_COMPLETED)
-                                                                                                       .payload("COMPLETED")
+                                                                                                       .payload(payloadMessage)
                                                                                                        .build();
             DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
             log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);
 
             log.debug("Async command execution complete.");
         }).start();
-
     }
 }

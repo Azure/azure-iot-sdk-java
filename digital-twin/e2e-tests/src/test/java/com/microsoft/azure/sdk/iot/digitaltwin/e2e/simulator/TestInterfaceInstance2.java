@@ -110,22 +110,12 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                 requestId,
                 payload);
         try {
-            if (SYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
+            if (SYNC_COMMAND_WITH_PAYLOAD.equals(commandName) || SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)
                                                  .payload(payload)
                                                  .build();
-            } else if (SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
-                return DigitalTwinCommandResponse.builder()
-                                                 .status(STATUS_CODE_COMPLETED)
-                                                 .build();
-            } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName)) {
-                runAsyncCommand(requestId, commandName, payload);
-                return DigitalTwinCommandResponse.builder()
-                                                 .status(STATUS_CODE_PENDING)
-                                                 .payload(payload)
-                                                 .build();
-            } else if (ASYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
+            } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName) || ASYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
                 runAsyncCommand(requestId, commandName, payload);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_PENDING)
