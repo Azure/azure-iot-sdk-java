@@ -11,6 +11,8 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance1;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncClient;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwinCommandResponse;
@@ -37,6 +39,7 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubList
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.synchronizedList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
@@ -56,6 +59,7 @@ public class DigitalTwinCommandE2ETests {
     private static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [\"%s\"]: COMPLETED";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
+    private static DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
@@ -75,6 +79,9 @@ public class DigitalTwinCommandE2ETests {
         digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString()
                                                                .connectionString(IOT_HUB_CONNECTION_STRING)
                                                                .build();
+        digitalTwinServiceAsyncClient = DigitalTwinServiceAsyncClientImpl.buildFromConnectionString()
+                                                                         .connectionString(IOT_HUB_CONNECTION_STRING)
+                                                                         .build();
     }
 
     @Before
@@ -186,13 +193,16 @@ public class DigitalTwinCommandE2ETests {
         List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
                                                    .map(Object :: toString)
                                                    .collect(Collectors.toList());
-        List<DigitalTwinCommandResponse> commandResponses = Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
-                                                                    .parallel()
-                                                                    .runOn(Schedulers.io())
-                                                                    .map(integer -> digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, payloadTextList.get(integer)))
-                                                                    .sequential()
-                                                                    .toList()
-                                                                    .blockingGet();
+        List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
+
+        Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
+                .parallel()
+                .runOn(Schedulers.io())
+                .map(integer -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, payloadTextList.get(integer))
+                        .subscribe(commandResponses::add))
+                .sequential()
+                .toList()
+                .blockingGet();
 
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             DigitalTwinCommandResponse commandResponse = commandResponses.get(i);
@@ -212,13 +222,16 @@ public class DigitalTwinCommandE2ETests {
         List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
                                                    .map(Object :: toString)
                                                    .collect(Collectors.toList());
-        List<DigitalTwinCommandResponse> commandResponses = Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
-                                                                    .parallel()
-                                                                    .runOn(Schedulers.io())
-                                                                    .map(integer -> digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, payloadTextList.get(integer)))
-                                                                    .sequential()
-                                                                    .toList()
-                                                                    .blockingGet();
+        List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
+
+        Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
+                .parallel()
+                .runOn(Schedulers.io())
+                .map(integer -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, payloadTextList.get(integer))
+                        .subscribe(commandResponses::add))
+                .sequential()
+                .toList()
+                .blockingGet();
 
         List<String> payloadTextListCopy = new ArrayList<>(payloadTextList);
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {

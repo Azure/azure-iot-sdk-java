@@ -10,6 +10,8 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncClient;
+import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -52,6 +54,7 @@ public class DigitalTwinPropertiesE2ETests {
     private static final String UNKNOWN_PROPERTY_NAME = "unknownPropertyName";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
+    private static DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
     private TestInterfaceInstance2 testInterfaceInstance;
@@ -72,6 +75,9 @@ public class DigitalTwinPropertiesE2ETests {
         digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString()
                                                                .connectionString(IOT_HUB_CONNECTION_STRING)
                                                                .build();
+        digitalTwinServiceAsyncClient = DigitalTwinServiceAsyncClientImpl.buildFromConnectionString()
+                                                                         .connectionString(IOT_HUB_CONNECTION_STRING)
+                                                                         .build();
     }
 
     @Before
@@ -121,7 +127,7 @@ public class DigitalTwinPropertiesE2ETests {
     }
 
     @Test
-    public void testUpdateWritablePropertyFromServiceMultithreaded() {
+    public void testUpdateWritablePropertyFromAsyncServiceMultithreaded() {
         List<String> payloadValueList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
                                                     .map(Object :: toString)
                                                     .collect(Collectors.toList());
@@ -132,7 +138,7 @@ public class DigitalTwinPropertiesE2ETests {
         Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
                 .parallel()
                 .runOn(Schedulers.io())
-                .map(integer -> digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatchList.get(integer)))
+                .map(integer -> digitalTwinServiceAsyncClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatchList.get(integer)).subscribe())
                 .sequential()
                 .toList()
                 .blockingGet();

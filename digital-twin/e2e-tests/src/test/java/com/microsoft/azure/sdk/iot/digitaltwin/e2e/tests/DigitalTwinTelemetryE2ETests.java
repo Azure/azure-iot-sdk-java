@@ -86,12 +86,12 @@ public class DigitalTwinTelemetryE2ETests {
     }
 
     @Test
-    public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetry() throws IOException, InterruptedException {
+    public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
         List<Integer> telemetryList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed().collect(Collectors.toList());
         Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
                 .parallel()
                 .runOn(Schedulers.io())
-                .map(integer -> testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryList.get(integer)).blockingGet())
+                .map(integer -> testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryList.get(integer)).subscribe())
                 .sequential()
                 .blockingSubscribe();
 
@@ -102,7 +102,7 @@ public class DigitalTwinTelemetryE2ETests {
     }
 
     @Test
-    public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetry() throws IOException, InterruptedException {
+    public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
         int intTelemetry = nextInt();
         boolean booleanTelemetry = nextBoolean();
         Single<DigitalTwinClientResult> result1 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, intTelemetry);
@@ -111,7 +111,7 @@ public class DigitalTwinTelemetryE2ETests {
         Flowable.fromArray(result1, result2)
                 .parallel()
                 .runOn(Schedulers.io())
-                .map(Single :: blockingGet)
+                .map(Single :: subscribe)
                 .sequential()
                 .blockingSubscribe();
 
