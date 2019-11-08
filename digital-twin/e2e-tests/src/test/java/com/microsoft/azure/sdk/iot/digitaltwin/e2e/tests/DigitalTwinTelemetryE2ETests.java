@@ -16,6 +16,7 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,13 +46,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(Parameterized.class)
 public class DigitalTwinTelemetryE2ETests {
     private static final String DCM_ID = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.DCM_ID_ENV_VAR_NAME);
-    private static final String TEST_INTERFACE_INSTANCE_NAME_2 = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
+    private static final String TEST_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinTelemetryE2ETests_";
     private static final int MAX_THREADS_MULTITHREADED_TEST = 5;
     private static final String TELEMETRY_PAYLOAD_PATTERN = "{\"%s\":%s}";
 
-    private TestInterfaceInstance2 testInterfaceInstance2;
+    private TestInterfaceInstance2 testInterfaceInstance;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
@@ -66,28 +67,31 @@ public class DigitalTwinTelemetryE2ETests {
         });
     }
 
-    @Ignore("Disabled until Service starts validating the telemetry payload with telemetry schema.")
-    @Test
-    public void testSendIncompatibleSchemaTelemetry() throws IOException, URISyntaxException, IotHubException {
+    @Before
+    public void setUpTest() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
+        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, nextBoolean()).blockingGet();
+        testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
+        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
+        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+    }
+
+    @Ignore("Disabled until Service starts validating the telemetry payload with telemetry schema.")
+    @Test
+    public void testSendIncompatibleSchemaTelemetry() throws IOException {
+        DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, nextBoolean()).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR);
     }
 
     @Test
-    public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetry() throws IOException, URISyntaxException, IotHubException, InterruptedException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetry() throws IOException, InterruptedException {
         List<Integer> telemetryList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed().collect(Collectors.toList());
         Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
                 .parallel()
                 .runOn(Schedulers.io())
-                .map(integer -> testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryList.get(integer)).blockingGet())
+                .map(integer -> testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryList.get(integer)).blockingGet())
                 .sequential()
                 .blockingSubscribe();
 
@@ -98,15 +102,11 @@ public class DigitalTwinTelemetryE2ETests {
     }
 
     @Test
-    public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetry() throws IotHubException, IOException, URISyntaxException, InterruptedException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetry() throws IOException, InterruptedException {
         int intTelemetry = nextInt();
         boolean booleanTelemetry = nextBoolean();
-        Single<DigitalTwinClientResult> result1 = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, intTelemetry);
-        Single<DigitalTwinClientResult> result2 = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_BOOLEAN, booleanTelemetry);
+        Single<DigitalTwinClientResult> result1 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, intTelemetry);
+        Single<DigitalTwinClientResult> result2 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_BOOLEAN, booleanTelemetry);
 
         Flowable.fromArray(result1, result2)
                 .parallel()
@@ -122,14 +122,10 @@ public class DigitalTwinTelemetryE2ETests {
     }
 
     @Test
-    public void testTelemetryOperationAfterClientCloseAndOpen() throws IotHubException, IOException, URISyntaxException, InterruptedException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
-
+    public void testTelemetryOperationAfterClientCloseAndOpen() throws IOException, InterruptedException {
         int telemetryValue1 = nextInt();
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue1);
-        DigitalTwinClientResult digitalTwinClientResult1 = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue1).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult1 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue1).blockingGet();
         log.debug("Telemetry operation result: {}", digitalTwinClientResult1);
 
         String expectedPayload1 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue1));
@@ -143,21 +139,11 @@ public class DigitalTwinTelemetryE2ETests {
 
         int telemetryValue2 = nextInt();
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue2);
-        DigitalTwinClientResult digitalTwinClientResult2 = testInterfaceInstance2.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue2).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult2 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue2).blockingGet();
         log.debug("Telemetry operation result: {}", digitalTwinClientResult2);
 
         String expectedPayload2 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue2));
         assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload2)).as("Verify EventHub received the sent telemetry").isTrue();
-    }
-
-    private TestInterfaceInstance2 registerAndReturnDigitalTwinInterface(TestDigitalTwinDevice testDevice) {
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
-
-        return testInterfaceInstance;
     }
 
     @After

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -38,11 +39,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(Parameterized.class)
 public class DigitalTwinTelemetryParameterizedE2ETests {
     private static final String DCM_ID = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.DCM_ID_ENV_VAR_NAME);
-    private static final String TEST_INTERFACE_INSTANCE_NAME_2 = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
+    private static final String TEST_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinTelemetryParameterizedE2ETests_";
     private static final String TELEMETRY_PAYLOAD_PATTERN = "{\"%s\":%s}";
 
+    private TestInterfaceInstance2 testInterfaceInstance;
+    private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
     @Parameterized.Parameter(0)
@@ -103,28 +106,25 @@ public class DigitalTwinTelemetryParameterizedE2ETests {
         return asList(data);
     }
 
-    @Test
-    public void testSendTelemetryDifferentSchema() throws IOException, InterruptedException, URISyntaxException, IotHubException {
-        String digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
+    @Before
+    public void setUpTest() throws IotHubException, IOException, URISyntaxException {
+        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        TestInterfaceInstance2 testInterfaceInstance2 = registerAndReturnDigitalTwinInterface(testDevice);
+        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
+        testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
+        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
+        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+    }
+
+    @Test
+    public void testSendTelemetryDifferentSchema() throws IOException, InterruptedException {
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", telemetryName, telemetryValue);
-        DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance2.sendTelemetry(telemetryName, telemetryValue).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance.sendTelemetry(telemetryName, telemetryValue).blockingGet();
         log.debug("Telemetry operation result: {}", digitalTwinClientResult);
 
         String expectedPayload = String.format(TELEMETRY_PAYLOAD_PATTERN, telemetryName, serialize(telemetryValue));
         assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
-    }
-
-    private TestInterfaceInstance2 registerAndReturnDigitalTwinInterface(TestDigitalTwinDevice testDevice) {
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
-
-        return testInterfaceInstance;
     }
 
     @After

@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,12 +77,19 @@ public class DigitalTwinCommandE2ETests {
                                                                .build();
     }
 
-    @Test
-    public void testDeviceClientReceivesSyncCommandWithPayloadAndResponds() throws IotHubException, IOException, URISyntaxException {
+    @Before
+    public void setUpTest() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
+        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
+        TestInterfaceInstance2 testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
+        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
+        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+    }
+
+    @Test
+    public void testDeviceClientReceivesSyncCommandWithPayloadAndResponds() {
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -91,24 +99,16 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @Test
-    public void testDeviceClientReceivesSyncCommandWithoutPayloadAndResponds() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
-
+    public void testDeviceClientReceivesSyncCommandWithoutPayloadAndResponds() {
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
-                assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_COMPLETED);
-                assertThat(commandResponse.getRequestId()).as("Verify Command Invocation Response RequestId").isNotNull();
+        assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_COMPLETED);
+        assertThat(commandResponse.getRequestId()).as("Verify Command Invocation Response RequestId").isNotNull();
     }
 
     @Test
-    public void testDeviceClientReceivesAsyncCommandWithPayloadAndResponds() throws IotHubException, IOException, URISyntaxException, InterruptedException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
-
+    public void testDeviceClientReceivesAsyncCommandWithPayloadAndResponds() throws InterruptedException {
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -122,11 +122,7 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @Test
-    public void testDeviceClientReceivesAsyncCommandWithoutPayloadAndResponds() throws IotHubException, IOException, URISyntaxException, InterruptedException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
-
+    public void testDeviceClientReceivesAsyncCommandWithoutPayloadAndResponds() throws InterruptedException {
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -139,11 +135,7 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @Test
-    public void testInvokeCommandInvalidInterfaceInstanceName() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
-
+    public void testInvokeCommandInvalidInterfaceInstanceName() {
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, INVALID_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -153,11 +145,7 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @Test
-    public void testInvokeCommandInvalidCommandName() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
-
+    public void testInvokeCommandInvalidCommandName() {
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, INVALID_COMMAND_NAME);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -194,11 +182,7 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @Test
-    public void testSyncCommandInvocationMultithreaded() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
-
+    public void testSyncCommandInvocationMultithreaded() {
         List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
                                                    .map(Object :: toString)
                                                    .collect(Collectors.toList());
@@ -224,11 +208,7 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @Test
-    public void testAsyncCommandInvocationMultithreaded() throws IotHubException, IOException, URISyntaxException, InterruptedException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
-        registerDigitalTwinInterface(testDevice);
-
+    public void testAsyncCommandInvocationMultithreaded() throws InterruptedException {
         List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
                                                    .map(Object :: toString)
                                                    .collect(Collectors.toList());
@@ -263,13 +243,5 @@ public class DigitalTwinCommandE2ETests {
     @After
     public void tearDownTest() {
         testDevice.closeAndDeleteDevice();
-    }
-
-    private void registerDigitalTwinInterface(TestDigitalTwinDevice testDevice) {
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
-
-        TestInterfaceInstance2 testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
     }
 }
