@@ -22,8 +22,8 @@ public class Application {
     private static final int DEVICE_OPERATION_TIMEOUT_IN_MINUTES = 2;
     private static final int NUM_REQUESTS = 20;
     private static final int SLEEP_DURATION_IN_SECS = 60;
+    private static final boolean AUTO_RECONNECT_ON_DISCONNECTED = true;
 
-    static boolean reconnectIndefinitely = true;
     static List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
     private static DeviceClientManager deviceClientManager;
 
@@ -38,7 +38,7 @@ public class Application {
         DeviceClient client = new DeviceClient(deviceConnectionString, protocol);
         log.debug("Successfully created an IoT Hub client.");
 
-        deviceClientManager = new DeviceClientManager(client);
+        deviceClientManager = new DeviceClientManager(client, AUTO_RECONNECT_ON_DISCONNECTED);
         deviceClientManager.setOperationTimeout(DEVICE_OPERATION_TIMEOUT_IN_MINUTES);
 
         deviceClientManager.connect();
