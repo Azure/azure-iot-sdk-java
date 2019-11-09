@@ -18,13 +18,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j-version>1.7.25</slf4j-version>
-        <rxjava3-version>3.0.0-RC3</rxjava3-version>
+        <lombok-version>1.18.8</lombok-version>
+        <maven-jar-plugin-version>3.1.0</maven-jar-plugin-version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
+            <version>${lombok-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -37,18 +38,13 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j-version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.reactivex.rxjava3</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>${rxjava3-version}</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>${maven-jar-plugin-version}</version>
                 <configuration>
                     <archive>
                         <manifest>
