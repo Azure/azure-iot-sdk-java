@@ -78,11 +78,6 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
 
     @Override
     protected void onPropertyUpdate(@NonNull DigitalTwinPropertyUpdate digitalTwinPropertyUpdate) {
-        log.debug("OnPropertyUpdate was received: ");
-        log.debug("getPropertyName: {}", digitalTwinPropertyUpdate.getPropertyName());
-        log.debug("getPropertyReported: {}", digitalTwinPropertyUpdate.getPropertyReported());
-        log.debug("getPropertyDesired: {}", digitalTwinPropertyUpdate.getPropertyDesired());
-        log.debug("getDesiredVersion: {}", digitalTwinPropertyUpdate.getDesiredVersion());
         propertyUpdatesReceived.put(digitalTwinPropertyUpdate.getPropertyName(), digitalTwinPropertyUpdate.getPropertyDesired());
     }
 

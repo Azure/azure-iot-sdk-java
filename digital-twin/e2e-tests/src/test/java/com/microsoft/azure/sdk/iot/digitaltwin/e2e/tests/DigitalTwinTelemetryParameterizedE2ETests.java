@@ -27,7 +27,7 @@ import java.util.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.*;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubListener.verifyThatMessageWasReceived;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
 import static java.util.Arrays.asList;
@@ -57,17 +57,17 @@ public class DigitalTwinTelemetryParameterizedE2ETests {
 
     @Parameterized.Parameters(name = "{index}: Telemetry Test: protocol={0}, telemetry name={1}, telemetry value={2}")
     public static Collection<Object[]> data() {
+        int arrayTelemetrySize = 5;
         String stringTelemetryValue = "StringTelemetryMessage_".concat(UUID.randomUUID().toString());
         long milliSecs = System.currentTimeMillis();
-        List<Integer> telemetryIntegerArray = asList(nextInt(), nextInt(), nextInt());
+        List<Integer> telemetryIntegerArray = generateRandomIntegerList(arrayTelemetrySize);
         Map<String, String> telemetryMap = new HashMap<String, String>() {{ put("mapTelemetryKey", "mapTelemetryValue"); }};
-
         int telemetryEnum = EnumTelemetry.OFFLINE.getValue();
         ComplexValueTelemetry telemetryComplexValue = new ComplexValueTelemetry(nextInt(), nextInt(), nextInt());
 
         int integerValue = nextInt();
         String stringValue = "ComplexObjectTelemetry_".concat(UUID.randomUUID().toString());
-        List<String> stringArrayValue = singletonList("ArrayTelemetry_".concat(UUID.randomUUID().toString()));
+        List<String> stringArrayValue = generateRandomStringList(arrayTelemetrySize);
         ComplexObjectTelemetry telemetryComplexObject = new ComplexObjectTelemetry(integerValue, stringValue, stringArrayValue);
 
         Object[][] data = new Object[][] {

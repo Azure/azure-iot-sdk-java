@@ -74,7 +74,7 @@ public class TestInterfaceInstance1 extends AbstractDigitalTwinInterfaceClient {
                                                  .status(STATUS_CODE_COMPLETED)
                                                  .payload(payload)
                                                  .build();
-            } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName) || SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
+            } else if (ASYNC_COMMAND_WITH_PAYLOAD.equals(commandName) || ASYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
                 runAsyncCommand(requestId, commandName, payload);
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_PENDING)

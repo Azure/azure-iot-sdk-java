@@ -15,8 +15,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncCl
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -24,19 +23,25 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_THREADS_MULTITHREADED_TEST;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.generateRandomStringList;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.createPropertyPatch;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Slf4j
 @RunWith(Parameterized.class)
 public class DigitalTwinPropertiesE2ETests {
     private static final String IOT_HUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
@@ -44,7 +49,7 @@ public class DigitalTwinPropertiesE2ETests {
     private static final String TEST_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinPropertiesE2ETests_";
-    private static final int MAX_THREADS_MULTITHREADED_TEST = 5;
+
     private static final String PROPERTY_VALUE_PATTERN = "{\"value\":\"%s\"}";
     private static final String PROPERTY_EACH_PATCH_PATTERN = "\"%s\":{\"reported\":null,\"desired\":%s}";
     private static final String PROPERTY_PATTERN_UPDATED_FROM_SERVICE = "\"name\":\"%s\",\"properties\":{\"%s\":{\"reported\":null,\"desired\":%s}}";
@@ -127,21 +132,23 @@ public class DigitalTwinPropertiesE2ETests {
     }
 
     @Test
-    public void testUpdateWritablePropertyFromAsyncServiceMultithreaded() {
-        List<String> payloadValueList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
-                                                    .map(Object :: toString)
-                                                    .collect(Collectors.toList());
+    public void testUpdateWritablePropertyFromAsyncServiceMultithreaded() throws InterruptedException {
+        final Semaphore semaphore = new Semaphore(0);
+        List<String> payloadValueList = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
         List<String> propertyPatchList = payloadValueList.stream()
-                                                         .map(s -> createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, s)))
+                                                         .map(propertyValue -> createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue)))
                                                          .collect(Collectors.toList());
 
-        Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
-                .parallel()
-                .runOn(Schedulers.io())
-                .map(integer -> digitalTwinServiceAsyncClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatchList.get(integer)).subscribe())
-                .sequential()
-                .toList()
-                .blockingGet();
+        propertyPatchList.forEach(propertyPatch -> {
+            try {
+                digitalTwinServiceAsyncClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatch)
+                        .subscribe(s -> semaphore.release());
+            } catch (IOException e) {
+                log.error("Exception thrown while updating property patch = {}", propertyPatch, e);
+            }
+        });
+
+        assertThat(semaphore.tryAcquire(MAX_THREADS_MULTITHREADED_TEST, MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS, SECONDS)).as("Timeout executing Async call").isTrue();
 
         boolean lastUpdatedPropertyReceived = false;
         String actualUpdatedProperty = null;
