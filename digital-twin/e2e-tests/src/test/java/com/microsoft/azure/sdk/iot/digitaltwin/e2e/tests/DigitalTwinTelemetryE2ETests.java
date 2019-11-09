@@ -11,9 +11,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
@@ -26,18 +24,21 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.concurrent.Semaphore;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_THREADS_MULTITHREADED_TEST;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.generateRandomIntegerList;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubListener.verifyThatMessageWasReceived;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +50,6 @@ public class DigitalTwinTelemetryE2ETests {
     private static final String TEST_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinTelemetryE2ETests_";
-    private static final int MAX_THREADS_MULTITHREADED_TEST = 5;
     private static final String TELEMETRY_PAYLOAD_PATTERN = "{\"%s\":%s}";
 
     private TestInterfaceInstance2 testInterfaceInstance;
@@ -87,13 +87,21 @@ public class DigitalTwinTelemetryE2ETests {
 
     @Test
     public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
-        List<Integer> telemetryList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed().collect(Collectors.toList());
-        Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
-                .parallel()
-                .runOn(Schedulers.io())
-                .map(integer -> testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryList.get(integer)).subscribe())
-                .sequential()
-                .blockingSubscribe();
+        final Semaphore semaphore = new Semaphore(0);
+        List<Integer> telemetryList = generateRandomIntegerList(MAX_THREADS_MULTITHREADED_TEST);
+
+        telemetryList.forEach(telemetryValue -> {
+            try {
+                testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue)
+                        .subscribe(digitalTwinClientResult -> {
+                            semaphore.release();
+                        });
+            } catch (IOException e) {
+                log.error("Exception thrown while sending telemetryValue={}", telemetryValue, e);
+            }
+        });
+
+        assertThat(semaphore.tryAcquire(MAX_THREADS_MULTITHREADED_TEST, MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS, SECONDS)).as("Timeout executing Async call").isTrue();
 
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             String expectedPayload = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryList.get(i)));
@@ -103,17 +111,19 @@ public class DigitalTwinTelemetryE2ETests {
 
     @Test
     public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
+        final Semaphore semaphore = new Semaphore(0);
+
         int intTelemetry = nextInt();
         boolean booleanTelemetry = nextBoolean();
-        Single<DigitalTwinClientResult> result1 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, intTelemetry);
-        Single<DigitalTwinClientResult> result2 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_BOOLEAN, booleanTelemetry);
 
-        Flowable.fromArray(result1, result2)
-                .parallel()
-                .runOn(Schedulers.io())
-                .map(Single :: subscribe)
-                .sequential()
-                .blockingSubscribe();
+        Disposable integerTelemetrySubscription = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, intTelemetry)
+                .subscribe(digitalTwinClientResult -> semaphore.release());
+        Disposable booleanTelemetrySubscription = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_BOOLEAN, booleanTelemetry)
+                .subscribe(digitalTwinClientResult -> semaphore.release());
+
+        assertThat(semaphore.tryAcquire(2, MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS, SECONDS)).as("Timeout executing Async call").isTrue();
+        integerTelemetrySubscription.dispose();
+        booleanTelemetrySubscription.dispose();
 
         String expectedPayloadResult1 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(intTelemetry));
         assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult1)).as("Verify EventHub received the sent telemetry").isTrue();

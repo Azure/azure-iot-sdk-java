@@ -3,6 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers;
 
+import io.reactivex.rxjava3.core.Flowable;
+import org.apache.commons.lang3.RandomUtils;
+
+import java.util.List;
+import java.util.UUID;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Tools {
@@ -25,5 +31,13 @@ public class Tools {
     public static String retrieveInterfaceNameFromInterfaceId(String interfaceId) {
         String[] interfaceIdParts = interfaceId.split(INTERFACE_ID_DELIMITER);
         return interfaceIdParts[interfaceIdParts.length - 2];
+    }
+
+    public static List<String> generateRandomStringList(int listSize) {
+        return Flowable.fromSupplier(UUID::randomUUID).map(UUID::toString).repeat(listSize).toList().blockingGet();
+    }
+
+    public static List<Integer> generateRandomIntegerList(int listSize) {
+        return Flowable.fromSupplier(RandomUtils::nextInt).repeat(listSize).toList().blockingGet();
     }
 }

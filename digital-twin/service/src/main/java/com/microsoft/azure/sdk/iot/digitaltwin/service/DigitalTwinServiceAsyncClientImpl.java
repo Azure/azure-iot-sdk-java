@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Setter;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -73,21 +74,24 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
     public Observable<String> getDigitalTwin(@NonNull String digitalTwinId) {
         return digitalTwin.getInterfacesAsync(digitalTwinId)
                           .filter(Objects :: nonNull)
-                          .flatMap(FUNC_MAP_TO_JSON_STRING);
+                          .flatMap(FUNC_MAP_TO_JSON_STRING)
+                          .subscribeOn(Schedulers.io());
     }
 
     @Override
     public Observable<String> getModel(@NonNull String modelId) {
         return digitalTwin.getDigitalTwinModelAsync(modelId)
                           .filter(Objects :: nonNull)
-                          .flatMap(FUNC_MAP_TO_JSON_STRING);
+                          .flatMap(FUNC_MAP_TO_JSON_STRING)
+                          .subscribeOn(Schedulers.io());
     }
 
     @Override
     public Observable<String> getModel(@NonNull String modelId, boolean expand) {
         return digitalTwin.getDigitalTwinModelAsync(modelId, expand)
                           .filter(Objects :: nonNull)
-                          .flatMap(FUNC_MAP_TO_JSON_STRING);
+                          .flatMap(FUNC_MAP_TO_JSON_STRING)
+                          .subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -102,7 +106,8 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
                 );
         return digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
                           .filter(Objects :: nonNull)
-                          .flatMap(FUNC_MAP_TO_JSON_STRING);
+                          .flatMap(FUNC_MAP_TO_JSON_STRING)
+                          .subscribeOn(Schedulers.io());
     }
 
     @Override
@@ -113,9 +118,11 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
     @Override
     public Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument) {
         return digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument), null, null)
-                .map(responseWithHeaders -> {
-                    DigitalTwinInvokeInterfaceCommandHeaders invokeInterfaceCommandHeaders = responseWithHeaders.headers();
-                    return new DigitalTwinCommandResponse(invokeInterfaceCommandHeaders.xMsCommandStatuscode(), invokeInterfaceCommandHeaders.xMsRequestId(), Objects.toString(responseWithHeaders.body(), null));
-                });
+
+                          .map(responseWithHeaders -> {
+                              DigitalTwinInvokeInterfaceCommandHeaders invokeInterfaceCommandHeaders = responseWithHeaders.headers();
+                              return new DigitalTwinCommandResponse(invokeInterfaceCommandHeaders.xMsCommandStatuscode(), invokeInterfaceCommandHeaders.xMsRequestId(), Objects.toString(responseWithHeaders.body(), null));
+                          })
+                          .subscribeOn(Schedulers.io());
     }
 }

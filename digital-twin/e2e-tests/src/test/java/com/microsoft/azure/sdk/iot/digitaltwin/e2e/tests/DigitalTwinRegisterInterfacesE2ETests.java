@@ -15,9 +15,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.UnpublishedInterfac
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -31,14 +29,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.*;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TEST_INTERFACE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.synchronizedList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
@@ -132,7 +134,10 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     }
 
     @Test
-    public void testRegisterInterfacesMultipleTimesInParallel() throws IotHubException, IOException, URISyntaxException {
+    public void testRegisterInterfacesMultipleTimesInParallel() throws IotHubException, IOException, URISyntaxException, InterruptedException {
+        final Semaphore semaphore = new Semaphore(0);
+        final List<DigitalTwinClientResult> registrationResults = synchronizedList(new ArrayList<>());
+
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
@@ -140,16 +145,20 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
         testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
 
-        Single<DigitalTwinClientResult> registrationResult1 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1));
-        Single<DigitalTwinClientResult> registrationResult2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2));
+        Disposable disposable1 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1))
+                .subscribe(digitalTwinClientResult -> {
+                    registrationResults.add(digitalTwinClientResult);
+                    semaphore.release();
+                });
+        Disposable disposable2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2))
+                .subscribe(digitalTwinClientResult -> {
+                    registrationResults.add(digitalTwinClientResult);
+                    semaphore.release();
+                });
 
-        List<DigitalTwinClientResult> registrationResults = Flowable.fromArray(registrationResult1, registrationResult2)
-                                                                    .parallel()
-                                                                    .runOn(Schedulers.io())
-                                                                    .map(Single :: blockingGet)
-                                                                    .sequential()
-                                                                    .toList()
-                                                                    .blockingGet();
+        assertThat(semaphore.tryAcquire(2, MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS, SECONDS)).as("Timeout executing Async call").isTrue();
+        disposable1.dispose();
+        disposable2.dispose();
 
         // The first call for register interfaces will be enqueued. The next call for register interfaces will immediately return "DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING".
         // Once registration completes successfully, the first call will return "DIGITALTWIN_CLIENT_OK".

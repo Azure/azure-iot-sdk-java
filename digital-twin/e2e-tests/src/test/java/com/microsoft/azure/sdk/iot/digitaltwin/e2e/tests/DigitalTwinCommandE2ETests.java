@@ -17,8 +17,6 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -29,17 +27,21 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.Semaphore;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_THREADS_MULTITHREADED_TEST;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.generateRandomStringList;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubListener.verifyThatMessageWasReceived;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
@@ -50,7 +52,6 @@ public class DigitalTwinCommandE2ETests {
     private static final String TEST_INTERFACE_INSTANCE_NAME_2 = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinCommandE2ETests_";
-    private static final int MAX_THREADS_MULTITHREADED_TEST = 5;
 
     private static final String SAMPLE_COMMAND_PAYLOAD = "samplePayload";
     private static final String INVALID_INTERFACE_INSTANCE_NAME = "invalidInterfaceInstanceName";
@@ -62,6 +63,7 @@ public class DigitalTwinCommandE2ETests {
     private static DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
+
 
     @Parameterized.Parameter(0)
     public IotHubClientProtocol protocol;
@@ -189,68 +191,62 @@ public class DigitalTwinCommandE2ETests {
     }
 
     @Test
-    public void testSyncCommandInvocationMultithreaded() {
-        List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
-                                                   .map(Object :: toString)
-                                                   .collect(Collectors.toList());
-        List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
+    public void testSyncCommandInvocationMultithreaded() throws InterruptedException {
+        final Semaphore semaphore = new Semaphore(0);
+        final List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
+        List<String> requestPayloadForMultiThreadTest = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
 
-        Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
-                .parallel()
-                .runOn(Schedulers.io())
-                .map(integer -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, payloadTextList.get(integer))
-                        .subscribe(commandResponses::add))
-                .sequential()
-                .toList()
-                .blockingGet();
+        requestPayloadForMultiThreadTest.forEach(payload -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD,payload)
+                                                                                   .subscribe(response -> {
+                                                                                       commandResponses.add(response);
+                                                                                       semaphore.release();
+                                                                                   }));
 
+        assertThat(semaphore.tryAcquire(MAX_THREADS_MULTITHREADED_TEST, MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS, SECONDS)).as("Timeout executing Async call").isTrue();
+
+        Set<String> responsePayloads = new HashSet<>();
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             DigitalTwinCommandResponse commandResponse = commandResponses.get(i);
 
             assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
             assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_COMPLETED);
             assertThat(commandResponse.getRequestId()).as("Verify Command Invocation Response RequestId").isNotNull();
-            assertThat(payloadTextList).contains(commandResponse.getPayload());
 
-            payloadTextList.remove(commandResponse.getPayload());
+            responsePayloads.add(commandResponse.getPayload());
         }
-        assertThat(payloadTextList).as("All sent commands were received").isEmpty();
+        assertThat(responsePayloads).as("All commands were invoked").hasSameElementsAs(requestPayloadForMultiThreadTest);
     }
 
     @Test
     public void testAsyncCommandInvocationMultithreaded() throws InterruptedException {
-        List<String> payloadTextList = new Random().ints(MAX_THREADS_MULTITHREADED_TEST).boxed()
-                                                   .map(Object :: toString)
-                                                   .collect(Collectors.toList());
-        List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
+        final Semaphore semaphore = new Semaphore(0);
+        final List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
+        List<String> requestPayloadForMultiThreadTest = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
 
-        Flowable.range(0, MAX_THREADS_MULTITHREADED_TEST)
-                .parallel()
-                .runOn(Schedulers.io())
-                .map(integer -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, payloadTextList.get(integer))
-                        .subscribe(commandResponses::add))
-                .sequential()
-                .toList()
-                .blockingGet();
+        requestPayloadForMultiThreadTest.forEach(payload -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD,payload)
+                                                                                         .subscribe(response -> {
+                                                                                             commandResponses.add(response);
+                                                                                             semaphore.release();
+                                                                                         }));
 
-        List<String> payloadTextListCopy = new ArrayList<>(payloadTextList);
+        assertThat(semaphore.tryAcquire(MAX_THREADS_MULTITHREADED_TEST, MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS, SECONDS)).as("Timeout executing Async call").isTrue();
+
+        Set<String> responsePayloads = new HashSet<>();
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             DigitalTwinCommandResponse commandResponse = commandResponses.get(i);
 
             assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
             assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_PENDING);
             assertThat(commandResponse.getRequestId()).as("Verify Command Invocation Response RequestId").isNotNull();
-            assertThat(payloadTextList).contains(commandResponse.getPayload());
 
-            payloadTextListCopy.remove(commandResponse.getPayload());
-        }
-        assertThat(payloadTextListCopy).as("All commands were invoked").isEmpty();
+            String responsePayload = commandResponse.getPayload();
+            responsePayloads.add(responsePayload);
 
-        // Verify that async command progress is sent to IoTHub
-        for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
-            String expectedPayload = String.format(ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT, ASYNC_COMMAND_WITH_PAYLOAD, payloadTextList.get(i));
+            // Verify that async command progress is sent to IoTHub
+            String expectedPayload = String.format(ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT, ASYNC_COMMAND_WITH_PAYLOAD, responsePayload);
             assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Async command progress sent to IoTHub").isTrue();
         }
+        assertThat(responsePayloads).as("All commands were invoked").hasSameElementsAs(requestPayloadForMultiThreadTest);
     }
 
     @After
