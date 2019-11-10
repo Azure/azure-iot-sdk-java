@@ -131,7 +131,7 @@ public class QueryCollection
         //Codes_SRS_QUERYCOLLECTION_34_012: [If a continuation token is not provided from the passed in query options, but there is a continuation token saved in the latest queryCollectionResponse, that token shall be put in the query headers to continue the query.]
         //Codes_SRS_QUERYCOLLECTION_34_013: [If the provided query options is not null, the query option's page size shall be included in the query headers.]
         //Codes_SRS_QUERYCOLLECTION_34_014: [If the provided query options is null, this object's page size shall be included in the query headers.]
-        DeviceOperations.setHeaders(buildQueryHeaders(options));
+        Map<String, String> queryHeaders = buildQueryHeaders(options);
 
         //Codes_SRS_QUERYCOLLECTION_34_015: [If this is a sql query, the payload of the query message shall be set to the json bytes representation of this object's query string.]
         //Codes_SRS_QUERYCOLLECTION_34_016: [If this is not a sql query, the payload of the query message shall be set to empty bytes.]
@@ -147,7 +147,7 @@ public class QueryCollection
         }
 
         //Codes_SRS_QUERYCOLLECTION_34_017: [This function shall send an HTTPS request using DeviceOperations.]
-        HttpResponse httpResponse = DeviceOperations.request(this.iotHubConnectionString, this.url, this.httpMethod, payload, null, this.timeout);
+        HttpResponse httpResponse = DeviceOperations.request(this.iotHubConnectionString, this.url, this.httpMethod, payload, null, this.timeout, queryHeaders);
 
         //Codes_SRS_QUERYCOLLECTION_34_018: [The method shall read the continuation token (x-ms-continuation) and response type (x-ms-item-type) from the HTTP Headers and save it.]
         handleQueryResponse(httpResponse);

@@ -64,7 +64,7 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed
      * @throws IOException This exception is thrown if the IO operation failed
      */
-    public synchronized MethodResult invoke(String deviceId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    public MethodResult invoke(String deviceId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
         /* Codes_SRS_DEVICEMETHOD_21_004: [The invoke shall throw IllegalArgumentException if the provided deviceId is null or empty.] */
         if((deviceId == null) || deviceId.isEmpty())
@@ -97,7 +97,7 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed
      * @throws IOException This exception is thrown if the IO operation failed
      */
-    public synchronized MethodResult invoke(String deviceId, String moduleId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    public MethodResult invoke(String deviceId, String moduleId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
         /* Codes_SRS_DEVICEMETHOD_28_001: [The invoke shall throw IllegalArgumentException if the provided deviceId is null or empty.] */
         if((deviceId == null) || deviceId.isEmpty())
@@ -135,7 +135,7 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed
      * @throws IOException This exception is thrown if the IO operation failed
      */
-    private synchronized MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    private MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
         /* Codes_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided responseTimeoutInSeconds is negative.] */
         /* Codes_SRS_DEVICEMETHOD_21_007: [The invoke shall throw IllegalArgumentException if the provided connectTimeoutInSeconds is negative.] */

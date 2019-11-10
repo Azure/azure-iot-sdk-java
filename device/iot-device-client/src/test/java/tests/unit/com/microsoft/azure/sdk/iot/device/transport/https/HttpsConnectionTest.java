@@ -15,6 +15,7 @@ import org.junit.Test;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
@@ -488,10 +489,11 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_011: [The function shall read from the input stream (response stream) and return the response.]
     @Test
-    public void readInputCompletelyReadsInputStream(
-            @Mocked final InputStream mockIs) throws IOException, TransportException
+    public void readInputCompletelyReadsInputStream() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
+        byte[] expectedResponse = { 1, 2, 3 };
+        final InputStream is = new ByteArrayInputStream(expectedResponse);
         new NonStrictExpectations()
         {
             {
@@ -502,9 +504,7 @@ public class HttpsConnectionTest
                 mockUrlConn.getRequestMethod();
                 result = httpsMethod.name();
                 mockUrlConn.getInputStream();
-                result = mockIs;
-                mockIs.read();
-                returns(1, 2, 3, -1);
+                result = is;
             }
         };
         HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
@@ -512,7 +512,6 @@ public class HttpsConnectionTest
 
         byte[] testResponse = conn.readInput();
 
-        byte[] expectedResponse = { 1, 2, 3 };
         assertThat(testResponse, is(expectedResponse));
     }
 
@@ -533,7 +532,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
                 mockUrlConn.getInputStream();
                 result = mockIs;
-                mockIs.read();
+                mockIs.read(withInstanceOf(byte[].class));
                 result = new TransportException("This is a test exception");
             }
         };
@@ -637,7 +636,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
                 mockUrlConn.getInputStream();
                 result = mockIs;
-                mockIs.read();
+                mockIs.read(withInstanceOf(byte[].class));
                 result = -1;
             }
         };
@@ -656,10 +655,11 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_013: [The function shall read from the error stream and return the response.]
     @Test
-    public void readErrorCompletelyReadsErrorStream(
-            @Mocked final InputStream mockIs) throws IOException, TransportException
+    public void readErrorCompletelyReadsErrorStream() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
+        byte[] expectedResponse = { 1, 2, 3 };
+        final InputStream is = new ByteArrayInputStream(expectedResponse);
         new NonStrictExpectations()
         {
             {
@@ -670,9 +670,7 @@ public class HttpsConnectionTest
                 mockUrlConn.getRequestMethod();
                 result = httpsMethod.name();
                 mockUrlConn.getErrorStream();
-                result = mockIs;
-                mockIs.read();
-                returns(1, 2, 3, -1);
+                result = is;
             }
         };
         HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
@@ -701,7 +699,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
                 mockUrlConn.getErrorStream();
                 result = mockIs;
-                mockIs.read();
+                mockIs.read(withInstanceOf(byte[].class));
                 result = new TransportException("This is a test exception");
             }
         };
@@ -794,7 +792,7 @@ public class HttpsConnectionTest
                 result = httpsMethod.name();
                 mockUrlConn.getErrorStream();
                 result = mockIs;
-                mockIs.read();
+                mockIs.read(withInstanceOf(byte[].class));
                 result = -1;
             }
         };

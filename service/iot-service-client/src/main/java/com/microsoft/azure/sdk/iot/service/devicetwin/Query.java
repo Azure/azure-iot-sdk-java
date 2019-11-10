@@ -182,8 +182,6 @@ public class Query
         //Codes_SRS_QUERY_25_007: [The method shall set the http headers x-ms-continuation and x-ms-max-item-count with request continuation token and page size if they were not null.]
         queryHeaders.put(PAGE_SIZE_KEY, String.valueOf(pageSize));
 
-        DeviceOperations.setHeaders(queryHeaders);
-
         if (isSqlQuery)
         {
             //Codes_SRS_QUERY_25_008: [The method shall obtain the serilaized query by using QueryRequestParser.]
@@ -196,7 +194,7 @@ public class Query
         }
 
         //Codes_SRS_QUERY_25_009: [The method shall use the provided HTTP Method and send request to IotHub with the serialized body over the provided URL.]
-        HttpResponse httpResponse = DeviceOperations.request(iotHubConnectionString, url, method, payload, null, timeoutInMs);
+        HttpResponse httpResponse = DeviceOperations.request(iotHubConnectionString, url, method, payload, null, timeoutInMs, queryHeaders);
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();

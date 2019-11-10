@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
@@ -33,6 +34,7 @@ import java.util.Map;
  */
 public class HttpsConnection
 {
+    private static final int BLOCK_SIZE = 1024;
     /** The underlying HTTP/HTTPS connection. */
     private final HttpURLConnection connection;
 
@@ -330,32 +332,31 @@ public class HttpsConnection
      *
      * @throws TransportException if the input stream could not be read from.
      */
-    private static byte[] readInputStream(InputStream stream) throws TransportException
+    protected static byte[] readInputStream(InputStream stream)
+            throws TransportException
     {
+        byte[] data = new byte[BLOCK_SIZE];
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        int len;
         try
         {
-            ArrayList<Byte> byteBuffer = new ArrayList<>();
-            int nextByte = -1;
-            // read(byte[]) reads the byte into the buffer and returns the number
-            // of bytes read, or -1 if the end of the stream has been reached.
-            while ((nextByte = stream.read()) > -1)
+            try
             {
-                byteBuffer.add((byte) nextByte);
+                while((len = stream.read(data)) != -1)
+                {
+                    os.write(data, 0, len);
+                }
+                return os.toByteArray();
             }
-
-            int bufferSize = byteBuffer.size();
-            byte[] byteArray = new byte[bufferSize];
-            for (int i = 0; i < bufferSize; ++i)
-            {
-                byteArray[i] = byteBuffer.get(i);
+            finally {
+                os.close();
             }
-
-            return byteArray;
         }
         catch (IOException e)
         {
             throw HttpsConnection.buildTransportException(e);
         }
+
     }
 
     void setSSLContext(SSLContext sslContext) throws IllegalArgumentException

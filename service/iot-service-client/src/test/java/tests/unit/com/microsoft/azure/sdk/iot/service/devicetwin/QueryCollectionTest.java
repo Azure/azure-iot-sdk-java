@@ -19,6 +19,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
@@ -322,10 +323,7 @@ public class QueryCollectionTest
         new Verifications()
         {
             {
-                DeviceOperations.setHeaders(expectedValidRequestHeaders);
-                times = 1;
-
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout, expectedValidRequestHeaders);
                 times = 1;
             }
         };
@@ -390,10 +388,7 @@ public class QueryCollectionTest
         new Verifications()
         {
             {
-                DeviceOperations.setHeaders(expectedValidRequestHeaders);
-                times = 1;
-
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout, expectedValidRequestHeaders);
                 times = 1;
             }
         };
@@ -439,7 +434,7 @@ public class QueryCollectionTest
         new Verifications()
         {
             {
-                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong);
+                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong, (Map<String, String>) any);
                 times = 1;
             }
         };
@@ -697,10 +692,9 @@ public class QueryCollectionTest
         new Verifications()
         {
             {
-                DeviceOperations.setHeaders(expectedValidRequestHeaders);
                 times = 1;
 
-                DeviceOperations.request(mockConnectionString, (URL) any, mockHttpMethod, (byte[]) any, null, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, (URL) any, mockHttpMethod, (byte[]) any, null, expectedTimeout, expectedValidRequestHeaders);
                 times = 1;
             }
         };

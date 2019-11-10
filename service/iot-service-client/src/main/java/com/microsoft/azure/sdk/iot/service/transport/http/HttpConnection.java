@@ -297,7 +297,6 @@ public class HttpConnection
             return os.toByteArray();
         }
         finally {
-            stream.close();
             os.close();
         }
     }

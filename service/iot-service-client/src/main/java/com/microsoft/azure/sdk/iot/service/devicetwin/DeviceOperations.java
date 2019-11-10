@@ -34,7 +34,6 @@ public class DeviceOperations
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
-    private static Map<String, String> headers = null;
 
     /**
      * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
@@ -56,6 +55,33 @@ public class DeviceOperations
             byte[] payload, 
             String requestId,
             long timeoutInMs) 
+            throws IOException, IotHubException, IllegalArgumentException
+    {
+        return request(iotHubConnectionString, url, method, payload, requestId, timeoutInMs, null);
+    }
+
+    /**
+     * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
+     *
+     * @param iotHubConnectionString is the connection string for the IoTHub
+     * @param url is the Twin URL for the device ID.
+     * @param method is the HTTP method (GET, POST, DELETE, PATCH, PUT).
+     * @param payload is the array of bytes that contains the payload.
+     * @param requestId is an unique number that identify the request.
+     * @param timeoutInMs is timeout in milliseconds.
+     * @param httpHeaders are the HTTP headers.
+     * @return the result of the request.
+     * @throws IotHubException This exception is thrown if the response verification failed
+     * @throws IOException This exception is thrown if the IO operation failed
+     */
+    public static HttpResponse request(
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod method,
+            byte[] payload,
+            String requestId,
+            long timeoutInMs,
+            Map<String, String> httpHeaders)
             throws IOException, IotHubException, IllegalArgumentException
     {
         /* Codes_SRS_DEVICE_OPERATIONS_21_001: [The request shall throw IllegalArgumentException if the provided `iotHubConnectionString` is null.] */
@@ -83,7 +109,7 @@ public class DeviceOperations
         }
 
         /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` exceed Integer.MAX_VALUE.] */
-        if((timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS) > Integer.MAX_VALUE) 
+        if((timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS) > Integer.MAX_VALUE)
         {
             throw new IllegalArgumentException("HTTP Request timeout shouldn't not exceed " + timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS + " milliseconds");
         }
@@ -91,19 +117,19 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_006: [The request shall create a new SASToken with the ServiceConnect rights.] */
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
         /* Codes_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
-         if((sasTokenString == null) || sasTokenString.isEmpty())
+        if((sasTokenString == null) || sasTokenString.isEmpty())
         {
             throw new IOException("Illegal sasToken null or empty");
         }
 
-         log.debug("Before request: requestId={}, url={}, method={}", requestId, url, method);
+        log.debug("Before request: requestId={}, url={}, method={}", requestId, url, method);
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
         HttpRequest request = new HttpRequest(url, method, payload);
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
         request.setReadTimeoutMillis((int)(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS));
-        
+
         /* Codes_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
         request.setHeaderField(AUTHORIZATION, sasTokenString);
 
@@ -123,15 +149,13 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_014: [The request shall add to the HTTP header a `Content-Type` key with `application/json; charset=utf-8`.] */
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
 
-        if (headers != null)
+        if (httpHeaders != null)
         {
             //SRS_DEVICE_OPERATIONS_25_019: [The request shall add to the HTTP header all the additional custom headers set for this request.]
-            for(Map.Entry<String, String> header : headers.entrySet())
+            for(Map.Entry<String, String> header : httpHeaders.entrySet())
             {
                 request.setHeaderField(header.getKey(), header.getValue());
             }
-
-            headers = null;
         }
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
@@ -140,25 +164,9 @@ public class DeviceOperations
         log.debug("After request: requestId={}, url={}, method={}", requestId, url, method);
         /* Codes_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
         IotHubExceptionManager.httpResponseVerification(response);
-        
+
         /* Codes_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
         return response;
     }
 
-    /**
-     * Sets headers to be used on next HTTP request
-     * @param httpHeaders non null and non empty custom headers
-     * @throws IllegalArgumentException This exception is thrown if headers were null or empty
-     */
-    public static void setHeaders(Map<String, String> httpHeaders) throws IllegalArgumentException
-    {
-        if (httpHeaders == null || httpHeaders.size() == 0)
-        {
-            //SRS_DEVICE_OPERATIONS_25_021: [If the headers map is null or empty then this method shall throw IllegalArgumentException.]
-            throw new IllegalArgumentException("Null or Empty headers can't be set");
-        }
-
-        //SRS_DEVICE_OPERATIONS_25_020: [This method shall set the headers map to be used for next request only.]
-        headers = httpHeaders;
-    }
 }

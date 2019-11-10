@@ -13,7 +13,12 @@ import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -732,7 +737,7 @@ public class DeviceOperationsTest
 
     //Tests_SRS_DEVICE_OPERATIONS_25_020: [This method shall set the headers map to be used for next request only.]
     @Test
-    public void setCustomHeadersSucceed(@Mocked IotHubServiceSasToken iotHubServiceSasToken,
+    public void withCustomHeaders(@Mocked IotHubServiceSasToken iotHubServiceSasToken,
                                         @Mocked HttpRequest httpRequest) throws Exception
     {
         //Arrange
@@ -740,16 +745,14 @@ public class DeviceOperationsTest
         headers.put("TestKey", "TestValue");
 
         //act
-        DeviceOperations.setHeaders(headers);
         DeviceOperations.request(
                 IOT_HUB_CONNECTION_STRING,
                 new URL(STANDARD_URL),
                 HttpMethod.POST,
                 STANDARD_PAYLOAD,
                 STANDARD_REQUEST_ID,
-                0);
-
-        assertNull(Deencapsulation.getField(DeviceOperations.class, "headers"));
+                0,
+                headers);
 
         //assert
         new Verifications()
@@ -761,53 +764,4 @@ public class DeviceOperationsTest
         };
     }
 
-    @Test
-    public void setCustomHeadersSetsOnlyOnce(@Mocked IotHubServiceSasToken iotHubServiceSasToken,
-                                        @Mocked HttpRequest httpRequest) throws Exception
-    {
-        //Arrange
-        Map<String, String> headers = new HashMap<>();
-        headers.put("TestKey", "TestValue");
-
-        //act
-        DeviceOperations.setHeaders(headers);
-        DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
-
-        DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
-        //assert
-        new Verifications()
-        {
-            {
-                httpRequest.setHeaderField("TestKey", "TestValue");
-                maxTimes = 1;
-            }
-        };
-    }
-
-    //Tests_SRS_DEVICE_OPERATIONS_25_021: [If the headers map is null or empty then this method shall throw IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setCustomHeadersThrowsOnNull() throws Exception
-    {
-        //act/assert
-        DeviceOperations.setHeaders(null);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void setCustomHeadersThrowsOnEmpty() throws Exception
-    {
-        //act/assert
-        DeviceOperations.setHeaders(new HashMap<>());
-    }
 }
