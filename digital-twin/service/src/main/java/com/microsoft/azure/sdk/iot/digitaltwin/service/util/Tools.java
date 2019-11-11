@@ -5,15 +5,9 @@ package com.microsoft.azure.sdk.iot.digitaltwin.service.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
 import rx.Observable;
 import rx.functions.Func1;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public final class Tools {
@@ -36,22 +30,5 @@ public final class Tools {
 
     public static String nullToEmpty(String value) {
         return value == null ? EMPTY : value;
-    }
-
-    private static String createSinglePropertyPatch(@NonNull String propertyName, @NonNull String propertyValue) {
-        return "\"" + propertyName + "\": {"
-                +"      \"desired\": {"
-                +"          \"value\": \"" + propertyValue + "\""
-                +"      }"
-                +"  }";
-    }
-
-    public static String createPropertyPatch(Map<String, String> propertiesMap) {
-        List<String> propertyPatches = new ArrayList<>();
-        for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
-            propertyPatches.add(createSinglePropertyPatch(entry.getKey(), entry.getValue()));
-        }
-
-        return "{ \"properties\": {" + join(",", propertyPatches) + "} }";
     }
 }

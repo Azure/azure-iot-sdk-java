@@ -30,10 +30,8 @@ import retrofit2.Retrofit;
 import rx.Observable;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 
-import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.createPropertyPatch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.*;
@@ -199,7 +197,7 @@ public class DigitalTwinServiceAsyncClientImplTest {
         String interfaceInstanceName = "someInterfaceInstanceName";
         String propertyName = "somePropertyName";
         String propertyValue = "somePropertyValue";
-        String propertyPatch = createPropertyPatch(Collections.singletonMap(propertyName, propertyValue));
+        String propertyPatch = createPropertyPatch(propertyName, propertyValue);
 
         when(digitalTwin.updateInterfacesAsync(anyString(), any(DigitalTwinInterfacesPatch.class))).thenReturn(Observable.just(digitalTwinInterfaces));
         String expectedDigitalTwin = objectMapper.writeValueAsString(digitalTwinInterfaces);
@@ -263,5 +261,17 @@ public class DigitalTwinServiceAsyncClientImplTest {
         // assert
         assertThat(actualResult).isEqualTo(expectedResult);
         verify(digitalTwin).invokeInterfaceCommandWithServiceResponseAsync(eq(DIGITAL_TWIN_ID), eq(interfaceInstanceName), eq(commandName), eq(arguments), eq(null), eq(null));
+    }
+
+    static String createPropertyPatch(String propertyName, String propertyValue) {
+        return "    { "
+                + "      \"properties\": {"
+                + "          \"" + propertyName + "\": {"
+                + "              \"desired\": {"
+                + "                  \"value\": \"" + propertyValue + "\""
+                + "              }"
+                + "          }"
+                + "     } "
+                + "  }";
     }
 }
