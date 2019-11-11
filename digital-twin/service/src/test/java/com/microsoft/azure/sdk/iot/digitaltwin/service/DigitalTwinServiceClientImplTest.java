@@ -19,9 +19,8 @@ import retrofit2.Retrofit;
 import rx.Observable;
 
 import java.io.IOException;
-import java.util.Collections;
 
-import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.createPropertyPatch;
+import static com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceAsyncClientImplTest.createPropertyPatch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.*;
@@ -168,7 +167,7 @@ public class DigitalTwinServiceClientImplTest {
         String interfaceInstanceName = "someInterfaceInstanceName";
         String propertyName = "somePropertyName";
         String propertyValue = "somePropertyValue";
-        String propertyPatch = createPropertyPatch(Collections.singletonMap(propertyName, propertyValue));
+        String propertyPatch = createPropertyPatch(propertyName, propertyValue);
         when(digitalTwinServiceAsyncClient.updateDigitalTwinProperties(anyString(), anyString(), anyString())).thenReturn(Observable.just(expectedDigitalTwin));
 
         // act

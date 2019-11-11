@@ -4,11 +4,15 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers;
 
 import io.reactivex.rxjava3.core.Flowable;
+import lombok.NonNull;
 import org.apache.commons.lang3.RandomUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Tools {
@@ -39,5 +43,22 @@ public class Tools {
 
     public static List<Integer> generateRandomIntegerList(int listSize) {
         return Flowable.fromSupplier(RandomUtils::nextInt).repeat(listSize).toList().blockingGet();
+    }
+
+    private static String createSinglePropertyPatch(@NonNull String propertyName, @NonNull String propertyValue) {
+        return "\"" + propertyName + "\": {"
+                +"      \"desired\": {"
+                +"          \"value\": \"" + propertyValue + "\""
+                +"      }"
+                +"  }";
+    }
+
+    public static String createPropertyPatch(Map<String, String> propertiesMap) {
+        List<String> propertyPatches = new ArrayList<>();
+        for (Map.Entry<String, String> entry : propertiesMap.entrySet()) {
+            propertyPatches.add(createSinglePropertyPatch(entry.getKey(), entry.getValue()));
+        }
+
+        return "{ \"properties\": {" + join(",", propertyPatches) + "} }";
     }
 }
