@@ -7,7 +7,7 @@
     <version>1.0.0</version>
     <name>Azure IoT Sdk Java Digital Twin</name>
     <packaging>pom</packaging>
-    <url>http://azure.github.io/azure-iot-sdk-java-digital-twin/</url>
+    <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -22,24 +22,26 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git@github.com:Azure/azure-iot-sdk-java-digital-twin.git</connection>
-        <developerConnection>scm:git:git@github.com:Azure/azure-iot-sdk-java-digital-twin.git</developerConnection>
-        <url>https://github.com/Azure/azure-iot-sdk-java-digital-twin.git</url>
+        <connection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</connection>
+        <developerConnection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</developerConnection>
+        <url>https://github.com/Azure/azure-iot-sdk-java.git</url>
     </scm>
     <modules>
         <module>device</module>
         <module>service</module>
-        <module>sample</module>
         <module>e2e-tests</module>
+        <module>service-samples</module>
+        <module>device-samples</module>
     </modules>
     <properties>
-        <java-sdk-version>1.7</java-sdk-version>
+        <java-sdk-device-version>1.7</java-sdk-device-version>
+        <java-sdk-service-version>1.8</java-sdk-service-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
-        <maven-source-plugin-version>3.1.0</maven-source-plugin-version>
+        <maven-source-plugin-version>${maven-jar-plugin-version}</maven-source-plugin-version>
         <maven-javadoc-plugin-version>3.1.1</maven-javadoc-plugin-version>
         <maven-surefire-plugin-version>2.22.2</maven-surefire-plugin-version>
-        <iot-device-client-version>1.19.0</iot-device-client-version>
+        <iot-device-client-version>1.20.0</iot-device-client-version>
         <jackson-version>2.9.9</jackson-version>
         <rxjava3-version>3.0.0-RC3</rxjava3-version>
         <lombok-version>1.18.4</lombok-version>
@@ -55,10 +57,13 @@
         <ms-rest-client-version>1.6.15</ms-rest-client-version>
         <project-device-version>1.0.1</project-device-version>
         <project-service-version>1.0.0</project-service-version>
-        <project-sample-version>1.0.0</project-sample-version>
+        <project-device-samples-version>1.0.0</project-device-samples-version>
+        <project-service-samples-version>1.0.0</project-service-samples-version>
         <project-e2e-tests-version>1.0.0</project-e2e-tests-version>
         <project-sdk-service-client>1.17.1</project-sdk-service-client>
         <azure-eventhubs-version>3.0.0</azure-eventhubs-version>
+        <maven-shade-version>2.4</maven-shade-version>
+        <maven-jar-plugin-version>3.1.0</maven-jar-plugin-version>
     </properties>
     <build>
         <plugins>
@@ -80,15 +85,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin-version}</version>
-                <configuration>
-                    <source>${java-sdk-version}</source>
-                    <target>${java-sdk-version}</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

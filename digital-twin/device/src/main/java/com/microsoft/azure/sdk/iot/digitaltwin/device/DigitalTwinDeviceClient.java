@@ -430,8 +430,9 @@ public final class DigitalTwinDeviceClient {
                     try {
                         DigitalTwinCommand digitalTwinCommand = deserialize((byte[]) methodData, DigitalTwinCommand.class);
                         CommandRequest commandRequest = digitalTwinCommand.getCommandRequest();
+                        String payload = commandRequest.getValue() != null ? commandRequest.getValue().getRawJson() : null;
                         DigitalTwinCommandRequest digitalTwinCommandRequest = digitalTwinCommandRequestBuilder.requestId(commandRequest.getRequestId())
-                                                                                                              .payload(commandRequest.getValue().getRawJson())
+                                                                                                              .payload(payload)
                                                                                                               .build();
                         DigitalTwinCommandResponse digitalTwinCommandResponse = digitalTwinInterfaceClient.onCommandReceived(digitalTwinCommandRequest);
                         return new DeviceMethodData(digitalTwinCommandResponse.getStatus(), digitalTwinCommandResponse.getPayload());

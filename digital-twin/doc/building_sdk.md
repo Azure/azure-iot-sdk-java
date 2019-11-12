@@ -14,14 +14,14 @@ To get setup to build applications that enable the Digital Twin for JAVA:
  mvn install
  
  cd ..
- git clone https://github.com/Azure/azure-iot-sdk-java-digital-twin.git
+ git clone https://github.com/Azure/azure-iot-sdk-java.git
 ```
 
 Because Digital Twin feature works only with a preview API version, build and install SDK client to maven local is required.
 
 ## Initial project
 * Open Intellij, File -> New Project -> Project from Existing Sources, select [pom.xml](../pom.xml) and select OK.
-* Digital Twin project is using lombok. To setup lombok, follow steps below:
+* Digital Twin project uses lombok. To setup lombok, follow steps below:
  
   * Install Intellij lombok plugin from files -> settings -> plugins
   * Enable annotation processing from files -> settings -> build, execution, deployment -> compiler -> annotation processors -> check "enable annotation processing"
@@ -29,7 +29,7 @@ Because Digital Twin feature works only with a preview API version, build and in
 ## Build API doc
 To get API doc, perform following command on the GitHub repo containing the Digital Twin SDK
 ```
-cd azure-iot-sdk-java-digital-twin/digital-twin
+cd azure-iot-sdk-java/digital-twin
 mvn javadoc:javadoc
 ```
 

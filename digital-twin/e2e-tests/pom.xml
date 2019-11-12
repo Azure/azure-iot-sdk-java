@@ -17,8 +17,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin-version}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <!--service version is higher than device version, and e2e uses both, so just take the service version-->
+                    <source>${java-sdk-service-version}</source>
+                    <target>${java-sdk-service-version}</target>
                 </configuration>
             </plugin>
         </plugins>
