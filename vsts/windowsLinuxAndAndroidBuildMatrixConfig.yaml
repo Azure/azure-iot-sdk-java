@@ -180,7 +180,7 @@ jobs:
   - task: CopyFiles@2
     displayName: 'Copy Test Results to Artifact Staging Directory'
     inputs:
-      SourceFolder: '$(Build.SourcesDirectory)\iot-e2e-tests\android\app\build\outputs\apk'
+      SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk'
       Contents: |
        *.*
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -190,12 +190,12 @@ jobs:
   - task: PublishPipelineArtifact@0
     inputs:
       artifactName: 'androidBuildFiles'
-      targetPath: 'iot-e2e-tests\android\app\build\outputs\apk'
+      targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
     
 - job: AndroidTest
   timeoutInMinutes: 180
   pool:
-    name: Hosted VS2017
+    vmImage: 'macOS-latest'
   strategy:
     maxParallel: 12
     matrix:
@@ -288,14 +288,14 @@ jobs:
   - task: DownloadPipelineArtifact@0
     inputs:
       artifactName: 'androidBuildFiles'
-      targetPath: $(Build.ArtifactStagingDirectory)\iot-e2e-tests\android\app\build\outputs\apk
+      targetPath: $(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk
   
   - task: AppCenterTest@1
     displayName: 'E2E with Visual Studio App Center'
     inputs:
-      appFile: '$(Build.ArtifactStagingDirectory)\iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      appFile: '$(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk/debug/app-debug.apk'
       frameworkOption: espresso
-      espressoBuildDirectory: '$(Build.ArtifactStagingDirectory)\iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      espressoBuildDirectory: '$(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk/androidTest/debug'
       serverEndpoint: 'AppCenter connection aziotclb'
       appSlug: 'Azure-Iot-Sdk/androide2e'
       devices: 'Azure-Iot-Sdk/api28_2'
