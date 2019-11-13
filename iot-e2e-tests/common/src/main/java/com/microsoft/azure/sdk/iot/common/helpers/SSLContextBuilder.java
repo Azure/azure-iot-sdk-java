@@ -34,6 +34,12 @@ public class SSLContextBuilder
 
     /**
      * Create an SSLContext instance with the provided public and private keys that also trusts the base iot hub certificates
+     * @param publicKeyCertificateString the public key to use for x509 authentication. Does not need to include the default
+     *                                   Iot Hub trusted certificate as it will be added automatically
+     * @param privateKeyString The private key to use for x509 authentication
+     * @return The created SSLContext that uses the provided public key and private key
+     * @throws GeneralSecurityException If the certificate creation fails, or if the SSLContext creation using those certificates fails
+     * @throws IOException If the certificates cannot be read
      */
     public static SSLContext buildSSLContext(String publicKeyCertificateString, String privateKeyString) throws GeneralSecurityException, IOException
     {
@@ -61,6 +67,12 @@ public class SSLContextBuilder
 
     /**
      * Build the default SSLContext. Trusts the iot hub base certificates, but can only be used for sas auth
+     * @return the default SSLContext
+     * @throws NoSuchAlgorithmException If the SSLContext cannot be created because of a missing algorithm
+     * @throws KeyManagementException If the SSLContext cannot be initiated
+     * @throws CertificateException If certificate creation fails
+     * @throws KeyStoreException If the keystore operations fail
+     * @throws IOException If the default certificate fails to be read
      */
     public static SSLContext buildSSLContext() throws NoSuchAlgorithmException, KeyManagementException, CertificateException, KeyStoreException, IOException
     {

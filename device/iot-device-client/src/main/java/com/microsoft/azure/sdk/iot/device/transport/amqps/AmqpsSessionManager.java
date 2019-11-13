@@ -148,7 +148,6 @@ public class AmqpsSessionManager
      * Open the session and the links. 
      *
      * @param connection the Proton connection object to work with.
-     * @return true if connection is ready, otherwise false to indicate authentication links open in progress
      */
     void onConnectionInit(Connection connection) throws TransportException
     {

@@ -19,9 +19,8 @@ public class ModuleManagerSample
 {
     /**
      * A simple sample for doing CRUD operations
-     * @param args
-     * @throws IOException
-     * @throws URISyntaxException
+     * @param args unused
+     * @throws Exception if any exception is thrown
      */
     public static void main(String[] args) throws Exception
     {

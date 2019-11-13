@@ -302,7 +302,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
     /**
      * Requests hub to provide a device key to begin authentication over MQTT (Only for TPM)
-     * @param responseCallback A non {@code null} value for the callback
+     * @param requestData the request data to be used while requesting nonce for TPM
      * @param responseCallback A non {@code null} value for the callback
      * @param authorizationCallbackContext An object for context. Can be {@code null}
      * @throws ProvisioningDeviceClientException If any of the parameters are invalid ({@code null} or empty)

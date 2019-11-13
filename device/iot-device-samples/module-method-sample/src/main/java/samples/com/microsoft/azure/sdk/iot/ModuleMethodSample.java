@@ -117,7 +117,7 @@ public class ModuleMethodSample
      * Receives method calls from IotHub. Default protocol is to use
      * use MQTT transport.
      *
-     * @param args 
+     * @param args The connection string and the selected protocol
      */
     public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
     {

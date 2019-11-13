@@ -276,7 +276,6 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
-     * @return The created device client instance
      * @throws URISyntaxException If the provided connString could not be parsed.
      * @throws IOException If the SecurityProvider throws any exception while authenticating
      */

@@ -53,8 +53,6 @@ public class Tools
      * @param registryManager the registry manager to use. Will not be closed after this call
      * @param identitiesToDispose the list of modules and or devices to be removed from the iot hub using the provided
      *                            registry manager
-     * @throws IOException if deleting the identity fails
-     * @throws IotHubException if deleting the identity fails
      */
     public static void removeDevicesAndModules(RegistryManager registryManager, Collection<BaseDevice> identitiesToDispose)
     {
