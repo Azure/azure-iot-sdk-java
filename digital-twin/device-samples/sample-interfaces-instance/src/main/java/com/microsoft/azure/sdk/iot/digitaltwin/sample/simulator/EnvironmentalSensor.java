@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.digitaltwin.sample;
+package com.microsoft.azure.sdk.iot.digitaltwin.sample.simulator;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
@@ -46,7 +46,7 @@ public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
     private static final String PROPERTY_NAME = "name";
     private static final String PROPERTY_BRIGHTNESS = "brightness";
 
-    protected EnvironmentalSensor(@NonNull String digitalTwinInterfaceInstanceName) {
+    public EnvironmentalSensor(@NonNull String digitalTwinInterfaceInstanceName) {
         super(digitalTwinInterfaceInstanceName, ENVIRONMENTAL_SENSOR_INTERFACE_ID);
     }
 
