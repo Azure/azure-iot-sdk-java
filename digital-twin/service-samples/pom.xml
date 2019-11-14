@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <artifactId>iot-sdk-java-digital-twin-service-samples</artifactId>
-    <version>${project-service-samples-version}</version>
+    <version>1.0.0</version>
 
     <modules>
         <module>get-digital-twin</module>
