@@ -1,20 +1,35 @@
-<project>
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java-digital-twin</artifactId>
         <version>1.0.0</version>
     </parent>
-    <name>Azure IoT Sdk Java Digital Twin Sample</name>
-    <description>Azure IoT Sdk Java Digital Twin Sample</description>
-    <artifactId>environmental-sensor-sample</artifactId>
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+
+    <artifactId>iot-sdk-java-digital-twin-device-samples</artifactId>
     <version>${project-device-samples-version}</version>
-    <packaging>jar</packaging>
+
+    <modules>
+        <module>environmental-sensor-sample</module>
+        <module>iot-central-sample</module>
+        <module>sample-interfaces-instance</module>
+    </modules>
+
+    <properties>
+        <provisioning-device-client-version>1.7.1</provisioning-device-client-version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-sdk-java-digital-twin-device</artifactId>
             <version>${project-device-version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -27,56 +42,17 @@
             <version>2.6</version>
         </dependency>
     </dependencies>
+
     <build>
-        <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven-jar-plugin-version}</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>com.microsoft.azure.sdk.iot.digitaltwin.sample.Application</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>${maven-compiler-plugin-version}</version>
                 <configuration>
                     <source>${java-sdk-device-version}</source>
                     <target>${java-sdk-device-version}</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven-shade-version}</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <finalName>${project.artifactId}-with-deps</finalName>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>with-deps</shadedClassifierName>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
