@@ -19,17 +19,17 @@ import static java.util.Arrays.asList;
 
 @Slf4j
 public class Application {
-    private static final String CONNECTION_STRING = System.getenv("DIGITAL_TWIN_DEVICE_CONNECTION_STRING");
+    private static final String DIGITAL_TWIN_DEVICE_CONNECTION_STRING = System.getenv("DIGITAL_TWIN_DEVICE_CONNECTION_STRING");
     private static final String DCM_ID = "urn:azureiot:samplemodel:1";
     private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "environmentalSensor";
 
     public static void main(String[] args) throws URISyntaxException {
-        if (CONNECTION_STRING == null || CONNECTION_STRING.isEmpty()) {
+        if (DIGITAL_TWIN_DEVICE_CONNECTION_STRING == null || DIGITAL_TWIN_DEVICE_CONNECTION_STRING.isEmpty()) {
             log.info("Please set a value for the environment variable \"DIGITAL_TWIN_DEVICE_CONNECTION_STRING\"");
             return;
         }
 
-        DeviceClient deviceClient = new DeviceClient(CONNECTION_STRING, MQTT);
+        DeviceClient deviceClient = new DeviceClient(DIGITAL_TWIN_DEVICE_CONNECTION_STRING, MQTT);
         deviceClient.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback() {
             @Override
             public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {

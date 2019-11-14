@@ -12,20 +12,20 @@ import java.util.Scanner;
 @Slf4j
 public class GetDigitalTwinSample
 {
-    private static final String CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String DIGITAL_TWIN_ID = System.getenv("DIGITAL_TWIN_ID");
+    private static final String IOTHUB_CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
+    private static final String DEVICE_ID = System.getenv("DEVICE_ID");
 
     private static final String usage = "In order to run this sample, you must set environment variables for \n" +
             "IOTHUB_CONNECTION_STRING - Your IoT Hub's connection string\n" +
-            "DIGITAL_TWIN_ID - your digital twin id to invoke the command onto\n";
+            "DEVICE_ID - The ID of the device to get the digital twin of\n";
 
     public static void main(String[] args) {
         verifyInputs();
-        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(CONNECTION_STRING).build();
+        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(IOTHUB_CONNECTION_STRING).build();
 
-        log.info("Getting the status of digital twin " + DIGITAL_TWIN_ID);
+        log.info("Getting the status of digital twin " + DEVICE_ID);
 
-        String digitalTwin = digitalTwinServiceClient.getDigitalTwin(DIGITAL_TWIN_ID);
+        String digitalTwin = digitalTwinServiceClient.getDigitalTwin(DEVICE_ID);
 
         log.info("Got the status of the digital twin successfully, the returned string was:");
         log.info(digitalTwin);
@@ -35,7 +35,7 @@ public class GetDigitalTwinSample
     }
 
     private static void verifyInputs() {
-        if (isNullOrEmpty(CONNECTION_STRING) || isNullOrEmpty(DIGITAL_TWIN_ID)) {
+        if (isNullOrEmpty(IOTHUB_CONNECTION_STRING) || isNullOrEmpty(DEVICE_ID)) {
             log.warn(usage);
             System.exit(0);
         }
