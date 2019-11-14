@@ -22,9 +22,8 @@ public class DeviceManagerX509Sample
 
     /**
      * A simple sample for doing CRUD operations involving X509 authenticated devices
-     * @param args
-     * @throws IOException
-     * @throws URISyntaxException
+     * @param args unused
+     * @throws Exception if any exception occurs
      */
     public static void main(String[] args) throws Exception
     {

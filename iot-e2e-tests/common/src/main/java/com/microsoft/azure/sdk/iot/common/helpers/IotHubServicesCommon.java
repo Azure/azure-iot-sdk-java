@@ -157,11 +157,15 @@ public class IotHubServicesCommon
      *
      * @param client the client to send the messages from
      * @param protocol the protocol the client is using
+     * @param numberOfMessages the number of messages to send
+     * @param breathPeriod time to sleep between checks of message callback arrival
+     * @param timeoutMilliseconds time to wait for any message to have its callback fired before the test times out
+     * @param authType the authentication type used is this test
      */
     public static void sendMessagesExpectingSASTokenExpiration(DeviceClient client,
                                                                String protocol,
                                                                int numberOfMessages,
-                                                               long retryMilliseconds,
+                                                               long breathPeriod,
                                                                long timeoutMilliseconds,
                                                                AuthenticationType authType)
     {
@@ -182,7 +186,7 @@ public class IotHubServicesCommon
                 long startTime = System.currentTimeMillis();
                 while(!messageSent.wasCallbackFired() || !statusUpdated.getResult())
                 {
-                    Thread.sleep(retryMilliseconds);
+                    Thread.sleep(breathPeriod);
                     if (System.currentTimeMillis() - startTime > timeoutMilliseconds)
                     {
                         Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed: " +

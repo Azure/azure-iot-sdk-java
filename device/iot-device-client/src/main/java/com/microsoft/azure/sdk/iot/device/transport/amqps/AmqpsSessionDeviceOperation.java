@@ -150,9 +150,7 @@ public class AmqpsSessionDeviceOperation
     /**
      * Delegate the link initialization call to device operation objects.
      *
-     * @param link the link ti initialize.
-     * @throws TransportException throw if Proton operation throws.
-     * @throws IllegalArgumentException throw if the link parameter is null.
+     * @param link the link that was initialized
      */
     void initLink(Link link)
     {

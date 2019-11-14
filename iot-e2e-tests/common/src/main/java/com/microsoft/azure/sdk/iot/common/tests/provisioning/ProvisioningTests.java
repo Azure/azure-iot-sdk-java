@@ -176,7 +176,8 @@ public class ProvisioningTests extends ProvisioningCommon
      * The custom allocation policy has a webhook to an Azure function, and that function will always dictate to provision
      * the device to the hub with the longest host name. This test verifies that an enrollment with a custom allocation policy
      * pointing to that Azure function will always enroll to the hub with the longest name
-     * @param enrollmentType
+     * @param enrollmentType The type of the enrollment to test
+     * @throws Exception if an exception occurs during provisioning or while creating the security provider
      */
     protected void customAllocationFlow(EnrollmentType enrollmentType) throws Exception
     {
