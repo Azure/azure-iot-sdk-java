@@ -13,29 +13,29 @@ import java.util.Scanner;
 @Slf4j
 public class UpdateDigitalTwinSample
 {
-    private static final String CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String DIGITAL_TWIN_ID = System.getenv("DIGITAL_TWIN_ID");
+    private static final String IOTHUB_CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
+    private static final String DEVICE_ID = System.getenv("DEVICE_ID");
     private static final String INTERFACE_INSTANCE_NAME = System.getenv("INTERFACE_INSTANCE_NAME");
     private static final String PROPERTY_NAME = System.getenv("PROPERTY_NAME");
     private static final String PROPERTY_VALUE = System.getenv("PROPERTY_VALUE");
 
     private static final String usage = "In order to run this sample, you must set environment variables for \n" +
             "IOTHUB_CONNECTION_STRING - Your IoT Hub's connection string\n" +
-            "DIGITAL_TWIN_ID - your digital twin id to invoke the command onto\n" +
-            "INTERFACE_INSTANCE_NAME - the interface the command belongs to\n" +
+            "DEVICE_ID - The ID of the device to update the property of\n" +
+            "INTERFACE_INSTANCE_NAME - the interface the property belongs to\n" +
             "PROPERTY_NAME - the name of the property to update on your digital twin\n" +
             "PROPERTY_VALUE - the value of the property to set";
 
     public static void main(String[] args) throws IOException
     {
         verifyInputs();
-        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(CONNECTION_STRING).build();
+        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(IOTHUB_CONNECTION_STRING).build();
 
-        log.info("Getting the status of digital twin " + DIGITAL_TWIN_ID);
+        log.info("Getting the status of digital twin " + DEVICE_ID);
 
         String patch = buildUpdatePatchSinglePropertyOnSingleInterface(PROPERTY_NAME, PROPERTY_VALUE);
 
-        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(DIGITAL_TWIN_ID, INTERFACE_INSTANCE_NAME, patch);
+        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(DEVICE_ID, INTERFACE_INSTANCE_NAME, patch);
 
         log.info("Got the status of the digital twin successfully, the returned string was:");
         log.info(digitalTwin);
@@ -82,7 +82,7 @@ public class UpdateDigitalTwinSample
     }
 
     private static void verifyInputs() {
-        if (isNullOrEmpty(CONNECTION_STRING) || isNullOrEmpty(DIGITAL_TWIN_ID) || isNullOrEmpty(INTERFACE_INSTANCE_NAME) || isNullOrEmpty(PROPERTY_NAME) || isNullOrEmpty(PROPERTY_VALUE)) {
+        if (isNullOrEmpty(IOTHUB_CONNECTION_STRING) || isNullOrEmpty(DEVICE_ID) || isNullOrEmpty(INTERFACE_INSTANCE_NAME) || isNullOrEmpty(PROPERTY_NAME) || isNullOrEmpty(PROPERTY_VALUE)) {
             log.warn(usage);
             System.exit(0);
         }

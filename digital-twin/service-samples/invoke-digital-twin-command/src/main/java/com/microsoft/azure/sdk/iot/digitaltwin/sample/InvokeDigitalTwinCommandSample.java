@@ -13,15 +13,15 @@ import java.util.Scanner;
 @Slf4j
 public class InvokeDigitalTwinCommandSample
 {
-    private static final String CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String DIGITAL_TWIN_ID = System.getenv("DIGITAL_TWIN_ID");
+    private static final String IOTHUB_CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
+    private static final String DEVICE_ID = System.getenv("DEVICE_ID");
     private static final String INTERFACE_INSTANCE_NAME = System.getenv("INTERFACE_INSTANCE_NAME");
     private static final String COMMAND_NAME = System.getenv("COMMAND_NAME");
     private static String PAYLOAD = System.getenv("PAYLOAD"); //optional
 
     private static final String usage = "In order to run this sample, you must set environment variables for \n" +
             "IOTHUB_CONNECTION_STRING - Your IoT Hub's connection string\n" +
-            "DIGITAL_TWIN_ID - Your digital twin id to invoke the command onto\n" +
+            "DEVICE_ID - The ID of the device to invoke the command onto\n" +
             "INTERFACE_INSTANCE_NAME - The interface the command belongs to\n" +
             "COMMAND_NAME - The name of the command to invoke on your digital twin\n" +
             "PAYLOAD - (optional) The json payload to include in the command";
@@ -29,11 +29,11 @@ public class InvokeDigitalTwinCommandSample
     public static void main(String[] args) {
         verifyInputs();
 
-        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(CONNECTION_STRING).build();
+        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(IOTHUB_CONNECTION_STRING).build();
 
-        log.info("Invoking " + COMMAND_NAME + " on device " + DIGITAL_TWIN_ID + " with interface instance name " + INTERFACE_INSTANCE_NAME);
+        log.info("Invoking " + COMMAND_NAME + " on device " + DEVICE_ID + " with interface instance name " + INTERFACE_INSTANCE_NAME);
 
-        DigitalTwinCommandResponse digitalTwinCommandResponse = digitalTwinServiceClient.invokeCommand(DIGITAL_TWIN_ID, INTERFACE_INSTANCE_NAME, COMMAND_NAME, PAYLOAD);
+        DigitalTwinCommandResponse digitalTwinCommandResponse = digitalTwinServiceClient.invokeCommand(DEVICE_ID, INTERFACE_INSTANCE_NAME, COMMAND_NAME, PAYLOAD);
 
         log.info("Command invoked on the device successfully, the returned status was " + digitalTwinCommandResponse.getStatus() + " and the request id was " + digitalTwinCommandResponse.getRequestId());
         log.info("The returned PAYLOAD was ");
@@ -44,7 +44,7 @@ public class InvokeDigitalTwinCommandSample
     }
 
     private static void verifyInputs() {
-        if (isNullOrEmpty(CONNECTION_STRING) || isNullOrEmpty(DIGITAL_TWIN_ID) || isNullOrEmpty(INTERFACE_INSTANCE_NAME) || isNullOrEmpty(COMMAND_NAME)) {
+        if (isNullOrEmpty(IOTHUB_CONNECTION_STRING) || isNullOrEmpty(DEVICE_ID) || isNullOrEmpty(INTERFACE_INSTANCE_NAME) || isNullOrEmpty(COMMAND_NAME)) {
             log.warn(usage);
             System.exit(0);
         }

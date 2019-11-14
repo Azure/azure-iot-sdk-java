@@ -7,23 +7,22 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URISyntaxException;
 import java.util.Scanner;
 
 @Slf4j
 public class GetModelSample
 {
-    private static final String CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
+    private static final String IOTHUB_CONNECTION_STRING = System.getenv("IOTHUB_CONNECTION_STRING");
     private static final String MODEL_ID = System.getenv("MODEL_ID");
 
     private static final String usage = "In order to run this sample, you must set environment variables for \n" +
             "IOTHUB_CONNECTION_STRING - Your IoT Hub's connection string\n" +
-            "MODEL_ID - your digital twin id to invoke the command onto";
+            "MODEL_ID - The ID of the model to retrieve from the model repo";
 
     public static void main(String[] args) {
         verifyInputs();
         
-        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(CONNECTION_STRING).build();
+        DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(IOTHUB_CONNECTION_STRING).build();
 
         log.info("Getting the model with model id " + MODEL_ID);
 
@@ -37,7 +36,7 @@ public class GetModelSample
     }
 
     private static void verifyInputs() {
-        if (isNullOrEmpty(CONNECTION_STRING) || isNullOrEmpty(MODEL_ID)) {
+        if (isNullOrEmpty(IOTHUB_CONNECTION_STRING) || isNullOrEmpty(MODEL_ID)) {
             log.warn(usage);
             System.exit(0);
         }
