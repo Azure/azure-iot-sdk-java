@@ -70,9 +70,10 @@ public class TokenRenewalTests extends IntegrationTest
      * Amqps/Amqps_ws : Expect the cbs link to send a new sas token before the old token expires
      * Mqtt/Mqtt_ws   : Expect the connection to be lost briefly, but re-established with a new sas token
      * Http           : No connection status callback, but should be able to send a message after the first generated sas token has expired
+     * @throws Exception if the test fails in any way
      */
     @Test
-    public void tokenRenewalWorks() throws URISyntaxException, ModuleClientException, IotHubException, IOException, InterruptedException
+    public void tokenRenewalWorks() throws Exception
     {
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 60;
         final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600;

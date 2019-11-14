@@ -64,6 +64,7 @@ public class X509CertificateGenerator
     /**
      * Constructor that generates a new self signed x509 certificate. Public certificate, private key, thumbprint, and the complete
      * certificate can be accessed by getters. The created certificate will have the provided common name.
+     * @param commonName the common name to use for the created certs
      */
     public X509CertificateGenerator(String commonName)
     {

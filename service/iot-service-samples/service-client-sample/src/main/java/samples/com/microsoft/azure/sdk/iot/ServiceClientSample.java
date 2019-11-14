@@ -41,11 +41,10 @@ public class ServiceClientSample
     private static final int RECEIVER_TIMEOUT = 10000; // Timeout in ms
  
     /**
-     * @param args
-     * @throws IOException
-     * @throws URISyntaxException
+     * @param args Unused
+     * @throws Exception if any exception occurs
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, Exception
+    public static void main(String[] args) throws Exception
     {
         System.out.println("********* Starting ServiceClient sample...");
 

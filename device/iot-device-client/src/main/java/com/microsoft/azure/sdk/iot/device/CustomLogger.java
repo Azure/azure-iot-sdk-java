@@ -62,8 +62,8 @@ public class CustomLogger {
     }
 
     /**
-     * @param message
-     * @param params
+     * @param message The message to log
+     * @param params The parameters to be put into the message
      * @deprecated Since the switch from Log4j to slf4j there is no fatal log level anymore. Mapped to error level
      */
     public void LogFatal(String message, Object...params)

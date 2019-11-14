@@ -686,7 +686,7 @@ public class IotHubTransport implements IotHubListener
 
     /**
      * Creates a new iotHubTransportConnection instance, sets this object as its listener, and opens that connection
-     * @throws TransportException
+     * @throws TransportException if any exception is thrown while opening the connection
      */
     private void openConnection() throws TransportException
     {
@@ -726,7 +726,7 @@ public class IotHubTransport implements IotHubListener
 
     /**
      * Attempts to reconnect. By the end of this call, the state of this object shall be either CONNECTED or DISCONNECTED
-     * @param transportException
+     * @param transportException the exception that caused the disconnection
      */
     private void handleDisconnection(TransportException transportException)
     {
