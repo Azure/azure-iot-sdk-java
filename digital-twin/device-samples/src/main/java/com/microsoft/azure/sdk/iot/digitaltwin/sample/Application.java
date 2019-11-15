@@ -59,6 +59,7 @@ public class Application {
         log.info("Waiting for service updates...");
         log.info("Enter any key to finish");
         new Scanner(System.in).nextLine();
+        System.exit(0);
     }
 
 }
