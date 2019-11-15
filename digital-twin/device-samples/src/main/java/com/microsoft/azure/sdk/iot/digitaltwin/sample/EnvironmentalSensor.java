@@ -34,7 +34,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Slf4j
 public class EnvironmentalSensor extends AbstractDigitalTwinInterfaceClient {
-    private static final String ENVIRONMENTAL_SENSOR_INTERFACE_ID = "urn:csharp_sdk_sample:EnvironmentalSensor:1";
+    public static final String ENVIRONMENTAL_SENSOR_INTERFACE_ID = "urn:java_sdk_sample:EnvironmentalSensor:1";
     private static final String COMMAND_NOT_HANDLED_MESSAGE_PATTERN = "\"Command[%s] is not handled for interface[%s].\"";
     private static final String TELEMETRY_NAME_TEMPERATURE = "temp";
     private static final String TELEMETRY_NAME_HUMIDITY = "humid";
