@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Scanner;
 
@@ -20,10 +21,11 @@ import static java.util.Arrays.asList;
 @Slf4j
 public class Application {
     private static final String DIGITAL_TWIN_DEVICE_CONNECTION_STRING = System.getenv("DIGITAL_TWIN_DEVICE_CONNECTION_STRING");
-    private static final String DCM_ID = "urn:azureiot:samplemodel:1";
+    private static final String DCM_ID = "urn:java_sdk_sample:sample_device:1";
     private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "environmentalSensor";
+    private static final String modelDefinitionInterfaceName = "urn_azureiot_ModelDiscovery_ModelDefinition";
 
-    public static void main(String[] args) throws URISyntaxException {
+    public static void main(String[] args) throws URISyntaxException, IOException {
         if (DIGITAL_TWIN_DEVICE_CONNECTION_STRING == null || DIGITAL_TWIN_DEVICE_CONNECTION_STRING.isEmpty()) {
             log.info("Please set a value for the environment variable \"DIGITAL_TWIN_DEVICE_CONNECTION_STRING\"");
             return;
@@ -48,7 +50,10 @@ public class Application {
                                                                      .totalMemory(16e9)
                                                                      .totalStorage(1e12)
                                                                      .build();
-        DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor)).blockingGet();
+        final ModelDefinition modelDefinition = ModelDefinition.builder()
+                .digitalTwinInterfaceInstanceName(modelDefinitionInterfaceName)
+                .build();
+        DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor, modelDefinition)).blockingGet();
         log.info("Register interfaces result: {}.", result);
 
         log.info("Waiting for service updates...");
