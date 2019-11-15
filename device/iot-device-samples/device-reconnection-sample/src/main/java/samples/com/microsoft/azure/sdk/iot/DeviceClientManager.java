@@ -19,7 +19,14 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     private static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 10;
     private final boolean autoReconnectOnDisconnected;
     private ConnectionStatus connectionStatus;
-    @Delegate
+
+    private interface DeviceClientNonDelegatedFunction {
+        void open();
+        void closeNow();
+    }
+
+    // The methods defined in the interface DeviceClientNonDelegatedFunction will be called on DeviceClientManager, and not on DeviceClient.
+    @Delegate(excludes = DeviceClientNonDelegatedFunction.class)
     private DeviceClient client;
 
     DeviceClientManager(DeviceClient deviceClient, boolean autoReconnectOnDisconnected) {
@@ -29,7 +36,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         this.autoReconnectOnDisconnected = autoReconnectOnDisconnected;
     }
 
-    public void connect() {
+    public void open() {
         synchronized (lock) {
             if(connectionStatus == ConnectionStatus.DISCONNECTED) {
                 connectionStatus = ConnectionStatus.CONNECTING;
@@ -40,7 +47,34 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         doConnect();
     }
 
-    public void disconnect() {
+    private void doConnect() {
+        // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
+        while (connectionStatus == ConnectionStatus.CONNECTING) {
+            synchronized (lock) {
+                if(connectionStatus == ConnectionStatus.CONNECTING) {
+                    try {
+                        log.debug("[connect] - Opening the device client instance...");
+                        client.open();
+                        connectionStatus = ConnectionStatus.CONNECTED;
+                        break;
+                    }
+                    catch (Exception ex) {
+                        log.error("[connect] - Exception thrown while opening DeviceClient instance: ", ex);
+                    }
+                }
+            }
+
+            try {
+                log.debug("[connect] - Sleeping for 10 secs before attempting another open()");
+                Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
+            }
+            catch (InterruptedException ex) {
+                log.error("[connect] - Exception in thread sleep: ", ex);
+            }
+        }
+    }
+
+    public void closeNow() {
         synchronized (lock) {
             try {
                 log.debug("[disconnect] - Closing the device client instance...");
@@ -98,7 +132,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    void handleRecoverableDisconnection() {
+    private void handleRecoverableDisconnection() {
         synchronized (lock) {
             if (connectionStatus == ConnectionStatus.CONNECTED && autoReconnectOnDisconnected) {
                 new Thread(new Runnable() {
@@ -124,33 +158,6 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                 }).start();
             } else {
                 connectionStatus = ConnectionStatus.DISCONNECTED;
-            }
-        }
-    }
-
-    void doConnect() {
-        // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
-        while (connectionStatus == ConnectionStatus.CONNECTING) {
-            synchronized (lock) {
-                if(connectionStatus == ConnectionStatus.CONNECTING) {
-                    try {
-                        log.debug("[connect] - Opening the device client instance...");
-                        client.open();
-                        connectionStatus = ConnectionStatus.CONNECTED;
-                        break;
-                    }
-                    catch (Exception ex) {
-                        log.error("[connect] - Exception thrown while opening DeviceClient instance: ", ex);
-                    }
-                }
-            }
-
-            try {
-                log.debug("[connect] - Sleeping for 10 secs before attempting another open()");
-                Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
-            }
-            catch (InterruptedException ex) {
-                log.error("[connect] - Exception in thread sleep: ", ex);
             }
         }
     }

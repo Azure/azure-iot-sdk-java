@@ -41,7 +41,7 @@ public class Application {
         deviceClientManager = new DeviceClientManager(client, AUTO_RECONNECT_ON_DISCONNECTED);
         deviceClientManager.setOperationTimeout(DEVICE_OPERATION_TIMEOUT_IN_MINUTES);
 
-        deviceClientManager.connect();
+        deviceClientManager.open();
         log.debug("Opened connection to IoT Hub.");
 
         log.debug("Setting C2D message handler...");
@@ -52,7 +52,7 @@ public class Application {
 
         // close the connection
         log.debug("Closing");
-        deviceClientManager.disconnect();
+        deviceClientManager.closeNow();
 
         if (! failedMessageListOnClose.isEmpty()) {
             log.debug("List of messages that were cancelled on close: {}", failedMessageListOnClose.toString());
