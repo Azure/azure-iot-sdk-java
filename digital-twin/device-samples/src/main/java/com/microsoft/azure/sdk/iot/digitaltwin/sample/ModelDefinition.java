@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.sample;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandResponse;
@@ -13,7 +12,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,8 +42,7 @@ public class ModelDefinition extends AbstractDigitalTwinInterfaceClient {
             // model Id in the payload, and the device must return the model definition in the command response payload
             if (getModelDefinitionCommandName.equals(digitalTwinCommandRequest.getCommandName()))
             {
-                ObjectMapper objectMapper = new ObjectMapper();
-                String commandPayload = objectMapper.writeValueAsString(digitalTwinCommandRequest.getPayload());
+                String commandPayload = digitalTwinCommandRequest.getPayload().replace("\"", "");
                 if (commandPayload.equals(EnvironmentalSensor.ENVIRONMENTAL_SENSOR_INTERFACE_ID))
                 {
                     return DigitalTwinCommandResponse.builder()
