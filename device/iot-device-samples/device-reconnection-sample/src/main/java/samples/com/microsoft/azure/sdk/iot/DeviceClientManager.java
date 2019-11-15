@@ -19,21 +19,27 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     private static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 10;
     private final boolean autoReconnectOnDisconnected;
     private ConnectionStatus connectionStatus;
+    private IotHubConnectionStatusChangeCallback suppliedConnectionStatusChangeCallback;
 
     private interface DeviceClientNonDelegatedFunction {
         void open();
         void closeNow();
+        void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
     // The methods defined in the interface DeviceClientNonDelegatedFunction will be called on DeviceClientManager, and not on DeviceClient.
     @Delegate(excludes = DeviceClientNonDelegatedFunction.class)
-    private DeviceClient client;
+    private final DeviceClient client;
 
     DeviceClientManager(DeviceClient deviceClient, boolean autoReconnectOnDisconnected) {
         this.connectionStatus = ConnectionStatus.DISCONNECTED;
         this.client = deviceClient;
-        this.client.registerConnectionStatusChangeCallback(this, this);
         this.autoReconnectOnDisconnected = autoReconnectOnDisconnected;
+    }
+
+    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
+        this.suppliedConnectionStatusChangeCallback = callback;
+        this.client.registerConnectionStatusChangeCallback(this, callbackContext);
     }
 
     public void open() {
@@ -91,6 +97,13 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     @Override
     public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
+        IotHubConnectionStatusChangeCallback suppliedCallback = this.suppliedConnectionStatusChangeCallback;
+        if (suppliedCallback != null) {
+            log.trace("Invoking the supplied IotHubConnectionStatusChangeCallback implementation.");
+            suppliedCallback.execute(status, statusChangeReason, throwable, callbackContext);
+        }
+
+        log.trace("Invoking DeviceClientManager IotHubConnectionStatusChangeCallback implementation.");
         log.debug("### Connection status change reported: status={}, reason={}, throwable={}", status, statusChangeReason, throwable);
 
         switch (status) {
