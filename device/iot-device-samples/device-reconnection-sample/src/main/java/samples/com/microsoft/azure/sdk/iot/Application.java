@@ -40,6 +40,7 @@ public class Application {
 
         deviceClientManager = new DeviceClientManager(client, AUTO_RECONNECT_ON_DISCONNECTED);
         deviceClientManager.setOperationTimeout(DEVICE_OPERATION_TIMEOUT_IN_MINUTES);
+        deviceClientManager.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeLogger(), deviceClientManager);
 
         deviceClientManager.open();
         log.debug("Opened connection to IoT Hub.");

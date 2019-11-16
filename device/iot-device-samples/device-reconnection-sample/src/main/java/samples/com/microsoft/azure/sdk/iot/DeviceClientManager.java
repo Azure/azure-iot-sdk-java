@@ -9,6 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.COMMUNICATION_ERROR;
+import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.RETRY_EXPIRED;
+import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.DISCONNECTED;
+
 @Slf4j
 public class DeviceClientManager implements IotHubConnectionStatusChangeCallback {
     private enum ConnectionStatus {
@@ -104,50 +108,15 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         }
 
         log.trace("Invoking DeviceClientManager IotHubConnectionStatusChangeCallback implementation.");
-        log.debug("### Connection status change reported: status={}, reason={}, throwable={}", status, statusChangeReason, throwable);
-
-        switch (status) {
-            case CONNECTED: {
-                log.debug("### The DeviceClient is CONNECTED; all operations will be carried out as normal.");
-                break;
-            }
-            case DISCONNECTED_RETRYING: {
-                log.debug("### The DeviceClient is retrying based on the retry policy. Do NOT close or open the DeviceClient instance");
-                log.debug("### The DeviceClient can still queue messages and report properties, but they won't be sent until the connection is established.");
-                break;
-            }
-            case DISCONNECTED: {
-                handleDisconnection(statusChangeReason);
-            }
+        if (autoReconnectOnDisconnected && status == DISCONNECTED && (statusChangeReason == RETRY_EXPIRED || statusChangeReason == COMMUNICATION_ERROR)) {
+            handleRecoverableDisconnection();
         }
-    }
 
-    private void handleDisconnection(IotHubConnectionStatusChangeReason statusChangeReason) {
-        switch (statusChangeReason) {
-            case CLIENT_CLOSE:
-                log.debug("### The DeviceClient has been closed gracefully. You can reopen by calling open() on this client.");
-                break;
-            case BAD_CREDENTIAL:
-            case EXPIRED_SAS_TOKEN:
-                log.warn("### The supplied credentials were invalid. Fix the input and create a new device client instance.");
-                break;
-            case RETRY_EXPIRED:
-                log.warn("### The DeviceClient has been disconnected because the retry policy expired. Can be reopened by closing and then opening the instance.");
-                handleRecoverableDisconnection();
-                break;
-            case COMMUNICATION_ERROR:
-                log.warn("### The DeviceClient has been disconnected due to a non-retryable exception. Inspect the throwable for details.");
-                log.warn("### The DeviceClient can be reopened by closing and then opening the instance.");
-                handleRecoverableDisconnection();
-                break;
-            default:
-                log.error("### [dead code] DeviceClient cannot be disconnected with reason {}", statusChangeReason);
-        }
     }
 
     private void handleRecoverableDisconnection() {
         synchronized (lock) {
-            if (connectionStatus == ConnectionStatus.CONNECTED && autoReconnectOnDisconnected) {
+            if (connectionStatus == ConnectionStatus.CONNECTED) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
