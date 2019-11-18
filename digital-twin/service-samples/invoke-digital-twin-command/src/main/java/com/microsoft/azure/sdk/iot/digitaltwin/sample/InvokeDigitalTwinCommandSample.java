@@ -3,11 +3,13 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwinCommandResponse;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 @Slf4j
@@ -26,7 +28,7 @@ public class InvokeDigitalTwinCommandSample
             "COMMAND_NAME - The name of the command to invoke on your digital twin\n" +
             "PAYLOAD - (optional) The json payload to include in the command";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         verifyInputs();
 
         DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(IOTHUB_CONNECTION_STRING).build();
@@ -36,8 +38,16 @@ public class InvokeDigitalTwinCommandSample
         DigitalTwinCommandResponse digitalTwinCommandResponse = digitalTwinServiceClient.invokeCommand(DEVICE_ID, INTERFACE_INSTANCE_NAME, COMMAND_NAME, PAYLOAD);
 
         log.info("Command invoked on the device successfully, the returned status was " + digitalTwinCommandResponse.getStatus() + " and the request id was " + digitalTwinCommandResponse.getRequestId());
-        log.info("The returned PAYLOAD was ");
-        log.info(digitalTwinCommandResponse.getPayload());
+
+        if (digitalTwinCommandResponse.getPayload() == null)
+        {
+            log.info("The returned PAYLOAD was null");
+        }
+        else
+        {
+            log.info("The returned PAYLOAD was ");
+            log.info(toPrettyFormat(digitalTwinCommandResponse.getPayload()));
+        }
 
         log.info("Enter any key to finish\n");
         new Scanner(System.in).nextLine();
@@ -57,5 +67,11 @@ public class InvokeDigitalTwinCommandSample
 
     private static boolean isNullOrEmpty(String s) {
         return s == null || s.length() == 0;
+    }
+
+    public static String toPrettyFormat(String jsonString) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Object json = mapper.readValue(jsonString, Object.class);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
     }
 }
