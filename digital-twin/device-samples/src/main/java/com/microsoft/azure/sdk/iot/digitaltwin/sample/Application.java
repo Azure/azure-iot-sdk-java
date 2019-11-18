@@ -56,6 +56,10 @@ public class Application {
         DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor, modelDefinition)).blockingGet();
         log.info("Register interfaces result: {}.", result);
 
+        log.info("Updating state of environmental sensor to true...");
+        environmentalSensor.updateStatusAsync(true).blockingGet();
+        log.info("State of environmental sensor was set to true");
+
         log.info("Waiting for service updates...");
         log.info("Enter any key to finish");
         new Scanner(System.in).nextLine();
