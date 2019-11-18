@@ -12,9 +12,11 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Slf4j
@@ -26,13 +28,14 @@ public class ModelDefinition extends AbstractDigitalTwinInterfaceClient {
     private static final String getModelDefinitionCommandName = "getModelDefinition";
 
     @Builder
-    private ModelDefinition(@NonNull String digitalTwinInterfaceInstanceName) throws IOException {
+    private ModelDefinition(@NonNull String digitalTwinInterfaceInstanceName) throws IOException, URISyntaxException {
         super(digitalTwinInterfaceInstanceName, modelDefinitionInterfaceId);
 
-        Path currentRelativePath = Paths.get("");
-        String s = currentRelativePath.toAbsolutePath().toString();
-
-        environmentalSensorModelDefinition = new String(Files.readAllBytes(Paths.get(s + "\\device-samples\\src\\main\\java\\com\\microsoft\\azure\\sdk\\iot\\digitaltwin\\sample\\EnvironmentalSensor.interface.json")));
+        //Model definition is located in a json file within the resources folder of this sample
+        URL res = getClass().getClassLoader().getResource("EnvironmentalSensor.interface.json");
+        File file = Paths.get(res.toURI()).toFile();
+        String modelDefinitionPath = file.getAbsolutePath();
+        environmentalSensorModelDefinition = new String(Files.readAllBytes(Paths.get(modelDefinitionPath)));
     }
 
     @Override
