@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.eventhubs.*;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
@@ -50,8 +51,15 @@ public class InvokeDigitalTwinAsyncCommandSample {
         DigitalTwinCommandResponse digitalTwinCommandResponse = digitalTwinServiceClient.invokeCommand(DEVICE_ID, INTERFACE_INSTANCE_NAME, ASYNC_COMMAND_NAME, PAYLOAD);
 
         log.info("Command invoked on the device successfully, the returned status was " + digitalTwinCommandResponse.getStatus() + " and the request id was " + digitalTwinCommandResponse.getRequestId());
-        log.info("The returned payload was ");
-        log.info(digitalTwinCommandResponse.getPayload());
+        if (digitalTwinCommandResponse.getPayload() == null)
+        {
+            log.info("The returned PAYLOAD was null");
+        }
+        else
+        {
+            log.info("The returned PAYLOAD was ");
+            log.info(toPrettyFormat(digitalTwinCommandResponse.getPayload()));
+        }
 
         listenForAsyncCommandUpdates(digitalTwinCommandResponse.getRequestId());
     }
@@ -141,5 +149,11 @@ public class InvokeDigitalTwinAsyncCommandSample {
 
     private static boolean isNullOrEmpty(String s) {
         return s == null || s.length() == 0;
+    }
+
+    public static String toPrettyFormat(String jsonString) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Object json = mapper.readValue(jsonString, Object.class);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
     }
 }

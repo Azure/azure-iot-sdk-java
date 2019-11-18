@@ -3,10 +3,12 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.sample;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 @Slf4j
@@ -19,7 +21,7 @@ public class GetDigitalTwinSample
             "IOTHUB_CONNECTION_STRING - Your IoT Hub's connection string\n" +
             "DEVICE_ID - The ID of the device to get the digital twin of\n";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         verifyInputs();
         DigitalTwinServiceClient digitalTwinServiceClient = DigitalTwinServiceClientImpl.buildFromConnectionString().connectionString(IOTHUB_CONNECTION_STRING).build();
 
@@ -28,7 +30,7 @@ public class GetDigitalTwinSample
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(DEVICE_ID);
 
         log.info("Got the status of the digital twin successfully, the returned string was:");
-        log.info(digitalTwin);
+        log.info(toPrettyFormat(digitalTwin));
 
         log.info("Enter any key to finish");
         new Scanner(System.in).nextLine();
@@ -44,5 +46,11 @@ public class GetDigitalTwinSample
     private static boolean isNullOrEmpty(String s)
     {
         return s == null || s.length() == 0;
+    }
+
+    public static String toPrettyFormat(String jsonString) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        Object json = mapper.readValue(jsonString, Object.class);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
     }
 }
