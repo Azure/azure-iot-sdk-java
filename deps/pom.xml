@@ -4,6 +4,11 @@
   -->
 
 <project>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-sdk-java</artifactId>
+        <version>0.26.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>Dependencies for Iot Hub Java SDK</name>
     <description>Dependencies for Iot Hub Java SDK</description>
@@ -28,7 +33,7 @@
     </scm>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-deps</artifactId>
-    <version>0.8.5</version>
+    <version>${iot-deps-version}</version>
     <packaging>jar</packaging>
 
     <properties>

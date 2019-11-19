@@ -1,6 +1,11 @@
 <!-- Copyright (c) Microsoft. All rights reserved. -->
 <!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
 <project>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-e2e-tests</artifactId>
+        <version>0.26.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-e2e-common</artifactId>
@@ -21,7 +26,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.18.0</version>
+            <version>${iot-device-client-version}</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>
@@ -42,30 +47,30 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.18.0</version>
+            <version>${iot-service-client-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-device-client</artifactId>
-            <version>1.7.1</version>
+            <version>${provisioning-device-client-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>provisioning-service-client</artifactId>
-            <version>1.5.2</version>
+            <version>${provisioning-service-client-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>tpm-provider-emulator</artifactId>
-            <version>1.1.1</version>
+            <version>${tpm-provider-emulator-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>x509-provider</artifactId>
-            <version>1.1.3</version>
+            <version>${x509-provider-version}</version>
             <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.littleshoot/littleproxy -->

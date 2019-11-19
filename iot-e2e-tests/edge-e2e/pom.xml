@@ -1,4 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-e2e-tests</artifactId>
+        <version>0.26.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.microsoft.azure.sdk.iot</groupId>
@@ -44,13 +49,13 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-device-client</artifactId>
-            <version>1.18.0</version>
+            <version>${iot-device-client-version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-service-client</artifactId>
-            <version>1.18.0</version>
+            <version>${iot-service-client-version}</version>
         </dependency>
     </dependencies>
 
