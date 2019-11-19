@@ -3,6 +3,11 @@
   ~  Licensed under the MIT license. See LICENSE file in the project root for full license information.
   -->
 <project>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+        <artifactId>provisioning</artifactId>
+        <version>1.8.1</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
     <artifactId>provisioning-samples</artifactId>
