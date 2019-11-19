@@ -68,33 +68,6 @@ public class PropertyTest
 
     }
 
-    /*
-    **Tests_SRS_Property_25_006: [**If the key contains illegal unicode control characters i.e ' ', '.', '$', the constructor shall throw an IllegalArgumentException.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnInvalidKey()
-    {
-        //act
-        Property testProp = new Property("Key with space", 1);
-
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnInvalidKey_2()
-    {
-        //act
-        Property testProp = new Property("KeyWith$", 1);
-
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnInvalidKey_3()
-    {
-        //act
-        Property testProp = new Property("KKeyWith.", 1);
-
-    }
-
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidKey_4()
     {

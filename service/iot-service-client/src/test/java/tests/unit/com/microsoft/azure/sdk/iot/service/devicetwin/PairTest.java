@@ -48,37 +48,6 @@ public class PairTest
     }
 
     /*
-    **Tests_SRS_Pair_25_003: [**If the key contains illegal unicode control characters i.e ' ', '.', '$', the constructor shall throw an IllegalArgumentException.**]**
-     */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfKeyIllegalCharacters_1()
-    {
-        //act
-        Pair testPair = new Pair("Key With Space", "TestObject");
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfKeyIllegalCharacters_2()
-    {
-        //act
-        Pair testPair = new Pair("Key With $", "TestObject");
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfKeyIllegalCharacters_3()
-    {
-        //act
-        Pair testPair = new Pair("Key With .", "TestObject");
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsIfKeyIllegalCharacters_4()
-    {
-        //act
-        Pair testPair = new Pair("Key With Length greater than 128 - 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
-                , "TestObject");
-    }
-    /*
     **Tests_SRS_Pair_25_005: [**The function shall return the value for this Pair.**]**
      */
     @Test
