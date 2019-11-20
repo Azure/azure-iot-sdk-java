@@ -81,7 +81,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=provisioning-x50
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-device-client</artifactId>
+            <artifactId>provisioning-device-client-preview</artifactId>
             <version>0.0.1</version>
         </dependency>
         <dependency>
@@ -312,7 +312,7 @@ This part of the tutorial builds on top of the code you wrote in the previous se
 		...
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-device-client</artifactId>
+            <artifactId>iot-device-client-preview</artifactId>
             <version>1.5.37</version>
         </dependency>
 		...
@@ -325,12 +325,12 @@ This part of the tutorial builds on top of the code you wrote in the previous se
 	 <dependencies>
 	    <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-device-client</artifactId>
+            <artifactId>iot-device-client-preview</artifactId>
             <version>1.5.37</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-device-client</artifactId>
+            <artifactId>provisioning-device-client-preview</artifactId>
             <version>0.0.1</version>
         </dependency>
         <dependency>
