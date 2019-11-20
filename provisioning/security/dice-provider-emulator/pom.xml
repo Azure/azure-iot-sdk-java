@@ -12,7 +12,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
+<<<<<<< HEAD
     <artifactId>${dice-provider-emulator-artifact-id}</artifactId>
+=======
+    <artifactId>dice-provider-emulator-preview</artifactId>
+>>>>>>> 4999a774e... refactor(all): Rename all published artifacts with -preview suffix
     <name>Provisioning Security DICE Emulator Provider</name>
     <version>${dice-provider-emulator-version}</version>
     <packaging>jar</packaging>

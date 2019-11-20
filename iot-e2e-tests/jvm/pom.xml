@@ -27,36 +27,36 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>tpm-provider-emulator</artifactId>
+            <artifactId>tpm-provider-emulator-preview</artifactId>
             <version>${tpm-provider-emulator-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>x509-provider</artifactId>
+            <artifactId>x509-provider-preview</artifactId>
             <version>${x509-provider-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-device-client</artifactId>
+            <artifactId>provisioning-device-client-preview</artifactId>
             <version>${provisioning-device-client-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-service-client</artifactId>
+            <artifactId>provisioning-service-client-preview</artifactId>
             <version>${provisioning-service-client-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-device-client</artifactId>
+            <artifactId>iot-device-client-preview</artifactId>
             <version>${iot-device-client-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-service-client</artifactId>
+            <artifactId>iot-service-client-preview</artifactId>
             <version>${iot-service-client-version}</version>
             <scope>test</scope>
         </dependency>

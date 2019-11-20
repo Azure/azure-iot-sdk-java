@@ -22,6 +22,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+<<<<<<< HEAD
+=======
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client-preview</artifactId>
+            <version>${iot-device-client-version}</version>
+        </dependency>
+>>>>>>> 4999a774e... refactor(all): Rename all published artifacts with -preview suffix
         <!-- test dependencies -->
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -41,6 +49,7 @@
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
+<<<<<<< HEAD
             <artifactId>${iot-device-client-artifact-id}</artifactId>
             <version>${iot-device-client-version}</version>
         </dependency>
@@ -51,10 +60,14 @@
 =======
             <artifactId>iot-service-client</artifactId>
 >>>>>>> 79e14f5e9... refactor(pom): Fix pom files to inherit jar versions from master pom
+=======
+            <artifactId>iot-service-client-preview</artifactId>
+>>>>>>> 4999a774e... refactor(all): Rename all published artifacts with -preview suffix
             <version>${iot-service-client-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+<<<<<<< HEAD
 <<<<<<< HEAD
             <artifactId>${provisioning-device-client-artifact-id}</artifactId>
             <version>${provisioning-device-client-version}</version>
@@ -75,24 +88,27 @@
             <version>${x509-provider-version}</version>
 =======
             <artifactId>provisioning-device-client</artifactId>
+=======
+            <artifactId>provisioning-device-client-preview</artifactId>
+>>>>>>> 4999a774e... refactor(all): Rename all published artifacts with -preview suffix
             <version>${provisioning-device-client-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-service-client</artifactId>
+            <artifactId>provisioning-service-client-preview</artifactId>
             <version>${provisioning-service-client-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>tpm-provider-emulator</artifactId>
+            <artifactId>tpm-provider-emulator-preview</artifactId>
             <version>${tpm-provider-emulator-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>x509-provider</artifactId>
+            <artifactId>x509-provider-preview</artifactId>
             <version>${x509-provider-version}</version>
             <scope>compile</scope>
 >>>>>>> 79e14f5e9... refactor(pom): Fix pom files to inherit jar versions from master pom

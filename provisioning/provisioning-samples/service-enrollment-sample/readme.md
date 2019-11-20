@@ -132,7 +132,7 @@ mvn archetype:generate -DgroupId=com.mycompany.app -DartifactId=service-enrollme
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-service-client</artifactId>
+            <artifactId>provisioning-service-client-preview</artifactId>
             <version>0.0.1</version>
         </dependency>
     </dependencies>

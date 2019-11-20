@@ -1,13 +1,13 @@
 {
-    "device": "1.18.0",
-    "service": "1.18.0",
-    "deps": "0.8.5",
-    "securityProvider": "1.3.0",
-    "tpmEmulator": "1.1.1",
-    "tpmHsm": "1.1.2",
-    "diceEmulator": "1.1.1",
-    "dice": "1.1.1",
-    "x509": "1.1.3",
-    "provisioningDevice": "1.7.1",
-    "provisioningService": "1.5.2"
+    "device": "1.0.0",
+    "service": "1.0.0",
+    "deps": "1.0.0",
+    "securityProvider": "1.0.0",
+    "tpmEmulator": "1.0.0",
+    "tpmHsm": "1.0.0",
+    "diceEmulator": "1.0.0",
+    "dice": "1.0.0",
+    "x509": "1.0.0",
+    "provisioningDevice": "1.0.0",
+    "provisioningService": "1.0.0"
 }

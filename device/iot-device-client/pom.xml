@@ -7,7 +7,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
+<<<<<<< HEAD
     <artifactId>${iot-device-client-artifact-id}</artifactId>
+=======
+    <artifactId>iot-device-client-preview</artifactId>
+>>>>>>> 4999a774e... refactor(all): Rename all published artifacts with -preview suffix
     <name>IoT Hub Java Device Client</name>
     <version>${iot-device-client-version}</version>
     <description>The Microsoft Azure IoT Device SDK for Java</description>
