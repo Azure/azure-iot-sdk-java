@@ -3,11 +3,16 @@
   ~  Licensed under the MIT license. See LICENSE file in the project root for full license information.
   -->
 <project>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+        <artifactId>provisioning</artifactId>
+        <version>1.8.1</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
     <artifactId>provisioning-service-client</artifactId>
     <name>Provisioning Service Client</name>
-    <version>1.5.2</version>
+    <version>${provisioning-service-client-version}</version>
     <packaging>jar</packaging>
     <description>The Microsoft Azure IoT Provisioning Service Client SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
@@ -36,7 +41,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-deps</artifactId>
-            <version>0.8.5</version>
+            <version>${iot-deps-version}</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>

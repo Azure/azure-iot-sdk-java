@@ -1,10 +1,15 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-device-client-parent</artifactId>
+        <version>1.18.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-device-client</artifactId>
     <name>IoT Hub Java Device Client</name>
-    <version>1.18.0</version>
+    <version>${iot-device-client-version}</version>
     <description>The Microsoft Azure IoT Device SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <developers>
@@ -50,7 +55,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-deps</artifactId>
-            <version>0.8.5</version>
+            <version>${iot-deps-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>
@@ -65,7 +70,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>security-provider</artifactId>
-            <version>1.3.0</version>
+            <version>${security-provider-version}</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>

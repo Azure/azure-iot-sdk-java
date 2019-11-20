@@ -1,9 +1,15 @@
-<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
+<project>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-service-client-parent</artifactId>
+        <version>1.18.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-service-client</artifactId>
     <name>Iot Hub Java Service SDK</name>
-    <version>1.18.0</version>
+    <version>${iot-service-client-version}</version>
     <description>The Microsoft Azure IoT Service SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <developers>
@@ -36,7 +42,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-deps</artifactId>
-            <version>0.8.5</version>
+            <version>${iot-deps-version}</version>
         </dependency>
         <dependency>
             <groupId>org.jmockit</groupId>
