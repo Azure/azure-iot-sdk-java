@@ -17,7 +17,6 @@
     <modules>
         <module>environmental-sensor-sample</module>
         <module>iot-central-sample</module>
-        <module>sample-interfaces-instance</module>
     </modules>
 
     <properties>
