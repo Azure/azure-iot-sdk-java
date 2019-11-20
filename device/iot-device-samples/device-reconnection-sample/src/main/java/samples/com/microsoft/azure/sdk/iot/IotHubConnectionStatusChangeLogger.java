@@ -32,7 +32,7 @@ public class IotHubConnectionStatusChangeLogger implements IotHubConnectionStatu
                     log.warn("### The DeviceClient has been disconnected because the retry policy expired. Can be reopened by closing and then opening the instance.");
                 } else if (statusChangeReason == COMMUNICATION_ERROR) {
                     log.warn("### The DeviceClient has been disconnected due to a non-retry-able exception. Inspect the throwable for details.");
-                    log.warn("### The DeviceClient can be reopened by closing and then opening the instance.");
+                    log.warn("### The DeviceClient instance should be discarded, and a new instance should be initialized.");
                 } else {
                     log.error("### [dead code] DeviceClient cannot be disconnected with reason {}", statusChangeReason);
                 }

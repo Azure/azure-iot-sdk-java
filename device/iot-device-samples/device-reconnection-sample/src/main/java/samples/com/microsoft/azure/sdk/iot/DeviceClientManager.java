@@ -3,15 +3,17 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.COMMUNICATION_ERROR;
+import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.NO_NETWORK;
 import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.RETRY_EXPIRED;
 import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.DISCONNECTED;
+import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.DISCONNECTED_RETRYING;
 
 @Slf4j
 public class DeviceClientManager implements IotHubConnectionStatusChangeCallback {
@@ -21,9 +23,9 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     private static final Object lock = new Object();
     private static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 10;
-    private final boolean autoReconnectOnDisconnected;
     private ConnectionStatus connectionStatus;
     private IotHubConnectionStatusChangeCallback suppliedConnectionStatusChangeCallback;
+    private Object suppliedCallbackContext;
 
     private interface DeviceClientNonDelegatedFunction {
         void open();
@@ -35,15 +37,15 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     @Delegate(excludes = DeviceClientNonDelegatedFunction.class)
     private final DeviceClient client;
 
-    DeviceClientManager(DeviceClient deviceClient, boolean autoReconnectOnDisconnected) {
+    DeviceClientManager(DeviceClient deviceClient) {
         this.connectionStatus = ConnectionStatus.DISCONNECTED;
         this.client = deviceClient;
-        this.autoReconnectOnDisconnected = autoReconnectOnDisconnected;
+        this.client.registerConnectionStatusChangeCallback(this, this);
     }
 
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
         this.suppliedConnectionStatusChangeCallback = callback;
-        this.client.registerConnectionStatusChangeCallback(this, callbackContext);
+        this.suppliedCallbackContext = callbackContext;
     }
 
     public void open() {
@@ -102,16 +104,23 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     @Override
     public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
         IotHubConnectionStatusChangeCallback suppliedCallback = this.suppliedConnectionStatusChangeCallback;
-        if (suppliedCallback != null) {
-            log.trace("Invoking the supplied IotHubConnectionStatusChangeCallback implementation.");
-            suppliedCallback.execute(status, statusChangeReason, throwable, callbackContext);
-        }
 
-        log.trace("Invoking DeviceClientManager IotHubConnectionStatusChangeCallback implementation.");
-        if (autoReconnectOnDisconnected && status == DISCONNECTED && (statusChangeReason == RETRY_EXPIRED || statusChangeReason == COMMUNICATION_ERROR)) {
+        if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
+            if (suppliedCallback != null) {
+                suppliedCallback.execute(DISCONNECTED_RETRYING, NO_NETWORK, throwable, this.suppliedCallbackContext);
+            }
+
             handleRecoverableDisconnection();
+        } else {
+            if (suppliedCallback != null) {
+                suppliedCallback.execute(status, statusChangeReason, throwable, this.suppliedCallbackContext);
+            }
         }
+    }
 
+    // This handles the state where the DeviceClient reports that OperationTimeout has expired, and stops retrying; even though the applied RetryPolicy is still valid.
+    private boolean shouldDeviceReconnect(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable) {
+        return (status == DISCONNECTED && statusChangeReason == RETRY_EXPIRED && throwable instanceof DeviceOperationTimeoutException);
     }
 
     private void handleRecoverableDisconnection() {
