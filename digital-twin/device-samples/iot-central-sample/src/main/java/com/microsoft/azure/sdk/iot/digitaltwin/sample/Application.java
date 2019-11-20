@@ -7,8 +7,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
-import com.microsoft.azure.sdk.iot.digitaltwin.sample.simulator.DeviceInformation;
-import com.microsoft.azure.sdk.iot.digitaltwin.sample.simulator.EnvironmentalSensor;
 import com.microsoft.azure.sdk.iot.provisioning.device.AdditionalData;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationCallback;
@@ -23,12 +21,11 @@ import java.net.URISyntaxException;
 import java.util.Scanner;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 @Slf4j
 public class Application {
     private static final String DCM_ID = "urn:azureiot:samplemodel:1";
-    private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "environmentalSensor";
     private static final String GLOBAL_ENDPOINT = System.getenv("GLOBAL_ENDPOINT");
     private static final String ID_SCOPE = System.getenv("ID_SCOPE");
     private static final String SYMMETRIC_PRIMARY_KEY = System.getenv("SYMMETRIC_PRIMARY_KEY");
@@ -97,7 +94,6 @@ public class Application {
 
             DigitalTwinDeviceClient digitalTwinDeviceClient = new DigitalTwinDeviceClient(deviceClient);
 
-            final EnvironmentalSensor environmentalSensor = new EnvironmentalSensor(ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME);
             final DeviceInformation deviceInformation = DeviceInformation.builder()
                                                                          .manufacturer("Microsoft")
                                                                          .model("1.0.0")
@@ -108,7 +104,7 @@ public class Application {
                                                                          .totalMemory(16e9)
                                                                          .totalStorage(1e12)
                                                                          .build();
-            DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor)).blockingGet();
+            DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(deviceInformation)).blockingGet();
             log.info("Register interfaces result: {}.", result);
 
             log.info("Waiting for service updates...");

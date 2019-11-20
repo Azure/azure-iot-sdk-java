@@ -9,8 +9,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
-import com.microsoft.azure.sdk.iot.digitaltwin.sample.simulator.DeviceInformation;
-import com.microsoft.azure.sdk.iot.digitaltwin.sample.simulator.EnvironmentalSensor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;

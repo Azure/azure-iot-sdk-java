@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.digitaltwin.sample.simulator;
+package com.microsoft.azure.sdk.iot.digitaltwin.sample;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;

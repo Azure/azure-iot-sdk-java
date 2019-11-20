@@ -12,15 +12,6 @@
     <artifactId>environmental-sensor-sample</artifactId>
     <version>${project-device-samples-version}</version>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
-            <artifactId>sample-interfaces-instance</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
-
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
