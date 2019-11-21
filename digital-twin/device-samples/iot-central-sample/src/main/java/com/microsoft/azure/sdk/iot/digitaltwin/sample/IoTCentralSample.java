@@ -24,7 +24,7 @@ import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDevice
 import static java.util.Collections.singletonList;
 
 @Slf4j
-public class Application {
+public class IoTCentralSample {
     private static final String DCM_ID = "urn:azureiot:samplemodel:1";
     private static final String GLOBAL_ENDPOINT = System.getenv("GLOBAL_ENDPOINT");
     private static final String ID_SCOPE = System.getenv("ID_SCOPE");
