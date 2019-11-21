@@ -11,19 +11,18 @@ import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRe
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class ModelDefinition extends AbstractDigitalTwinInterfaceClient {
     private static final String modelDefinitionInterfaceId = "urn:azureiot:ModelDiscovery:ModelDefinition:1";
 
-    private String environmentalSensorModelDefinition = null;
+    private final String environmentalSensorModelDefinition;
 
     private static final String getModelDefinitionCommandName = "getModelDefinition";
 
@@ -32,10 +31,10 @@ public class ModelDefinition extends AbstractDigitalTwinInterfaceClient {
         super(digitalTwinInterfaceInstanceName, modelDefinitionInterfaceId);
 
         //Model definition is located in a json file within the resources folder of this sample
-        URL res = getClass().getClassLoader().getResource("EnvironmentalSensor.interface.json");
-        File file = Paths.get(res.toURI()).toFile();
-        String modelDefinitionPath = file.getAbsolutePath();
-        environmentalSensorModelDefinition = new String(Files.readAllBytes(Paths.get(modelDefinitionPath)));
+        ClassLoader classLoader = ModelDefinition.class.getClassLoader();
+        try (InputStream is = classLoader.getResourceAsStream("EnvironmentalSensor.interface.json")) {
+            environmentalSensorModelDefinition = IOUtils.toString(is, StandardCharsets.UTF_8);
+        }
     }
 
     @Override
