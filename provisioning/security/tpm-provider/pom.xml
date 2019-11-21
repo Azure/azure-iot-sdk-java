@@ -14,7 +14,7 @@
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
     <artifactId>tpm-provider</artifactId>
     <name>Provisioning Security TPM Provider</name>
-    <version>${tpm-hsm-version}</version>
+    <version>${tpm-provider-version}</version>
     <packaging>jar</packaging>
     <description>The Microsoft Azure IoT Provisioning Security TPM provider for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
