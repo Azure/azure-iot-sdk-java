@@ -41,7 +41,7 @@
         <maven-source-plugin-version>${maven-jar-plugin-version}</maven-source-plugin-version>
         <maven-javadoc-plugin-version>3.1.1</maven-javadoc-plugin-version>
         <maven-surefire-plugin-version>2.22.2</maven-surefire-plugin-version>
-        <iot-device-client-version>1.20.0</iot-device-client-version>
+        <iot-device-client-version>1.0.0</iot-device-client-version>
         <jackson-version>2.9.9</jackson-version>
         <rxjava3-version>3.0.0-RC3</rxjava3-version>
         <lombok-version>1.18.4</lombok-version>
