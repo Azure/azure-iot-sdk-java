@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 import java.util.Scanner;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
 
 @Slf4j
 public class IoTCentralSample {
@@ -30,6 +30,7 @@ public class IoTCentralSample {
     private static final String ID_SCOPE = System.getenv("ID_SCOPE");
     private static final String SYMMETRIC_PRIMARY_KEY = System.getenv("SYMMETRIC_PRIMARY_KEY");
     private static final String ENROLLMENT_REGISTRATION_ID = System.getenv("REGISTRATION_ID");
+    private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "environmentalSensor";
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
     private static final IotHubClientProtocol DEVICE_CLIENT_TRANSPORT_PROTOCOL = IotHubClientProtocol.MQTT;
     private static final int WAIT_FOR_REGISTRATION_IN_MILLISECONDS = 10000;
@@ -98,6 +99,7 @@ public class IoTCentralSample {
 
             DigitalTwinDeviceClient digitalTwinDeviceClient = new DigitalTwinDeviceClient(deviceClient);
 
+            final EnvironmentalSensor environmentalSensor = new EnvironmentalSensor(ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME);
             final DeviceInformation deviceInformation = DeviceInformation.builder()
                                                                          .manufacturer("Microsoft")
                                                                          .model("1.0.0")
@@ -108,7 +110,7 @@ public class IoTCentralSample {
                                                                          .totalMemory(16e9)
                                                                          .totalStorage(1e12)
                                                                          .build();
-            DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(deviceInformation)).blockingGet();
+            DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor)).blockingGet();
             log.info("Register interfaces result: {}.", result);
 
             log.info("Waiting for service updates...");
