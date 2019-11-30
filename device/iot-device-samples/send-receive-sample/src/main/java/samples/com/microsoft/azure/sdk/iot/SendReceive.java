@@ -5,7 +5,6 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import org.slf4j.impl.SimpleLogger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -175,13 +174,6 @@ public class SendReceive
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
-        //Enable INFO level logging, including timestamps. Uncomment the other log levels to get debug or trace level logs as well
-        System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "INFO");
-        //System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG");
-        //System.setProperty(SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "TRACE");
-        System.setProperty(SimpleLogger.SHOW_DATE_TIME_KEY, "true");
-        System.setProperty(SimpleLogger.DATE_TIME_FORMAT_KEY, "yyyy-MM-dd HH:mm:ss:SSS");
-
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 

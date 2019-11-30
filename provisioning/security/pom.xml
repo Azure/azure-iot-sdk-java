@@ -4,16 +4,16 @@
   -->
 
 <project>
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
         <artifactId>provisioning</artifactId>
         <version>1.8.1</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-    <artifactId>security</artifactId>
-    <name>Provisioning Security Provider</name>
     <version>1.3.0</version>
+    <artifactId>security</artifactId>
+    <name>Provisioning Security Parent</name>
     <packaging>pom</packaging>
     <description>The Microsoft Azure IoT Provisioning Security SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>

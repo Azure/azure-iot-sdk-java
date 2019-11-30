@@ -9,16 +9,16 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderDiceEmulator;
-import com.microsoft.msr.RiotEmulator.RIoT;
 import mockit.Deencapsulation;
-import mockit.Mocked;
 import org.junit.Test;
 
 import java.security.Key;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertNotNull;
 
 /*
  * Unit tests for SecurityProviderDiceEmulator
@@ -29,9 +29,6 @@ public class SecurityProviderDiceEmulatorTest
     private static final String TEST_ALIAS = "TestAlias";
     private static final String TEST_SIGNER = "TestSigner";
     private static final String TEST_ROOT = "TestRoot";
-
-    @Mocked
-    RIoT mockedRIoT;
 
     //SRS_SecurityClientDiceEmulator_25_001: [ Constructor shall create a default unique names for Alias Certificate, Signer Certificate and Root certificate ]
     //SRS_SecurityClientDiceEmulator_25_002: [ Constructor shall create a diceBundle by calling CreateDeviceAuthBundle ]
