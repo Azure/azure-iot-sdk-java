@@ -2,33 +2,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java-digital-twin</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-
+    <groupId>com.microsoft.azure.sdk.iot.device.samples</groupId>
     <artifactId>iot-sdk-java-digital-twin-device-samples</artifactId>
-    <version>${project-device-samples-version}</version>
-
+    <version>1.0.1</version>
     <modules>
         <module>environmental-sensor-sample</module>
         <module>iot-central-sample</module>
     </modules>
-
     <properties>
-        <provisioning-device-client-version>1.7.1</provisioning-device-client-version>
+        <project-device-samples-version>1.0.1</project-device-samples-version>
+        <provisioning-device-client-version>1.0.1</provisioning-device-client-version>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-sdk-java-digital-twin-device</artifactId>
             <version>${project-device-version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -38,7 +34,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>${commons-io-version}</version>
         </dependency>
     </dependencies>
 

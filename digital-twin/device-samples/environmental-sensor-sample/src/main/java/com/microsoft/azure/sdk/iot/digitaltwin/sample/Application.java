@@ -23,7 +23,7 @@ public class Application {
     private static final String DIGITAL_TWIN_DEVICE_CONNECTION_STRING = System.getenv("DIGITAL_TWIN_DEVICE_CONNECTION_STRING");
     private static final String DCM_ID = "urn:java_sdk_sample:sample_device:1";
     private static final String ENVIRONMENTAL_SENSOR_INTERFACE_INSTANCE_NAME = "environmentalSensor";
-    private static final String modelDefinitionInterfaceName = "urn_azureiot_ModelDiscovery_ModelDefinition";
+    private static final String MODEL_DEFINITION_INTERFACE_NAME = "urn_azureiot_ModelDiscovery_ModelDefinition";
 
     public static void main(String[] args) throws URISyntaxException, IOException {
         if (DIGITAL_TWIN_DEVICE_CONNECTION_STRING == null || DIGITAL_TWIN_DEVICE_CONNECTION_STRING.isEmpty()) {
@@ -51,7 +51,7 @@ public class Application {
                                                                      .totalStorage(1e12)
                                                                      .build();
         final ModelDefinition modelDefinition = ModelDefinition.builder()
-                .digitalTwinInterfaceInstanceName(modelDefinitionInterfaceName)
+                .digitalTwinInterfaceInstanceName(MODEL_DEFINITION_INTERFACE_NAME)
                 .build();
         DigitalTwinClientResult result = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(deviceInformation, environmentalSensor, modelDefinition)).blockingGet();
         log.info("Register interfaces result: {}.", result);
