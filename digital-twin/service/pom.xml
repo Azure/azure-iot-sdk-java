@@ -3,11 +3,11 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java-digital-twin</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
     <name>Azure IoT Sdk Java Digital Twin Service</name>
     <description>The Microsoft Azure IoT Digital Twin Service SDK for Java</description>
-    <artifactId>iot-sdk-java-digital-twin-service-preview</artifactId>
+    <artifactId>iot-sdk-java-digital-twin-service</artifactId>
     <version>${project-service-version}</version>
     <packaging>jar</packaging>
     <build>

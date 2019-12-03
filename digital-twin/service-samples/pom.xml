@@ -2,18 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java-digital-twin</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-
+    <groupId>com.microsoft.azure.sdk.iot.service.samples</groupId>
     <artifactId>iot-sdk-java-digital-twin-service-samples</artifactId>
-    <version>1.0.0</version>
-
+    <version>1.0.1</version>
+    <packaging>pom</packaging>
     <modules>
         <module>get-digital-twin</module>
         <module>update-digital-twin</module>
@@ -21,13 +19,14 @@
         <module>invoke-digital-twin-command</module>
         <module>invoke-digital-twin-async-command</module>
     </modules>
-
+    <properties>
+        <project-service-samples-version>1.0.1</project-service-samples-version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>iot-sdk-java-digital-twin-service</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
+            <version>${project-service-version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
