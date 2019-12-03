@@ -15,7 +15,7 @@ This document describes how to prepare your development environment to use the *
 To use the SDK and run the samples you will need **Java SE 8**.
 
 ### Windows
-For downloads and installation instructions go [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
+For downloads and installation instructions go [here](https://docs.microsoft.com/en-us/java/azure/jdk/?view=azure-java-stable).
 
 #### Set up environment variables
 * Please make sure that the `PATH` environment variable includes the full path to the `jdk1.8.x\bin` directory. (Example: C:\\Program Files\\Java\\jdk1.8.0_60\\bin)
