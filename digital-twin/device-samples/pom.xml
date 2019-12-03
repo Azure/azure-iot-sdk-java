@@ -23,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-sdk-java-digital-twin-device</artifactId>
+            <artifactId>iot-sdk-java-digital-twin-device-preview</artifactId>
             <version>${project-device-version}</version>
         </dependency>
         <dependency>
