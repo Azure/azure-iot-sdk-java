@@ -7,7 +7,7 @@
     </parent>
     <name>Azure IoT Sdk Java Digital Twin Device</name>
     <description>Device of Azure IoT Sdk Java Digital Twin</description>
-    <artifactId>iot-sdk-java-digital-twin-device</artifactId>
+    <artifactId>iot-sdk-java-digital-twin-device-preview</artifactId>
     <version>${project-device-version}</version>
     <packaging>jar</packaging>
 
