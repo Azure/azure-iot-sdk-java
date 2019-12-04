@@ -9,7 +9,8 @@ This project contains a sample implementation of a simulated environmental senso
   * Use the digital twin device client to register this interfaceInstance and interact with the Digital Twins services.
   * How to respond to command invocations
   * How to respond to property updates
-
+  
+For Android, please see [here](./Android)
 ## How to run the sample
 
 ### Setup environment
