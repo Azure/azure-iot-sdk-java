@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -31,7 +32,7 @@ import java.util.Map;
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
  */
-public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
+public class AmqpFileUploadNotificationReceivedHandler extends ErrorLoggingBaseHandler
 {
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";
     private static final String SEND_PORT_AMQPS = ":5671";

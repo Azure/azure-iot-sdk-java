@@ -10,6 +10,8 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandler;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.ProtonJExceptionParser;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -42,7 +44,7 @@ import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
  * a message, and logic to re-establish the connection with the IoTHub in case it gets lost.
  */
 @Slf4j
-public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection
+public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler implements IotHubTransportConnection
 {
     private static final int MAX_WAIT_TO_CLOSE_CONNECTION = 60 * 1000; // 60 second timeout
     private static final int MAX_WAIT_TO_OPEN_CBS_LINKS = 20 * 1000; // 20 second timeout
@@ -914,7 +916,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onTransportError(Event event)
     {
-        this.log.warn("OnTransportError fired by proton");
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]
@@ -1222,35 +1223,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         return this.deviceClientConfig.getIotHubHostname();
     }
 
-    private ErrorCondition getErrorConditionFromEndpoint(Endpoint endpoint)
-    {
-        return endpoint.getCondition() != null && endpoint.getCondition().getCondition() != null ? endpoint.getCondition() : endpoint.getRemoteCondition();
-    }
-
-    private TransportException getTransportExceptionFromProtonEndpoints(Endpoint... endpoints)
-    {
-        for (Endpoint endpoint : endpoints)
-        {
-            if (endpoint == null)
-            {
-                continue;
-            }
-
-            ErrorCondition errorCondition = getErrorConditionFromEndpoint(endpoint);
-            if (errorCondition == null || errorCondition.getCondition() == null)
-            {
-                continue;
-            }
-
-            String error = errorCondition.getCondition().toString();
-            String errorDescription = errorCondition.getDescription();
-
-            return AmqpsExceptionTranslator.convertToAmqpException(error, errorDescription);
-        }
-
-        return null;
-    }
-
     /**
      * Derive the transport exception from the provided event, defaulting to a generic, retryable TransportException
      *
@@ -1259,18 +1231,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
      */
     private TransportException getTransportExceptionFromEvent(Event event)
     {
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_080: [If no exception can be found in the sender, receiver, session, connection, link, or transport, this function shall return a generic TransportException.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_081: [If an exception can be found in the sender, this function shall return a the mapped amqp exception derived from that exception.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_082: [If an exception can be found in the receiver, this function shall return a the mapped amqp exception derived from that exception.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_083: [If an exception can be found in the session, this function shall return a the mapped amqp exception derived from that exception.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_084: [If an exception can be found in the connection, this function shall return a the mapped amqp exception derived from that exception.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_085: [If an exception can be found in the link, this function shall return a the mapped amqp exception derived from that exception.]
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_34_086: [If an exception can be found in the transport, this function shall return a the mapped amqp exception derived from that exception.]
-        TransportException transportException = getTransportExceptionFromProtonEndpoints(event.getSender(), event.getReceiver(), event.getConnection(), event.getTransport(), event.getSession(), event.getLink());
+        ProtonJExceptionParser protonJExceptionParser = new ProtonJExceptionParser(event);
+        TransportException transportException = AmqpsExceptionTranslator.convertToAmqpException(protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
 
-        if (transportException == null)
+        if (protonJExceptionParser.getError().equals(ProtonJExceptionParser.DEFAULT_ERROR))
         {
-            transportException = new TransportException("Unknown transport exception occurred");
             transportException.setRetryable(true);
         }
 
