@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="logcat" class="ch.qos.logback.classic.android.LogcatAppender">
+        <file>/data/data/com.example/files/log/foo.log</file>
+        <encoder>
+            <pattern>%msg</pattern>
+        </encoder>
+    </appender>
+    <root level="DEBUG">
+        <appender-ref ref="logcat" />
+    </root>
+</configuration>
