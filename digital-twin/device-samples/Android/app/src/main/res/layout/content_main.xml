@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textSize="24sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingStart="2sp"
+            android:paddingEnd="2sp"
+            android:text="@string/property_name"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingStart="2sp"
+            android:paddingEnd="2sp"
+            android:text="@string/property_brightness"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/brightness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingStart="2sp"
+            android:paddingEnd="2sp"
+            android:text="@string/property_temperature"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/temperature"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingStart="2sp"
+            android:paddingEnd="2sp"
+            android:text="@string/property_humidity"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/humidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingStart="2sp"
+            android:paddingEnd="2sp"
+            android:text="@string/status_connectivity"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/connectivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_disconnected" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingStart="2sp"
+            android:paddingEnd="2sp"
+            android:text="@string/status_registration"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/registration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_unregistered" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="100sp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:paddingStart="2sp"
+            android:paddingEnd="2sp"
+            android:text="@string/status_onoff"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/onoff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_on" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center|bottom"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/blink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center|bottom"
+            android:text="@string/action_blinking"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>
