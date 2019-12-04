@@ -73,7 +73,7 @@ phases:
     inputs:
       tsaVersion: TsaV2
       codebase: NewOrUpdate
-      tsaEnvironment: Production
+      tsaEnvironment: PROD
       codeBaseName: 'Azure-Iot-SDK-Java-Master'
       notificationAlias: 'timtay@microsoft.com, prmathur@microsoft.com, jasminel@microsoft.com'
       codeBaseAdmins: 'REDMOND\timtay;REDMOND\prmathur;REDMOND\jasminel'

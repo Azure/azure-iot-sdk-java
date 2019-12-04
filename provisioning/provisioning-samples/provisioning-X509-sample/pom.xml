@@ -6,7 +6,6 @@
         <version>1.8.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
     <artifactId>provisioning-X509-sample</artifactId>
     <version>1.8.1</version>
     <name>Provisioning X509 Sample for Device Client</name>
