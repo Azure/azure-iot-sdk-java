@@ -1,0 +1,34 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-sdk-java-digital-twin</artifactId>
+        <version>1.0.1</version>
+    </parent>
+    <name>Azure IoT Sdk Java Digital Twin Service</name>
+    <description>The Microsoft Azure IoT Digital Twin Service SDK for Java</description>
+    <artifactId>iot-sdk-java-digital-twin-service-preview</artifactId>
+    <version>${project-service-version}</version>
+    <packaging>jar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin-version}</version>
+                <configuration>
+                    <source>${java-sdk-service-version}</source>
+                    <target>${java-sdk-service-version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.microsoft.rest/client-runtime -->
+        <dependency>
+            <groupId>com.microsoft.rest</groupId>
+            <artifactId>client-runtime</artifactId>
+            <version>${ms-rest-client-version}</version>
+        </dependency>
+    </dependencies>
+</project>
