@@ -43,7 +43,6 @@ public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         provisioningServiceConnectionString = BuildConfig.DeviceProvisioningServiceConnectionString;
-        provisioningServiceGlobalEndpoint = BuildConfig.DeviceProvisioningServiceGlobalEndpoint;
         provisioningServiceIdScope = BuildConfig.DeviceProvisioningServiceIdScope;
         provisioningServiceGlobalEndpointWithInvalidCert = BuildConfig.InvalidDeviceProvisioningServiceGlobalEndpoint;
         provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
