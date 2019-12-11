@@ -79,6 +79,12 @@ dependencies {
     androidTestImplementation 'com.android.support:support-annotations:28.0.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'junit:junit:4.12'
+
+    // Adds libraries defining annotations to only the compile classpath.
+    compileOnly 'com.microsoft.azure:azure-annotations:1.7.0'
+    // Adds the annotation processor dependency to the annotation processor classpath.
+    annotationProcessor 'com.microsoft.azure:azure-annotations:1.7.0'
+
 }
 
 repositories {
