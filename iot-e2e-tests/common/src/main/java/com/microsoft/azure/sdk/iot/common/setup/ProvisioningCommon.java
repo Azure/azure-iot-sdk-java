@@ -79,8 +79,7 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME = "PROVISIONING_CONNECTION_STRING_INVALIDCERT";
     public static String provisioningServiceWithInvalidCertConnectionString = "";
 
-    public static final String DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME = "IOT_DPS_GLOBAL_ENDPOINT";
-    public static String provisioningServiceGlobalEndpoint = "";
+    public static String provisioningServiceGlobalEndpoint = "global.azure-devices-provisioning.net";
 
     public static final String DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT_INVALIDCERT";
     public static String provisioningServiceGlobalEndpointWithInvalidCert = "";
