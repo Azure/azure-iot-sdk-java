@@ -192,6 +192,7 @@ java/**/target/
 java/**/*.iml
 java/**/*dependency-reduced-pom.xml
 java/**/*.crt
+.flattened-pom.xml
 
 # VS Code stuff
 **/typings/**
