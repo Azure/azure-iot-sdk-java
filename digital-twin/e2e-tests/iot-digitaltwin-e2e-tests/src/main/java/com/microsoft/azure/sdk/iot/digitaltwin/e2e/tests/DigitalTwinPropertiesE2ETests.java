@@ -53,8 +53,7 @@ public class DigitalTwinPropertiesE2ETests {
     private static final String DEVICE_ID_PREFIX = "DigitalTwinPropertiesE2ETests_";
 
     private static final String PROPERTY_VALUE_PATTERN = "{\"value\":\"%s\"}";
-    private static final String PROPERTY_EACH_PATCH_PATTERN = "\"%s\":{\"reported\":null,\"desired\":%s}";
-    private static final String PROPERTY_PATTERN_UPDATED_FROM_SERVICE = "\"name\":\"%s\",\"properties\":{\"%s\":{\"reported\":null,\"desired\":%s}}";
+    private static final String PROPERTY_PATTERN_UPDATED_FROM_SERVICE = "\"%s\":{\"desired\":%s}";
     private static final String SERVICE_PROPERTY_UPDATE_PREFIX = "propertyUpdatedFromService_";
     private static final String DEVICE_PROPERTY_UPDATE_PREFIX = "propertyUpdatedFromDevice_";
     private static final String UNKNOWN_INTERFACE_INSTANCE_NAME = "unknownInterfaceInstanceName";
@@ -129,8 +128,8 @@ public class DigitalTwinPropertiesE2ETests {
 
         // Assert that property is updated in the twin
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(PROPERTY_EACH_PATCH_PATTERN, PROPERTY_NAME_WRITABLE, expectedValue1));
-        assertThat(digitalTwin).contains(String.format(PROPERTY_EACH_PATCH_PATTERN, PROPERTY_NAME_2_WRITABLE, expectedValue2));
+        assertThat(digitalTwin).contains(String.format(PROPERTY_PATTERN_UPDATED_FROM_SERVICE, PROPERTY_NAME_WRITABLE, expectedValue1));
+        assertThat(digitalTwin).contains(String.format(PROPERTY_PATTERN_UPDATED_FROM_SERVICE, PROPERTY_NAME_2_WRITABLE, expectedValue2));
     }
 
     @Test
@@ -222,6 +221,8 @@ public class DigitalTwinPropertiesE2ETests {
 
     @After
     public void tearDownTest() {
-        testDevice.closeAndDeleteDevice();
+        if (testDevice != null) {
+            testDevice.closeAndDeleteDevice();
+        }
     }
 }

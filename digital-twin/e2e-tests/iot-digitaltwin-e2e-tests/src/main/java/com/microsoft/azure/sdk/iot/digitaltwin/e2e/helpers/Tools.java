@@ -23,14 +23,11 @@ public class Tools {
 
     private static final String INTERFACE_ID_DELIMITER = ":";
     private static final Map<String, String> ANDROID_ENV_VAR = retrieveAndroidEnvVariables();
-    private static boolean isAndroid = false;
 
     public static String retrieveEnvironmentVariableValue(String environmentVariableName) {
-        String environmentVariableValue = "";
-        if (isAndroid) {
-            if (ANDROID_ENV_VAR.containsKey(environmentVariableName)) {
-                environmentVariableValue = ANDROID_ENV_VAR.get(environmentVariableName);
-            }
+        String environmentVariableValue;
+        if (ANDROID_ENV_VAR.containsKey(environmentVariableName)) {
+            environmentVariableValue = ANDROID_ENV_VAR.get(environmentVariableName);
         } else {
             environmentVariableValue = System.getenv().get(environmentVariableName);
         }
@@ -77,8 +74,6 @@ public class Tools {
         Map<String, String> envVariables = new HashMap<>();
         try {
             Class buildConfig = Class.forName("com.microsoft.azure.sdk.iot.android.BuildConfig");
-            isAndroid = true;
-
             Arrays.stream(buildConfig.getFields()).forEach(field -> {
                 try {
                     envVariables.put(field.getName(), field.get(null).toString());

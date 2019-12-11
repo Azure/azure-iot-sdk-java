@@ -251,6 +251,8 @@ public class DigitalTwinCommandE2ETests {
 
     @After
     public void tearDownTest() {
-        testDevice.closeAndDeleteDevice();
+        if (testDevice != null) {
+            testDevice.closeAndDeleteDevice();
+        }
     }
 }
