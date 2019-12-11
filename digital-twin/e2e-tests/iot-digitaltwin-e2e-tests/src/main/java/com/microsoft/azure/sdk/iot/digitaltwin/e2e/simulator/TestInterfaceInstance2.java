@@ -150,8 +150,12 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                                                                                                            .statusCode(STATUS_CODE_PENDING)
                                                                                                            .payload(progressPercentage)
                                                                                                            .build();
-                DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
-                log.debug("Execute async command: {}; result: {}", progressPercentage, digitalTwinClientResult);
+                try {
+                    DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
+                    log.debug("Execute async command: {}; result: {}", progressPercentage , digitalTwinClientResult);
+                } catch (Exception e) {
+                    log.error("Exception thrown while executing async command: ", e);
+                }
 
                 try {
                     Thread.sleep(1000);
@@ -168,8 +172,12 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
                                                                                                        .statusCode(STATUS_CODE_COMPLETED)
                                                                                                        .payload(payloadMessage)
                                                                                                        .build();
-            DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
-            log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);
+            try {
+                DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
+                log.debug("Execute async command: completed; result: {}", digitalTwinClientResult);
+            } catch (Exception e) {
+                log.error("Exception thrown while executing async command: ", e);
+            }
 
             log.debug("Async command execution complete.");
         }).start();
