@@ -1,5 +1,6 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java-digital-twin</artifactId>
@@ -8,42 +9,9 @@
     <name>Azure IoT Sdk Java Digital Twin E2E Tests</name>
     <description>Azure IoT Sdk Java Digital Twin E2E Tests</description>
     <artifactId>iot-sdk-java-digital-twin-e2e-tests</artifactId>
-    <version>${project-e2e-tests-version}</version>
-    <packaging>jar</packaging>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin-version}</version>
-                <configuration>
-                    <!--service version is higher than device version, and e2e uses both, so just take the service version-->
-                    <source>${java-sdk-service-version}</source>
-                    <target>${java-sdk-service-version}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    <dependencies>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-sdk-java-digital-twin-device-preview</artifactId>
-            <version>${project-device-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-sdk-java-digital-twin-service-preview</artifactId>
-            <version>${project-service-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-service-client-preview</artifactId>
-            <version>${iot-service-client-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.azure</groupId>
-            <artifactId>azure-eventhubs</artifactId>
-            <version>${azure-eventhubs-version}</version>
-        </dependency>
-    </dependencies>
+    <version>1.0.1</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>iot-digitaltwin-e2e-tests</module>
+    </modules>
 </project>

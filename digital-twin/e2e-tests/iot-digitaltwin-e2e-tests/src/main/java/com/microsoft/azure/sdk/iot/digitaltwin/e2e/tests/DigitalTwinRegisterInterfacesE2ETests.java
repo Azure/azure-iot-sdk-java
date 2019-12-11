@@ -6,8 +6,6 @@ package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance1;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
@@ -34,9 +32,9 @@ import java.util.concurrent.Semaphore;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.*;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.*;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TEST_INTERFACE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedList;
@@ -45,10 +43,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class DigitalTwinRegisterInterfacesE2ETests {
-    private static final String IOT_HUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-    private static final String DCM_ID = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.DCM_ID_ENV_VAR_NAME);
+    private static final String IOT_HUB_CONNECTION_STRING = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String TEST_INTERFACE_INSTANCE_NAME_1 = retrieveInterfaceNameFromInterfaceId(TestInterfaceInstance1.TEST_INTERFACE_ID);
-    private static final String TEST_INTERFACE_INSTANCE_NAME_2 = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
+    private static final String TEST_INTERFACE_INSTANCE_NAME_2 = retrieveInterfaceNameFromInterfaceId(TestInterfaceInstance2.TEST_INTERFACE_ID);
     private static final String UNPUBLISHED_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(UnpublishedInterfaceInstance.TEST_INTERFACE_ID);
     private static final String INVALID_INTERFACE_INSTANCE_NAME = "invalidInterfaceInstanceName";
 
@@ -92,7 +89,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID));
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TestInterfaceInstance2.TEST_INTERFACE_ID));
     }
 
     @Test
@@ -110,7 +107,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
         assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_1, TestInterfaceInstance1.TEST_INTERFACE_ID));
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID));
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TestInterfaceInstance2.TEST_INTERFACE_ID));
     }
 
     @Test
@@ -126,7 +123,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         // assert that the registered interface is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TEST_INTERFACE_ID));
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TestInterfaceInstance2.TEST_INTERFACE_ID));
 
         testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
         DigitalTwinClientResult registrationResult2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1)).blockingGet();

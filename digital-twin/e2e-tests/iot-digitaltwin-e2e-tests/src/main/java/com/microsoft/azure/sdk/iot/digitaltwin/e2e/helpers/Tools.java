@@ -5,9 +5,12 @@ package com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers;
 
 import io.reactivex.rxjava3.core.Flowable;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,17 +18,25 @@ import java.util.UUID;
 import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+@Slf4j
 public class Tools {
 
     private static final String INTERFACE_ID_DELIMITER = ":";
+    private static final Map<String, String> ANDROID_ENV_VAR = retrieveAndroidEnvVariables();
+    private static boolean isAndroid = false;
 
     public static String retrieveEnvironmentVariableValue(String environmentVariableName) {
-        String environmentVariableValue = System.getenv().get(environmentVariableName);
-        if (isBlank(environmentVariableValue)) {
-            environmentVariableValue = System.getProperty(environmentVariableName);
-            if (isBlank(environmentVariableValue)) {
-                throw new IllegalArgumentException("Environment variable is not set: " + environmentVariableName);
+        String environmentVariableValue = "";
+        if (isAndroid) {
+            if (ANDROID_ENV_VAR.containsKey(environmentVariableName)) {
+                environmentVariableValue = ANDROID_ENV_VAR.get(environmentVariableName);
             }
+        } else {
+            environmentVariableValue = System.getenv().get(environmentVariableName);
+        }
+
+        if (isBlank(environmentVariableValue)) {
+            throw new IllegalArgumentException("Environment variable is not set: " + environmentVariableName);
         }
 
         return environmentVariableValue;
@@ -60,5 +71,27 @@ public class Tools {
         }
 
         return "{ \"properties\": {" + join(",", propertyPatches) + "} }";
+    }
+
+    private static Map<String, String> retrieveAndroidEnvVariables() {
+        Map<String, String> envVariables = new HashMap<>();
+        try {
+            Class buildConfig = Class.forName("com.microsoft.azure.sdk.iot.android.BuildConfig");
+            isAndroid = true;
+
+            Arrays.stream(buildConfig.getFields()).forEach(field -> {
+                try {
+                    envVariables.put(field.getName(), field.get(null).toString());
+                }
+                catch (IllegalAccessException e) {
+                    log.error("Cannot access the following field: ", e);
+                }
+            });
+        }
+        catch (ClassNotFoundException e) {
+            log.debug("Running the JVM tests");
+        }
+
+        return envVariables;
     }
 }
