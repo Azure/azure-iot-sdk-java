@@ -5,7 +5,11 @@ package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
-import com.microsoft.azure.sdk.iot.digitaltwin.device.model.*;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandResponse;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyUpdate;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
 import io.reactivex.rxjava3.core.Single;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
