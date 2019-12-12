@@ -5,7 +5,7 @@ jobs:
   timeoutInMinutes: 30
   pool:
     name: Hosted VS2017
-  displayName: Windows
+  displayName: Windows Cleanup
   condition: succeeded()
   steps:
   - powershell: ./vsts/cleanup.ps1
@@ -20,7 +20,7 @@ jobs:
   timeoutInMinutes: 30
   pool:
     name: Hosted VS2017
-  displayName: Windows
+  displayName: Linux Cleanup
   condition: succeeded()
   steps:
   - powershell: ./vsts/cleanup.ps1
@@ -35,7 +35,7 @@ jobs:
   timeoutInMinutes: 30
   pool:
     name: Hosted VS2017
-  displayName: Windows
+  displayName: Android Cleanup
   condition: succeeded()
   steps:
   - powershell: ./vsts/cleanup.ps1
