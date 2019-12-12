@@ -1,10 +1,10 @@
-﻿if ($IOTHUB_CONNECTION_STRING.length < 1)
+﻿if ($IOTHUB_CONNECTION_STRING.length -eq 0)
 {
         $exception = "Iot hub connection string not set"
 		throw $exception
 }
 
-if ($IOT_DPS_CONNECTION_STRING.length < 1)
+if ($IOT_DPS_CONNECTION_STRING.length -eq 0)
 {
         $exception = "DPS connection string not set"
 		throw $exception
