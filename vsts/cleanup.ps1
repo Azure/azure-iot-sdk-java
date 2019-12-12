@@ -1,10 +1,10 @@
-﻿if ($IOTHUB_CONNECTION_STRING.length -eq 0)
+﻿if ($env:IOTHUB_CONNECTION_STRING.length -eq 0)
 {
         $exception = "Iot hub connection string not set"
 		throw $exception
 }
 
-if ($IOT_DPS_CONNECTION_STRING.length -eq 0)
+if ($env:IOT_DPS_CONNECTION_STRING.length -eq 0)
 {
         $exception = "DPS connection string not set"
 		throw $exception
@@ -19,4 +19,4 @@ cd service/iot-service-samples/device-deletion-sample/target
 
 #Run sample code to delete all devices from these iot hubs
 echo "Cleaning up iot hub and dps"
-java -jar deviceDeletionSample.jar $IOTHUB_CONNECTION_STRING $IOT_DPS_CONNECTION_STRING
+java -jar deviceDeletionSample.jar $env:IOTHUB_CONNECTION_STRING $env:IOT_DPS_CONNECTION_STRING
