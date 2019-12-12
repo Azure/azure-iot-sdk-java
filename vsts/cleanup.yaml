@@ -9,7 +9,7 @@ jobs:
   condition: succeeded()
   steps:
   - powershell: ./vsts/cleanup.ps1
-    displayName: 'Echo Inputs'
+    displayName: 'Run Cleanup script'
     env:
       COMMIT_FROM: $(COMMIT_FROM)
       IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
@@ -24,7 +24,7 @@ jobs:
   condition: succeeded()
   steps:
   - powershell: ./vsts/cleanup.ps1
-    displayName: 'Echo Inputs'
+    displayName: 'Run Cleanup script'
     env:
       COMMIT_FROM: $(COMMIT_FROM)
       IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
@@ -39,7 +39,7 @@ jobs:
   condition: succeeded()
   steps:
   - powershell: ./vsts/cleanup.ps1
-    displayName: 'Echo Inputs'
+    displayName: 'Run Cleanup script'
     env:
       COMMIT_FROM: $(COMMIT_FROM)
       IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
