@@ -1,4 +1,17 @@
-﻿#Install the Java SDK
+﻿if ($IOTHUB_CONNECTION_STRING.length < 1)
+{
+        $exception = "Iot hub connection string not set"
+		throw $exception
+}
+
+if ($IOT_DPS_CONNECTION_STRING.length < 1)
+{
+        $exception = "DPS connection string not set"
+		throw $exception
+}
+
+
+#Install the Java SDK
 mvn install -DskipTests=true -T 2C
 
 #move to sample folder where you can run the sample that deletes all devices tied to a hub
