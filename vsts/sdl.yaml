@@ -13,11 +13,6 @@ phases:
     name: sdl-java
     timeoutInMinutes: 60
   steps:
-  - powershell: ./vsts/manual_checkout.ps1
-    displayName: 'GIT checkout'
-    env:
-      COMMIT_FROM: $(COMMIT_FROM)
-
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
 
