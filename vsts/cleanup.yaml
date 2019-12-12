@@ -1,0 +1,47 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+jobs:
+- job: Windows Cleanup
+  timeoutInMinutes: 30
+  pool:
+    name: Hosted VS2017
+  displayName: Windows
+  condition: succeeded()
+  steps:
+  - powershell: ./vsts/cleanup.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+      IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
+    condition: always()
+
+- job: Linux Cleanup
+  timeoutInMinutes: 30
+  pool:
+    name: Hosted VS2017
+  displayName: Windows
+  condition: succeeded()
+  steps:
+  - powershell: ./vsts/cleanup.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+      IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
+    condition: always()
+
+- job: Android Cleanup
+  timeoutInMinutes: 30
+  pool:
+    name: Hosted VS2017
+  displayName: Windows
+  condition: succeeded()
+  steps:
+  - powershell: ./vsts/cleanup.ps1
+    displayName: 'Echo Inputs'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+    condition: always()
