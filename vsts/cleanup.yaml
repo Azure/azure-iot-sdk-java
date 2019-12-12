@@ -1,7 +1,7 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 jobs:
-- job: Windows Cleanup
+- job: Windows
   timeoutInMinutes: 30
   pool:
     name: Hosted VS2017
@@ -16,7 +16,7 @@ jobs:
       IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
     condition: always()
 
-- job: Linux Cleanup
+- job: Linux
   timeoutInMinutes: 30
   pool:
     name: Hosted VS2017
@@ -31,7 +31,7 @@ jobs:
       IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
     condition: always()
 
-- job: Android Cleanup
+- job: Android
   timeoutInMinutes: 30
   pool:
     name: Hosted VS2017
