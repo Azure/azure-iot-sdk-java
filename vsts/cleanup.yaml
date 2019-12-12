@@ -1,5 +1,12 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
-
+trigger: none
+pr: none
+schedules:
+  - cron: "30 22 * * *"
+    displayName: Nightly build
+    branches:
+      include:
+        - hubCleanupSample
 jobs:
 - job: Windows
   timeoutInMinutes: 30
