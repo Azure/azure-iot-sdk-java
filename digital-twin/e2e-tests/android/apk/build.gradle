@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 //***********************************************************************************************//
-def IOT_HUB_CONNECTION_STRING = project.hasProperty('IOT_HUB_CONNECTION_STRING') ? '"'+project.property('IOT_HUB_CONNECTION_STRING')+'"' : '"Define IotHub Connection String"'
+def IOTHUB_CONNECTION_STRING = project.hasProperty('IOTHUB_CONNECTION_STRING') ? '"'+project.property('IOTHUB_CONNECTION_STRING')+'"' : '"Define IotHub Connection String"'
 def EVENT_HUB_CONNECTION_STRING = project.hasProperty('EVENT_HUB_CONNECTION_STRING') ? '"'+project.property('EVENT_HUB_CONNECTION_STRING')+'"': '"Define Event Hub Connection String"'
 def APPCENTER_APP_SECRET = project.hasProperty('AppCenterAppSecret') ? '"'+project.property('AppCenterAppSecret')+'"': '"Define AppCenter App Secret"'
 
@@ -22,7 +22,7 @@ android {
         //********** We can define variables here **********
         each {
             //buildTypes.mBuildConfigFields 'DATATYPE','VARIABLE',|"GRADLE VARIABLE|"'
-            buildConfigField STRING, 'IOT_HUB_CONNECTION_STRING', IOT_HUB_CONNECTION_STRING
+            buildConfigField STRING, 'IOTHUB_CONNECTION_STRING', IOTHUB_CONNECTION_STRING
             buildConfigField STRING, 'EVENT_HUB_CONNECTION_STRING', EVENT_HUB_CONNECTION_STRING
             buildConfigField STRING, 'AppCenterAppSecret', APPCENTER_APP_SECRET
         }
