@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests.DigitalTwinTelemetryPar
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+@TestGroup40
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {DigitalTwinServiceClientE2ETests.class,
         DigitalTwinRegisterInterfacesE2ETests.class,
