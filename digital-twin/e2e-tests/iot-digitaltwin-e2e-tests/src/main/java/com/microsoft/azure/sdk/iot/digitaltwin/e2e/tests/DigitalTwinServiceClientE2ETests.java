@@ -88,8 +88,8 @@ public class DigitalTwinServiceClientE2ETests {
 
         // Assert that returned digital twin contains the default interface implemented by all devices
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains("\"urn_azureiot_ModelDiscovery_DigitalTwin\"");
-        assertThat(digitalTwin).contains("\"version\":1");
+        String expectedInterface = "{\"interfaces\":{\"urn_azureiot_ModelDiscovery_DigitalTwin\":\"urn:azureiot:ModelDiscovery:DigitalTwin:1\"}}";
+        assertThat(digitalTwin).contains(expectedInterface);
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status

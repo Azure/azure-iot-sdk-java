@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
@@ -14,21 +16,13 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
@@ -53,7 +47,6 @@ public class DigitalTwinPropertiesE2ETests {
     private static final String DEVICE_ID_PREFIX = "DigitalTwinPropertiesE2ETests_";
 
     private static final String PROPERTY_VALUE_PATTERN = "{\"value\":\"%s\"}";
-    private static final String PROPERTY_PATTERN_UPDATED_FROM_SERVICE = "\"%s\":{\"desired\":%s}";
     private static final String SERVICE_PROPERTY_UPDATE_PREFIX = "propertyUpdatedFromService_";
     private static final String DEVICE_PROPERTY_UPDATE_PREFIX = "propertyUpdatedFromDevice_";
     private static final String UNKNOWN_INTERFACE_INSTANCE_NAME = "unknownInterfaceInstanceName";
@@ -107,9 +100,12 @@ public class DigitalTwinPropertiesE2ETests {
         String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
         assertThat(testInterfaceInstance.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device received the property update from service").isTrue();
 
-        // Assert that property is updated in the twin - strong matching done to ensure correct property is updated - will break if service changes the twin structure
+        // Assert that property is updated in the twin
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(PROPERTY_PATTERN_UPDATED_FROM_SERVICE, TEST_INTERFACE_INSTANCE_NAME, PROPERTY_NAME_WRITABLE, expectedValue));
+        JsonNode updatedProperty = getPropertyJsonNodeFromTwin(digitalTwin, TEST_INTERFACE_INSTANCE_NAME);
+        assertThat(updatedProperty.has(PROPERTY_NAME_WRITABLE)).isTrue();
+        String updatePropertyValue = getPropertyValueFromTwin(updatedProperty, PROPERTY_NAME_WRITABLE);
+        assertThat(updatePropertyValue).isEqualTo(propertyValue);
     }
 
     @Test
@@ -128,12 +124,19 @@ public class DigitalTwinPropertiesE2ETests {
 
         // Assert that property is updated in the twin
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(PROPERTY_PATTERN_UPDATED_FROM_SERVICE, PROPERTY_NAME_WRITABLE, expectedValue1));
-        assertThat(digitalTwin).contains(String.format(PROPERTY_PATTERN_UPDATED_FROM_SERVICE, PROPERTY_NAME_2_WRITABLE, expectedValue2));
+        JsonNode updatedProperty = getPropertyJsonNodeFromTwin(digitalTwin, TEST_INTERFACE_INSTANCE_NAME);
+
+        assertThat(updatedProperty.has(PROPERTY_NAME_WRITABLE)).isTrue();
+        String updatePropertyValue1 = getPropertyValueFromTwin(updatedProperty, PROPERTY_NAME_WRITABLE);
+        assertThat(updatePropertyValue1).isEqualTo(propertyValue1);
+
+        assertThat(updatedProperty.has(PROPERTY_NAME_2_WRITABLE)).isTrue();
+        String updatePropertyValue2 = getPropertyValueFromTwin(updatedProperty, PROPERTY_NAME_2_WRITABLE);
+        assertThat(updatePropertyValue2).isEqualTo(propertyValue2);
     }
 
     @Test
-    public void testUpdateWritablePropertyFromAsyncServiceMultithreaded() throws InterruptedException {
+    public void testUpdateWritablePropertyFromAsyncServiceMultithreaded() throws InterruptedException, IOException {
         final Semaphore semaphore = new Semaphore(0);
         List<String> payloadValueList = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
         List<String> propertyPatchList = payloadValueList.stream()
@@ -158,18 +161,22 @@ public class DigitalTwinPropertiesE2ETests {
 
             if (testInterfaceInstance.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)) {
                 lastUpdatedPropertyReceived = true;
-                actualUpdatedProperty = expectedValue;
+                actualUpdatedProperty = payloadValueList.get(i);
             }
         }
 
         // Only the last updated property will persist on the twin
         assertThat(lastUpdatedPropertyReceived).as("Verify that device received the property update from service").isTrue();
 
-        // Assert that property is updated in the twin - strong matching done to ensure correct property is updated - will break if service changes the twin structure
+        // Assert that property is updated in the twin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
         String finalActualUpdatedProperty = actualUpdatedProperty;
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(PROPERTY_PATTERN_UPDATED_FROM_SERVICE, TEST_INTERFACE_INSTANCE_NAME, PROPERTY_NAME_WRITABLE, finalActualUpdatedProperty));
+
+        JsonNode updatedProperty = getPropertyJsonNodeFromTwin(digitalTwin, TEST_INTERFACE_INSTANCE_NAME);
+        assertThat(updatedProperty.has(PROPERTY_NAME_WRITABLE)).isTrue();
+        String updatePropertyValue = getPropertyValueFromTwin(updatedProperty, PROPERTY_NAME_WRITABLE);
+        assertThat(updatePropertyValue).isEqualTo(finalActualUpdatedProperty);
     }
 
     @Test
@@ -206,9 +213,12 @@ public class DigitalTwinPropertiesE2ETests {
         String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
         assertThat(testInterfaceInstance.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_READONLY, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
 
-        // Assert that property is updated in the twin - strong matching done to ensure correct property is updated - will break if service changes the twin structure
+        // Assert that property is not updated in the twin
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).doesNotContain(String.format(PROPERTY_PATTERN_UPDATED_FROM_SERVICE, TEST_INTERFACE_INSTANCE_NAME, PROPERTY_NAME_READONLY, expectedValue));
+        JsonNode updatedProperty = getPropertyJsonNodeFromTwin(digitalTwin, TEST_INTERFACE_INSTANCE_NAME);
+        assertThat(updatedProperty.has(PROPERTY_NAME_READONLY)).isTrue();
+        String updatePropertyValue = getPropertyValueFromTwin(updatedProperty, PROPERTY_NAME_READONLY);
+        assertThat(updatePropertyValue).isNotEqualTo(propertyValue);
     }
 
     @Test
@@ -217,6 +227,16 @@ public class DigitalTwinPropertiesE2ETests {
         DigitalTwinClientResult updateResult = testInterfaceInstance.updatePropertyFromDevice(PROPERTY_NAME_WRITABLE, propertyValue).blockingGet();
 
         assertThat(updateResult).as("Verify that device sent the property update to service").isEqualTo(DIGITALTWIN_CLIENT_OK);
+    }
+
+    private static JsonNode getPropertyJsonNodeFromTwin(String digitalTwin, String interfaceInstanceName) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode digitalTwinObject = mapper.readTree(digitalTwin);
+        return digitalTwinObject.get("interfaces").get(interfaceInstanceName).get("properties");
+    }
+
+    private static String getPropertyValueFromTwin(JsonNode propertyJsonNode, String propertyName) {
+        return propertyJsonNode.get(propertyName).get("desired").get("value").asText();
     }
 
     @After
