@@ -22,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class Tools {
 
     private static final String INTERFACE_ID_DELIMITER = ":";
+    private static final String ANDROID_BUILD_CONFIG_CLASS = "com.microsoft.azure.sdk.iot.digitaltwin.android.BuildConfig";
     private static final Map<String, String> ANDROID_ENV_VAR = retrieveAndroidEnvVariables();
 
     public static String retrieveEnvironmentVariableValue(String environmentVariableName) {
@@ -73,7 +74,7 @@ public class Tools {
     private static Map<String, String> retrieveAndroidEnvVariables() {
         Map<String, String> envVariables = new HashMap<>();
         try {
-            Class buildConfig = Class.forName("com.microsoft.azure.sdk.iot.android.BuildConfig");
+            Class buildConfig = Class.forName(ANDROID_BUILD_CONFIG_CLASS);
             Arrays.stream(buildConfig.getFields()).forEach(field -> {
                 try {
                     envVariables.put(field.getName(), field.get(null).toString());
