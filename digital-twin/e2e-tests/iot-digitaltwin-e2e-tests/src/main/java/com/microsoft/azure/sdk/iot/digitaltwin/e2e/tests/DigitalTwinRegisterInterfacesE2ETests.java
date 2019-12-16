@@ -17,7 +17,9 @@ import io.reactivex.rxjava3.disposables.Disposable;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -57,6 +59,9 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     private TestDigitalTwinDevice testDevice;
     private TestInterfaceInstance1 testInterfaceInstance1;
     private TestInterfaceInstance2 testInterfaceInstance2;
+
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
 
     @Parameterized.Parameter(0)
     public IotHubClientProtocol protocol;

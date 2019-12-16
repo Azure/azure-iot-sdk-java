@@ -11,7 +11,9 @@ import com.microsoft.rest.RestException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -40,6 +42,9 @@ public class DigitalTwinServiceClientE2ETests {
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
+
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
 
     @BeforeClass
     public static void setUp() {
