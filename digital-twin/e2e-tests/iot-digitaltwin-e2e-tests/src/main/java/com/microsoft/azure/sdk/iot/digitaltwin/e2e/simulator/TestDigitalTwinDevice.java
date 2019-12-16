@@ -40,13 +40,10 @@ public class TestDigitalTwinDevice {
         }
         this.deviceId = deviceId;
         this.deviceClient = createDeviceClient(protocol);
-        this.deviceClient.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback() {
-
-            @Override
-            public void execute(IotHubConnectionStatus iotHubConnectionStatus, IotHubConnectionStatusChangeReason iotHubConnectionStatusChangeReason, Throwable throwable, Object o) {
-                log.debug("status={}, reason={}", iotHubConnectionStatus, iotHubConnectionStatusChangeReason);
-            }
-        }, this.deviceClient);
+        this.deviceClient.registerConnectionStatusChangeCallback((iotHubConnectionStatus, iotHubConnectionStatusChangeReason, throwable, o) -> {
+            TestDigitalTwinDevice testDigitalTwinDevice = (TestDigitalTwinDevice) o;
+            log.debug("DeviceID={}; status={}, reason={}", testDigitalTwinDevice.getDeviceId(), iotHubConnectionStatus, iotHubConnectionStatusChangeReason);
+        }, this);
         this.digitalTwinDeviceClient = createDigitalTwinDeviceClient();
         log.debug("Created device: {}", deviceId);
     }

@@ -17,7 +17,9 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -54,6 +56,9 @@ public class DigitalTwinTelemetryParameterizedE2ETests {
     private TestInterfaceInstance2 testInterfaceInstance;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
+
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
 
     @Parameterized.Parameter(0)
     public IotHubClientProtocol protocol;
