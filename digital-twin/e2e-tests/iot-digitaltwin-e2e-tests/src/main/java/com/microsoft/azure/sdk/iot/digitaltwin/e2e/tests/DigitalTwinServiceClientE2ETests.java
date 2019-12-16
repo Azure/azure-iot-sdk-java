@@ -40,7 +40,6 @@ public class DigitalTwinServiceClientE2ETests {
     private static final String INVALID_DEVICE_ID = "InvalidDevice";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
-    private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
     @Rule
@@ -55,8 +54,7 @@ public class DigitalTwinServiceClientE2ETests {
 
     @Before
     public void setUpTest() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, MQTT);
+        testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), MQTT);
     }
 
     @Test
@@ -89,7 +87,7 @@ public class DigitalTwinServiceClientE2ETests {
 
     @Test
     public void testGetAllDigitalTwinInterfacesValidDigitalTwinId() {
-        String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
+        String digitalTwin = digitalTwinServiceClient.getDigitalTwin(testDevice.getDeviceId());
 
         // Assert that returned digital twin contains the default interface implemented by all devices
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
@@ -117,7 +115,7 @@ public class DigitalTwinServiceClientE2ETests {
                 + "      }"
                 + "  }";
 
-        digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch);
+        digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), interfaceInstanceName, propertyPatch);
     }
 
     // Service throws a 404 Not Found

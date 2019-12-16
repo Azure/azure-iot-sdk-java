@@ -5,9 +5,6 @@ package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools;

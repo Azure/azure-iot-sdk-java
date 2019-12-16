@@ -55,7 +55,6 @@ public class DigitalTwinPropertiesE2ETests {
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private static DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient;
-    private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
     private TestInterfaceInstance2 testInterfaceInstance;
 
@@ -85,8 +84,7 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Before
     public void setUpTest() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
+        testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
@@ -99,7 +97,7 @@ public class DigitalTwinPropertiesE2ETests {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
-        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
+        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
 
         String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
         assertThat(testInterfaceInstance.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device received the property update from service").isTrue();
@@ -119,7 +117,7 @@ public class DigitalTwinPropertiesE2ETests {
         Map<String, String> propertyValues = new HashMap<String, String>() {{ put(PROPERTY_NAME_WRITABLE, propertyValue1); put(PROPERTY_NAME_2_WRITABLE, propertyValue2); }};
 
         String propertyPatch = createPropertyPatch(propertyValues);
-        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
+        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
 
         String expectedValue1 = String.format(PROPERTY_VALUE_PATTERN, propertyValue1);
         String expectedValue2 = String.format(PROPERTY_VALUE_PATTERN, propertyValue2);
@@ -149,7 +147,7 @@ public class DigitalTwinPropertiesE2ETests {
 
         propertyPatchList.forEach(propertyPatch -> {
             try {
-                digitalTwinServiceAsyncClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatch)
+                digitalTwinServiceAsyncClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME, propertyPatch)
                         .subscribe(s -> semaphore.release());
             } catch (IOException e) {
                 log.error("Exception thrown while updating property patch = {}", propertyPatch, e);
@@ -173,7 +171,7 @@ public class DigitalTwinPropertiesE2ETests {
         assertThat(lastUpdatedPropertyReceived).as("Verify that device received the property update from service").isTrue();
 
         // Assert that property is updated in the twin
-        String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
+        String digitalTwin = digitalTwinServiceClient.getDigitalTwin(testDevice.getDeviceId());
         String finalActualUpdatedProperty = actualUpdatedProperty;
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
 
@@ -188,7 +186,7 @@ public class DigitalTwinPropertiesE2ETests {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
-        digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, UNKNOWN_INTERFACE_INSTANCE_NAME, propertyPatch);
+        digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), UNKNOWN_INTERFACE_INSTANCE_NAME, propertyPatch);
 
         String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
         assertThat(testInterfaceInstance.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
@@ -200,7 +198,7 @@ public class DigitalTwinPropertiesE2ETests {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(UNKNOWN_PROPERTY_NAME, propertyValue));
-        digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
+        digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
 
         String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
         assertThat(testInterfaceInstance.verifyIfPropertyUpdateWasReceived(UNKNOWN_PROPERTY_NAME, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
@@ -212,7 +210,7 @@ public class DigitalTwinPropertiesE2ETests {
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_READONLY, propertyValue));
-        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
+        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME, propertyPatch);
 
         String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
         assertThat(testInterfaceInstance.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_READONLY, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();

@@ -53,7 +53,6 @@ public class DigitalTwinTelemetryE2ETests {
     private static final String TELEMETRY_PAYLOAD_PATTERN = "{\"%s\":%s}";
 
     private TestInterfaceInstance2 testInterfaceInstance;
-    private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
     @Rule
@@ -72,8 +71,7 @@ public class DigitalTwinTelemetryE2ETests {
 
     @Before
     public void setUpTest() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
+        testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
@@ -108,7 +106,7 @@ public class DigitalTwinTelemetryE2ETests {
 
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             String expectedPayload = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryList.get(i)));
-            assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
+            assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayload)).as("Verify EventHub received the sent telemetry").isTrue();
         }
     }
 
@@ -129,9 +127,9 @@ public class DigitalTwinTelemetryE2ETests {
         booleanTelemetrySubscription.dispose();
 
         String expectedPayloadResult1 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(intTelemetry));
-        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult1)).as("Verify EventHub received the sent telemetry").isTrue();
+        assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayloadResult1)).as("Verify EventHub received the sent telemetry").isTrue();
         String expectedPayloadResult2 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_BOOLEAN, serialize(booleanTelemetry));
-        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayloadResult2)).as("Verify EventHub received the sent telemetry").isTrue();
+        assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayloadResult2)).as("Verify EventHub received the sent telemetry").isTrue();
     }
 
     @Test
@@ -142,7 +140,7 @@ public class DigitalTwinTelemetryE2ETests {
         log.debug("Telemetry operation result: {}", digitalTwinClientResult1);
 
         String expectedPayload1 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue1));
-        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload1)).as("Verify EventHub received the sent telemetry").isTrue();
+        assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayload1)).as("Verify EventHub received the sent telemetry").isTrue();
 
         // close the device client
         testDevice.getDeviceClient().closeNow();
@@ -156,7 +154,7 @@ public class DigitalTwinTelemetryE2ETests {
         log.debug("Telemetry operation result: {}", digitalTwinClientResult2);
 
         String expectedPayload2 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue2));
-        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload2)).as("Verify EventHub received the sent telemetry").isTrue();
+        assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayload2)).as("Verify EventHub received the sent telemetry").isTrue();
     }
 
     @After

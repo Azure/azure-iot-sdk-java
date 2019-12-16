@@ -63,7 +63,6 @@ public class DigitalTwinCommandE2ETests {
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private static DigitalTwinServiceAsyncClient digitalTwinServiceAsyncClient;
-    private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
 
     @Rule
@@ -92,8 +91,7 @@ public class DigitalTwinCommandE2ETests {
 
     @Before
     public void setUpTest() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
+        testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         TestInterfaceInstance2 testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
@@ -103,7 +101,7 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testDeviceClientReceivesSyncCommandWithPayloadAndResponds() {
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
+        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
         assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_COMPLETED);
@@ -113,7 +111,7 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testDeviceClientReceivesSyncCommandWithoutPayloadAndResponds() {
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITHOUT_PAYLOAD);
+        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
         assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_COMPLETED);
@@ -122,7 +120,7 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testDeviceClientReceivesAsyncCommandWithPayloadAndResponds() throws InterruptedException {
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
+        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
         assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_PENDING);
@@ -131,12 +129,12 @@ public class DigitalTwinCommandE2ETests {
 
         // Verify that async command progress is sent to IoTHub
         String expectedPayload = String.format(ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT, ASYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
-        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Async command progress sent to IoTHub").isTrue();
+        assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayload)).as("Async command progress sent to IoTHub").isTrue();
     }
 
     @Test
     public void testDeviceClientReceivesAsyncCommandWithoutPayloadAndResponds() throws InterruptedException {
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITHOUT_PAYLOAD);
+        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
         assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_PENDING);
@@ -144,12 +142,12 @@ public class DigitalTwinCommandE2ETests {
 
         // Verify that async command progress is sent to IoTHub
         String expectedPayload = String.format(ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT, ASYNC_COMMAND_WITHOUT_PAYLOAD, "");
-        assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Async command progress sent to IoTHub").isTrue();
+        assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayload)).as("Async command progress sent to IoTHub").isTrue();
     }
 
     @Test
     public void testInvokeCommandInvalidInterfaceInstanceName() {
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, INVALID_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITHOUT_PAYLOAD);
+        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), INVALID_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
         assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_NOT_IMPLEMENTED);
@@ -159,7 +157,7 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testInvokeCommandInvalidCommandName() {
-        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, INVALID_COMMAND_NAME);
+        DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, INVALID_COMMAND_NAME);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
         assertThat(commandResponse.getStatus()).isEqualTo(STATUS_CODE_NOT_IMPLEMENTED);
@@ -169,8 +167,7 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testSameCommandNameOnMultipleRegisteredInterfacesSuccess() throws IotHubException, IOException, URISyntaxException {
-        digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
-        testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
+        testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         TestInterfaceInstance1 testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
@@ -180,8 +177,8 @@ public class DigitalTwinCommandE2ETests {
 
         String samplePayload1 = "samplePayload1";
         String samplePayload2 = "samplePayload2";
-        DigitalTwinCommandResponse commandResponse1 = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_1, TestInterfaceInstance1.SYNC_COMMAND_WITH_PAYLOAD, samplePayload1);
-        DigitalTwinCommandResponse commandResponse2 = digitalTwinServiceClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, samplePayload2);
+        DigitalTwinCommandResponse commandResponse1 = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_1, TestInterfaceInstance1.SYNC_COMMAND_WITH_PAYLOAD, samplePayload1);
+        DigitalTwinCommandResponse commandResponse2 = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, samplePayload2);
 
         assertThat(commandResponse1).as("Verify Command1 Invocation Response").isNotNull();
         assertThat(commandResponse1.getStatus()).isEqualTo(STATUS_CODE_COMPLETED);
@@ -200,7 +197,7 @@ public class DigitalTwinCommandE2ETests {
         final List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
         List<String> requestPayloadForMultiThreadTest = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
 
-        requestPayloadForMultiThreadTest.forEach(payload -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD,payload)
+        requestPayloadForMultiThreadTest.forEach(payload -> digitalTwinServiceAsyncClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD,payload)
                                                                                    .subscribe(response -> {
                                                                                        commandResponses.add(response);
                                                                                        semaphore.release();
@@ -227,7 +224,7 @@ public class DigitalTwinCommandE2ETests {
         final List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
         List<String> requestPayloadForMultiThreadTest = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
 
-        requestPayloadForMultiThreadTest.forEach(payload -> digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD,payload)
+        requestPayloadForMultiThreadTest.forEach(payload -> digitalTwinServiceAsyncClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD,payload)
                                                                                          .subscribe(response -> {
                                                                                              commandResponses.add(response);
                                                                                              semaphore.release();
@@ -248,7 +245,7 @@ public class DigitalTwinCommandE2ETests {
 
             // Verify that async command progress is sent to IoTHub
             String expectedPayload = String.format(ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT, ASYNC_COMMAND_WITH_PAYLOAD, responsePayload);
-            assertThat(verifyThatMessageWasReceived(digitalTwinId, expectedPayload)).as("Async command progress sent to IoTHub").isTrue();
+            assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayload)).as("Async command progress sent to IoTHub").isTrue();
         }
         assertThat(responsePayloads).as("All commands were invoked").hasSameElementsAs(requestPayloadForMultiThreadTest);
     }
