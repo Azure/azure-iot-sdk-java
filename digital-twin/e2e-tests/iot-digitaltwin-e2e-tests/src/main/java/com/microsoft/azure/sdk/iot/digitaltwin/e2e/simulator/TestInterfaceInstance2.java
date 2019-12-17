@@ -82,12 +82,13 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
 
     @Override
     protected void onPropertyUpdate(@NonNull DigitalTwinPropertyUpdate digitalTwinPropertyUpdate) {
+        log.trace("Property received: name={}, desired value={}, version={}", digitalTwinPropertyUpdate.getPropertyName(), digitalTwinPropertyUpdate.getPropertyDesired(), digitalTwinPropertyUpdate.getDesiredVersion());
         propertyUpdatesReceived.put(digitalTwinPropertyUpdate.getPropertyName(), digitalTwinPropertyUpdate.getPropertyDesired());
     }
 
     public boolean verifyIfPropertyUpdateWasReceived(String expectedPropertyName, String expectedValue) {
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() < startTime + MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS) {
+        while (System.currentTimeMillis() < startTime + MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS * 1000) {
             if (propertyUpdatesReceived.entrySet().stream()
                                        .anyMatch(stringStringEntry -> stringStringEntry.getKey().equals(expectedPropertyName) && stringStringEntry.getValue().equals(expectedValue))) {
                 return true;

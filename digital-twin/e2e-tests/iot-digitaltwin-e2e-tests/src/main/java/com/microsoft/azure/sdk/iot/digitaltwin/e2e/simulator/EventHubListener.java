@@ -82,10 +82,13 @@ public final class EventHubListener {
                 log.trace("ReceivedBatch Size: {}", batchSize);
 
                 for (EventData receivedEvent : eventData) {
-                    String receivedDeviceId = receivedEvent.getProperties().get(TELEMETRY_PROPERTY_DEVICE_ID).toString();
-                    String payload = new String(receivedEvent.getBytes(), Charset.defaultCharset());
-                    log.trace(">> EventData Received: deviceId={}: payload={}", receivedDeviceId, payload);
-                    RECEIVED_EVENT_DATA.put(payload, receivedEvent);
+                    Map<String, Object> receivedEventProperties = receivedEvent.getProperties();
+                    if (receivedEventProperties != null && receivedEventProperties.containsKey(TELEMETRY_PROPERTY_DEVICE_ID)) {
+                        String receivedDeviceId = receivedEventProperties.get(TELEMETRY_PROPERTY_DEVICE_ID).toString();
+                        String payload = new String(receivedEvent.getBytes(), Charset.defaultCharset());
+                        log.trace(">> EventData Received: deviceId={}: payload={}", receivedDeviceId, payload);
+                        RECEIVED_EVENT_DATA.put(payload, receivedEvent);
+                    }
                 }
             }
         }, EXECUTOR_SERVICE).get();

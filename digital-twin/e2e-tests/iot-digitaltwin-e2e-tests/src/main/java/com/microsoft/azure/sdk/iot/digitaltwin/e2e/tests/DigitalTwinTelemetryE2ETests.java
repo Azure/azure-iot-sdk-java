@@ -88,7 +88,6 @@ public class DigitalTwinTelemetryE2ETests {
 
     @Test
     public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
-        log.debug("Executing test=testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetryAsync, deviceID={}", testDevice.getDeviceId());
         final Semaphore semaphore = new Semaphore(0);
         List<Integer> telemetryList = generateRandomIntegerList(MAX_THREADS_MULTITHREADED_TEST);
 
@@ -113,7 +112,6 @@ public class DigitalTwinTelemetryE2ETests {
 
     @Test
     public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
-        log.debug("Executing test=testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetryAsync, deviceID={}", testDevice.getDeviceId());
         final Semaphore semaphore = new Semaphore(0);
 
         int intTelemetry = nextInt();
@@ -136,7 +134,6 @@ public class DigitalTwinTelemetryE2ETests {
 
     @Test
     public void testTelemetryOperationAfterClientCloseAndOpen() throws IOException, InterruptedException {
-        log.debug("Executing test=testTelemetryOperationAfterClientCloseAndOpen, deviceID={}", testDevice.getDeviceId());
         int telemetryValue1 = nextInt();
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue1);
         DigitalTwinClientResult digitalTwinClientResult1 = testInterfaceInstance.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue1).blockingGet();
