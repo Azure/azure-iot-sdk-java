@@ -15,7 +15,6 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.models.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -48,7 +47,6 @@ import static java.util.Collections.synchronizedList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 @RunWith(Parameterized.class)
 public class DigitalTwinCommandE2ETests {
     private static final String IOT_HUB_CONNECTION_STRING = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
@@ -103,7 +101,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testDeviceClientReceivesSyncCommandWithPayloadAndResponds() {
-        log.debug("Executing test=testDeviceClientReceivesSyncCommandWithPayloadAndResponds, deviceID={}", testDevice.getDeviceId());
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -114,7 +111,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testDeviceClientReceivesSyncCommandWithoutPayloadAndResponds() {
-        log.debug("Executing test=testDeviceClientReceivesSyncCommandWithoutPayloadAndResponds, deviceID={}", testDevice.getDeviceId());
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -124,7 +120,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testDeviceClientReceivesAsyncCommandWithPayloadAndResponds() throws InterruptedException {
-        log.debug("Executing test=testDeviceClientReceivesAsyncCommandWithPayloadAndResponds, deviceID={}", testDevice.getDeviceId());
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITH_PAYLOAD, SAMPLE_COMMAND_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -139,7 +134,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testDeviceClientReceivesAsyncCommandWithoutPayloadAndResponds() throws InterruptedException {
-        log.debug("Executing test=testDeviceClientReceivesAsyncCommandWithoutPayloadAndResponds, deviceID={}", testDevice.getDeviceId());
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, ASYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -153,7 +147,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testInvokeCommandInvalidInterfaceInstanceName() {
-        log.debug("Executing test=testInvokeCommandInvalidInterfaceInstanceName, deviceID={}", testDevice.getDeviceId());
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), INVALID_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITHOUT_PAYLOAD);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -164,7 +157,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testInvokeCommandInvalidCommandName() {
-        log.debug("Executing test=testInvokeCommandInvalidCommandName, deviceID={}", testDevice.getDeviceId());
         DigitalTwinCommandResponse commandResponse = digitalTwinServiceClient.invokeCommand(testDevice.getDeviceId(), TEST_INTERFACE_INSTANCE_NAME_2, INVALID_COMMAND_NAME);
 
         assertThat(commandResponse).as("Verify Command Invocation Response").isNotNull();
@@ -175,7 +167,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testSameCommandNameOnMultipleRegisteredInterfacesSuccess() throws IotHubException, IOException, URISyntaxException {
-        log.debug("Executing test=testSameCommandNameOnMultipleRegisteredInterfacesSuccess, deviceID={}", testDevice.getDeviceId());
         testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
@@ -202,7 +193,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testSyncCommandInvocationMultithreaded() throws InterruptedException {
-        log.debug("Executing test=testSyncCommandInvocationMultithreaded, deviceID={}", testDevice.getDeviceId());
         final Semaphore semaphore = new Semaphore(0);
         final List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
         List<String> requestPayloadForMultiThreadTest = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
@@ -230,7 +220,6 @@ public class DigitalTwinCommandE2ETests {
 
     @Test
     public void testAsyncCommandInvocationMultithreaded() throws InterruptedException {
-        log.debug("Executing test=testAsyncCommandInvocationMultithreaded, deviceID={}", testDevice.getDeviceId());
         final Semaphore semaphore = new Semaphore(0);
         final List<DigitalTwinCommandResponse> commandResponses = synchronizedList(new ArrayList<>());
         List<String> requestPayloadForMultiThreadTest = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);

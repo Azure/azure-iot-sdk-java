@@ -25,7 +25,7 @@ public class DigitalTwinPropertyUpdate {
      */
     private final String propertyReported;
     /**
-     * Version (from the service, NOT the C structure) of this property.
+     * Version (from the service) of this property.
      * This version should be specified when updating this property.
      */
     private final Integer desiredVersion;

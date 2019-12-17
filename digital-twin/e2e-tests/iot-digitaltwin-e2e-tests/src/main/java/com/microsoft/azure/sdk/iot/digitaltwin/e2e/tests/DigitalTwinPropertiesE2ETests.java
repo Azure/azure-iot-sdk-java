@@ -94,7 +94,6 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateSingleWritablePropertyFromService() throws IOException {
-        log.debug("Executing test=testUpdateSingleWritablePropertyFromService, deviceID={}", testDevice.getDeviceId());
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
@@ -113,7 +112,6 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateMultipleWritablePropertyFromService() throws IOException {
-        log.debug("Executing test=testUpdateMultipleWritablePropertyFromService, deviceID={}", testDevice.getDeviceId());
         String propertyValue1 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         String propertyValue2 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         Map<String, String> propertyValues = new HashMap<String, String>() {{ put(PROPERTY_NAME_WRITABLE, propertyValue1); put(PROPERTY_NAME_2_WRITABLE, propertyValue2); }};
@@ -141,7 +139,6 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateWritablePropertyFromAsyncServiceMultithreaded() throws InterruptedException, IOException {
-        log.debug("Executing test=testUpdateWritablePropertyFromAsyncServiceMultithreaded, deviceID={}", testDevice.getDeviceId());
         final Semaphore semaphore = new Semaphore(0);
         List<String> payloadValueList = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
         List<String> propertyPatchList = payloadValueList.stream()
@@ -186,7 +183,6 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateSinglePropertyFromServiceUnknownInterfaceName() throws IOException {
-        log.debug("Executing test=testUpdateSinglePropertyFromServiceUnknownInterfaceName, deviceID={}", testDevice.getDeviceId());
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
@@ -229,7 +225,6 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateSingleWritablePropertyFromDevice() {
-        log.debug("Executing test=testUpdateSingleWritablePropertyFromDevice, deviceID={}", testDevice.getDeviceId());
         String propertyValue = DEVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         DigitalTwinClientResult updateResult = testInterfaceInstance.updatePropertyFromDevice(PROPERTY_NAME_WRITABLE, propertyValue).blockingGet();
 
