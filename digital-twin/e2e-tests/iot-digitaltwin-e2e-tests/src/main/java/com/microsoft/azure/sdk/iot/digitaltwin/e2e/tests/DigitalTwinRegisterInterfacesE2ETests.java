@@ -85,10 +85,10 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
     @Test
     public void testRegisterSingleInterfaceSuccess() throws IotHubException, IOException, URISyntaxException {
-        log.debug("Executing test=testRegisterSingleInterfaceSuccess, deviceID={}", testDevice.getDeviceId());
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
+        log.debug("Executing test=testRegisterSingleInterfaceSuccess, deviceID={}", testDevice.getDeviceId());
 
         testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
         DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
@@ -102,10 +102,10 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
     @Test
     public void testRegisterMultipleInterfacesSuccess() throws IotHubException, IOException, URISyntaxException {
-        log.debug("Executing test=testRegisterMultipleInterfacesSuccess, deviceID={}", testDevice.getDeviceId());
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
+        log.debug("Executing test=testRegisterMultipleInterfacesSuccess, deviceID={}", testDevice.getDeviceId());
 
         testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
         testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
@@ -121,10 +121,10 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
     @Test
     public void testRegisterInterfacesMultipleTimesSequentially() throws IotHubException, IOException, URISyntaxException {
-        log.debug("Executing test=testRegisterInterfacesMultipleTimesSequentially, deviceID={}", testDevice.getDeviceId());
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
+        log.debug("Executing test=testRegisterInterfacesMultipleTimesSequentially, deviceID={}", testDevice.getDeviceId());
 
         testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
         DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
@@ -142,13 +142,13 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
     @Test
     public void testRegisterInterfacesMultipleTimesInParallel() throws IotHubException, IOException, URISyntaxException, InterruptedException {
-        log.debug("Executing test=testRegisterInterfacesMultipleTimesInParallel, deviceID={}", testDevice.getDeviceId());
         final Semaphore semaphore = new Semaphore(0);
         final List<DigitalTwinClientResult> registrationResults = synchronizedList(new ArrayList<>());
 
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
+        log.debug("Executing test=testRegisterInterfacesMultipleTimesInParallel, deviceID={}", testDevice.getDeviceId());
 
         testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
         testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
