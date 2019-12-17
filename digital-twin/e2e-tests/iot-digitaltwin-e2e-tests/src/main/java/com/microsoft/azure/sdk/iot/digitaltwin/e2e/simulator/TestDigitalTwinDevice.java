@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -32,7 +33,8 @@ public class TestDigitalTwinDevice {
     private DeviceClient deviceClient;
     private DigitalTwinDeviceClient digitalTwinDeviceClient;
 
-    public TestDigitalTwinDevice(@NonNull String deviceId, @NonNull IotHubClientProtocol protocol) throws IotHubException, IOException, URISyntaxException {
+    @SneakyThrows
+    public TestDigitalTwinDevice(@NonNull String deviceId, @NonNull IotHubClientProtocol protocol) {
         if (!protocol.equals(MQTT) && !protocol.equals(MQTT_WS)) {
             throw new IllegalArgumentException("Supported protocols for DigitalTwin are MQTT, MQTT_WS");
         }
@@ -49,6 +51,7 @@ public class TestDigitalTwinDevice {
         log.debug("Created device: {}", deviceId);
     }
 
+    @SneakyThrows
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(IOT_HUB_CONNECTION_STRING);
 
