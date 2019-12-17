@@ -129,6 +129,7 @@ public class DigitalTwinTelemetryParameterizedE2ETests {
 
     @Test
     public void testSendTelemetryDifferentSchema() throws IOException, InterruptedException {
+        log.debug("Executing test=testSendTelemetryDifferentSchema, deviceID={}", testDevice.getDeviceId());
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", telemetryName, telemetryValue);
         DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance.sendTelemetry(telemetryName, telemetryValue).blockingGet();
         log.debug("Telemetry operation result: {}", digitalTwinClientResult);
