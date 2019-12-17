@@ -12,11 +12,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstan
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.UnpublishedInterfaceInstance;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import io.reactivex.rxjava3.disposables.Disposable;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Triple;
-import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -25,8 +21,6 @@ import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,8 +29,12 @@ import java.util.concurrent.Semaphore;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.*;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.*;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.DCM_ID;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
 import static java.util.Arrays.asList;
@@ -57,8 +55,6 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     private static final String DIGITAL_TWIN_INTERFACE_PATTERN = "\"%s\":\"%s\"";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
-    private TestInterfaceInstance1 testInterfaceInstance1;
-    private TestInterfaceInstance2 testInterfaceInstance2;
 
     @Rule
     public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
@@ -88,7 +84,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         try {
-            testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
+            TestInterfaceInstance2 testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
             DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
             assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
 
@@ -108,8 +104,8 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         try {
-            testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
-            testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
+            TestInterfaceInstance1 testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
+            TestInterfaceInstance2 testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
             DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(testInterfaceInstance1, testInterfaceInstance2)).blockingGet();
             assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
 
@@ -130,8 +126,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         try {
-
-            testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
+            TestInterfaceInstance2 testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
             DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
             assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
 
@@ -140,7 +135,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
             assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
             assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TestInterfaceInstance2.TEST_INTERFACE_ID));
 
-            testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
+            TestInterfaceInstance1 testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
             DigitalTwinClientResult registrationResult2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1)).blockingGet();
             assertThat(registrationResult2).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
         } finally {
@@ -158,8 +153,8 @@ public class DigitalTwinRegisterInterfacesE2ETests {
 
         try {
 
-            testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
-            testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
+            TestInterfaceInstance1 testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
+            TestInterfaceInstance2 testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
 
             Disposable disposable1 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1))
                                                             .subscribe(digitalTwinClientResult -> {
