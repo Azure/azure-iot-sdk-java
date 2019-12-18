@@ -3,15 +3,15 @@
 
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
-        <artifactId>iot-sdk-java-digital-twin</artifactId>
-        <version>1.0.1</version>
+        <artifactId>digital-twin-preview</artifactId>
+        <version>1.0.0</version>
     </parent>
-    <name>Azure IoT Sdk Java Digital Twin E2E Tests</name>
-    <description>Azure IoT Sdk Java Digital Twin E2E Tests</description>
-    <artifactId>iot-sdk-java-digital-twin-e2e-tests</artifactId>
-    <version>1.0.1</version>
+    <name>Azure IoT Digital Twin E2E Tests</name>
+    <description>The Microsoft Azure IoT Digital Twin E2E Tests</description>
+    <artifactId>digital-twin-e2e-tests</artifactId>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>iot-digitaltwin-e2e-tests</module>
+        <module>digital-twin-e2e-tests-common</module>
     </modules>
 </project>

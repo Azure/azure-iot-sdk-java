@@ -5,25 +5,25 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
-        <artifactId>iot-sdk-java-digital-twin</artifactId>
-        <version>1.0.1</version>
+        <artifactId>digital-twin-preview</artifactId>
+        <version>1.0.0</version>
     </parent>
     <packaging>pom</packaging>
     <groupId>com.microsoft.azure.sdk.iot.device.samples</groupId>
-    <artifactId>iot-sdk-java-digital-twin-device-samples</artifactId>
-    <version>1.0.1</version>
+    <artifactId>digital-twin-device-samples</artifactId>
+    <version>1.0.0</version>
     <modules>
         <module>environmental-sensor-sample</module>
         <module>iot-central-sample</module>
     </modules>
     <properties>
-        <project-device-samples-version>1.0.1</project-device-samples-version>
-        <provisioning-device-client-version>1.0.1</provisioning-device-client-version>
+        <project-device-samples-version>1.0.0</project-device-samples-version>
+        <provisioning-device-client-version>1.0.0</provisioning-device-client-version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-sdk-java-digital-twin-device-preview</artifactId>
+            <artifactId>digital-twin-device-client-preview</artifactId>
             <version>${project-device-version}</version>
         </dependency>
         <dependency>

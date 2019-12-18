@@ -3,14 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>iot-sdk-java-digital-twin-e2e-tests</artifactId>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
-        <version>1.0.1</version>
+        <artifactId>digital-twin-e2e-tests</artifactId>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>Azure IoT Sdk Java Digital Twin E2E Common Tests</name>
-    <description>Azure IoT Sdk Java Digital Twin Common Tests</description>
-    <artifactId>iot-digitaltwin-e2e-tests</artifactId>
+    <name>Azure IoT Digital Twin E2E Common Tests</name>
+    <description>The Microsoft Azure IoT Digital Twin E2E Common Tests</description>
+    <artifactId>digital-twin-e2e-tests-common</artifactId>
     <version>${project-e2e-tests-version}</version>
     <developers>
         <developer>
@@ -50,12 +50,12 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-sdk-java-digital-twin-device-preview</artifactId>
+            <artifactId>digital-twin-device-client-preview</artifactId>
             <version>${project-device-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-sdk-java-digital-twin-service-preview</artifactId>
+            <artifactId>digital-twin-service-client-preview</artifactId>
             <version>${project-service-version}</version>
         </dependency>
         <dependency>

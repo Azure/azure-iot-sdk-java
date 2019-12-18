@@ -68,7 +68,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:multidex:1.0.3'
 
-    implementation('com.microsoft.azure.sdk.iot:iot-digitaltwin-e2e-tests:1.0.1'){
+    implementation('com.microsoft.azure.sdk.iot:digital-twin-e2e-tests-common:1.0.0'){
         exclude module: 'junit'
         exclude module: 'azure-storage'
     }

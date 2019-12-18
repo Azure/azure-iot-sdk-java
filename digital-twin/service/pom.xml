@@ -2,12 +2,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
-        <artifactId>iot-sdk-java-digital-twin</artifactId>
-        <version>1.0.1</version>
+        <artifactId>digital-twin-preview</artifactId>
+        <version>1.0.0</version>
     </parent>
-    <name>Azure IoT Sdk Java Digital Twin Service</name>
-    <description>The Microsoft Azure IoT Digital Twin Service SDK for Java</description>
-    <artifactId>iot-sdk-java-digital-twin-service-preview</artifactId>
+    <name>Azure IoT Digital Twin Service Client SDK</name>
+    <description>The Microsoft Azure IoT Digital Twin Service Client SDK for Java</description>
+    <artifactId>digital-twin-service-client-preview</artifactId>
     <version>${project-service-version}</version>
     <packaging>jar</packaging>
     <build>
