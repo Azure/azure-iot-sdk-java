@@ -56,8 +56,8 @@
         <testng-version>6.14.3</testng-version>
         <build-helper-version>3.0.0</build-helper-version>
         <ms-rest-client-version>1.6.15</ms-rest-client-version>
-        <project-device-version>1.0.0</project-device-version>
-        <project-service-version>1.0.0</project-service-version>
+        <digital-twin-device-client-version>1.0.0</digital-twin-device-client-version>
+        <digital-twin-service-client-version>1.0.0</digital-twin-service-client-version>
         <project-e2e-tests-version>1.0.0</project-e2e-tests-version>
         <iot-device-client-version>1.0.1</iot-device-client-version>
         <iot-service-client-version>1.0.1</iot-service-client-version>
