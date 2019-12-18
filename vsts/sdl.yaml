@@ -40,7 +40,7 @@ phases:
       buildClasspath: '$(Build.SourcesDirectory)'
       buildSourceVersion: 1.8
       buildSourcePath: '$(Build.SourcesDirectory)'
-      buildAnalyzerParams: '-exclude "$(Build.SourcesDirectory)\**\test\**\*" -exclude "$(Build.SourcesDirectory)\**\*sample*\**\*" -exclude "$(Build.SourcesDirectory)\edge-e2e\**\*" -exclude "$(Build.SourcesDirectory)\iot-e2e-tests\**\*" -exclude "$(Build.SourcesDirectory)\provisioning\provisioning-tools\**\*"'
+      buildAnalyzerParams: '-exclude "$(Build.SourcesDirectory)\**\test\**\*" -exclude "$(Build.SourcesDirectory)\**\*sample*\**\*" -exclude "$(Build.SourcesDirectory)\edge-e2e\**\*" -exclude "$(Build.SourcesDirectory)\iot-e2e-tests\**\*" -exclude "$(Build.SourcesDirectory)\provisioning\provisioning-tools\**\*" -exclude "$(Build.SourcesDirectory)\digital-twin\e2e-tests\**\*"'
       fortifyBuildId: 12345
       scaVerbose: true
       scaDebug: true

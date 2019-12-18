@@ -8,7 +8,7 @@
     <name>Azure IoT Digital Twin Service Client SDK</name>
     <description>The Microsoft Azure IoT Digital Twin Service Client SDK for Java</description>
     <artifactId>digital-twin-service-client-preview</artifactId>
-    <version>${project-service-version}</version>
+    <version>${digital-twin-service-client-version}</version>
     <packaging>jar</packaging>
     <build>
         <plugins>

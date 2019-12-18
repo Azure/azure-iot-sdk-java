@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>digital-twin-device-client-preview</artifactId>
-            <version>${project-device-version}</version>
+            <version>${digital-twin-device-client-version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
