@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.device.samples</groupId>
-        <artifactId>iot-sdk-java-digital-twin-device-samples</artifactId>
-        <version>1.0.1</version>
+        <artifactId>digital-twin-device-samples</artifactId>
+        <version>1.0.0</version>
     </parent>
     <artifactId>environmental-sensor-sample</artifactId>
     <version>${project-device-samples-version}</version>

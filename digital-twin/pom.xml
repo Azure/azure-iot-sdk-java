@@ -3,9 +3,9 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
-    <artifactId>iot-sdk-java-digital-twin</artifactId>
-    <version>1.0.1</version>
-    <name>Azure IoT Sdk Java Digital Twin</name>
+    <artifactId>digital-twin-preview</artifactId>
+    <version>1.0.0</version>
+    <name>Azure IoT Digital Twin SDK</name>
     <packaging>pom</packaging>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
     <licenses>
@@ -56,9 +56,9 @@
         <testng-version>6.14.3</testng-version>
         <build-helper-version>3.0.0</build-helper-version>
         <ms-rest-client-version>1.6.15</ms-rest-client-version>
-        <project-device-version>1.0.1</project-device-version>
-        <project-service-version>1.0.1</project-service-version>
-        <project-e2e-tests-version>1.0.1</project-e2e-tests-version>
+        <project-device-version>1.0.0</project-device-version>
+        <project-service-version>1.0.0</project-service-version>
+        <project-e2e-tests-version>1.0.0</project-e2e-tests-version>
         <iot-device-client-version>1.0.1</iot-device-client-version>
         <iot-service-client-version>1.0.1</iot-service-client-version>
         <azure-eventhubs-version>3.0.0</azure-eventhubs-version>
