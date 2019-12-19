@@ -35,6 +35,7 @@ jobs:
       CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
       FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
       IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+      EVENT_HUB_CONNECTION_STRING: $(WINDOWS-EVENT-HUB-CONNECTION-STRING)
     condition: always()
 
   - task: CopyFiles@2
@@ -100,6 +101,7 @@ jobs:
       CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
       FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
       IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+      EVENT_HUB_CONNECTION_STRING: $(LINUX-EVENT-HUB-CONNECTION-STRING)
     condition: always()
 
   - task: CopyFiles@2
@@ -125,12 +127,12 @@ jobs:
     continueOnError: true
     condition: always()  
     
- ### Android, Multi configuration build (12 different test groups to cover) ###
-- job: AndroidBuild
+ ### IoTHub and Provisioning Android E2E Tests, Multi configuration build (12 different test groups to cover) ###
+- job: AndroidBuildIoTHubProvisioning
   timeoutInMinutes: 45
   pool:
     name: Hosted VS2017
-  displayName: Android Build
+  displayName: Android Build - IoTHub and Provisioning
 
   steps:
   - powershell: ./vsts/echo_versions.ps1
@@ -139,8 +141,8 @@ jobs:
       COMMIT_FROM: $(COMMIT_FROM)
     condition: always()
 
-  - powershell: ./vsts/android_java.cmd
-    displayName: 'Android Build'
+  - powershell: ./vsts/android_iothub_provisioning.cmd
+    displayName: 'Android Build - IoTHub and Provisioning'
     env:
       IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
       STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
@@ -152,7 +154,8 @@ jobs:
       INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
       CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
       FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
-      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB) 
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+      EVENT_HUB_CONNECTION_STRING: $(ANDROID-EVENT-HUB-CONNECTION-STRING) 
     condition: always()
       
   - task: CopyFiles@2
@@ -167,10 +170,10 @@ jobs:
     
   - task: PublishPipelineArtifact@0
     inputs:
-      artifactName: 'androidBuildFiles'
+      artifactName: 'androidBuildFilesIoTHubProvisioning'
       targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
     
-- job: AndroidTest
+- job: AndroidTestIoTHubProvisioning
   timeoutInMinutes: 180
   pool:
     vmImage: 'macOS-latest'
@@ -255,9 +258,9 @@ jobs:
         ANDROID_TEST_GROUP_ID: TestGroup38
       TestGroup39:
         ANDROID_TEST_GROUP_ID: TestGroup39
-      
-  displayName: Android Test
-  dependsOn: AndroidBuild
+
+  displayName: Android Test - IoTHub and Provisioning
+  dependsOn: AndroidBuildIoTHubProvisioning
   steps:
   - powershell: ./vsts/install_appcenter_cli.ps1
     displayName: 'Install app center cli'
@@ -265,7 +268,7 @@ jobs:
    
   - task: DownloadPipelineArtifact@0
     inputs:
-      artifactName: 'androidBuildFiles'
+      artifactName: 'androidBuildFilesIoTHubProvisioning'
       targetPath: $(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk
   
   - task: AppCenterTest@1
@@ -278,4 +281,75 @@ jobs:
       appSlug: 'Azure-Iot-Sdk/androide2e'
       devices: 'Azure-Iot-Sdk/api28_2'
       runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.$(ANDROID_TEST_GROUP_ID)'
+      showDebugOutput: true
+
+ ### Digital Twin Android E2E Tests, Multi configuration build (12 different test groups to cover) ###
+- job: AndroidBuildDigitalTwin
+  timeoutInMinutes: 45
+  pool:
+    name: Hosted VS2017
+  displayName: Android Build - Digital Twin
+
+  steps:
+  - powershell: ./vsts/echo_versions.ps1
+    displayName: 'Echo Versions'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
+
+  - powershell: ./vsts/android_digitaltwin.cmd
+    displayName: 'Android Build - Digital Twin'
+    env:
+      APPCENTER_DIGITAL_TWIN_APP_SECRET: $(APPCENTER-DIGITAL-TWIN-APP-SECRET)
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      EVENT_HUB_CONNECTION_STRING: $(ANDROID-EVENT-HUB-CONNECTION-STRING)
+    condition: always()
+
+  - task: CopyFiles@2
+    displayName: 'Copy Test Results to Artifact Staging Directory'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk'
+      Contents: |
+       *.*
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    continueOnError: true
+    condition: always()
+
+  - task: PublishPipelineArtifact@0
+    inputs:
+      artifactName: 'androidBuildFilesDigitalTwin'
+      targetPath: 'digital-twin/e2e-tests/android/apk/build/outputs/apk'
+
+- job: AndroidTestDigitalTwin
+  timeoutInMinutes: 180
+  pool:
+    vmImage: 'macOS-latest'
+  strategy:
+    maxParallel: 12
+    matrix:
+      TestGroupDigitalTwin1:
+        ANDROID_TEST_GROUP_ID: TestGroupDigitalTwin1
+
+  displayName: Android Test  - Digital Twin
+  dependsOn: AndroidBuildDigitalTwin
+  steps:
+  - powershell: ./vsts/install_appcenter_cli.ps1
+    displayName: 'Install app center cli'
+    condition: always()
+
+  - task: DownloadPipelineArtifact@0
+    inputs:
+      artifactName: 'androidBuildFilesDigitalTwin'
+      targetPath: $(Build.ArtifactStagingDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk
+
+  - task: AppCenterTest@1
+    displayName: 'E2E with Visual Studio App Center'
+    inputs:
+      appFile: '$(Build.ArtifactStagingDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk/debug/apk-debug.apk'
+      frameworkOption: espresso
+      espressoBuildDirectory: '$(Build.ArtifactStagingDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk/androidTest/debug'
+      serverEndpoint: 'AppCenter connection aziotclb'
+      appSlug: 'Azure-Iot-Sdk/digital-twin-androide2e'
+      devices: 'Azure-Iot-Sdk/api28_2'
+      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.digitaltwin.android.helper.$(ANDROID_TEST_GROUP_ID)'
       showDebugOutput: true

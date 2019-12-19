@@ -1,0 +1,68 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>digital-twin-preview</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <name>Azure IoT Digital Twin Device Client SDK</name>
+    <description>The Microsoft Azure IoT Digital Twin Device Client SDK for Java</description>
+    <artifactId>digital-twin-device-client-preview</artifactId>
+    <version>${digital-twin-device-client-version}</version>
+    <packaging>jar</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin-version}</version>
+                <configuration>
+                    <source>${java-sdk-device-version}</source>
+                    <target>${java-sdk-device-version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin-version}</version>
+                <configuration>
+                    <includeDependencySources>true</includeDependencySources>
+                    <show>protected</show>
+                    <sourcepath>${project.build.directory}/delombok</sourcepath>
+                    <excludePackageNames>
+                        com.microsoft.azure.sdk.iot.digitaltwin.device.model.dto,com.microsoft.azure.sdk.iot.digitaltwin.device.serializer
+                    </excludePackageNames>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-device-client-preview</artifactId>
+            <version>${iot-device-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.reactivex.rxjava3</groupId>
+            <artifactId>rxjava</artifactId>
+            <version>${rxjava3-version}</version>
+        </dependency>
+    </dependencies>
+</project>

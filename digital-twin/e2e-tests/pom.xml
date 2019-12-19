@@ -1,0 +1,17 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>digital-twin-preview</artifactId>
+        <version>1.0.0</version>
+    </parent>
+    <name>Azure IoT Digital Twin E2E Tests</name>
+    <description>The Microsoft Azure IoT Digital Twin E2E Tests</description>
+    <artifactId>digital-twin-e2e-tests</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>digital-twin-e2e-tests-common</module>
+    </modules>
+</project>
