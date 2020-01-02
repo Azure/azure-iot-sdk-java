@@ -7,6 +7,7 @@ schedules:
     branches:
       include:
         - hubCleanupSample
+    always: true
 jobs:
 - job: Windows
   timeoutInMinutes: 30
