@@ -30,8 +30,6 @@
         <module>device</module>
         <module>service</module>
         <module>e2e-tests</module>
-        <module>service-samples</module>
-        <module>device-samples</module>
     </modules>
     <properties>
         <java-sdk-device-version>1.7</java-sdk-device-version>
