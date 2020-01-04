@@ -93,6 +93,7 @@ public class ServiceClientTests extends IotHubIntegrationTest
 
         // Create service client
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol);
+        serviceClient.setSasTokenExpiryTime(30);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 
@@ -124,7 +125,6 @@ public class ServiceClientTests extends IotHubIntegrationTest
 
         try
         {
-            serviceClient.open();
             serviceClient.send(testInstance.deviceId, new Message("some message"));
         }
         catch (IOException e)
@@ -144,14 +144,16 @@ public class ServiceClientTests extends IotHubIntegrationTest
     {
         boolean expectedExceptionWasCaught = false;
 
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
-
         try
         {
-            serviceClient.open();
-            FeedbackReceiver receiver = serviceClient.getFeedbackReceiver();
+            FeedbackMessageListenerClient receiver = new FeedbackMessageListenerClient(invalidCertificateServerConnectionString, testInstance.protocol, new FeedbackBatchMessageCallback() {
+                @Override
+                public DeliveryOutcome onFeedbackMessageReceived(FeedbackBatch feedbackBatch) {
+                    //No need to implement. Test should fail while opening the connection
+                    return null;
+                }
+            });
             receiver.open();
-            receiver.receive(1000);
         }
         catch (IOException e)
         {
@@ -170,14 +172,16 @@ public class ServiceClientTests extends IotHubIntegrationTest
     {
         boolean expectedExceptionWasCaught = false;
 
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
-
         try
         {
-            serviceClient.open();
-            FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver();
+            FileUploadNotificationListenerClient receiver = new FileUploadNotificationListenerClient(invalidCertificateServerConnectionString, testInstance.protocol, new FileUploadNotificationCallback() {
+                @Override
+                public DeliveryOutcome onFileUploadNotificationReceived(FileUploadNotification fileUploadNotification) {
+                    //No need to implement. Test should fail while opening the connection
+                    return null;
+                }
+            });
             receiver.open();
-            receiver.receive(1000);
         }
         catch (IOException e)
         {

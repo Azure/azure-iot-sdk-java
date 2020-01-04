@@ -69,7 +69,6 @@ public class ReceiveMessagesCommon extends IotHubIntegrationTest
         {
             registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
             serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
-            serviceClient.open();
         }
         catch (IOException e)
         {
@@ -99,7 +98,6 @@ public class ReceiveMessagesCommon extends IotHubIntegrationTest
         messageProperties.put("name3", "value3");
 
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
-        serviceClient.open();
 
         List inputs = new ArrayList();
         for (ClientType clientType : clientTypes)
