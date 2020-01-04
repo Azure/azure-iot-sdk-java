@@ -35,7 +35,7 @@ public class IotHubConnectionStringBuilder
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_001: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))
         {
-            throw new IllegalArgumentException("connection string cannotbe null or empty");
+            throw new IllegalArgumentException("connection string cannot be null or empty");
         }
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_002: [The function shall create a new IotHubConnectionString object deserializing the given string]
         IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
@@ -76,9 +76,8 @@ public class IotHubConnectionStringBuilder
      *
      * @param connectionString The connection string to deserialize
      * @param iotHubConnectionString The target object for deserialization
-     * @throws IOException This exception is thrown if the parsing failed
      */
-    protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString) throws IOException
+    protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString)
     {
         Map<String, String> keyValueMap = new HashMap<String, String>();
 

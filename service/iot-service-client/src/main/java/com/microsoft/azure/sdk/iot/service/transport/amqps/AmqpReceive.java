@@ -19,7 +19,11 @@ import java.io.IOException;
  * Instance of the QPID-Proton-J BaseHandler class
  * overriding the events what are needed to handle
  * high level open, close methods and feedback received event.
+ *
+ * @deprecated in favor of {@link com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackListenerHandler} which has better
+ * logging and better error reporting
  */
+@Deprecated
 public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;

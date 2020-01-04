@@ -9,8 +9,6 @@ import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubDeviceMaximumQueueDepthExceededException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,21 +23,21 @@ import java.util.concurrent.ExecutionException;
  */
 public class ServiceClientSample
 {
-
     private static final String connectionString = "[Connection string goes here]";
     private static final String deviceId = "[Device name goes here]";
-    
+
     /** Choose iotHubServiceClientProtocol */
     private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
-//  private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
+    //  private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS_WS;
 
     private static ServiceClient serviceClient = null;
-    private static FeedbackReceiver feedbackReceiver = null;
-    private static FileUploadNotificationReceiver fileUploadNotificationReceiver = null;
-    
-    private static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to send in a loop
-    private static final int RECEIVER_TIMEOUT = 10000; // Timeout in ms
- 
+    private static FeedbackMessageListenerClient feedbackMessageListenerClient = null;
+    private static FileUploadNotificationListenerClient fileUploadNotificationListenerClient = null;
+
+    private static final int MAX_MESSAGES_TO_SEND = 5; // maximum messages to send in a loop
+    private static final int SECONDS_TO_WAIT_FOR_FEEDBACK = 10; //wait 10 seconds for feedback messages
+    private static final int SECONDS_TO_WAIT_FOR_FILE_UPLOAD_NOTIFICATIONS = 10; //wait 10 seconds for file upload notifications
+
     /**
      * @param args Unused
      * @throws Exception if any exception occurs
@@ -47,132 +45,28 @@ public class ServiceClientSample
     public static void main(String[] args) throws Exception
     {
         System.out.println("********* Starting ServiceClient sample...");
+        serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
+        feedbackMessageListenerClient = new FeedbackMessageListenerClient(connectionString, protocol, new FeedbackBatchMessageCallbackImpl());
+        fileUploadNotificationListenerClient = new FileUploadNotificationListenerClient(connectionString, protocol, new FileUploadNotificationCallbackImpl());
 
-        openServiceClient();
-        openFeedbackReceiver();
-        openFileUploadNotificationReceiver();
+        sendMultipleMessagesAndReadFromTheFeedbackReceiver();
 
-        // Sending multiple commands
-        try
-        {
-            sendMultipleCommandsAndReadFromTheFeedbackReceiver();
-        }
-        catch(UnsupportedEncodingException e)
-        {
-           System.out.println("Exception:" + e.getMessage());
-        } catch (InterruptedException e) 
-        {
-            System.out.println("Exception:" + e.getMessage());
-        } catch (ExecutionException e) 
-        {
-            System.out.println("Exception:" + e.getMessage());
-        }
-
-        // Receive FileUploadNotification
-        CompletableFuture<FileUploadNotification> fileUploadNotificationCompletableFuture = fileUploadNotificationReceiver.receiveAsync(RECEIVER_TIMEOUT);
-        FileUploadNotification fileUploadNotification = fileUploadNotificationCompletableFuture.get();
-
-        if (fileUploadNotification != null)
-        {
-            System.out.println("File Upload notification received");
-            System.out.println("Device Id : " + fileUploadNotification.getDeviceId());
-            System.out.println("Blob Uri: " + fileUploadNotification.getBlobUri());
-            System.out.println("Blob Name: " + fileUploadNotification.getBlobName());
-            System.out.println("Last Updated : " + fileUploadNotification.getLastUpdatedTimeDate());
-            System.out.println("Blob Size (Bytes): " + fileUploadNotification.getBlobSizeInBytes());
-            System.out.println("Enqueued Time: " + fileUploadNotification.getEnqueuedTimeUtcDate());
-        }
-        else
-        {
-            System.out.println("No file upload notification received !");
-            closeFileUploadNotificationReceiver();
-            closeServiceClient();
-            System.out.println("********* Shutting down ServiceClient sample...");
-        }
-
-        closeFileUploadNotificationReceiver();
-        closeFeedbackReceiver();
-        closeServiceClient();
+        listenForFileUploadNotifications();
 
         System.out.println("********* Shutting down ServiceClient sample...");
     }
 
-    protected static void openServiceClient() throws Exception
+    protected static void sendMultipleMessagesAndReadFromTheFeedbackReceiver() throws InterruptedException, IOException
     {
-        System.out.println("Creating ServiceClient...");
-        serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
-
-        CompletableFuture<Void> future = serviceClient.openAsync();
-        future.get();
-        System.out.println("********* Successfully created an ServiceClient.");
-    }
-
-    protected static void closeServiceClient() throws ExecutionException, InterruptedException, IOException
-    {
-        serviceClient.close();
-
-        CompletableFuture<Void> future = serviceClient.closeAsync();
-        future.get();
-        serviceClient = null;
-        System.out.println("********* Successfully closed ServiceClient.");
-    }
-
-    protected static void openFeedbackReceiver() throws ExecutionException, InterruptedException
-    {
-        if (serviceClient != null)
-        {
-            feedbackReceiver = serviceClient.getFeedbackReceiver();
-            if (feedbackReceiver != null)
-            {
-                CompletableFuture<Void> future = feedbackReceiver.openAsync();
-                future.get();
-                System.out.println("********* Successfully opened FeedbackReceiver...");
-            }
-        }
-    }
-
-    protected static void closeFeedbackReceiver() throws ExecutionException, InterruptedException
-    {
-        CompletableFuture<Void> future = feedbackReceiver.closeAsync();
-        future.get();
-        feedbackReceiver = null;
-        System.out.println("********* Successfully closed FeedbackReceiver.");
-    }
-
-
-    protected static void openFileUploadNotificationReceiver() throws ExecutionException, InterruptedException
-    {
-        if (serviceClient != null)
-        {
-            fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
-            if (fileUploadNotificationReceiver != null)
-            {
-                CompletableFuture<Void> future = fileUploadNotificationReceiver.openAsync();
-                future.get();
-                System.out.println("********* Successfully opened fileUploadNotificationReceiver...");
-            }
-        }
-    }
-
-    protected static void closeFileUploadNotificationReceiver() throws ExecutionException, InterruptedException
-    {
-        CompletableFuture<Void> future = fileUploadNotificationReceiver.closeAsync();
-        future.get();
-        fileUploadNotificationReceiver = null;
-        System.out.println("********* Successfully closed fileUploadNotificationReceiver.");
-    }
-    
-     protected static void sendMultipleCommandsAndReadFromTheFeedbackReceiver() throws ExecutionException, InterruptedException, UnsupportedEncodingException
-     {
         List<CompletableFuture<Void>> futureList = new ArrayList<CompletableFuture<Void>>();
         Map<String, String> propertiesToSend = new HashMap<String, String>();
-        String commandMessage = "Cloud to Device Message: "; 
-        
-        System.out.println("sendMultipleCommandsAndReadFromTheFeedbackReceiver: Send count is : " + MAX_COMMANDS_TO_SEND);
+        String cloudToDeviceMessage = "Cloud to Device Message: ";
 
-        for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
+        System.out.println("sendMultipleMessagesAndReadFromTheFeedbackReceiver: Send count is : " + MAX_MESSAGES_TO_SEND);
+
+        for (int i = 0; i < MAX_MESSAGES_TO_SEND; i++)
         {
-            Message messageToSend = new Message(commandMessage + Integer.toString(i));
+            Message messageToSend = new Message(cloudToDeviceMessage + Integer.toString(i));
             messageToSend.setDeliveryAcknowledgementFinal(DeliveryAcknowledgement.Full);
 
             // Setting standard properties
@@ -211,25 +105,61 @@ public class ServiceClientSample
         }
         System.out.println("All sends completed !");
 
-        System.out.println("Waiting for the feedback...");
-        CompletableFuture<FeedbackBatch> future = feedbackReceiver.receiveAsync(); // Default timeout is 60 seconds. [DEFAULT_TIMEOUT_MS = 60000]
-        FeedbackBatch feedbackBatch = future.get(); 
+        System.out.println("Opening feedback message listener...");
+        feedbackMessageListenerClient.open();
+        System.out.println("Waiting for the feedback for " + SECONDS_TO_WAIT_FOR_FEEDBACK + " seconds...");
 
-        if (feedbackBatch != null) // check if any feedback was received
-        {
+        Thread.sleep(SECONDS_TO_WAIT_FOR_FEEDBACK * 1000);
+
+        System.out.println("Closing feedback message listener");
+        feedbackMessageListenerClient.close();
+    }
+
+    protected static void listenForFileUploadNotifications() throws IOException, InterruptedException
+    {
+        System.out.println("Opening file upload notification listener...");
+        fileUploadNotificationListenerClient.open();
+
+        System.out.println("Waiting for file upload notifications for " + SECONDS_TO_WAIT_FOR_FILE_UPLOAD_NOTIFICATIONS + " seconds...");
+        Thread.sleep(SECONDS_TO_WAIT_FOR_FILE_UPLOAD_NOTIFICATIONS * 1000);
+
+        System.out.println("Closing file upload notification listener...");
+        fileUploadNotificationListenerClient.close();
+    }
+
+    static class FileUploadNotificationCallbackImpl implements FileUploadNotificationCallback
+    {
+        @Override
+        public DeliveryOutcome onFileUploadNotificationReceived(FileUploadNotification fileUploadNotification) {
+            System.out.println("File Upload notification received");
+            System.out.println("Device Id : " + fileUploadNotification.getDeviceId());
+            System.out.println("Blob Uri: " + fileUploadNotification.getBlobUri());
+            System.out.println("Blob Name: " + fileUploadNotification.getBlobName());
+            System.out.println("Last Updated : " + fileUploadNotification.getLastUpdatedTimeDate());
+            System.out.println("Blob Size (Bytes): " + fileUploadNotification.getBlobSizeInBytes());
+            System.out.println("Enqueued Time: " + fileUploadNotification.getEnqueuedTimeUtcDate());
+
+            //Acknowledge the file upload notification as a successful delivery, so that it won't be sent again
+            return DeliveryOutcome.Complete;
+        }
+    }
+
+    static class FeedbackBatchMessageCallbackImpl implements FeedbackBatchMessageCallback
+    {
+        @Override
+        public DeliveryOutcome onFeedbackMessageReceived(FeedbackBatch feedbackBatch) {
             System.out.println(" Feedback received, feedback time: " + feedbackBatch.getEnqueuedTimeUtc());
             System.out.println(" Record size: " + feedbackBatch.getRecords().size());
-            
-            for (int i=0; i < feedbackBatch.getRecords().size(); i++)
+
+            for (int i = 0; i < feedbackBatch.getRecords().size(); i++)
             {
                 System.out.println(" Messsage id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
                 System.out.println(" Device id : " + feedbackBatch.getRecords().get(i).getDeviceId());
                 System.out.println(" Status description : " + feedbackBatch.getRecords().get(i).getDescription());
             }
-        }
-        else
-        {
-            System.out.println("No feedback received");
+
+            //Acknowledge the message as a successful delivery, so that it won't be sent again
+            return DeliveryOutcome.Complete;
         }
     }
 }

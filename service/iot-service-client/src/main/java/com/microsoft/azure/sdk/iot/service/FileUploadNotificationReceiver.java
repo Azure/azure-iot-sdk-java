@@ -12,6 +12,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * @deprecated in favor of {@link FileUploadNotificationListenerClient}. The file upload notification listener extends a callback
+ * that is executed each time a file upload notification is received. It also allows you to Complete/Abandon/Reject each
+ * file upload notification. This deprecated implementation automatically Completes each request
+ */
+@Deprecated
 public class FileUploadNotificationReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
@@ -55,6 +61,7 @@ public class FileUploadNotificationReceiver extends Receiver
      *
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
+    @Deprecated
     public void open() throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_004: [** The function shall call open() on the member AmqpFileUploadNotificationReceive object **]**
@@ -66,6 +73,7 @@ public class FileUploadNotificationReceiver extends Receiver
      *
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
+    @Deprecated
     public void close() throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_006: [** The function shall call close() on the member AmqpFileUploadNotificationReceive object **]**
@@ -81,6 +89,7 @@ public class FileUploadNotificationReceiver extends Receiver
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
+    @Deprecated
     public FileUploadNotification receive() throws IOException, InterruptedException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_007: [** The function shall call receive(long timeoutMs) function with the default timeout **]**
@@ -97,6 +106,7 @@ public class FileUploadNotificationReceiver extends Receiver
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
+    @Deprecated
     public FileUploadNotification receive(long timeoutMs) throws IOException, InterruptedException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_008: [** The function shall throw IOException if the member AmqpFileUploadNotificationReceive object has not been initialized **]**
@@ -114,6 +124,7 @@ public class FileUploadNotificationReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<Void> openAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_010: [** The function shall create an async wrapper around the open() function call **]**
@@ -137,6 +148,7 @@ public class FileUploadNotificationReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<Void> closeAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_011: [** The function shall create an async wrapper around the close() function call **]**
@@ -162,6 +174,7 @@ public class FileUploadNotificationReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<FileUploadNotification> receiveAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_012: [** The function shall create an async wrapper around the receive() function call using the default timeout **]**
@@ -176,6 +189,7 @@ public class FileUploadNotificationReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<FileUploadNotification> receiveAsync(long timeoutMs)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_013: [** The function shall create an async wrapper around the receive(long timeoutMs) function call **]**

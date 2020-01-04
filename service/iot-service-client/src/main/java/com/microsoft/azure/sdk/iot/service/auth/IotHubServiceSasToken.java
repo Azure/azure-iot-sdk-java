@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
  */
 public final class IotHubServiceSasToken
 {
-    long TOKEN_VALID_SECS = 365*24*60*60;
+    static final long TOKEN_VALID_SECS = 365*24*60*60;
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:
@@ -43,11 +43,23 @@ public final class IotHubServiceSasToken
 
     /**
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
-     * the specified amount of time. (1 year specified in TOKEN_VALID_SECS)
+     * the specified amount of time. (1 year specified in DEFAULT_TOKEN_VALID_SECS)
      *
      * @param iotHubConnectionString Connection string object containing the connection parameters
      */
     public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString)
+    {
+        this(iotHubConnectionString, TOKEN_VALID_SECS);
+    }
+
+    /**
+     * Constructor. Generates a SAS token that grants access to an IoT Hub for
+     * the specified amount of time. (1 year specified in DEFAULT_TOKEN_VALID_SECS)
+     *
+     * @param iotHubConnectionString Connection string object containing the connection parameters
+     * @param sasTokenExpiryTime the time, in seconds, that the sas token will be valid for
+     */
+    public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString, long sasTokenExpiryTime)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_001: [The constructor shall throw IllegalArgumentException if the input object is null]
         if (iotHubConnectionString == null)
@@ -62,7 +74,7 @@ public final class IotHubServiceSasToken
         this.resourceUri = iotHubConnectionString.getHostName();
         this.keyValue = iotHubConnectionString.getSharedAccessKey();
         this.keyName = iotHubConnectionString.getSharedAccessKeyName();
-        this.expiryTime = buildExpiresOn();
+        this.expiryTime = buildExpiresOn(sasTokenExpiryTime);
         this.token =  buildToken();
     }
 
@@ -101,7 +113,8 @@ public final class IotHubServiceSasToken
             String token = String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
 
             return token;
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_007: [The constructor shall throw Exception if building the token failed]
             throw new RuntimeException(e);
@@ -113,10 +126,10 @@ public final class IotHubServiceSasToken
      *
      * @return Seconds from now to expiry
      */
-    private long buildExpiresOn()
+    private long buildExpiresOn(long sasTokenExpiryTime)
     {
         long expiresOnDate = System.currentTimeMillis();
-        expiresOnDate += TOKEN_VALID_SECS * 1000;
+        expiresOnDate += sasTokenExpiryTime * 1000;
         return expiresOnDate / 1000;
     }
 

@@ -21,7 +21,12 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Instance of the QPID-Proton-J BaseHandler class
  * overriding the events what are needed to handle
  * high level open, close methods and feedback received event.
+ *
+ * @deprecated in favor of {@link com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationListenerHandler} which has better
+ * logging and better error reporting
+ *
  */
+@Deprecated
 public class AmqpFileUploadNotificationReceive extends BaseHandler implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;

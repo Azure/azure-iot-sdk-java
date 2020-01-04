@@ -15,7 +15,12 @@ import java.util.concurrent.Executors;
 /**
  * FeedbackReceiver is a specialized receiver whose ReceiveAsync
  * method returns a FeedbackBatch instead of a Message.
+ *
+ * @deprecated in favor of {@link FeedbackMessageListenerClient}. The feedback message listener extends a callback that
+ * notifies you when each feedback message is received, and allows you to Complete/Abandon/Reject the feedback message.
+ * This deprecated implementation automatically Completes each request
  */
+@Deprecated
 public class FeedbackReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
@@ -72,6 +77,7 @@ public class FeedbackReceiver extends Receiver
      * @param iotHubServiceClientProtocol protocol to be used
      * 
      */
+    @Deprecated
     public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
@@ -102,6 +108,7 @@ public class FeedbackReceiver extends Receiver
      *
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
+    @Deprecated
     public void open() throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_004: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
@@ -118,6 +125,7 @@ public class FeedbackReceiver extends Receiver
      *
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
+    @Deprecated
     public void close() throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_006: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
@@ -136,6 +144,7 @@ public class FeedbackReceiver extends Receiver
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
+    @Deprecated
     public FeedbackBatch receive() throws IOException, InterruptedException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_008: [The function shall call receive(long timeoutMs) function with the default timeout]
@@ -149,6 +158,7 @@ public class FeedbackReceiver extends Receiver
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
+    @Deprecated
     public FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_009: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
@@ -166,6 +176,7 @@ public class FeedbackReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<Void> openAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_011: [The function shall create an async wrapper around the open() function call]
@@ -189,6 +200,7 @@ public class FeedbackReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<Void> closeAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_012: [The function shall create an async wrapper around the close() function call]
@@ -212,6 +224,7 @@ public class FeedbackReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<FeedbackBatch> receiveAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_013: [The function shall create an async wrapper around the receive() function call]
@@ -224,6 +237,7 @@ public class FeedbackReceiver extends Receiver
      * @return The future object for the requested operation
      */
     @Override
+    @Deprecated
     public CompletableFuture<FeedbackBatch> receiveAsync(long timeoutMs)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_014: [The function shall create an async wrapper around the receive(long timeoutMs) function call]

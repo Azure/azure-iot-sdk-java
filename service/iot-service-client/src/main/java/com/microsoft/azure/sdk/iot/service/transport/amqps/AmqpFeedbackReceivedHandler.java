@@ -29,7 +29,11 @@ import java.util.Map;
  * Contains and sets connection parameters (path, port, endpoint)
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
+ *
+ * @deprecated in favor of {@link com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackListenerHandler} which has better
+ * logging and better error reporting
  */
+@Deprecated
 public class AmqpFeedbackReceivedHandler extends BaseHandler
 {
     public static final String RECEIVE_TAG = "receiver";

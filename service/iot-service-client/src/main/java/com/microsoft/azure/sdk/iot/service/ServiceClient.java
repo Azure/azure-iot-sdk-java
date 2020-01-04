@@ -21,12 +21,14 @@ public class ServiceClient
 {
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    private AmqpSend amqpMessageSender;
     private final String hostName;
     private final String userName;
-    private final String sasToken;
     protected IotHubConnectionString iotHubConnectionString;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
+
+    //By default, generated sas tokens live for one year, but this can be configured
+    private long DEFAULT_SAS_TOKEN_EXPIRY_TIME = 365*24*60*60;
+    private long sasTokenExpiryTime;
 
     /**
      * Create ServiceClient from the specified connection string
@@ -65,52 +67,54 @@ public class ServiceClient
             throw new IllegalArgumentException();
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_005: [The constructor shall create a SAS token object using the IotHubConnectionString]
-        IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
-
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_006: [The constructor shall store connection string, hostname, username and sasToken]
         this.iotHubConnectionString = iotHubConnectionString;
         this.hostName = iotHubConnectionString.getHostName();
         this.userName = iotHubConnectionString.getUserString();
-        this.sasToken = iotHubServiceSasToken.toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_007: [The constructor shall create a new instance of AmqpSend object]
-        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol);
+        this.sasTokenExpiryTime = DEFAULT_SAS_TOKEN_EXPIRY_TIME;
     }
 
     /**
-     * Open AMQP sender
-     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
+     * Set how long newly generated sas tokens will live for, in seconds. By default, tokens live for 1 year.
+     * A sas token is generated each time a connection is opened. This only applies for connections for sending cloud
+     * to device messages. The file upload notification receiver and feedback message receiver have their own sas token
+     * expiry time that can be set. See {@link FeedbackMessageListenerClient#setSasTokenExpiryTime(long)} and
+     * {@link FeedbackMessageListenerClient#setSasTokenExpiryTime(long)}
+     * @param sasTokenExpiryTime the number of seconds newly generated sas tokens will live for.
      */
+    public void setSasTokenExpiryTime(long sasTokenExpiryTime)
+    {
+        this.sasTokenExpiryTime = sasTokenExpiryTime;
+    }
+
+    /**
+     * Does nothing anymore
+     * @throws IOException This method never throws this exception anymore
+     * @deprecated This method no longer does anything. File upload notification listener and feedback message listener
+     * must be opened through their respective open() APIs, and the cloud to device message sender in this client opens
+     * itself before sending each message
+     */
+    @Deprecated
     public void open() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_008: [The function shall throw IOException if the member AMQP sender object has not been initialized]
-        if (this.amqpMessageSender == null)
-        {
-            throw new IOException("AMQP sender is not initialized");
-        }
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_009: [The function shall call open() on the member AMQP sender object]
-        this.amqpMessageSender.open();
     }
 
     /**
-     * Close AMQP sender
-     * @throws IOException This exception is thrown if the AmqpSender object is not initialized
+     * Does nothing anymore
+     * @throws IOException This method never throws this exception anymore
+     * @deprecated This method no longer does anything. File upload notification listener and feedback message listener
+     * must be closed through their respective close() APIs, and the cloud to device message sender in this client closes
+     * itself after sending each message
      */
+    @Deprecated
     public void close() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_010: [The function shall throw IOException if the member AMQP sender object has not been initialized]
-        if (this.amqpMessageSender == null)
-        {
-            throw new IOException("AMQP sender is not initialized");
-        }
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_011: [The function shall call close() on the member AMQP sender object]
-        this.amqpMessageSender.close();
     }
 
     /**
      * Send a one-way message to the specified device
+     * This method opens the connection, sends the message, and then closes the connection
      *
      * @param deviceId The device identifier for the target device
      * @param message The message for the device
@@ -124,7 +128,8 @@ public class ServiceClient
     }
 
     /**
-     * Send a one-way message to the specified module
+     * Send a one-way message to the specified module of the specified device
+     * This method opens the connection, sends the message, and then closes the connection
      *
      * @param deviceId The device identifier for the target device
      * @param moduleId The module identifier for the target device
@@ -134,20 +139,16 @@ public class ServiceClient
      */
     public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_001: [The function shall throw IOException if the member AMQP sender object has not been initialized]
-        if (this.amqpMessageSender == null)
-        {
-            throw new IOException("AMQP sender is not initialized");
-        }
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_002: [The function shall call send() on the member AMQP sender object with the given parameters]
-        this.amqpMessageSender.send(deviceId, moduleId, message);
+        AmqpSend amqpMessageSender = new AmqpSend(hostName, userName, iotHubConnectionString, this.iotHubServiceClientProtocol, this.sasTokenExpiryTime);
+        amqpMessageSender.send(deviceId, moduleId, message);
     }
 
     /**
-     * Provide asynchronous access to open()
-     *
+     * Provide asynchronous access to open(), which does nothing anymore
+     * @deprecated This method no longer does anything. See {@link #open()} documentation for more details
      * @return The future object for the requested operation
      */
+    @Deprecated
     public CompletableFuture<Void> openAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_014: [The function shall create an async wrapper around the open() function call]
@@ -157,7 +158,8 @@ public class ServiceClient
             {
                 open();
                 future.complete(null);
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 future.completeExceptionally(e);
             }
@@ -166,10 +168,11 @@ public class ServiceClient
     }
 
     /**
-     * Provide asynchronous access to close()
-     *
+     * Provide asynchronous access to close(), which does nothing anymore
+     * @deprecated This method no longer does anything. See {@link #close()} documentation for more details
      * @return The future object for the requested operation
      */
+    @Deprecated
     public CompletableFuture<Void> closeAsync()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_015: [The function shall create an async wrapper around the close() function call]
@@ -179,7 +182,8 @@ public class ServiceClient
             {
                 close();
                 future.complete(null);
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 future.completeExceptionally(e);
             }
@@ -203,7 +207,8 @@ public class ServiceClient
         {
             send(deviceId, message);
             future.complete(null);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             future.completeExceptionally(e);
         }
@@ -213,39 +218,40 @@ public class ServiceClient
 
     /**
      * Get FeedbackReceiver object.This API has been deprecated. Use new API without deviceId as an input parameter.
-     * @deprecated As of release 1.1.15, replaced by {@link #getFeedbackReceiver()}
+     * @deprecated Use {@link com.microsoft.azure.sdk.iot.service.FeedbackMessageListenerClient} instead
      * @param deviceId The device identifier for the target device
      * @return The instance of the FeedbackReceiver
      */
-    @Deprecated public FeedbackReceiver getFeedbackReceiver(String deviceId)
+    @Deprecated
+    public FeedbackReceiver getFeedbackReceiver(String deviceId)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it. This API is deprecated.]
-        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
-        return feedbackReceiver;
+        return new FeedbackReceiver(hostName, userName, makeSasToken(), iotHubServiceClientProtocol, deviceId);
     }
     
      /**
      * Get FeedbackReceiver object.  
-     *
-     *
+     * @deprecated Use {@link com.microsoft.azure.sdk.iot.service.FeedbackMessageListenerClient} instead
      * @return The instance of the FeedbackReceiver
      */
-    
-     public FeedbackReceiver getFeedbackReceiver()
+    @Deprecated
+    public FeedbackReceiver getFeedbackReceiver()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_018: [The function shall create a FeedbackReceiver object and returns with it. This API doesn't need deviceId as an input parameter]
-        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        return feedbackReceiver;
+        return new FeedbackReceiver(hostName, userName, makeSasToken(), iotHubServiceClientProtocol);
     }
 
     /**
      * Get FileUploadNotificationReceiver object.
-     *
+     * @deprecated Use {@link com.microsoft.azure.sdk.iot.service.FileUploadNotificationListenerClient} instead
      * @return The instance of the FileUploadNotificationReceiver
      */
+    @Deprecated
     public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
     {
-        return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        return new FileUploadNotificationReceiver(hostName, userName, makeSasToken(), iotHubServiceClientProtocol);
     }
-    
+
+    private String makeSasToken()
+    {
+        return new IotHubServiceSasToken(iotHubConnectionString, sasTokenExpiryTime).toString();
+    }
 }

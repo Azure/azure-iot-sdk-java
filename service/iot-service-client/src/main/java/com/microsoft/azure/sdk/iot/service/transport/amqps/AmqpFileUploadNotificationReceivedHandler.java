@@ -30,7 +30,11 @@ import java.util.Map;
  * Contains and sets connection parameters (path, port, endpoint)
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
+ *
+ * @deprecated in favor of {@link com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationListenerHandler} which has better
+ * logging and better error reporting
  */
+@Deprecated
 public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
 {
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";

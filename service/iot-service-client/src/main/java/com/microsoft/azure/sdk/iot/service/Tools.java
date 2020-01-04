@@ -268,4 +268,20 @@ public class Tools
         //neither is null, so this comparison won't throw
         return a.equals(b);
     }
+
+    public static void throwIfNull(Object o, String message)
+    {
+        if (o == null)
+        {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void throwIfNullOrEmpty(String o, String message)
+    {
+        if (o == null || o.isEmpty())
+        {
+            throw new IllegalArgumentException(message);
+        }
+    }
 }
