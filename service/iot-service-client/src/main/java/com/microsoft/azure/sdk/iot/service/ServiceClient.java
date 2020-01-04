@@ -24,9 +24,13 @@ public class ServiceClient
     private AmqpSend amqpMessageSender;
     private final String hostName;
     private final String userName;
-    private final String sasToken;
+    private String sasToken;
     protected IotHubConnectionString iotHubConnectionString;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
+
+    //By default, generated sas tokens live for one year, but this can be configured
+    private long DEFAULT_SAS_TOKEN_EXPIRY_TIME = 365*24*60*60;
+    private long sasTokenExpiryTime;
 
     /**
      * Create ServiceClient from the specified connection string
@@ -65,18 +69,21 @@ public class ServiceClient
             throw new IllegalArgumentException();
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_005: [The constructor shall create a SAS token object using the IotHubConnectionString]
-        IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
-
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_006: [The constructor shall store connection string, hostname, username and sasToken]
         this.iotHubConnectionString = iotHubConnectionString;
         this.hostName = iotHubConnectionString.getHostName();
         this.userName = iotHubConnectionString.getUserString();
-        this.sasToken = iotHubServiceSasToken.toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.sasTokenExpiryTime = DEFAULT_SAS_TOKEN_EXPIRY_TIME;
+    }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_007: [The constructor shall create a new instance of AmqpSend object]
-        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol);
+    /**
+     * Set how long the generated sas token will live for, in seconds. By default, tokens live for 1 year.
+     * @param sasTokenExpiryTime the number of seconds the generated sas token will live for
+     */
+    public void setSasTokenExpiryTime(long sasTokenExpiryTime)
+    {
+        this.sasTokenExpiryTime = sasTokenExpiryTime;
     }
 
     /**
@@ -85,11 +92,9 @@ public class ServiceClient
      */
     public void open() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_008: [The function shall throw IOException if the member AMQP sender object has not been initialized]
-        if (this.amqpMessageSender == null)
-        {
-            throw new IOException("AMQP sender is not initialized");
-        }
+        this.sasToken = new IotHubServiceSasToken(iotHubConnectionString, sasTokenExpiryTime).toString();
+        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol);
+
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_009: [The function shall call open() on the member AMQP sender object]
         this.amqpMessageSender.open();
     }
@@ -213,12 +218,14 @@ public class ServiceClient
 
     /**
      * Get FeedbackReceiver object.This API has been deprecated. Use new API without deviceId as an input parameter.
-     * @deprecated As of release 1.1.15, replaced by {@link #getFeedbackReceiver()}
+     * @deprecated Use {@link #getFeedbackMessageListener(FeedbackBatchMessageCallback)} instead
      * @param deviceId The device identifier for the target device
      * @return The instance of the FeedbackReceiver
      */
     @Deprecated public FeedbackReceiver getFeedbackReceiver(String deviceId)
     {
+        this.sasToken = new IotHubServiceSasToken(iotHubConnectionString, sasTokenExpiryTime).toString();
+
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it. This API is deprecated.]
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
         return feedbackReceiver;
@@ -226,13 +233,14 @@ public class ServiceClient
     
      /**
      * Get FeedbackReceiver object.  
-     *
-     *
+     * @deprecated Use {@link #getFeedbackMessageListener(FeedbackBatchMessageCallback)} instead
      * @return The instance of the FeedbackReceiver
      */
-    
-     public FeedbackReceiver getFeedbackReceiver()
+    @Deprecated
+    public FeedbackReceiver getFeedbackReceiver()
     {
+        this.sasToken = new IotHubServiceSasToken(iotHubConnectionString, sasTokenExpiryTime).toString();
+
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_018: [The function shall create a FeedbackReceiver object and returns with it. This API doesn't need deviceId as an input parameter]
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
         return feedbackReceiver;
@@ -240,12 +248,25 @@ public class ServiceClient
 
     /**
      * Get FileUploadNotificationReceiver object.
-     *
+     * @deprecated Use {@link #getFileUploadNotificationListener(FileUploadNotificationCallback)} instead
      * @return The instance of the FileUploadNotificationReceiver
      */
+    @Deprecated
     public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
     {
+        this.sasToken = new IotHubServiceSasToken(iotHubConnectionString, sasTokenExpiryTime).toString();
         return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
-    
+
+    public FileUploadNotificationListener getFileUploadNotificationListener(FileUploadNotificationCallback fileUploadNotificationCallback)
+    {
+        this.sasToken = new IotHubServiceSasToken(iotHubConnectionString, sasTokenExpiryTime).toString();
+        return new FileUploadNotificationListener(hostName, userName, sasToken, iotHubServiceClientProtocol, fileUploadNotificationCallback);
+    }
+
+    public FeedbackMessageListener getFeedbackMessageListener(FeedbackBatchMessageCallback feedbackBatchMessageCallback)
+    {
+        this.sasToken = new IotHubServiceSasToken(iotHubConnectionString, sasTokenExpiryTime).toString();
+        return new FeedbackMessageListener(hostName, userName, sasToken, iotHubServiceClientProtocol, feedbackBatchMessageCallback);
+    }
 }

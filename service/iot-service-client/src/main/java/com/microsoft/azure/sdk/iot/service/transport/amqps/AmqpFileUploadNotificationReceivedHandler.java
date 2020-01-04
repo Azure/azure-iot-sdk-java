@@ -31,6 +31,7 @@ import java.util.Map;
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
  */
+@Deprecated
 public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
 {
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";

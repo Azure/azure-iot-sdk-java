@@ -15,6 +15,8 @@ import org.apache.qpid.proton.engine.Event;
 import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class
@@ -22,14 +24,15 @@ import java.io.IOException;
  * high level open, close and send methods.
  * Initialize and use AmqpsSendHandler class for low level ampqs operations.
  */
-public class AmqpSend extends BaseHandler
+public class AmqpSend extends BaseHandler implements AmqpSendHandlerMessageSentCallback
 {
     protected final String hostName;
     protected final String userName;
     protected final String sasToken;
-    protected Reactor reactor = null;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private CountDownLatch sendLatch;
+    private static final int SEND_MESSAGE_TIMEOUT_SECONDS = 60;
 
     /**
      * Constructor to set up connection parameters
@@ -89,7 +92,7 @@ public class AmqpSend extends BaseHandler
     public void open()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_004: [The function shall create an AmqpsSendHandler object to handle reactor events]
-        amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol);
+        amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this);
     }
 
     /**
@@ -127,13 +130,33 @@ public class AmqpSend extends BaseHandler
                     // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_001: [The function shall create a binary message with the given content with moduleId]
                     amqpSendHandler.createProtonMessage(deviceId, moduleId, message);
                 }
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_002: [The function shall initialize the Proton reactor object]
-                this.reactor = Proton.reactor(this);
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_003: [The function shall start the Proton reactor object]
-                this.reactor.run();
-                this.reactor.free();
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_004: [** The function shall call sendComplete to identify the status of sent message and throws exception if thrown by sendComplete **]**
-                amqpSendHandler.sendComplete();
+
+                sendLatch = new CountDownLatch(1);
+
+                try
+                {
+                    this.amqpSendHandler.open();
+                }
+                catch (InterruptedException e)
+                {
+                    throw new IOException("Amqp connection was interrupted while opening", e);
+                }
+
+                try
+                {
+                    boolean sendTimedOut = !sendLatch.await(SEND_MESSAGE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+
+                    if (sendTimedOut)
+                    {
+                        throw new IOException("Sending the message timed out");
+                    }
+                }
+                catch (InterruptedException e)
+                {
+                    throw new IOException("Amqp connection was interrupted while sending the message", e);
+                }
+
+                this.amqpSendHandler.close();
             }
             else
             {
@@ -141,5 +164,11 @@ public class AmqpSend extends BaseHandler
                 throw new IOException("send handler is not initialized. call open before send");
             }
         }
+    }
+
+    @Override
+    public void onMessageSent(AmqpResponseVerification deliveryAcknowledgement)
+    {
+        sendLatch.countDown();
     }
 }

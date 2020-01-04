@@ -20,6 +20,7 @@ import java.io.IOException;
  * overriding the events what are needed to handle
  * high level open, close methods and feedback received event.
  */
+@Deprecated
 public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;

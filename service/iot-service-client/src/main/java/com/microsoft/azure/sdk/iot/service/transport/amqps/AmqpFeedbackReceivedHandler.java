@@ -30,6 +30,7 @@ import java.util.Map;
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
  */
+@Deprecated
 public class AmqpFeedbackReceivedHandler extends BaseHandler
 {
     public static final String RECEIVE_TAG = "receiver";
