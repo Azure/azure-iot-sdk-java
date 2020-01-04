@@ -149,9 +149,14 @@ public class ServiceClientTests extends IntegrationTest
         try
         {
             serviceClient.open();
-            FeedbackReceiver receiver = serviceClient.getFeedbackReceiver();
+            FeedbackMessageListener receiver = serviceClient.getFeedbackMessageListener(new FeedbackBatchMessageCallback() {
+                @Override
+                public DeliveryOutcome onFeedbackMessageReceived(FeedbackBatch feedbackBatch) {
+                    //No need to implement. Test should fail while opening the connection
+                    return null;
+                }
+            });
             receiver.open();
-            receiver.receive(1000);
         }
         catch (IOException e)
         {
@@ -175,9 +180,14 @@ public class ServiceClientTests extends IntegrationTest
         try
         {
             serviceClient.open();
-            FileUploadNotificationReceiver receiver = serviceClient.getFileUploadNotificationReceiver();
+            FileUploadNotificationListener receiver = serviceClient.getFileUploadNotificationListener(new FileUploadNotificationCallback() {
+                @Override
+                public DeliveryOutcome onFileUploadNotificationReceived(FileUploadNotification fileUploadNotification) {
+                    //No need to implement. Test should fail while opening the connection
+                    return null;
+                }
+            });
             receiver.open();
-            receiver.receive(1000);
         }
         catch (IOException e)
         {

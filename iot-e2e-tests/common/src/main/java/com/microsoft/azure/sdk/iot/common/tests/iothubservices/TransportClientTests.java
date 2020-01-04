@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -117,7 +118,7 @@ public class TransportClientTests extends IntegrationTest
 
     public TransportClientTestInstance testInstance;
 
-    public class TransportClientTestInstance
+    public class TransportClientTestInstance implements FileUploadNotificationCallback
     {
         public IotHubClientProtocol protocol;
         public AtomicBoolean succeed;
@@ -129,17 +130,18 @@ public class TransportClientTests extends IntegrationTest
         private DeviceState[] devicesUnderTest = new DeviceState[MAX_DEVICE_MULTIPLEX];
         private FileUploadState[] fileUploadState;
         private MessageState[] messageStates;
-        private FileUploadNotificationReceiver fileUploadNotificationReceiver;
+        private FileUploadNotificationListener fileUploadNotificationListener;
+        private Set<FileUploadNotification> fileUploadNotifications = new HashSet<>();
 
-        public TransportClientTestInstance(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
+        public TransportClientTestInstance(IotHubClientProtocol protocol)
         {
             this.protocol = protocol;
         }
 
         public void setup() throws InterruptedException, IotHubException, IOException, URISyntaxException
         {
-            fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
-            Assert.assertNotNull(fileUploadNotificationReceiver);
+            fileUploadNotificationListener = serviceClient.getFileUploadNotificationListener(this);
+            Assert.assertNotNull(fileUploadNotificationListener);
 
             String uuid = UUID.randomUUID().toString();
 
@@ -185,6 +187,21 @@ public class TransportClientTests extends IntegrationTest
             {
                 //ignore the exception, don't care if tear down wasn't successful for this test
             }
+        }
+
+        @Override
+        public DeliveryOutcome onFileUploadNotificationReceived(FileUploadNotification fileUploadNotification) {
+            for (Device d : this.devicesList)
+            {
+                if (fileUploadNotification.getDeviceId().equals(d.getDeviceId()))
+                {
+                    fileUploadNotifications.add(fileUploadNotification);
+                    return DeliveryOutcome.Complete;
+                }
+            }
+
+            // Unrelated notification, likely belongs to another test
+            return DeliveryOutcome.Abandon;
         }
     }
 
@@ -316,10 +333,29 @@ public class TransportClientTests extends IntegrationTest
                     }
                 });
 
+                testInstance.fileUploadNotificationListener.open();
+                FileUploadNotification expectedFileUploadNotification = null;
+                long startTime = System.currentTimeMillis();
+                while (expectedFileUploadNotification == null)
+                {
+                    if (System.currentTimeMillis() - startTime < MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB)
+                    {
+                        throw new AssertionError("Test timed out waiting for file upload notification to be received");
+                    }
+
+                    for (FileUploadNotification fileUploadNotification : this.testInstance.fileUploadNotifications)
+                    {
+                        if (fileUploadNotification.getDeviceId().equals(testInstance.clientArrayList.get(indexJ).getConfig().getDeviceId()))
+                        {
+                            expectedFileUploadNotification = fileUploadNotification;
+                        }
+                    }
+                }
+
+                testInstance.fileUploadNotificationListener.close();
+
                 // assert
-                FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
-                Assert.assertNotNull(buildExceptionMessage("file upload notification was null", testInstance.clientArrayList.get(indexJ)), fileUploadNotification);
-                verifyNotification(fileUploadNotification, testInstance.fileUploadState[i], testInstance.clientArrayList.get(indexJ));
+                verifyNotification(expectedFileUploadNotification, testInstance.fileUploadState[i], testInstance.clientArrayList.get(indexJ));
                 Assert.assertTrue(buildExceptionMessage("File upload callback was not triggered for file upload attempt " + i, testInstance.clientArrayList.get(indexJ)), testInstance.fileUploadState[i].isCallBackTriggered);
                 Assert.assertEquals(buildExceptionMessage("File upload status was not successful on attempt " + i + ", status was: " + testInstance.fileUploadState[i].fileUploadStatus, testInstance.clientArrayList.get(indexJ)), testInstance.fileUploadState[i].fileUploadStatus, SUCCESS);
                 Assert.assertEquals(buildExceptionMessage("Message status was not successful on attempt " + i + ", status was: " + testInstance.messageStates[i].messageStatus, testInstance.clientArrayList.get(indexJ)), testInstance.messageStates[i].messageStatus, SUCCESS);
@@ -979,11 +1015,7 @@ public class TransportClientTests extends IntegrationTest
 
     private void setUpFileUploadState() throws Exception
     {
-        // Start receiver for a test
-        testInstance.fileUploadNotificationReceiver.open();
-        testInstance.fileUploadNotificationReceiver.receive(MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION);
-        testInstance.fileUploadNotificationReceiver.close();
-        testInstance.fileUploadNotificationReceiver.open();
+        testInstance.fileUploadNotificationListener.open();
 
         testInstance.fileUploadState = new FileUploadState[MAX_FILES_TO_UPLOAD];
         testInstance.messageStates = new MessageState[MAX_FILES_TO_UPLOAD];
