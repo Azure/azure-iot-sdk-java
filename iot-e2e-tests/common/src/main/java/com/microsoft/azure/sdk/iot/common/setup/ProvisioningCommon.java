@@ -109,10 +109,6 @@ public class ProvisioningCommon extends ProvisioningIntegrationTest
                     new Object[][]
                             {
                                     {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType}
                             });
         }
         else if (attestationType == AttestationType.TPM)
@@ -121,8 +117,6 @@ public class ProvisioningCommon extends ProvisioningIntegrationTest
                     new Object[][]
                             {
                                     {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
 
                                     //MQTT/MQTT_WS does not support tpm attestation
                                     //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
