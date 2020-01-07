@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
+import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.*;
@@ -34,7 +35,7 @@ import static junit.framework.TestCase.fail;
  * Test class containing all tests to be run on JVM and android pertaining to Export and Import jobs. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class ExportImportTests
+public class ExportImportTests extends IotHubIntegrationTest
 {
     private static final long IMPORT_EXPORT_TEST_TIMEOUT = 8 * 60 * 1000;
     private static final long IMPORT_JOB_TIMEOUT = 6 * 60 * 1000;

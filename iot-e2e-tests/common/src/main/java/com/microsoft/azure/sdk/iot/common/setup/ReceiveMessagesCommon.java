@@ -13,10 +13,8 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 
 import javax.net.ssl.SSLContext;
@@ -35,7 +33,7 @@ import static org.junit.Assert.fail;
  * Utility functions, setup and teardown for all C2D telemetry integration tests. This class should not contain any tests,
  * but any child class should.
  */
-public class ReceiveMessagesCommon extends IntegrationTest
+public class ReceiveMessagesCommon extends IotHubIntegrationTest
 {
     protected static Map<String, String> messageProperties = new HashMap<>(3);
 

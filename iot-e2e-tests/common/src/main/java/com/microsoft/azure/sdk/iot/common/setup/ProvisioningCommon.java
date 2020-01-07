@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.setup;
 
 import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.ProvisioningIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.X509CertificateGenerator;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
@@ -47,9 +47,8 @@ import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggi
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 
-public class ProvisioningCommon extends IntegrationTest
+public class ProvisioningCommon extends ProvisioningIntegrationTest
 {
     public enum AttestationType
     {
@@ -179,11 +178,15 @@ public class ProvisioningCommon extends IntegrationTest
     @After
     public void tearDown()
     {
-        registryManager.close();
+        if (registryManager != null)
+        {
+            registryManager.close();
+        }
+
         provisioningServiceClient = null;
         registryManager = null;
 
-        if (testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
+        if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
             try
             {
