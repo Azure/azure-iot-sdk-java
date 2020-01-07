@@ -49,7 +49,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.Application</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.DeviceClientManagerSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -12,10 +12,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static samples.com.microsoft.azure.sdk.iot.TelemetryHelper.composeMessage;
-
 @Slf4j
-public class Application {
+public class DeviceClientManagerSample {
     private static final String deviceConnectionString = System.getenv("DEVICE_CONNECTION_STRING");
     // Can be configured to use any protocol from HTTPS, AMQPS, MQTT, AMQPS_WS, MQTT_WS. Note: HTTPS does not support status callback, device methods and device twins.
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -79,5 +77,22 @@ public class Application {
                 log.error("Exception thrown while sleeping: ", e);
             }
         }
+    }
+
+    private static Message composeMessage(int counter) {
+        double temperature = 0.0;
+        double humidity = 0.0;
+
+        temperature = 20 + Math.random() * 10;
+        humidity = 30 + Math.random() * 20;
+        String messageId = java.util.UUID.randomUUID().toString();
+
+        String msgStr = String.format(">> {\"count\": %d, \"messageId\": %s, \"temperature\": %f, \"humidity\": %f}", counter, messageId, temperature, humidity);
+        Message msg = new Message(msgStr);
+        msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
+        msg.setMessageId(messageId);
+        log.debug(msgStr);
+
+        return msg;
     }
 }
