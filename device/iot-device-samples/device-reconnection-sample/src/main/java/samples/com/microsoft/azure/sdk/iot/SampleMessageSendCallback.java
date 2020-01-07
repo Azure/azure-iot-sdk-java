@@ -5,7 +5,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.extern.slf4j.Slf4j;
 
-import static samples.com.microsoft.azure.sdk.iot.Application.failedMessageListOnClose;
+import static samples.com.microsoft.azure.sdk.iot.DeviceClientManagerSample.failedMessageListOnClose;
 
 @Slf4j
 public class SampleMessageSendCallback implements IotHubEventCallback {

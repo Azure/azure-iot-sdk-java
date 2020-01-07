@@ -111,10 +111,8 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
             }
 
             handleRecoverableDisconnection();
-        } else {
-            if (suppliedCallback != null) {
-                suppliedCallback.execute(status, statusChangeReason, throwable, this.suppliedCallbackContext);
-            }
+        } else if (suppliedCallback != null) {
+            suppliedCallback.execute(status, statusChangeReason, throwable, this.suppliedCallbackContext);
         }
     }
 
