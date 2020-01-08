@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to identity CRUD. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class RegistryManagerTests extends IntegrationTest
+public class RegistryManagerTests extends IotHubIntegrationTest
 {
     protected static String iotHubConnectionString = "";
     private static String deviceIdPrefix = "java-crud-e2e-test-";

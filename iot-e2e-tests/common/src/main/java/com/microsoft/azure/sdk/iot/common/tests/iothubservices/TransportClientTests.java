@@ -41,7 +41,7 @@ import static junit.framework.TestCase.fail;
  * Test class containing all tests to be run on JVM and android pertaining to multiplexing with the TransportClient class.
  * Class needs to be extended in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class TransportClientTests extends IntegrationTest
+public class TransportClientTests extends IotHubIntegrationTest
 {
     //how many devices to test multiplexing with
     private static final int MAX_DEVICE_MULTIPLEX = 3;

@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
+import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -36,7 +37,7 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to method and twin jobs. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class JobClientTests
+public class JobClientTests extends IotHubIntegrationTest
 {
     protected static String iotHubConnectionString = "";
     public static boolean isBasicTierHub;

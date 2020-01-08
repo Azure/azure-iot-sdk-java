@@ -31,7 +31,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static junit.framework.TestCase.fail;
 
-public class HubTierConnectionTests extends IntegrationTest
+public class HubTierConnectionTests extends IotHubIntegrationTest
 {
     protected static final long WAIT_FOR_DISCONNECT_TIMEOUT = 1 * 60 * 1000; // 1 minute
 

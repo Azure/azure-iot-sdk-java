@@ -5,13 +5,16 @@
 
 package com.microsoft.azure.sdk.iot.common.helpers;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.rules.Timeout;
 import org.junit.runner.Description;
 
-public class IntegrationTest
+import static org.junit.Assume.assumeTrue;
+
+public abstract class IntegrationTest
 {
     @Rule
     public TestRule watcher = new TestWatcher()
@@ -37,4 +40,27 @@ public class IntegrationTest
     public Timeout timeout = new Timeout(E2E_TEST_TIMEOUT_MS);
 
     public static boolean isBasicTierHub;
+
+    //By default, run all tests. Even if env vars aren't set
+    public static boolean runIotHubTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_IOTHUB_TESTS", "true"));
+    public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
+
+    public abstract boolean isProvisioningTest();
+    public abstract boolean isIotHubTest();
+
+    @Before
+    public void checkIfTestShouldBeRun()
+    {
+        if (isIotHubTest())
+        {
+            //Will skip the test if it is an iot hub test when told to skip iot hub tests
+            assumeTrue(runIotHubTests);
+        }
+
+        if (isProvisioningTest())
+        {
+            //Will skip the test if it is a provisioning test when told to skip provisioning tests
+            assumeTrue(runProvisioningTests);
+        }
+    }
 }

@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to twin with version. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class DeviceTwinWithVersionTests extends IntegrationTest
+public class DeviceTwinWithVersionTests extends IotHubIntegrationTest
 {
     private static final long BREATHE_TIME = 100; // 0.1 sec
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
@@ -222,18 +222,24 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     @After
     public void destroyDevice() throws Exception
     {
-        if (testInstance.testDevice != null)
+        if (testInstance.testDevice.deviceClient != null)
         {
             testInstance.testDevice.deviceClient.closeNow();
             testInstance.testDevice.deviceClient = null;
+        }
+
+        if (testInstance != null && testInstance.testDevice != null)
+        {
             testInstance.testDevice.expectedProperties = null;
             testInstance.testDevice.reportedPropertyVersion = null;
             testInstance.testDevice.receivedProperties = null;
             testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
-            registryManager.removeDevice(testInstance.testDevice.deviceId);
-        }
 
-        testInstance.testDevice = null;
+            if (registryManager != null && testInstance.testDevice.deviceId != null)
+            {
+                registryManager.removeDevice(testInstance.testDevice.deviceId);
+            }
+        }
     }
 
     @Test

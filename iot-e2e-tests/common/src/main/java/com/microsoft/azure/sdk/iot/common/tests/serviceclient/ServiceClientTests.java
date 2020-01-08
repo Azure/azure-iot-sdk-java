@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.tests.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.service.*;
@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to C2D communication using the service client. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class ServiceClientTests extends IntegrationTest
+public class ServiceClientTests extends IotHubIntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";

@@ -31,7 +31,7 @@ import java.util.UUID;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.assertTrue;
 
-public class TokenRenewalTests extends IntegrationTest
+public class TokenRenewalTests extends IotHubIntegrationTest
 {
     protected static String iotHubConnectionString;
     private static RegistryManager registryManager;
