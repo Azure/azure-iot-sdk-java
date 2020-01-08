@@ -54,16 +54,12 @@ public abstract class IntegrationTest
         //only run tests if flag was set to run provisioning tests
         if (isIotHubTest())
         {
-            System.out.println("runIotHubTests=" + runIotHubTests);
             assumeTrue(runIotHubTests);
-            System.out.println("Running iot hub test");
         }
 
         if (isProvisioningTest())
         {
-            System.out.println("runProvisioningTests=" + runProvisioningTests);
             assumeTrue(runProvisioningTests);
-            System.out.println("Running provisioning test");
         }
     }
 }
