@@ -247,5 +247,6 @@ public class ServiceClient
     {
         return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
+    //some service client change
     
 }
