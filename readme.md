@@ -122,6 +122,7 @@ Here is what you can expect Microsoft Support to be able to help with:
 * [Prepare your development environment to use the Azure IoT device SDK for Java][devbox-setup]
 * [Setup IoT Hub][setup-iothub]
 * [Java SDKs API reference][java-api-reference]
+* [Configure TLS Protocol Version and Ciphers](./configure_tls_protocol_version_and_ciphers.md)
 
 ## SDK folder structure
 
