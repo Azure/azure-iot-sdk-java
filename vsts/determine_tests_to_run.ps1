@@ -14,15 +14,7 @@ if (($env:TARGET_BRANCH).Contains("System.PullRequest.TargetBranch"))
     Write-Host "Assuming this build is not a pull request build, running all tests"
     $targetBranch = "master"
 
-    # TODO test this path
     $Env:runIotHubTests = "true"
-    $Env:runProvisioningTests = "true"
-
-    # TODO Temp hardcode, remove these
-    Write-Host "Setting runIotHubTests to false"
-    $Env:runIotHubTests = "false"
-
-    Write-Host "Setting runProvisioningTests to true"
     $Env:runProvisioningTests = "true"
 
     exit 0
