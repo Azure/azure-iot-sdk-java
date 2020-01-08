@@ -46,7 +46,7 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void sendMessages() throws Exception
     {
-        throw new AssertionError("Test should not have run");
+
     }
 
 }

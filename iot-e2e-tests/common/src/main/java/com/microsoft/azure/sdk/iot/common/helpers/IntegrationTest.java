@@ -41,9 +41,9 @@ public abstract class IntegrationTest
 
     public static boolean isBasicTierHub;
 
-    //By default, run all tests
-    public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_IOTHUB_TESTS"));
-    public static boolean runIotHubTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS"));
+    //By default, run all tests. Even if env vars aren't set
+    public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_IOTHUB_TESTS", "true"));
+    public static boolean runIotHubTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
 
     public abstract boolean isProvisioningTest();
     public abstract boolean isIotHubTest();

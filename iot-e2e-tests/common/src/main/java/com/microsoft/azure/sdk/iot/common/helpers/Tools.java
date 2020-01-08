@@ -37,6 +37,18 @@ public class Tools
         return environmentVariableValue;
     }
 
+    public static String retrieveEnvironmentVariableValue(String environmentVariableName, String defaultValue)
+    {
+        try
+        {
+            return retrieveEnvironmentVariableValue(environmentVariableName);
+        }
+        catch (IllegalArgumentException e)
+        {
+            return defaultValue;
+        }
+    }
+
     /**
      * Checks if the provided exception contains a certain type of exception in its cause chain
      * @param possibleExceptionCause the type of exception to be searched for
