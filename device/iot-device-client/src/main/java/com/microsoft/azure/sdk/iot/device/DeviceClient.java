@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public final class DeviceClient extends InternalClient implements Closeable
 {
+    //Some device client change
     /**
      * @deprecated as of release 1.2.27 this value is deprecated and will not be replaced.
      * The hostname attribute name in a connection string.
