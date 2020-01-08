@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.tests.provisioning;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
-import com.microsoft.azure.sdk.iot.common.setup.ProvisioningCommon;
+import com.microsoft.azure.sdk.iot.common.setup.provisioning.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -25,7 +25,6 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import org.junit.Test;

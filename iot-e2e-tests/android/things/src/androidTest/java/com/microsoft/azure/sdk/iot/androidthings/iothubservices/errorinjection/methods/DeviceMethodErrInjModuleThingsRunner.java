@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.androidthings.helper.TestGroupA;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection.DeviceMethodErrInjTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.errorinjection.DeviceMethodErrInjTests;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
