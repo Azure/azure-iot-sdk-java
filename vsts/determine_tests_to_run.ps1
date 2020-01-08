@@ -9,7 +9,7 @@ $Env:runIotHubTests = "false"
 $Env:runProvisioningTests = "false"
 
 $targetBranch = ($env:TARGET_BRANCH)
-if (($env:TARGET_BRANCH).Contains("System.PullRequest.TargetBranch"))
+if (($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
 {
     Write-Host "Assuming this build is not a pull request build, running all tests"
     $targetBranch = "master"
@@ -30,38 +30,38 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 	else
 	{
 	    # If code changes were made to provisioning sdk code or to provisioning e2e tests
-		if ($line.Contains("Provisioning", "CurrentCultureIgnoreCase"))
+		if ($line.toLower().Contains("provisioning"))
 		{
 			$Env:runProvisioningTests = "true"
 		}
 
         # If code changes were made to iot hub e2e tests
-		if ($line.Contains("iothub", "CurrentCultureIgnoreCase"))
+		if ($line.toLower().Contains("iothub"))
 		{
 			$Env:runIotHubTests = "true"
 		}
 
 		# If code changes were made to device client
-		if ($line.Contains("iot-device-client/src/main", "CurrentCultureIgnoreCase"))
+		if ($line.toLower().Contains("iot-device-client/src/main"))
    		{
    			$Env:runIotHubTests = "true"
    		}
 
         # If code changes were made to service client
-        if ($line.Contains("iot-service-client/src/main", "CurrentCultureIgnoreCase"))
+        if ($line.toLower().Contains("iot-service-client/src/main"))
         {
            	$Env:runIotHubTests = "true"
         }
 
         # Both provisioning and iot hub depend on deps package
-		if ($line.Contains("deps/src/main", "CurrentCultureIgnoreCase"))
+		if ($line.toLower().Contains("deps/src/main"))
 		{
 			$Env:runIotHubTests = "true"
 			$Env:runProvisioningTests = "true"
 		}
 
         # Helpers can be used in any test, so we must run every test
-		if ($line.Contains("iot-e2e-tests/common/helpers", "CurrentCultureIgnoreCase"))
+		if ($line.toLower().Contains("iot-e2e-tests/common/helpers"))
         {
            	$Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"

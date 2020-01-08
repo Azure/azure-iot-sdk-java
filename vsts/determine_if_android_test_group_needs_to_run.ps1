@@ -28,9 +28,9 @@ Write-Host "Searching for instances of " $testGroupImportPattern
 ForEach ($line in $($paths -split "`r`n"))
 {
 	# ignore dex, class, etc files.
-	if ($line.Contains("AndroidRunner.java", "CurrentCultureIgnoreCase"))
+	if ($line.toLower().Contains("androidrunner.java"))
 	{
-		if ($line.Contains("DummyAndroidRunner.java", "CurrentCultureIgnoreCase"))
+		if ($line.toLower().Contains("dummyandroidrunner.java"))
 		{
 			# Ignore this file, it has no bearing on which tests should be run
 		}
@@ -49,11 +49,11 @@ Write-Host "Searching for instances of " $testGroupAnnotationPattern
 ForEach ($line in $($paths -split "`r`n"))
 {
 	# ignore dex, class, etc files.
-	if ($line.Contains("AndroidRunner.java", "CurrentCultureIgnoreCase"))
+	if ($line.toLower().Contains("androidrunner.java"))
 	{
-		if ($testRunnerFilePaths.Contains($line, "CurrentCultureIgnoreCase"))
+		if ($testRunnerFilePaths.toLower().Contains($line))
 		{
-			if ($line.Contains("DummyAndroidRunner.java", "CurrentCultureIgnoreCase"))
+			if ($line.toLower().Contains("dummyandroidrunner.java"))
 			{
 				# Ignore this file, it has no bearing on which tests should be run
 			}
@@ -61,7 +61,7 @@ ForEach ($line in $($paths -split "`r`n"))
 			{
 				$confirmedTestRunnerFilePaths += $line
 
-				if ($line.Contains("iothub", "CurrentCultureIgnoreCase") -and ($Env:runIotHubTests -eq "true"))
+				if ($line.toLower().Contains("iothub") -and ($Env:runIotHubTests -eq "true"))
 				{
 				    Write-Host "This test group includes iot hub tests, and iot hub tests have to be run, so this test group will run"
                     Write-Host "##vso[task.setvariable variable=task.android.needToRun]yes"
@@ -70,7 +70,7 @@ ForEach ($line in $($paths -split "`r`n"))
                     exit 0
 				}
 
-				if ($line.Contains("provisioning", "CurrentCultureIgnoreCase") -and ($Env:runProvisioningTests -eq "true"))
+				if ($line.toLower().Contains("provisioning") -and ($Env:runProvisioningTests -eq "true"))
 				{
 				    Write-Host "This test group includes provisioning tests, and provisioning tests have to be run, so this test group will run"
 				    Write-Host "##vso[task.setvariable variable=task.android.needToRun]yes"
