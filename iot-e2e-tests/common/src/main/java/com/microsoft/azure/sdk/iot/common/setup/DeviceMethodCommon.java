@@ -271,12 +271,11 @@ public class DeviceMethodCommon extends IntegrationTest
         try
         {
             this.testInstance.deviceTestManager.setup(true, false);
-            IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000, this.testInstance.deviceTestManager.client);
         }
         catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
-            fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + e.getMessage(), this.testInstance.deviceTestManager.client));
+            fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), this.testInstance.deviceTestManager.client));
         }
         catch (UnsupportedOperationException e)
         {
