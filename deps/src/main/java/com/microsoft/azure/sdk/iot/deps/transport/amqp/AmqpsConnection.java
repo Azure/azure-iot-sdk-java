@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.concurrent.*;
 
-public class AmqpsConnection extends BaseHandler
+public class AmqpsConnection extends ErrorLoggingBaseHandler
 {
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
@@ -535,28 +535,14 @@ public class AmqpsConnection extends BaseHandler
     }
 
     /**
-     * Event handler for the link remote close event. This triggers reconnection attempts until successful.
-     * Both sender and receiver links closing trigger this event, so we only handle one of them,
-     * since the other is redundant.
-     * @param event The Proton Event object.
-     */
-    @Override
-    public void onLinkRemoteClose(Event event)
-    {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
-    }
-
-    /**
      * Event handler for the transport error event. This triggers reconnection attempts until successful.
      * @param event The Proton Event object.
      */
     @Override
     public void onTransportError(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
+        super.onTransportError(event);
         this.isOpen = false;
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     @Override
