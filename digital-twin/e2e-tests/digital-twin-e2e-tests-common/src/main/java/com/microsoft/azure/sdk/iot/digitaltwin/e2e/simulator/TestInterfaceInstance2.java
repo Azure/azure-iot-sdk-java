@@ -48,7 +48,7 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
     public static final String PROPERTY_NAME_READONLY = "readOnlyProperty";
     public static final String COMMAND_NOT_IMPLEMENTED_MESSAGE_PATTERN = "Command[%s] is not handled for interface[%s].";
     private static final String ASYNC_COMMAND_PROGRESS_MESSAGE_FORMAT = "Progress of %s [%s]: %d";
-    private static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [%s]: COMPLETED";
+    public static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [%s]: COMPLETED";
     private static final int MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS = 30;
 
     private static String interfaceInstanceName;
