@@ -271,6 +271,7 @@ public class DeviceMethodCommon extends IntegrationTest
         try
         {
             this.testInstance.deviceTestManager.setup(true, false);
+            IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000, this.testInstance.deviceTestManager.client);
         }
         catch (IOException | InterruptedException e)
         {
