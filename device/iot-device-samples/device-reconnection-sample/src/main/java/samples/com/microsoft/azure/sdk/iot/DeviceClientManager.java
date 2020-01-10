@@ -1,6 +1,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
@@ -24,8 +25,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     private static final Object lock = new Object();
     private static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 10;
     private ConnectionStatus connectionStatus;
-    private IotHubConnectionStatusChangeCallback suppliedConnectionStatusChangeCallback;
-    private Object suppliedCallbackContext;
+    private Pair<IotHubConnectionStatusChangeCallback, Object> suppliedConnectionStatusChangeCallback;
 
     private interface DeviceClientNonDelegatedFunction {
         void open();
@@ -44,8 +44,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     }
 
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
-        this.suppliedConnectionStatusChangeCallback = callback;
-        this.suppliedCallbackContext = callbackContext;
+        this.suppliedConnectionStatusChangeCallback = new Pair<>(callback, callbackContext);
     }
 
     public void open() {
@@ -103,16 +102,18 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     @Override
     public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
-        IotHubConnectionStatusChangeCallback suppliedCallback = this.suppliedConnectionStatusChangeCallback;
+        Pair<IotHubConnectionStatusChangeCallback, Object> suppliedCallbackPair = this.suppliedConnectionStatusChangeCallback;
+        IotHubConnectionStatusChangeCallback suppliedCallback = suppliedCallbackPair.getKey();
+        Object suppliedCallbackContext = suppliedCallbackPair.getValue();
 
         if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
             if (suppliedCallback != null) {
-                suppliedCallback.execute(DISCONNECTED_RETRYING, NO_NETWORK, throwable, this.suppliedCallbackContext);
+                suppliedCallback.execute(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackContext);
             }
 
             handleRecoverableDisconnection();
         } else if (suppliedCallback != null) {
-            suppliedCallback.execute(status, statusChangeReason, throwable, this.suppliedCallbackContext);
+            suppliedCallback.execute(status, statusChangeReason, throwable, suppliedCallbackContext);
         }
     }
 
