@@ -10,6 +10,7 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandler;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
@@ -42,7 +43,7 @@ import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
  * a message, and logic to re-establish the connection with the IoTHub in case it gets lost.
  */
 @Slf4j
-public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTransportConnection
+public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler implements IotHubTransportConnection
 {
     private static final int MAX_WAIT_TO_CLOSE_CONNECTION = 60 * 1000; // 60 second timeout
     private static final int MAX_WAIT_TO_OPEN_CBS_LINKS = 20 * 1000; // 20 second timeout
@@ -895,6 +896,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onLinkRemoteClose(Event event)
     {
+        super.onLinkRemoteClose(event);
         this.amqpsSessionManager.onLinkRemoteClose(event.getLink());
 
         log.trace("onLinkRemoteClose fired by proton, setting AMQP connection state as DISCONNECTED");
@@ -914,7 +916,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onTransportError(Event event)
     {
-        this.log.warn("OnTransportError fired by proton");
+        super.onTransportError(event);
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]

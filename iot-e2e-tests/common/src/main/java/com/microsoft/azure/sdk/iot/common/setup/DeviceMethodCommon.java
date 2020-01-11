@@ -276,7 +276,7 @@ public class DeviceMethodCommon extends IntegrationTest
         catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
-            fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + e.getMessage(), this.testInstance.deviceTestManager.client));
+            fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), this.testInstance.deviceTestManager.client));
         }
         catch (UnsupportedOperationException e)
         {
