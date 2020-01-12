@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.setup.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -161,7 +162,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
                     }
                     catch (IOException | InterruptedException e)
                     {
-                        fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + e.getMessage(), internalClient));
+                        fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), internalClient));
                     }
                 }
             });
