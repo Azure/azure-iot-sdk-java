@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.SasTokenProvider;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.credentials.ServiceClientCredentialsProvider;
@@ -21,6 +22,7 @@ import com.microsoft.rest.serializer.JacksonAdapter;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
@@ -29,9 +31,10 @@ import java.util.HashMap;
 import java.util.Objects;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.FUNC_MAP_TO_JSON_STRING;
-import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.nullToEmpty;
+import static com.microsoft.azure.sdk.iot.digitaltwin.service.util.Tools.isNullOrEmpty;
 import static lombok.AccessLevel.PACKAGE;
 
+@Slf4j
 public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServiceAsyncClient {
     @Setter(PACKAGE)
     private DigitalTwins digitalTwin;
@@ -117,11 +120,32 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
 
     @Override
     public Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument) {
-        return digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(digitalTwinId, interfaceInstanceName, commandName, nullToEmpty(argument), null, null)
+        Object payload = "";
+
+        // The request argument needs to be deserialized into JSON object because AutoRest always serializes the REST @Body parameter
+        if (! isNullOrEmpty(argument)) {
+            try {
+                payload = objectMapper.readValue(argument, Object.class);
+            }
+            catch (IOException e) {
+                log.error("Exception thrown while deserializing argument to JSON object: ", e);
+            }
+        }
+
+        return digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(digitalTwinId, interfaceInstanceName, commandName, payload, null, null)
 
                           .map(responseWithHeaders -> {
                               DigitalTwinInvokeInterfaceCommandHeaders invokeInterfaceCommandHeaders = responseWithHeaders.headers();
-                              return new DigitalTwinCommandResponse(invokeInterfaceCommandHeaders.xMsCommandStatuscode(), invokeInterfaceCommandHeaders.xMsRequestId(), Objects.toString(responseWithHeaders.body(), null));
+
+                              // The response payload has to be serialized back into String because AutoRest always deserializes the response
+                              String commandResponse = null;
+                              try {
+                                  commandResponse = responseWithHeaders.body() != "" ? objectMapper.writeValueAsString(responseWithHeaders.body()) : null;
+                              }
+                              catch (JsonProcessingException e) {
+                                  log.error("Exception thrown while serializing response payload to JSON string: ", e);
+                              }
+                              return new DigitalTwinCommandResponse(invokeInterfaceCommandHeaders.xMsCommandStatuscode(), invokeInterfaceCommandHeaders.xMsRequestId(), commandResponse);
                           })
                           .subscribeOn(Schedulers.io());
     }
