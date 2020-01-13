@@ -28,7 +28,7 @@ public final class Tools {
 
     }
 
-    public static String nullToEmpty(String value) {
-        return value == null ? EMPTY : value;
+    public static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }
