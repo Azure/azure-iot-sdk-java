@@ -260,7 +260,8 @@ public class DigitalTwinServiceAsyncClientImplTest {
 
         // assert
         assertThat(actualResult).isEqualTo(expectedResult);
-        verify(digitalTwin).invokeInterfaceCommandWithServiceResponseAsync(eq(DIGITAL_TWIN_ID), eq(interfaceInstanceName), eq(commandName), eq(arguments), eq(null), eq(null));
+        Object requestArgument = new ObjectMapper().readValue(arguments, Object.class);
+        verify(digitalTwin).invokeInterfaceCommandWithServiceResponseAsync(eq(DIGITAL_TWIN_ID), eq(interfaceInstanceName), eq(commandName), eq(requestArgument), eq(null), eq(null));
     }
 
     static String createPropertyPatch(String propertyName, String propertyValue) {
