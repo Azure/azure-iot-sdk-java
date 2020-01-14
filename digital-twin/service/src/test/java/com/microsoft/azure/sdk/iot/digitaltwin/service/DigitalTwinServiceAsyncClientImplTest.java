@@ -244,7 +244,7 @@ public class DigitalTwinServiceAsyncClientImplTest {
         // arrange
         String interfaceInstanceName = "someInterfaceInstance";
         String commandName = "someCommandName";
-        String arguments = "someArgs";
+        String arguments = "\"someArgs\"";
         DigitalTwinCommandResponse expectedResult = mock(DigitalTwinCommandResponse.class);
         ServiceResponseWithHeaders responseWithHeaders = mock(ServiceResponseWithHeaders.class);
         DigitalTwinInvokeInterfaceCommandHeaders commandHeaders = mock(DigitalTwinInvokeInterfaceCommandHeaders.class);
