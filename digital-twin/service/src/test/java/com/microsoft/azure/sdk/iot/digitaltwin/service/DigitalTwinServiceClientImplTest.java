@@ -199,7 +199,7 @@ public class DigitalTwinServiceClientImplTest {
         // arrange
         String interfaceInstanceName = "someInterfaceInstance";
         String commandName = "someCommandName";
-        String arguments = "someArgs";
+        String arguments = "\"someArgs\"";
         DigitalTwinCommandResponse expectedResult = mock(DigitalTwinCommandResponse.class);
         when(digitalTwinServiceAsyncClient.invokeCommand(anyString(), anyString(), anyString(), anyString())).thenReturn(Observable.just(expectedResult));
 
