@@ -26,6 +26,10 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 	{
         # These file types are ignored when determining if source code changes require running e2e tests
 	}
+	elseif ($line.toLower().Contains("sample"))
+	{
+	    # Sample changes don't necessitate running e2e tests
+    }
 	else
 	{
 	    # If code changes were made to provisioning sdk code or to provisioning e2e tests
