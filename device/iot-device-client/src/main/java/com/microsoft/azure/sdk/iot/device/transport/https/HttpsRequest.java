@@ -61,7 +61,7 @@ public class HttpsRequest
         headers = new HashMap<>();
 
         List<String> hostHeaderValues = new ArrayList<>();
-        if (url.getHost() != null && !url.getHost().isEmpty())
+        if (url != null && url.getHost() != null && !url.getHost().isEmpty())
         {
             String host = url.getHost();
             if (url.getPort() != -1)
@@ -93,6 +93,11 @@ public class HttpsRequest
      */
     public HttpsResponse send() throws TransportException
     {
+        if (this.url == null)
+        {
+            throw new IllegalArgumentException("url cannot be null");
+        }
+
         HttpsConnection connection = new HttpsConnection(url, method, this.proxySettings);
 
         for (String headerKey : headers.keySet())
