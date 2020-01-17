@@ -5,6 +5,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,13 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                         break;
                     }
                     catch (Exception ex) {
-                        log.error("[connect] - Exception thrown while opening DeviceClient instance: ", ex);
+                        if (ex.getCause() instanceof TransportException && ((TransportException) ex.getCause()).isRetryable()) {
+                            log.warn("[connect] - Transport exception thrown while opening DeviceClient instance, retrying: ", ex);
+                            continue;
+                        }
+                        log.error("[connect] - Non-retryable exception thrown while opening DeviceClient instance: ", ex);
+                        connectionStatus = ConnectionStatus.DISCONNECTED;
+                        break;
                     }
                 }
             }
