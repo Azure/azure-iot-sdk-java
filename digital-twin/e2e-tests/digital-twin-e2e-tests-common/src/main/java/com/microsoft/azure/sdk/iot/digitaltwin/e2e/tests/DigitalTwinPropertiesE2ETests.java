@@ -76,6 +76,8 @@ public class DigitalTwinPropertiesE2ETests {
     private TestDigitalTwinDevice testDevice;
     private TestComponent2 testComponent;
 
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
     @Rule
     public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
 
@@ -118,7 +120,7 @@ public class DigitalTwinPropertiesE2ETests {
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
         String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch);
 
-        String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
+        JsonNode expectedValue = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, propertyValue));
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device received the property update from service").isTrue();
 
         // Assert that property is updated in the twin
@@ -142,8 +144,8 @@ public class DigitalTwinPropertiesE2ETests {
         String propertyPatch = createPropertyPatch(propertyValues);
         String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch);
 
-        String expectedValue1 = String.format(PROPERTY_VALUE_PATTERN, propertyValue1);
-        String expectedValue2 = String.format(PROPERTY_VALUE_PATTERN, propertyValue2);
+        JsonNode expectedValue1 = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, propertyValue1));
+        JsonNode expectedValue2 = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, propertyValue2));
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue1)).as("Verify that device received the property update from service").isTrue();
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_2_WRITABLE, expectedValue2)).as("Verify that device received the property update from service").isTrue();
 
@@ -183,7 +185,7 @@ public class DigitalTwinPropertiesE2ETests {
         boolean lastUpdatedPropertyReceived = false;
         String actualUpdatedProperty = null;
         for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
-            String expectedValue = String.format(PROPERTY_VALUE_PATTERN, payloadValueList.get(i));
+            JsonNode expectedValue = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, payloadValueList.get(i)));
 
             if (testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)) {
                 lastUpdatedPropertyReceived = true;
@@ -213,7 +215,7 @@ public class DigitalTwinPropertiesE2ETests {
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
         digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), UNKNOWN_COMPONENT_NAME, propertyPatch);
 
-        String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
+        JsonNode expectedValue = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, propertyValue));
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
     }
 
@@ -224,7 +226,7 @@ public class DigitalTwinPropertiesE2ETests {
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
         String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch);
 
-        String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
+        JsonNode expectedValue = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, propertyValue));
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
 
         // Assert that property is updated in the twin
@@ -244,7 +246,7 @@ public class DigitalTwinPropertiesE2ETests {
         String propertyPatch = createPropertyPatch(singletonMap(UNKNOWN_PROPERTY_NAME, propertyValue));
         digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch);
 
-        String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
+        JsonNode expectedValue = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, propertyValue));
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(UNKNOWN_PROPERTY_NAME, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
     }
 
@@ -257,7 +259,7 @@ public class DigitalTwinPropertiesE2ETests {
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_READONLY, propertyValue));
         String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch);
 
-        String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
+        JsonNode expectedValue = objectMapper.readTree(String.format(PROPERTY_VALUE_PATTERN, propertyValue));
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_READONLY, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
 
         // Assert that property is not updated in the twin
