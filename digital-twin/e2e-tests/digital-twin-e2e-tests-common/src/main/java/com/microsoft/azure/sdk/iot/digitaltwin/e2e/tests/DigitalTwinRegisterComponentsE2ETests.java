@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
@@ -34,7 +35,6 @@ import java.util.concurrent.Semaphore;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.COMPONENT_KEY;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.DCM_ID;
@@ -62,7 +62,6 @@ public class DigitalTwinRegisterComponentsE2ETests {
     private static final String INVALID_COMPONENT_NAME = "invalidComponentName";
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinRegisterComponentsE2ETests_";
-    private static final String DIGITAL_TWIN_INTERFACE_PATTERN = "\"%s\":\"%s\"";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private String digitalTwinId;
@@ -104,8 +103,12 @@ public class DigitalTwinRegisterComponentsE2ETests {
 
         // assert that the registered component is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
+        JsonNode digitalTwinObject = convertJsonStringToJsonNode(digitalTwin);
+
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_2, TestComponent2.TEST_INTERFACE_ID));
+        JsonNode componentList = getComponentListFromDigitalTwin(digitalTwinObject);
+        assertThat(componentList.has(TEST_COMPONENT_NAME_2)).isTrue();
+        assertThat(componentList.get(TEST_COMPONENT_NAME_2).asText()).isEqualTo(TestComponent2.TEST_INTERFACE_ID);
     }
 
     @Test
@@ -121,9 +124,14 @@ public class DigitalTwinRegisterComponentsE2ETests {
 
         // assert that the registered component is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
+        JsonNode digitalTwinObject = convertJsonStringToJsonNode(digitalTwin);
+
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_1, TestComponent1.TEST_INTERFACE_ID));
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_2, TestComponent2.TEST_INTERFACE_ID));
+        JsonNode componentList = getComponentListFromDigitalTwin(digitalTwinObject);
+        assertThat(componentList.has(TEST_COMPONENT_NAME_1)).isTrue();
+        assertThat(componentList.get(TEST_COMPONENT_NAME_1).asText()).isEqualTo(TestComponent1.TEST_INTERFACE_ID);
+        assertThat(componentList.has(TEST_COMPONENT_NAME_2)).isTrue();
+        assertThat(componentList.get(TEST_COMPONENT_NAME_2).asText()).isEqualTo(TestComponent2.TEST_INTERFACE_ID);
     }
 
     @Test
@@ -140,8 +148,12 @@ public class DigitalTwinRegisterComponentsE2ETests {
 
         // assert that the registered component is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
+        JsonNode digitalTwinObject = convertJsonStringToJsonNode(digitalTwin);
+
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_2, TestComponent2.TEST_INTERFACE_ID));
+        JsonNode componentList = getComponentListFromDigitalTwin(digitalTwinObject);
+        assertThat(componentList.has(TEST_COMPONENT_NAME_2)).isTrue();
+        assertThat(componentList.get(TEST_COMPONENT_NAME_2).asText()).isEqualTo(TestComponent2.TEST_INTERFACE_ID);
     }
 
     @Test
@@ -210,6 +222,10 @@ public class DigitalTwinRegisterComponentsE2ETests {
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
+    }
+
+    private static JsonNode getComponentListFromDigitalTwin(JsonNode digitalTwinObject) {
+        return digitalTwinObject.get(COMPONENT_KEY).get(DEFAULT_IMPLEMENTED_MODEL_INFORMATION_COMPONENT_NAME).get(PROPERTY_KEY).get(MODEL_DISCOVERY_MODEL_NAME).get(REPORTED_KEY).get("value").get(COMPONENT_KEY);
     }
 
     @After

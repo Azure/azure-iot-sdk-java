@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
@@ -63,20 +64,24 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     @Test
-    public void testGetModelInformationValidModelUrn() {
+    public void testGetModelInformationValidModelUrn() throws IOException {
         String modelString = digitalTwinServiceClient.getModel(DCM_ID);
+        JsonNode modelObject = convertJsonStringToJsonNode(modelString);
 
         assertThat(modelString).as("Verify model").isNotNull();
-        assertThat(modelString).contains(String.format("\"@id\":\"%s\"", DCM_ID));
+        assertThat(modelObject.get("@id").toString()).isEqualTo(DCM_ID);
+        // assertThat(modelString).contains(String.format("\"@id\":\"%s\"", DCM_ID));
     }
 
 
     @Test
-    public void testGetModelInformationValidInterfaceUrn() {
+    public void testGetModelInformationValidInterfaceUrn() throws IOException {
         String modelString = digitalTwinServiceClient.getModel(TEST_INTERFACE_ID);
+        JsonNode modelObject = convertJsonStringToJsonNode(modelString);
 
         assertThat(modelString).as("Verify Interface").isNotNull();
-        assertThat(modelString).contains(String.format("\"@id\":\"%s\"", TEST_INTERFACE_ID));
+        assertThat(modelObject.get("@id").toString()).isEqualTo(TEST_INTERFACE_ID);
+        // assertThat(modelString).contains(String.format("\"@id\":\"%s\"", TEST_INTERFACE_ID));
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
@@ -92,13 +97,14 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     @Test
-    public void testGetAllDigitalTwinInterfacesValidDigitalTwinId() {
+    public void testGetAllDigitalTwinInterfacesValidDigitalTwinId() throws IOException {
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(testDevice.getDeviceId());
+        JsonNode digitalTwinObject = convertJsonStringToJsonNode(digitalTwin);
 
         // Assert that returned digital twin contains the default interface implemented by all devices
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        String expectedInterface = "{\"interfaces\":{\"urn_azureiot_ModelDiscovery_DigitalTwin\":\"urn:azureiot:ModelDiscovery:DigitalTwin:1\"}}";
-        assertThat(digitalTwin).contains(expectedInterface);
+        assertThat(digitalTwinObject.get(COMPONENT_KEY).has(DEFAULT_IMPLEMENTED_MODEL_INFORMATION_COMPONENT_NAME)).isTrue();
+        assertThat(digitalTwinObject.get(VERSION_KEY).intValue()).isEqualTo(1);
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
