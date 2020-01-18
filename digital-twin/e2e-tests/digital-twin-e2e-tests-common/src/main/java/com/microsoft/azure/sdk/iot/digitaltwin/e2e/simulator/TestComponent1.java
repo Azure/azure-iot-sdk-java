@@ -53,7 +53,7 @@ public class TestComponent1 extends AbstractDigitalTwinComponent {
     }
 
     @Override
-    protected  DigitalTwinCommandResponse onCommandReceived(DigitalTwinCommandRequest digitalTwinCommandRequest) {
+    protected DigitalTwinCommandResponse onCommandReceived(DigitalTwinCommandRequest digitalTwinCommandRequest) {
         String commandName = digitalTwinCommandRequest.getCommandName();
         String requestId = digitalTwinCommandRequest.getRequestId();
         String payload = digitalTwinCommandRequest.getPayload();
@@ -62,7 +62,7 @@ public class TestComponent1 extends AbstractDigitalTwinComponent {
                 commandName,
                 requestId,
                 payload);
-        try{
+        try {
             if (SYNC_COMMAND_WITH_PAYLOAD.equals(commandName) || SYNC_COMMAND_WITHOUT_PAYLOAD.equals(commandName)) {
                 return DigitalTwinCommandResponse.builder()
                                                  .status(STATUS_CODE_COMPLETED)

@@ -16,23 +16,40 @@ import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.*;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.*;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.*;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_THREADS_MULTITHREADED_TEST;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.createPropertyPatch;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.generateRandomStringList;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveComponentNameFromInterfaceId;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.PROPERTY_NAME_2_WRITABLE;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.PROPERTY_NAME_READONLY;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.PROPERTY_NAME_WRITABLE;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.TEST_INTERFACE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -68,7 +85,7 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Parameterized.Parameters(name = "{index}: Update Properties Test: protocol={0}")
     public static Collection<Object[]> data() {
-        return asList(new Object[][]{
+        return asList(new Object[][] {
                 {MQTT},
                 {MQTT_WS},
                 });
@@ -117,7 +134,10 @@ public class DigitalTwinPropertiesE2ETests {
         assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         String propertyValue1 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         String propertyValue2 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
-        Map<String, String> propertyValues = new HashMap<String, String>() {{ put(PROPERTY_NAME_WRITABLE, propertyValue1); put(PROPERTY_NAME_2_WRITABLE, propertyValue2); }};
+        Map<String, String> propertyValues = new HashMap<String, String>() {{
+            put(PROPERTY_NAME_WRITABLE, propertyValue1);
+            put(PROPERTY_NAME_2_WRITABLE, propertyValue2);
+        }};
 
         String propertyPatch = createPropertyPatch(propertyValues);
         String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch);

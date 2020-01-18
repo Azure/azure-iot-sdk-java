@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
-
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.MAX_THREADS_MULTITHREADED_TEST;
@@ -95,7 +94,7 @@ public class DigitalTwinCommandE2ETests {
 
     @Parameterized.Parameters(name = "{index}: Invoke Commands Test: protocol={0}")
     public static Collection<Object[]> data() {
-        return asList(new Object[][]{
+        return asList(new Object[][] {
                 {MQTT},
                 {MQTT_WS},
                 });

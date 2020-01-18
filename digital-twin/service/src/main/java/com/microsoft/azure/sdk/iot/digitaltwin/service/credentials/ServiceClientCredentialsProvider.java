@@ -9,9 +9,6 @@ import lombok.NonNull;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
-
-import java.io.IOException;
 
 @AllArgsConstructor
 public class ServiceClientCredentialsProvider implements ServiceClientCredentials {
