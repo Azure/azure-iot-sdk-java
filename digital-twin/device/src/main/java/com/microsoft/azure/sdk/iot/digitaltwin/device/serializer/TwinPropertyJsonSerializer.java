@@ -16,7 +16,7 @@ import java.util.List;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.isNotEmpty;
 
 public final class TwinPropertyJsonSerializer {
-    public static final String DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX = "$iotin:";
+    public static final String DIGITAL_TWIN_COMPONENT_NAME_PREFIX = "$iotin:";
     private static final JsonParser JSON_PARSER = new JsonParser();
     static final String ATTRIBUTE_VALUE = "value";
     static final String ATTRIBUTE_STATUS_CODE = "sc";
@@ -27,7 +27,7 @@ public final class TwinPropertyJsonSerializer {
     }
 
     public static Property serializeReportProperty(
-            @NonNull final String digitalTwinInterfaceInstanceName,
+            @NonNull final String digitalTwinComponentName,
             @NonNull final List<DigitalTwinReportProperty> reportProperties
     ) {
         JsonObject propertiesNode = new JsonObject();
@@ -49,7 +49,7 @@ public final class TwinPropertyJsonSerializer {
             }
             propertiesNode.add(reportProperty.getPropertyName(), propertyNode);
         }
-        return new Property(DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX + digitalTwinInterfaceInstanceName, propertiesNode);
+        return new Property(DIGITAL_TWIN_COMPONENT_NAME_PREFIX + digitalTwinComponentName, propertiesNode);
     }
 
 }

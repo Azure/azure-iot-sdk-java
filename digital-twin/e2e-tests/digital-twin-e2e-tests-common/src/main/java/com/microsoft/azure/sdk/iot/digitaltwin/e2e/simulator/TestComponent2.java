@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
-import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinComponent;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
@@ -22,7 +22,7 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSeri
 import static java.util.Collections.singletonList;
 
 @Slf4j
-public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
+public class TestComponent2 extends AbstractDigitalTwinComponent {
     public static final String TEST_INTERFACE_ID = "urn:contoso:azureiot:sdk:testinterface2:2";
     public static final String TELEMETRY_NAME_INTEGER = "telemetryWithIntegerValue";
     public static final String TELEMETRY_NAME_LONG = "telemetryWithLongValue";
@@ -51,18 +51,11 @@ public class TestInterfaceInstance2 extends AbstractDigitalTwinInterfaceClient {
     public static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [%s]: COMPLETED";
     private static final int MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS = 30;
 
-    private static String interfaceInstanceName;
     private Map<String, String> propertyUpdatesReceived;
 
-    public TestInterfaceInstance2(@NonNull String digitalTwinInterfaceInstanceName) {
-        super(digitalTwinInterfaceInstanceName, TEST_INTERFACE_ID);
-        interfaceInstanceName = digitalTwinInterfaceInstanceName;
+    public TestComponent2(@NonNull String digitalTwinComponentName) {
+        super(digitalTwinComponentName, TEST_INTERFACE_ID);
         propertyUpdatesReceived = new ConcurrentHashMap<>();
-    }
-
-    @Override
-    public void onRegistered() {
-        log.debug("Interface Instance registered with name: {}", interfaceInstanceName);
     }
 
     public Single<DigitalTwinClientResult> sendTelemetry(@NonNull String telemetryName, @NonNull Object telemetryValue) throws IOException {

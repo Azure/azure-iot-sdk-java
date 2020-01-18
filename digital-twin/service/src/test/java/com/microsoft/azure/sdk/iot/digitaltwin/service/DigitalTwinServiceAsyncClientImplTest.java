@@ -194,7 +194,7 @@ public class DigitalTwinServiceAsyncClientImplTest {
     public void updatePropertiesCallsDigitalTwinUpdateInterfaces() throws IOException {
         // arrange
         DigitalTwinInterfaces digitalTwinInterfaces = new DigitalTwinInterfaces();
-        String interfaceInstanceName = "someInterfaceInstanceName";
+        String componentName = "someComponentName";
         String propertyName = "somePropertyName";
         String propertyValue = "somePropertyValue";
         String propertyPatch = createPropertyPatch(propertyName, propertyValue);
@@ -204,14 +204,14 @@ public class DigitalTwinServiceAsyncClientImplTest {
         ArgumentCaptor<DigitalTwinInterfacesPatch> argumentCaptor = ArgumentCaptor.forClass(DigitalTwinInterfacesPatch.class);
 
         // act
-        String actualDigitalTwin = testee.updateDigitalTwinProperties(DIGITAL_TWIN_ID, interfaceInstanceName, propertyPatch).toBlocking().single();
+        String actualDigitalTwin = testee.updateDigitalTwinProperties(DIGITAL_TWIN_ID, componentName, propertyPatch).toBlocking().single();
 
         // assert
         assertThat(actualDigitalTwin).isEqualTo(expectedDigitalTwin);
         verify(digitalTwin).updateInterfacesAsync(anyString(), argumentCaptor.capture());
         DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = argumentCaptor.getValue();
-        assertThat(digitalTwinInterfacesPatch.interfaces()).containsOnlyKeys(interfaceInstanceName);
-        Map<String, DigitalTwinInterfacesPatchInterfacesValuePropertiesValue> properties = digitalTwinInterfacesPatch.interfaces().get(interfaceInstanceName).properties();
+        assertThat(digitalTwinInterfacesPatch.interfaces()).containsOnlyKeys(componentName);
+        Map<String, DigitalTwinInterfacesPatchInterfacesValuePropertiesValue> properties = digitalTwinInterfacesPatch.interfaces().get(componentName).properties();
         assertThat(properties).containsOnlyKeys(propertyName);
         assertThat(properties.get(propertyName).desired().value()).isEqualTo(propertyValue);
     }
@@ -219,7 +219,7 @@ public class DigitalTwinServiceAsyncClientImplTest {
     @Test
     public void invokeCommandWithoutArgsCallsDigitalTwinInvokeInterfaceCommand() throws Exception {
         // arrange
-        String interfaceInstanceName = "someInterfaceInstance";
+        String componentName = "someComponentName";
         String commandName = "someCommandName";
         DigitalTwinCommandResponse expectedResult = mock(DigitalTwinCommandResponse.class);
         ServiceResponseWithHeaders responseWithHeaders = mock(ServiceResponseWithHeaders.class);
@@ -232,17 +232,17 @@ public class DigitalTwinServiceAsyncClientImplTest {
         when(digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(anyString(), anyString(), anyString(), anyString(), eq(null), eq(null))).thenReturn(Observable.just(responseWithHeaders));
 
         // act
-        DigitalTwinCommandResponse actualResult = testee.invokeCommand(DIGITAL_TWIN_ID, interfaceInstanceName, commandName).toBlocking().single();
+        DigitalTwinCommandResponse actualResult = testee.invokeCommand(DIGITAL_TWIN_ID, componentName, commandName).toBlocking().single();
 
         // assert
         assertThat(actualResult).isEqualTo(expectedResult);
-        verify(digitalTwin).invokeInterfaceCommandWithServiceResponseAsync(eq(DIGITAL_TWIN_ID), eq(interfaceInstanceName), eq(commandName), eq(EMPTY_STRING), eq(null), eq(null));
+        verify(digitalTwin).invokeInterfaceCommandWithServiceResponseAsync(eq(DIGITAL_TWIN_ID), eq(componentName), eq(commandName), eq(EMPTY_STRING), eq(null), eq(null));
     }
 
     @Test
     public void invokeCommandWithArgsCallsDigitalTwinInvokeInterfaceCommand() throws Exception {
         // arrange
-        String interfaceInstanceName = "someInterfaceInstance";
+        String componentName = "someComponentName";
         String commandName = "someCommandName";
         String arguments = "\"someArgs\"";
         DigitalTwinCommandResponse expectedResult = mock(DigitalTwinCommandResponse.class);
@@ -256,12 +256,12 @@ public class DigitalTwinServiceAsyncClientImplTest {
         when(digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(anyString(), anyString(), anyString(), anyString(), eq(null), eq(null))).thenReturn(Observable.just(responseWithHeaders));
 
         // act
-        DigitalTwinCommandResponse actualResult = testee.invokeCommand(DIGITAL_TWIN_ID, interfaceInstanceName, commandName, arguments).toBlocking().single();
+        DigitalTwinCommandResponse actualResult = testee.invokeCommand(DIGITAL_TWIN_ID, componentName, commandName, arguments).toBlocking().single();
 
         // assert
         assertThat(actualResult).isEqualTo(expectedResult);
         Object requestArgument = new ObjectMapper().readValue(arguments, Object.class);
-        verify(digitalTwin).invokeInterfaceCommandWithServiceResponseAsync(eq(DIGITAL_TWIN_ID), eq(interfaceInstanceName), eq(commandName), eq(requestArgument), eq(null), eq(null));
+        verify(digitalTwin).invokeInterfaceCommandWithServiceResponseAsync(eq(DIGITAL_TWIN_ID), eq(componentName), eq(commandName), eq(requestArgument), eq(null), eq(null));
     }
 
     static String createPropertyPatch(String propertyName, String propertyValue) {

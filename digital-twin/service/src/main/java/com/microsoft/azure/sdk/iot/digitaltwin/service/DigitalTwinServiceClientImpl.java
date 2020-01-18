@@ -58,17 +58,17 @@ public final class DigitalTwinServiceClientImpl implements DigitalTwinServiceCli
     }
 
     @Override
-    public String updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String interfaceInstanceName, @NonNull String propertyPatch) throws IOException {
-        return digitalTwinServiceAsyncClient.updateDigitalTwinProperties(digitalTwinId, interfaceInstanceName, propertyPatch).toBlocking().single();
+    public String updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String componentName, @NonNull String propertyPatch) throws IOException {
+        return digitalTwinServiceAsyncClient.updateDigitalTwinProperties(digitalTwinId, componentName, propertyPatch).toBlocking().single();
     }
 
     @Override
-    public DigitalTwinCommandResponse invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName) {
-        return invokeCommand(digitalTwinId, interfaceInstanceName, commandName, null);
+    public DigitalTwinCommandResponse invokeCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName) {
+        return invokeCommand(digitalTwinId, componentName, commandName, null);
     }
 
     @Override
-    public DigitalTwinCommandResponse invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument) {
-        return digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, interfaceInstanceName, commandName, argument).toBlocking().single();
+    public DigitalTwinCommandResponse invokeCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, String argument) {
+        return digitalTwinServiceAsyncClient.invokeCommand(digitalTwinId, componentName, commandName, argument).toBlocking().single();
     }
 }
