@@ -47,19 +47,19 @@ public class Tools {
     }
 
     public static List<String> generateRandomStringList(int listSize) {
-        return Flowable.fromSupplier(UUID::randomUUID).map(UUID::toString).repeat(listSize).toList().blockingGet();
+        return Flowable.fromSupplier(UUID :: randomUUID).map(UUID :: toString).repeat(listSize).toList().blockingGet();
     }
 
     public static List<Integer> generateRandomIntegerList(int listSize) {
-        return Flowable.fromSupplier(RandomUtils::nextInt).repeat(listSize).toList().blockingGet();
+        return Flowable.fromSupplier(RandomUtils :: nextInt).repeat(listSize).toList().blockingGet();
     }
 
     private static String createSinglePropertyPatch(@NonNull String propertyName, @NonNull String propertyValue) {
         return "\"" + propertyName + "\": {"
-                +"      \"desired\": {"
-                +"          \"value\": \"" + propertyValue + "\""
-                +"      }"
-                +"  }";
+                + "      \"desired\": {"
+                + "          \"value\": \"" + propertyValue + "\""
+                + "      }"
+                + "  }";
     }
 
     public static String createPropertyPatch(Map<String, String> propertiesMap) {

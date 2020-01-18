@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import rx.Observable;
 import rx.functions.Func1;
 
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-
 public final class Tools {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     public static final Func1<Object, Observable<String>> FUNC_MAP_TO_JSON_STRING = object -> {

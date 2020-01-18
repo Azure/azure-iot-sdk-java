@@ -61,7 +61,7 @@ public class TestDigitalTwinDevice {
         return new DigitalTwinDeviceClient(deviceClient, DCM_ID);
     }
 
-    public void closeAndDeleteDevice(){
+    public void closeAndDeleteDevice() {
         try {
             deviceClient.closeNow();
 
