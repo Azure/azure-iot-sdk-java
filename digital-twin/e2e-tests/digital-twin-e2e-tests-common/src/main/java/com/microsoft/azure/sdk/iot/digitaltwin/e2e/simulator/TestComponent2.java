@@ -4,6 +4,8 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
 import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinComponent;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
@@ -51,7 +53,9 @@ public class TestComponent2 extends AbstractDigitalTwinComponent {
     public static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [%s]: COMPLETED";
     private static final int MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS = 30;
 
-    private Map<String, String> propertyUpdatesReceived;
+    private static String interfaceInstanceName;
+    private Map<String, JsonNode> propertyUpdatesReceived;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     public TestComponent2(@NonNull String digitalTwinComponentName) {
         super(digitalTwinComponentName, TEST_INTERFACE_ID);
@@ -76,10 +80,16 @@ public class TestComponent2 extends AbstractDigitalTwinComponent {
     @Override
     protected void onPropertyUpdate(@NonNull DigitalTwinPropertyUpdate digitalTwinPropertyUpdate) {
         log.trace("Property received: name={}, desired value={}, version={}", digitalTwinPropertyUpdate.getPropertyName(), digitalTwinPropertyUpdate.getPropertyDesired(), digitalTwinPropertyUpdate.getDesiredVersion());
-        propertyUpdatesReceived.put(digitalTwinPropertyUpdate.getPropertyName(), digitalTwinPropertyUpdate.getPropertyDesired());
+        JsonNode desiredProperty = null;
+        try {
+            desiredProperty = objectMapper.readTree(digitalTwinPropertyUpdate.getPropertyDesired());
+        } catch (IOException e) {
+            log.error("Exception thrown while converting desired property update to Json Node: ", e);
+        }
+        propertyUpdatesReceived.put(digitalTwinPropertyUpdate.getPropertyName(), desiredProperty);
     }
 
-    public boolean verifyIfPropertyUpdateWasReceived(String expectedPropertyName, String expectedValue) {
+    public boolean verifyIfPropertyUpdateWasReceived(String expectedPropertyName, JsonNode expectedValue) {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() < startTime + MAX_WAIT_FOR_PROPERTY_UPDATE_IN_SECONDS * 1000) {
             if (propertyUpdatesReceived.entrySet().stream()

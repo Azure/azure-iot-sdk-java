@@ -3,11 +3,14 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.rxjava3.core.Flowable;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -89,5 +92,10 @@ public class Tools {
         }
 
         return envVariables;
+    }
+
+    public static JsonNode convertJsonStringToJsonNode(String jsonString) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readTree(jsonString);
     }
 }
