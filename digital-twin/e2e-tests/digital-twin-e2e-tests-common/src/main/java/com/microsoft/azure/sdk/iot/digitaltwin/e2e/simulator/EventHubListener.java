@@ -34,7 +34,6 @@ public final class EventHubListener {
     private static final String TELEMETRY_PROPERTY_DEVICE_ID = "$.cdid";
     private static final Map<String, EventData> RECEIVED_EVENT_DATA = new ConcurrentHashMap<>();
     private static final ScheduledExecutorService EXECUTOR_SERVICE = Executors.newScheduledThreadPool(4);
-
     static {
         try {
             startReceivingEvents();
@@ -43,7 +42,6 @@ public final class EventHubListener {
             log.error("StartReceivingEvents failed.", e);
         }
     }
-
     private static void startReceivingEvents() throws EventHubException, ExecutionException, InterruptedException, IOException {
         EventHubClient eventHubClient = EventHubClient.createFromConnectionStringSync(EVENT_HUB_CONNECTION_STRING, EXECUTOR_SERVICE);
         EventHubRuntimeInformation eventHubInfo = eventHubClient.getRuntimeInformation().get();
@@ -95,7 +93,7 @@ public final class EventHubListener {
     }
 
     public static boolean verifyThatMessageWasReceived(String deviceId, String expectedPayload) throws InterruptedException {
-        log.debug(">> Expected payload: deviceId={}: payload={}", deviceId, expectedPayload);
+        log.debug(">> Expected payload: deviceId={}, payload={}", deviceId, expectedPayload);
 
         long receiveEndTime = System.currentTimeMillis() + RECEIVE_EVENTS_FOR_SECONDS * 1000;
         while (!RECEIVED_EVENT_DATA.containsKey(expectedPayload) && System.currentTimeMillis() < receiveEndTime) {

@@ -146,7 +146,7 @@ public class TestComponent2 extends AbstractDigitalTwinComponent {
                                                                                                            .build();
                 try {
                     DigitalTwinClientResult digitalTwinClientResult = updateAsyncCommandStatusAsync(digitalTwinAsyncCommandUpdate).blockingGet();
-                    log.debug("Execute async command: {}; result: {}", progressPercentage , digitalTwinClientResult);
+                    log.debug("Execute async command: {}; result: {}", progressPercentage, digitalTwinClientResult);
                 } catch (Exception e) {
                     log.error("Exception thrown while executing async command: ", e);
                 }

@@ -22,8 +22,12 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.COMPONENT_KEY;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.DCM_ID;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.DEFAULT_IMPLEMENTED_MODEL_INFORMATION_COMPONENT_NAME;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.VERSION_KEY;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.convertJsonStringToJsonNode;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveComponentNameFromInterfaceId;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.SYNC_COMMAND_WITH_PAYLOAD;
@@ -36,9 +40,9 @@ public class DigitalTwinServiceClientE2ETests {
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientE2ETests_";
 
+    private static final String INVALID_DEVICE_ID = "InvalidDevice";
     private static final String INVALID_MODEL_URN = "urn:invalidNamespace:invalidModelName:1"; // Model ID format should contain a min of 4 segments [urn:namespace:name:version]
     private static final String INVALID_INTERFACE_URN = "urn:invalidNamespace:invalidInterfaceName:1"; // Interface ID format should contain a min of 4 segments [urn:namespace:name:version]
-    private static final String INVALID_DEVICE_ID = "InvalidDevice";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private TestDigitalTwinDevice testDevice;
@@ -76,13 +80,13 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
-    @Test (expected = NoSuchElementException.class)
+    @Test(expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidModelUrn() {
         digitalTwinServiceClient.getModel(INVALID_MODEL_URN);
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
-    @Test (expected = NoSuchElementException.class)
+    @Test(expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidInterfaceUrn() {
         digitalTwinServiceClient.getModel(INVALID_INTERFACE_URN);
     }
@@ -98,12 +102,12 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
-    @Test (expected = NoSuchElementException.class)
+    @Test(expected = NoSuchElementException.class)
     public void testGetAllDigitalTwinInterfacesInvalidDigitalTwinId() {
         digitalTwinServiceClient.getDigitalTwin(INVALID_DEVICE_ID);
     }
 
-    @Test (expected = IOException.class)
+    @Test(expected = IOException.class)
     public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String componentName = "testComponentName";
@@ -121,7 +125,7 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     // Service throws a 404 Not Found
-    @Test (expected = RestException.class)
+    @Test(expected = RestException.class)
     public void testInvokeCommandOnInvalidDevice() {
         String samplePayload = "samplePayload";
         digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_COMPONENT_NAME, SYNC_COMMAND_WITH_PAYLOAD, samplePayload);

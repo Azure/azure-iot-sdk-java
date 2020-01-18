@@ -90,7 +90,9 @@ public class DigitalTwinTelemetryParameterizedE2ETests {
         String stringTelemetryValue = "StringTelemetryMessage_".concat(UUID.randomUUID().toString());
         long milliSecs = System.currentTimeMillis();
         List<Integer> telemetryIntegerArray = generateRandomIntegerList(arrayTelemetrySize);
-        Map<String, String> telemetryMap = new HashMap<String, String>() {{ put("mapTelemetryKey", "mapTelemetryValue"); }};
+        Map<String, String> telemetryMap = new HashMap<String, String>() {{
+            put("mapTelemetryKey", "mapTelemetryValue");
+        }};
         int telemetryEnum = EnumTelemetry.OFFLINE.getValue();
         ComplexValueTelemetry telemetryComplexValue = new ComplexValueTelemetry(nextInt(), nextInt(), nextInt());
 
