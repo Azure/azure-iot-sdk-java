@@ -56,24 +56,24 @@ public interface DigitalTwinServiceAsyncClient {
      * @return The observable to the json string specifying the updated state  of the digital twin representation
      * @throws IOException Throws IOException if the json deserialization fails
      */
-    Observable<String> updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String interfaceInstanceName, @NonNull String propertyPatch) throws IOException;
+    Observable<String> updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String componentName, @NonNull String propertyPatch) throws IOException;
 
     /**
      * Invoke a digital twin command on the given interface instance that is implemented by the given digital twin
      * @param digitalTwinId The digital twin to invoke the command on
-     * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
+     * @param componentName The name of the component in that digital twin that the method belongs to
      * @param commandName The name of the command to be invoked
      * @return The observable to the result of the command invocation, containing the request ID, status code and optional response payload
      */
-    Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName);
+    Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName);
 
     /**
      * Invoke a digital twin command on the given interface instance that is implemented by the given digital twin
      * @param digitalTwinId The digital twin to invoke the command on
-     * @param interfaceInstanceName The name of the interface instance in that digital twin that the method belongs to
+     * @param componentName The name of the component in that digital twin that the method belongs to
      * @param commandName The name of the command to be invoked
      * @param argument Additional information to be given to the device receiving the command. Must be UTF-8 encoded JSON bytes
      * @return The observable to the result of the command invocation, containing the request ID, status code and optional response payload
      */
-    Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument);
+    Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, String argument);
 }

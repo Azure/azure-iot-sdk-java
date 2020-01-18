@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.DCM_ID;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 
 @Slf4j
@@ -57,7 +58,7 @@ public class TestDigitalTwinDevice {
     }
 
     private DigitalTwinDeviceClient createDigitalTwinDeviceClient() {
-        return new DigitalTwinDeviceClient(deviceClient);
+        return new DigitalTwinDeviceClient(deviceClient, DCM_ID);
     }
 
     public void closeAndDeleteDevice(){

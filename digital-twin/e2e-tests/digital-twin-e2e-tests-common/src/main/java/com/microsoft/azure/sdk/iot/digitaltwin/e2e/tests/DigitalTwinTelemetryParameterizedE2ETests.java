@@ -10,7 +10,7 @@ import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.ComplexObjectTeleme
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.ComplexValueTelemetry;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EnumTelemetry;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
+import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -35,11 +35,11 @@ import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.DCM_ID;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.*;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.EventHubListener.verifyThatMessageWasReceived;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.*;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.RandomUtils.*;
@@ -48,12 +48,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @RunWith(Parameterized.class)
 public class DigitalTwinTelemetryParameterizedE2ETests {
-    private static final String TEST_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
+    private static final String TEST_COMPONENT_NAME = retrieveComponentNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinTelemetryParameterizedE2ETests_";
     private static final String TELEMETRY_PAYLOAD_PATTERN = "{\"%s\":%s}";
 
-    private TestInterfaceInstance2 testInterfaceInstance;
+    private TestComponent2 testComponent;
     private TestDigitalTwinDevice testDevice;
 
     @Rule
@@ -122,15 +122,14 @@ public class DigitalTwinTelemetryParameterizedE2ETests {
         testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        testInterfaceInstance = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK);
+        testComponent = new TestComponent2(TEST_COMPONENT_NAME);
+        assertThat(digitalTwinDeviceClient.bindComponents(singletonList(testComponent))).isEqualTo(DIGITALTWIN_CLIENT_OK);
     }
 
     @Test
     public void testSendTelemetryDifferentSchema() throws IOException, InterruptedException {
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", telemetryName, telemetryValue);
-        DigitalTwinClientResult digitalTwinClientResult = testInterfaceInstance.sendTelemetry(telemetryName, telemetryValue).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testComponent.sendTelemetry(telemetryName, telemetryValue).blockingGet();
         log.debug("Telemetry operation result: {}", digitalTwinClientResult);
 
         String expectedPayload = String.format(TELEMETRY_PAYLOAD_PATTERN, telemetryName, serialize(telemetryValue));

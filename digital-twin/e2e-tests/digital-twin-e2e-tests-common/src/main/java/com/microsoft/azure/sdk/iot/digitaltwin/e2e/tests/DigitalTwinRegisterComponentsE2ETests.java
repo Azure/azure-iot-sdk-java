@@ -7,9 +7,9 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestDigitalTwinDevice;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance1;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2;
-import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.UnpublishedInterfaceInstance;
+import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent1;
+import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2;
+import com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.UnpublishedComponent;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClient;
 import com.microsoft.azure.sdk.iot.digitaltwin.service.DigitalTwinServiceClientImpl;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -36,7 +36,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.*;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.*;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveComponentNameFromInterfaceId;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.synchronizedList;
@@ -44,21 +44,21 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
-public class DigitalTwinRegisterInterfacesE2ETests {
+public class DigitalTwinRegisterComponentsE2ETests {
     private static final String IOT_HUB_CONNECTION_STRING = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-    private static final String TEST_INTERFACE_INSTANCE_NAME_1 = retrieveInterfaceNameFromInterfaceId(TestInterfaceInstance1.TEST_INTERFACE_ID);
-    private static final String TEST_INTERFACE_INSTANCE_NAME_2 = retrieveInterfaceNameFromInterfaceId(TestInterfaceInstance2.TEST_INTERFACE_ID);
-    private static final String UNPUBLISHED_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(UnpublishedInterfaceInstance.TEST_INTERFACE_ID);
-    private static final String INVALID_INTERFACE_INSTANCE_NAME = "invalidInterfaceInstanceName";
+    private static final String TEST_COMPONENT_NAME_1 = retrieveComponentNameFromInterfaceId(TestComponent1.TEST_INTERFACE_ID);
+    private static final String TEST_COMPONENT_NAME_2 = retrieveComponentNameFromInterfaceId(TestComponent2.TEST_INTERFACE_ID);
+    private static final String UNPUBLISHED_COMPONENT_NAME = retrieveComponentNameFromInterfaceId(UnpublishedComponent.TEST_INTERFACE_ID);
+    private static final String INVALID_COMPONENT_NAME = "invalidComponentName";
 
-    private static final String DEVICE_ID_PREFIX = "DigitalTwinRegisterInterfacesE2ETests_";
+    private static final String DEVICE_ID_PREFIX = "DigitalTwinRegisterComponentsE2ETests_";
     private static final String DIGITAL_TWIN_INTERFACE_PATTERN = "\"%s\":\"%s\"";
 
     private static DigitalTwinServiceClient digitalTwinServiceClient;
     private String digitalTwinId;
     private TestDigitalTwinDevice testDevice;
-    private TestInterfaceInstance1 testInterfaceInstance1;
-    private TestInterfaceInstance2 testInterfaceInstance2;
+    private TestComponent1 testComponent1;
+    private TestComponent2 testComponent2;
 
     @Rule
     public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
@@ -66,7 +66,7 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     @Parameterized.Parameter(0)
     public IotHubClientProtocol protocol;
 
-    @Parameterized.Parameters(name = "{index}: Register interfaces Test: protocol={0}")
+    @Parameterized.Parameters(name = "{index}: Register components Test: protocol={0}")
     public static Collection<Object[]> data() {
         return asList(new Object[][] {
                 {MQTT},
@@ -82,61 +82,60 @@ public class DigitalTwinRegisterInterfacesE2ETests {
     }
 
     @Test
-    public void testRegisterSingleInterfaceSuccess() throws IotHubException, IOException, URISyntaxException {
+    public void testRegisterSingleComponentSuccess() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        testComponent2 = new TestComponent2(TEST_COMPONENT_NAME_2);
 
-        // assert that the registered interface is returned in the DigitalTwin
+        assertThat(digitalTwinDeviceClient.bindComponents(singletonList(testComponent2))).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+
+        // assert that the registered component is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TestInterfaceInstance2.TEST_INTERFACE_ID));
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_2, TestComponent2.TEST_INTERFACE_ID));
     }
 
     @Test
-    public void testRegisterMultipleInterfacesSuccess() throws IotHubException, IOException, URISyntaxException {
+    public void testRegisterMultipleComponentsSuccess() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, asList(testInterfaceInstance1, testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        testComponent1 = new TestComponent1(TEST_COMPONENT_NAME_1);
+        testComponent2 = new TestComponent2(TEST_COMPONENT_NAME_2);
+        assertThat(digitalTwinDeviceClient.bindComponents(asList(testComponent1, testComponent2))).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_OK);
 
-        // assert that the registered interface is returned in the DigitalTwin
+        // assert that the registered component is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_1, TestInterfaceInstance1.TEST_INTERFACE_ID));
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TestInterfaceInstance2.TEST_INTERFACE_ID));
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_1, TestComponent1.TEST_INTERFACE_ID));
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_2, TestComponent2.TEST_INTERFACE_ID));
     }
 
     @Test
-    public void testRegisterInterfacesMultipleTimesSequentially() throws IotHubException, IOException, URISyntaxException {
+    public void testRegisterComponentsMultipleTimesSequentially() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        testComponent1 = new TestComponent1(TEST_COMPONENT_NAME_1);
+        testComponent2 = new TestComponent2(TEST_COMPONENT_NAME_2);
+        assertThat(digitalTwinDeviceClient.bindComponents(asList(testComponent1, testComponent2))).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_OK);
 
-        // assert that the registered interface is returned in the DigitalTwin
+        // assert that the registered component is returned in the DigitalTwin
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(digitalTwinId);
         assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
-        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_INTERFACE_INSTANCE_NAME_2, TestInterfaceInstance2.TEST_INTERFACE_ID));
-
-        testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
-        DigitalTwinClientResult registrationResult2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1)).blockingGet();
-        assertThat(registrationResult2).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
+        assertThat(digitalTwin).contains(String.format(DIGITAL_TWIN_INTERFACE_PATTERN, TEST_COMPONENT_NAME_2, TestComponent2.TEST_INTERFACE_ID));
     }
 
     @Test
-    public void testRegisterInterfacesMultipleTimesInParallel() throws IotHubException, IOException, URISyntaxException, InterruptedException {
+    public void testRegisterComponentsMultipleTimesInParallel() throws IotHubException, IOException, URISyntaxException, InterruptedException {
         final Semaphore semaphore = new Semaphore(0);
         final List<DigitalTwinClientResult> registrationResults = synchronizedList(new ArrayList<>());
 
@@ -144,15 +143,15 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        testInterfaceInstance1 = new TestInterfaceInstance1(TEST_INTERFACE_INSTANCE_NAME_1);
-        testInterfaceInstance2 = new TestInterfaceInstance2(TEST_INTERFACE_INSTANCE_NAME_2);
-
-        Disposable disposable1 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance1))
+        testComponent1 = new TestComponent1(TEST_COMPONENT_NAME_1);
+        testComponent2 = new TestComponent2(TEST_COMPONENT_NAME_2);
+        assertThat(digitalTwinDeviceClient.bindComponents(asList(testComponent1, testComponent2))).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        Disposable disposable1 = digitalTwinDeviceClient.registerComponentsAsync()
                 .subscribe(digitalTwinClientResult -> {
                     registrationResults.add(digitalTwinClientResult);
                     semaphore.release();
                 });
-        Disposable disposable2 = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance2))
+        Disposable disposable2 = digitalTwinDeviceClient.registerComponentsAsync()
                 .subscribe(digitalTwinClientResult -> {
                     registrationResults.add(digitalTwinClientResult);
                     semaphore.release();
@@ -162,48 +161,45 @@ public class DigitalTwinRegisterInterfacesE2ETests {
         disposable1.dispose();
         disposable2.dispose();
 
-        // The first call for register interfaces will be enqueued. The next call for register interfaces will immediately return "DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING".
-        // Once registration completes successfully, the first call will return "DIGITALTWIN_CLIENT_OK".
-        assertThat(registrationResults.get(0)).isEqualTo(DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING);
+        assertThat(registrationResults.get(0)).isEqualTo(DIGITALTWIN_CLIENT_OK);
         assertThat(registrationResults.get(1)).isEqualTo(DIGITALTWIN_CLIENT_OK);
     }
 
     // No error thrown, unpublished interface registered
     @Ignore("Disabled until service validates and throws exception")
     @Test
-    public void testRegisterInterfaceNotPublishedInRepository() throws IotHubException, IOException, URISyntaxException {
+    public void testRegisterComponentNotPublishedInRepository() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        UnpublishedInterfaceInstance unpublishedInterfaceInstance = new UnpublishedInterfaceInstance(UNPUBLISHED_INTERFACE_INSTANCE_NAME);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(unpublishedInterfaceInstance)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
+        UnpublishedComponent unpublishedComponent = new UnpublishedComponent(UNPUBLISHED_COMPONENT_NAME);
+        assertThat(digitalTwinDeviceClient.bindComponents(singletonList(unpublishedComponent))).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
     }
 
     // No error thrown, interface registered with the invalid name
     @Ignore("Disabled until service validates and throws exception")
     @Test
-    public void testRegisterInterfaceWithDifferentInstanceName() throws IotHubException, IOException, URISyntaxException {
+    public void testRegisterComponentsWithDifferentComponentName() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        TestInterfaceInstance1 testInterfaceInstance = new TestInterfaceInstance1(INVALID_INTERFACE_INSTANCE_NAME);
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, singletonList(testInterfaceInstance)).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
+        TestComponent1 testComponent = new TestComponent1(INVALID_COMPONENT_NAME);
+        assertThat(digitalTwinDeviceClient.bindComponents(singletonList(testComponent))).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
     }
 
     // No error thrown, no interface registered
     @Ignore("Disabled until service validates and throws exception")
     @Test
-    public void testRegisterEmptyListOfInterfaces() throws IotHubException, IOException, URISyntaxException {
+    public void testRegisterEmptyListOfComponents() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
         DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
-        DigitalTwinClientResult registrationResult = digitalTwinDeviceClient.registerInterfacesAsync(DCM_ID, new ArrayList<>()).blockingGet();
-        assertThat(registrationResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
+        assertThat(digitalTwinDeviceClient.registerComponents()).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
     }
 
     @After

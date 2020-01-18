@@ -6,17 +6,15 @@ package com.microsoft.azure.sdk.iot.digitaltwin.device;
 public enum DigitalTwinClientResult {
     /** The operation is successful. */
     DIGITALTWIN_CLIENT_OK,
-    /** The operation failed since registration is still processing. */
-    DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING,
-    /** The operation failed since registration is already done.
-     * Most likely caused by registration API been called multi times.
+    /** The operation failed since bind is already done.
+     * Most likely caused by bind API been called multi times.
      */
-    DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED,
+    DIGITALTWIN_CLIENT_ERROR_COMPONENTS_ALREADY_BOUND,
     /**
-     * The operation failed since registration hasn't been completed.
-     * Most likely caused by calling an API before registration completed.
+     * The operation failed since bind hasn't been completed.
+     * Most likely caused by calling an API before bind completed.
      */
-    DIGITALTWIN_CLIENT_ERROR_INTERFACE_NOT_REGISTERED,
+    DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND,
     /**
      * The operation failed since there was unexpected exception and there is no suggested way to recover.
      * Please check the log to figure out the details.
