@@ -41,7 +41,7 @@ public class Tools {
     }
 
     // Interface ID is in the format: [urn:namespace:name:version]
-    public static String retrieveInterfaceNameFromInterfaceId(String interfaceId) {
+    public static String retrieveComponentNameFromInterfaceId(String interfaceId) {
         String[] interfaceIdParts = interfaceId.split(INTERFACE_ID_DELIMITER);
         return interfaceIdParts[interfaceIdParts.length - 2];
     }

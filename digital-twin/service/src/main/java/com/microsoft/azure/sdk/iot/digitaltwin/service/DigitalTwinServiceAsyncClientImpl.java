@@ -98,13 +98,13 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
     }
 
     @Override
-    public Observable<String> updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String interfaceInstanceName, @NonNull String propertyPatch) throws IOException {
+    public Observable<String> updateDigitalTwinProperties(@NonNull String digitalTwinId, @NonNull final String componentName, @NonNull String propertyPatch) throws IOException {
         final DigitalTwinInterfacesPatchInterfacesValue digitalTwinInterfacesPatchInterfacesValue = objectMapper.readValue(propertyPatch, DigitalTwinInterfacesPatchInterfacesValue.class);
 
         DigitalTwinInterfacesPatch digitalTwinInterfacesPatch = new DigitalTwinInterfacesPatch()
                 .withInterfaces(
                         new HashMap<String, DigitalTwinInterfacesPatchInterfacesValue>() {{
-                            put(interfaceInstanceName, digitalTwinInterfacesPatchInterfacesValue);
+                            put(componentName, digitalTwinInterfacesPatchInterfacesValue);
                         }}
                 );
         return digitalTwin.updateInterfacesAsync(digitalTwinId, digitalTwinInterfacesPatch)
@@ -114,12 +114,12 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
     }
 
     @Override
-    public Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName) {
-        return invokeCommand(digitalTwinId, interfaceInstanceName, commandName, null);
+    public Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName) {
+        return invokeCommand(digitalTwinId, componentName, commandName, null);
     }
 
     @Override
-    public Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String interfaceInstanceName, @NonNull String commandName, String argument) {
+    public Observable<DigitalTwinCommandResponse> invokeCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, String argument) {
         Object payload = "";
 
         // The request argument needs to be deserialized into JSON object because AutoRest always serializes the REST @Body parameter
@@ -132,8 +132,7 @@ public final class DigitalTwinServiceAsyncClientImpl implements DigitalTwinServi
             }
         }
 
-        return digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(digitalTwinId, interfaceInstanceName, commandName, payload, null, null)
-
+        return digitalTwin.invokeInterfaceCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payload, null, null)
                           .map(responseWithHeaders -> {
                               DigitalTwinInvokeInterfaceCommandHeaders invokeInterfaceCommandHeaders = responseWithHeaders.headers();
 

@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Getter
 @AllArgsConstructor
-public class DigitalTwinInterfaceRegistrationMessage {
+public class DigitalTwinComponentRegistrationMessage {
     private final ModelInformation modelInformation;
 
     @Builder
@@ -25,6 +25,6 @@ public class DigitalTwinInterfaceRegistrationMessage {
         private final String dcmId;
         @JsonProperty("interfaces")
         @Singular
-        private final Map<String, String> interfaceInstances;
+        private final Map<String, String> components;
     }
 }

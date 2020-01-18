@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.device.model;
 
-import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinComponent;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
@@ -16,7 +16,7 @@ import lombok.NonNull;
 public class DigitalTwinCommandResponse {
     /**
      * Status code to map back to the server.  Roughly maps to HTTP status codes.
-     * To indicate that this command has been accepted but that the final response is pending, set this to {@link AbstractDigitalTwinInterfaceClient#STATUS_CODE_PENDING}.
+     * To indicate that this command has been accepted but that the final response is pending, set this to {@link AbstractDigitalTwinComponent#STATUS_CODE_PENDING}.
      */
     @NonNull
     private final Integer status;

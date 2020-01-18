@@ -11,6 +11,7 @@ import com.microsoft.rest.RestException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -24,14 +25,14 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.DCM_ID;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME;
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveInterfaceNameFromInterfaceId;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.SYNC_COMMAND_WITH_PAYLOAD;
-import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestInterfaceInstance2.TEST_INTERFACE_ID;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveComponentNameFromInterfaceId;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.SYNC_COMMAND_WITH_PAYLOAD;
+import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.TEST_INTERFACE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DigitalTwinServiceClientE2ETests {
     private static final String IOT_HUB_CONNECTION_STRING = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-    private static final String TEST_INTERFACE_INSTANCE_NAME = retrieveInterfaceNameFromInterfaceId(TEST_INTERFACE_ID);
+    private static final String TEST_COMPONENT_NAME = retrieveComponentNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientE2ETests_";
 
@@ -64,6 +65,7 @@ public class DigitalTwinServiceClientE2ETests {
         assertThat(modelString).as("Verify model").isNotNull();
         assertThat(modelString).contains(String.format("\"@id\":\"%s\"", DCM_ID));
     }
+
 
     @Test
     public void testGetModelInformationValidInterfaceUrn() {
@@ -104,7 +106,7 @@ public class DigitalTwinServiceClientE2ETests {
     @Test (expected = IOException.class)
     public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
-        String interfaceInstanceName = "testInterfaceInstanceName";
+        String componentName = "testComponentName";
         String propertyName = "testPropertyName_";
         String propertyValue = "testPropertyValue_".concat(randomUuid);
         String propertyPatch = "{"
@@ -115,14 +117,14 @@ public class DigitalTwinServiceClientE2ETests {
                 + "      }"
                 + "  }";
 
-        digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), interfaceInstanceName, propertyPatch);
+        digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), componentName, propertyPatch);
     }
 
     // Service throws a 404 Not Found
     @Test (expected = RestException.class)
     public void testInvokeCommandOnInvalidDevice() {
         String samplePayload = "samplePayload";
-        digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_INTERFACE_INSTANCE_NAME, SYNC_COMMAND_WITH_PAYLOAD, samplePayload);
+        digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_COMPONENT_NAME, SYNC_COMMAND_WITH_PAYLOAD, samplePayload);
     }
 
     @After

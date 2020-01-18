@@ -16,7 +16,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinPropertyUpdate;
-import io.reactivex.rxjava3.core.Flowable;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinReportProperty;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.functions.Consumer;
 import lombok.extern.slf4j.Slf4j;
@@ -39,21 +39,18 @@ import java.util.Set;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.ERROR;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient.STATUS_CODE_COMPLETED;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient.STATUS_CODE_NOT_IMPLEMENTED;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinComponent.STATUS_CODE_COMPLETED;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinComponent.STATUS_CODE_NOT_IMPLEMENTED;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_COMPONENTS_ALREADY_BOUND;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_COMMAND_NAME;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_DIGITAL_TWIN_COMPONENT;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_MESSAGE_SCHEMA;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_REQUEST_ID;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_STATUS;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.RegistrationStatus.REGISTERED;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.RegistrationStatus.REGISTERING;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.RegistrationStatus.UNREGISTERED;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX;
+import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.DIGITAL_TWIN_COMPONENT_NAME_PREFIX;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +62,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -72,8 +70,8 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DeviceClient.class})
 public class DigitalTwinDeviceClientTest {
-    private static final String DIGITAL_TWIN_INTERFACE_INSTANCE_1 = "DIGITAL_TWIN_INTERFACE_INSTANCE_1";
-    private static final String DIGITAL_TWIN_INTERFACE_INSTANCE_2 = "DIGITAL_TWIN_INTERFACE_INSTANCE_2";
+    private static final String DIGITAL_TWIN_COMPONENT_NAME_1 = "DIGITAL_TWIN_COMPONENT_NAME_1";
+    private static final String DIGITAL_TWIN_COMPONENT_NAME_2 = "DIGITAL_TWIN_COMPONENT_NAME_2";
     private static final String DIGITAL_TWIN_INTERFACE_ID_1 = "DIGITAL_TWIN_INTERFACE_ID_1";
     private static final String DIGITAL_TWIN_INTERFACE_ID_2 = "DIGITAL_TWIN_INTERFACE_ID_2";
     private static final String DIGITAL_TWIN_DCM_ID = "DIGITAL_TWIN_DCM_ID";
@@ -82,31 +80,42 @@ public class DigitalTwinDeviceClientTest {
     private static final String COMMAND_NAME = "DIGITAL_TWIN_COMMAND_NAME";
     private static final String REQUEST_ID = "DIGITAL_TWIN_REQUEST_ID";
     private static final byte[] COMMAND_PAYLOAD = String.format("{\"commandRequest\":{\"requestId\":\"%s\", \"value\":%s}}", REQUEST_ID, TEST_PAYLOAD).getBytes(UTF_8);
-    private static final String DIGITAL_TWIN_INTERFACE_INSTANCE_UNKNOWN = "UNKNOWN_INTERFACE_INSTANCE_NAME";
+    private static final String DIGITAL_TWIN_COMPONENT_NAME_UNKNOWN = "UNKNOWN_COMPONENT_NAME";
     private static final int DESIRED_VERSION = 1234;
     private static final int DELAY_IN_MS = 100;
+    private static final List<DigitalTwinReportProperty> TEST_PROPERTIES = asList(
+            DigitalTwinReportProperty.builder()
+                                     .propertyName("PROPERTY_INT")
+                .propertyValue("123")
+                .build(),
+            DigitalTwinReportProperty.builder()
+                                     .propertyName("PROPERTY_STRING")
+                                     .propertyValue("\"STRING_VALUE\"")
+                                     .build()
+    );
 
     private DigitalTwinDeviceClient testee;
-    private List<? extends AbstractDigitalTwinInterfaceClient> digitalTwinInterfaceClients;
+    private List<? extends AbstractDigitalTwinComponent> digitalTwinComponents;
     @Mock
     private DeviceClient deviceClient;
     @Mock
-    private AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient1;
+    private AbstractDigitalTwinComponent digitalTwinComponent1;
     @Mock
-    private AbstractDigitalTwinInterfaceClient digitalTwinInterfaceClient2;
+    private AbstractDigitalTwinComponent digitalTwinComponent2;
     @Mock
     private Consumer<Throwable> errorConsumer;
     @Mock
     private Object context;
 
+
     @Before
     public void setUp() throws IOException {
-        testee = new DigitalTwinDeviceClient(deviceClient);
-        digitalTwinInterfaceClients = asList(digitalTwinInterfaceClient1, digitalTwinInterfaceClient2);
-        when(digitalTwinInterfaceClient1.getDigitalTwinInterfaceInstanceName()).thenReturn(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
-        when(digitalTwinInterfaceClient2.getDigitalTwinInterfaceInstanceName()).thenReturn(DIGITAL_TWIN_INTERFACE_INSTANCE_2);
-        when(digitalTwinInterfaceClient1.getDigitalTwinInterfaceId()).thenReturn(DIGITAL_TWIN_INTERFACE_ID_1);
-        when(digitalTwinInterfaceClient2.getDigitalTwinInterfaceId()).thenReturn(DIGITAL_TWIN_INTERFACE_ID_2);
+        testee = new DigitalTwinDeviceClient(deviceClient, DIGITAL_TWIN_DCM_ID);
+        digitalTwinComponents = asList(digitalTwinComponent1, digitalTwinComponent2);
+        when(digitalTwinComponent1.getDigitalTwinComponentName()).thenReturn(DIGITAL_TWIN_COMPONENT_NAME_1);
+        when(digitalTwinComponent2.getDigitalTwinComponentName()).thenReturn(DIGITAL_TWIN_COMPONENT_NAME_2);
+        when(digitalTwinComponent1.getDigitalTwinInterfaceId()).thenReturn(DIGITAL_TWIN_INTERFACE_ID_1);
+        when(digitalTwinComponent2.getDigitalTwinInterfaceId()).thenReturn(DIGITAL_TWIN_INTERFACE_ID_2);
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -170,55 +179,67 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void registerInterfacesAsyncTest() {
-        Single<DigitalTwinClientResult> single = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERING);
-        DigitalTwinClientResult digitalTwinClientResult = single.blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
-        verify(digitalTwinInterfaceClient1).setDigitalTwinDeviceClient(eq(testee));
-        verify(digitalTwinInterfaceClient2).setDigitalTwinDeviceClient(eq(testee));
-        verify(digitalTwinInterfaceClient1).onRegistered();
-        verify(digitalTwinInterfaceClient2).onRegistered();
+    public void bindComponentsTest() throws IOException {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(digitalTwinComponent1).setDigitalTwinDeviceClient(eq(testee));
+        verify(digitalTwinComponent2).setDigitalTwinDeviceClient(eq(testee));
+        verify(deviceClient, never()).open();
     }
 
     @Test
-    public void registerInterfacesTest() {
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfaces(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
-        verify(digitalTwinInterfaceClient1).setDigitalTwinDeviceClient(eq(testee));
-        verify(digitalTwinInterfaceClient2).setDigitalTwinDeviceClient(eq(testee));
-        verify(digitalTwinInterfaceClient1).onRegistered();
-        verify(digitalTwinInterfaceClient2).onRegistered();
+    public void bindComponentsTwiceTest() throws IOException {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(digitalTwinComponent1).setDigitalTwinDeviceClient(eq(testee));
+        verify(digitalTwinComponent2).setDigitalTwinDeviceClient(eq(testee));
+        verify(deviceClient, never()).open();
+
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_ERROR_COMPONENTS_ALREADY_BOUND);
     }
 
     @Test
-    public void registerInterfacesAsyncTwicePendingTest() {
-        Single<DigitalTwinClientResult> single = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERING);
-        DigitalTwinClientResult digitalTwinClientResult2 = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult2).isEqualTo(DIGITALTWIN_CLIENT_ERROR_REGISTRATION_PENDING);
-
-        DigitalTwinClientResult digitalTwinClientResult = single.blockingGet();
+    public void registerComponentsAsyncTest() throws IOException {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        DigitalTwinClientResult digitalTwinClientResult = testee.registerComponentsAsync().blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        verify(deviceClient).open();
+        verify(deviceClient).sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
     }
 
     @Test
-    public void registerInterfacesAsyncTwiceAfterTest() {
-        Single<DigitalTwinClientResult> single = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERING);
-        DigitalTwinClientResult digitalTwinClientResult = single.blockingGet();
+    public void registerComponentsTest() {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        DigitalTwinClientResult digitalTwinClientResult = testee.registerComponents();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
-
-        DigitalTwinClientResult digitalTwinClientResult2 = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult2).isEqualTo(DIGITALTWIN_CLIENT_ERROR_INTERFACE_ALREADY_REGISTERED);
     }
 
     @Test
-    public void registerInterfacesAsyncOpenThrowExceptionTest() throws Throwable {
+    public void registerComponentsAsyncTwiceParallelTest() throws IOException {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        Single<DigitalTwinClientResult> single1 = testee.registerComponentsAsync();
+        Single<DigitalTwinClientResult> single2 = testee.registerComponentsAsync();
+        assertThat(single1.blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(single2.blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient, times(2)).sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
+    }
+
+    @Test
+    public void registerComponentsAsyncTwiceSequentialTest() {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient, times(2)).sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
+    }
+
+    @Test
+    public void registerComponentsWithoutBindingTest() {
+        DigitalTwinClientResult digitalTwinClientResult = testee.registerComponents();
+        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND);
+    }
+
+    @Test
+    public void registerComponentsAsyncOpenThrowExceptionTest() throws Throwable {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
         final Exception exception = new Exception("OpenThrowException");
         doAnswer(new Answer() {
             @Override
@@ -229,26 +250,22 @@ public class DigitalTwinDeviceClientTest {
           .open();
 
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
+            DigitalTwinClientResult digitalTwinClientResult = testee.registerComponentsAsync()
                                                                     .doOnError(errorConsumer)
                                                                     .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
-            log.debug("Open throw exception", e);
+            log.debug("Open threw exception", e);
         }
 
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
         verify(errorConsumer).accept(eq(exception));
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
         verify(deviceClient, never()).sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
     }
 
     @Test
-    public void registerInterfacesAsyncSendRegistrationMessageFailedTest() throws IOException {
+    public void registerComponentsAsyncFailedTest() throws IOException {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -270,18 +287,14 @@ public class DigitalTwinDeviceClientTest {
         }).when(deviceClient)
           .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
 
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testee.registerComponentsAsync().blockingGet();
+        verify(deviceClient).open();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
-        verify(deviceClient, never()).subscribeToDeviceMethod(any(DeviceMethodCallback.class), any(), any(IotHubEventCallback.class), any());
     }
 
     @Test
-    public void registerInterfacesAsyncSendRegistrationMessageThrowExceptionTest() throws Throwable {
+    public void registerComponentsAsyncThrowExceptionTest() throws Throwable {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
         final Exception exception = new Exception("SendRegistrationMessageThrowException");
         doAnswer(new Answer() {
             @Override
@@ -292,26 +305,60 @@ public class DigitalTwinDeviceClientTest {
           .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
 
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
+            DigitalTwinClientResult digitalTwinClientResult = testee.registerComponentsAsync()
                                                                     .doOnError(errorConsumer)
                                                                     .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
-            log.debug("Send registration message throw exception", e);
+            log.debug("Send registration message threw exception", e);
+        }
+
+        verify(deviceClient).open();
+        verify(errorConsumer).accept(eq(exception));
+    }
+
+    @Test
+    public void subscribeForCommandsAsyncTest() throws IOException {
+        assertThat(testee.subscribeForCommandsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient).subscribeToDeviceMethod(any(DeviceMethodCallback.class), any(), any(IotHubEventCallback.class), any());
+    }
+
+    @Test
+    public void subscribeForCommandsTest() throws IOException {
+        assertThat(testee.subscribeForCommands()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient).subscribeToDeviceMethod(any(DeviceMethodCallback.class), any(), any(IotHubEventCallback.class), any());
+    }
+
+    @Test
+    public void subscribeForCommandsAsyncOpenThrowExceptionTest() throws Throwable {
+        final Exception exception = new Exception("OpenThrowException");
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Exception {
+                throw exception;
+            }
+        }).when(deviceClient)
+          .open();
+
+        try {
+            DigitalTwinClientResult digitalTwinClientResult = testee.subscribeForCommandsAsync()
+                                                                    .doOnError(errorConsumer)
+                                                                    .blockingGet();
+            log.debug("Unexpected result: {}", digitalTwinClientResult);
+            fail("Should throw exception.");
+        } catch (Throwable e) {
+            log.debug("Open threw exception", e);
         }
 
         verify(errorConsumer).accept(eq(exception));
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
         verify(deviceClient, never()).subscribeToDeviceMethod(any(DeviceMethodCallback.class), any(), any(IotHubEventCallback.class), any());
     }
 
     @Test
-    public void registerInterfacesAsyncCommandSubscriptionFailedTest() throws IOException {
+    public void subscribeForCommandsAsyncFailedTest() throws IOException {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -332,18 +379,13 @@ public class DigitalTwinDeviceClientTest {
             }
         }).when(deviceClient)
           .subscribeToDeviceMethod(any(DeviceMethodCallback.class), any(), any(IotHubEventCallback.class), any());
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testee.subscribeForCommandsAsync().blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
-        verify(deviceClient, never()).startDeviceTwin(any(IotHubEventCallback.class), any(), any(TwinPropertyCallBack.class), any());
+        verify(deviceClient).open();
     }
 
     @Test
-    public void registerInterfacesAsyncCommandSubscriptionThrowExceptionTest() throws Throwable {
+    public void subscribeForCommandsAsyncThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("CommandSubscriptionThrowException");
         doAnswer(new Answer() {
             @Override
@@ -354,26 +396,60 @@ public class DigitalTwinDeviceClientTest {
           .subscribeToDeviceMethod(any(DeviceMethodCallback.class), any(), any(IotHubEventCallback.class), any());
 
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
+            DigitalTwinClientResult digitalTwinClientResult = testee.subscribeForCommandsAsync()
                                                                     .doOnError(errorConsumer)
                                                                     .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
-            log.debug("Subscribe command throw exception.", e);
+            log.debug("Subscribe command threw exception.", e);
         }
 
         verify(errorConsumer).accept(eq(exception));
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
+        verify(deviceClient).open();
+    }
+
+    @Test
+    public void subscribeForPropertiesAsyncTest() throws IOException {
+        assertThat(testee.subscribeForPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), any(TwinPropertyCallBack.class), any());
+    }
+
+    @Test
+    public void subscribeForPropertiesTest() throws IOException {
+        assertThat(testee.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), any(TwinPropertyCallBack.class), any());
+    }
+
+    @Test
+    public void subscribeForPropertiesAsyncOpenThrowExceptionTest() throws Throwable {
+        final Exception exception = new Exception("OpenThrowException");
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Exception {
+                throw exception;
+            }
+        }).when(deviceClient)
+          .open();
+
+        try {
+            DigitalTwinClientResult digitalTwinClientResult = testee.subscribeForPropertiesAsync()
+                                                                    .doOnError(errorConsumer)
+                                                                    .blockingGet();
+            log.debug("Unexpected result: {}", digitalTwinClientResult);
+            fail("Should throw exception.");
+        } catch (Throwable e) {
+            log.debug("Open threw exception", e);
+        }
+
+        verify(errorConsumer).accept(eq(exception));
         verify(deviceClient, never()).startDeviceTwin(any(IotHubEventCallback.class), any(), any(TwinPropertyCallBack.class), any());
     }
 
     @Test
-    public void registerInterfacesAsyncTwinSubscriptionFailedTest() throws IOException {
+    public void subscribeForPropertiesAsyncFailedTest() throws IOException {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) {
@@ -394,18 +470,13 @@ public class DigitalTwinDeviceClientTest {
             }
         }).when(deviceClient)
           .startDeviceTwin(any(IotHubEventCallback.class), any(), any(TwinPropertyCallBack.class), any());
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testee.subscribeForPropertiesAsync().blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
-        verify(deviceClient, never()).sendReportedProperties(anySetOf(Property.class));
+        verify(deviceClient).open();
     }
 
     @Test
-    public void registerInterfacesAsyncTwinSubscriptionThrowExceptionTest() throws Throwable {
+    public void subscribeForPropertiesAsyncThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("TwinSubscriptionThrowException");
         doAnswer(new Answer() {
             @Override
@@ -416,56 +487,50 @@ public class DigitalTwinDeviceClientTest {
           .startDeviceTwin(any(IotHubEventCallback.class), any(), any(TwinPropertyCallBack.class), any());
 
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
+            DigitalTwinClientResult digitalTwinClientResult = testee.subscribeForPropertiesAsync()
                                                                     .doOnError(errorConsumer)
                                                                     .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
-            log.debug("Subscribe Twin throw exception.", e);
+            log.debug("Subscribe Twin threw exception.", e);
         }
 
         verify(errorConsumer).accept(eq(exception));
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
-        verify(deviceClient, never()).sendReportedProperties(anySetOf(Property.class));
+        verify(deviceClient).open();
     }
 
     @Test
-    public void registerInterfacesAsyncReportSdkInformationThrowExceptionTest() throws Throwable {
-        final Exception exception = new Exception("ReportSdkInformationThrowException");
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Exception {
-                throw exception;
-            }
-        }).when(deviceClient)
-          .sendReportedProperties(anySetOf(Property.class));
-
-        try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
-                                                                    .doOnError(errorConsumer)
-                                                                    .blockingGet();
-            log.debug("Unexpected result: {}", digitalTwinClientResult);
-            fail("Should throw exception.");
-        } catch (Throwable e) {
-            log.debug("Report Sdk information throw exception.", e);
-        }
-
-        verify(errorConsumer).accept(eq(exception));
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
-        verify(deviceClient, never()).getDeviceTwin();
+    public void readyTest() {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.ready()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(digitalTwinComponent1).ready();
+        verify(digitalTwinComponent2).ready();
     }
 
     @Test
-    public void registerInterfacesAsyncGetTwinThrowExceptionTest() throws Throwable {
+    public void readyWithoutBindingTest() {
+        assertThat(testee.ready()).isEqualTo(DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND);
+        verify(digitalTwinComponent1, never()).ready();
+        verify(digitalTwinComponent2, never()).ready();
+    }
+
+    @Test
+    public void syncupPropertiesAsyncTest() throws IOException {
+        assertThat(testee.syncupPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient).getDeviceTwin();
+    }
+
+    @Test
+    public void syncupPropertiesTest() throws IOException {
+        assertThat(testee.syncupProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient).getDeviceTwin();
+    }
+
+    @Test
+    public void syncupPropertiesAsyncThrowExceptionTest() throws Throwable {
         final Exception exception = new Exception("GetTwinThrowException");
         doAnswer(new Answer() {
             @Override
@@ -476,83 +541,27 @@ public class DigitalTwinDeviceClientTest {
           .getDeviceTwin();
 
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
+            DigitalTwinClientResult digitalTwinClientResult = testee.syncupPropertiesAsync()
                                                                     .doOnError(errorConsumer)
                                                                     .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
-            log.debug("Get twin throw exception.", e);
+            log.debug("Get twin threw exception.", e);
         }
 
         verify(errorConsumer).accept(eq(exception));
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient2, never()).setDigitalTwinDeviceClient(any(DigitalTwinDeviceClient.class));
-        verify(digitalTwinInterfaceClient1, never()).onRegistered();
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
-    }
-
-    @Test
-    public void registerInterfacesAsyncOnRegistered1ThrowExceptionTest() throws Throwable {
-        final Exception exception = new Exception("InterfaceClient1OnRegisteredThrowExceptionThrowException");
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Exception {
-                throw exception;
-            }
-        }).when(digitalTwinInterfaceClient1)
-          .onRegistered();
-
-        try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
-                                                                    .doOnError(errorConsumer)
-                                                                    .blockingGet();
-            log.debug("Unexpected result: {}", digitalTwinClientResult);
-            fail("Should throw exception.");
-        } catch (Throwable e) {
-            log.debug("Interface client 1 throw exception when on registered called.", e);
-        }
-
-        verify(errorConsumer).accept(eq(exception));
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient2, never()).onRegistered();
-    }
-
-    @Test
-    public void registerInterfacesAsyncOnRegistered2ThrowExceptionTest() throws Throwable {
-        final Exception exception = new Exception("InterfaceClient2OnRegisteredThrowExceptionThrowException");
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Exception {
-                throw exception;
-            }
-        }).when(digitalTwinInterfaceClient2)
-          .onRegistered();
-
-        try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients)
-                                                                    .doOnError(errorConsumer)
-                                                                    .blockingGet();
-            log.debug("Unexpected result: {}", digitalTwinClientResult);
-            fail("Should throw exception.");
-        } catch (Throwable e) {
-            log.debug("Interface client 2 throw exception when on registered called.", e);
-        }
-
-        verify(errorConsumer).accept(eq(exception));
-        assertThat(testee.getRegistrationStatus()).isEqualTo(UNREGISTERED);
-        verify(digitalTwinInterfaceClient1).onRegistered();
+        verify(deviceClient).open();
     }
 
     @Test
     public void sendTelemetryAsyncTest() {
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_INTERFACE_INSTANCE_1, TELEMETRY_NAME, TEST_PAYLOAD).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TELEMETRY_NAME, TEST_PAYLOAD).blockingSingle();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
-        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE)).isEqualTo(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
+        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
         assertThat(message.getProperty(PROPERTY_MESSAGE_SCHEMA)).isEqualTo(TELEMETRY_NAME);
         String expectedPayload = String.format("{\"%s\":%s}", TELEMETRY_NAME, TEST_PAYLOAD);
         assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(expectedPayload);
@@ -576,11 +585,11 @@ public class DigitalTwinDeviceClientTest {
         }).when(deviceClient)
           .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_INTERFACE_INSTANCE_1, TELEMETRY_NAME, TEST_PAYLOAD).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TELEMETRY_NAME, TEST_PAYLOAD).blockingSingle();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
-        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE)).isEqualTo(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
+        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
         assertThat(message.getProperty(PROPERTY_MESSAGE_SCHEMA)).isEqualTo(TELEMETRY_NAME);
         String expectedPayload = String.format("{\"%s\":%s}", TELEMETRY_NAME, TEST_PAYLOAD);
         assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(expectedPayload);
@@ -598,19 +607,19 @@ public class DigitalTwinDeviceClientTest {
           .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
 
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_INTERFACE_INSTANCE_1, TELEMETRY_NAME, TEST_PAYLOAD)
+            DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TELEMETRY_NAME, TEST_PAYLOAD)
                                                                     .doOnError(errorConsumer)
                                                                     .blockingSingle();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
-            log.debug("Send event throw exception.", e);
+            log.debug("Send event threw exception.", e);
         }
         verify(errorConsumer).accept(eq(exception));
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
-        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE)).isEqualTo(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
+        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
         assertThat(message.getProperty(PROPERTY_MESSAGE_SCHEMA)).isEqualTo(TELEMETRY_NAME);
         String expectedPayload = String.format("{\"%s\":%s}", TELEMETRY_NAME, TEST_PAYLOAD);
         assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(expectedPayload);
@@ -625,11 +634,11 @@ public class DigitalTwinDeviceClientTest {
                                                                                         .statusCode(STATUS_CODE_COMPLETED)
                                                                                         .payload(TEST_PAYLOAD)
                                                                                         .build();
-        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(DIGITAL_TWIN_INTERFACE_INSTANCE_1, asyncCommandUpdate).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(DIGITAL_TWIN_COMPONENT_NAME_1, asyncCommandUpdate).blockingSingle();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
-        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE)).isEqualTo(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
+        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
         assertThat(message.getProperty(PROPERTY_COMMAND_NAME)).isEqualTo(COMMAND_NAME);
         assertThat(message.getProperty(PROPERTY_REQUEST_ID)).isEqualTo(REQUEST_ID);
         assertThat(message.getProperty(PROPERTY_STATUS)).isEqualTo(String.valueOf(STATUS_CODE_COMPLETED));
@@ -660,11 +669,11 @@ public class DigitalTwinDeviceClientTest {
                                                                                         .statusCode(STATUS_CODE_COMPLETED)
                                                                                         .payload(TEST_PAYLOAD)
                                                                                         .build();
-        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(DIGITAL_TWIN_INTERFACE_INSTANCE_1, asyncCommandUpdate).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(DIGITAL_TWIN_COMPONENT_NAME_1, asyncCommandUpdate).blockingSingle();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
-        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE)).isEqualTo(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
+        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
         assertThat(message.getProperty(PROPERTY_COMMAND_NAME)).isEqualTo(COMMAND_NAME);
         assertThat(message.getProperty(PROPERTY_REQUEST_ID)).isEqualTo(REQUEST_ID);
         assertThat(message.getProperty(PROPERTY_STATUS)).isEqualTo(String.valueOf(STATUS_CODE_COMPLETED));
@@ -690,19 +699,19 @@ public class DigitalTwinDeviceClientTest {
                                                                                             .statusCode(STATUS_CODE_COMPLETED)
                                                                                             .payload(TEST_PAYLOAD)
                                                                                             .build();
-            DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(DIGITAL_TWIN_INTERFACE_INSTANCE_1, asyncCommandUpdate)
+            DigitalTwinClientResult digitalTwinClientResult = testee.updateAsyncCommandStatusAsync(DIGITAL_TWIN_COMPONENT_NAME_1, asyncCommandUpdate)
                                                                     .doOnError(errorConsumer)
                                                                     .blockingSingle();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
             fail("Should throw exception.");
         } catch (Throwable e) {
-            log.debug("Update async command status throw exception when on registered called.", e);
+            log.debug("Update async command status threw exception when on registered called.", e);
         }
         verify(errorConsumer).accept(eq(exception));
 
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
-        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_INTERFACE_INSTANCE)).isEqualTo(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
+        assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
         assertThat(message.getProperty(PROPERTY_COMMAND_NAME)).isEqualTo(COMMAND_NAME);
         assertThat(message.getProperty(PROPERTY_REQUEST_ID)).isEqualTo(REQUEST_ID);
         assertThat(message.getProperty(PROPERTY_STATUS)).isEqualTo(String.valueOf(STATUS_CODE_COMPLETED));
@@ -710,20 +719,28 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
+    public void reportPropertiesAsyncTest() throws IOException {
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.reportPropertiesAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TEST_PROPERTIES).blockingSingle()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        verify(deviceClient).open();
+        verify(deviceClient).sendReportedProperties(anySetOf(Property.class));
+    }
+
+    @Test
     public void commandDispatcherTest() throws Exception {
         ArgumentCaptor<DeviceMethodCallback> methodCallbackCaptor = ArgumentCaptor.forClass(DeviceMethodCallback.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForCommandsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).subscribeToDeviceMethod(methodCallbackCaptor.capture(), any(), any(IotHubEventCallback.class), any());
         DeviceMethodCallback methodCallback = methodCallbackCaptor.getValue();
         methodCallback.call(
-                String.format("%s%s*%s", DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX, DIGITAL_TWIN_INTERFACE_INSTANCE_1, COMMAND_NAME),
+                String.format("%s%s*%s", DIGITAL_TWIN_COMPONENT_NAME_PREFIX, DIGITAL_TWIN_COMPONENT_NAME_1, COMMAND_NAME),
                 COMMAND_PAYLOAD,
                 context
         );
         ArgumentCaptor<DigitalTwinCommandRequest> commandRequestCaptor = ArgumentCaptor.forClass(DigitalTwinCommandRequest.class);
-        verify(digitalTwinInterfaceClient1).onCommandReceived(commandRequestCaptor.capture());
+        verify(digitalTwinComponent1).onCommandReceived(commandRequestCaptor.capture());
         DigitalTwinCommandRequest commandRequest = commandRequestCaptor.getValue();
         assertThat(commandRequest.getCommandName()).isEqualTo(COMMAND_NAME);
         assertThat(commandRequest.getRequestId()).isEqualTo(REQUEST_ID);
@@ -731,11 +748,11 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void commandDispatcherWithoutInterfaceInstanceNameTest() throws IOException {
+    public void commandDispatcherWithoutComponentNameTest() throws IOException {
         ArgumentCaptor<DeviceMethodCallback> methodCallbackCaptor = ArgumentCaptor.forClass(DeviceMethodCallback.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForCommandsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).subscribeToDeviceMethod(methodCallbackCaptor.capture(), any(), any(IotHubEventCallback.class), any());
         DeviceMethodCallback methodCallback = methodCallbackCaptor.getValue();
         DeviceMethodData methodData = methodCallback.call(
@@ -743,45 +760,45 @@ public class DigitalTwinDeviceClientTest {
                 COMMAND_PAYLOAD,
                 context
         );
-        verify(digitalTwinInterfaceClient1, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
-        verify(digitalTwinInterfaceClient2, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
+        verify(digitalTwinComponent1, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
+        verify(digitalTwinComponent2, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
         assertThat(methodData.getStatus()).isEqualTo(STATUS_CODE_NOT_IMPLEMENTED);
     }
 
     @Test
-    public void commandDispatcherWithUnknownInterfaceInstanceNameTest() throws IOException {
+    public void commandDispatcherWithUnknownComponentNameTest() throws IOException {
         ArgumentCaptor<DeviceMethodCallback> methodCallbackCaptor = ArgumentCaptor.forClass(DeviceMethodCallback.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForCommandsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).subscribeToDeviceMethod(methodCallbackCaptor.capture(), any(), any(IotHubEventCallback.class), any());
         DeviceMethodCallback methodCallback = methodCallbackCaptor.getValue();
         DeviceMethodData methodData = methodCallback.call(
-                String.format("%s%s*%s", DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX, DIGITAL_TWIN_INTERFACE_INSTANCE_UNKNOWN, COMMAND_NAME),
+                String.format("%s%s*%s", DIGITAL_TWIN_COMPONENT_NAME_PREFIX, DIGITAL_TWIN_COMPONENT_NAME_UNKNOWN, COMMAND_NAME),
                 COMMAND_PAYLOAD,
                 context
         );
-        verify(digitalTwinInterfaceClient1, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
-        verify(digitalTwinInterfaceClient2, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
+        verify(digitalTwinComponent1, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
+        verify(digitalTwinComponent2, never()).onCommandReceived(any(DigitalTwinCommandRequest.class));
         assertThat(methodData.getStatus()).isEqualTo(STATUS_CODE_NOT_IMPLEMENTED);
     }
 
     @Test
     public void propertyDispatcherReportedTest() throws IOException {
         ArgumentCaptor<TwinPropertyCallBack> twinPropertyCallbackCaptor = ArgumentCaptor.forClass(TwinPropertyCallBack.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), twinPropertyCallbackCaptor.capture(), any());
         Property property = mock(Property.class);
         JsonElement propertyValue = new JsonParser().parse(TEST_PAYLOAD);
-        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX, DIGITAL_TWIN_INTERFACE_INSTANCE_1));
+        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_COMPONENT_NAME_PREFIX, DIGITAL_TWIN_COMPONENT_NAME_1));
         when(property.getIsReported()).thenReturn(true);
         when(property.getValue()).thenReturn(propertyValue);
         TwinPropertyCallBack twinPropertyCallBack = twinPropertyCallbackCaptor.getValue();
         twinPropertyCallBack.TwinPropertyCallBack(property, context);
         ArgumentCaptor<DigitalTwinPropertyUpdate> propertyUpdateCaptor = ArgumentCaptor.forClass(DigitalTwinPropertyUpdate.class);
-        verify(digitalTwinInterfaceClient1, atLeastOnce()).onPropertyUpdate(propertyUpdateCaptor.capture());
+        verify(digitalTwinComponent1, atLeastOnce()).onPropertyUpdate(propertyUpdateCaptor.capture());
         List<DigitalTwinPropertyUpdate> propertyUpdates = propertyUpdateCaptor.getAllValues();
         Map<String, String> actualProperties = new HashMap<>();
         for (DigitalTwinPropertyUpdate propertyUpdate : propertyUpdates) {
@@ -800,20 +817,20 @@ public class DigitalTwinDeviceClientTest {
     @Test
     public void propertyDispatcherDesiredTest() throws IOException {
         ArgumentCaptor<TwinPropertyCallBack> twinPropertyCallbackCaptor = ArgumentCaptor.forClass(TwinPropertyCallBack.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), twinPropertyCallbackCaptor.capture(), any());
         Property property = mock(Property.class);
         JsonElement propertyValue = new JsonParser().parse(TEST_PAYLOAD);
-        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX, DIGITAL_TWIN_INTERFACE_INSTANCE_1));
+        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_COMPONENT_NAME_PREFIX, DIGITAL_TWIN_COMPONENT_NAME_1));
         when(property.getIsReported()).thenReturn(false);
         when(property.getValue()).thenReturn(propertyValue);
         when(property.getVersion()).thenReturn(DESIRED_VERSION);
         TwinPropertyCallBack twinPropertyCallBack = twinPropertyCallbackCaptor.getValue();
         twinPropertyCallBack.TwinPropertyCallBack(property, context);
         ArgumentCaptor<DigitalTwinPropertyUpdate> propertyUpdateCaptor = ArgumentCaptor.forClass(DigitalTwinPropertyUpdate.class);
-        verify(digitalTwinInterfaceClient1, atLeastOnce()).onPropertyUpdate(propertyUpdateCaptor.capture());
+        verify(digitalTwinComponent1, atLeastOnce()).onPropertyUpdate(propertyUpdateCaptor.capture());
         List<DigitalTwinPropertyUpdate> propertyUpdates = propertyUpdateCaptor.getAllValues();
         Map<String, String> actualProperties = new HashMap<>();
         for (DigitalTwinPropertyUpdate propertyUpdate : propertyUpdates) {
@@ -830,69 +847,69 @@ public class DigitalTwinDeviceClientTest {
     }
 
     @Test
-    public void propertyDispatcherWithoutInterfaceInstanceNameTest() throws IOException {
+    public void propertyDispatcherWithoutComponentNameTest() throws IOException {
         ArgumentCaptor<TwinPropertyCallBack> twinPropertyCallbackCaptor = ArgumentCaptor.forClass(TwinPropertyCallBack.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), twinPropertyCallbackCaptor.capture(), any());
         Property property = mock(Property.class);
         JsonElement propertyValue = new JsonParser().parse(TEST_PAYLOAD);
-        when(property.getKey()).thenReturn(DIGITAL_TWIN_INTERFACE_INSTANCE_1);
+        when(property.getKey()).thenReturn(DIGITAL_TWIN_COMPONENT_NAME_1);
         when(property.getValue()).thenReturn(propertyValue);
         TwinPropertyCallBack twinPropertyCallBack = twinPropertyCallbackCaptor.getValue();
         twinPropertyCallBack.TwinPropertyCallBack(property, context);
-        verify(digitalTwinInterfaceClient1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
-        verify(digitalTwinInterfaceClient2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
     }
 
     @Test
     public void propertyDispatcherNonObjectTest() throws IOException {
         ArgumentCaptor<TwinPropertyCallBack> twinPropertyCallbackCaptor = ArgumentCaptor.forClass(TwinPropertyCallBack.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), twinPropertyCallbackCaptor.capture(), any());
         Property property = mock(Property.class);
         JsonElement propertyValue = new JsonPrimitive(true);
-        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX, DIGITAL_TWIN_INTERFACE_INSTANCE_1));
+        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_COMPONENT_NAME_PREFIX, DIGITAL_TWIN_COMPONENT_NAME_1));
         when(property.getValue()).thenReturn(propertyValue);
         TwinPropertyCallBack twinPropertyCallBack = twinPropertyCallbackCaptor.getValue();
         twinPropertyCallBack.TwinPropertyCallBack(property, context);
-        verify(digitalTwinInterfaceClient1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
-        verify(digitalTwinInterfaceClient2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
     }
 
     @Test
     public void propertyDispatcherNonJsonTest() throws IOException {
         ArgumentCaptor<TwinPropertyCallBack> twinPropertyCallbackCaptor = ArgumentCaptor.forClass(TwinPropertyCallBack.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), twinPropertyCallbackCaptor.capture(), any());
         Property property = mock(Property.class);
-        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX, DIGITAL_TWIN_INTERFACE_INSTANCE_1));
+        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_COMPONENT_NAME_PREFIX, DIGITAL_TWIN_COMPONENT_NAME_1));
         when(property.getValue()).thenReturn(REQUEST_ID);
         TwinPropertyCallBack twinPropertyCallBack = twinPropertyCallbackCaptor.getValue();
         twinPropertyCallBack.TwinPropertyCallBack(property, context);
-        verify(digitalTwinInterfaceClient1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
-        verify(digitalTwinInterfaceClient2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
     }
 
     @Test
-    public void propertyDispatcherWithUnknownInterfaceInstanceNameTest() throws IOException {
+    public void propertyDispatcherWithUnknownComponentNameTest() throws IOException {
         ArgumentCaptor<TwinPropertyCallBack> twinPropertyCallbackCaptor = ArgumentCaptor.forClass(TwinPropertyCallBack.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.registerInterfacesAsync(DIGITAL_TWIN_DCM_ID, digitalTwinInterfaceClients).blockingGet();
-        assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(testee.getRegistrationStatus()).isEqualTo(REGISTERED);
+        assertThat(testee.bindComponents(digitalTwinComponents)).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.registerComponentsAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        assertThat(testee.subscribeForPropertiesAsync().blockingGet()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).startDeviceTwin(any(IotHubEventCallback.class), any(), twinPropertyCallbackCaptor.capture(), any());
         Property property = mock(Property.class);
         JsonElement propertyValue = new JsonParser().parse(TEST_PAYLOAD);
-        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_INTERFACE_INSTANCE_NAME_PREFIX, DIGITAL_TWIN_INTERFACE_INSTANCE_UNKNOWN));
+        when(property.getKey()).thenReturn(String.format("%s%s", DIGITAL_TWIN_COMPONENT_NAME_PREFIX, DIGITAL_TWIN_COMPONENT_NAME_UNKNOWN));
         when(property.getValue()).thenReturn(propertyValue);
         TwinPropertyCallBack twinPropertyCallBack = twinPropertyCallbackCaptor.getValue();
         twinPropertyCallBack.TwinPropertyCallBack(property, context);
-        verify(digitalTwinInterfaceClient1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
-        verify(digitalTwinInterfaceClient2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent1, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
+        verify(digitalTwinComponent2, never()).onPropertyUpdate(any(DigitalTwinPropertyUpdate.class));
     }
 }

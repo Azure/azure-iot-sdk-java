@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator;
 
-import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinInterfaceClient;
+import com.microsoft.azure.sdk.iot.digitaltwin.device.AbstractDigitalTwinComponent;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinAsyncCommandUpdate;
 import com.microsoft.azure.sdk.iot.digitaltwin.device.model.DigitalTwinCommandRequest;
@@ -19,7 +19,7 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSeri
 import static java.util.Collections.singletonList;
 
 @Slf4j
-public class TestInterfaceInstance1 extends AbstractDigitalTwinInterfaceClient {
+public class TestComponent1 extends AbstractDigitalTwinComponent {
     public static final String TEST_INTERFACE_ID = "urn:contoso:azureiot:sdk:testinterface:1";
     public static final String TELEMETRY_NAME_INTEGER = "telemetryWithIntegerValue";
     public static final String SYNC_COMMAND_WITH_PAYLOAD = "syncCommand";
@@ -31,16 +31,8 @@ public class TestInterfaceInstance1 extends AbstractDigitalTwinInterfaceClient {
     private static final String ASYNC_COMMAND_PROGRESS_MESSAGE_FORMAT = "Progress of %s [%s]: %d";
     private static final String ASYNC_COMMAND_COMPLETED_MESSAGE_FORMAT = "Progress of %s [%s]: COMPLETED";
 
-    private static String interfaceInstanceName;
-
-    public TestInterfaceInstance1(@NonNull String digitalTwinInterfaceInstanceName) {
-        super(digitalTwinInterfaceInstanceName, TEST_INTERFACE_ID);
-        interfaceInstanceName = digitalTwinInterfaceInstanceName;
-    }
-
-    @Override
-    public void onRegistered() {
-        log.debug("Interface Instance registered with name: {}", interfaceInstanceName);
+    public TestComponent1(@NonNull String digitalTwinComponentName) {
+        super(digitalTwinComponentName, TEST_INTERFACE_ID);
     }
 
     public Single<DigitalTwinClientResult> sendTelemetry(@NonNull String telemetryName, @NonNull Object telemetryValue) throws IOException {
