@@ -48,7 +48,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         this.suppliedConnectionStatusChangeCallback = new Pair<>(callback, callbackContext);
     }
 
-    public void open() {
+    public void open() throws IOException {
         synchronized (lock) {
             if(connectionStatus == ConnectionStatus.DISCONNECTED) {
                 connectionStatus = ConnectionStatus.CONNECTING;
@@ -59,7 +59,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         doConnect();
     }
 
-    private void doConnect() {
+    private void doConnect() throws IOException {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         while (connectionStatus == ConnectionStatus.CONNECTING) {
             synchronized (lock) {
@@ -77,7 +77,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                         }
                         log.error("[connect] - Non-retryable exception thrown while opening DeviceClient instance: ", ex);
                         connectionStatus = ConnectionStatus.DISCONNECTED;
-                        break;
+                        throw ex;
                     }
                 }
             }
@@ -150,7 +150,11 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                                 return;
                             }
                         }
-                        doConnect();
+                        try {
+                            doConnect();
+                        } catch (IOException e) {
+                            log.error("[reconnect] - Exception thrown while opening DeviceClient instance: ", e);
+                        }
                     }
                 }).start();
             } else {
