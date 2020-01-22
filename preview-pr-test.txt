@@ -1,0 +1,4 @@
+CODEOWNERS    doc		pom.xml		     SECURITY.md
+deps	      iot-e2e-tests	preview-pr-test.txt  service
+device	      LICENSE		provisioning	     versions.json
+digital-twin  lts_branches.png	readme.md	     vsts
