@@ -22,6 +22,18 @@
         <module>digital-twin</module>
     </modules>
     <properties>
+        <iot-device-client-artifact-id>iot-device-client-preview</iot-device-client-artifact-id>
+        <iot-service-client-artifact-id>iot-service-client-preview</iot-service-client-artifact-id>
+        <iot-deps-artifact-id>iot-deps-preview</iot-deps-artifact-id>
+        <provisioning-device-client-artifact-id>provisioning-device-client-preview</provisioning-device-client-artifact-id>
+        <provisioning-service-client-artifact-id>provisioning-service-client-preview</provisioning-service-client-artifact-id>
+        <security-provider-artifact-id>security-provider-preview</security-provider-artifact-id>
+        <tpm-provider-emulator-artifact-id>tpm-provider-emulator-preview</tpm-provider-emulator-artifact-id>
+        <tpm-provider-artifact-id>tpm-provider-preview</tpm-provider-artifact-id>
+        <dice-provider-emulator-artifact-id>dice-provider-emulator-preview</dice-provider-emulator-artifact-id>
+        <dice-provider-artifact-id>dice-provider-preview</dice-provider-artifact-id>
+        <x509-provider-artifact-id>x509-provider-preview</x509-provider-artifact-id>
+
         <iot-device-client-version>1.0.1</iot-device-client-version>
         <iot-service-client-version>1.0.1</iot-service-client-version>
         <iot-deps-version>1.0.1</iot-deps-version>

@@ -12,7 +12,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-    <artifactId>x509-provider-preview</artifactId>
+    <artifactId>${x509-provider-artifact-id}</artifactId>
     <name>Provisioning Security X509 Provider</name>
     <version>${x509-provider-version}</version>
     <packaging>jar</packaging>
@@ -42,7 +42,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>security-provider-preview</artifactId>
+            <artifactId>${security-provider-artifact-id}</artifactId>
             <version>${security-provider-version}</version>
         </dependency>
         <dependency>
