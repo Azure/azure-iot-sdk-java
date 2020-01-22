@@ -38,7 +38,7 @@ public class DeviceClientManagerSample {
 
         deviceClientManager = new DeviceClientManager(client);
         deviceClientManager.setOperationTimeout(DEVICE_OPERATION_TIMEOUT_IN_MINUTES);
-        deviceClientManager.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeLogger(), deviceClientManager);
+        deviceClientManager.registerConnectionStatusChangeCallback(null, new Object());
 
         deviceClientManager.open();
         log.debug("Opened connection to IoT Hub.");
