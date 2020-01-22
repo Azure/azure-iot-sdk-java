@@ -73,11 +73,11 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                     catch (Exception ex) {
                         if (ex.getCause() instanceof TransportException && ((TransportException) ex.getCause()).isRetryable()) {
                             log.warn("[connect] - Transport exception thrown while opening DeviceClient instance, retrying: ", ex);
-                            continue;
+                        } else {
+                            log.error("[connect] - Non-retryable exception thrown while opening DeviceClient instance: ", ex);
+                            connectionStatus = ConnectionStatus.DISCONNECTED;
+                            throw ex;
                         }
-                        log.error("[connect] - Non-retryable exception thrown while opening DeviceClient instance: ", ex);
-                        connectionStatus = ConnectionStatus.DISCONNECTED;
-                        throw ex;
                     }
                 }
             }
