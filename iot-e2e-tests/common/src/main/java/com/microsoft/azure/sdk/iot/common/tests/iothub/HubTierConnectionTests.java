@@ -34,6 +34,7 @@ import static junit.framework.TestCase.fail;
 public class HubTierConnectionTests extends IotHubIntegrationTest
 {
     protected static final long WAIT_FOR_DISCONNECT_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    protected static final long DEVICE_CLIENT_OPERATION_TIMEOUT = 30 * 1000; // 30secs
 
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 180000;
@@ -204,6 +205,7 @@ public class HubTierConnectionTests extends IotHubIntegrationTest
             }
         }, null);
 
+        testInstance.client.setOperationTimeout(DEVICE_CLIENT_OPERATION_TIMEOUT);
         testInstance.client.open();
 
         //act
