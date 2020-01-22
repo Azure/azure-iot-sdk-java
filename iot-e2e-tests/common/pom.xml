@@ -25,7 +25,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-device-client-preview</artifactId>
+            <artifactId>${iot-device-client-artifact-id}</artifactId>
             <version>${iot-device-client-version}</version>
         </dependency>
         <!-- test dependencies -->
@@ -46,30 +46,30 @@
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-service-client-preview</artifactId>
+            <artifactId>${iot-service-client-artifact-id}</artifactId>
             <version>${iot-service-client-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-device-client-preview</artifactId>
+            <artifactId>${provisioning-device-client-artifact-id}</artifactId>
             <version>${provisioning-device-client-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-service-client-preview</artifactId>
+            <artifactId>${provisioning-service-client-artifact-id}</artifactId>
             <version>${provisioning-service-client-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>tpm-provider-emulator-preview</artifactId>
+            <artifactId>${tpm-provider-emulator-artifact-id}</artifactId>
             <version>${tpm-provider-emulator-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>x509-provider-preview</artifactId>
+            <artifactId>${x509-provider-artifact-id}</artifactId>
             <version>${x509-provider-version}</version>
             <scope>compile</scope>
         </dependency>

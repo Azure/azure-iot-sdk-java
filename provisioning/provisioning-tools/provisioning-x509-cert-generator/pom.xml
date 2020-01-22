@@ -23,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>dice-provider-emulator-preview</artifactId>
+            <artifactId>${dice-provider-emulator-artifact-id}</artifactId>
             <version>${dice-provider-emulator-version}</version>
         </dependency>
     </dependencies>
