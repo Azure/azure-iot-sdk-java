@@ -19,20 +19,24 @@ public class AmqpNotFoundException extends ProtocolException
     public AmqpNotFoundException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public AmqpNotFoundException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public AmqpNotFoundException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public AmqpNotFoundException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 }

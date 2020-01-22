@@ -19,24 +19,20 @@ public class AmqpConnectionRedirectException extends ProtocolException
     public AmqpConnectionRedirectException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpConnectionRedirectException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpConnectionRedirectException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpConnectionRedirectException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

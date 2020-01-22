@@ -10,20 +10,24 @@ public class ServiceUnknownException extends IotHubServiceException
     public ServiceUnknownException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public ServiceUnknownException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public ServiceUnknownException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public ServiceUnknownException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 }

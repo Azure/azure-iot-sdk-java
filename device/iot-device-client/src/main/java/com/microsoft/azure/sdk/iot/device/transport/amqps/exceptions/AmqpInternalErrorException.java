@@ -19,24 +19,20 @@ public class AmqpInternalErrorException extends ProtocolException
     public AmqpInternalErrorException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpInternalErrorException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpInternalErrorException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpInternalErrorException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

@@ -19,20 +19,24 @@ public class AmqpNotImplementedException extends ProtocolException
     public AmqpNotImplementedException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public AmqpNotImplementedException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public AmqpNotImplementedException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public AmqpNotImplementedException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 }

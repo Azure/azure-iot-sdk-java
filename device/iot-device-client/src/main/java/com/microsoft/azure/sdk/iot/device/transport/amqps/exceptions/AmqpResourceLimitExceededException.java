@@ -19,20 +19,24 @@ public class AmqpResourceLimitExceededException extends ProtocolException
     public AmqpResourceLimitExceededException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public AmqpResourceLimitExceededException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public AmqpResourceLimitExceededException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public AmqpResourceLimitExceededException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 }

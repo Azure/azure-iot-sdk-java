@@ -12,25 +12,21 @@ public class ServerBusyException extends IotHubServiceException
     public ServerBusyException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public ServerBusyException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public ServerBusyException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public ServerBusyException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 
     @Override

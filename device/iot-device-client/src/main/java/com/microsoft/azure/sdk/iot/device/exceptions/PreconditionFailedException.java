@@ -12,21 +12,25 @@ public class PreconditionFailedException extends IotHubServiceException
     public PreconditionFailedException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public PreconditionFailedException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public PreconditionFailedException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public PreconditionFailedException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 
     @Override

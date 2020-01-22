@@ -19,24 +19,20 @@ public class AmqpLinkDetachForcedException extends ProtocolException
     public AmqpLinkDetachForcedException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpLinkDetachForcedException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpLinkDetachForcedException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpLinkDetachForcedException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

@@ -19,20 +19,24 @@ public class AmqpResourceDeletedException extends ProtocolException
     public AmqpResourceDeletedException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public AmqpResourceDeletedException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public AmqpResourceDeletedException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public AmqpResourceDeletedException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 }

@@ -19,24 +19,20 @@ public class AmqpConnectionForcedException extends ProtocolException
     public AmqpConnectionForcedException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpConnectionForcedException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpConnectionForcedException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpConnectionForcedException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

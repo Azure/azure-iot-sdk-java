@@ -9,7 +9,7 @@ import static com.microsoft.azure.sdk.iot.device.exceptions.TransportException.I
 
 public class TransportException extends DeviceClientException
 {
-    protected boolean isRetryable = false;
+    protected boolean isRetryable = true;
 
     public enum IotHubService
     {

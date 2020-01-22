@@ -20,24 +20,20 @@ public class MqttServerUnavailableException extends ProtocolException
     public MqttServerUnavailableException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public MqttServerUnavailableException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public MqttServerUnavailableException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public MqttServerUnavailableException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

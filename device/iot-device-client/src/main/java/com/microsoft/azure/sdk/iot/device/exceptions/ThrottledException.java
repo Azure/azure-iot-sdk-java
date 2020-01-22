@@ -12,25 +12,21 @@ public class ThrottledException extends IotHubServiceException
     public ThrottledException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public ThrottledException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public ThrottledException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public ThrottledException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 
     @Override

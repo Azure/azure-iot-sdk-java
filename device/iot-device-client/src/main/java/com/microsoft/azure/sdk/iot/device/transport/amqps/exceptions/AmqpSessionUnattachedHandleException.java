@@ -19,24 +19,20 @@ public class AmqpSessionUnattachedHandleException extends ProtocolException
     public AmqpSessionUnattachedHandleException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpSessionUnattachedHandleException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpSessionUnattachedHandleException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpSessionUnattachedHandleException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

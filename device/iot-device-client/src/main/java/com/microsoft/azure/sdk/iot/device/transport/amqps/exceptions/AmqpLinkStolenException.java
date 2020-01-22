@@ -19,24 +19,20 @@ public class AmqpLinkStolenException extends ProtocolException
     public AmqpLinkStolenException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpLinkStolenException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpLinkStolenException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpLinkStolenException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

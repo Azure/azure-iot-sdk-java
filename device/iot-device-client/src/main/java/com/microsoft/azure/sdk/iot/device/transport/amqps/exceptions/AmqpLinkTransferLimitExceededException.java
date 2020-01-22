@@ -19,24 +19,20 @@ public class AmqpLinkTransferLimitExceededException extends ProtocolException
     public AmqpLinkTransferLimitExceededException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpLinkTransferLimitExceededException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpLinkTransferLimitExceededException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpLinkTransferLimitExceededException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

@@ -19,24 +19,20 @@ public class AmqpSessionWindowViolationException extends ProtocolException
     public AmqpSessionWindowViolationException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpSessionWindowViolationException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpSessionWindowViolationException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpSessionWindowViolationException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

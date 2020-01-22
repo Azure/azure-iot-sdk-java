@@ -19,24 +19,20 @@ public class AmqpSessionHandleInUseException extends ProtocolException
     public AmqpSessionHandleInUseException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpSessionHandleInUseException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpSessionHandleInUseException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpSessionHandleInUseException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }

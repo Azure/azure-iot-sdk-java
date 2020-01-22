@@ -17,24 +17,20 @@ public class AmqpConnectionThrottledException extends ProtocolException
     public AmqpConnectionThrottledException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpConnectionThrottledException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpConnectionThrottledException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpConnectionThrottledException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }
