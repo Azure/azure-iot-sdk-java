@@ -13,10 +13,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <artifactId>${tpm-provider-emulator-artifact-id}</artifactId>
 =======
     <artifactId>tpm-provider-emulator-preview</artifactId>
 >>>>>>> 4999a774e... refactor(all): Rename all published artifacts with -preview suffix
+=======
+    <artifactId>${tpm-provider-emulator-artifact-id}</artifactId>
+>>>>>>> ab6b533e0... refactor(pom): Factor out published artifactids into master pom
     <name>Provisioning Security TPM Emulator Provider</name>
     <version>${tpm-provider-emulator-version}</version>
     <packaging>jar</packaging>

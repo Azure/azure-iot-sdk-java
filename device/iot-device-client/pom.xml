@@ -8,10 +8,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <artifactId>${iot-device-client-artifact-id}</artifactId>
 =======
     <artifactId>iot-device-client-preview</artifactId>
 >>>>>>> 4999a774e... refactor(all): Rename all published artifacts with -preview suffix
+=======
+    <artifactId>${iot-device-client-artifact-id}</artifactId>
+>>>>>>> ab6b533e0... refactor(pom): Factor out published artifactids into master pom
     <name>IoT Hub Java Device Client</name>
     <version>${iot-device-client-version}</version>
     <description>The Microsoft Azure IoT Device SDK for Java</description>
