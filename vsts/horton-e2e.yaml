@@ -1,3 +1,7 @@
+pr:
+  - master
+  - preview
+
 variables:
   Horton.FrameworkRoot: $(Agent.BuildDirectory)/e2e-fx
   Horton.FrameworkRef: master
