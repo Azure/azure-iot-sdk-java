@@ -45,7 +45,11 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     }
 
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
-        this.suppliedConnectionStatusChangeCallback = new Pair<>(callback, callbackContext);
+        if (callback != null) {
+            this.suppliedConnectionStatusChangeCallback = new Pair<>(callback, callbackContext);
+        } else {
+            this.suppliedConnectionStatusChangeCallback = null;
+        }
     }
 
     public void open() throws IOException {
@@ -110,17 +114,15 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     @Override
     public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext) {
         Pair<IotHubConnectionStatusChangeCallback, Object> suppliedCallbackPair = this.suppliedConnectionStatusChangeCallback;
-        IotHubConnectionStatusChangeCallback suppliedCallback = suppliedCallbackPair.getKey();
-        Object suppliedCallbackContext = suppliedCallbackPair.getValue();
 
         if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
-            if (suppliedCallback != null) {
-                suppliedCallback.execute(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackContext);
+            if (suppliedCallbackPair != null) {
+                suppliedCallbackPair.getKey().execute(DISCONNECTED_RETRYING, NO_NETWORK, throwable, suppliedCallbackPair.getValue());
             }
 
             handleRecoverableDisconnection();
-        } else if (suppliedCallback != null) {
-            suppliedCallback.execute(status, statusChangeReason, throwable, suppliedCallbackContext);
+        } else if (suppliedCallbackPair != null) {
+            suppliedCallbackPair.getKey().execute(status, statusChangeReason, throwable, suppliedCallbackPair.getValue());
         }
     }
 
