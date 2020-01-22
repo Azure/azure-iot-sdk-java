@@ -1,0 +1,9 @@
+CODEOWNERS				       master-pr-test.txt
+configure_tls_protocol_version_and_ciphers.md  pom.xml
+deps					       provisioning
+device					       readme.md
+doc					       SECURITY.md
+iot-e2e-tests				       service
+LICENSE					       versions.json
+lts_branches.png			       vsts
+master-pr-test
