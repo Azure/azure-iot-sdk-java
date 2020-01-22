@@ -65,16 +65,16 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
             synchronized (lock) {
                 if(connectionStatus == ConnectionStatus.CONNECTING) {
                     try {
-                        log.debug("[connect] - Opening the device client instance...");
+                        log.debug("Opening the device client instance...");
                         client.open();
                         connectionStatus = ConnectionStatus.CONNECTED;
                         break;
                     }
                     catch (Exception ex) {
                         if (ex.getCause() instanceof TransportException && ((TransportException) ex.getCause()).isRetryable()) {
-                            log.warn("[connect] - Transport exception thrown while opening DeviceClient instance, retrying: ", ex);
+                            log.warn("Transport exception thrown while opening DeviceClient instance, retrying: ", ex);
                         } else {
-                            log.error("[connect] - Non-retryable exception thrown while opening DeviceClient instance: ", ex);
+                            log.error("Non-retryable exception thrown while opening DeviceClient instance: ", ex);
                             connectionStatus = ConnectionStatus.DISCONNECTED;
                             throw ex;
                         }
@@ -83,11 +83,11 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
             }
 
             try {
-                log.debug("[connect] - Sleeping for 10 secs before attempting another open()");
+                log.debug("Sleeping for 10 secs before attempting another open()");
                 Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
             }
             catch (InterruptedException ex) {
-                log.error("[connect] - Exception in thread sleep: ", ex);
+                throw new RuntimeException("InterruptedException in thread sleep: ", ex);
             }
         }
     }
@@ -95,11 +95,11 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
     public void closeNow() {
         synchronized (lock) {
             try {
-                log.debug("[disconnect] - Closing the device client instance...");
+                log.debug("Closing the device client instance...");
                 client.closeNow();
             }
             catch (IOException e) {
-                log.error("[disconnect] - Exception thrown while closing DeviceClient instance: ", e);
+                log.error("Exception thrown while closing DeviceClient instance: ", e);
             } finally {
                 connectionStatus = ConnectionStatus.DISCONNECTED;
             }
@@ -135,25 +135,25 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        log.debug("[reconnect] - Attempting reconnect for device client...");
+                        log.debug("Attempting reconnect for device client...");
                         synchronized (lock) {
                             if (connectionStatus == ConnectionStatus.CONNECTED) {
                                 try {
                                     client.closeNow();
                                 } catch (Exception e) {
-                                    log.warn("[reconnect] - DeviceClient closeNow failed.", e);
+                                    log.warn("DeviceClient closeNow failed.", e);
                                 } finally {
                                     connectionStatus = ConnectionStatus.CONNECTING;
                                 }
                             } else {
-                                log.debug("[reconnect] - DeviceClient is currently connecting, or already connected; skipping...");
+                                log.debug("DeviceClient is currently connecting, or already connected; skipping...");
                                 return;
                             }
                         }
                         try {
                             doConnect();
                         } catch (IOException e) {
-                            log.error("[reconnect] - Exception thrown while opening DeviceClient instance: ", e);
+                            log.error("Exception thrown while opening DeviceClient instance: ", e);
                         }
                     }
                 }).start();
