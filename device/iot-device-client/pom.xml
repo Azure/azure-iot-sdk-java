@@ -7,7 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
-    <artifactId>iot-device-client</artifactId>
+    <artifactId>${iot-device-client-artifact-id}</artifactId>
     <name>IoT Hub Java Device Client</name>
     <version>${iot-device-client-version}</version>
     <description>The Microsoft Azure IoT Device SDK for Java</description>
@@ -54,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-deps</artifactId>
+            <artifactId>${iot-deps-artifact-id}</artifactId>
             <version>${iot-deps-version}</version>
         </dependency>
         <dependency>
@@ -69,7 +69,7 @@
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>security-provider</artifactId>
+            <artifactId>${security-provider-artifact-id}</artifactId>
             <version>${security-provider-version}</version>
         </dependency>
         <!-- test dependencies -->
