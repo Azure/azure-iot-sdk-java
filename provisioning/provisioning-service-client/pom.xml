@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-    <artifactId>provisioning-service-client</artifactId>
+    <artifactId>${provisioning-service-client-artifact-id}</artifactId>
     <name>Provisioning Service Client</name>
     <version>${provisioning-service-client-version}</version>
     <packaging>jar</packaging>
@@ -40,7 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-deps</artifactId>
+            <artifactId>${iot-deps-artifact-id}</artifactId>
             <version>${iot-deps-version}</version>
         </dependency>
         <!-- test dependencies -->

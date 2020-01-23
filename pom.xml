@@ -21,6 +21,18 @@
         <module>provisioning</module>
     </modules>
     <properties>
+        <iot-device-client-artifact-id>iot-device-client</iot-device-client-artifact-id>
+        <iot-service-client-artifact-id>iot-service-client</iot-service-client-artifact-id>
+        <iot-deps-artifact-id>iot-deps</iot-deps-artifact-id>
+        <provisioning-device-client-artifact-id>provisioning-device-client</provisioning-device-client-artifact-id>
+        <provisioning-service-client-artifact-id>provisioning-service-client</provisioning-service-client-artifact-id>
+        <security-provider-artifact-id>security-provider</security-provider-artifact-id>
+        <tpm-provider-emulator-artifact-id>tpm-provider-emulator</tpm-provider-emulator-artifact-id>
+        <tpm-provider-artifact-id>tpm-provider</tpm-provider-artifact-id>
+        <dice-provider-emulator-artifact-id>dice-provider-emulator</dice-provider-emulator-artifact-id>
+        <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
+        <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
+
         <iot-device-client-version>1.19.0</iot-device-client-version>
         <iot-service-client-version>1.19.0</iot-service-client-version>
         <iot-deps-version>0.8.5</iot-deps-version>

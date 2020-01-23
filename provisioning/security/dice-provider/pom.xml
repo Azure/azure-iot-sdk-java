@@ -12,7 +12,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-    <artifactId>dice-provider</artifactId>
+    <artifactId>${dice-provider-artifact-id}</artifactId>
     <name>Provisioning Security DICE Provider</name>
     <version>${dice-provider-version}</version>
     <packaging>jar</packaging>
@@ -47,7 +47,7 @@
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
-            <artifactId>security-provider</artifactId>
+            <artifactId>${security-provider-artifact-id}</artifactId>
             <version>${security-provider-version}</version>
         </dependency>
         <dependency>
