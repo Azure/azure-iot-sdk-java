@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Mac;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Provides a means to sign data for authentication purposes
  */
+@Slf4j
 public class HttpHsmSignatureProvider implements SignatureProvider
 {
     private static final String ENCODING_CHARSET = "UTF-8";
@@ -50,6 +52,8 @@ public class HttpHsmSignatureProvider implements SignatureProvider
             // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_005: [If the apiVersion is null or empty, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("apiVersion cannot be null or empty");
         }
+
+        log.trace("Creating HttpHsmSignatureProvider with providerUri {}", providerUri);
 
         // Codes_SRS_HTTPHSMSIGNATUREPROVIDER_34_002: [This constructor shall create a new HttpsHsmClient with the provided providerUri.]
         this.httpClient = new HttpsHsmClient(providerUri);
