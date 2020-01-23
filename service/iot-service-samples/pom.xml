@@ -27,7 +27,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-service-client</artifactId>
+            <artifactId>${iot-service-client-artifact-id}</artifactId>
             <version>${iot-service-client-version}</version>
         </dependency>
     </dependencies>
