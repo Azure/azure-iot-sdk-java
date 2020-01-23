@@ -19,24 +19,20 @@ public class AmqpResourceLockedException extends ProtocolException
     public AmqpResourceLockedException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpResourceLockedException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpResourceLockedException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpResourceLockedException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }
