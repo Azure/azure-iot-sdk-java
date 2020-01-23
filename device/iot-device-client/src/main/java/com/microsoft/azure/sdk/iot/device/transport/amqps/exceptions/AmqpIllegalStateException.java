@@ -19,20 +19,24 @@ public class AmqpIllegalStateException extends ProtocolException
     public AmqpIllegalStateException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public AmqpIllegalStateException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public AmqpIllegalStateException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public AmqpIllegalStateException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 }

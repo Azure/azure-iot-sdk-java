@@ -19,20 +19,24 @@ public class AmqpNotAllowedException extends ProtocolException
     public AmqpNotAllowedException()
     {
         super();
+        this.isRetryable = false;
     }
 
     public AmqpNotAllowedException(String message)
     {
         super(message);
+        this.isRetryable = false;
     }
 
     public AmqpNotAllowedException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = false;
     }
 
     public AmqpNotAllowedException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = false;
     }
 }
