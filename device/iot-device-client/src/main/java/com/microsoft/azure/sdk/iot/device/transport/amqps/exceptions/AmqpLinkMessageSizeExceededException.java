@@ -19,24 +19,20 @@ public class AmqpLinkMessageSizeExceededException extends ProtocolException
     public AmqpLinkMessageSizeExceededException()
     {
         super();
-        this.isRetryable = true;
     }
 
     public AmqpLinkMessageSizeExceededException(String message)
     {
         super(message);
-        this.isRetryable = true;
     }
 
     public AmqpLinkMessageSizeExceededException(String message, Throwable cause)
     {
         super(message, cause);
-        this.isRetryable = true;
     }
 
     public AmqpLinkMessageSizeExceededException(Throwable cause)
     {
         super(cause);
-        this.isRetryable = true;
     }
 }
