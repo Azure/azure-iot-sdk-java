@@ -126,7 +126,7 @@ public class InternalClient
         throw new IOException("Broke horton");
     }
 
-    public void close() throws IOException
+    public void close()
     {
         while (!this.deviceIO.isEmpty())
         {
