@@ -63,7 +63,7 @@ public abstract class AbstractDigitalTwinComponent {
      */
     protected final Single<DigitalTwinClientResult> sendTelemetryAsync(@NonNull final String telemetryName, @NonNull final String payload) {
         if (digitalTwinDeviceClient == null) {
-            log.debug("Send TelemetryAsync from component={}, telemetryName={} failed: component is not registered.", digitalTwinComponentName, telemetryName);
+            log.debug("Send TelemetryAsync from component={}, telemetryName={} failed: component is not bound.", digitalTwinComponentName, telemetryName);
             return Single.just(DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND);
         } else {
             log.debug("Sending TelemetryAsync from component={}, telemetryName={}...", digitalTwinComponentName, telemetryName);
@@ -106,7 +106,7 @@ public abstract class AbstractDigitalTwinComponent {
     protected final Single<DigitalTwinClientResult> reportPropertiesAsync(@NonNull final List<DigitalTwinReportProperty> digitalTwinReportProperties) {
         log.debug("Reporting PropertiesAsync from component={}", digitalTwinComponentName);
         if (digitalTwinDeviceClient == null) {
-            log.debug("Report PropertiesAsync from component={} failed: component is not registered.", digitalTwinComponentName);
+            log.debug("Report PropertiesAsync from component={} failed: component is not bound.", digitalTwinComponentName);
             return Single.just(DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND);
         } else {
             log.debug("Reporting Properties from component={}.", digitalTwinComponentName);

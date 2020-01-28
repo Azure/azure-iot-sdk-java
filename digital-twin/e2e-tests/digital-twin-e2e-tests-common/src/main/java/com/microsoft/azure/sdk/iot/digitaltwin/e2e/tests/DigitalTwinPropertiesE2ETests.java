@@ -38,6 +38,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @Slf4j
 @RunWith(Parameterized.class)
@@ -63,13 +64,14 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Parameterized.Parameter(0)
     public IotHubClientProtocol protocol;
+    private DigitalTwinDeviceClient digitalTwinDeviceClient;
 
     @Parameterized.Parameters(name = "{index}: Update Properties Test: protocol={0}")
     public static Collection<Object[]> data() {
         return asList(new Object[][]{
                 {MQTT},
                 {MQTT_WS},
-        });
+                });
     }
 
     @BeforeClass
@@ -85,15 +87,15 @@ public class DigitalTwinPropertiesE2ETests {
     @Before
     public void setUpTest() throws IotHubException, IOException, URISyntaxException {
         testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
-        DigitalTwinDeviceClient digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
+        digitalTwinDeviceClient = testDevice.getDigitalTwinDeviceClient();
 
         testComponent = new TestComponent2(TEST_COMPONENT_NAME);
         assertThat(digitalTwinDeviceClient.bindComponents(singletonList(testComponent))).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
     }
 
     @Test
     public void testUpdateSingleWritablePropertyFromService() throws IOException {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
@@ -112,6 +114,7 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateMultipleWritablePropertyFromService() throws IOException {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         String propertyValue1 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         String propertyValue2 = SERVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         Map<String, String> propertyValues = new HashMap<String, String>() {{ put(PROPERTY_NAME_WRITABLE, propertyValue1); put(PROPERTY_NAME_2_WRITABLE, propertyValue2); }};
@@ -139,6 +142,7 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateWritablePropertyFromAsyncServiceMultithreaded() throws InterruptedException, IOException {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         final Semaphore semaphore = new Semaphore(0);
         List<String> payloadValueList = generateRandomStringList(MAX_THREADS_MULTITHREADED_TEST);
         List<String> propertyPatchList = payloadValueList.stream()
@@ -148,7 +152,7 @@ public class DigitalTwinPropertiesE2ETests {
         propertyPatchList.forEach(propertyPatch -> {
             try {
                 digitalTwinServiceAsyncClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch)
-                        .subscribe(s -> semaphore.release());
+                                             .subscribe(s -> semaphore.release());
             } catch (IOException e) {
                 log.error("Exception thrown while updating property patch = {}", propertyPatch, e);
             }
@@ -158,7 +162,7 @@ public class DigitalTwinPropertiesE2ETests {
 
         boolean lastUpdatedPropertyReceived = false;
         String actualUpdatedProperty = null;
-        for (int i = 0; i <  MAX_THREADS_MULTITHREADED_TEST; i++) {
+        for (int i = 0; i < MAX_THREADS_MULTITHREADED_TEST; i++) {
             String expectedValue = String.format(PROPERTY_VALUE_PATTERN, payloadValueList.get(i));
 
             if (testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)) {
@@ -183,6 +187,7 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateSinglePropertyFromServiceUnknownInterfaceName() throws IOException {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
@@ -192,9 +197,28 @@ public class DigitalTwinPropertiesE2ETests {
         assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
     }
 
+    @Test
+    public void testUpdateFromServiceWithoutSubscribe() throws IOException {
+        String randomUuid = UUID.randomUUID().toString();
+        String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
+        String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_WRITABLE, propertyValue));
+        String digitalTwin = digitalTwinServiceClient.updateDigitalTwinProperties(testDevice.getDeviceId(), TEST_COMPONENT_NAME, propertyPatch);
+
+        String expectedValue = String.format(PROPERTY_VALUE_PATTERN, propertyValue);
+        assertThat(testComponent.verifyIfPropertyUpdateWasReceived(PROPERTY_NAME_WRITABLE, expectedValue)).as("Verify that device did not receive the property update from service").isFalse();
+
+        // Assert that property is updated in the twin
+        assertThat(digitalTwin).as("Verify DigitalTwin").isNotNull();
+        JsonNode updatedProperty = getPropertyJsonNodeFromTwin(digitalTwin, TEST_COMPONENT_NAME);
+        assertThat(updatedProperty.has(PROPERTY_NAME_WRITABLE)).isTrue();
+        String updatePropertyValue = getPropertyValueFromTwin(updatedProperty, PROPERTY_NAME_WRITABLE);
+        assertThat(updatePropertyValue).isEqualTo(propertyValue);
+    }
+
     @Ignore("Disabled until service validates and throws exception")
     @Test
     public void testUpdateSingleWritablePropertyFromServiceUnknownPropertyName() throws IOException {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(UNKNOWN_PROPERTY_NAME, propertyValue));
@@ -207,6 +231,7 @@ public class DigitalTwinPropertiesE2ETests {
     @Ignore("Disabled until service validates and throws exception")
     @Test
     public void testUpdateSingleReadonlyPropertyFromService() throws IOException {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         String randomUuid = UUID.randomUUID().toString();
         String propertyValue = SERVICE_PROPERTY_UPDATE_PREFIX.concat(randomUuid);
         String propertyPatch = createPropertyPatch(singletonMap(PROPERTY_NAME_READONLY, propertyValue));
@@ -225,10 +250,34 @@ public class DigitalTwinPropertiesE2ETests {
 
     @Test
     public void testUpdateSingleWritablePropertyFromDevice() {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
         String propertyValue = DEVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
         DigitalTwinClientResult updateResult = testComponent.updatePropertyFromDevice(PROPERTY_NAME_WRITABLE, propertyValue).blockingGet();
 
         assertThat(updateResult).as("Verify that device sent the property update to service").isEqualTo(DIGITALTWIN_CLIENT_OK);
+    }
+
+    @Test
+    public void testUpdatePropertyFromDevice() {
+        assertThat(digitalTwinDeviceClient.subscribeForProperties()).isEqualTo(DIGITALTWIN_CLIENT_OK);
+        String propertyValue = DEVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
+        DigitalTwinClientResult updateResult = testComponent.updatePropertyFromDevice(PROPERTY_NAME_WRITABLE, propertyValue).blockingGet();
+
+        assertThat(updateResult).as("Verify that device sent the property update to service").isEqualTo(DIGITALTWIN_CLIENT_OK);
+    }
+
+    // TODO (Java only limitation) subscribeForProperties should be called before syncupProperties.
+    @Test
+    public void testUpdatePropertyWithoutSubscribe() {
+        String propertyValue = DEVICE_PROPERTY_UPDATE_PREFIX.concat(UUID.randomUUID().toString());
+        try {
+            testComponent.updatePropertyFromDevice(PROPERTY_NAME_WRITABLE, propertyValue).blockingGet();
+            fail("Should throw exception.");
+        } catch (RuntimeException e) {
+            Throwable cause = e.getCause();
+            assertThat(cause).isInstanceOf(IOException.class);
+            assertThat(cause.getMessage()).contains("Start twin before using it");
+        }
     }
 
     private static JsonNode getPropertyJsonNodeFromTwin(String digitalTwin, String componentName) throws IOException {
