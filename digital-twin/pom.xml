@@ -59,6 +59,7 @@
         <project-e2e-tests-version>1.1.0</project-e2e-tests-version>
         <iot-device-client-version>1.0.1</iot-device-client-version>
         <iot-service-client-version>1.0.1</iot-service-client-version>
+        <project-e2e-tests-version>1.0.0</project-e2e-tests-version>
         <azure-eventhubs-version>3.0.0</azure-eventhubs-version>
         <maven-shade-version>2.4</maven-shade-version>
         <maven-jar-plugin-version>3.1.0</maven-jar-plugin-version>
