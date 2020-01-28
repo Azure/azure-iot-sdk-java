@@ -30,7 +30,9 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     private interface DeviceClientNonDelegatedFunction {
         void open();
+
         void closeNow();
+
         void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
@@ -54,7 +56,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     public void open() throws IOException {
         synchronized (lock) {
-            if(connectionStatus == ConnectionStatus.DISCONNECTED) {
+            if (connectionStatus == ConnectionStatus.DISCONNECTED) {
                 connectionStatus = ConnectionStatus.CONNECTING;
             } else {
                 return;
@@ -67,14 +69,13 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         while (connectionStatus == ConnectionStatus.CONNECTING) {
             synchronized (lock) {
-                if(connectionStatus == ConnectionStatus.CONNECTING) {
+                if (connectionStatus == ConnectionStatus.CONNECTING) {
                     try {
                         log.debug("Opening the device client instance...");
                         client.open();
                         connectionStatus = ConnectionStatus.CONNECTED;
                         break;
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         if (ex.getCause() instanceof TransportException && ((TransportException) ex.getCause()).isRetryable()) {
                             log.warn("Transport exception thrown while opening DeviceClient instance, retrying: ", ex);
                         } else {
@@ -89,8 +90,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
             try {
                 log.debug("Sleeping for 10 secs before attempting another open()");
                 Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
-            }
-            catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 throw new RuntimeException("InterruptedException in thread sleep: ", ex);
             }
         }
@@ -101,8 +101,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
             try {
                 log.debug("Closing the device client instance...");
                 client.closeNow();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 log.error("Exception thrown while closing DeviceClient instance: ", e);
             } finally {
                 connectionStatus = ConnectionStatus.DISCONNECTED;
