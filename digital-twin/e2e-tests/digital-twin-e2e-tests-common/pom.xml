@@ -50,12 +50,12 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>digital-twin-device-client-preview</artifactId>
+            <artifactId>${digital-twin-device-client-artifact-id}</artifactId>
             <version>${digital-twin-device-client-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>digital-twin-service-client-preview</artifactId>
+            <artifactId>${digital-twin-service-client-artifact-id}</artifactId>
             <version>${digital-twin-service-client-version}</version>
         </dependency>
         <dependency>
