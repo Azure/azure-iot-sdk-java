@@ -55,10 +55,6 @@ public class IotHubServicesCommon
         try
         {
             client.open();
-            if (statusUpdates != null)
-            {
-                confirmOpenStabilized(statusUpdates, 120000, client);
-            }
 
             for (int i = 0; i < messagesToSend.size(); ++i)
             {
@@ -107,10 +103,6 @@ public class IotHubServicesCommon
         try
         {
             client.open();
-            if (statusUpdates != null)
-            {
-                confirmOpenStabilized(statusUpdates, 120000, client);
-            }
 
             // Send the initial message
             MessageAndResult messageToSend = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);

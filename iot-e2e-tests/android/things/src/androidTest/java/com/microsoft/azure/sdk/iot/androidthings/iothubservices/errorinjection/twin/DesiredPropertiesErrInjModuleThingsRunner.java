@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.androidthings.iothubservices.errorinjection.
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.errorinjection.DesiredPropertiesErrInjTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.errorinjection.DesiredPropertiesErrInjTests;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;

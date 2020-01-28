@@ -5,7 +5,7 @@
 package com.microsoft.azure.sdk.iot.androidthings.serviceclient;
 
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
-import com.microsoft.azure.sdk.iot.common.tests.serviceclient.ServiceClientTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient.ServiceClientTests;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

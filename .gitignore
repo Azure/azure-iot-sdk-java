@@ -227,3 +227,10 @@ vertx.log.lck
 **/gradlew*
 **/.gradle
 **/build
+
+# =========================
+# Samples logging config
+# =========================
+
+#Whitelist, will allow changes to log4j.properties files to be tracked via source control
+!log4j.properties
