@@ -7,6 +7,7 @@
 Write-Host "Determining tests to run..."
 $Env:runIotHubTests = "false"
 $Env:runProvisioningTests = "false"
+$Env:runDigitalTwinTests = "false"
 
 $targetBranch = ($env:TARGET_BRANCH)
 if (($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
@@ -15,6 +16,7 @@ if (($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
 
     $Env:runIotHubTests = "true"
     $Env:runProvisioningTests = "true"
+    $Env:runDigitalTwinTests = "true"
 
     exit 0
 }
@@ -56,7 +58,8 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		if ($line.toLower().Contains("iot-device-client/src/main") -or $line.toLower().Contains("iot-device-client/pom.xml"))
 		{
 		    $Env:runIotHubTests = "true"
-		    $Env:runProvisioningTests = "true"
+            $Env:runProvisioningTests = "true"
+            $Env:runDigitalTwinTests = "true"
 		}
 
         # If code changes were made to service client
@@ -86,6 +89,24 @@ ForEach ($line in $($GitDiff -split "`r`n"))
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
         }
+
+        # If code changes were made to digital twin device client
+        if ($line.toLower().Contains("digitaltwin/device/src/main"))
+        {
+            $Env:runDigitalTwinTests = "true"
+        }
+
+        # If code changes were made to digital twin service client
+        if ($line.toLower().Contains("digitaltwin/service/src/main"))
+        {
+            $Env:runDigitalTwinTests = "true"
+        }
+
+        # If code changes were made to digital twin E2E tests
+        if ($line.toLower().Contains("digitaltwin/device/e2e-tests"))
+        {
+            $Env:runDigitalTwinTests = "true"
+        }
 	}
 }
 
@@ -105,5 +126,14 @@ if ($Env:runProvisioningTests -eq "true")
 else
 {
     Write-Host "Will not run provisioning tests"
+}
+
+if ($Env:runDigitalTwinTests -eq "true")
+{
+    Write-Host "Will run digital twin tests"
+}
+else
+{
+    Write-Host "Will not run digital twin tests"
 }
 
