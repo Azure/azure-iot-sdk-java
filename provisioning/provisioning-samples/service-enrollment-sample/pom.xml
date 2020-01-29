@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-service-client-preview</artifactId>
+            <artifactId>${provisioning-service-client-artifact-id}</artifactId>
             <version>${provisioning-service-client-version}</version>
         </dependency>
     </dependencies>
