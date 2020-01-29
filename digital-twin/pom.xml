@@ -1,6 +1,11 @@
 <!-- Copyright (c) Microsoft. All rights reserved. -->
 <!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
 <project>
+    <parent>
+        <groupId>com.microsoft.azure.sdk.iot</groupId>
+        <artifactId>iot-sdk-java</artifactId>
+        <version>0.26.0</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>digital-twin-preview</artifactId>
