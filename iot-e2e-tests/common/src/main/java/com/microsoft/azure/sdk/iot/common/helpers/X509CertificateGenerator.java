@@ -99,8 +99,8 @@ public class X509CertificateGenerator
 
         X500Name issuer = new X500Name(issuerStringBuilder.toString());
         BigInteger serial = BigInteger.ONE;
-        Date notBefore = new Date();
-        Date notAfter = new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1)); //1 hour lifetime
+        Date notBefore = new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(24)); // valid from 24 hours earlier as well, to avoid clock skew issues with start time
+        Date notAfter = new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2)); //2 hour lifetime
         X500Name subject = new X500Name(issuerStringBuilder.toString());
         PublicKey publicKey = keyPair.getPublic();
         JcaX509v3CertificateBuilder v3Bldr = new JcaX509v3CertificateBuilder(issuer, serial, notBefore, notAfter, subject, publicKey);

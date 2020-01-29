@@ -21,6 +21,7 @@ import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.Map;
  * Public API for communicating from Edge Modules. A ModuleClient can be used to send messages from an Edge module to an EdgeHub or an IotHub.
  * It can also send twin updates and listen for method calls from an EdgeHub or IotHub as well
  */
+@Slf4j
 public class ModuleClient extends InternalClient
 {
     private static final String DEFAULT_API_VERSION = "2018-06-28";
@@ -116,7 +118,6 @@ public class ModuleClient extends InternalClient
         commonConstructorVerifications(protocol, this.getConfig());
     }
 
-
     /**
      * Create a module client instance that uses the provided SSLContext for SSL negotiation.
      *
@@ -153,12 +154,15 @@ public class ModuleClient extends InternalClient
      */
     public static ModuleClient createFromEnvironment(IotHubClientProtocol protocol) throws ModuleClientException
     {
+        log.info("Creating module client from environment with protocol {}...", protocol);
         Map<String, String> envVariables = System.getenv();
 
         //Codes_SRS_MODULECLIENT_34_013: [This function shall check for a saved edgehub connection string.]
+        log.debug("Checking for an edgehub connection string...");
         String connectionString = envVariables.get(EdgehubConnectionstringVariableName);
         if (connectionString == null)
         {
+            log.debug("No edgehub connection string was configured, checking for an IoThub connection string...");
             //Codes_SRS_MODULECLIENT_34_019: [If no edgehub connection string is present, this function shall check for a saved iothub connection string.]
             connectionString = envVariables.get(IothubConnectionstringVariableName);
         }
@@ -166,6 +170,8 @@ public class ModuleClient extends InternalClient
         // First try to create from connection string and if env variable for connection string is not found try to create from edgedUri
         if (connectionString != null)
         {
+            log.debug("Creating module client with the provided connection string");
+
             //Codes_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
             ModuleClient moduleClient = null;
             try
@@ -181,6 +187,7 @@ public class ModuleClient extends InternalClient
             String alternativeDefaultTrustedCert = envVariables.get(EdgeCaCertificateFileVariableName);
             if (alternativeDefaultTrustedCert != null && !alternativeDefaultTrustedCert.isEmpty())
             {
+                log.debug("Configuring module client to use the configured alternative trusted certificate");
                 //Codes_SRS_MODULECLIENT_34_031: [If an alternative default trusted cert is saved in the environment
                 // variables, this function shall set that trusted cert in the created module client.]
                 moduleClient.setOption_SetCertificatePath(alternativeDefaultTrustedCert);
@@ -190,6 +197,7 @@ public class ModuleClient extends InternalClient
         }
         else
         {
+            log.info("No connection string was configured for this module, so it will get its credentials from the edgelet");
             //Codes_SRS_MODULECLIENT_34_014: [This function shall check for environment variables for edgedUri, deviceId, moduleId,
             // hostname, authScheme, gatewayHostname, and generationId. If any of these other than gatewayHostname is missing,
             // this function shall throw a ModuleClientException.]
