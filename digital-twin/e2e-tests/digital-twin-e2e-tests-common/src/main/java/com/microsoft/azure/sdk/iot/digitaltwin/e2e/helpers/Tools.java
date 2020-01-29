@@ -25,18 +25,25 @@ public class Tools {
     private static final String ANDROID_BUILD_CONFIG_CLASS = "com.microsoft.azure.sdk.iot.digitaltwin.android.BuildConfig";
     private static final Map<String, String> ANDROID_ENV_VAR = retrieveAndroidEnvVariables();
 
+    public static String retrieveEnvironmentVariableValue(String environmentVariableName, String defaultValue) {
+        String retrievedValued = retrieveEnvironmentVariableValue(environmentVariableName);
+        if (isBlank(retrievedValued)) {
+            if (defaultValue == null) {
+                throw new IllegalArgumentException("Environment variable is not set: " + environmentVariableName);
+            }
+            return defaultValue;
+        }
+        return retrievedValued;
+    }
+
     public static String retrieveEnvironmentVariableValue(String environmentVariableName) {
         String environmentVariableValue;
+
         if (ANDROID_ENV_VAR.containsKey(environmentVariableName)) {
             environmentVariableValue = ANDROID_ENV_VAR.get(environmentVariableName);
         } else {
             environmentVariableValue = System.getenv().get(environmentVariableName);
         }
-
-        if (isBlank(environmentVariableValue)) {
-            throw new IllegalArgumentException("Environment variable is not set: " + environmentVariableName);
-        }
-
         return environmentVariableValue;
     }
 
