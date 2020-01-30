@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 public class AbstractDigitalTwinComponentTest {
     private static final String DIGITAL_TWIN_COMPONENT_NAME = "DIGITAL_TWIN_COMPONENT_NAME";
     private static final String DIGITAL_TWIN_INTERFACE_ID = "DIGITAL_TWIN_INTERFACE_ID";
-    private static final String TELEMETRY_PAYLOAD = "{\"TELEMETRY_NAME\": \"TELEMETRY_PAYLOAD\"}";
+    private static final String TELEMETRY_PAYLOAD = "{\"TELEMETRY_NAME\": \"TELEMETRY_VALUE\"}";
     private static final int OPERATION_LATENCY = 500;
 
     private AbstractDigitalTwinComponent testee;
