@@ -58,9 +58,9 @@ public class TestComponent2 extends AbstractDigitalTwinComponent {
         propertyUpdatesReceived = new ConcurrentHashMap<>();
     }
 
-    public Single<DigitalTwinClientResult> sendTelemetry(@NonNull String telemetryName, @NonNull Object telemetryValue) throws IOException {
-        log.debug("Telemetry value sent: telemetryName={}; telemetryValue={}", telemetryName, telemetryValue);
-        return sendTelemetryAsync(telemetryName, serialize(telemetryValue));
+    public Single<DigitalTwinClientResult> sendTelemetryPropertiesAsync(@NonNull Map<String, Object> telemetryProperties) throws IOException {
+        log.debug("Telemetry value sent: telemetryProperties={}", telemetryProperties);
+        return sendTelemetryAsync(serialize(telemetryProperties));
     }
 
     public Single<DigitalTwinClientResult> updatePropertyFromDevice(String propertyName, String propertyValue) {

@@ -14,6 +14,8 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.JsonSerializer.serialize;
 import static java.util.Collections.singletonList;
@@ -35,9 +37,9 @@ public class TestComponent1 extends AbstractDigitalTwinComponent {
         super(digitalTwinComponentName, TEST_INTERFACE_ID);
     }
 
-    public Single<DigitalTwinClientResult> sendTelemetry(@NonNull String telemetryName, @NonNull Object telemetryValue) throws IOException {
-        log.debug("Telemetry value sent: telemetryName={}; telemetryValue={}", telemetryName, telemetryValue);
-        return sendTelemetryAsync(telemetryName, serialize(telemetryValue));
+    public Single<DigitalTwinClientResult> sendTelemetryPropertiesAsync(@NonNull Map<String, Object> telemetryProperties) throws IOException {
+        log.debug("Telemetry value sent: telemetryProperties={}", telemetryProperties);
+        return sendTelemetryAsync(serialize(telemetryProperties));
     }
 
     private Single<DigitalTwinClientResult> updateWritableReportedProperty(String reportedPropertyValue) {
