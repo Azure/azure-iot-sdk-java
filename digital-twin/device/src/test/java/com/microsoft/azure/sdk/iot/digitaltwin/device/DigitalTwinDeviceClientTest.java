@@ -47,7 +47,6 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientRe
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinClientResult.DIGITALTWIN_CLIENT_OK;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_COMMAND_NAME;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_DIGITAL_TWIN_COMPONENT;
-import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_MESSAGE_SCHEMA;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_REQUEST_ID;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.DigitalTwinDeviceClient.PROPERTY_STATUS;
 import static com.microsoft.azure.sdk.iot.digitaltwin.device.serializer.TwinPropertyJsonSerializer.DIGITAL_TWIN_COMPONENT_NAME_PREFIX;
@@ -75,7 +74,6 @@ public class DigitalTwinDeviceClientTest {
     private static final String DIGITAL_TWIN_INTERFACE_ID_1 = "DIGITAL_TWIN_INTERFACE_ID_1";
     private static final String DIGITAL_TWIN_INTERFACE_ID_2 = "DIGITAL_TWIN_INTERFACE_ID_2";
     private static final String DIGITAL_TWIN_DCM_ID = "DIGITAL_TWIN_DCM_ID";
-    private static final String TELEMETRY_NAME = "TELEMETRY_NAME";
     private static final String TEST_PAYLOAD = "{\"number\":123,\"str\":\"abc\",\"boolean\":true}";
     private static final String COMMAND_NAME = "DIGITAL_TWIN_COMMAND_NAME";
     private static final String REQUEST_ID = "DIGITAL_TWIN_REQUEST_ID";
@@ -557,14 +555,12 @@ public class DigitalTwinDeviceClientTest {
     @Test
     public void sendTelemetryAsyncTest() {
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TELEMETRY_NAME, TEST_PAYLOAD).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TEST_PAYLOAD).blockingSingle();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
         assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
-        assertThat(message.getProperty(PROPERTY_MESSAGE_SCHEMA)).isEqualTo(TELEMETRY_NAME);
-        String expectedPayload = String.format("{\"%s\":%s}", TELEMETRY_NAME, TEST_PAYLOAD);
-        assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(expectedPayload);
+        assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(TEST_PAYLOAD);
     }
 
     @Test
@@ -585,14 +581,12 @@ public class DigitalTwinDeviceClientTest {
         }).when(deviceClient)
           .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
         ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TELEMETRY_NAME, TEST_PAYLOAD).blockingSingle();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TEST_PAYLOAD).blockingSingle();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
         assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
-        assertThat(message.getProperty(PROPERTY_MESSAGE_SCHEMA)).isEqualTo(TELEMETRY_NAME);
-        String expectedPayload = String.format("{\"%s\":%s}", TELEMETRY_NAME, TEST_PAYLOAD);
-        assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(expectedPayload);
+        assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(TEST_PAYLOAD);
     }
 
     @Test
@@ -607,7 +601,7 @@ public class DigitalTwinDeviceClientTest {
           .sendEventAsync(any(Message.class), any(IotHubEventCallback.class), any());
 
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TELEMETRY_NAME, TEST_PAYLOAD)
+            DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(DIGITAL_TWIN_COMPONENT_NAME_1, TEST_PAYLOAD)
                                                                     .doOnError(errorConsumer)
                                                                     .blockingSingle();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
@@ -620,9 +614,7 @@ public class DigitalTwinDeviceClientTest {
         verify(deviceClient).sendEventAsync(messageCaptor.capture(), any(IotHubEventCallback.class), any());
         Message message = messageCaptor.getValue();
         assertThat(message.getProperty(PROPERTY_DIGITAL_TWIN_COMPONENT)).isEqualTo(DIGITAL_TWIN_COMPONENT_NAME_1);
-        assertThat(message.getProperty(PROPERTY_MESSAGE_SCHEMA)).isEqualTo(TELEMETRY_NAME);
-        String expectedPayload = String.format("{\"%s\":%s}", TELEMETRY_NAME, TEST_PAYLOAD);
-        assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(expectedPayload);
+        assertThat(new String(message.getBytes(), UTF_8)).isEqualTo(TEST_PAYLOAD);
     }
 
     @Test
