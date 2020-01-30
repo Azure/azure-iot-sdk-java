@@ -11,4 +11,4 @@ Use the Azure IoT Digital Twins Device SDK to:
 * Receive changes to writable properties.
 * Handle synchronous and asynchronous commands
 
-For samples on how to do each of these, check [this folder](../device-samples)
+For samples on how to do each of these, check [Digital Twin Samples](https://github.com/Azure-Samples/azure-iot-samples-java/tree/master/digital-twin/Samples)
