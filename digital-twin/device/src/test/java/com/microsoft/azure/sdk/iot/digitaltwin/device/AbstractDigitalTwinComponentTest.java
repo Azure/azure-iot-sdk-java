@@ -41,8 +41,7 @@ import static org.mockito.Mockito.when;
 public class AbstractDigitalTwinComponentTest {
     private static final String DIGITAL_TWIN_COMPONENT_NAME = "DIGITAL_TWIN_COMPONENT_NAME";
     private static final String DIGITAL_TWIN_INTERFACE_ID = "DIGITAL_TWIN_INTERFACE_ID";
-    private static final String TELEMETRY_NAME = "TELEMETRY_NAME";
-    private static final String TELEMETRY_PAYLOAD = "TELEMETRY_PAYLOAD";
+    private static final String TELEMETRY_PAYLOAD = "{\"TELEMETRY_NAME\": \"TELEMETRY_PAYLOAD\"}";
     private static final int OPERATION_LATENCY = 500;
 
     private AbstractDigitalTwinComponent testee;
@@ -61,7 +60,7 @@ public class AbstractDigitalTwinComponentTest {
 
     @Before
     public void setUp() {
-        when(digitalTwinDeviceClient.sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD)))
+        when(digitalTwinDeviceClient.sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_PAYLOAD)))
                 .thenReturn(Flowable.just(DIGITALTWIN_CLIENT_OK));
         when(digitalTwinDeviceClient.reportPropertiesAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(properties)))
                 .thenReturn(Flowable.just(DIGITALTWIN_CLIENT_OK));
@@ -74,37 +73,37 @@ public class AbstractDigitalTwinComponentTest {
     @Test
     public void sendTelemetryTest() {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetry(TELEMETRY_NAME, TELEMETRY_PAYLOAD);
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetry(TELEMETRY_PAYLOAD);
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD));
+        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_PAYLOAD));
     }
 
     @Test
     public void sendTelemetryAsyncTest() {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_PAYLOAD).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_OK);
-        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD));
+        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_PAYLOAD));
     }
 
     @Test
     public void sendTelemetryAsyncFailureTest() {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
-        when(digitalTwinDeviceClient.sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD)))
+        when(digitalTwinDeviceClient.sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_PAYLOAD)))
                 .thenReturn(Flowable.just(DIGITALTWIN_CLIENT_ERROR));
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_PAYLOAD).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR);
-        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD));
+        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_PAYLOAD));
     }
 
     @Test
     public void sendTelemetryAsyncExceptionTest() throws Throwable {
         testee.setDigitalTwinDeviceClient(digitalTwinDeviceClient);
         Exception exception = new Exception("SendTelemetryAsyncException");
-        when(digitalTwinDeviceClient.sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD)))
+        when(digitalTwinDeviceClient.sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_PAYLOAD)))
                 .thenReturn(Flowable.<DigitalTwinClientResult>error(exception));
         try {
-            DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD)
+            DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_PAYLOAD)
                                                                     .doOnError(errorConsumer)
                                                                     .blockingGet();
             log.debug("Unexpected result: {}", digitalTwinClientResult);
@@ -113,14 +112,14 @@ public class AbstractDigitalTwinComponentTest {
             log.debug("Send telemetry async throw exception", e);
         }
         verify(errorConsumer).accept(exception);
-        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_NAME), eq(TELEMETRY_PAYLOAD));
+        verify(digitalTwinDeviceClient).sendTelemetryAsync(eq(DIGITAL_TWIN_COMPONENT_NAME), eq(TELEMETRY_PAYLOAD));
     }
 
     @Test
     public void sendTelemetryAsyncWithoutRegisterTest() {
-        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_NAME, TELEMETRY_PAYLOAD).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testee.sendTelemetryAsync(TELEMETRY_PAYLOAD).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND);
-        verify(digitalTwinDeviceClient, never()).sendTelemetryAsync(anyString(), anyString(), anyString());
+        verify(digitalTwinDeviceClient, never()).sendTelemetryAsync(anyString(), anyString());
     }
 
     @Test

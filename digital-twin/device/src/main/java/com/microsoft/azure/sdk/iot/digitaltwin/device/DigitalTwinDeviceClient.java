@@ -262,7 +262,6 @@ public final class DigitalTwinDeviceClient {
 
     Flowable<DigitalTwinClientResult> sendTelemetryAsync(
             @NonNull final String digitalTwinComponentName,
-            @NonNull final String telemetryName,
             @NonNull final String payload) {
         return ensureConnectAsync()
                 .flatMap(new Function<DigitalTwinClientResult, Flowable<DigitalTwinClientResult>>() {
@@ -272,10 +271,10 @@ public final class DigitalTwinDeviceClient {
                             @Override
                             public void subscribe(FlowableEmitter<DigitalTwinClientResult> emitter) throws Throwable {
                                 log.debug("Sending TelemetryAsync...");
-                                SimpleEntry body = new SimpleEntry<>(telemetryName, new JsonRawValue(payload));
-                                Message message = new Message(serialize(body));
+                                Message message = new Message(payload);
                                 message.setProperty(PROPERTY_DIGITAL_TWIN_COMPONENT, digitalTwinComponentName);
-                                message.setProperty(PROPERTY_MESSAGE_SCHEMA, telemetryName);
+                                message.setContentTypeFinal(CONTENT_TYPE_APPLICATION_JSON);
+                                message.setContentEncoding(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
                                 IotHubEventCallback callback = createIotHubEventCallback(emitter);
                                 deviceClientManager.sendEventAsync(message, callback, callback);
                                 log.debug("SendTelemetryAsync succeeded.");
@@ -324,6 +323,8 @@ public final class DigitalTwinDeviceClient {
                                 message.setProperty(PROPERTY_COMMAND_NAME, digitalTwinAsyncCommandUpdate.getCommandName());
                                 message.setProperty(PROPERTY_REQUEST_ID, digitalTwinAsyncCommandUpdate.getRequestId());
                                 message.setProperty(PROPERTY_STATUS, String.valueOf(digitalTwinAsyncCommandUpdate.getStatusCode()));
+                                message.setContentTypeFinal(CONTENT_TYPE_APPLICATION_JSON);
+                                message.setContentEncoding(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
                                 IotHubEventCallback asyncCommandCallback = createIotHubEventCallback(emitter);
                                 deviceClientManager.sendEventAsync(message, asyncCommandCallback, asyncCommandCallback);
                                 log.debug("UpdateAsyncCommandStatus succeeded.");

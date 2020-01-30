@@ -41,6 +41,7 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponen
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.TEST_INTERFACE_ID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.apache.commons.lang3.RandomUtils.nextBoolean;
 import static org.apache.commons.lang3.RandomUtils.nextInt;
@@ -83,7 +84,7 @@ public class DigitalTwinTelemetryE2ETests {
     @Ignore("Disabled until Service starts validating the telemetry payload with telemetry schema.")
     @Test
     public void testSendIncompatibleSchemaTelemetry() throws IOException {
-        DigitalTwinClientResult digitalTwinClientResult = testComponent.sendTelemetry(TELEMETRY_NAME_INTEGER, nextBoolean()).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult = testComponent.sendTelemetryPropertiesAsync(singletonMap(TELEMETRY_NAME_INTEGER, nextBoolean())).blockingGet();
         assertThat(digitalTwinClientResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR);
     }
 
@@ -94,7 +95,7 @@ public class DigitalTwinTelemetryE2ETests {
 
         telemetryList.forEach(telemetryValue -> {
             try {
-                testComponent.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue)
+                testComponent.sendTelemetryPropertiesAsync(singletonMap(TELEMETRY_NAME_INTEGER, telemetryValue))
                              .subscribe(digitalTwinClientResult -> {
                             semaphore.release();
                         });
@@ -118,9 +119,9 @@ public class DigitalTwinTelemetryE2ETests {
         int intTelemetry = nextInt();
         boolean booleanTelemetry = nextBoolean();
 
-        Disposable integerTelemetrySubscription = testComponent.sendTelemetry(TELEMETRY_NAME_INTEGER, intTelemetry)
+        Disposable integerTelemetrySubscription = testComponent.sendTelemetryPropertiesAsync(singletonMap(TELEMETRY_NAME_INTEGER, intTelemetry))
                                                                .subscribe(digitalTwinClientResult -> semaphore.release());
-        Disposable booleanTelemetrySubscription = testComponent.sendTelemetry(TELEMETRY_NAME_BOOLEAN, booleanTelemetry)
+        Disposable booleanTelemetrySubscription = testComponent.sendTelemetryPropertiesAsync(singletonMap(TELEMETRY_NAME_BOOLEAN, booleanTelemetry))
                                                                .subscribe(digitalTwinClientResult -> semaphore.release());
 
         assertThat(semaphore.tryAcquire(2, MAX_WAIT_TIME_FOR_ASYNC_CALL_IN_SECONDS, SECONDS)).as("Timeout executing Async call").isTrue();
@@ -137,7 +138,7 @@ public class DigitalTwinTelemetryE2ETests {
     public void testTelemetryOperationAfterClientCloseAndOpen() throws IOException, InterruptedException {
         int telemetryValue1 = nextInt();
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue1);
-        DigitalTwinClientResult digitalTwinClientResult1 = testComponent.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue1).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult1 = testComponent.sendTelemetryPropertiesAsync(singletonMap(TELEMETRY_NAME_INTEGER, telemetryValue1)).blockingGet();
         log.debug("Telemetry operation result: {}", digitalTwinClientResult1);
 
         String expectedPayload1 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue1));
@@ -151,7 +152,7 @@ public class DigitalTwinTelemetryE2ETests {
 
         int telemetryValue2 = nextInt();
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue2);
-        DigitalTwinClientResult digitalTwinClientResult2 = testComponent.sendTelemetry(TELEMETRY_NAME_INTEGER, telemetryValue2).blockingGet();
+        DigitalTwinClientResult digitalTwinClientResult2 = testComponent.sendTelemetryPropertiesAsync(singletonMap(TELEMETRY_NAME_INTEGER, telemetryValue2)).blockingGet();
         log.debug("Telemetry operation result: {}", digitalTwinClientResult2);
 
         String expectedPayload2 = String.format(TELEMETRY_PAYLOAD_PATTERN, TELEMETRY_NAME_INTEGER, serialize(telemetryValue2));

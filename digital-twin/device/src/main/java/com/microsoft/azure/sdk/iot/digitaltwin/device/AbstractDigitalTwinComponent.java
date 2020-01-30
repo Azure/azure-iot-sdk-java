@@ -59,17 +59,27 @@ public abstract class AbstractDigitalTwinComponent {
      * The application may invoke this function as many times as it wants, subject to the device's resource availability. The application does NOT need to wait for each send to finish.
      * The SDK will automatically attempt to retry the telemetry send on transient errors.
      *
+     * @param payload DigitalTwin telemetry message payload. It should be a valid json string represent a map. The key is property name. the JSON should look like:
+     *				{
+     *                  "int_property_name": 123,
+     *                  "boolean_property_name": true,
+     *                  "string_property_name": "string value",
+     *                  "complex_property_name": {
+     *                      "sub_int_property_name": 789,
+     *                      "sub_boolean_property_name": false,
+     *                      "sub_string_property_name": "sub string value"
+     *                  }
+     *              }
      * @return Result of this async function.
      */
-    protected final Single<DigitalTwinClientResult> sendTelemetryAsync(@NonNull final String telemetryName, @NonNull final String payload) {
+    protected final Single<DigitalTwinClientResult> sendTelemetryAsync(@NonNull final String payload) {
         if (digitalTwinDeviceClient == null) {
-            log.debug("Send TelemetryAsync from component={}, telemetryName={} failed: component is not bound.", digitalTwinComponentName, telemetryName);
+            log.debug("Send TelemetryAsync from component={}, payload={} failed: component is not bound.", digitalTwinComponentName, payload);
             return Single.just(DIGITALTWIN_CLIENT_ERROR_COMPONENTS_NOT_BOUND);
         } else {
-            log.debug("Sending TelemetryAsync from component={}, telemetryName={}...", digitalTwinComponentName, telemetryName);
+            log.debug("Sending TelemetryAsync from component={}, payload={}...", digitalTwinComponentName, payload);
             return digitalTwinDeviceClient.sendTelemetryAsync(
                     digitalTwinComponentName,
-                    telemetryName,
                     payload
             ).singleOrError();
         }
@@ -80,10 +90,21 @@ public abstract class AbstractDigitalTwinComponent {
      * The device application calls this function to send telemetry to the server. The call will be blocked and will return the result once telemetry is processed.
      * The SDK will automatically attempt to retry the telemetry send on transient errors.
      *
+     * @param payload DigitalTwin telemetry message payload. It should be a valid json string represent a map. The key is property name. the JSON should look like:
+     *				{
+     *                  "int_property_name": 123,
+     *                  "boolean_property_name": true,
+     *                  "string_property_name": "string value",
+     *                  "complex_property_name": {
+     *                      "sub_int_property_name": 789,
+     *                      "sub_boolean_property_name": false,
+     *                      "sub_string_property_name": "sub string value"
+     *                  }
+     *              }
      * @return Result of this sync function.
      */
-    protected final DigitalTwinClientResult sendTelemetry(@NonNull final String telemetryName, @NonNull final String payload) {
-        return sendTelemetryAsync(telemetryName, payload).blockingGet();
+    protected final DigitalTwinClientResult sendTelemetry(@NonNull final String payload) {
+        return sendTelemetryAsync(payload).blockingGet();
     }
 
     /**
