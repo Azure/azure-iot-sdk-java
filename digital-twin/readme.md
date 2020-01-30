@@ -8,7 +8,7 @@ These instructions and samples assume basic familiarity with Digital Twin concep
 Instructions on how to build the Digital Twin Client SDK or else retrieve packages for it are available [here](./doc/building_sdk.md). 
 
 ### Exploring samples
-There are two components Environmental Sensor and Device Information [here](./device-samples). **It may be easiest to just jump in here for a guided tour of Digital Twin.**
+There are two components Environmental Sensor and Device Information [Digital Twin Samples](https://github.com/Azure-Samples/azure-iot-samples-java/tree/master/digital-twin/Samples). **It may be easiest to just jump in here for a guided tour of Digital Twin.**
 
 ## If something is broken
 If you hit an issue with the JAVA Digital Twin SDK, please open a GitHub issue [here](https://github.com/Azure/azure-iot-sdk-java/issues).

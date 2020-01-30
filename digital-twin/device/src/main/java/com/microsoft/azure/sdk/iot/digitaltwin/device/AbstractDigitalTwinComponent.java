@@ -59,8 +59,8 @@ public abstract class AbstractDigitalTwinComponent {
      * The application may invoke this function as many times as it wants, subject to the device's resource availability. The application does NOT need to wait for each send to finish.
      * The SDK will automatically attempt to retry the telemetry send on transient errors.
      *
-     * @param payload DigitalTwin telemetry message payload. It should be a valid json string represent a map. The key is property name. the JSON should look like:
-     *				{
+     * @param payload DigitalTwin telemetry message payload. It should be a valid json string representing a map. The key is property name. The JSON should look like:
+     *              {
      *                  "int_property_name": 123,
      *                  "boolean_property_name": true,
      *                  "string_property_name": "string value",
@@ -90,8 +90,8 @@ public abstract class AbstractDigitalTwinComponent {
      * The device application calls this function to send telemetry to the server. The call will be blocked and will return the result once telemetry is processed.
      * The SDK will automatically attempt to retry the telemetry send on transient errors.
      *
-     * @param payload DigitalTwin telemetry message payload. It should be a valid json string represent a map. The key is property name. the JSON should look like:
-     *				{
+     * @param payload DigitalTwin telemetry message payload. It should be a valid json string representing a map. The key is property name. The JSON should look like:
+     *              {
      *                  "int_property_name": 123,
      *                  "boolean_property_name": true,
      *                  "string_property_name": "string value",
