@@ -75,9 +75,9 @@ public class TokenRenewalTests extends IotHubIntegrationTest
     @Test
     public void tokenRenewalWorks() throws Exception
     {
-        final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 60;
-        final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600;
-        final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 30;
+        final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
+        final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
+        final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 120; //wait time beyond the expected grace period, just in case
 
         List<InternalClient> clients = createClientsToTest();
 
