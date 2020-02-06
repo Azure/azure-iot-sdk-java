@@ -90,7 +90,7 @@ public class TokenRenewalTests extends IotHubIntegrationTest
             //set it so a newly generated sas token only lasts for a small amount of time
             client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
         }
-        
+
         Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
         Success[] mqttDisconnectDidHappenSuccesses = new Success[clients.size()];
         Success[] shutdownWasGracefulSuccesses = new Success[clients.size()];
