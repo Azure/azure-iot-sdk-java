@@ -81,7 +81,7 @@ public class TokenRenewalTests extends IotHubIntegrationTest
 
         List<InternalClient> clients = createClientsToTest();
 
-        //service grants a 5 minute grace period beyond when sas token expires, this test attempts to send a message after that grace period
+        //service grants a 10 minute grace period beyond when sas token expires, this test attempts to send a message after that grace period
         // to ensure that the first sas token has expired, and that the sas token was renewed successfully.
         final long WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE = EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS + EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS;
 
@@ -90,8 +90,7 @@ public class TokenRenewalTests extends IotHubIntegrationTest
             //set it so a newly generated sas token only lasts for a small amount of time
             client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
         }
-
-
+        
         Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
         Success[] mqttDisconnectDidHappenSuccesses = new Success[clients.size()];
         Success[] shutdownWasGracefulSuccesses = new Success[clients.size()];
