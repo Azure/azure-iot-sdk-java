@@ -862,7 +862,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection, anyInt, anyBoolean);
+                mockedParserUtility.validateMap(twinCollection, anyBoolean);
                 times = 0;
             }
         };
@@ -917,7 +917,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection, anyInt, anyBoolean);
+                mockedParserUtility.validateMap(twinCollection, anyBoolean);
                 times = 0;
             }
         };

@@ -192,30 +192,22 @@ public class ParserUtility
      * levels and optionally if the keys ar not metadata.
      *
      * @param map the {@code Map} to be validate. It can be {@code null}, and it will succeed in this case.
-     * @param maxLevel the max number of level allowed in the map.
      * @param allowMetadata the {@code boolean} that indicates if the key can contain metadata `$` or not.
      * @throws IllegalArgumentException If the Map contains more than maxLevel levels or do not allow metadata
      *                                  but contains metadata key.
      */
-    public static void validateMap(Map<String, Object> map, int maxLevel, boolean allowMetadata) throws IllegalArgumentException
+    public static void validateMap(Map<String, Object> map, boolean allowMetadata) throws IllegalArgumentException
     {
-        /* Codes_SRS_PARSER_UTILITY_21_046: [The validateMap shall throws IllegalArgumentException if the maxLevel is `0` or negative.] */
-        if(maxLevel <= 0)
-        {
-            throw new IllegalArgumentException("maxLevel cannot be zero or negative");
-        }
         /* Codes_SRS_PARSER_UTILITY_21_048: [The validateMap shall do nothing if the map is null.] */
         if(map != null)
         {
             /* Codes_SRS_PARSER_UTILITY_21_047: [The validateMap shall do nothing if the map is a valid Map.] */
-            validateMapInternal(map, 1, maxLevel, allowMetadata);
+            validateMapInternal(map, allowMetadata);
         }
     }
 
-    private static void validateMapInternal(Map<String, Object> map, int level, int maxLevel, boolean allowMetadata) throws IllegalArgumentException
+    private static void validateMapInternal(Map<String, Object> map, boolean allowMetadata) throws IllegalArgumentException
     {
-        level ++;
-
         for(Map.Entry<String, Object> entry : map.entrySet())
         {
             String key = entry.getKey();
@@ -234,17 +226,7 @@ public class ParserUtility
             if((value != null) && (value instanceof Map))
             {
                 /* Codes_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
-                if(level <= maxLevel)
-                {
-                    validateMapInternal((Map<String, Object>) value, level, maxLevel, allowMetadata);
-                }
-                else
-                {
-                    if (!mapOnlyContainsMetaData((Map<String, Object>)value))
-                    {
-                        throw new IllegalArgumentException("Map exceed maximum of " + maxLevel + " levels");
-                    }
-                }
+                validateMapInternal((Map<String, Object>) value, allowMetadata);
             }
         }
     }

@@ -291,58 +291,6 @@ public class TwinCollectionTest
         // assert
     }
 
-    /* SRS_TWIN_COLLECTION_21_004: [The putAll shall throw IllegalArgumentException if the provided Map is null, empty or invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void putAllThrowsOnIllegal6InnerMaps()
-    {
-        // arrange
-        final Map<String, Object> rawMap = new HashMap<String, Object>()
-        {
-            {
-                put(VALID_KEY_NAME, VALID_VALUE_NAME);
-                put("MaxSpeed", new TwinCollection()
-                {
-                    {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
-                        {
-                            {
-                                putFinal("Inner2", new TwinCollection()
-                                {
-                                    {
-                                        putFinal("Inner3", new TwinCollection()
-                                        {
-                                            {
-                                                putFinal("Inner4", new TwinCollection()
-                                                {
-                                                    {
-                                                    	putFinal("Inner5", new TwinCollection()
-                                                        {
-                                                    		{
-                                                    			putFinal("Inner6", "FinalInnerValue");
-                                                    		}
-                                                        });
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
-        TwinCollection twinCollection = new TwinCollection();
-
-        // act
-        twinCollection.putAllFinal(rawMap);
-
-        // assert
-    }
-
     /* SRS_TWIN_COLLECTION_21_005: [The putAll shall copy all entries in the provided Map to the TwinCollection.] */
     @Test
     public void putAllSucceedOn5InnerMaps()
@@ -472,53 +420,6 @@ public class TwinCollectionTest
         assertTrue(inner instanceof TwinCollection);
     }
 
-    /* SRS_TWIN_COLLECTION_21_009: [The put shall throw IllegalArgumentException if the final collection contains more that 5 levels.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void putThrowsOn6InnerMaps()
-    {
-        // arrange
-        final Map<String, Object> rawMap = new HashMap<String, Object>()
-        {
-            {
-                put(VALID_KEY_NAME, VALID_VALUE_NAME);
-                put("MaxSpeed", new TwinCollection()
-                {
-                    {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
-                        {
-                            {
-                                putFinal("Inner2", new TwinCollection()
-                                {
-                                    {
-                                        putFinal("Inner3", new TwinCollection()
-                                        {
-                                            {
-                                                putFinal("Inner4", new TwinCollection()
-                                                {
-                                                    {
-                                                        putFinal("Inner5", "FinalInnerValue");
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
-        TwinCollection twinCollection = new TwinCollection();
-
-        // act
-        twinCollection.putFinal("Key1", rawMap);
-
-        // assert
-    }
-
     /* Tests_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
     @Test
     public void putDoesNotThrowOn6InnerMapsIfHighestLevelIsMetaData(@Mocked final ParserUtility mockedParserUtility,
@@ -568,62 +469,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection, anyInt, anyBoolean);
-                times = 0;
-            }
-        };
-    }
-
-    /* Tests_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
-    @Test
-    public void putDoesNotThrowOn6InnerMapsIfHighestLevelIsVersionTag(@Mocked final ParserUtility mockedParserUtility,
-                                                                    @Mocked final JsonElement mockedJsonElement)
-    {
-        // arrange
-        final Map<String, Object> rawMap = new HashMap<String, Object>()
-        {
-            {
-                put(VALID_KEY_NAME, VALID_VALUE_NAME);
-                put("MaxSpeed", new TwinCollection()
-                {
-                    {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
-                        {
-                            {
-                                putFinal("Inner2", new TwinCollection()
-                                {
-                                    {
-                                        putFinal("Inner3", new TwinCollection()
-                                        {
-                                            {
-                                                putFinal("Inner4", new TwinCollection()
-                                                {
-                                                    {
-                                                        putFinal("Inner5", "FinalInnerValue");
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
-        final TwinCollection twinCollection = new TwinCollection();
-
-        // act
-        twinCollection.putFinal(Deencapsulation.getField(TwinCollection.class, "VERSION_TAG").toString(), rawMap);
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockedParserUtility.validateMap(twinCollection, anyInt, anyBoolean);
+                mockedParserUtility.validateMap(twinCollection, anyBoolean);
                 times = 0;
             }
         };
@@ -898,57 +744,6 @@ public class TwinCollectionTest
                 "    }\n";
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         TwinCollection rawMap = gson.fromJson(inconsistentJson, TwinCollection.class);
-
-        // act
-        Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);
-
-        // assert
-    }
-
-    /* SRS_TWIN_COLLECTION_21_015: [The constructor shall throw IllegalArgumentException if the Twin collection contains more than 5 levels.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnMoreThan5Levels()
-    {
-        // arrange
-        final Map<String, Object> rawMap = new HashMap<String, Object>()
-        {
-            {
-                put(VALID_KEY_NAME, VALID_VALUE_NAME);
-                put("MaxSpeed", new TwinCollection()
-                {
-                    {
-                        putFinal("Value", 500.0);
-                        putFinal("NewValue", 300.0);
-                        putFinal("Inner1", new TwinCollection()
-                        {
-                            {
-                                putFinal("Inner2", new TwinCollection()
-                                {
-                                    {
-                                        putFinal("Inner3", new TwinCollection()
-                                        {
-                                            {
-                                                putFinal("Inner4", new TwinCollection()
-                                                {
-                                                    {
-                                                    	putFinal("Inner5", new TwinCollection()
-                                                    	{
-                                                    		{
-                                                    			putFinal("Inner6", "FinalInnerValue");
-                                                    		}
-                                                    	});
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
 
         // act
         Deencapsulation.invoke(TwinCollection.class, "createFromRawCollection", rawMap);

@@ -30,9 +30,6 @@ public class TwinProperty
     private static final String LAST_UPDATE_TAG = "$lastUpdated";
     private static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
 
-    private static final int MAX_PROPERTY_LEVEL = 5;
-    private static final int MAX_METADATA_LEVEL = MAX_PROPERTY_LEVEL + 2;
-
     private Object lock = new Object();
 
     private class Property
@@ -168,14 +165,14 @@ public class TwinProperty
             {
                 if(entry.getValue() instanceof Map)
                 {
-                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), MAX_METADATA_LEVEL, true);
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), true);
                 }
             }
             else if(!entry.getKey().equals(VERSION_TAG))
             {
                 if(entry.getValue() instanceof Map)
                 {
-                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), MAX_PROPERTY_LEVEL, false);
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), false);
                 }
             }
         }
