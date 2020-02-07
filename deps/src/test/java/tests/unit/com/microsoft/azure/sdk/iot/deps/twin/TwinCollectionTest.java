@@ -469,7 +469,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection, anyBoolean);
+                mockedParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };
@@ -497,19 +497,6 @@ public class TwinCollectionTest
 
         // act
         twinCollection.putFinal("", "NewNiceCar");
-
-        // assert
-    }
-
-    /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void putThrowsOnKeyInvalid()
-    {
-        // arrange
-        TwinCollection twinCollection = new TwinCollection();
-
-        // act
-        twinCollection.putFinal("Invalid space", "NewNiceCar");
 
         // assert
     }

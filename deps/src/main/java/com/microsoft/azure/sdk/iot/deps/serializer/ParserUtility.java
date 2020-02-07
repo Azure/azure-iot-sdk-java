@@ -151,43 +151,6 @@ public class ParserUtility
     }
 
     /**
-     * Helper to validate if the provided string is a valid json key.
-     *
-     * @param key is the string to be validated.
-     * @param isMetadata defines if the key belongs to a metadata, which allows character `$`.
-     * @throws IllegalArgumentException if the string do not fit the criteria.
-     */
-    public static void validateKey(String key, boolean isMetadata) throws IllegalArgumentException
-    {
-        /* Codes_SRS_PARSER_UTILITY_21_014: [The validateKey shall throw IllegalArgumentException if the provided string is null or empty.] */
-        /* Codes_SRS_PARSER_UTILITY_21_015: [The validateKey shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.] */
-        try
-        {
-            validateStringUTF8(key);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new IllegalArgumentException("The provided key is not valid");
-        }
-
-        /* Codes_SRS_PARSER_UTILITY_21_016: [The validateKey shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
-        if(key.length() > 128)
-        {
-            throw new IllegalArgumentException("The provided key is bigger than 128 characters");
-        }
-
-        /* Codes_SRS_PARSER_UTILITY_21_017: [The validateKey shall throw IllegalArgumentException if the provided string contains an illegal character (`$`,`.`, space).] */
-        /* Codes_SRS_PARSER_UTILITY_21_018: [If `isMetadata` is `true`, the validateKey shall accept the character `$` as valid.] */
-        /* Codes_SRS_PARSER_UTILITY_21_019: [If `isMetadata` is `false`, the validateKey shall not accept the character `$` as valid.] */
-        if((key.contains(".") || key.contains(" ") || (key.contains("$") && ! isMetadata)))
-        {
-            throw new IllegalArgumentException("The provided key is not valid");
-        }
-
-        /* Codes_SRS_PARSER_UTILITY_21_013: [The validateKey shall do nothing if the string is a valid key.] */
-    }
-
-    /**
      * Helper to validate if the provided map in terms of maximum
      * levels and optionally if the keys ar not metadata.
      *
@@ -196,26 +159,21 @@ public class ParserUtility
      * @throws IllegalArgumentException If the Map contains more than maxLevel levels or do not allow metadata
      *                                  but contains metadata key.
      */
-    public static void validateMap(Map<String, Object> map, boolean allowMetadata) throws IllegalArgumentException
+    public static void validateMap(Map<String, Object> map) throws IllegalArgumentException
     {
         /* Codes_SRS_PARSER_UTILITY_21_048: [The validateMap shall do nothing if the map is null.] */
         if(map != null)
         {
             /* Codes_SRS_PARSER_UTILITY_21_047: [The validateMap shall do nothing if the map is a valid Map.] */
-            validateMapInternal(map, allowMetadata);
+            validateMapInternal(map);
         }
     }
 
-    private static void validateMapInternal(Map<String, Object> map, boolean allowMetadata) throws IllegalArgumentException
+    private static void validateMapInternal(Map<String, Object> map) throws IllegalArgumentException
     {
         for(Map.Entry<String, Object> entry : map.entrySet())
         {
-            String key = entry.getKey();
             Object value = entry.getValue();
-
-            /* Codes_SRS_PARSER_UTILITY_21_049: [The validateMap shall throws IllegalArgumentException if any key in the map is null, empty, contains more than 128 characters, or illegal characters (`$`,`.`, space).] */
-            /* Codes_SRS_PARSER_UTILITY_21_050: [If `isMetadata` is `true`, the validateMap shall accept the character `$` in the key.] */
-            ParserUtility.validateKey(key, allowMetadata);
 
             /* Codes_SRS_PARSER_UTILITY_21_051: [The validateMap shall throws IllegalArgumentException if any value contains illegal type (array or invalid class).] */
             if((value != null) && ((value.getClass().isArray()) || (value.getClass().isLocalClass())))
@@ -226,7 +184,7 @@ public class ParserUtility
             if((value != null) && (value instanceof Map))
             {
                 /* Codes_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
-                validateMapInternal((Map<String, Object>) value, allowMetadata);
+                validateMapInternal((Map<String, Object>) value);
             }
         }
     }

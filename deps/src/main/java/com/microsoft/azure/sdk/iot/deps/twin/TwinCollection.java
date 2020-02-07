@@ -267,7 +267,7 @@ public class TwinCollection extends HashMap<String, Object>
         /* Codes_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
         if (!key.equals(VERSION_TAG) && !key.equals(METADATA_TAG))
         {
-            ParserUtility.validateMap(this, true);
+            ParserUtility.validateMap(this);
         }
 
         return last;
@@ -310,7 +310,7 @@ public class TwinCollection extends HashMap<String, Object>
         /* Codes_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
         if (!key.equals(VERSION_TAG) && !key.equals(METADATA_TAG))
         {
-            ParserUtility.validateMap(this, true);
+            ParserUtility.validateMap(this);
         }
 
         return last;

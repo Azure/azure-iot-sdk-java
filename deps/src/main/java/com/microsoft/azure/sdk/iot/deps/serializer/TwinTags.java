@@ -163,14 +163,14 @@ public class TwinTags
             {
                 if(entry.getValue() instanceof Map)
                 {
-                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), true);
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue());
                 }
             }
             else if(!entry.getKey().equals(VERSION_TAG))
             {
                 if(entry.getValue() instanceof Map)
                 {
-                    ParserUtility.validateMap((Map<String, Object>)entry.getValue(), false);
+                    ParserUtility.validateMap((Map<String, Object>)entry.getValue());
                 }
             }
         }
