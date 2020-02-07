@@ -155,7 +155,6 @@ public class ParserUtility
      * levels and optionally if the keys ar not metadata.
      *
      * @param map the {@code Map} to be validate. It can be {@code null}, and it will succeed in this case.
-     * @param allowMetadata the {@code boolean} that indicates if the key can contain metadata `$` or not.
      * @throws IllegalArgumentException If the Map contains more than maxLevel levels or do not allow metadata
      *                                  but contains metadata key.
      */
