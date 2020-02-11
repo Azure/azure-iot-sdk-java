@@ -262,16 +262,31 @@ jobs:
   displayName: Android Test - IoTHub and Provisioning
   dependsOn: AndroidBuildIoTHubProvisioning
   steps:
-  - powershell: ./vsts/install_appcenter_cli.ps1
-    displayName: 'Install app center cli'
+  - task: PowerShell@2
+    displayName: 'determine if testing needed'
     condition: always()
-   
+    inputs:
+      targetType: 'filePath'
+      filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
+    env:
+      TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+      TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+
+  - task: PowerShell@2
+    displayName: 'Install app center cli'
+    condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+    inputs:
+      targetType: 'filePath'
+      filePath: './vsts/install_appcenter_cli.ps1'
+
   - task: DownloadPipelineArtifact@0
+    condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
     inputs:
       artifactName: 'androidBuildFilesIoTHubProvisioning'
       targetPath: $(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk
   
   - task: AppCenterTest@1
+    condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
     displayName: 'E2E with Visual Studio App Center'
     inputs:
       appFile: '$(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk/debug/app-debug.apk'

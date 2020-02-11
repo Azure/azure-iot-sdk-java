@@ -29,6 +29,13 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.29</version>
+        </dependency>
+    </dependencies>
     <scm>
         <connection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</connection>
         <developerConnection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</developerConnection>
@@ -46,8 +53,6 @@
         <module>service-bulkoperation-sample</module>
         <module>service-enrollment-group-sample</module>
     </modules>
-    <dependencies>
-    </dependencies>
     <build>
         <plugins>
             <plugin>

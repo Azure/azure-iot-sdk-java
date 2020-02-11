@@ -1061,25 +1061,18 @@ public class TwinParser
     {
         if(map != null)
         {
-            validateMap(map, 0, MAX_MAP_LEVEL, false);
+            validateMap(map, 0, MAX_MAP_LEVEL);
         }
     }
 
-    private void validateMap(Map<String, Object> map, int level, int maxLevel, boolean allowDollar) throws IllegalArgumentException
+    private void validateMap(Map<String, Object> map, int level, int maxLevel) throws IllegalArgumentException
     {
         level ++;
         
         for(Map.Entry<String, Object> entry : map.entrySet())
         {
-            String key = entry.getKey();
             Object value = entry.getValue();
 
-            /* Codes_SRS_TWINPARSER_21_152: [A valid `key` shall not be null.] */
-            /* Codes_SRS_TWINPARSER_21_153: [A valid `key` shall not be empty.] */
-            /* Codes_SRS_TWINPARSER_21_154: [A valid `key` shall be less than 128 characters long.] */
-            /* Codes_SRS_TWINPARSER_21_155: [A valid `key` shall not have an illegal character (`$`,`.`, space).] */
-            ParserUtility.validateKey(key, allowDollar);
-            
             /* Codes_SRS_TWINPARSER_21_156: [A valid `value` shall contains types of boolean, number, string, or object.] */
             if((value != null) && ((value.getClass().isArray()) || (value.getClass().isLocalClass())))
             {
@@ -1092,7 +1085,7 @@ public class TwinParser
                 /* Codes_TWIN_21_158: [A valid `value` shall contains less than 5 levels of sub-maps.] */
                 if(level <= maxLevel)
                 {
-                    validateMap((Map<String, Object>) value, level, maxLevel, allowDollar);
+                    validateMap((Map<String, Object>) value, level, maxLevel);
                 }
                 else
                 {

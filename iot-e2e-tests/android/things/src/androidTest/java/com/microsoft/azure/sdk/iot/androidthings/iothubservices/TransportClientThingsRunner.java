@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.androidthings.iothubservices;
 
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.TransportClientTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.TransportClientTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 

@@ -8,7 +8,7 @@ All the artifacts that you need to execute this sample are ready to be built and
 
 ## References
 
-[Provisioning Device Client - Documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.device._Provisioning_Device_Client)  
+[Provisioning Device Client - Documentation](https://docs.microsoft.com/en-us/java/api/com.microsoft.azure.sdk.iot.provisioning.device.provisioningdeviceclient?view=azure-java-stable)  
 [Provisioning Device Client - Source Code][povisioning-device-client]
 
 ## X509 Certificate Generator

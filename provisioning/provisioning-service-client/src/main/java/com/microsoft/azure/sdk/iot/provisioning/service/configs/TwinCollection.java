@@ -96,9 +96,6 @@ import java.util.Map;
  */
 public class TwinCollection extends HashMap<String, Object>
 {
-    // By definition, Twin maps cannot contain more than 5 levels.
-    private static final int MAX_TWIN_LEVEL = 5;
-
     // the Twin collection version
     private static final String VERSION_TAG = "$version";
     private Integer version;
@@ -207,7 +204,7 @@ public class TwinCollection extends HashMap<String, Object>
         /* Codes_SRS_TWIN_COLLECTION_34_028: [The put shall not validate the map if the provided key is a metadata tag, or a version tag.] */
         if (!key.equals(VERSION_TAG) && !key.equals(METADATA_TAG))
         {
-            ParserUtility.validateMap(this, MAX_TWIN_LEVEL, true);
+            ParserUtility.validateMap(this);
         }
 
         return last;
