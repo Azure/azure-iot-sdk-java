@@ -63,6 +63,8 @@ public class DigitalTwinServiceClientE2ETests {
         testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), MQTT);
     }
 
+    // TODO: Service is currently throwing 500 InternalServerError for Model GET API calls
+    @Ignore
     @Test
     public void testGetModelInformationValidModelUrn() throws IOException {
         String modelString = digitalTwinServiceClient.getModel(DCM_ID);
@@ -74,6 +76,8 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
 
+    // TODO: Service is currently throwing 500 InternalServerError for Model GET API calls
+    @Ignore
     @Test
     public void testGetModelInformationValidInterfaceUrn() throws IOException {
         String modelString = digitalTwinServiceClient.getModel(TEST_INTERFACE_ID);
@@ -85,12 +89,16 @@ public class DigitalTwinServiceClientE2ETests {
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
+    // TODO: Service is currently throwing 500 InternalServerError for Model GET API calls
+    @Ignore
     @Test(expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidModelUrn() {
         digitalTwinServiceClient.getModel(INVALID_MODEL_URN);
     }
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
+    // TODO: Service is currently throwing 500 InternalServerError for Model GET API calls
+    @Ignore
     @Test(expected = NoSuchElementException.class)
     public void testGetModelInformationInvalidInterfaceUrn() {
         digitalTwinServiceClient.getModel(INVALID_INTERFACE_URN);
