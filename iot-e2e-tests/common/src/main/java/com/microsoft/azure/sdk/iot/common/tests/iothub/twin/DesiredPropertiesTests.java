@@ -190,36 +190,6 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void setDesiredPropertiesAtMaxDepthAllowed() throws IOException, IotHubException
-    {
-        deviceUnderTest.sCDeviceForTwin.clearTwin();
-        deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
-
-        sCDeviceTwin.getTwin(deviceUnderTest.sCDeviceForTwin);
-
-        //Update twin Tags and Desired Properties
-        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-
-        HashMap<String, String> map5 = new HashMap<>();
-        map5.put("5", "this value is at an allowable depth");
-        HashMap<String, Map> map4 = new HashMap<>();
-        map4.put("4", map5);
-        HashMap<String, Map> map3 = new HashMap<>();
-        map3.put("3", map4);
-        HashMap<String, Map> map2 = new HashMap<>();
-        map2.put("2", map3);
-        HashMap<String, Map> map1 = new HashMap<>();
-        map1.put("1", map2);
-        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair("0", map1));
-        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
-
-        //This line will ensure that the SDK does not complain when receiving a valid, full twin depth from the service
-        sCDeviceTwin.getTwin(deviceUnderTest.sCDeviceForTwin);
-    }
-
-    @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testUpdateDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

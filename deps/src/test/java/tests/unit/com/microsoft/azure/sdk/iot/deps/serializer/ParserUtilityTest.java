@@ -256,230 +256,12 @@ public class ParserUtilityTest
         Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateHostName", new Class[]{String.class} , "hostName.azure-devices.net");
     }
 
-    /* Tests_SRS_PARSER_UTILITY_21_013: [The validateKey shall do nothing if the string is a valid key.] */
-    /* Tests_SRS_PARSER_UTILITY_21_019: [If `isMetadata` is `false`, the validateKey shall not accept the character `$` as valid.] */
-    @Test
-    public void validateKeyNoMetadataSucceed() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", "test-key", false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_013: [The validateKey shall do nothing if the string is a valid key.] */
-    /* Tests_SRS_PARSER_UTILITY_21_018: [If `isMetadata` is `true`, the validateKey shall accept the character `$` as valid.] */
-    @Test
-    public void validateKeyMetadataSucceed() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", "$test-key", true);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_014: [The validateKey shall throw IllegalArgumentException if the provided string is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateKeyNullKeyThrows() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey",
-                new Class[]{String.class, Boolean.class}, (String)null, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_014: [The validateKey shall throw IllegalArgumentException if the provided string is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateKeyEmptyKeyThrows() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", "", false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_015: [The validateKey shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateKeyInvalidKeyThrows() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", "\u1234-test-key", false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_016: [The validateKey shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
-    @Test
-    public void validateKeyEdgeSizeSucceed() throws ClassNotFoundException
-    {
-        // arrange
-        String key = "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "12345678";
-
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", key, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_016: [The validateKey shall throw IllegalArgumentException if the provided string contains more than 128 characters.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateKeyInvalidBigKeyThrows() throws ClassNotFoundException
-    {
-        // arrange
-        String key = "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "123456789";
-
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", key, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_017: [The validateKey shall throw IllegalArgumentException if the provided string contains an illegal character (`$`,`.`, space).] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateKeyInvalidDotThrows() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", "test.key", false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_017: [The validateKey shall throw IllegalArgumentException if the provided string contains an illegal character (`$`,`.`, space).] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateKeyInvalidSpaceThrows() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", "test key", false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_017: [The validateKey shall throw IllegalArgumentException if the provided string contains an illegal character (`$`,`.`, space).] */
-    /* Tests_SRS_PARSER_UTILITY_21_019: [If `isMetadata` is `false`, the validateKey shall not accept the character `$` as valid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateKeyNoDollarInvalidDollarThrows() throws ClassNotFoundException
-    {
-        // act
-        Deencapsulation.invoke(Class.forName("com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility"),"validateKey", "$test-key", false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_046: [The validateMap shall throws IllegalArgumentException if the maxLevel is `0` or negative.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateMapThrowsOnZeroMaxLevel() throws ClassNotFoundException
-    {
-        // act
-        ParserUtility.validateMap(new HashMap<String, Object>(), 0, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_046: [The validateMap shall throws IllegalArgumentException if the maxLevel is `0` or negative.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateMapThrowsOnNegativeMaxLevel() throws ClassNotFoundException
-    {
-        // act
-        ParserUtility.validateMap(new HashMap<String, Object>(), -1, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_047: [The validateMap shall do nothing if the map is a valid Map.] */
-    @Test
-    public void validateMapLowerThanMaxLevelSucceed() throws ClassNotFoundException
-    {
-        // arrange
-        final Map<String, Object> mapSample = new HashMap<String, Object>()
-        {
-            {
-                put("key1", "value");
-                put("root", new HashMap<String, Object>()
-                {
-                    {
-                        put("inner1", new HashMap<String, Object>()
-                        {
-                            {
-                                put("innerI1", "innerValue");
-                            }
-                        });
-                        put("inner20", new HashMap<String, Object>()
-                        {
-                            {
-                                put("inner21", new HashMap<String, Object>()
-                                {
-                                    {
-                                        put("inner22", "innerValue");
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
-
-        // act
-        ParserUtility.validateMap(mapSample, 4, false);
-    }
-
     /* Tests_SRS_PARSER_UTILITY_21_048: [The validateMap shall do nothing if the map is null.] */
     @Test
     public void validateMapNullMapSucceed() throws ClassNotFoundException
     {
         // act
-        ParserUtility.validateMap(null, 4, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_049: [The validateMap shall throws IllegalArgumentException if any key in the map is null, empty, contains more than 128 characters, or illegal characters (`$`,`.`, space).] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateMapThrowsOnNullKey() throws ClassNotFoundException
-    {
-        // arrange
-        final Map<String, Object> mapSample = new HashMap<String, Object>()
-        {
-            {
-                put(null, "value");
-            }
-        };
-
-        // act
-        ParserUtility.validateMap(mapSample, 10, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_049: [The validateMap shall throws IllegalArgumentException if any key in the map is null, empty, contains more than 128 characters, or illegal characters (`$`,`.`, space).] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateMapThrowsOnEmptyKey() throws ClassNotFoundException
-    {
-        // arrange
-        final Map<String, Object> mapSample = new HashMap<String, Object>()
-        {
-            {
-                put("", "value");
-            }
-        };
-
-        // act
-        ParserUtility.validateMap(mapSample, 10, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_049: [The validateMap shall throws IllegalArgumentException if any key in the map is null, empty, contains more than 128 characters, or illegal characters (`$`,`.`, space).] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateMapThrowsOnMoreThan128CharKey() throws ClassNotFoundException
-    {
-        // arrange
-        final String bigKey = "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "1234567890123456789012345678901234567890" +
-                "123456789";
-        final Map<String, Object> mapSample = new HashMap<String, Object>()
-        {
-            {
-                put(bigKey, "value");
-            }
-        };
-
-        // act
-        ParserUtility.validateMap(mapSample, 10, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_049: [The validateMap shall throws IllegalArgumentException if any key in the map is null, empty, contains more than 128 characters, or illegal characters (`$`,`.`, space).] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateMapThrowsOnInvalidKey() throws ClassNotFoundException
-    {
-        // arrange
-        final Map<String, Object> mapSample = new HashMap<String, Object>()
-        {
-            {
-                put("$key", "value");
-            }
-        };
-
-        // act
-        ParserUtility.validateMap(mapSample, 10, false);
+        ParserUtility.validateMap(null);
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_050: [If `isMetadata` is `true`, the validateMap shall accept the character `$` in the key.] */
@@ -495,7 +277,7 @@ public class ParserUtilityTest
         };
 
         // act
-        ParserUtility.validateMap(mapSample, 10, true);
+        ParserUtility.validateMap(mapSample);
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_051: [The validateMap shall throws IllegalArgumentException if any value contains illegal type (array or invalid class).] */
@@ -511,7 +293,7 @@ public class ParserUtilityTest
         };
 
         // act
-        ParserUtility.validateMap(mapSample, 10, true);
+        ParserUtility.validateMap(mapSample);
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_051: [The validateMap shall throws IllegalArgumentException if any value contains illegal type (array or invalid class).] */
@@ -531,83 +313,7 @@ public class ParserUtilityTest
         };
 
         // act
-        ParserUtility.validateMap(mapSample, 10, true);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void validateMapThrowsOnBiggerThanMaxLevel() throws ClassNotFoundException
-    {
-        // arrange
-        final Map<String, Object> mapSample = new HashMap<String, Object>()
-        {
-            {
-                put("key1", "value");
-                put("root", new HashMap<String, Object>()
-                {
-                    {
-                        put("inner1", new HashMap<String, Object>()
-                        {
-                            {
-                                put("innerI1", "innerValue");
-                            }
-                        });
-                        put("inner20", new HashMap<String, Object>()
-                        {
-                            {
-                                put("inner21", new HashMap<String, Object>()
-                                {
-                                    {
-                                        put("inner22", "innerValue");
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
-
-        // act
-        ParserUtility.validateMap(mapSample, 3, false);
-    }
-
-    /* Tests_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
-    @Test
-    public void validateMapDoesNotThrowOnBiggerThanMaxLevelIfOnlyMetadata() throws ClassNotFoundException
-    {
-        // arrange
-        final Map<String, Object> mapSample = new HashMap<String, Object>()
-        {
-            {
-                put("key1", "value");
-                put("root", new HashMap<String, Object>()
-                {
-                    {
-                        put("inner1", new HashMap<String, Object>()
-                        {
-                            {
-                                put("innerI1", "innerValue");
-                            }
-                        });
-                        put("inner20", new HashMap<String, Object>()
-                        {
-                            {
-                                put("inner21", new HashMap<String, Object>()
-                                {
-                                    {
-                                        put(TwinMetadata.LAST_UPDATE_TAG, "metaDataValue");
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        };
-
-        // act
-        ParserUtility.validateMap(mapSample, 3, false);
+        ParserUtility.validateMap(mapSample);
     }
 
     /* Tests_SRS_PARSER_UTILITY_21_020: [The getDateTimeUtc shall parse the provide string using `UTC` timezone.] */
