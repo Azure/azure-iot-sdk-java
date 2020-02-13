@@ -12,7 +12,7 @@ public class DigitalTwinE2ETests {
     private static boolean isBasicTier = Boolean.parseBoolean(retrieveEnvironmentVariableValue("IS_BASIC_TIER_HUB"));
 
     @Rule
-    public Timeout globalTimeout = Timeout.seconds(0); // 1 minute max per method tested
+    public Timeout globalTimeout = Timeout.seconds(60); // 1 minute max per method tested
 
     @BeforeClass
     public static void checkIfTestShouldBeRun() {
