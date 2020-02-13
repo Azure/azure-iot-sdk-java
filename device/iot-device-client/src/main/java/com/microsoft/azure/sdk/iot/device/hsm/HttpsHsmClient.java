@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -24,6 +25,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 public class HttpsHsmClient
 {
     private String baseUrl;
@@ -42,48 +44,15 @@ public class HttpsHsmClient
      */
     public HttpsHsmClient(String baseUrl) throws URISyntaxException
     {
-        // Codes_SRS_HSMHTTPCLIENT_34_001: [This constructor shall save the provided baseUrl.]
-        this.baseUrl = baseUrl;
-        URI uri = new URI(baseUrl);
-        this.scheme = uri.getScheme();
-
-        //URL class does not have a url stream handler for unix scheme by default. We need this class for parsing
-        // a url rather than opening any connections, so this psuedo-stub class is used.
-        if (this.scheme.equalsIgnoreCase(UNIX_SCHEME))
+        if (baseUrl == null || baseUrl.isEmpty())
         {
-            // Codes_SRS_HSMHTTPCLIENT_34_012: [If the provided baseUrl uses the unix scheme, this constructor shall set
-            // a stub url stream handler factory to handle that unix scheme.]
-            URLStreamHandlerFactory fac = new URLStreamHandlerFactory()
-            {
-                @Override
-                public URLStreamHandler createURLStreamHandler(String protocol)
-                {
-                    if (protocol.equalsIgnoreCase(UNIX_SCHEME))
-                    {
-                        return new URLStreamHandler()
-                        {
-                            @Override
-                            protected URLConnection openConnection(URL u)
-                            {
-                                //unix connection should never be opened using this method
-                                throw new UnsupportedOperationException("Cannot use URL class to open a unix connection");
-                            }
-                        };
-                    }
-
-                    return null;
-                }
-            };
-
-			try
-            {
-				URL.setURLStreamHandlerFactory(fac);	
-			}
-			catch (Error e)
-            {
-				//this function only throws if the factory has already been set, so we can ignore this error
-			}
+            throw new IllegalArgumentException("baseUrl cannot be null");
         }
+
+        log.trace("Creating HttpsHsmClient with base url {}", baseUrl);
+
+        this.baseUrl = baseUrl;
+        this.scheme = new URI(baseUrl).getScheme();
     }
 
     /**
@@ -99,6 +68,7 @@ public class HttpsHsmClient
      */
     public SignResponse sign(String apiVersion, String moduleName, SignRequest signRequest, String generationId) throws IOException, TransportException, HsmException
     {
+        log.debug("Sending sign request...");
         // Codes_SRS_HSMHTTPCLIENT_34_002: [This function shall build an http request with the url in the format
         // <base url>/modules/<url encoded name>/genid/<url encoded gen id>/sign?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
@@ -142,6 +112,7 @@ public class HttpsHsmClient
      */
     public TrustBundleResponse getTrustBundle(String apiVersion) throws IOException, TransportException, HsmException
     {
+        log.debug("Getting trust bundle...");
         if (apiVersion == null || apiVersion.isEmpty())
         {
             // Codes_SRS_HSMHTTPCLIENT_34_007: [If the provided api version is null or empty, this function shall throw an IllegalArgumentException.]
@@ -193,15 +164,30 @@ public class HttpsHsmClient
     private HttpsResponse sendRequestBasedOnScheme(HttpsMethod httpsMethod, byte[] body, String baseUri, String path, String queryString) throws TransportException, IOException
     {
         URL requestUrl;
-        if (queryString != null && !queryString.isEmpty())
+        if (this.scheme.equalsIgnoreCase(HTTPS_SCHEME) || this.scheme.equalsIgnoreCase(HTTP_SCHEME))
         {
-            requestUrl = new URL(baseUri + path + "?" + queryString);
+            if (queryString != null && !queryString.isEmpty())
+            {
+                requestUrl = new URL(baseUri + path + "?" + queryString);
+            }
+            else
+            {
+                requestUrl = new URL(baseUri + path);
+            }
+        }
+        else if (this.scheme.equalsIgnoreCase(UNIX_SCHEME))
+        {
+            //leave the url null, for unix flow, there is no need to build a URL instance
+            requestUrl = null;
         }
         else
         {
-            requestUrl = new URL(baseUri + path);
+            throw new UnsupportedOperationException("unrecognized URI scheme. Only HTTPS, HTTP and UNIX are supported");
         }
 
+        // requestUrl will be null, if unix socket is used, but HttpsRequest won't null check it until we send the request.
+        // In the unix case, we don't build the https request to send it, we just build it to hold all the information that
+        // will go into the unix socket request later, such as headers, method, etc.
         HttpsRequest httpsRequest = new HttpsRequest(requestUrl, httpsMethod, body, "");
 
         // Codes_SRS_HSMHTTPCLIENT_34_003: [This function shall build an http request with headers ContentType and Accept with value application/json.]
@@ -241,6 +227,8 @@ public class HttpsHsmClient
      */
     private HttpsResponse sendHttpRequestUsingUnixSocket(HttpsRequest httpsRequest, String httpRequestPath, String httpRequestQueryString, String unixSocketAddress) throws IOException
     {
+        log.debug("Sending data over unix socket...");
+
         UnixSocketChannel channel = null;
         HttpsResponse response = null;
         try
@@ -272,6 +260,7 @@ public class HttpsHsmClient
         {
             if (channel != null)
             {
+                log.trace("Closing unix socket channel...");
                 channel.close();
             }
         }
@@ -281,6 +270,8 @@ public class HttpsHsmClient
 
     private String readResponseFromChannel(UnixSocketChannel channel) throws IOException
     {
+        log.debug("Reading response from unix socket channel...");
+
         ByteBuffer buf = ByteBuffer.allocateDirect(10);
         String response = "";
         int numRead = 0;

@@ -44,12 +44,6 @@ public class HttpsRequestResponseSerializer
             throw new IllegalArgumentException("The httpsRequest cannot be null");
         }
 
-        if (httpsRequest.getRequestUrl() == null)
-        {
-            // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_002: [If the provided request's url is null, this function shall throw an IllegalArgumentException.]
-            throw new IllegalArgumentException("Request uri of the request cannot be null");
-        }
-
         if (path == null || path.isEmpty())
         {
             throw new IllegalArgumentException("path cannot be null or empty");

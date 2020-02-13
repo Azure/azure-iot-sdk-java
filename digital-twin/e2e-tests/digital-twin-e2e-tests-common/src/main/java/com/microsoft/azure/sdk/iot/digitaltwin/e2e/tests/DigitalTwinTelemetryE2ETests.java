@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @RunWith(Parameterized.class)
-public class DigitalTwinTelemetryE2ETests {
+public class DigitalTwinTelemetryE2ETests extends DigitalTwinE2ETests {
     private static final String TEST_COMPONENT_NAME = retrieveComponentNameFromInterfaceId(TEST_INTERFACE_ID);
 
     private static final String DEVICE_ID_PREFIX = "DigitalTwinTelemetryE2ETests_";

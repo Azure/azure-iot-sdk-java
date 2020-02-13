@@ -35,7 +35,7 @@ import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponen
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.simulator.TestComponent2.TEST_INTERFACE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DigitalTwinServiceClientE2ETests {
+public class DigitalTwinServiceClientE2ETests extends DigitalTwinE2ETests {
     private static final String IOT_HUB_CONNECTION_STRING = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String TEST_COMPONENT_NAME = retrieveComponentNameFromInterfaceId(TEST_INTERFACE_ID);
 

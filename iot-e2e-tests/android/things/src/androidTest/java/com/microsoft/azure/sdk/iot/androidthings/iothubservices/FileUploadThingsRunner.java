@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.androidthings.iothubservices;
 
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.FileUploadTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.FileUploadTests;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;

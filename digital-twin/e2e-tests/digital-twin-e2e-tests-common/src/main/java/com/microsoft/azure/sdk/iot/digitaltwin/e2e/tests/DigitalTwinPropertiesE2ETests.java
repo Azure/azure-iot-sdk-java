@@ -59,7 +59,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 @Slf4j
 @RunWith(Parameterized.class)
-public class DigitalTwinPropertiesE2ETests {
+public class DigitalTwinPropertiesE2ETests extends DigitalTwinE2ETests {
     private static final String IOT_HUB_CONNECTION_STRING = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String TEST_COMPONENT_NAME = retrieveComponentNameFromInterfaceId(TEST_INTERFACE_ID);
 

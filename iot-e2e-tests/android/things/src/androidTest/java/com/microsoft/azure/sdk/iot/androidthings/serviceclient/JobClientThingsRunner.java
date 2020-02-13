@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.androidthings.serviceclient;
 
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
-import com.microsoft.azure.sdk.iot.common.tests.serviceclient.JobClientTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient.JobClientTests;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;

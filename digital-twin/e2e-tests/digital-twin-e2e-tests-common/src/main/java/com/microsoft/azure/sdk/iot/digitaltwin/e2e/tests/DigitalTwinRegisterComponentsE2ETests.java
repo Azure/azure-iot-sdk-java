@@ -54,7 +54,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
-public class DigitalTwinRegisterComponentsE2ETests {
+public class DigitalTwinRegisterComponentsE2ETests extends DigitalTwinE2ETests {
     private static final String IOT_HUB_CONNECTION_STRING = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static final String TEST_COMPONENT_NAME_1 = retrieveComponentNameFromInterfaceId(TestComponent1.TEST_INTERFACE_ID);
     private static final String TEST_COMPONENT_NAME_2 = retrieveComponentNameFromInterfaceId(TestComponent2.TEST_INTERFACE_ID);

@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.androidthings.serviceclient;
 
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
-import com.microsoft.azure.sdk.iot.common.tests.serviceclient.ExportImportTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient.ExportImportTests;
 import com.microsoft.azure.storage.StorageException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;

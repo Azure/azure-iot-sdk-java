@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.androidthings.iothubservices.twin;
 
 import com.microsoft.azure.sdk.iot.androidthings.BuildConfig;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.tests.iothubservices.twin.DeviceTwinWithVersionTests;
+import com.microsoft.azure.sdk.iot.common.tests.iothub.twin.DeviceTwinWithVersionTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
 import org.junit.Rule;
