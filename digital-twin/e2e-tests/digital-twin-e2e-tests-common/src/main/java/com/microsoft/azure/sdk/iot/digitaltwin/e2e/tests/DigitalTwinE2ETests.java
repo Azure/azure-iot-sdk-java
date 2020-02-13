@@ -1,20 +1,11 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
 import static org.junit.Assume.assumeTrue;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( {DigitalTwinServiceClientE2ETests.class,
-        DigitalTwinRegisterComponentsE2ETests.class,
-        DigitalTwinTelemetryE2ETests.class,
-        DigitalTwinTelemetryParameterizedE2ETests.class,
-        DigitalTwinPropertiesE2ETests.class,
-        DigitalTwinCommandE2ETests.class})
-public class DigitalTwinE2ETestsSuite {
+public class DigitalTwinE2ETests {
     private static boolean runDigitalTwinTests = Boolean.parseBoolean(retrieveEnvironmentVariableValue("RUN_DIGITAL_TWIN_TESTS", "true"));
     private static boolean isBasicTier = Boolean.parseBoolean(retrieveEnvironmentVariableValue("IS_BASIC_TIER_HUB"));
 
