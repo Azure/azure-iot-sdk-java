@@ -1,6 +1,8 @@
 package com.microsoft.azure.sdk.iot.digitaltwin.e2e.tests;
 
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 
 import static com.microsoft.azure.sdk.iot.digitaltwin.e2e.helpers.Tools.retrieveEnvironmentVariableValue;
 import static org.junit.Assume.assumeTrue;
@@ -8,6 +10,9 @@ import static org.junit.Assume.assumeTrue;
 public class DigitalTwinE2ETests {
     private static boolean runDigitalTwinTests = Boolean.parseBoolean(retrieveEnvironmentVariableValue("RUN_DIGITAL_TWIN_TESTS", "true"));
     private static boolean isBasicTier = Boolean.parseBoolean(retrieveEnvironmentVariableValue("IS_BASIC_TIER_HUB"));
+
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(0); // 1 minute max per method tested
 
     @BeforeClass
     public static void checkIfTestShouldBeRun() {
