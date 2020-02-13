@@ -300,42 +300,42 @@ jobs:
       runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.$(ANDROID_TEST_GROUP_ID)'
       showDebugOutput: true
 
- ### Digital Twin Android E2E Tests, Multi configuration build (12 different test groups to cover) ###
-#- job: AndroidBuildDigitalTwin
-#  timeoutInMinutes: 45
-#  pool:
-#    name: Hosted VS2017
-#  displayName: Android Build - Digital Twin
+ ### Digital Twin Android E2E Tests ###
+- job: AndroidBuildDigitalTwin
+  timeoutInMinutes: 45
+  pool:
+    name: Hosted VS2017
+  displayName: Android Build - Digital Twin
 
-#  steps:
-#  - powershell: ./vsts/echo_versions.ps1
-#    displayName: 'Echo Versions'
-#    env:
-#      COMMIT_FROM: $(COMMIT_FROM)
-#    condition: always()
+  steps:
+  - powershell: ./vsts/echo_versions.ps1
+    displayName: 'Echo Versions'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+    condition: always()
 
-#  - powershell: ./vsts/android_digitaltwin.cmd
-#    displayName: 'Android Build - Digital Twin'
-#    env:
-#      APPCENTER_DIGITAL_TWIN_APP_SECRET: $(APPCENTER-DIGITAL-TWIN-APP-SECRET)
-#      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
-#      EVENT_HUB_CONNECTION_STRING: $(ANDROID-EVENT-HUB-CONNECTION-STRING)
-#    condition: always()
+  - powershell: ./vsts/android_digitaltwin.cmd
+    displayName: 'Android Build - Digital Twin'
+    env:
+      APPCENTER_DIGITAL_TWIN_APP_SECRET: $(APPCENTER-DIGITAL-TWIN-APP-SECRET)
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      EVENT_HUB_CONNECTION_STRING: $(ANDROID-EVENT-HUB-CONNECTION-STRING)
+    condition: always()
 
-#  - task: CopyFiles@2
-#    displayName: 'Copy Test Results to Artifact Staging Directory'
-#    inputs:
-#      SourceFolder: '$(Build.SourcesDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk'
-#      Contents: |
-#       *.*
-#      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-#    continueOnError: true
-#    condition: always()
+  - task: CopyFiles@2
+    displayName: 'Copy Test Results to Artifact Staging Directory'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk'
+      Contents: |
+       *.*
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    continueOnError: true
+    condition: always()
 
-#  - task: PublishPipelineArtifact@0
-#    inputs:
-#      artifactName: 'androidBuildFilesDigitalTwin'
-#      targetPath: 'digital-twin/e2e-tests/android/apk/build/outputs/apk'
+  - task: PublishPipelineArtifact@0
+    inputs:
+      artifactName: 'androidBuildFilesDigitalTwin'
+      targetPath: 'digital-twin/e2e-tests/android/apk/build/outputs/apk'
 
 #- job: AndroidTestDigitalTwin
 #  timeoutInMinutes: 180
