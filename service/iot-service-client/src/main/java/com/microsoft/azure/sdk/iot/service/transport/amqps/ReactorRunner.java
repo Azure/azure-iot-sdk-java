@@ -36,7 +36,7 @@ public class ReactorRunner implements Runnable
         }
         catch (HandlerException e)
         {
-            log.error("Encountered an exception while running reactor on thread {}", threadName, e);
+            log.debug("Encountered an exception while running reactor on thread {}", threadName, e);
         }
         finally
         {

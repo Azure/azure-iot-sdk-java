@@ -438,7 +438,10 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandler
         log.trace("Stopping reactor");
 
         // At this point, all links, sessions, and connections should be closed locally, so it is safe to stop the reactor
-        reactor.stop();
+        if (reactor != null)
+        {
+            reactor.stop();
+        }
     }
 
     /**
