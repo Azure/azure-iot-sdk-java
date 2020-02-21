@@ -38,10 +38,10 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     public static final String DEVICE_PATH_FORMAT = "/devices/%s/messages/devicebound";
     public static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
     private static final String THREAD_POSTFIX_NAME = "SendHandler";
-    private AmqpResponseVerification deliveryAcknowledgement;
+    private AmqpMessageAcknowledgement deliveryAcknowledgement;
     private org.apache.qpid.proton.message.Message messageToBeSent;
     private static final int expectedLinkCount = 1;
-    private AmqpSendHandlerMessageSentCallback callback;
+    private AmqpMessageSentCallback callback;
     private Sender cloudToDeviceMessageSender;
 
     /**
@@ -52,7 +52,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param iotHubServiceClientProtocol protocol to use
      * @param callback the callback to be executed when the message has been sent
      */
-    public AmqpSendHandler(String hostName, String userName, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpSendHandlerMessageSentCallback callback)
+    public AmqpSendHandler(String hostName, String userName, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpMessageSentCallback callback)
     {
         super(hostName, userName, iotHubServiceClientProtocol, SEND_TAG, ENDPOINT, expectedLinkCount);
 
@@ -200,7 +200,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     @Override
     public void onMessageAcknowledged(DeliveryState deliveryState)
     {
-        deliveryAcknowledgement = new AmqpResponseVerification(deliveryState);
+        deliveryAcknowledgement = new AmqpMessageAcknowledgement(deliveryState);
         log.debug("Received acknowledgement for sent message with delivery state {}", deliveryState.getType());
         if (deliveryAcknowledgement.getException() != null)
         {

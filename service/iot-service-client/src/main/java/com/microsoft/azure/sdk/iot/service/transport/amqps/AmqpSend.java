@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * and automatically closes the connection after sending it
  */
 @Slf4j
-public class AmqpSend implements AmqpSendHandlerMessageSentCallback
+public class AmqpSend implements AmqpMessageSentCallback
 {
     protected final String hostName;
     protected final String userName;
@@ -165,7 +165,7 @@ public class AmqpSend implements AmqpSendHandlerMessageSentCallback
     }
 
     @Override
-    public void onMessageSent(AmqpResponseVerification deliveryAcknowledgement)
+    public void onMessageSent(AmqpMessageAcknowledgement acknowledgement)
     {
         sendLatch.countDown();
         log.info("Message with correlation id {} was sent successfully", this.correlationId);

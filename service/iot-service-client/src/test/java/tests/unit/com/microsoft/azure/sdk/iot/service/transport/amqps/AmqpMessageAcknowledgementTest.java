@@ -1,7 +1,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.*;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpMessageAcknowledgement;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class AmqpResponseVerificationTest
+public class AmqpMessageAcknowledgementTest
 {
     @Mocked
     DeliveryState mockedDeliveryState;
@@ -53,7 +53,7 @@ public class AmqpResponseVerificationTest
 
         };
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedRejected);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedRejected);
 
         //Assert
         new Verifications()
@@ -84,7 +84,7 @@ public class AmqpResponseVerificationTest
         };
 
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedRejected);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedRejected);
 
         //Assert
         new Verifications()
@@ -115,7 +115,7 @@ public class AmqpResponseVerificationTest
         };
 
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedRejected);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedRejected);
 
         //Assert
         new Verifications()
@@ -146,7 +146,7 @@ public class AmqpResponseVerificationTest
         };
 
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedRejected);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedRejected);
 
         //Assert
         new Verifications()
@@ -177,7 +177,7 @@ public class AmqpResponseVerificationTest
         };
 
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedRejected);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedRejected);
 
         //Assert
         new Verifications()
@@ -208,7 +208,7 @@ public class AmqpResponseVerificationTest
         };
 
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedRejected);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedRejected);
 
         //Assert
         new Verifications()
@@ -224,7 +224,7 @@ public class AmqpResponseVerificationTest
     public void constructor_saves_if_accepted()
     {
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedAccepted);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedAccepted);
 
         //Assert
         new Verifications()
@@ -239,7 +239,7 @@ public class AmqpResponseVerificationTest
     public void constructor_saves_if_received()
     {
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedReceived);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedReceived);
 
         //Assert
         new Verifications()
@@ -254,7 +254,7 @@ public class AmqpResponseVerificationTest
     public void constructor_saves_if_released()
     {
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedReleased);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedReleased);
 
         //Assert
         new Verifications()
@@ -269,7 +269,7 @@ public class AmqpResponseVerificationTest
     public void constructor_saves_if_modified()
     {
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedModified);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedModified);
 
         //Assert
         new Verifications()
@@ -300,7 +300,7 @@ public class AmqpResponseVerificationTest
         };
 
         //Act
-        AmqpResponseVerification testVerification = new AmqpResponseVerification(mockedRejected);
+        AmqpMessageAcknowledgement testVerification = new AmqpMessageAcknowledgement(mockedRejected);
 
         //Assert
         new Verifications()

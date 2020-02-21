@@ -14,7 +14,7 @@ import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 
 import java.util.Map;
 
-public class AmqpResponseVerification implements AmqpError
+public class AmqpMessageAcknowledgement implements AmqpError
 {
     private Symbol errorCondition = null;
     private String errorDescription = null;
@@ -22,7 +22,7 @@ public class AmqpResponseVerification implements AmqpError
     //Codes_SRS_SERVICE_SDK_JAVA_AMQPRESPONSEVERIFICATION_25_006: [** The function shall save null exception if the amqp delivery state is accepted or received or released or modified **]**
     private IotHubException exception = null;
 
-    public AmqpResponseVerification(DeliveryState state)
+    public AmqpMessageAcknowledgement(DeliveryState state)
     {
         if (state == null)
         {

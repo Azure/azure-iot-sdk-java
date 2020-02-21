@@ -9,9 +9,9 @@ import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpMessageAcknowledgement;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandlerMessageSentCallback;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpMessageSentCallback;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -82,9 +82,11 @@ public class AmqpSendHandlerTest
     @Mocked Target target;
     @Mocked Delivery delivery;
     @Mocked Disposition disposition;
-    @Mocked AmqpResponseVerification responseVerification;
+    @Mocked
+    AmqpMessageAcknowledgement responseVerification;
     @Mocked IotHubSSLContext mockedIotHubSSLContext;
-    @Mocked AmqpSendHandlerMessageSentCallback mockSendHandlerCallback;
+    @Mocked
+    AmqpMessageSentCallback mockSendHandlerCallback;
 
     // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
     // Test_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_002: [The constructor shall concatenate the host name with the port]
@@ -460,7 +462,7 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall send the encoded bytes]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall close the Sender, Session and Connection]
     @Test
-    public void onLinkFlowBufferOverflow_call_flow_ok(final @Mocked AmqpResponseVerification mockedVerification) throws UnsupportedEncodingException
+    public void onLinkFlowBufferOverflow_call_flow_ok(final @Mocked AmqpMessageAcknowledgement mockedVerification) throws UnsupportedEncodingException
     {
         // Arrange
         String hostName = "aaa";
@@ -533,7 +535,7 @@ public class AmqpSendHandlerTest
     Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
      */
     @Test
-    public void sendComplete_flow_OK(final @Mocked AmqpResponseVerification mockedVerification) throws IotHubException, IOException
+    public void sendComplete_flow_OK(final @Mocked AmqpMessageAcknowledgement mockedVerification) throws IotHubException, IOException
     {
         // Arrange
         String hostName = "aaa";
@@ -557,7 +559,7 @@ public class AmqpSendHandlerTest
 
     //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
     @Test (expected = IotHubException.class)
-    public void sendComplete_throws_exception_if_found(final @Mocked AmqpResponseVerification mockedVerification,
+    public void sendComplete_throws_exception_if_found(final @Mocked AmqpMessageAcknowledgement mockedVerification,
                                                        final @Mocked IotHubException mockedIotHubException) throws IotHubException, IOException
     {
         // Arrange
@@ -584,7 +586,7 @@ public class AmqpSendHandlerTest
 
     //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
     @Test (expected = IOException.class)
-    public void sendComplete_throws_Connection_exception_if_found(final @Mocked AmqpResponseVerification mockedVerification,
+    public void sendComplete_throws_Connection_exception_if_found(final @Mocked AmqpMessageAcknowledgement mockedVerification,
                                                                   final @Mocked IotHubException mockedIotHubException,
                                                                   final @Mocked Event mockedEvent) throws IotHubException, IOException
     {
