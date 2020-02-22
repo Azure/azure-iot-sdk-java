@@ -93,14 +93,3 @@ client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCa
 | MqttServerUnavailableException | | Yes | SDK will retry | 
 | MqttUnauthorizedException | Paho: REASON_CODE_NOT_AUTHORIZED | No | Verify your credentials and make sure they are up-to-date. |
 | MqttUnexpectedErrorException | | No | Inspect the exception details, collect logs and contact service |
-
-
-
-
-
-
-
-
-
-
-
