@@ -211,10 +211,6 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
                 message.decode(withAny(buffer), 0, anyInt);
                 delivery.disposition(Accepted.getInstance()); // send disposition frame and settle the outcome
                 delivery.settle();
-                session = receiver.getSession();
-                session.close();
-                connection = session.getConnection();
-                connection.close();
                 message.getBody();
                 result = mockData;
 
@@ -345,11 +341,8 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
                 link = event.getLink();
                 link.getName();
                 result = Deencapsulation.getField(amqpReceiveHandler, "FILE_NOTIFICATION_RECEIVE_TAG");
-                target = new Target();
-                target.setAddress(endpoint);
                 source = new Source();
                 source.setAddress(endpoint);
-                link.setTarget(target);
                 link.setSource(source);
             }
         };
@@ -359,7 +352,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_022: [This function shall set the variable 'connectionWasOpened' to true]
     @Test
-    public void onLinkRemoteOpenedFlagsConnectionWasOpened()
+    public void onLinkRemoteOpenedFlagsConnectionWasOpened(@Mocked Event mockEvent)
     {
         // Arrange
         String hostName = "aaa";
@@ -369,15 +362,15 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
 
         // Act
-        amqpReceiveHandler.onLinkRemoteOpen(null);
+        amqpReceiveHandler.onLinkRemoteOpen(mockEvent);
 
         // Assert
-        assertTrue(Deencapsulation.getField(amqpReceiveHandler, "connectionWasOpened"));
+        assertTrue(Deencapsulation.getField(amqpReceiveHandler, "linkOpenedRemotely"));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
-    public void receiveCompleteChecksForSavedException() throws IOException, IotHubException
+    public void verifyConnectionOpenedChecksForSavedException() throws IOException, IotHubException
     {
         // Arrange
         String hostName = "aaa";
@@ -386,16 +379,18 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
 
-        Deencapsulation.setField(amqpReceiveHandler, "connectionWasOpened", true);
+        Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", true);
+        Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
+        Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "receiveComplete");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
-    public void receiveCompleteChecksThatConnectionWasOpened() throws IOException, IotHubException
+    public void verifyConnectionOpenedChecksThatConnectionWasOpened() throws IOException, IotHubException
     {
         // Arrange
         String hostName = "aaa";
@@ -404,11 +399,13 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
 
-        Deencapsulation.setField(amqpReceiveHandler, "connectionWasOpened", false);
+        Deencapsulation.setField(amqpReceiveHandler, "connectionOpenedRemotely", false);
+        Deencapsulation.setField(amqpReceiveHandler, "sessionOpenedRemotely", true);
+        Deencapsulation.setField(amqpReceiveHandler, "linkOpenedRemotely", true);
         Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "receiveComplete");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
     }
 
     private void createProtonObjects()

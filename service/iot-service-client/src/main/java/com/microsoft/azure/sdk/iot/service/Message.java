@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * IotHub specific message container
@@ -177,6 +178,7 @@ public class Message
     {
         this.properties = new HashMap<String, String>(1);
         this.setDeliveryAcknowledgementFinal(DeliveryAcknowledgement.Full);
+        this.correlationId = UUID.randomUUID().toString();
     }
 
     /**

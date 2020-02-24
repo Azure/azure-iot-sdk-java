@@ -6,9 +6,11 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -30,26 +32,14 @@ import java.util.Map;
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
  */
-public class AmqpFeedbackReceivedHandler extends BaseHandler
+@Slf4j
+public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
 {
     public static final String RECEIVE_TAG = "receiver";
-    public static final String SEND_PORT_AMQPS = ":5671";
-    public static final String SEND_PORT_AMQPS_WS = ":443";
     public static final String ENDPOINT = "/messages/servicebound/feedback";
-    public static final String WEBSOCKET_PATH = "/$iothub/websocket";
-    public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
-
-    private final String hostName;
-    private final String userName;
-    private final String sasToken;
-
-    protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    protected final String webSocketHostName;
 
     private AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
-
-    private Exception savedException;
-    private boolean connectionWasOpened = false;
+    private Receiver feedbackReceiverLink;
 
     /**
      * Constructor to set up connection parameters and initialize
@@ -62,22 +52,9 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
      */
     public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.webSocketHostName = hostName;
-        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
-        {
-            this.hostName = hostName + SEND_PORT_AMQPS_WS;
-        }
-        else
-        {
-            this.hostName = hostName + SEND_PORT_AMQPS;
-        }
+        super(hostName, userName, sasToken, iotHubServiceClientProtocol);
 
-        this.userName = userName;
-        this.sasToken = sasToken;
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
-        this.savedException = null;
 
         // Add a child handler that performs some default handshaking
         // behaviour.
@@ -88,17 +65,15 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         add(new FlowController());
     }
 
-    /**
-     * Create Proton SslDomain object from Address using the given Ssl mode
-     * @param mode Proton enum value of requested Ssl mode
-     * @return The created Ssl domain
-     */
-    private SslDomain makeDomain(SslDomain.Mode mode)
+    @Override
+    public void onTimerTask(Event event)
     {
-        SslDomain domain = Proton.sslDomain();
-        domain.init(mode);
-
-        return domain;
+        //This callback is scheduled by the reactor runner as a signal to gracefully close the connection, starting with its link
+        if (this.feedbackReceiverLink != null)
+        {
+            log.debug("Shutdown event occurred, closing feedback receiver link");
+            this.feedbackReceiverLink.close();
+        }
     }
 
     /**
@@ -126,50 +101,20 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [The event handler shall settle the Delivery with the Accepted outcome]
             delivery.disposition(Accepted.getInstance());
             delivery.settle();
-          
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_008: [The event handler shall close the Session and Connection (Proton)]
-            recv.getSession().close();
-            recv.getSession().getConnection().close();
+
+            //By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
+            // onLinkLocalClose closes the session locally and eventually the connection and reactor
+            if (recv.getLocalState() == EndpointState.ACTIVE)
+            {
+                log.debug("Closing amqp feedback receiver link since a feedback message was received");
+                recv.close();
+            }
 
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
             if (amqpFeedbackReceivedEvent != null)
             {
                 amqpFeedbackReceivedEvent.onFeedbackReceived(msg.getBody().toString());
             }
-        }
-    }
-
-    @Override
-    public void onConnectionBound(Event event)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
-        Transport transport = event.getConnection().getTransport();
-        if (transport != null)
-        {
-            if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
-            {
-                WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.webSocketHostName, WEBSOCKET_PATH, 0, WEBSOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal)transport).addTransportLayer(webSocket);
-            }
-            Sasl sasl = transport.sasl();
-            sasl.plain(this.userName, this.sasToken);
-
-            SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
-            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-
-            try
-            {
-                // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
-                domain.setSslContext(new IotHubSSLContext().getSSLContext());
-            }
-            catch (Exception e)
-            {
-                this.savedException = e;
-            }
-
-            Ssl ssl = transport.ssl(domain);
         }
     }
 
@@ -196,13 +141,14 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_15_017: [The Receiver object shall have the properties set to service client version identifier.]
         Map<Symbol, Object> properties = new HashMap<>();
         properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
-        Receiver receiver = ssn.receiver(RECEIVE_TAG);
-        receiver.setProperties(properties);
+        feedbackReceiverLink = ssn.receiver(RECEIVE_TAG);
+        feedbackReceiverLink.setProperties(properties);
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_014: [The event handler shall open the Connection, the Session and the Receiver object]
+        log.debug("Opening connection, session and link for amqp feedback receiver");
         conn.open();
         ssn.open();
-        receiver.open();
+        feedbackReceiverLink.open();
     }
 
     @Override
@@ -213,38 +159,9 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         Link link = event.getLink();
         if (event.getLink().getName().equals(RECEIVE_TAG))
         {
-            Target t = new Target();
-            t.setAddress(ENDPOINT);
             Source source = new Source();
             source.setAddress(ENDPOINT);
-            link.setTarget(t);
             link.setSource(source);
-        }
-    }
-
-    @Override
-    public void onLinkRemoteOpen(Event event)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_018: [This function shall set the variable 'connectionWasOpened' to true]
-        this.connectionWasOpened = true;
-    }
-
-    /**
-     * If an exception was encountered while opening the AMQP connection, this function shall throw that saved exception
-     * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
-     * exception will be the inner exception
-     */
-    void receiveComplete() throws IOException
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
-        if (this.savedException != null)
-        {
-            throw new IOException("Connection failed to be established", this.savedException);
-        }
-
-        if (!this.connectionWasOpened)
-        {
-            throw new IOException("Connection failed to open");
         }
     }
 }

@@ -7,7 +7,9 @@ package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.engine.BaseHandler;
+import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Link;
 
 @Slf4j
 public class ErrorLoggingBaseHandler extends BaseHandler
@@ -17,49 +19,73 @@ public class ErrorLoggingBaseHandler extends BaseHandler
     @Override
     public void onLinkRemoteClose(Event event)
     {
-        protonJExceptionParser = new ProtonJExceptionParser(event);
-        if (protonJExceptionParser.getError() == null)
+        if (event.getLink().getLocalState().equals(EndpointState.ACTIVE))
         {
-            log.debug("Amqp link {} was closed remotely", event.getLink().getName());
-        }
-        else
-        {
-            if (event.getLink() != null && event.getLink().getName() != null)
+            protonJExceptionParser = new ProtonJExceptionParser(event);
+            if (protonJExceptionParser.getError() == null)
             {
-                log.warn("Amqp link {} was closed remotely with exception {} with description {}", event.getLink().getName(), protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                log.debug("Amqp link {} was closed remotely", event.getLink().getName());
             }
             else
             {
-                log.warn("Unknown amqp link was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                if (event.getLink() != null && event.getLink().getName() != null)
+                {
+                    log.warn("Amqp link {} was closed remotely with exception {} with description {}", event.getLink().getName(), protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                }
+                else
+                {
+                    log.warn("Unknown amqp link was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                }
             }
+        }
+        else
+        {
+            // If the link closes remotely, but local state is already closed, then no error occurred.
+            log.trace("Amqp link {} closed remotely after being closed locally", event.getLink().getName());
         }
     }
 
     @Override
     public void onSessionRemoteClose(Event event)
     {
-        protonJExceptionParser = new ProtonJExceptionParser(event);
-        if (protonJExceptionParser.getError() == null)
+        if (event.getSession().getLocalState().equals(EndpointState.ACTIVE))
         {
-            log.warn("Amqp session was closed remotely with an unknown exception");
+            protonJExceptionParser = new ProtonJExceptionParser(event);
+            if (protonJExceptionParser.getError() == null)
+            {
+                log.warn("Amqp session was closed remotely with an unknown exception");
+            }
+            else
+            {
+                log.warn("Amqp session was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+            }
         }
         else
         {
-            log.warn("Amqp session was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+            // If the session closes remotely, but local state is already closed, then no error occurred.
+            log.trace("Amqp session closed remotely after being closed locally");
         }
     }
 
     @Override
     public void onConnectionRemoteClose(Event event)
     {
-        protonJExceptionParser = new ProtonJExceptionParser(event);
-        if (protonJExceptionParser.getError() == null)
+        if (event.getConnection().getLocalState().equals(EndpointState.ACTIVE))
         {
-            log.warn("Amqp connection was closed remotely with an unknown exception");
+            protonJExceptionParser = new ProtonJExceptionParser(event);
+            if (protonJExceptionParser.getError() == null)
+            {
+                log.warn("Amqp connection was closed remotely with an unknown exception");
+            }
+            else
+            {
+                log.warn("Amqp connection was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+            }
         }
         else
         {
-            log.warn("Amqp connection was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+            // If the connection closes remotely, but local state is already closed, then no error occurred.
+            log.trace("Amqp connection closed remotely after being closed locally");
         }
     }
 
@@ -69,11 +95,11 @@ public class ErrorLoggingBaseHandler extends BaseHandler
         protonJExceptionParser = new ProtonJExceptionParser(event);
         if (protonJExceptionParser.getError() == null)
         {
-            log.warn("Amqp transport closed with an unknown exception");
+            log.warn("Amqp transport threw an unknown exception");
         }
         else
         {
-            log.warn("Amqp transport closed due to exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+            log.warn("Amqp transport threw exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
         }
     }
 }

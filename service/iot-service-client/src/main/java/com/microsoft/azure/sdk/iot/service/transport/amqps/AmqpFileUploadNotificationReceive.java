@@ -8,9 +8,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.engine.BaseHandler;
-import org.apache.qpid.proton.engine.Event;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
@@ -22,17 +20,16 @@ import java.util.concurrent.LinkedBlockingDeque;
  * overriding the events what are needed to handle
  * high level open, close methods and feedback received event.
  */
-public class AmqpFileUploadNotificationReceive extends BaseHandler implements AmqpFeedbackReceivedEvent
+@Slf4j
+public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;
     private final String userName;
     private final String sasToken;
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    private Reactor reactor = null;
     private FileUploadNotification fileUploadNotification;
     private Queue<FileUploadNotification> fileUploadNotificationQueue;
-    private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
 
     /**
      * Constructor to set up connection parameters
@@ -48,24 +45,6 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
         this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-    }
-
-    /**
-     * Event handler for the reactor init event
-     * @param event The proton event object
-     */
-    @Override
-    public void onReactorInit(Event event)
-    {
-        // You can use the connection method to create AMQP connections.
-
-        // This connection's handler is the AmqpSendHandler object. All the events
-        // for this connection will go to the AmqpSendHandler object instead of
-        // going to the reactor. If you were to omit the AmqpSendHandler object,
-        // all the events would go to the reactor.
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_002: [The event handler shall set the member AmqpsReceiveHandler object to handle the given connection events]
-        event.getReactor().connection(amqpReceiveHandler);
     }
 
     /**
@@ -89,8 +68,9 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_004: [The function shall invalidate the member AmqpsReceiveHandler object]
         amqpReceiveHandler = null;
-        if ( fileUploadNotificationQueue!= null && !fileUploadNotificationQueue.isEmpty())
+        if ( fileUploadNotificationQueue != null && !fileUploadNotificationQueue.isEmpty())
         {
+            log.warn("Close was called while the file upload notification queue was not empty, clearing the file upload notification queue");
             fileUploadNotificationQueue.clear();
         }
         fileUploadNotificationQueue = null;
@@ -108,29 +88,13 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
     {
         if  (amqpReceiveHandler != null)
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_005: [The function shall initialize the Proton reactor object]
-            this.reactor = Proton.reactor(this);
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_006: [The function shall start the Proton reactor object]
-            this.reactor.setTimeout(REACTOR_TIMEOUT);
-            this.reactor.start();
-            
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_007: [The function shall wait for specified timeout to check for any feedback message]
-            long startTime = System.currentTimeMillis();
-            long endTime = startTime + timeoutMs;
-            
-            while(this.reactor.process())
-            {
-                if (System.currentTimeMillis() > endTime)
-                {
-                    break;
-                }
-            }
-            
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_008: [The function shall stop and free the Proton reactor object]
-            this.reactor.stop();
-            this.reactor.process();
-            this.reactor.free();
-            this.amqpReceiveHandler.receiveComplete();
+            log.info("Receiving on file upload notification receiver for up to {} milliseconds", timeoutMs);
+
+            new ReactorRunner(amqpReceiveHandler, "AmqpFileUploadNotificationReceiver").run(timeoutMs);
+
+            log.trace("Amqp receive reactor stopped, checking that the connection was opened");
+            this.amqpReceiveHandler.verifyConnectionOpened();
+            log.trace("Amqp receive reactor did successfully open the connection, returning without exception");
         }
         else
         {
@@ -155,8 +119,6 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
      */
     public synchronized void onFeedbackReceived(String feedbackJson)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_010: [The function shall parse the received Json string to FeedbackBath object]
-
         try
         {
             FileUploadNotificationParser notificationParser = new FileUploadNotificationParser(feedbackJson);
@@ -167,14 +129,10 @@ public class AmqpFileUploadNotificationReceive extends BaseHandler implements Am
 
             fileUploadNotificationQueue.add(fileUploadNotification);
         }
-        catch (IOException e)
-        {
-            this.fileUploadNotification = null;
-        }
         catch (Exception e)
         {
             // this should never happen. However if it does, proton can't handle it. So guard against throwing it at proton.
-            System.out.println("Service threw something mysteriously dangerous, message abandoned.");
+            log.warn("Service gave feedback message with poorly formed json, message abandoned.");
         }
     }
 }
