@@ -43,7 +43,9 @@ public class ProxiedSSLSocket extends SSLSocket
     private String proxyUsername;
     private char[] proxyPassword;
 
-    private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
+    private static final String HTTP = "HTTP/";
+    private static final String HTTP_VERSION_1_1 = HTTP + "1.1";
+
 
     protected ProxiedSSLSocket(SSLSocketFactory socketFactory, Socket proxySocket, String proxyUsername, char[] proxyPassword)
     {
@@ -122,10 +124,10 @@ public class ProxiedSSLSocket extends SSLSocket
 
         //Expects the same http version in the response as the request
         String firstLine = connectResponseLines[connectResponseStart];
-        if (!firstLine.startsWith(HTTP_VERSION_1_1))
+        if (!firstLine.startsWith(HTTP))
         {
             tunnel.close();
-            throw new IOException(String.format("Unable to tunnel through %s:%d.  Expected first response line to start with %s, but proxy returns \"%s\"", host, port, HTTP_VERSION_1_1, firstLine));
+            throw new IOException(String.format("Unable to tunnel through %s:%d.  Expected first response line to start with %s, but proxy returns \"%s\"", host, port, HTTP, firstLine));
         }
 
         String[] replyStrParts = firstLine.split(" ");
