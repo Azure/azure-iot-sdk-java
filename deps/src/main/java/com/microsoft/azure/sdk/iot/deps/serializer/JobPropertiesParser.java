@@ -153,7 +153,7 @@ public class JobPropertiesParser
     }
 
     /**
-     * Getter for storageAuthenticationType
+     * Getter for authentication type being used for connecting to a storage account.
      *
      * @return The value of storageAuthenticationType
      */
@@ -163,7 +163,7 @@ public class JobPropertiesParser
     }
 
     /**
-     * Setter for storageAuthenticationType
+     * Setter for authentication type being used for connecting to a storage account.
      *
      * @param storageAuthenticationType the value to set storageAuthenticationType to
      */

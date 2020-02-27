@@ -1,7 +1,7 @@
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.google.gson.annotations.SerializedName;
-
+/* Specifies authentication type being used for connecting to storage account */
 public enum StorageAuthenticationType
 {
     /* Use a shared access key for authentication */
