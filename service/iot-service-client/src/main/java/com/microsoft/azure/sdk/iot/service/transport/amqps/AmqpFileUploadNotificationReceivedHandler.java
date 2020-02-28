@@ -6,15 +6,14 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.Accepted;
-import org.apache.qpid.proton.amqp.messaging.Data;
-import org.apache.qpid.proton.amqp.messaging.Source;
-import org.apache.qpid.proton.amqp.messaging.Target;
+import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.FlowController;
@@ -31,27 +30,14 @@ import java.util.Map;
  * Maintains the layers of AMQP protocol (Link, Session, Connection, Transport)
  * Creates and sets SASL authentication for transport
  */
-public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
+@Slf4j
+public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHandler
 {
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";
-    private static final String SEND_PORT_AMQPS = ":5671";
-    private static final String SEND_PORT_AMQPS_WS = ":443";
     private static final String FILENOTIFICATION_ENDPOINT = "/messages/serviceBound/filenotifications";
-    private static final String WEBSOCKET_PATH = "/$iothub/websocket";
-    private static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
-
-    private final String hostName;
-    private final String userName;
-    private final String sasToken;
-
-    private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    private final String webSocketHostName;
 
     private AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
-
-    private Exception savedException;
-
-    private boolean connectionWasOpened = false;
+    private Receiver fileUploadNotificationReceiverLink;
 
     /**
      * Constructor to set up connection parameters and initialize
@@ -63,28 +49,9 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
      */
     AmqpFileUploadNotificationReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_001: [The constructor shall copy all input parameters to private member variables for event processing]
-        if (hostName == null || userName == null || sasToken == null || iotHubServiceClientProtocol == null || amqpFeedbackReceivedEvent == null ||
-                hostName.isEmpty() || userName.isEmpty() || sasToken.isEmpty())
-        {
-            //Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_021: [** The constructor shall throw IllegalArgumentException if any of the parameters are null or empty **]
-            throw new IllegalArgumentException("Input parameters cannot be null or empty");
-        }
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.webSocketHostName = hostName;
-        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
-        {
-            this.hostName = hostName + SEND_PORT_AMQPS_WS;
-        }
-        else
-        {
-            this.hostName = hostName + SEND_PORT_AMQPS;
-        }
+        super(hostName, userName, sasToken, iotHubServiceClientProtocol);
 
-        this.userName = userName;
-        this.sasToken = sasToken;
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
-        this.savedException = null;
 
         // Add a child handler that performs some default handshaking
         // behaviour.
@@ -95,17 +62,15 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
         add(new FlowController());
     }
 
-    /**
-     * Create Proton SslDomain object from Address using the given Ssl mode
-     * @param mode Proton enum value of requested Ssl mode
-     * @return The created Ssl domain
-     */
-    private SslDomain makeDomain(SslDomain.Mode mode)
+    @Override
+    public void onTimerTask(Event event)
     {
-        SslDomain domain = Proton.sslDomain();
-        domain.init(mode);
-
-        return domain;
+        //This callback is scheduled by the reactor runner as a signal to gracefully close the connection, starting with its link
+        if (this.fileUploadNotificationReceiverLink != null)
+        {
+            log.debug("Shutdown event occurred, closing file upload notification receiver link");
+            this.fileUploadNotificationReceiverLink.close();
+        }
     }
 
     /**
@@ -131,13 +96,24 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
             org.apache.qpid.proton.message.Message msg = Proton.message();
             msg.decode(buffer, 0, read);
           
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_007: [The event handler shall settle the Delivery with the Accepted outcome]
-            delivery.disposition(Accepted.getInstance());
-            delivery.settle();
-          
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_008: [The event handler shall close the Session and Connection (Proton)]
-            recv.getSession().close();
-            recv.getSession().getConnection().close();
+            if (recv.getLocalState() == EndpointState.ACTIVE)
+            {
+                delivery.disposition(Accepted.getInstance());
+                delivery.settle();
+
+                //By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
+                // onLinkLocalClose closes the session locally and eventually the connection and reactor
+                log.debug("Closing amqp file upload notification receiver link since a file upload notification was received");
+                recv.close();
+            }
+            else
+            {
+                //Each connection should only handle one message. Any further deliveries must be released so that
+                // another connection can receive it instead
+                log.trace("Releasing a delivery since this connection already handled one, service will send it again later");
+                delivery.disposition(Released.getInstance());
+                delivery.settle();
+            }
 
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
             if (amqpFeedbackReceivedEvent != null)
@@ -148,41 +124,6 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
                     amqpFeedbackReceivedEvent.onFeedbackReceived(feedbackJson.getValue().toString());
                 }
             }
-        }
-    }
-
-    @Override
-    public void onConnectionBound(Event event)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_019: [The event handler shall set the SASL PLAIN authentication on the Transport using the given user name and sas token]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_010: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport]
-        Transport transport = event.getConnection().getTransport();
-        if (transport != null)
-        {
-            if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
-            {
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_020: [** The event handler shall not initialize WebSocket if the protocol is AMQP **]
-                WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.webSocketHostName, WEBSOCKET_PATH, 0, WEBSOCKET_SUB_PROTOCOL, null, null);
-                ((TransportInternal)transport).addTransportLayer(webSocket);
-            }
-            Sasl sasl = transport.sasl();
-            sasl.plain(this.userName, this.sasToken);
-
-            SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
-            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-
-            try
-            {
-                // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
-                domain.setSslContext(new IotHubSSLContext().getSSLContext());
-            }
-            catch (Exception e)
-            {
-                this.savedException = e;
-            }
-
-            Ssl ssl = transport.ssl(domain);
         }
     }
 
@@ -210,13 +151,14 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
         Map<Symbol, Object> properties = new HashMap<>();
         properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
 
-        Receiver notificationReceiver = ssn.receiver(FILE_NOTIFICATION_RECEIVE_TAG);
-        notificationReceiver.setProperties(properties);
+        fileUploadNotificationReceiverLink = ssn.receiver(FILE_NOTIFICATION_RECEIVE_TAG);
+        fileUploadNotificationReceiverLink.setProperties(properties);
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_014: [The event handler shall open the Connection, the Session and the Receiver object]
+        log.debug("Opening connection, session and link for amqp file upload notification receiver");
         conn.open();
         ssn.open();
-        notificationReceiver.open();
+        fileUploadNotificationReceiverLink.open();
     }
 
     @Override
@@ -227,39 +169,9 @@ public class AmqpFileUploadNotificationReceivedHandler extends BaseHandler
         Link link = event.getLink();
         if (event.getLink().getName().equals(FILE_NOTIFICATION_RECEIVE_TAG))
         {
-
-            Target t = new Target();
-            t.setAddress(FILENOTIFICATION_ENDPOINT);
             Source source = new Source();
             source.setAddress(FILENOTIFICATION_ENDPOINT);
-            link.setTarget(t);
             link.setSource(source);
-        }
-    }
-
-    @Override
-    public void onLinkRemoteOpen(Event event)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_022: [This function shall set the variable 'connectionWasOpened' to true]
-        this.connectionWasOpened = true;
-    }
-
-    /**
-     * If an exception was encountered while opening the AMQP connection, this function shall throw that saved exception
-     * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
-     * exception will be the inner exception
-     */
-    void receiveComplete() throws IOException
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
-        if (this.savedException != null)
-        {
-            throw new IOException("Connection failed to be established", this.savedException);
-        }
-
-        if (!this.connectionWasOpened)
-        {
-            throw new IOException("Connection failed to open");
         }
     }
 }

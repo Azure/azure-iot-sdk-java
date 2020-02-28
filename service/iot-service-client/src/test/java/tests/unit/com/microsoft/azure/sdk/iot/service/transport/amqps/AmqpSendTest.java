@@ -179,49 +179,6 @@ public class AmqpSendTest
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
 
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_003: [The event handler shall set the member AmqpsSendHandler object to handle the given connection events]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_004: [The event handler shall create an AmqpsSendHandler object to handle reactor events]
-    @Test
-    public void onReactorInit_creates_SendHandler() throws IOException
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        amqpSend.open();
-        // Assert
-        new Expectations()
-        {
-            {
-                reactor = event.getReactor();
-                connection = reactor.connection(Deencapsulation.getField(amqpSend, "amqpSendHandler"));
-            }
-        };
-        // Act
-        amqpSend.onReactorInit(event);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_005: [The event handler shall invalidate the member AmqpsSendHandler object]
-    @Test
-    public void onReactorInit_invalidates_SendHandler() throws IOException
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        amqpSend.open();
-        amqpSend.onReactorInit(event);
-        // Act
-        amqpSend.close();
-        // Assert
-        assertNull(Deencapsulation.getField(amqpSend, "amqpSendHandler"));
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_006: [The function shall create a binary message with the given content with deviceId only if moduleId is null]
     @Test
     public void send_creates_ProtonMessage(@Mocked AmqpSendHandler mockAmqpSendHandler) throws Exception
@@ -273,34 +230,6 @@ public class AmqpSendTest
             {
                 Deencapsulation.invoke(handler, "createProtonMessage"
                         , deviceId, moduleId, message);
-            }
-        };
-        // Act
-        amqpSend.send(deviceId, moduleId, message);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_002: [The event handler shall initialize the Proton reactor object]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_003: [The event handler shall start the Proton reactor object]
-    @Test
-    public void sendToModule_initializes_Reactor(@Mocked AmqpSendHandler mockAmqpSendHandler) throws Exception
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String deviceId = "deviceId";
-        String moduleId = "moduleId";
-        String content = "abcdefghijklmnopqrst";
-        Message message = new Message(content);
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        amqpSend.open();
-        // Assert
-        new Expectations()
-        {
-            {
-                reactor = proton.reactor(amqpSend);
-                reactor.run();
             }
         };
         // Act

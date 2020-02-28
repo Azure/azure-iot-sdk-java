@@ -6,12 +6,14 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 public class FileUploadNotificationReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
@@ -57,8 +59,12 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     public void open() throws IOException
     {
+        log.info("Opening file upload notification receiver");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_004: [** The function shall call open() on the member AmqpFileUploadNotificationReceive object **]**
         this.amqpFileUploadNotificationReceive.open();
+
+        log.info("Opened file upload notification receiver");
     }
 
     /**
@@ -68,8 +74,12 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     public void close() throws IOException
     {
+        log.info("Closing file upload notification receiver");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_006: [** The function shall call close() on the member AmqpFileUploadNotificationReceive object **]**
         this.amqpFileUploadNotificationReceive.close();
+
+        log.info("Closed file upload notification receiver");
     }
 
     /**

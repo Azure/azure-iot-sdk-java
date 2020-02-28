@@ -2226,17 +2226,17 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getReceiver();
                 result = null;
                 mockEvent.getTransport();
-                result = mockTransport;
+                result = null;
                 mockEvent.getSession();
                 result = null;
                 mockEvent.getConnection();
                 result = null;
                 mockEvent.getLink();
-                result = null;
-                mockTransport.getCondition();
+                result = mockLink;
+                mockLink.getCondition();
                 result = null;
 
-                mockTransport.getRemoteCondition();
+                mockLink.getRemoteCondition();
                 result = mockedErrorCondition;
                 mockedErrorCondition.getCondition();
                 result = mockedSymbol;
