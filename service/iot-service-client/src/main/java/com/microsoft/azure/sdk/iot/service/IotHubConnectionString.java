@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -39,7 +41,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_PATH_DEVICES = "devices";
     private static final String URL_PATH_MODULES = "modules";
     private static final String URL_PATH_CONFIG = "configurations";
-    private static final String URL_API_VERSION = "api-version=2019-03-30";
+    private static final String URL_API_VERSION = "api-version=" + TransportUtils.IOTHUB_API_VERSION;
     private static final String URL_MAX_COUNT = "top=";
     private static final String URL_PATH_DEVICESTATISTICS = "statistics";
     private static final String USER_SEPARATOR = "@";
