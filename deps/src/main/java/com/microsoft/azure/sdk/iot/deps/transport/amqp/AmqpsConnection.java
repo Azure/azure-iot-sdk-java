@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.concurrent.*;
 
-public class AmqpsConnection extends ErrorLoggingBaseHandler
+public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 {
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;

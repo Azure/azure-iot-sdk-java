@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 /**
  * Extend the ServiceClient class and provide AMPQ specific implementation.
  */
+@Slf4j
 public class ServiceClient
 {
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -90,8 +92,12 @@ public class ServiceClient
         {
             throw new IOException("AMQP sender is not initialized");
         }
+
+        log.info("Opening service client...");
+
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_009: [The function shall call open() on the member AMQP sender object]
         this.amqpMessageSender.open();
+        log.info("Service client opened successfully");
     }
 
     /**
@@ -105,8 +111,11 @@ public class ServiceClient
         {
             throw new IOException("AMQP sender is not initialized");
         }
+
+        log.info("Closing service client...");
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_011: [The function shall call close() on the member AMQP sender object]
         this.amqpMessageSender.close();
+        log.info("Service client closed successfully");
     }
 
     /**
@@ -139,6 +148,7 @@ public class ServiceClient
         {
             throw new IOException("AMQP sender is not initialized");
         }
+
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_002: [The function shall call send() on the member AMQP sender object with the given parameters]
         this.amqpMessageSender.send(deviceId, moduleId, message);
     }
@@ -233,9 +243,7 @@ public class ServiceClient
     
      public FeedbackReceiver getFeedbackReceiver()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_018: [The function shall create a FeedbackReceiver object and returns with it. This API doesn't need deviceId as an input parameter]
-        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        return feedbackReceiver;
+        return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
 
     /**
