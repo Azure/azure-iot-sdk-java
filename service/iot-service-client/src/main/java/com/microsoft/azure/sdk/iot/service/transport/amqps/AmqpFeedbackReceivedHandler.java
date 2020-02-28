@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
@@ -97,17 +98,24 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_006: [The event handler shall create a Message (Proton) object from the decoded buffer]
             org.apache.qpid.proton.message.Message msg = Proton.message();
             msg.decode(buffer, 0, read);
-          
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_007: [The event handler shall settle the Delivery with the Accepted outcome]
-            delivery.disposition(Accepted.getInstance());
-            delivery.settle();
 
             //By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
             // onLinkLocalClose closes the session locally and eventually the connection and reactor
             if (recv.getLocalState() == EndpointState.ACTIVE)
             {
+                delivery.disposition(Accepted.getInstance());
+                delivery.settle();
+
                 log.debug("Closing amqp feedback receiver link since a feedback message was received");
                 recv.close();
+            }
+            else
+            {
+                //Each connection should only handle one message. Any further deliveries must be released so that
+                // another connection can receive it instead
+                log.trace("Releasing a delivery since this connection already handled one, service will send it again later");
+                delivery.disposition(Released.getInstance());
+                delivery.settle();
             }
 
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]

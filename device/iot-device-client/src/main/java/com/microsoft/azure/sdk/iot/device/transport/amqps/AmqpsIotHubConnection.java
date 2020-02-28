@@ -919,8 +919,6 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
         super.onTransportError(event);
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!onTransportError!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
         //Codes_SRS_AMQPSIOTHUBCONNECTION_34_060 [If the provided event object's transport holds an error condition object, this function shall report the associated TransportException to this object's listeners.]
         this.savedException = getTransportExceptionFromEvent(event);
 

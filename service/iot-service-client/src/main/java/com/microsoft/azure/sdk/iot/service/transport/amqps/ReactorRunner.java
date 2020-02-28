@@ -40,32 +40,43 @@ public class ReactorRunner
             long startTime = System.currentTimeMillis();
             long endTime = startTime + timeoutMs;
 
+            boolean closedBeforeTimeout = true;
             this.reactor.start();
             while (this.reactor.process())
             {
-                if (System.currentTimeMillis() > endTime) break;
-            }
-
-            // onTimerTask event will fire immediately in the basehandler being run. It is the responsibility of that handler
-            // to close it's link/session/connection and stop this reactor. This runner will allow some time for the amqp connection
-            // to be closed gracefully, but will forcefully free the resources if the graceful close takes too long
-            log.trace("Scheduling shutdown event for reactor for thread {}", threadName);
-            this.reactor.schedule(0, this.reactor.getHandler());
-
-            startTime = System.currentTimeMillis();
-            while (this.reactor.process())
-            {
-                if (System.currentTimeMillis() - startTime > CLOSE_REACTOR_GRACEFULLY_TIMEOUT)
+                if (System.currentTimeMillis() > endTime)
                 {
-                    // The connection/session/link may not have been closed from the service's perspective, but we can free up the socket at least
-                    log.trace("Amqp reactor in thread {} failed to close gracefully in expected time frame, forcefully closing it now", this.threadName);
+                    closedBeforeTimeout = false;
                     break;
                 }
             }
-            this.reactor.process();
 
-            log.trace("Stopping reactor for thread {}", threadName);
-            this.reactor.stop();
+            if (!closedBeforeTimeout)
+            {
+                // onTimerTask event will fire immediately in the basehandler being run. It is the responsibility of that handler
+                // to close it's link/session/connection and stop this reactor. This runner will allow some time for the amqp connection
+                // to be closed gracefully, but will forcefully free the resources if the graceful close takes too long
+                log.trace("Scheduling shutdown event for reactor for thread {}", threadName);
+                this.reactor.schedule(0, this.reactor.getHandler());
+
+                startTime = System.currentTimeMillis();
+                while (this.reactor.process())
+                {
+                    if (System.currentTimeMillis() - startTime > CLOSE_REACTOR_GRACEFULLY_TIMEOUT)
+                    {
+                        // The connection/session/link may not have been closed from the service's perspective, but we can free up the socket at least
+                        log.trace("Amqp reactor in thread {} failed to close gracefully in expected time frame, forcefully closing it now", this.threadName);
+                        break;
+                    }
+                }
+
+                log.trace("Stopping reactor for thread {}", threadName);
+                this.reactor.stop();
+            }
+            else
+            {
+                log.trace("Amqp reactor thread closed itself gracefully before the designated time out");
+            }
         }
         catch (HandlerException e)
         {

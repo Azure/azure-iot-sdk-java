@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -28,7 +27,6 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FileUploadNotification fileUploadNotification;
-    private Queue<FileUploadNotification> fileUploadNotificationQueue;
 
     /**
      * Constructor to set up connection parameters
@@ -56,7 +54,6 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         if (amqpReceiveHandler == null)
         {
             amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this);
-            this.fileUploadNotificationQueue = new LinkedBlockingDeque<>();
         }
     }
 
@@ -65,14 +62,8 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      */
     public synchronized void close()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_004: [The function shall invalidate the member AmqpsReceiveHandler object]
         amqpReceiveHandler = null;
-        if ( fileUploadNotificationQueue != null && !fileUploadNotificationQueue.isEmpty())
-        {
-            log.warn("Close was called while the file upload notification queue was not empty, clearing the file upload notification queue");
-            fileUploadNotificationQueue.clear();
-        }
-        fileUploadNotificationQueue = null;
+        fileUploadNotification = null;
     }
 
     /**
@@ -100,14 +91,8 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_009: [The function shall throw IOException if the send handler object is not initialized]
             throw new IOException("receive handler is not initialized. call open before receive");
         }
-        if (!fileUploadNotificationQueue.isEmpty())
-        {
-            return fileUploadNotificationQueue.remove();
-        }
-        else
-        {
-            return null;
-        }
+
+        return fileUploadNotification;
     }
 
     /**
@@ -125,8 +110,6 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
             fileUploadNotification = new FileUploadNotification(notificationParser.getDeviceId(),
                     notificationParser.getBlobUri(), notificationParser.getBlobName(), notificationParser.getLastUpdatedTime(),
                     notificationParser.getBlobSizeInBytesTag(), notificationParser.getEnqueuedTimeUtc());
-
-            fileUploadNotificationQueue.add(fileUploadNotification);
         }
         catch (Exception e)
         {

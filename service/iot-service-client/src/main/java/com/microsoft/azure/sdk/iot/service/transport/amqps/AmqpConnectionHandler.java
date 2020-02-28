@@ -143,19 +143,9 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
             throw new IOException("Connection failed to be established", this.savedException);
         }
 
-        if (!this.connectionOpenedRemotely)
+        if (!this.connectionOpenedRemotely || !this.sessionOpenedRemotely || !this.linkOpenedRemotely)
         {
-            throw new IOException("Amqp Connection failed to open");
-        }
-
-        if (!this.sessionOpenedRemotely)
-        {
-            throw new IOException("Amqp Session failed to open");
-        }
-
-        if (!this.linkOpenedRemotely)
-        {
-            throw new IOException("Amqp link never opened");
+            throw new IOException("Amqp connection timed out waiting for service to respond");
         }
     }
 

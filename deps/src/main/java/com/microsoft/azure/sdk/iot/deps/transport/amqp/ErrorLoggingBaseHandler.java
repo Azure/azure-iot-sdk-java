@@ -24,17 +24,17 @@ public class ErrorLoggingBaseHandler extends BaseHandler
             protonJExceptionParser = new ProtonJExceptionParser(event);
             if (protonJExceptionParser.getError() == null)
             {
-                log.debug("Amqp link {} was closed remotely", event.getLink().getName());
+                log.error("Amqp link {} was closed remotely", event.getLink().getName());
             }
             else
             {
-                if (event.getLink() != null && event.getLink().getName() != null)
+                if (event.getLink().getName() != null)
                 {
-                    log.warn("Amqp link {} was closed remotely with exception {} with description {}", event.getLink().getName(), protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                    log.error("Amqp link {} was closed remotely with exception {} with description {}", event.getLink().getName(), protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
                 }
                 else
                 {
-                    log.warn("Unknown amqp link was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                    log.error("Unknown amqp link was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
                 }
             }
         }
@@ -53,11 +53,11 @@ public class ErrorLoggingBaseHandler extends BaseHandler
             protonJExceptionParser = new ProtonJExceptionParser(event);
             if (protonJExceptionParser.getError() == null)
             {
-                log.warn("Amqp session was closed remotely with an unknown exception");
+                log.error("Amqp session was closed remotely with an unknown exception");
             }
             else
             {
-                log.warn("Amqp session was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                log.error("Amqp session was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
             }
         }
         else
@@ -75,11 +75,11 @@ public class ErrorLoggingBaseHandler extends BaseHandler
             protonJExceptionParser = new ProtonJExceptionParser(event);
             if (protonJExceptionParser.getError() == null)
             {
-                log.warn("Amqp connection was closed remotely with an unknown exception");
+                log.error("Amqp connection was closed remotely with an unknown exception");
             }
             else
             {
-                log.warn("Amqp connection was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+                log.error("Amqp connection was closed remotely with exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
             }
         }
         else
@@ -95,11 +95,11 @@ public class ErrorLoggingBaseHandler extends BaseHandler
         protonJExceptionParser = new ProtonJExceptionParser(event);
         if (protonJExceptionParser.getError() == null)
         {
-            log.warn("Amqp transport threw an unknown exception");
+            log.error("Amqp transport threw an unknown exception");
         }
         else
         {
-            log.warn("Amqp transport threw exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
+            log.error("Amqp transport threw exception {} with description {}", protonJExceptionParser.getError(), protonJExceptionParser.getErrorDescription());
         }
     }
 }

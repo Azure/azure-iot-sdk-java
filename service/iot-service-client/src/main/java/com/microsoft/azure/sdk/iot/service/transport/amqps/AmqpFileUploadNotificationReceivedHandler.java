@@ -13,10 +13,7 @@ import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.Accepted;
-import org.apache.qpid.proton.amqp.messaging.Data;
-import org.apache.qpid.proton.amqp.messaging.Source;
-import org.apache.qpid.proton.amqp.messaging.Target;
+import org.apache.qpid.proton.amqp.messaging.*;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.FlowController;
@@ -99,16 +96,23 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
             org.apache.qpid.proton.message.Message msg = Proton.message();
             msg.decode(buffer, 0, read);
           
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_007: [The event handler shall settle the Delivery with the Accepted outcome]
-            delivery.disposition(Accepted.getInstance());
-            delivery.settle();
-
             if (recv.getLocalState() == EndpointState.ACTIVE)
             {
+                delivery.disposition(Accepted.getInstance());
+                delivery.settle();
+
                 //By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
                 // onLinkLocalClose closes the session locally and eventually the connection and reactor
                 log.debug("Closing amqp file upload notification receiver link since a file upload notification was received");
                 recv.close();
+            }
+            else
+            {
+                //Each connection should only handle one message. Any further deliveries must be released so that
+                // another connection can receive it instead
+                log.trace("Releasing a delivery since this connection already handled one, service will send it again later");
+                delivery.disposition(Released.getInstance());
+                delivery.settle();
             }
 
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
