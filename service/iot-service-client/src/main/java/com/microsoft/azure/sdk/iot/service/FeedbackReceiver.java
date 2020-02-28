@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +17,7 @@ import java.util.concurrent.Executors;
  * FeedbackReceiver is a specialized receiver whose ReceiveAsync
  * method returns a FeedbackBatch instead of a Message.
  */
+@Slf4j
 public class FeedbackReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
@@ -109,8 +111,13 @@ public class FeedbackReceiver extends Receiver
         {
             throw new IOException("AMQP receiver is not initialized");
         }
+
+        log.info("Opening feedback receiver client");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_005: [The function shall call open() on the member AMQPReceive object]
         this.amqpReceive.open();
+
+        log.info("Opened feedback receiver client");
     }
 
     /**
@@ -125,8 +132,13 @@ public class FeedbackReceiver extends Receiver
         {
             throw new IOException("AMQP receiver is not initialized");
         }
+
+        log.info("Closing feedback receiver client");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_007: [The function shall call close() on the member AMQPReceive object]
         this.amqpReceive.close();
+
+        log.info("Closed feedback receiver client");
     }
 
     /**
