@@ -385,7 +385,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         Deencapsulation.setField(amqpReceiveHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_023: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
@@ -405,7 +405,7 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
     }
 
     private void createProtonObjects()

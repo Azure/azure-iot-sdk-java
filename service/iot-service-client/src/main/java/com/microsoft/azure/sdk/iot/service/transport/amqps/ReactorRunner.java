@@ -21,11 +21,9 @@ public class ReactorRunner
     private final Reactor reactor;
     public static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
     public static final int CLOSE_REACTOR_GRACEFULLY_TIMEOUT = 10 * 1000;
-    public BaseHandler baseHandler;
 
     public ReactorRunner(BaseHandler baseHandler, String threadNamePostfix) throws IOException
     {
-        this.baseHandler = baseHandler;
         this.reactor = Proton.reactor(baseHandler);
         this.threadName = THREAD_NAME_PREFIX + threadNamePostfix;
     }

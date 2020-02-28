@@ -671,7 +671,7 @@ public class AmqpSendHandlerTest
         };
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_033: [This function shall set the variable 'verifyConnectionOpened' to true]
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_033: [This function shall set the variable 'verifyConnectionWasOpened' to true]
     @Test
     public void onConnectionRemoteOpenedFlagsVerifyConnectionOpened(@Mocked Event mockEvent)
     {
@@ -689,7 +689,7 @@ public class AmqpSendHandlerTest
         assertTrue(Deencapsulation.getField(amqpSendHandler, "connectionOpenedRemotely"));
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
     public void sendCompleteChecksForSavedException() throws IOException, IotHubException
     {
@@ -709,7 +709,7 @@ public class AmqpSendHandlerTest
         amqpSendHandler.verifySendSucceeded();
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
     public void sendCompleteChecksThatverifyConnectionOpened() throws IOException, IotHubException
     {

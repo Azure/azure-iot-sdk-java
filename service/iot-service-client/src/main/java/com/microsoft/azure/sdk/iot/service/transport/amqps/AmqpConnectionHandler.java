@@ -131,7 +131,7 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
      * @throws IOException if an exception was encountered while openinging the AMQP connection. The encountered
      * exception will be the inner exception
      */
-    protected void verifyConnectionOpened() throws IOException
+    protected void verifyConnectionWasOpened() throws IOException
     {
         if (this.protonJExceptionParser != null)
         {

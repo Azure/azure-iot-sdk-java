@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
 import java.util.Queue;
@@ -93,7 +92,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
             new ReactorRunner(amqpReceiveHandler, "AmqpFileUploadNotificationReceiver").run(timeoutMs);
 
             log.trace("Amqp receive reactor stopped, checking that the connection was opened");
-            this.amqpReceiveHandler.verifyConnectionOpened();
+            this.amqpReceiveHandler.verifyConnectionWasOpened();
             log.trace("Amqp receive reactor did successfully open the connection, returning without exception");
         }
         else

@@ -301,7 +301,7 @@ public class AmqpFeedbackReceivedHandlerTest
         Deencapsulation.setField(amqpReceiveHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
@@ -321,7 +321,7 @@ public class AmqpFeedbackReceivedHandlerTest
         Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
@@ -341,7 +341,7 @@ public class AmqpFeedbackReceivedHandlerTest
         Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_019: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
@@ -361,7 +361,7 @@ public class AmqpFeedbackReceivedHandlerTest
         Deencapsulation.setField(amqpReceiveHandler, "savedException", null);
 
         // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionOpened");
+        Deencapsulation.invoke(amqpReceiveHandler, "verifyConnectionWasOpened");
     }
 
     private void createProtonObjects()

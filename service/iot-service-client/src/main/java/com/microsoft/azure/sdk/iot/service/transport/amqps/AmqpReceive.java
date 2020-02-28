@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
 
@@ -79,7 +78,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
             new ReactorRunner(this.amqpReceiveHandler, "AmqpFeedbackReceiver").run(timeoutMs);
 
             log.trace("Feedback receiver reactor finished running, verifying that the connection opened correctly");
-            this.amqpReceiveHandler.verifyConnectionOpened();
+            this.amqpReceiveHandler.verifyConnectionWasOpened();
             log.trace("Feedback receiver reactor did successfully open the connection, returning without exception");
         }
         else

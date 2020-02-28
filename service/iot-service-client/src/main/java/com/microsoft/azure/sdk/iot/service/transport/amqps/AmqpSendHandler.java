@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class to override
@@ -271,7 +269,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
 
     public void verifySendSucceeded() throws IotHubException, IOException
     {
-        super.verifyConnectionOpened();
+        super.verifyConnectionWasOpened();
 
         //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message]
         if (amqpResponse != null)
