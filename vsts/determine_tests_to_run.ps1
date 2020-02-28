@@ -32,6 +32,13 @@ ForEach ($line in $($GitDiff -split "`r`n"))
     }
 	else
 	{
+	    # If code changes were made to vsts pipeline
+		if ($line.toLower().Contains("vsts"))
+		{
+            $Env:runIotHubTests = "true"
+            $Env:runProvisioningTests = "true"
+		}
+
 	    # If code changes were made to provisioning sdk code or to provisioning e2e tests
 		if ($line.toLower().Contains("provisioning"))
 		{
@@ -46,21 +53,21 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		}
 
 		# If code changes were made to device client
-		if ($line.toLower().Contains("iot-device-client/src/main"))
+		if ($line.toLower().Contains("iot-device-client/src/main") -or $line.toLower().Contains("iot-device-client/pom.xml"))
 		{
 		    $Env:runIotHubTests = "true"
 		    $Env:runProvisioningTests = "true"
 		}
 
         # If code changes were made to service client
-        if ($line.toLower().Contains("iot-service-client/src/main"))
+        if ($line.toLower().Contains("iot-service-client/src/main") -or $line.toLower().Contains("iot-service-client/pom.xml"))
         {
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
         }
 
         # Both provisioning and iot hub depend on deps package
-		if ($line.toLower().Contains("deps/src/main"))
+		if ($line.toLower().Contains("deps/src/main") -or $line.toLower().Contains("deps/pom.xml"))
 		{
 			$Env:runIotHubTests = "true"
 			$Env:runProvisioningTests = "true"
