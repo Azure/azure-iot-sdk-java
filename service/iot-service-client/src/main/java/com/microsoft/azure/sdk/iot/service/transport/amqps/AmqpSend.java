@@ -9,10 +9,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.engine.BaseHandler;
-import org.apache.qpid.proton.engine.Event;
-import org.apache.qpid.proton.reactor.Reactor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
@@ -22,12 +19,12 @@ import java.io.IOException;
  * high level open, close and send methods.
  * Initialize and use AmqpsSendHandler class for low level ampqs operations.
  */
-public class AmqpSend extends BaseHandler
+@Slf4j
+public class AmqpSend
 {
     protected final String hostName;
     protected final String userName;
     protected final String sasToken;
-    protected Reactor reactor = null;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
 
@@ -64,23 +61,6 @@ public class AmqpSend extends BaseHandler
         this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-    }
-
-    /**
-     * Event handler for the reactor init event
-     * @param event The proton event object
-     */
-    @Override
-    public void onReactorInit(Event event) {
-        // You can use the connection method to create AMQP connections.
-
-        // This connection's handler is the AmqpSendHandler object. All the events
-        // for this connection will go to the AmqpSendHandler object instead of
-        // going to the reactor. If you were to omit the AmqpSendHandler object,
-        // all the events would go to the reactor.
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_003: [The event handler shall set the member AmqpsSendHandler object to handle the given connection events]
-        event.getReactor().connection(amqpSendHandler);
     }
 
     /**
@@ -121,19 +101,21 @@ public class AmqpSend extends BaseHandler
                 {
                     // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_006: [The function shall create a binary message with the given content with deviceId only if moduleId is null]
                     amqpSendHandler.createProtonMessage(deviceId, message);
+                    log.info("Sending cloud to device message");
                 }
                 else
                 {
                     // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_001: [The function shall create a binary message with the given content with moduleId]
                     amqpSendHandler.createProtonMessage(deviceId, moduleId, message);
+                    log.info("Sending cloud to device module message");
                 }
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_002: [The function shall initialize the Proton reactor object]
-                this.reactor = Proton.reactor(this);
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_003: [The function shall start the Proton reactor object]
-                this.reactor.run();
-                this.reactor.free();
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_004: [** The function shall call sendComplete to identify the status of sent message and throws exception if thrown by sendComplete **]**
-                amqpSendHandler.sendComplete();
+
+                new ReactorRunner(amqpSendHandler, "AmqpSend").run();
+
+                log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");
+
+                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_004: [** The function shall call verifySendSucceeded to identify the status of sent message and throws exception if thrown by verifySendSucceeded **]**
+                amqpSendHandler.verifySendSucceeded();
             }
             else
             {
