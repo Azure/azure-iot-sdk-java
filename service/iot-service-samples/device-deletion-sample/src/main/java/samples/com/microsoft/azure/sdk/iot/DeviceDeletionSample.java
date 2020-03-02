@@ -24,114 +24,157 @@ public class DeviceDeletionSample
     /**
      * A simple sample for deleting all devices from an iothub
      */
-    public static void main(String[] args) throws IOException, InterruptedException
+    public static void main(String[] args) throws InterruptedException
     {
         if (args.length != 1 && args.length != 2)
         {
             System.out.format(
                     "Expected 1 or 2 arguments but received: %d.\n"
-                            + "1.) Iot hub connection string to hub, this sample will delete all devices registered in this hub"
+                            + "1.) Iot hub connection string to hub, this sample will delete all devices registered in this hub\n"
                             + "2.) (optional) DPS connection string, this sample will delete all enrollment groups and individual enrollments",
                     args.length);
             return;
         }
 
+
         String iotHubConnString = args[0];
+        Thread hubCleanupRunnable = null;
         if (!(iotHubConnString == null || iotHubConnString.isEmpty() || iotHubConnString.equals(" ")))
         {
-            cleanupIotHub(iotHubConnString);
+            hubCleanupRunnable = new Thread(new HubCleanupRunnable(iotHubConnString));
+            hubCleanupRunnable.start();
         }
 
+        Thread dpsCleanupRunnable = null;
         if (args.length > 1 && args[1] != null && !args[1].isEmpty())
         {
             String dpsConnString = args[1];
-            cleanupDPS(dpsConnString);
+            dpsCleanupRunnable = new Thread(new DPSCleanupRunnable(dpsConnString));
+            dpsCleanupRunnable.start();
+        }
+
+        if (hubCleanupRunnable != null)
+        {
+            hubCleanupRunnable.join();
+        }
+
+        if (dpsCleanupRunnable != null)
+        {
+            dpsCleanupRunnable.join();
         }
     }
 
-    private static void cleanupIotHub(String connString) throws IOException
-    {
-        RegistryManager registryManager = null;
-        try
+    public static class HubCleanupRunnable implements Runnable {
+
+        public String iotConnString;
+
+        public HubCleanupRunnable(String iotConnString)
         {
-            registryManager = RegistryManager.createFromConnectionString(connString);
-        }
-        catch (IOException e)
-        {
-            throw new IOException("Could not create registry manager from the provided connection string", e);
+            this.iotConnString = iotConnString;
         }
 
-        System.out.println("Querying ");
-        DeviceTwin deviceTwin = null;
-        try
-        {
-            deviceTwin = DeviceTwin.createFromConnectionString(connString);
-        }
-        catch (Exception e)
-        {
-            throw new IOException("Could not create device twin client from the provided connection string", e);
-        }
-
-        Query query = null;
-        try
-        {
-            query = deviceTwin.queryTwin("SELECT * FROM Devices", 100);
-        }
-        catch (Exception e)
-        {
-            throw new IOException("Could not execute the query on your iot hub to retrieve the device list", e);
-        }
-
-        List<String> deviceIdsToRemove = new ArrayList<>();
-        try
-        {
-            while (deviceTwin.hasNextDeviceTwin(query))
-            {
-                DeviceTwinDevice device = deviceTwin.getNextDeviceTwin(query);
-                if (!device.getDeviceId().toLowerCase().contains("longhaul"))
-                {
-                    deviceIdsToRemove.add(device.getDeviceId());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            throw new IOException("Could not collect the full list of device ids to delete", e);
-        }
-
-        int deletedDeviceCount = 0;
-        for (String deviceIdToRemove : deviceIdsToRemove)
-        {
+        @Override
+        public void run() {
+            RegistryManager registryManager = null;
             try
             {
-                registryManager.removeDevice(deviceIdToRemove);
-                System.out.println("Removed device " + deviceIdToRemove);
-                deletedDeviceCount++;
+                registryManager = RegistryManager.createFromConnectionString(iotConnString);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                System.out.println("Could not create registry manager from the provided connection string, exiting iot hub cleanup thread");
+                return;
+            }
+
+            System.out.println("Querying ");
+            DeviceTwin deviceTwin = null;
+            try
+            {
+                deviceTwin = DeviceTwin.createFromConnectionString(this.iotConnString);
             }
             catch (Exception e)
             {
-                System.out.println("Could not remove device with id " +deviceIdToRemove);
                 e.printStackTrace();
-
-                System.out.println("Moving onto deleting the remaining devices anyways...");
+                System.out.println("Could not create device twin client from the provided connection string, exiting iot hub cleanup thread");
+                return;
             }
+
+            Query query = null;
+            try
+            {
+                query = deviceTwin.queryTwin("SELECT * FROM Devices", 100);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                System.out.println("Could not execute the query on your iot hub to retrieve the device list, exiting iot hub cleanup thread");
+                return;
+            }
+
+            List<String> deviceIdsToRemove = new ArrayList<>();
+            try
+            {
+                while (deviceTwin.hasNextDeviceTwin(query))
+                {
+                    DeviceTwinDevice device = deviceTwin.getNextDeviceTwin(query);
+                    if (!device.getDeviceId().toLowerCase().contains("longhaul"))
+                    {
+                        deviceIdsToRemove.add(device.getDeviceId());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                System.out.println("Could not collect the full list of device ids to delete, exiting iot hub cleanup thread");
+                return;
+            }
+
+            int deletedDeviceCount = 0;
+            for (String deviceIdToRemove : deviceIdsToRemove)
+            {
+                try
+                {
+                    registryManager.removeDevice(deviceIdToRemove);
+                    System.out.println("Removed device " + deviceIdToRemove);
+                    deletedDeviceCount++;
+                }
+                catch (Exception e)
+                {
+                    System.out.println("Could not remove device with id " +deviceIdToRemove);
+                    e.printStackTrace();
+
+                    System.out.println("Moving onto deleting the remaining devices anyways...");
+                }
+            }
+
+            System.out.println("Deleted " + deletedDeviceCount + " out of the total " + deviceIdsToRemove.size() + " devices");
+
+            registryManager.close();
+        }
+    }
+
+    public static class DPSCleanupRunnable implements Runnable
+    {
+        public String dpsConnString;
+
+        public DPSCleanupRunnable(String dpsConnString)
+        {
+            this.dpsConnString = dpsConnString;
         }
 
-        System.out.println("Deleted " + deletedDeviceCount + " out of the total " + deviceIdsToRemove.size() + " devices");
+        @Override
+        public void run() {
+            ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(this.dpsConnString);
+            QuerySpecification querySpecificationForAllEnrollments = new QuerySpecification("SELECT * FROM enrollments");
 
-        registryManager.close();
+            deleteEnrollmentGroups(provisioningServiceClient, querySpecificationForAllEnrollments);
+            deleteIndividualEnrollments(provisioningServiceClient, querySpecificationForAllEnrollments);
+        }
     }
 
-    private static void cleanupDPS(String connString) throws InterruptedException
-    {
-        ProvisioningServiceClient provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(connString);
-        QuerySpecification querySpecificationForAllEnrollments = new QuerySpecification("SELECT * FROM enrollments");
-
-        deleteEnrollmentGroups(provisioningServiceClient, querySpecificationForAllEnrollments);
-        deleteIndividualEnrollments(provisioningServiceClient, querySpecificationForAllEnrollments);
-    }
-
-    private static void deleteIndividualEnrollments(ProvisioningServiceClient provisioningServiceClient, QuerySpecification querySpecificationForAllEnrollments) throws InterruptedException
+    private static void deleteIndividualEnrollments(ProvisioningServiceClient provisioningServiceClient, QuerySpecification querySpecificationForAllEnrollments)
     {
         com.microsoft.azure.sdk.iot.provisioning.service.Query individualEnrollmentQuery = provisioningServiceClient.createIndividualEnrollmentQuery(querySpecificationForAllEnrollments);
         while (individualEnrollmentQuery.hasNext())
@@ -165,12 +208,17 @@ public class DeviceDeletionSample
                 e.printStackTrace();
 
                 //likely a throttling exception, just wait a bit
-                Thread.sleep(4000);
+                try {
+                    Thread.sleep(4000);
+                }
+                catch (InterruptedException ex) {
+                    //ignore
+                }
             }
         }
     }
 
-    private static void deleteEnrollmentGroups(ProvisioningServiceClient provisioningServiceClient, QuerySpecification querySpecificationForAllEnrollments) throws InterruptedException
+    private static void deleteEnrollmentGroups(ProvisioningServiceClient provisioningServiceClient, QuerySpecification querySpecificationForAllEnrollments)
     {
         com.microsoft.azure.sdk.iot.provisioning.service.Query enrollmentGroupQuery = provisioningServiceClient.createEnrollmentGroupQuery(querySpecificationForAllEnrollments, 1000);
         while (enrollmentGroupQuery.hasNext())
@@ -193,13 +241,18 @@ public class DeviceDeletionSample
                         e.printStackTrace();
 
                         //likely a throttling exception, just wait a bit
-                        Thread.sleep(400);
+                        Thread.sleep(2000);
                     }
                 }
             }
             catch (Exception e)
             {
-                Thread.sleep(1000);
+                try {
+                    Thread.sleep(2000);
+                }
+                catch (InterruptedException ex) {
+                    //Ignore
+                }
 
                 //likely a throttling exception, just wait a bit
                 e.printStackTrace();
