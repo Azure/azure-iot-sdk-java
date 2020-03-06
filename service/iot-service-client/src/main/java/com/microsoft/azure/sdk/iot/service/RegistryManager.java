@@ -676,7 +676,8 @@ public class RegistryManager
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_064: [The function shall create a new HttpRequest for the bulk export job creation ]
-        String jobPropertiesJson = CreateExportJobPropertiesJson(exportBlobContainerUri, excludeKeys);
+        ImportExportJobRequestParameters requestParameters = new ImportExportJobRequestParameters(exportBlobContainerUri, excludeKeys);
+        String jobPropertiesJson = CreateExportJobPropertiesJson(requestParameters);
         HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_065: [The function shall send the created request and get the response]
@@ -744,9 +745,9 @@ public class RegistryManager
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_071: [The function shall create a new SAS token for the bulk import job]
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
-
+        ImportExportJobRequestParameters requestParameters = new ImportExportJobRequestParameters(importBlobContainerUri, outputBlobContainerUri);
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_072: [The function shall create a new HttpRequest for the bulk import job creation]
-        String jobPropertiesJson = CreateImportJobPropertiesJson(importBlobContainerUri, outputBlobContainerUri);
+        String jobPropertiesJson = CreateImportJobPropertiesJson(requestParameters);
         HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_073: [The function shall send the created request and get the response]
@@ -1421,22 +1422,22 @@ public class RegistryManager
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
-    private String CreateExportJobPropertiesJson(String exportBlobContainerUri, Boolean excludeKeysInExport)
+    private String CreateExportJobPropertiesJson(ImportExportJobRequestParameters jobRequestParameters)
     {
         JobProperties jobProperties = new JobProperties();
         jobProperties.setType(JobProperties.JobType.EXPORT);
-        jobProperties.setOutputBlobContainerUri(exportBlobContainerUri);
-        jobProperties.setExcludeKeysInExport(excludeKeysInExport);
-        return jobProperties.toJobPropertiesParser().toJson();
+        jobProperties.setExportBlobContainerUri(jobRequestParameters.getExportBlobContainerUri());
+        jobProperties.setExcludeKeysInExport(jobRequestParameters.getExcludeKeysInExport());
+        return jobProperties.toJobPropertiesParser(jobRequestParameters).toJson();
     }
 
-    private String CreateImportJobPropertiesJson(String importBlobContainerUri, String outputBlobContainerUri)
+    private String CreateImportJobPropertiesJson(ImportExportJobRequestParameters jobRequestParameters)
     {
         JobProperties jobProperties = new JobProperties();
         jobProperties.setType(JobProperties.JobType.IMPORT);
-        jobProperties.setInputBlobContainerUri(importBlobContainerUri);
-        jobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
-        return jobProperties.toJobPropertiesParser().toJson();
+        jobProperties.setInputBlobContainerUri(jobRequestParameters.getInputBlobContainerUri());
+        jobProperties.setOutputBlobContainerUri(jobRequestParameters.getOutputBlobContainerUri());
+        return jobProperties.toJobPropertiesParser(jobRequestParameters).toJson();
     }
 
     private JobProperties ProcessJobResponse(HttpResponse response) throws IotHubException, JsonSyntaxException {
