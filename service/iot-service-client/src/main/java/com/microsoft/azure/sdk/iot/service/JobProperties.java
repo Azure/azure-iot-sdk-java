@@ -290,4 +290,76 @@ public class JobProperties
 
         return jobPropertiesParser;
     }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Import job
+     *
+     * @param inputBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
+     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForImportJob(
+            String inputBlobContainerUri,
+            String outputBlobContainerUri)
+    {
+        StorageAuthenticationType storageAuthenticationType = StorageAuthenticationType.KEY;
+        return createForImportJob(inputBlobContainerUri, outputBlobContainerUri, storageAuthenticationType);
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Import job
+     *
+     * @param inputBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
+     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForImportJob(
+            String inputBlobContainerUri,
+            String outputBlobContainerUri,
+            StorageAuthenticationType storageAuthenticationType)
+    {
+        JobProperties importJobProperties = new JobProperties();
+        importJobProperties.setType(JobProperties.JobType.IMPORT);
+        importJobProperties.setInputBlobContainerUri(inputBlobContainerUri);
+        importJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        importJobProperties.setStorageAuthenticationType(storageAuthenticationType);
+        return importJobProperties;
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Export job
+     *
+     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @param excludeKeysInExport Indicates if authorization keys are included in export output
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForExportJob(
+            String outputBlobContainerUri,
+            boolean excludeKeysInExport )
+    {
+        StorageAuthenticationType storageAuthenticationType = StorageAuthenticationType.KEY;
+        return createForExportJob(outputBlobContainerUri, excludeKeysInExport, storageAuthenticationType);
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Export job
+     *
+     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @param excludeKeysInExport Indicates if authorization keys are included in export output
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForExportJob(
+            String outputBlobContainerUri,
+            boolean excludeKeysInExport,
+            StorageAuthenticationType storageAuthenticationType)
+    {
+        JobProperties exportJobProperties = new JobProperties();
+        exportJobProperties.setType(JobProperties.JobType.EXPORT);
+        exportJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        exportJobProperties.setExcludeKeysInExport(excludeKeysInExport);
+        exportJobProperties.setStorageAuthenticationType(storageAuthenticationType);
+        return exportJobProperties;
+    }
 }

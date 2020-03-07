@@ -721,7 +721,7 @@ public class RegistryManager
     /**
      * Create a bulk export job.
      *
-     * @param exportDevicesParameters
+     * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
      *
      * @return A JobProperties object for the newly created bulk export job
      *
@@ -760,7 +760,7 @@ public class RegistryManager
 
     /**
      * Async wrapper for exportDevices() operation
-     * @param exportDevicesParameters
+     * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
@@ -862,7 +862,7 @@ public class RegistryManager
     /**
      * Create a bulk import job.
      *
-     * @param importDevicesParameters
+     * @param importDevicesParameters A JobProperties object containing input parameters for import Devices job
      *
      * @return A JobProperties object for the newly created bulk import job
      *
@@ -901,7 +901,7 @@ public class RegistryManager
     /**
      * Async wrapper for importDevices() operation
      *
-     * @param
+     * @param importParameters A JobProperties object containing input parameters for import Devices job
      * @return The future object for the requested operation
      *
      * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
