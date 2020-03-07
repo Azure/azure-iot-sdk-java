@@ -676,8 +676,7 @@ public class RegistryManager
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_064: [The function shall create a new HttpRequest for the bulk export job creation ]
-        ImportExportJobRequestParameters requestParameters = new ImportExportJobRequestParameters(exportBlobContainerUri, excludeKeys);
-        String jobPropertiesJson = CreateExportJobPropertiesJson(requestParameters);
+        String jobPropertiesJson = CreateExportJobPropertiesJson(exportBlobContainerUri, excludeKeys);
         HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_065: [The function shall send the created request and get the response]
@@ -720,6 +719,76 @@ public class RegistryManager
     }
 
     /**
+     * Create a bulk export job.
+     *
+     * @param exportDevicesParameters
+     *
+     * @return A JobProperties object for the newly created bulk export job
+     *
+     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties exportDevices(JobProperties exportDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_061: [The function shall throw IllegalArgumentException
+        // if any of the input parameters is null]
+        if (exportDevicesParameters == null || exportDevicesParameters.getOutputBlobContainerUri() == null)
+        {
+            throw new IllegalArgumentException("Object or Output Blob Container URI cannot be null");
+        }
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_062: [The function shall get the URL for the bulk export job creation]
+        URL url = iotHubConnectionString.getUrlCreateExportImportJob();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_063: [The function shall create a new SAS token for the bulk export job]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_064: [The function shall create a new HttpRequest for the bulk export job creation ]
+        exportDevicesParameters.setType(JobProperties.JobType.EXPORT);
+        String jobPropertiesJson = exportDevicesParameters.toJobPropertiesParser().toJson();
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_065: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_066: [The function shall verify the response status and throw proper Exception]
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_067: [The function shall create a new JobProperties object from the response and return it]
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Async wrapper for exportDevices() operation
+     * @param exportDevicesParameters
+     * @return The future object for the requested operation
+     *
+     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public CompletableFuture<JobProperties> exportDevicesAsync(JobProperties exportDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_068: [The function shall create an async wrapper around the
+        // exportDevices() function call, handle the return value or delegate exception]
+        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
+        executor.submit(() ->
+        {
+            try
+            {
+                JobProperties responseJobProperties = exportDevices(exportDevicesParameters);
+                future.complete(responseJobProperties);
+            }
+            catch (IllegalArgumentException | IotHubException | IOException e)
+            {
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    /**
      * Create a bulk import job.
      *
      * @param importBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
@@ -745,9 +814,9 @@ public class RegistryManager
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_071: [The function shall create a new SAS token for the bulk import job]
         String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
-        ImportExportJobRequestParameters requestParameters = new ImportExportJobRequestParameters(importBlobContainerUri, outputBlobContainerUri);
+
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_072: [The function shall create a new HttpRequest for the bulk import job creation]
-        String jobPropertiesJson = CreateImportJobPropertiesJson(requestParameters);
+        String jobPropertiesJson = CreateImportJobPropertiesJson(importBlobContainerUri, outputBlobContainerUri);
         HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
 
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_073: [The function shall send the created request and get the response]
@@ -780,6 +849,76 @@ public class RegistryManager
             try
             {
                 JobProperties responseJobProperties = importDevices(importBlobContainerUri, outputBlobContainerUri);
+                future.complete(responseJobProperties);
+            }
+            catch (IllegalArgumentException | IotHubException | IOException e)
+            {
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Create a bulk import job.
+     *
+     * @param importDevicesParameters
+     *
+     * @return A JobProperties object for the newly created bulk import job
+     *
+     * @throws IllegalArgumentException This exception is thrown if the importBlobContainerUri or outputBlobContainerUri parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties importDevices(JobProperties importDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_069: [The function shall throw IllegalArgumentException if any of the input parameters is null]
+        if (importDevicesParameters == null || importDevicesParameters.getInputBlobContainerUri() == null || importDevicesParameters.getOutputBlobContainerUri() == null)
+        {
+            throw new IllegalArgumentException("Object, Import blob uri or output blob uri cannot be null");
+        }
+
+        //CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_070: [The function shall get the URL for the bulk import job creation]
+        URL url = iotHubConnectionString.getUrlCreateExportImportJob();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_071: [The function shall create a new SAS token for the bulk import job]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_072: [The function shall create a new HttpRequest for the bulk import job creation]
+        importDevicesParameters.setType(JobProperties.JobType.IMPORT);
+        String jobPropertiesJson = importDevicesParameters.toJobPropertiesParser().toJson();
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_073: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_074: [The function shall verify the response status and throw proper Exception]
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_075: [The function shall create a new JobProperties object from the response and return it]
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Async wrapper for importDevices() operation
+     *
+     * @param
+     * @return The future object for the requested operation
+     *
+     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public CompletableFuture<JobProperties> importDevicesAsync(JobProperties importParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_076: [The function shall create an async wrapper around
+        // the importDevices() function call, handle the return value or delegate exception]
+        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
+        executor.submit(() ->
+        {
+            try
+            {
+                JobProperties responseJobProperties = importDevices(importParameters);
                 future.complete(responseJobProperties);
             }
             catch (IllegalArgumentException | IotHubException | IOException e)
@@ -1422,23 +1561,24 @@ public class RegistryManager
         IotHubExceptionManager.httpResponseVerification(response);
     }
 
-    private String CreateExportJobPropertiesJson(ImportExportJobRequestParameters jobRequestParameters)
+    private String CreateExportJobPropertiesJson(String exportBlobContainerUri, Boolean excludeKeysInExport)
     {
         JobProperties jobProperties = new JobProperties();
         jobProperties.setType(JobProperties.JobType.EXPORT);
-        jobProperties.setExportBlobContainerUri(jobRequestParameters.getExportBlobContainerUri());
-        jobProperties.setExcludeKeysInExport(jobRequestParameters.getExcludeKeysInExport());
-        return jobProperties.toJobPropertiesParser(jobRequestParameters).toJson();
+        jobProperties.setOutputBlobContainerUri(exportBlobContainerUri);
+        jobProperties.setExcludeKeysInExport(excludeKeysInExport);
+        return jobProperties.toJobPropertiesParser().toJson();
     }
 
-    private String CreateImportJobPropertiesJson(ImportExportJobRequestParameters jobRequestParameters)
+    private String CreateImportJobPropertiesJson(String importBlobContainerUri, String outputBlobContainerUri)
     {
         JobProperties jobProperties = new JobProperties();
         jobProperties.setType(JobProperties.JobType.IMPORT);
-        jobProperties.setInputBlobContainerUri(jobRequestParameters.getInputBlobContainerUri());
-        jobProperties.setOutputBlobContainerUri(jobRequestParameters.getOutputBlobContainerUri());
-        return jobProperties.toJobPropertiesParser(jobRequestParameters).toJson();
+        jobProperties.setInputBlobContainerUri(importBlobContainerUri);
+        jobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        return jobProperties.toJobPropertiesParser().toJson();
     }
+
 
     private JobProperties ProcessJobResponse(HttpResponse response) throws IotHubException, JsonSyntaxException {
         IotHubExceptionManager.httpResponseVerification(response);

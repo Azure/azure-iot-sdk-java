@@ -6,10 +6,11 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 
 import java.util.Date;
 
-public class JobProperties extends ImportExportJobRequestParameters
+public class JobProperties
 {
     public JobProperties()
     {
@@ -141,6 +142,64 @@ public class JobProperties extends ImportExportJobRequestParameters
         this.failureReason = failureReason;
     }
 
+    /**
+     * @return URI containing SAS token to a blob container that contains registry data to sync.
+     */
+    public String getInputBlobContainerUri() {
+        return inputBlobContainerUri;
+    }
+
+    /**
+     * @param inputBlobContainerUri the input blob container URI.
+     */
+    public void setInputBlobContainerUri(String inputBlobContainerUri) {
+        this.inputBlobContainerUri = inputBlobContainerUri;
+    }
+
+    /**
+     * @return URI containing SAS token to a blob container.
+     * This is used to output the status of the job and the results.
+     */
+    public String getOutputBlobContainerUri() {
+        return outputBlobContainerUri;
+    }
+
+    /**
+     * @param outputBlobContainerUri the output blob container URI.
+     */
+    public void setOutputBlobContainerUri(String outputBlobContainerUri) {
+        this.outputBlobContainerUri = outputBlobContainerUri;
+    }
+
+    /**
+     * @return
+     */
+    public StorageAuthenticationType getStorageAuthenticationType() {
+        return storageAuthenticationType;
+    }
+
+    /**
+     * @param storageAuthenticationType
+     */
+    public void setStorageAuthenticationType(StorageAuthenticationType storageAuthenticationType) {
+        this.storageAuthenticationType = storageAuthenticationType;
+    }
+
+    /**
+     * @return whether the keys are included in export or not.
+     */
+    public boolean getExcludeKeysInExport() {
+        return excludeKeysInExport;
+    }
+
+    /**
+     * @param excludeKeysInExport optional for export jobs; ignored for other jobs.  Default: false.
+     * If false, authorization keys are included in export output.  Keys are exported as null otherwise.
+     */
+    public void setExcludeKeysInExport(boolean excludeKeysInExport) {
+        this.excludeKeysInExport = excludeKeysInExport;
+    }
+
     public enum JobStatus
     {
         UNKNOWN,
@@ -171,20 +230,21 @@ public class JobProperties extends ImportExportJobRequestParameters
     private String outputBlobContainerUri;
     private boolean excludeKeysInExport;
     private String failureReason;
+    private StorageAuthenticationType storageAuthenticationType;
 
     /**
      * Constructs a new JobProperties object using a JobPropertiesParser object
      * @param parser the parser object to convert from
      */
-    JobProperties(JobPropertiesParser parser, ImportExportJobRequestParameters jobRequestProperties)
+    JobProperties(JobPropertiesParser parser)
     {
         //Codes_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_003: [This method shall convert the provided parser into a JobProperty object and return it.]
         this.endTimeUtc = parser.getEndTimeUtc();
-        jobRequestProperties.setExcludeKeysInExport(parser.isExcludeKeysInExport());
-        jobRequestProperties.setInputBlobContainerUri(parser.getInputBlobContainerUri());
+        this.excludeKeysInExport = parser.isExcludeKeysInExport();
+        this.inputBlobContainerUri = parser.getInputBlobContainerUri();
         this.failureReason = parser.getFailureReason();
-        jobRequestProperties.setOutputBlobContainerUri(parser.getOutputBlobContainerUri());
-        jobRequestProperties.setStorageAuthenticationType(parser.getStorageAuthenticationType()) ;
+        this.outputBlobContainerUri = parser.getOutputBlobContainerUri();
+        this.storageAuthenticationType = parser.getStorageAuthenticationType();
         this.jobId = parser.getJobIdFinal();
         this.progress = parser.getProgress();
         this.startTimeUtc = parser.getStartTimeUtc();
@@ -204,16 +264,16 @@ public class JobProperties extends ImportExportJobRequestParameters
      * Converts this into a JobPropertiesParser object that can be used for serialization and deserialization
      * @return the converted JobPropertiesParser object
      */
-    JobPropertiesParser toJobPropertiesParser(ImportExportJobRequestParameters jobRequestProperties)
+    JobPropertiesParser toJobPropertiesParser()
     {
         //Codes_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_002: [This method shall convert this into a JobPropertiesParser object and return it.]
         JobPropertiesParser jobPropertiesParser = new JobPropertiesParser();
         jobPropertiesParser.setEndTimeUtc(this.endTimeUtc);
-        jobPropertiesParser.setExcludeKeysInExport(jobRequestProperties.getExcludeKeysInExport());
+        jobPropertiesParser.setExcludeKeysInExport(this.excludeKeysInExport);
         jobPropertiesParser.setFailureReason(this.failureReason);
-        jobPropertiesParser.setInputBlobContainerUri(jobRequestProperties.getInputBlobContainerUri());
-        jobPropertiesParser.setOutputBlobContainerUri(jobPropertiesParser.getOutputBlobContainerUri());
-        jobPropertiesParser.setStorageAuthenticationType(jobPropertiesParser.getStorageAuthenticationType());
+        jobPropertiesParser.setInputBlobContainerUri(this.inputBlobContainerUri);
+        jobPropertiesParser.setOutputBlobContainerUri(this.outputBlobContainerUri);
+        jobPropertiesParser.setStorageAuthenticationType(this.storageAuthenticationType);
         jobPropertiesParser.setJobId(this.jobId);
         jobPropertiesParser.setProgress(this.progress);
         jobPropertiesParser.setStartTimeUtc(this.startTimeUtc);
