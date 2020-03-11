@@ -244,7 +244,9 @@ public class JobProperties
         this.inputBlobContainerUri = parser.getInputBlobContainerUri();
         this.failureReason = parser.getFailureReason();
         this.outputBlobContainerUri = parser.getOutputBlobContainerUri();
-        this.storageAuthenticationType = parser.getStorageAuthenticationType();
+        if (IotHubConnectionString.IsStorageIdentityEnabled) {
+            this.storageAuthenticationType = parser.getStorageAuthenticationType();
+        }
         this.jobId = parser.getJobIdFinal();
         this.progress = parser.getProgress();
         this.startTimeUtc = parser.getStartTimeUtc();
@@ -273,11 +275,12 @@ public class JobProperties
         jobPropertiesParser.setFailureReason(this.failureReason);
         jobPropertiesParser.setInputBlobContainerUri(this.inputBlobContainerUri);
         jobPropertiesParser.setOutputBlobContainerUri(this.outputBlobContainerUri);
-        jobPropertiesParser.setStorageAuthenticationType(this.storageAuthenticationType);
+        if (IotHubConnectionString.IsStorageIdentityEnabled) {
+            jobPropertiesParser.setStorageAuthenticationType(this.storageAuthenticationType);
+        }
         jobPropertiesParser.setJobId(this.jobId);
         jobPropertiesParser.setProgress(this.progress);
         jobPropertiesParser.setStartTimeUtc(this.startTimeUtc);
-
         if (this.status != null)
         {
             jobPropertiesParser.setStatus(this.status.toString());

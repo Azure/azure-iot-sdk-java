@@ -213,7 +213,7 @@ public class ExportImportTests extends IotHubIntegrationTest
         {
             try
             {
-                if(storageAuthenticationType.isPresent())
+                if (storageAuthenticationType.isPresent())
                 {
                     JobProperties exportJobProperties = JobProperties.createForExportJob(containerSasUri, excludeKeys, storageAuthenticationType.get());
                     exportJob = registryManager.exportDevices(exportJobProperties);
@@ -229,7 +229,7 @@ public class ExportImportTests extends IotHubIntegrationTest
             catch (IotHubTooManyDevicesException e)
             {
                 //test is being throttled, wait a while and try again
-                Thread.sleep(30 * 1000);
+                Thread.sleep(10 * 1000);
             }
         }
 
@@ -335,7 +335,7 @@ public class ExportImportTests extends IotHubIntegrationTest
             catch (IotHubTooManyDevicesException e)
             {
                 //test is being throttled, wait a while and try again
-                Thread.sleep(30 * 1000);
+                Thread.sleep(10 * 1000);
             }
         }
 
