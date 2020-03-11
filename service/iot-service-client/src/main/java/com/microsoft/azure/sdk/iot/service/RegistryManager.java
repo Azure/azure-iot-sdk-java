@@ -1579,7 +1579,6 @@ public class RegistryManager
         return jobProperties.toJobPropertiesParser().toJson();
     }
 
-
     private JobProperties ProcessJobResponse(HttpResponse response) throws IotHubException, JsonSyntaxException {
         IotHubExceptionManager.httpResponseVerification(response);
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);

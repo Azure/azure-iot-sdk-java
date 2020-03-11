@@ -9,7 +9,10 @@ import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 
 import java.util.Date;
-
+/**
+ * Contains properties of a Job.
+ * See online <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/createimportexportjob">documentation</a> for more infomration.
+*/
 public class JobProperties
 {
     public JobProperties()
@@ -172,14 +175,14 @@ public class JobProperties
     }
 
     /**
-     * @return
+     * @return authentication type being used for connecting to storage account
      */
     public StorageAuthenticationType getStorageAuthenticationType() {
         return storageAuthenticationType;
     }
 
     /**
-     * @param storageAuthenticationType
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
      */
     public void setStorageAuthenticationType(StorageAuthenticationType storageAuthenticationType) {
         this.storageAuthenticationType = storageAuthenticationType;
@@ -339,7 +342,7 @@ public class JobProperties
      */
     public static JobProperties createForExportJob(
             String outputBlobContainerUri,
-            Boolean excludeKeysInExport )
+            Boolean excludeKeysInExport)
     {
         StorageAuthenticationType storageAuthenticationType = StorageAuthenticationType.KEY;
         return createForExportJob(outputBlobContainerUri, excludeKeysInExport, storageAuthenticationType);
