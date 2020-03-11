@@ -91,7 +91,7 @@ public class JobPropertiesParserTest
         String inputContainerUri = "inputContainerUri";
         String outputContainerUri = "outputContainerUri";
         int progress = 2;
-        boolean excludeKeysInExport = false;
+        Boolean excludeKeysInExport = false;
         String jobId = "jobId";
         String status = "status";
         String type = "type";

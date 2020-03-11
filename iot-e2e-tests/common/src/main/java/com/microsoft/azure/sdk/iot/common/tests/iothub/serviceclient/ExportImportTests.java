@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
@@ -76,7 +77,7 @@ public class ExportImportTests extends IotHubIntegrationTest
     public static void tearDown() throws Exception
     {
         //Deleting all devices created as a part of the bulk import-export test
-        List<ExportImportDevice> exportedDevices = runExportJob();
+        List<ExportImportDevice> exportedDevices = runExportJob(Optional.empty());
         List<ExportImportDevice> devicesToBeDeleted = new ArrayList<>();
 
         for(ExportImportDevice device : exportedDevices)
@@ -87,7 +88,7 @@ public class ExportImportTests extends IotHubIntegrationTest
             }
         }
 
-        runImportJob(devicesToBeDeleted, ImportMode.Delete);
+        runImportJob(devicesToBeDeleted, ImportMode.Delete, Optional.empty());
 
         //Cleaning up the containers
         importContainer.deleteIfExists();
@@ -102,6 +103,82 @@ public class ExportImportTests extends IotHubIntegrationTest
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
     public void export_import_e2e() throws Exception
+    {
+
+        List<ExportImportDevice> devicesForImport = createListofDevices();
+
+        //importing devices - create mode
+        runImportJob(devicesForImport, ImportMode.CreateOrUpdate, Optional.empty());
+
+        List<ExportImportDevice> exportedDevices = runExportJob(Optional.empty());
+
+        for (ExportImportDevice importedDevice : devicesForImport)
+        {
+            if (!exportedDevices.contains(importedDevice))
+            {
+                Assert.fail("Exported devices list does not contain device with id: " + importedDevice.getId());
+            }
+        }
+
+        //importing devices - delete mode
+        runImportJob(devicesForImport, ImportMode.Delete, Optional.empty());
+
+        exportedDevices = runExportJob(Optional.empty());
+
+        for (ExportImportDevice importedDevice : devicesForImport)
+        {
+            if (exportedDevices.contains(importedDevice))
+            {
+                Assert.fail("Device with id: " + importedDevice.getId() + " was not deleted by the import job");
+            }
+        }
+    }
+
+    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    public void export_import_key_based_storage_auth_e2e() throws Exception
+    {
+        export_import_storage_auth_e2e(StorageAuthenticationType.KEY);
+    }
+
+    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    public void export_import_identity_based_storage_auth_e2e() throws Exception
+    {
+        export_import_storage_auth_e2e(StorageAuthenticationType.IDENTITY);
+    }
+
+    private static void export_import_storage_auth_e2e(StorageAuthenticationType storageAuthenticationType) throws Exception
+    {
+
+        List<ExportImportDevice> devicesForImport = createListofDevices();
+
+        //importing devices - create mode
+        runImportJob(devicesForImport, ImportMode.CreateOrUpdate, Optional.of(storageAuthenticationType));
+
+        List<ExportImportDevice> exportedDevices = runExportJob(Optional.of(storageAuthenticationType));
+
+        for (ExportImportDevice importedDevice : devicesForImport)
+        {
+            if (!exportedDevices.contains(importedDevice))
+            {
+                Assert.fail("Exported devices list does not contain device with id: " + importedDevice.getId());
+            }
+        }
+
+        //importing devices - delete mode
+        runImportJob(devicesForImport, ImportMode.Delete, Optional.of(storageAuthenticationType));
+
+        exportedDevices = runExportJob(Optional.of(storageAuthenticationType));
+
+        for (ExportImportDevice importedDevice : devicesForImport)
+        {
+            if (exportedDevices.contains(importedDevice))
+            {
+                Assert.fail("Device with id: " + importedDevice.getId() + " was not deleted by the import job");
+            }
+        }
+    }
+
+    private static List<ExportImportDevice> createListofDevices()
     {
         //Creating the list of devices to be created, then deleted
         Integer numberOfDevices = 10;
@@ -122,34 +199,10 @@ public class ExportImportTests extends IotHubIntegrationTest
             devicesForImport.add(deviceToAdd);
         }
 
-        //importing devices - create mode
-        runImportJob(devicesForImport, ImportMode.CreateOrUpdate);
-
-        List<ExportImportDevice> exportedDevices = runExportJob();
-
-        for (ExportImportDevice importedDevice : devicesForImport)
-        {
-            if (!exportedDevices.contains(importedDevice))
-            {
-                Assert.fail("Exported devices list does not contain device with id: " + importedDevice.getId());
-            }
-        }
-
-        //importing devices - delete mode
-        runImportJob(devicesForImport, ImportMode.Delete);
-
-        exportedDevices = runExportJob();
-
-        for (ExportImportDevice importedDevice : devicesForImport)
-        {
-            if (exportedDevices.contains(importedDevice))
-            {
-                Assert.fail("Device with id: " + importedDevice.getId() + " was not deleted by the import job");
-            }
-        }
+        return devicesForImport;
     }
 
-    private static List<ExportImportDevice> runExportJob() throws Exception
+    private static List<ExportImportDevice> runExportJob(Optional<StorageAuthenticationType> storageAuthenticationType) throws Exception
     {
         Boolean excludeKeys = false;
         String containerSasUri = getContainerSasUri(exportContainer);
@@ -160,8 +213,18 @@ public class ExportImportTests extends IotHubIntegrationTest
         {
             try
             {
-                exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
-                exportJobScheduled = true;
+                if(storageAuthenticationType.isPresent())
+                {
+                    JobProperties exportJobProperties = JobProperties.createForExportJob(containerSasUri, excludeKeys, storageAuthenticationType.get());
+                    exportJob = registryManager.exportDevices(exportJobProperties);
+                    exportJobScheduled = true;
+                }
+                else
+                {
+                    exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
+                    exportJobScheduled = true;
+                }
+
             }
             catch (IotHubTooManyDevicesException e)
             {
@@ -223,7 +286,7 @@ public class ExportImportTests extends IotHubIntegrationTest
         return result;
     }
 
-    private static void runImportJob(List<ExportImportDevice> devices, ImportMode importMode) throws Exception
+    private static void runImportJob(List<ExportImportDevice> devices, ImportMode importMode, Optional<StorageAuthenticationType> storageAuthenticationType) throws Exception
     {
         // Creating the json string to be submitted for import using the specified importMode
         StringBuilder devicesToAdd = new StringBuilder();
@@ -256,8 +319,18 @@ public class ExportImportTests extends IotHubIntegrationTest
         {
             try
             {
-                importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
-                importJobScheduled = true;
+                if (storageAuthenticationType.isPresent())
+                {
+                    // For a given StorageAuthenticationType, create JobProperties and pass it
+                    JobProperties importJobProperties = JobProperties.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
+                    importJob = registryManager.importDevices(importJobProperties);
+                    importJobScheduled = true;
+                }
+                else
+                {
+                    importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
+                    importJobScheduled = true;
+                }
             }
             catch (IotHubTooManyDevicesException e)
             {

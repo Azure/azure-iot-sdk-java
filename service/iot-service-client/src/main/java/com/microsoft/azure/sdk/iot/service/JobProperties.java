@@ -188,7 +188,7 @@ public class JobProperties
     /**
      * @return whether the keys are included in export or not.
      */
-    public boolean getExcludeKeysInExport() {
+    public Boolean getExcludeKeysInExport() {
         return excludeKeysInExport;
     }
 
@@ -196,7 +196,7 @@ public class JobProperties
      * @param excludeKeysInExport optional for export jobs; ignored for other jobs.  Default: false.
      * If false, authorization keys are included in export output.  Keys are exported as null otherwise.
      */
-    public void setExcludeKeysInExport(boolean excludeKeysInExport) {
+    public void setExcludeKeysInExport(Boolean excludeKeysInExport) {
         this.excludeKeysInExport = excludeKeysInExport;
     }
 
@@ -228,7 +228,7 @@ public class JobProperties
     private int progress;
     private String inputBlobContainerUri;
     private String outputBlobContainerUri;
-    private boolean excludeKeysInExport;
+    private Boolean excludeKeysInExport;
     private String failureReason;
     private StorageAuthenticationType storageAuthenticationType;
 
@@ -285,7 +285,7 @@ public class JobProperties
 
         if (this.type != null)
         {
-            jobPropertiesParser.setType(jobPropertiesParser.getType().toString().toLowerCase());
+            jobPropertiesParser.setType(this.type.toString().toLowerCase());
         }
 
         return jobPropertiesParser;
@@ -336,7 +336,7 @@ public class JobProperties
      */
     public static JobProperties createForExportJob(
             String outputBlobContainerUri,
-            boolean excludeKeysInExport )
+            Boolean excludeKeysInExport )
     {
         StorageAuthenticationType storageAuthenticationType = StorageAuthenticationType.KEY;
         return createForExportJob(outputBlobContainerUri, excludeKeysInExport, storageAuthenticationType);
@@ -352,7 +352,7 @@ public class JobProperties
      */
     public static JobProperties createForExportJob(
             String outputBlobContainerUri,
-            boolean excludeKeysInExport,
+            Boolean excludeKeysInExport,
             StorageAuthenticationType storageAuthenticationType)
     {
         JobProperties exportJobProperties = new JobProperties();

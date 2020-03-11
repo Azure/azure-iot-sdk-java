@@ -734,7 +734,7 @@ public class RegistryManager
     {
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_061: [The function shall throw IllegalArgumentException
         // if any of the input parameters is null]
-        if (exportDevicesParameters == null || exportDevicesParameters.getOutputBlobContainerUri() == null)
+        if (exportDevicesParameters == null || exportDevicesParameters.getOutputBlobContainerUri() == null || exportDevicesParameters.getExcludeKeysInExport() == null)
         {
             throw new IllegalArgumentException("Object or Output Blob Container URI cannot be null");
         }
