@@ -191,7 +191,7 @@ public class JobProperties
     /**
      * @return whether the keys are included in export or not.
      */
-    public Boolean getExcludeKeysInExport() {
+    public boolean getExcludeKeysInExport() {
         return excludeKeysInExport;
     }
 
@@ -199,7 +199,7 @@ public class JobProperties
      * @param excludeKeysInExport optional for export jobs; ignored for other jobs.  Default: false.
      * If false, authorization keys are included in export output.  Keys are exported as null otherwise.
      */
-    public void setExcludeKeysInExport(Boolean excludeKeysInExport) {
+    public void setExcludeKeysInExport(boolean excludeKeysInExport) {
         this.excludeKeysInExport = excludeKeysInExport;
     }
 
@@ -231,7 +231,7 @@ public class JobProperties
     private int progress;
     private String inputBlobContainerUri;
     private String outputBlobContainerUri;
-    private Boolean excludeKeysInExport;
+    private boolean excludeKeysInExport;
     private String failureReason;
     private StorageAuthenticationType storageAuthenticationType;
 

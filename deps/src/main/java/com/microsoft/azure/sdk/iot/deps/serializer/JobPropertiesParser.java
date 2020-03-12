@@ -59,7 +59,7 @@ public class JobPropertiesParser
     private static final String EXCLUDE_KEYS_IN_EXPORT_NAME = "excludeKeysInExport";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(EXCLUDE_KEYS_IN_EXPORT_NAME)
-    private Boolean excludeKeysInExport;
+    private boolean excludeKeysInExport;
 
     private static final String FAILURE_REASON_NAME = "failureReason";
     @Expose(serialize = true, deserialize = true)
@@ -296,7 +296,7 @@ public class JobPropertiesParser
      *
      * @return The value of excludeKeysInExport
      */
-    public Boolean isExcludeKeysInExport()
+    public boolean isExcludeKeysInExport()
     {
         //Codes_SRS_JOB_PROPERTIES_PARSER_34_028: [This method shall return the value of this object's excludeKeysInExport.]
         return excludeKeysInExport;
@@ -413,7 +413,7 @@ public class JobPropertiesParser
      *
      * @param excludeKeysInExport the value to set ExcludeKeysInExport to
      */
-    public void setExcludeKeysInExport(Boolean excludeKeysInExport)
+    public void setExcludeKeysInExport(boolean excludeKeysInExport)
     {
         //Codes_SRS_JOB_PROPERTIES_PARSER_34_027: [This method shall set the value of this object's excludeKeysInExport equal to the provided value.]
         this.excludeKeysInExport = excludeKeysInExport;

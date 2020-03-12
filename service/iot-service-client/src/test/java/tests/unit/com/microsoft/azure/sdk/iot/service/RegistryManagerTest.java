@@ -1163,29 +1163,6 @@ public class RegistryManagerTest
         registryManager.getStatisticsAsync();
     }
 
-    @Test (expected = IllegalArgumentException.class)
-    public void exportDevices_jobProperties_blob_input_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
-
-        JobProperties jobProperties =
-                JobProperties.createForExportJob(null, true, StorageAuthenticationType.IDENTITY);
-
-        registryManager.exportDevices(jobProperties);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void exportDevices_jobProperties_exclude_keys_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
-        JobProperties jobProperties =
-                JobProperties.createForExportJob("www.someurl.com", null, StorageAuthenticationType.IDENTITY);
-
-        registryManager.exportDevices(jobProperties);
-    }
-
     @Test
     public void exportDevices_jobProperties_good_case() throws Exception
     {
@@ -1429,28 +1406,6 @@ public class RegistryManagerTest
 
         CompletableFuture<JobProperties> completableFuture =  registryManager.importDevicesAsync("importblob", "outputblob");
         completableFuture.get();
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void importDevices_JobProperties_inputblob_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
-        JobProperties jobProperties =
-                JobProperties.createForImportJob(null, "outputblob", StorageAuthenticationType.IDENTITY);
-
-        registryManager.importDevices(jobProperties);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void importDevices_JobProperties_outputblob_null() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
-        JobProperties jobProperties =
-                JobProperties.createForImportJob("inputblob", null, StorageAuthenticationType.IDENTITY);
-
-        registryManager.importDevices(jobProperties);
     }
 
     @Test

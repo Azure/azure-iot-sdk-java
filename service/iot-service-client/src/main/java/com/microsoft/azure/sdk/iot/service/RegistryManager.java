@@ -732,13 +732,6 @@ public class RegistryManager
     public JobProperties exportDevices(JobProperties exportDevicesParameters)
             throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
     {
-        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_061: [The function shall throw IllegalArgumentException
-        // if any of the input parameters is null]
-        if (exportDevicesParameters == null || exportDevicesParameters.getOutputBlobContainerUri() == null || exportDevicesParameters.getExcludeKeysInExport() == null)
-        {
-            throw new IllegalArgumentException("Object or Output Blob Container URI cannot be null");
-        }
-
         // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_062: [The function shall get the URL for the bulk export job creation]
         URL url = iotHubConnectionString.getUrlCreateExportImportJob();
 
@@ -873,12 +866,6 @@ public class RegistryManager
     public JobProperties importDevices(JobProperties importDevicesParameters)
             throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
     {
-        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_069: [The function shall throw IllegalArgumentException if any of the input parameters is null]
-        if (importDevicesParameters == null || importDevicesParameters.getInputBlobContainerUri() == null || importDevicesParameters.getOutputBlobContainerUri() == null)
-        {
-            throw new IllegalArgumentException("Object, Import blob uri or output blob uri cannot be null");
-        }
-
         //CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_070: [The function shall get the URL for the bulk import job creation]
         URL url = iotHubConnectionString.getUrlCreateExportImportJob();
 
