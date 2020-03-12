@@ -37,6 +37,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String WS_SSL_PREFIX = "wss://";
 
     private static final String WEBSOCKET_RAW_PATH = "/$iothub/websocket";
+    private static final String NO_CLIENT_CERT_QUERY_STRING = "?iothub-no-client-cert=true";
 
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
@@ -44,6 +45,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String API_VERSION = "?api-version=" + TransportUtils.IOTHUB_API_VERSION;
 
     private String connectionId;
+    private String webSocketQueryString;
 
     private IotHubListener listener;
 
@@ -136,6 +138,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     this.iotHubUserPassword = null;
                 }
 
+                if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.X509_CERTIFICATE)
+                {
+                    //X509 auth websocket should not include the iothub-no-client-cert flag
+                    this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
+                }
+                else
+                {
+                    this.webSocketQueryString = "";
+                }
+
                 //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
                 // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding
                 String userAgentString = this.config.getProductInfo().getUserAgentString();
@@ -159,7 +171,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 if (this.config.isUseWebsocket())
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
-                    final String wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH;
+                    final String wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + this.webSocketQueryString;
                     mqttConnection = new MqttConnection(wsServerUri,
                             clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext, this.config.getProxySettings());
                 }
