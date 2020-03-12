@@ -66,15 +66,19 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     // configurations
     private static final String URL_PATH_APPLY_CONTENT_CONFIGURATION = "applyConfigurationContent";
 
-    // For import/export devices jobs, a new parameter is available in a
-    // new api-version, which is only available in a few initial regions.
-    // Control access via an environment variable. If a user wishes to try it out,
-    // they can set "EnabledStorageIdentity" to "1". Otherwise, the SDK will still
-    // default to the latest, broadly-supported api-version used in this SDK.
-    protected static String storageIdentity = System.getenv().get("EnableStorageIdentity");
-    protected static boolean IsStorageIdentityEnabled = storageIdentity.equalsIgnoreCase("1");
+    protected String storageIdentity;
+    boolean IsStorageIdentityEnabled;
 
-    protected IotHubConnectionString() {}
+    protected IotHubConnectionString() {
+
+        // For import/export devices jobs, a new parameter is available in a
+        // new api-version, which is only available in a few initial regions.
+        // Control access via an environment variable. If a user wishes to try it out,
+        // they can set "EnabledStorageIdentity" to "1". Otherwise, the SDK will still
+        // default to the latest, broadly-supported api-version used in this SDK.
+        storageIdentity = System.getenv().get("EnableStorageIdentity");
+        IsStorageIdentityEnabled = "1".equalsIgnoreCase(storageIdentity);
+    }
 
     /**
      * Serialize user string
@@ -647,7 +651,8 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         // Control access via an environment variable. If a user wishes to try it out,
         // they can set "EnabledStorageIdentity" to "1". Otherwise, the SDK will still
         // default to the latest, broadly-supported api-version used in this SDK.
-        if (IsStorageIdentityEnabled)
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
+        if (iotHubConnectionString.IsStorageIdentityEnabled)
         {
             stringBuilder.append(URL_API_VERSION_LIMITED_AVAILABILITY);
         }

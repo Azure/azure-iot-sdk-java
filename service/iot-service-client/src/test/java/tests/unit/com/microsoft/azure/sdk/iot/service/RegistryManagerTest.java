@@ -1453,7 +1453,7 @@ public class RegistryManagerTest
         registryManager.importDevices(jobProperties);
     }
 
-    @Test (expected = IllegalArgumentException.class)
+    @Test
     public void importDevices_jobProperties_good_case() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";

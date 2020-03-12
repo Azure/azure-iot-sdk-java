@@ -247,7 +247,8 @@ public class JobProperties
         this.inputBlobContainerUri = parser.getInputBlobContainerUri();
         this.failureReason = parser.getFailureReason();
         this.outputBlobContainerUri = parser.getOutputBlobContainerUri();
-        if (IotHubConnectionString.IsStorageIdentityEnabled) {
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
+        if (iotHubConnectionString.IsStorageIdentityEnabled) {
             this.storageAuthenticationType = parser.getStorageAuthenticationType();
         }
         this.jobId = parser.getJobIdFinal();
@@ -278,7 +279,8 @@ public class JobProperties
         jobPropertiesParser.setFailureReason(this.failureReason);
         jobPropertiesParser.setInputBlobContainerUri(this.inputBlobContainerUri);
         jobPropertiesParser.setOutputBlobContainerUri(this.outputBlobContainerUri);
-        if (IotHubConnectionString.IsStorageIdentityEnabled) {
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
+        if (iotHubConnectionString.IsStorageIdentityEnabled) {
             jobPropertiesParser.setStorageAuthenticationType(this.storageAuthenticationType);
         }
         jobPropertiesParser.setJobId(this.jobId);
