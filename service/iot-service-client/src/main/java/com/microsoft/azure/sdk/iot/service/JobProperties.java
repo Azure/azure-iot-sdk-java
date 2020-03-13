@@ -146,29 +146,32 @@ public class JobProperties
     }
 
     /**
-     * @return URI containing SAS token to a blob container that contains registry data to sync.
+     * @return URI to a blob container that contains registry data to sync.
+     * Including a SAS token is dependent on the StorageAuthenticationType
      */
     public String getInputBlobContainerUri() {
         return inputBlobContainerUri;
     }
 
     /**
-     * @param inputBlobContainerUri the input blob container URI.
+     * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
+     *                              Including a SAS token is dependent on the StorageAuthenticationType
      */
     public void setInputBlobContainerUri(String inputBlobContainerUri) {
         this.inputBlobContainerUri = inputBlobContainerUri;
     }
 
     /**
-     * @return URI containing SAS token to a blob container.
-     * This is used to output the status of the job and the results.
+     * @return URI to a blob container. This is used to output the status of the job and the results.
+     * Including a SAS token is dependent on the StorageAuthenticationType
      */
     public String getOutputBlobContainerUri() {
         return outputBlobContainerUri;
     }
 
     /**
-     * @param outputBlobContainerUri the output blob container URI.
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
      */
     public void setOutputBlobContainerUri(String outputBlobContainerUri) {
         this.outputBlobContainerUri = outputBlobContainerUri;
@@ -302,8 +305,10 @@ public class JobProperties
     /**
      * Creates an instance of JobProperties with parameters ready to start an Import job
      *
-     * @param inputBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
-     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
+     *                              Including a SAS token is dependent on the StorageAuthenticationType
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @return An instance of JobProperties
      */
     public static JobProperties createForImportJob(
@@ -317,8 +322,10 @@ public class JobProperties
     /**
      * Creates an instance of JobProperties with parameters ready to start an Import job
      *
-     * @param inputBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
-     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
+     *                              Including a SAS token is dependent on the StorageAuthenticationType
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
      * @return An instance of JobProperties
      */
@@ -338,7 +345,8 @@ public class JobProperties
     /**
      * Creates an instance of JobProperties with parameters ready to start an Export job
      *
-     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param excludeKeysInExport Indicates if authorization keys are included in export output
      * @return An instance of JobProperties
      */
@@ -353,7 +361,8 @@ public class JobProperties
     /**
      * Creates an instance of JobProperties with parameters ready to start an Export job
      *
-     * @param outputBlobContainerUri URI containing SAS token to a blob container.  This is used to output the status of the job and the results.
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
      * @param excludeKeysInExport Indicates if authorization keys are included in export output
      * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
      * @return An instance of JobProperties
