@@ -66,6 +66,11 @@ public class JobPropertiesParser
     @SerializedName(FAILURE_REASON_NAME)
     private String failureReason;
 
+    private static final String STORAGE_AUTHENTICATION_TYPE = "storageAuthenticationType";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(STORAGE_AUTHENTICATION_TYPE)
+    private StorageAuthenticationType storageAuthenticationType;
+
     /**
      * Empty constructor: Used only to keep GSON happy.
      */
@@ -113,6 +118,7 @@ public class JobPropertiesParser
         this.progress = parser.progress;
         this.outputBlobContainerUri = parser.outputBlobContainerUri;
         this.failureReason = parser.failureReason;
+        this.storageAuthenticationType = parser.storageAuthenticationType;
 
         if (parser.endTimeUtcString != null)
         {
@@ -144,6 +150,26 @@ public class JobPropertiesParser
         }
 
         return gson.toJson(this);
+    }
+
+    /**
+     * Getter for authentication type being used for connecting to a storage account.
+     *
+     * @return The value of storageAuthenticationType
+     */
+    public StorageAuthenticationType getStorageAuthenticationType()
+    {
+        return storageAuthenticationType;
+    }
+
+    /**
+     * Setter for authentication type being used for connecting to a storage account.
+     *
+     * @param storageAuthenticationType the value to set storageAuthenticationType to
+     */
+    public void setStorageAuthenticationType(StorageAuthenticationType storageAuthenticationType)
+    {
+        this.storageAuthenticationType = storageAuthenticationType;
     }
 
     /**
