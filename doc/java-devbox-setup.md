@@ -107,7 +107,7 @@ _This is the recommended method of including the Azure IoT SDKs in your project,
 	<dependency>
 		<groupId>com.microsoft.azure.sdk.iot</groupId>
 		<artifactId>iot-device-client</artifactId>
-		<version>1.14.1</version>
+		<version>1.20.1</version>
 		<!--This is the current version number as of the writing of this document. Yours may be different.-->
 	</dependency>
 ```
@@ -118,7 +118,7 @@ _This is the recommended method of including the Azure IoT SDKs in your project,
 	<dependency>
 		<groupId>com.microsoft.azure.sdk.iot</groupId>
 		<artifactId>iot-service-client</artifactId>
-		<version>1.15.1</version>
+		<version>1.20.1</version>
 		<!--This is the current version number as of the writing of this document. Yours may be different.-->
 	</dependency>
 ```
