@@ -5,6 +5,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -38,6 +39,7 @@ public class JobPropertiesParserTest
         parser.setJobId("jobId");
         parser.setStatus("status");
         parser.setType("type");
+        parser.setStorageAuthenticationType(StorageAuthenticationType.KEY);
 
         // act
         JobPropertiesParser processedParser = new JobPropertiesParser(parser.toJson());
@@ -51,6 +53,7 @@ public class JobPropertiesParserTest
         assertEquals(parser.getProgress(), processedParser.getProgress());
         assertEquals(parser.getStatus(), processedParser.getStatus());
         assertEquals(parser.getType(), processedParser.getType());
+        assertEquals(parser.getStorageAuthenticationType(), processedParser.getStorageAuthenticationType());
 
 
         String startTimeUtc = Deencapsulation.getField(processedParser, "startTimeUtcString");
