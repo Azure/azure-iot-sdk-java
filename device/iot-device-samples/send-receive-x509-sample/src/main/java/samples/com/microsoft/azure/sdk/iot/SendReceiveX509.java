@@ -160,7 +160,7 @@ public class SendReceiveX509
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<host_name>;DeviceId=<device_id>;x509=true\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
+                            + "3. (mqtt | https | amqps  | mqtt_ws)\n",
                     args.length);
             return;
         }
@@ -210,7 +210,7 @@ public class SendReceiveX509
                                 + "The program should be called with the following args: \n"
                                 + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<host_name>;DeviceId=<device_id>;x509=true\n"
                                 + "2. [number of requests to send]\n"
-                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
+                                + "3. (mqtt | https | amqps | mqtt_ws)\n",
                         protocolStr);
                 return;
             }
