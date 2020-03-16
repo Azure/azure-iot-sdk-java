@@ -115,7 +115,6 @@ public class HttpsRequest
             connection.setSSLContext(this.sslContext);
         }
 
-
         if (this.connectionTimeout != 0)
         {
             connection.setReadTimeoutMillis(this.connectionTimeout);
