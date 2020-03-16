@@ -395,7 +395,7 @@ public class HttpsConnectionTest
 
     //Tests_SRS_HTTPSCONNECTION_34_026: [If this object uses HTTP, this function shall throw an UnsupportedOperationException.]
     @Test (expected = IllegalArgumentException.class)
-    public void setSSLContextThrowsIfHttp(@Mocked final SSLContext mockedContext) throws IOException, TransportException
+    public void HttpsConnectionConstructorThrowsIfHttp(@Mocked final SSLContext mockedContext) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final String field = "test-field";
