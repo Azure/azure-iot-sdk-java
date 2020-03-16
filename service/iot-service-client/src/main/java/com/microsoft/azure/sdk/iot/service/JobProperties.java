@@ -6,14 +6,32 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 
 import java.util.Date;
-
+/**
+ * Contains properties of a Job.
+ * See online <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/createimportexportjob">documentation</a> for more infomration.
+*/
 public class JobProperties
 {
     public JobProperties()
     {
         this.setJobIdFinal("");
+    }
+
+    /**
+     * @return the type of job to execute.
+     */
+    public JobType getType() {
+        return type;
+    }
+
+    /**
+     * @param type the type of job to execute.
+     */
+    public void setType(JobType type) {
+        this.type = type;
     }
 
     /**
@@ -84,20 +102,6 @@ public class JobProperties
     }
 
     /**
-     * @return the type of job to execute.
-     */
-    public JobType getType() {
-        return type;
-    }
-
-    /**
-     * @param type the type of job to execute.
-     */
-    public void setType(JobType type) {
-        this.type = type;
-    }
-
-    /**
      * @return the system generated job status. Ignored at creation.
      */
     public JobStatus getStatus() {
@@ -127,32 +131,64 @@ public class JobProperties
     }
 
     /**
-     * @return URI containing SAS token to a blob container that contains registry data to sync.
+     * @return System generated. Ignored at creation.
+     * If status == failure, this represents a string containing the reason.
+     */
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    /**
+     * @param failureReason the failure reason.
+     */
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
+    }
+
+    /**
+     * @return URI to a blob container that contains registry data to sync.
+     * Including a SAS token is dependent on the StorageAuthenticationType
      */
     public String getInputBlobContainerUri() {
         return inputBlobContainerUri;
     }
 
     /**
-     * @param inputBlobContainerUri the input blob container URI.
+     * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
+     *                              Including a SAS token is dependent on the StorageAuthenticationType
      */
     public void setInputBlobContainerUri(String inputBlobContainerUri) {
         this.inputBlobContainerUri = inputBlobContainerUri;
     }
 
     /**
-     * @return URI containing SAS token to a blob container.
-     * This is used to output the status of the job and the results.
+     * @return URI to a blob container. This is used to output the status of the job and the results.
+     * Including a SAS token is dependent on the StorageAuthenticationType
      */
     public String getOutputBlobContainerUri() {
         return outputBlobContainerUri;
     }
 
     /**
-     * @param outputBlobContainerUri the output blob container URI.
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
      */
     public void setOutputBlobContainerUri(String outputBlobContainerUri) {
         this.outputBlobContainerUri = outputBlobContainerUri;
+    }
+
+    /**
+     * @return authentication type being used for connecting to storage account
+     */
+    public StorageAuthenticationType getStorageAuthenticationType() {
+        return storageAuthenticationType;
+    }
+
+    /**
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
+     */
+    public void setStorageAuthenticationType(StorageAuthenticationType storageAuthenticationType) {
+        this.storageAuthenticationType = storageAuthenticationType;
     }
 
     /**
@@ -170,28 +206,6 @@ public class JobProperties
         this.excludeKeysInExport = excludeKeysInExport;
     }
 
-    /**
-     * @return System generated. Ignored at creation.
-     * If status == failure, this represents a string containing the reason.
-     */
-    public String getFailureReason() {
-        return failureReason;
-    }
-
-    /**
-     * @param failureReason the failure reason.
-     */
-    public void setFailureReason(String failureReason) {
-        this.failureReason = failureReason;
-    }
-
-    public enum JobType
-    {
-        UNKNOWN,
-        EXPORT,
-        IMPORT
-    }
-
     public enum JobStatus
     {
         UNKNOWN,
@@ -200,6 +214,13 @@ public class JobProperties
         COMPLETED,
         FAILED,
         CANCELLED
+    }
+
+    public enum JobType
+    {
+        UNKNOWN,
+        EXPORT,
+        IMPORT
     }
 
     // CODES_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_001: [The JobProperties class shall have the following properties: jobId,
@@ -215,6 +236,7 @@ public class JobProperties
     private String outputBlobContainerUri;
     private boolean excludeKeysInExport;
     private String failureReason;
+    private StorageAuthenticationType storageAuthenticationType;
 
     /**
      * Constructs a new JobProperties object using a JobPropertiesParser object
@@ -225,9 +247,13 @@ public class JobProperties
         //Codes_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_003: [This method shall convert the provided parser into a JobProperty object and return it.]
         this.endTimeUtc = parser.getEndTimeUtc();
         this.excludeKeysInExport = parser.isExcludeKeysInExport();
-        this.failureReason = parser.getFailureReason();
         this.inputBlobContainerUri = parser.getInputBlobContainerUri();
+        this.failureReason = parser.getFailureReason();
         this.outputBlobContainerUri = parser.getOutputBlobContainerUri();
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
+        if (iotHubConnectionString.IsStorageIdentityEnabled) {
+            this.storageAuthenticationType = parser.getStorageAuthenticationType();
+        }
         this.jobId = parser.getJobIdFinal();
         this.progress = parser.getProgress();
         this.startTimeUtc = parser.getStartTimeUtc();
@@ -256,10 +282,13 @@ public class JobProperties
         jobPropertiesParser.setFailureReason(this.failureReason);
         jobPropertiesParser.setInputBlobContainerUri(this.inputBlobContainerUri);
         jobPropertiesParser.setOutputBlobContainerUri(this.outputBlobContainerUri);
+        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
+        if (iotHubConnectionString.IsStorageIdentityEnabled) {
+            jobPropertiesParser.setStorageAuthenticationType(this.storageAuthenticationType);
+        }
         jobPropertiesParser.setJobId(this.jobId);
         jobPropertiesParser.setProgress(this.progress);
         jobPropertiesParser.setStartTimeUtc(this.startTimeUtc);
-
         if (this.status != null)
         {
             jobPropertiesParser.setStatus(this.status.toString());
@@ -271,5 +300,83 @@ public class JobProperties
         }
 
         return jobPropertiesParser;
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Import job
+     *
+     * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
+     *                              Including a SAS token is dependent on the StorageAuthenticationType
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForImportJob(
+            String inputBlobContainerUri,
+            String outputBlobContainerUri)
+    {
+        StorageAuthenticationType storageAuthenticationType = StorageAuthenticationType.KEY;
+        return createForImportJob(inputBlobContainerUri, outputBlobContainerUri, storageAuthenticationType);
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Import job
+     *
+     * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
+     *                              Including a SAS token is dependent on the StorageAuthenticationType
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForImportJob(
+            String inputBlobContainerUri,
+            String outputBlobContainerUri,
+            StorageAuthenticationType storageAuthenticationType)
+    {
+        JobProperties importJobProperties = new JobProperties();
+        importJobProperties.setType(JobProperties.JobType.IMPORT);
+        importJobProperties.setInputBlobContainerUri(inputBlobContainerUri);
+        importJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        importJobProperties.setStorageAuthenticationType(storageAuthenticationType);
+        return importJobProperties;
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Export job
+     *
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
+     * @param excludeKeysInExport Indicates if authorization keys are included in export output
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForExportJob(
+            String outputBlobContainerUri,
+            Boolean excludeKeysInExport)
+    {
+        StorageAuthenticationType storageAuthenticationType = StorageAuthenticationType.KEY;
+        return createForExportJob(outputBlobContainerUri, excludeKeysInExport, storageAuthenticationType);
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Export job
+     *
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
+     * @param excludeKeysInExport Indicates if authorization keys are included in export output
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForExportJob(
+            String outputBlobContainerUri,
+            Boolean excludeKeysInExport,
+            StorageAuthenticationType storageAuthenticationType)
+    {
+        JobProperties exportJobProperties = new JobProperties();
+        exportJobProperties.setType(JobProperties.JobType.EXPORT);
+        exportJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        exportJobProperties.setExcludeKeysInExport(excludeKeysInExport);
+        exportJobProperties.setStorageAuthenticationType(storageAuthenticationType);
+        return exportJobProperties;
     }
 }

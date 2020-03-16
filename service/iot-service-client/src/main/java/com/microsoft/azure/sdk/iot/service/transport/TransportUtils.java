@@ -8,11 +8,13 @@ public class TransportUtils
     /** Version identifier key */
     public static final String versionIdentifierKey = "com.microsoft:client-version";
     public static String javaServiceClientIdentifier = "com.microsoft.azure.sdk.iot.iot-service-client/";
-    public static String serviceVersion = "1.20.1";
+    public static String serviceVersion = "1.21.0";
 
     private static String JAVA_RUNTIME = System.getProperty("java.version");
     private static String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");
     private static String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
 
     public static final String USER_AGENT_STRING = javaServiceClientIdentifier + serviceVersion + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
+    public static final String IOTHUB_API_VERSION = "2019-03-30";
+    public static final String IOTHUB_API_VERSION_LIMITED_AVAILIBILITY = "2020-03-13";
 }
