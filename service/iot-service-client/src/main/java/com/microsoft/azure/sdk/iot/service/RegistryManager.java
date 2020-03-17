@@ -722,7 +722,7 @@ public class RegistryManager
      * Create a bulk export job.
      *
      * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
-     *                                This API also supports identity bases storage authentication, identity authentication
+     *                                This API also supports identity based storage authentication, identity authentication
      *                                support is currently available in limited regions. If a user wishes to try it out,
      *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
      *                                otherwise default key based authentication is used for storage
@@ -759,7 +759,7 @@ public class RegistryManager
     /**
      * Async wrapper for exportDevices() operation
      * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
-     *                                This API also supports identity bases storage authentication, identity authentication
+     *                                This API also supports identity based storage authentication, identity authentication
      *                                support is currently available in limited regions. If a user wishes to try it out,
      *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
      *                                otherwise default key based authentication is used for storage
@@ -866,7 +866,7 @@ public class RegistryManager
      * Create a bulk import job.
      *
      * @param importDevicesParameters A JobProperties object containing input parameters for import Devices job
-     *                                This API also supports identity bases storage authentication, identity authentication
+     *                                This API also supports identity based storage authentication, identity authentication
      *                                support is currently available in limited regions. If a user wishes to try it out,
      *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
      *                                otherwise default key based authentication is used for storage
@@ -904,7 +904,7 @@ public class RegistryManager
      * Async wrapper for importDevices() operation
      *
      * @param importParameters A JobProperties object containing input parameters for import Devices job
-     *                         This API also supports identity bases storage authentication, identity authentication
+     *                         This API also supports identity based storage authentication, identity authentication
      *                         support is currently available in limited regions. If a user wishes to try it out,
      *                         they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
      *                         otherwise default key based authentication is used for storage
