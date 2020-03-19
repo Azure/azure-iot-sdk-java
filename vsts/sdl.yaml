@@ -10,7 +10,7 @@ phases:
 
   condition: succeeded()
   queue:
-    name: sdl-java
+    name: cloud-hosted-sdl-java
     timeoutInMinutes: 60
   steps:
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
