@@ -135,10 +135,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
                 {
                     this.log.trace("MQTT connection will use X509 certificate based auth");
-
-                    this.webSocketQueryString = "";
-
-                    //X509 auth over websocket should not include the iothub-no-client-cert flag
                     this.iotHubUserPassword = null;
                 }
 
@@ -165,7 +161,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 if (this.config.isUseWebsocket())
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
-                    final String wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + this.webSocketQueryString;
+                    final String wsServerUri;
+                    if (this.webSocketQueryString == null)
+                    {
+                        wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH;
+                    }
+                    else
+                    {
+                        wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + this.webSocketQueryString;
+                    }
+
                     mqttConnection = new MqttConnection(wsServerUri,
                             clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext, this.config.getProxySettings());
                 }
