@@ -363,9 +363,8 @@ public class MqttIotHubConnectionTest
     public void websocketOpenHasNoQueryStringIfX509Auth(@Mocked final ProxySettings mockedProxySettings) throws IOException, TransportException
     {
         final String WS_RAW_PATH = "/$iothub/websocket";
-        final String WS_QUERY = "?iothub-no-client-cert=true";
         final String WS_SSLPrefix = "wss://";
-        final String serverUri = WS_SSLPrefix + iotHubHostName + WS_RAW_PATH + WS_QUERY;
+        final String serverUri = WS_SSLPrefix + iotHubHostName + WS_RAW_PATH;
 
         baseExpectations();
         openExpectations(mockedProxySettings);
