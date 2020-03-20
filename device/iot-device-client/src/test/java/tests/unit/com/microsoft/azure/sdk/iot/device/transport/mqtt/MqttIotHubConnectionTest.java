@@ -359,6 +359,50 @@ public class MqttIotHubConnectionTest
         };
     }
 
+    @Test
+    public void websocketOpenHasNoQueryStringIfX509Auth(@Mocked final ProxySettings mockedProxySettings) throws IOException, TransportException
+    {
+        final String WS_RAW_PATH = "/$iothub/websocket";
+        final String WS_QUERY = "?iothub-no-client-cert=true";
+        final String WS_SSLPrefix = "wss://";
+        final String serverUri = WS_SSLPrefix + iotHubHostName + WS_RAW_PATH + WS_QUERY;
+
+        baseExpectations();
+        openExpectations(mockedProxySettings);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                mockConfig.isUseWebsocket();
+                result = true;
+                mockConfig.getProxySettings();
+                result = mockedProxySettings;
+            }
+        };
+
+        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
+
+        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
+
+        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&"));
+
+        IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
+        IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
+        assertEquals(expectedState, actualState);
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, any, any, mockedProxySettings);
+                times = 1;
+            }
+        };
+    }
+
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established for any reason,
     // the function shall throw a TransportException.]
     @Test(expected = TransportException.class)
