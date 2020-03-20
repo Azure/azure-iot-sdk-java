@@ -367,9 +367,8 @@ public class MqttIotHubConnectionTest
         final String serverUri = WS_SSLPrefix + iotHubHostName + WS_RAW_PATH;
 
         baseExpectations();
-        openExpectations(mockedProxySettings);
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockConfig.getAuthenticationType();
@@ -378,6 +377,7 @@ public class MqttIotHubConnectionTest
                 result = true;
                 mockConfig.getProxySettings();
                 result = mockedProxySettings;
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, null, any, mockedProxySettings);
             }
         };
 
@@ -392,14 +392,6 @@ public class MqttIotHubConnectionTest
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
         assertEquals(expectedState, actualState);
-
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, any, any, mockedProxySettings);
-                times = 1;
-            }
-        };
     }
 
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established for any reason,
