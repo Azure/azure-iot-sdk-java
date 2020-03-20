@@ -130,22 +130,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 {
                     this.log.trace("MQTT connection will use sas token based auth");
                     this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
+                    this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
                 {
                     this.log.trace("MQTT connection will use X509 certificate based auth");
 
-                    this.iotHubUserPassword = null;
-                }
-
-                if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.X509_CERTIFICATE)
-                {
-                    //X509 auth websocket should not include the iothub-no-client-cert flag
-                    this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
-                }
-                else
-                {
                     this.webSocketQueryString = "";
+
+                    //X509 auth over websocket should not include the iothub-no-client-cert flag
+                    this.iotHubUserPassword = null;
                 }
 
                 //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
