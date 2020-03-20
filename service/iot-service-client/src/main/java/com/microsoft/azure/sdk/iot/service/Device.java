@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 
 /**
- * The Device class extends the Device class
+ * The Device class extends the BaseDevice class
  * implementing constructors and serialization functionality.
  */
 public class Device extends BaseDevice
