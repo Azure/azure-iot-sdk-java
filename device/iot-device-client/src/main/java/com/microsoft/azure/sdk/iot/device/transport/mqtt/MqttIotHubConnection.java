@@ -37,7 +37,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String WS_SSL_PREFIX = "wss://";
 
     private static final String WEBSOCKET_RAW_PATH = "/$iothub/websocket";
-    private static final String WEBSOCKET_QUERY = "?iothub-no-client-cert=true";
+    private static final String NO_CLIENT_CERT_QUERY_STRING = "?iothub-no-client-cert=true";
 
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
@@ -45,6 +45,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String API_VERSION = "?api-version=" + TransportUtils.IOTHUB_API_VERSION;
 
     private String connectionId;
+    private String webSocketQueryString;
 
     private IotHubListener listener;
 
@@ -129,17 +130,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 {
                     this.log.trace("MQTT connection will use sas token based auth");
                     this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
+                    this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
                 {
-                    if (this.config.isUseWebsocket())
-                    {
-                        //Codes_SRS_MQTTIOTHUBCONNECTION_34_027: [If this function is called while using websockets and x509 authentication, an UnsupportedOperationException shall be thrown.]
-                        throw new UnsupportedOperationException("X509 authentication is not supported over MQTT_WS");
-                    }
-
                     this.log.trace("MQTT connection will use X509 certificate based auth");
-
                     this.iotHubUserPassword = null;
                 }
 
@@ -166,7 +161,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 if (this.config.isUseWebsocket())
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
-                    final String wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + WEBSOCKET_QUERY ;
+                    final String wsServerUri;
+                    if (this.webSocketQueryString == null)
+                    {
+                        wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH;
+                    }
+                    else
+                    {
+                        wsServerUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + this.webSocketQueryString;
+                    }
+
                     mqttConnection = new MqttConnection(wsServerUri,
                             clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext, this.config.getProxySettings());
                 }
