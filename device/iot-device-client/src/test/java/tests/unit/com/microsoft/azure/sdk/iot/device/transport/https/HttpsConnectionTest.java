@@ -394,27 +394,21 @@ public class HttpsConnectionTest
     }
 
     //Tests_SRS_HTTPSCONNECTION_34_026: [If this object uses HTTP, this function shall throw an UnsupportedOperationException.]
-    @Test (expected = UnsupportedOperationException.class)
-    public void setSSLContextThrowsIfHttp(@Mocked final SSLContext mockedContext) throws IOException, TransportException
+    @Test (expected = IllegalArgumentException.class)
+    public void HttpsConnectionConstructorThrowsIfHttp(@Mocked final SSLContext mockedContext) throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.POST;
         final String field = "test-field";
         final String value = "test-value";
         final int timeout = 1;
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockUrl.getProtocol();
                 result = "http";
-                mockUrl.openConnection();
-                result = mockHttpURLConnection;
-                mockUrlConn.getRequestMethod();
-                result = httpsMethod.name();
             }
         };
         final HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
-
-        Deencapsulation.invoke(conn, "setSSLContext", mockedContext);
     }
 
 
@@ -426,15 +420,11 @@ public class HttpsConnectionTest
         final String field = "test-field";
         final String value = "test-value";
         final int timeout = 1;
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockUrl.getProtocol();
                 result = "https";
-                mockUrl.openConnection();
-                result = mockUrlConn;
-                mockUrlConn.getRequestMethod();
-                result = httpsMethod.name();
             }
         };
         final HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
@@ -448,7 +438,7 @@ public class HttpsConnectionTest
     {
         final HttpsMethod httpsMethod = HttpsMethod.GET;
         final byte[] body = { 1, 2 };
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 mockUrl.getProtocol();
