@@ -73,8 +73,8 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 			$Env:runProvisioningTests = "true"
 		}
 
-        # Helpers can be used in any test, so we must run every test
-		if ($line.toLower().Contains("iot-e2e-tests/common/helpers"))
+        # E2E common code can be used in any test, so we must run every test
+		if ($line.toLower().Contains("iot-e2e-tests/common/src/main/java/com/microsoft/azure/sdk/iot/common/helpers"))
         {
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
