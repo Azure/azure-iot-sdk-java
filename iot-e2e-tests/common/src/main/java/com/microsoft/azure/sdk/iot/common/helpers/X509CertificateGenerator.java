@@ -26,13 +26,13 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.fail;
 
 /**
- * Utility class for generating self signed certificates, and computing their thumprints
+ * Utility class for generating self signed certificates, and computing their thumbprints
  */
 public class X509CertificateGenerator
 {
     // subject name is the same as the issuer string because it is self signed.
     private static final String ISSUER_STRING = "C=US, O=Microsoft, L=Redmond, OU=Azure";
-    private static final String SIGNATURE_ALGORITHM = "SHA1WithRSA";
+    private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
     private static final String KEY_PAIR_ALGORITHM = "RSA";
 
     private final static String PRIVATE_KEY_HEADER = "-----BEGIN PRIVATE KEY-----\n";
@@ -134,7 +134,7 @@ public class X509CertificateGenerator
     private void generateCertificate(String commonName) throws CertificateException, NoSuchAlgorithmException, OperatorCreationException, SignatureException, NoSuchProviderException, InvalidKeyException
     {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(KEY_PAIR_ALGORITHM);
-        keyGen.initialize(1024, new SecureRandom());
+        keyGen.initialize(4096, new SecureRandom());
         KeyPair keypair = keyGen.generateKeyPair();
         this.x509Certificate = createX509CertificateFromKeyPair(keypair, commonName);
         this.x509Thumbprint = new String(Hex.encodeHex(DigestUtils.sha(x509Certificate.getEncoded())));
