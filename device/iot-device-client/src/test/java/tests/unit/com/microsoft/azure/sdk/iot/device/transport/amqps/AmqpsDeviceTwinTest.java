@@ -1170,10 +1170,10 @@ public class AmqpsDeviceTwinTest
         String deviceId = "deviceId";
         final String messageId = "messageId";
         final String to = "to";
-        final byte[] bytes = new byte[] {1, 2};
+        final byte[] bytes = new byte[] {50, 51};
         final Object messageContext = "context";
 
-        AmqpsMessage amqpsMessage = new AmqpsMessage();
+        final AmqpsMessage amqpsMessage = new AmqpsMessage();
         final Binary userId = new Binary(bytes);
         Section section = new Data(userId);
         amqpsMessage.setBody(section);

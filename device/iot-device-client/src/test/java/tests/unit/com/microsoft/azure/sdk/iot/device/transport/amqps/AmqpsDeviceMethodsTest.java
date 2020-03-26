@@ -521,7 +521,7 @@ public class AmqpsDeviceMethodsTest
         final String correlationId = "correlationId";
         final String messageId = "messageId";
         final String to = "to";
-        final byte[] bytes = new byte[] {1, 2};
+        final byte[] bytes = new byte[] {50,51};
         final Object messageContext = "context";
 
         AmqpsMessage amqpsMessage = new AmqpsMessage();
