@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Unit test for Message Property class.
@@ -59,19 +59,6 @@ public class MessagePropertyTest
         assertThat(testValue, is(expectedValue));
     }
     
-    @Test
-    public void constructorSavesPropertyValueTab()
-    {
-        final String name = "names";
-        final String value = "First Name"+"\t"+"\t"+"Last Name";
-        
-        MessageProperty property = new MessageProperty(name, value);
-        String testValue = property.getValue();
-
-        final String expectedValue = value;
-        assertThat(testValue, is(expectedValue));
-    }
-
     // Tests_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void constructorRejectsInvalidPropertyName()
@@ -170,5 +157,49 @@ public class MessagePropertyTest
 
         final boolean expectedIsValidAppProperty = false;
         assertThat(testIsValidAppProperty, is(expectedIsValidAppProperty));
+    }
+
+    @Test
+    public void isValidAppPropertyReturnsTrueForUnusualAppPropertyKey()
+    {
+        final String name = "Test1234!#$%&'*+-.^_`|~";
+        final String value = "test-value";
+
+        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
+
+        assertTrue(isValidProperty);
+    }
+
+    @Test
+    public void isValidAppPropertyReturnsTrueForUnusualAppPropertyValue()
+    {
+        final String name = "test-key";
+        final String value = "Test1234!#$%&'*+-.^_`|~";
+
+        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
+
+        assertTrue(isValidProperty);
+    }
+
+    @Test
+    public void isValidAppPropertyReturnsFalseForUnusualAppPropertyKey()
+    {
+        final String name = "Test1234 Test1234";
+        final String value = "test-value";
+
+        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
+
+        assertFalse(isValidProperty);
+    }
+
+    @Test
+    public void isValidAppPropertyReturnsFalseForUnusualAppPropertyValue()
+    {
+        final String name = "test-key";
+        final String value = "\"someQuotedValue\"";
+
+        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
+
+        assertFalse(isValidProperty);
     }
 }

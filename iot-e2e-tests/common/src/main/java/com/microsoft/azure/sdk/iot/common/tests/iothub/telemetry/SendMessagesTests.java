@@ -7,7 +7,10 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.telemetry;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.SendMessagesCommon;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -25,7 +28,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.microsoft.azure.sdk.iot.common.helpers.SasTokenGenerator.generateSasTokenForIotDevice;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
-import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 
 /**
@@ -65,6 +67,19 @@ public class SendMessagesTests extends SendMessagesCommon
         this.testInstance.setup();
 
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
+
+    @Test
+    public void sendMessagesWithUnusualApplicationProperties() throws Exception
+    {
+        this.testInstance.setup();
+        this.testInstance.client.open();
+        Message msg = new Message("asdf");
+
+        //All of these characters should be allowed within application properties
+        msg.setProperty("TestKey1234!#$%&'*+-^_`|~", "TestValue1234!#$%&'*+-^_`|~");
+        IotHubServicesCommon.sendMessageAndWaitForResponse(this.testInstance.client, new MessageAndResult(msg, IotHubStatusCode.OK_EMPTY), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.protocol);
+        this.testInstance.client.closeNow();
     }
 
     @Test

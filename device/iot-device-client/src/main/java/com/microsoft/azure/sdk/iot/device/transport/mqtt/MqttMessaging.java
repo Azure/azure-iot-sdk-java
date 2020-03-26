@@ -102,24 +102,24 @@ public class MqttMessaging extends Mqtt
         //Codes_SRS_MqttMessaging_34_032: [If the message has a content type, this method shall append that to publishTopic before publishing using the key name `$.ct`.]
         //Codes_SRS_MqttMessaging_34_032: [If the message has a content encoding, this method shall append that to publishTopic before publishing using the key name `$.ce`.]
         //Codes_SRS_MqttMessaging_34_034: [If the message has a creation time utc, this method shall append that to publishTopic before publishing using the key name `$.ctime`.]
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MESSAGE_ID, message.getMessageId());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CORRELATION_ID, message.getCorrelationId());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, USER_ID, message.getUserId());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, TO, message.getTo());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, OUTPUT_NAME, message.getOutputName());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_DEVICE_ID, message.getConnectionDeviceId());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_MODULE_ID, message.getConnectionModuleId());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_ENCODING, message.getContentEncoding());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_TYPE, message.getContentType());
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CREATION_TIME_UTC, message.getCreationTimeUTCString());
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MESSAGE_ID, message.getMessageId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CORRELATION_ID, message.getCorrelationId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, USER_ID, message.getUserId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, TO, message.getTo(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, OUTPUT_NAME, message.getOutputName(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_DEVICE_ID, message.getConnectionDeviceId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_MODULE_ID, message.getConnectionModuleId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_ENCODING, message.getContentEncoding(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_TYPE, message.getContentType(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CREATION_TIME_UTC, message.getCreationTimeUTCString(), false);
         if (message.isSecurityMessage())
         {
-            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MQTT_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE);
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MQTT_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE, false);
         }
 
         for (MessageProperty property : message.getProperties())
         {
-            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, property.getName(), property.getValue());
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, property.getName(), property.getValue(), true);
         }
 
         if (this.moduleId != null && !this.moduleId.isEmpty())
@@ -141,7 +141,7 @@ public class MqttMessaging extends Mqtt
      * @param propertyValue the property value (message id, correlation id, etc.)
      * @return true if a separator will be needed for any later properties appended on
      */
-    private boolean appendPropertyIfPresent(StringBuilder stringBuilder, boolean separatorNeeded, String propertyKey, String propertyValue) throws TransportException
+    private boolean appendPropertyIfPresent(StringBuilder stringBuilder, boolean separatorNeeded, String propertyKey, String propertyValue, boolean isApplicationProperty) throws TransportException
     {
         try
         {
@@ -152,7 +152,15 @@ public class MqttMessaging extends Mqtt
                     stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
                 }
 
-                stringBuilder.append(propertyKey);
+                if (isApplicationProperty)
+                {
+                    stringBuilder.append(URLEncoder.encode(propertyKey, StandardCharsets.UTF_8.name()));
+                }
+                else
+                {
+                    stringBuilder.append(propertyKey);
+                }
+
                 stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
                 stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()));
 
@@ -163,7 +171,7 @@ public class MqttMessaging extends Mqtt
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new TransportException("Could not utf-8 encode the mqtt property", e);
+            throw new TransportException("Could not utf-8 encode the property with name " + propertyKey + " and value " + propertyValue, e);
         }
     }
 }

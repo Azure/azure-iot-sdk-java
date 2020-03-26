@@ -31,6 +31,11 @@ public final class MessageProperty {
     public static final String IOTHUB_SECURITY_INTERFACE_ID = "iothub-interface-id";
     public static final String IOTHUB_SECURITY_INTERFACE_ID_VALUE = "urn:azureiot:Security:SecurityAgent:1";
 
+    //Note this list includes the characters for tab and space.
+    private static final String BANNED_NON_ALPHANUMERIC_CHARACTERS = "()<>@,;:\"\\[]?={} \t";
+    private static final int ASCII_LOWER_BOUND = 32;
+    private static final int ASCII_UPPER_BOUND = 127;
+
 
     static {
         HashSet<String> reservedPropertyNames = new HashSet<>();
@@ -89,7 +94,7 @@ public final class MessageProperty {
 
         // Codes_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(name)) {
-            String errMsg = String.format("%s is not a valid IoT Hub message property name. %n", name);
+            String errMsg = String.format("%s is not a valid IoT Hub message property name. Characters in property keys must fall within ASCII value range %d and %d but excluding the set %s", name, ASCII_LOWER_BOUND, ASCII_UPPER_BOUND, BANNED_NON_ALPHANUMERIC_CHARACTERS);
             throw new IllegalArgumentException(errMsg);
         }
 
@@ -102,7 +107,7 @@ public final class MessageProperty {
         // Codes_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
         if (!usesValidChars(value))
         {
-            String errMsg = String.format("%s is not a valid IoT Hub message property value.%n", value);
+            String errMsg = String.format("%s is not a valid IoT Hub message property value. Characters in property values must fall within ASCII value range %d and %d but excluding the set %s", value, ASCII_LOWER_BOUND, ASCII_UPPER_BOUND, BANNED_NON_ALPHANUMERIC_CHARACTERS);
             throw new IllegalArgumentException(errMsg);
         }
 
@@ -192,22 +197,23 @@ public final class MessageProperty {
         return propertyIsValid;
     }
 
-    /**
-     * Returns true if the string only uses US-ASCII 
-     *
-     * @param s the string.
-     *
-     * @return whether the string only uses US-ASCII 
-     */
     private static boolean usesValidChars(String s) {
-        boolean isValid = false;
-
-        if (s.matches("\\p{ASCII}*"))
+        for (char c : s.toCharArray())
         {
-            isValid = true;
+            //Range of characters includes US alphanumeric characters, as well as a few special characters like '+' and ','
+            // Any characters outside of this range are banned
+            if (!(c > ASCII_LOWER_BOUND && c < ASCII_UPPER_BOUND))
+            {
+                return false;
+            }
+
+            if (BANNED_NON_ALPHANUMERIC_CHARACTERS.indexOf(c) != -1)
+            {
+                return false;
+            }
         }
 
-        return isValid;
+        return true;
     }
 
     @SuppressWarnings("unused")
