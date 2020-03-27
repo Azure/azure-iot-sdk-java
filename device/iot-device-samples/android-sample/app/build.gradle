@@ -5,7 +5,7 @@ android {
 
     defaultConfig {
         applicationId "com.iothub.azure.microsoft.com.androidsample"
-        minSdkVersion 19
+        minSdkVersion 26
         targetSdkVersion 27
         multiDexEnabled true
         versionCode 1
@@ -44,7 +44,13 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // Remote binary dependency
-    api 'com.microsoft.azure.sdk.iot:iot-device-client:1.20.2'
+    api ('com.microsoft.azure.sdk.iot:iot-device-client:1.20.2') {
+        exclude module: 'slf4j-api'
+        exclude module:'azure-storage'
+    }
+    implementation 'org.slf4j:slf4j-android:1.7.29'
+    implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0'
+    implementation 'org.apache.commons:commons-lang3:3.6'
 }
 
 repositories {
