@@ -303,34 +303,6 @@ public class AmqpConnectionTest
     }
 
     @Test
-    public void onConnectionInitThrowOnOpenLinks() throws IOException, InterruptedException
-    {
-        AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedEvent.getConnection();
-                result = mockedConnection;
-
-                mockedConnection.session();
-                result = mockedSession;
-
-                mockedConnection.open();
-                mockedSession.open();
-
-                mockedProvisionOperations.openLinks(mockedSession);
-                result = new Exception();
-            }
-        };
-
-        // Act
-        amqpsConnection.onConnectionInit(mockedEvent);
-
-        //assert
-    }
-
-    @Test
     public void onConnectionInitSucceeds() throws IOException, InterruptedException
     {
         AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
@@ -408,25 +380,6 @@ public class AmqpConnectionTest
                 result = mockedLink;
 
                 mockedProvisionOperations.initLink(mockedLink);
-            }
-        };
-
-        // Act
-        amqpsConnection.onLinkInit(mockedEvent);
-
-        //assert
-    }
-
-    @Test
-    public void onLinkInitThrowsOnGetLink() throws IOException, InterruptedException
-    {
-        AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedEvent.getLink();
-                result = new Exception();
             }
         };
 
