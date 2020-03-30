@@ -382,6 +382,28 @@ public class ProvisioningAmqpOperationsTest
         //assert
     }
 
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void sendStatusMessageThrowsIfSendFails() throws Exception
+    {
+        //arrange
+        ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedAmqpConnection.setListener((AmqpListener)any);
+                mockedAmqpConnection.open();
+            }
+        };
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
+
+        setupSendReceiveMocks();
+
+        Deencapsulation.setField(provisioningAmqpOperations, "messageSendFailedExceptionMessage", "someError");
+
+        //act
+        provisioningAmqpOperations.sendStatusMessage(TEST_OPERATION_ID, mockedResponseCallback, null);
+    }
+
     // SRS_ProvisioningAmqpOperations_07_018: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
     @Test (expected = ProvisioningDeviceClientException.class)
     public void sendStatusMessageThrowsOnWaitLock() throws Exception
@@ -514,6 +536,33 @@ public class ProvisioningAmqpOperationsTest
 
         //assert
     }
+
+    @Test (expected = ProvisioningDeviceClientException.class)
+    public void sendRegisterMessageThrowsIfSendMessageFails() throws Exception
+    {
+        //arrange
+        ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
+        new NonStrictExpectations()
+        {
+            {
+                mockedAmqpConnection.setListener((AmqpListener)any);
+                mockedAmqpConnection.open();
+                mockedAmqpConnection.isConnected();
+                result = true;
+            }
+        };
+        provisioningAmqpOperations.open(TEST_REGISTRATION_ID, mockedSSLContext, null, false);
+
+        setupSendReceiveMocks();
+
+        Deencapsulation.setField(provisioningAmqpOperations, "messageSendFailedExceptionMessage", "someError");
+
+        //act
+        provisioningAmqpOperations.sendRegisterMessage(mockedResponseCallback, null, null);
+
+        //assert
+    }
+
 
     // SRS_ProvisioningAmqpOperations_07_013: [This method shall add the message to a message queue.]
     // SRS_ProvisioningAmqpOperations_07_014: [This method shall then Notify the receiveLock.]

@@ -38,6 +38,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     private Map<String, Object> messageAppProperties;
     private String idScope;
     private String hostName;
+    private String messageSendFailedExceptionMessage;
 
     /**
      * Constructor for ProvisioningAmqpOperation that handle the AMQP transport for provisioning
@@ -198,8 +199,8 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     }
 
     /**
-     * Sends the Status message to the Amqp Endpoint
-     * @param operationId The operation ID of this call?
+     * Sends the Status message to the Amqp Endpoint to check if the device has been provisioned yet or not
+     * @param operationId The operation ID of this call
      * @param responseCallback Callback that gets initiated when the function call is complete
      * @param callbackContext Callback context for the response call.
      * @throws ProvisioningDeviceClientException If sending status is unsuccessful for any reason.
@@ -226,12 +227,18 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             {
                 this.receiveLock.waitLock(MAX_WAIT_TO_SEND_MSG);
             }
+
+            if (this.messageSendFailedExceptionMessage != null)
+            {
+                throw new ProvisioningDeviceClientException("Failed to send amqp message to check provisioning status: " + messageSendFailedExceptionMessage);
+            }
+
             this.retrieveAmqpMessage(responseCallback, callbackContext);
         }
         catch (InterruptedException e)
         {
             // SRS_ProvisioningAmqpOperations_07_018: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
-            throw new ProvisioningDeviceClientException("Provisioning service failed to reply is alloted time.");
+            throw new ProvisioningDeviceClientException("Provisioning service failed to reply is allotted time.");
         }
     }
 
@@ -281,6 +288,12 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
             {
                 this.receiveLock.waitLock(MAX_WAIT_TO_SEND_MSG);
             }
+
+            if (this.messageSendFailedExceptionMessage != null)
+            {
+                throw new ProvisioningDeviceClientException("Failed to send amqp message to register device: " + messageSendFailedExceptionMessage);
+            }
+
             this.retrieveAmqpMessage(responseCallback, callbackContext);
         }
         catch (InterruptedException e)
@@ -331,6 +344,15 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         synchronized (this.receiveLock)
         {
             // SRS_ProvisioningAmqpOperations_07_014: [This method shall then Notify the receiveLock.]
+            this.receiveLock.notifyLock();
+        }
+    }
+
+    public void messageSendFailed(String exceptionMessage)
+    {
+        messageSendFailedExceptionMessage = exceptionMessage;
+        synchronized (this.receiveLock)
+        {
             this.receiveLock.notifyLock();
         }
     }
