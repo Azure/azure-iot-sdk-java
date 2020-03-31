@@ -173,7 +173,7 @@ public class DeviceTwin
          */
         TwinState twinState = new TwinState(device.getTagsMap(), device.getDesiredMap(), null);
 
-        // determine whether there is an explicit change in the etag. If there is, ensure updating the twinState and the request header before the update operation
+        // at this point, twinState does not have an eTag set. Therefore, add a if-match header with an etag that is either set explicitly by the user, or one that is already set on the device
         if (!Tools.isNullOrEmpty(device.getETag()))
         {
             twinState.setETag(device.getETag());
