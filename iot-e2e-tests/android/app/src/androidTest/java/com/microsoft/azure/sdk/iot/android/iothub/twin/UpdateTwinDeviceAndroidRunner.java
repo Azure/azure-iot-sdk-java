@@ -29,23 +29,19 @@ import java.util.Collection;
 public class UpdateTwinDeviceAndroidRunner extends UpdateTwinTests
 {
     @Rule
-    public Rerun count = new Rerun(3);
-
-    @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    public UpdateTwinDeviceAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
-    {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
-    }
-
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{0}_{1}_{2}")
+    @Parameterized.Parameters(name = "{0}")
     public static Collection inputsCommons() throws IOException, GeneralSecurityException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        return inputsCommon(ClientType.DEVICE_CLIENT);
+        return UpdateTwinTests.inputsCommon();
+    }
+
+    public UpdateTwinDeviceAndroidRunner(IotHubClientProtocol protocol)
+    {
+        super(protocol);
     }
 
     @After
