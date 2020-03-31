@@ -22,6 +22,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetr
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.concurrent.Callable;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_RECEIVED;
 
+@Slf4j
 public class RegisterTask implements Callable
 {
     private static int MAX_WAIT_FOR_REGISTRATION_RESPONSE = 90*1000; // 90 seconds
@@ -159,7 +161,7 @@ public class RegisterTask implements Callable
 
         String value = tokenScope.concat("\n" + String.valueOf(expiryTimeUTC));
         byte[] token = null;
-        if (securityProvider instanceof  SecurityProviderTpm)
+        if (securityProvider instanceof SecurityProviderTpm)
         {
             SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
             token = securityClientTpm.signWithIdentity(value.getBytes());
@@ -231,6 +233,8 @@ public class RegisterTask implements Callable
                 SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
                 //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger authenticateWithTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
                 ResponseData nonceResponseData = new ResponseData();
+
+                log.debug("Requesting service nonce for tpm authentication");
                 this.provisioningDeviceClientContract.requestNonceForTPM(requestData, responseCallback, nonceResponseData);
 
                 waitForResponse(nonceResponseData);
@@ -240,6 +244,7 @@ public class RegisterTask implements Callable
                     if (nonceResponseData.getResponseData() != null)
                     {
                         //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
+                        log.debug("Received service nonce, activating tpm identity key with it");
                         securityClientTpm.activateIdentityKey(nonceResponseData.getResponseData());
                     }
                     else
@@ -248,6 +253,7 @@ public class RegisterTask implements Callable
                         throw new ProvisioningDeviceClientAuthenticationException("Service did not send authentication key");
                     }
 
+                    log.debug("Authenticating with device provisioning service using the activated tpm identity key");
                     return authenticateWithSasToken(requestData);
                 }
                 else
@@ -287,11 +293,12 @@ public class RegisterTask implements Callable
             if (this.securityProvider instanceof SecurityProviderX509)
             {
                 RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, true, this.provisioningDeviceClientConfig.getPayload());
+                log.info("Authenticating with device provisioning service using x509 certificates");
                 return this.authenticateWithX509(requestData);
             }
-            else if (this.securityProvider instanceof SecurityProviderTpm )
+            else if (this.securityProvider instanceof SecurityProviderTpm)
             {
-                SecurityProviderTpm securityProviderTpm = (SecurityProviderTpm)securityProvider;
+                SecurityProviderTpm securityProviderTpm = (SecurityProviderTpm) securityProvider;
                 if (securityProviderTpm.getEndorsementKey() == null || securityProviderTpm.getStorageRootKey() == null)
                 {
                     throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
@@ -300,12 +307,14 @@ public class RegisterTask implements Callable
                 //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
                 RequestData requestData = new RequestData(securityProviderTpm.getEndorsementKey(), securityProviderTpm.getStorageRootKey(), securityProvider.getRegistrationId(), sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
+                log.info("Authenticating with device provisioning service using tpm");
                 return this.authenticateWithTPM(requestData);
             }
             else if (this.securityProvider instanceof SecurityProviderSymmetricKey)
             {
                 RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
+                log.info("Authenticating with device provisioning service using symmetric key");
                 return this.authenticateWithSasToken(requestData);
             }
             else
