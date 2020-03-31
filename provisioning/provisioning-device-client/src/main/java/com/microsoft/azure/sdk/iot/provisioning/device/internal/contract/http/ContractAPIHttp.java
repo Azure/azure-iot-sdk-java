@@ -23,12 +23,15 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.TpmRegist
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.RequestData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class ContractAPIHttp extends ProvisioningDeviceClientContract
 {
     private String idScope;
@@ -137,6 +140,9 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private HttpResponse sendRequest(HttpRequest request) throws ProvisioningDeviceHubException, IOException
     {
         HttpResponse response = request.send();
+
+        log.trace("Provisioning device client received http response with status {}", response.getStatus());
+
         ProvisioningDeviceClientExceptionManager.verifyHttpResponse(response);
         return response;
     }
@@ -211,7 +217,8 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 //SRS_ContractAPIHttp_25_008: [If service return a status as 404 then this method shall trigger the callback to the user with the response message.]
                 if (httpResponse.getStatus() == ACCEPTABLE_NONCE_HTTP_STATUS)
                 {
-                    TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(new String(e.getMessage()));
+                    String tpmRegistrationResultJson = new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8);
+                    TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(tpmRegistrationResultJson);
                     byte[] base64DecodedAuthKey = Base64.decodeBase64Local(registerResponseTPMParser.getAuthenticationKey().getBytes());
                     responseCallback.run(new ResponseData(base64DecodedAuthKey, ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
                     return;

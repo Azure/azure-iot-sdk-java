@@ -13,10 +13,12 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.Provisi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.device.AdditionalData;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 public class ProvisioningDeviceClient
 {
     private static final int MAX_THREADS_TO_RUN = 1;
@@ -98,6 +100,7 @@ public class ProvisioningDeviceClient
         this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
 
         //SRS_ProvisioningDeviceClient_25_010: [ This method shall start the executor with the ProvisioningTask. ]
+        log.debug("Starting provisioning thread...");
         ProvisioningTask provisioningTask = new ProvisioningTask(this.provisioningDeviceClientConfig, this.provisioningDeviceClientContract);
         executor.submit(provisioningTask);
     }
@@ -123,6 +126,7 @@ public class ProvisioningDeviceClient
         this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
 
         //SRS_ProvisioningDeviceClient_25_010: [ This method shall start the executor with the ProvisioningTask. ]
+        log.debug("Starting provisioning thread...");
         ProvisioningTask provisioningTask = new ProvisioningTask(this.provisioningDeviceClientConfig, this.provisioningDeviceClientContract);
         executor.submit(provisioningTask);
     }
