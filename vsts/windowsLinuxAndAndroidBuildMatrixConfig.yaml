@@ -257,6 +257,8 @@ jobs:
         ANDROID_TEST_GROUP_ID: TestGroup38
       TestGroup39:
         ANDROID_TEST_GROUP_ID: TestGroup39
+      TestGroup40:
+        ANDROID_TEST_GROUP_ID: TestGroup40
       
   displayName: Android Test
   dependsOn: AndroidBuild
