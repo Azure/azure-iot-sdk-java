@@ -537,6 +537,8 @@ public class DeviceTwinTest
                 result = testMap;
                 Deencapsulation.invoke(mockedDevice, "getTagsMap");
                 result = testMap;
+                Deencapsulation.invoke(mockedDevice, "getETag");
+                result = "abc";
                 new TwinState((TwinCollection)any, (TwinCollection)any, null);
                 result = mockedTwinState;
                 mockedTwinState.toJsonElement().toString();
@@ -556,7 +558,7 @@ public class DeviceTwinTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 5;
+                times = 6;
                 mockedHttpRequest.send();
                 times = 1;
             }

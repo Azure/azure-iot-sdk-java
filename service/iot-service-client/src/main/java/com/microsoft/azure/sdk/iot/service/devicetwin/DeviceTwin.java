@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.microsoft.azure.sdk.iot.deps.twin.*;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -22,6 +23,7 @@ public class DeviceTwin
 {
     private IotHubConnectionString iotHubConnectionString = null;
     private Integer requestId = 0;
+    private static final String CONDITION_KEY = "If-Match";
     private final long USE_DEFAULT_TIMEOUT = 0;
     private final int DEFAULT_PAGE_SIZE = 100;
 
@@ -170,6 +172,16 @@ public class DeviceTwin
         **Codes_SRS_DEVICETWIN_25_015: [** The function shall serialize the twin map by calling updateTwin Api on the twin object for the device provided by the user**]**
          */
         TwinState twinState = new TwinState(device.getTagsMap(), device.getDesiredMap(), null);
+
+        // determine whether there is an explicit change in the etag. If there is, ensure updating the twinState and the request header before the update operation
+        if (!Tools.isNullOrEmpty(device.getETag()))
+        {
+            twinState.setETag(device.getETag());
+            Map<String, String> queryHeaders = new HashMap<>();
+            queryHeaders.put(CONDITION_KEY, '"' + device.getETag() + '"');
+            DeviceOperations.setHeaders(queryHeaders);
+        }
+
         String twinJson = twinState.toJsonElement().toString();
 
         /*
