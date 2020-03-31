@@ -8,18 +8,14 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.twin;
 import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
-import com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient.ServiceClientTests;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubPreconditionFailedException;
-import org.junit.Test;
-import org.junit.runners.Parameterized;
 
+import org.junit.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -36,47 +32,18 @@ public class UpdateTwinTests
     private static final int TEMPERATURE_RANGE = 100;
     private static final int HUMIDITY_RANGE = 100;
 
-    public UpdateTwinTests(IotHubServiceClientProtocol protocol) {
-        this.testInstance = new ServiceClientITRunner(protocol);
-    }
-
-    private class ServiceClientITRunner {
-        private IotHubServiceClientProtocol protocol;
-        private String deviceId;
-
-        public ServiceClientITRunner(IotHubServiceClientProtocol protocol) {
-            this.protocol = protocol;
-            this.deviceId = deviceIdPrefix.concat("-" + UUID.randomUUID().toString());
-
-        }
-    }
-
-    private ServiceClientITRunner testInstance;
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection inputsCommon() throws IOException {
-        List inputs = Arrays.asList(
-                new Object[][]
-                        {
-                                {IotHubServiceClientProtocol.AMQPS},
-                                {IotHubServiceClientProtocol.AMQPS_WS}
-                        }
-        );
-
-        return inputs;
-    }
-
     @Test(expected = IotHubPreconditionFailedException.class)
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void UpdateTwin_WithMismatchingEtag_ExceptionThrown() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException {
         // setup a new device in IoT Hub
+        String deviceId = deviceIdPrefix.concat("-" + UUID.randomUUID().toString());
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        Device deviceAdded = Device.createFromId(testInstance.deviceId, null, null);
+        Device deviceAdded = Device.createFromId(deviceId, null, null);
         Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         // create the twin client and device
         DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-        DeviceTwinDevice deviceTwin = new DeviceTwinDevice(testInstance.deviceId);
+        DeviceTwinDevice deviceTwin = new DeviceTwinDevice(deviceId);
 
         // change the properties of the device without specifying an etag
         changeDesiredProperties(twinClient, deviceTwin, null);
@@ -84,7 +51,7 @@ public class UpdateTwinTests
         // change the properties of the device with speciying an etag that mismatches the cloud twin
         changeDesiredProperties(twinClient, deviceTwin, "XXXXXXXXXXXX");
 
-        registryManager.removeDevice(testInstance.deviceId);
+        registryManager.removeDevice(deviceId);
     }
 
     private static void changeDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device, String etag) throws IOException, IotHubException {

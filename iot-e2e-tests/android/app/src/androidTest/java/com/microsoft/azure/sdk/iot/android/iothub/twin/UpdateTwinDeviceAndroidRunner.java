@@ -31,17 +31,10 @@ public class UpdateTwinDeviceAndroidRunner extends UpdateTwinTests
     @Rule
     public ReportHelper reportHelper = Factory.getReportHelper();
 
-    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection inputsCommons() throws IOException, GeneralSecurityException
+    @BeforeClass
+    public static void setUp() throws IOException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        return UpdateTwinTests.inputsCommon();
-    }
-
-    public UpdateTwinDeviceAndroidRunner(IotHubClientProtocol protocol)
-    {
-        super(protocol);
     }
 
     @After
