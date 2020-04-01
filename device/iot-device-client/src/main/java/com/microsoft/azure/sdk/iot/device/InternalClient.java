@@ -24,7 +24,10 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 @Slf4j
 public class InternalClient
 {
+    // SET_MINIMUM_POLLING_INTERVAL is used for setting the interval for https polling task.
     static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
+    // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP receive task.
+    static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
@@ -386,22 +389,16 @@ public class InternalClient
             switch (optionName)
             {
                 case SET_MINIMUM_POLLING_INTERVAL:
+                case SET_RECEIVE_INTERVAL:
                 {
                     if (this.deviceIO.isOpen())
                     {
-                        throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
-                                "only works when the transport is closed");
+                        throw new IllegalStateException("setOption " + optionName +
+                                " only works when the transport is closed");
                     }
                     else
                     {
-                        if (this.deviceIO.getProtocol() == IotHubClientProtocol.HTTPS)
-                        {
-                            setOption_SetMinimumPollingInterval(value);
-                        }
-                        else
-                        {
-                            throw new IllegalArgumentException("optionName is unknown = " + optionName + " for " + this.deviceIO.getProtocol().toString());
-                        }
+                        setOption_SetMinimumPollingInterval(value);
                     }
 
                     break;
