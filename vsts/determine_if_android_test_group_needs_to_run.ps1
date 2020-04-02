@@ -8,6 +8,19 @@ Write-Host "##vso[task.setvariable variable=task.android.needToRunTestGroup]no"
 # "TestGroup12", for instance
 $testGroupString = $env:TEST_GROUP_ID
 
+$isBasicTierHub = $env:IS_BASIC_TIER_HUB
+
+# Due to resource limitations on the SDK team, we can't afford the time it would take to run Android tests on standard tier iothubs
+# and basic tier iothubs, so we will skip testing basic tier hubs for now
+if ($isBasicTierHub.toLower() -eq "true")
+{
+    Write-Host "Currently skipping all Android testing on basic tier hubs"
+    Write-Host "##vso[task.setvariable variable=task.android.needToRunTestGroup]no"
+
+    # No more need to continue, basic tier hub testing is skipped for Android for now
+    exit 0
+}
+
 $testGroupImportPattern = $testGroupString + ";"
 $testGroupAnnotationPattern = "@" + $testGroupString
 
