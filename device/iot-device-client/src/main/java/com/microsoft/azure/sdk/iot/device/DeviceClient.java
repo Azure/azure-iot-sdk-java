@@ -547,8 +547,8 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
-     *	      - <b>SetReceiveInterval</b> - this option is applicable to all protocols
-     *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
+     *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
+     *        in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
      *        in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
      *        between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *	    - <b>SetCertificatePath</b> - this option is applicable only
