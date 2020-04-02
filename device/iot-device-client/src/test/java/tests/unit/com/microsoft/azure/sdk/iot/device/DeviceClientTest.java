@@ -626,29 +626,37 @@ public class DeviceClientTest
         client.setOption("thisIsNotAHandledOption", someMilliseconds);
     }
 
-    //Tests_SRS_DEVICECLIENT_02_017: [Available only for HTTP.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setOptionMinimumPollingIntervalWithAMQPfails()
+    //Tests_SRS_DEVICECLIENT_02_017: [Available for all protocols]
+    @Test
+    public void setOptionSetReceiveIntervalWithMQTTsucceeds()
             throws IOException, URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
                 + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        long someMilliseconds = 4;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        final long someMilliseconds = 4L;
         new NonStrictExpectations()
         {
             {
                 mockDeviceIO.isOpen();
                 result = false;
                 mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.AMQPS;
+                result = IotHubClientProtocol.MQTT;
             }
         };
         DeviceClient client = new DeviceClient(connString, protocol);
 
         // act
-        client.setOption("SetMinimumPollingInterval", someMilliseconds);
+        client.setOption("SetReceiveInterval", someMilliseconds);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockDeviceIO.setReceivePeriodInMilliseconds(someMilliseconds);
+            }
+        };
     }
 
     //Tests_SRS_DEVICECLIENT_02_018: [Value needs to have type long].
@@ -1483,20 +1491,6 @@ public class DeviceClientTest
 
         // act
         client.setOption("SetSendInterval", "thisIsNotALong");
-    }
-
-    // Tests_SRS_DEVICECLIENT_12_023: [If the client configured to use TransportClient the SetMinimumPollingInterval shall throw IOException.]
-    @Test (expected = IllegalStateException.class)
-    public void setOptionWithTransportClientThrowsSetMinimumPollingInterval()
-            throws URISyntaxException
-    {
-        // arrange
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        DeviceClient client = new DeviceClient(connString, mockTransportClient);
-
-        // act
-        client.setOption("SetMinimumPollingInterval", "thisIsNotALong");
     }
 
     //Tests_SRS_DEVICECLIENT_34_065: [""SetSASTokenExpiryTime" if this option is called when not using sas token authentication, an IllegalStateException shall be thrown.*]

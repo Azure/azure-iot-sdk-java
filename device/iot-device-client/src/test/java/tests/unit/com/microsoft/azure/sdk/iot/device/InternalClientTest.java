@@ -1853,15 +1853,15 @@ public class InternalClientTest
     }
 
     //Tests_SRS_INTERNALCLIENT_02_017: [Available only for HTTP.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setOptionMinimumPollingIntervalWithAMQPfails()
+    @Test
+    public void setOptionSetReceiveIntervalWithAMQPsucceeds()
             throws IOException, URISyntaxException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
-        long someMilliseconds = 4;
+        final long someMilliseconds = 4L;
         new NonStrictExpectations()
         {
             {
@@ -1874,7 +1874,15 @@ public class InternalClientTest
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
 
         // act
-        client.setOption("SetMinimumPollingInterval", someMilliseconds);
+        client.setOption("SetReceiveInterval", someMilliseconds);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockDeviceIO.setReceivePeriodInMilliseconds(someMilliseconds);
+            }
+        };
     }
 
     //Tests_SRS_INTERNALCLIENT_02_018: [Value needs to have type long].
