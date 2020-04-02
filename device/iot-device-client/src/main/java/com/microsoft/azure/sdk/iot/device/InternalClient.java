@@ -24,9 +24,9 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 @Slf4j
 public class InternalClient
 {
-    // SET_MINIMUM_POLLING_INTERVAL is used for setting the interval for https polling task.
+    // SET_MINIMUM_POLLING_INTERVAL is used for setting the interval for https message polling.
     static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
-    // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP receive task.
+    // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
     static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
@@ -356,6 +356,10 @@ public class InternalClient
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
+     *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
+     *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
+     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods between
+     *	      spawning up threads that would read a message off of the connection and invoking the message callback.
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
