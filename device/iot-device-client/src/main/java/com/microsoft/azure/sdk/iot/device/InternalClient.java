@@ -358,8 +358,8 @@ public class InternalClient
      *	      is expected to be of type {@code long}.
      *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
      *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
-     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods between
-     *	      spawning up threads that would read a message off of the connection and invoking the message callback.
+     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
+     *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
