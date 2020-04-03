@@ -547,6 +547,10 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
+     *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
+     *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
+     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
+     *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
@@ -580,13 +584,8 @@ public final class DeviceClient extends InternalClient implements Closeable
         {
             // Codes_SRS_DEVICECLIENT_02_016: ["SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.]
             case SET_MINIMUM_POLLING_INTERVAL:
+            case SET_RECEIVE_INTERVAL:
             {
-                // Codes_SRS_DEVICECLIENT_12_023: [If the client configured to use TransportClient the SetMinimumPollingInterval shall throw IOException.]
-                if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
-                {
-                    throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
-                            "only works with HTTP protocol");
-                }
                 break;
             }
             // Codes_SRS_DEVICECLIENT_21_040: ["SetSendInterval" - time in milliseconds between 2 consecutive message sends.]

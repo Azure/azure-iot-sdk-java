@@ -24,7 +24,10 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 @Slf4j
 public class InternalClient
 {
+    // SET_MINIMUM_POLLING_INTERVAL is used for setting the interval for https message polling.
     static final String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
+    // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
+    static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
@@ -353,6 +356,10 @@ public class InternalClient
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
+     *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
+     *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
+     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
+     *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
@@ -386,22 +393,16 @@ public class InternalClient
             switch (optionName)
             {
                 case SET_MINIMUM_POLLING_INTERVAL:
+                case SET_RECEIVE_INTERVAL:
                 {
                     if (this.deviceIO.isOpen())
                     {
-                        throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
-                                "only works when the transport is closed");
+                        throw new IllegalStateException("setOption " + optionName +
+                                " only works when the transport is closed");
                     }
                     else
                     {
-                        if (this.deviceIO.getProtocol() == IotHubClientProtocol.HTTPS)
-                        {
-                            setOption_SetMinimumPollingInterval(value);
-                        }
-                        else
-                        {
-                            throw new IllegalArgumentException("optionName is unknown = " + optionName + " for " + this.deviceIO.getProtocol().toString());
-                        }
+                        setOption_SetMinimumPollingInterval(value);
                     }
 
                     break;
