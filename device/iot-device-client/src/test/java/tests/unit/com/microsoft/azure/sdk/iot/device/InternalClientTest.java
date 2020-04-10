@@ -2152,6 +2152,66 @@ public class InternalClientTest
         };
     }
 
+    @Test
+    public void setOptionSetConnectTimeoutSucceeds()
+    {
+        // arrange
+        new Expectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.HTTPS;
+            }
+        };
+
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        final int connectTimeout = 60;
+
+        // act
+        client.setOption("SetHttpsConnectTimeout", connectTimeout);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockConfig.setHttpsConnectTimeout(connectTimeout);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void setOptionSetReadTimeoutSucceeds()
+    {
+        // arrange
+        new Expectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.HTTPS;
+            }
+        };
+
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        final int connectTimeout = 60;
+
+        // act
+        client.setOption("SetHttpsReadTimeout", connectTimeout);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockConfig.setHttpsReadTimeout(connectTimeout);
+                times = 1;
+            }
+        };
+    }
+
     /*Tests_SRS_INTERNALCLIENT_25_024: ["SetSASTokenExpiryTime" shall restart the transport
                                     1. If the device currently uses device key and
                                     2. If transport is already open

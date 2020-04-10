@@ -318,13 +318,44 @@ public class HttpsConnectionTest
         };
         HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
 
-        conn.setReadTimeoutMillis(timeout);
+        conn.setReadTimeout(timeout);
 
         final int expectedTimeout = timeout;
         new Verifications()
         {
             {
                 mockUrl.openConnection().setReadTimeout(expectedTimeout);
+            }
+        };
+    }
+
+    @Test
+    public void setConnectTimeoutSetsConnectTimeout() throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final String field = "test-field";
+        final String value = "test-value";
+        final int timeout = 1;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+            }
+        };
+        HttpsConnection conn = new HttpsConnection(mockUrl, httpsMethod);
+
+        conn.setConnectTimeout(timeout);
+
+        final int expectedTimeout = timeout;
+        new Verifications()
+        {
+            {
+                mockUrl.openConnection().setConnectTimeout(expectedTimeout);
             }
         };
     }

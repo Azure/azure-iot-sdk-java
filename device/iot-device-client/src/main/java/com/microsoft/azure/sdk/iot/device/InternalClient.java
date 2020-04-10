@@ -33,6 +33,9 @@ public class InternalClient
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
 
+    static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
+    static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
+
     DeviceClientConfig config;
     DeviceIO deviceIO;
 
@@ -356,20 +359,33 @@ public class InternalClient
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
+     *
      *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
      *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
+     *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
      *	      The value is expected to be of type {@code String}.
+     *
      *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
      *         AMQP/MQTT. This option specifies the interval in seconds after which
      *         SASToken expires. If the transport is already open then setting this
      *         option will restart the transport with the updated expiry time, and
      *         will use that expiry time length for all subsequently generated sas tokens.
      *         The value is expected to be of type {@code long}.
+     *
+     *      - <b>SetHttpsReadTimeout</b> - this option is applicable for HTTPS.
+     *         This option specifies the read timeout in milliseconds per https request
+     *         made by this client. By default, this value is 4 minutes.
+     *         The value is expected to be of type {@code int}.
+     *
+     *      - <b>SetHttpsConnectTimeout</b> - this option is applicable for HTTPS.
+     *         This option specifies the connect timeout in milliseconds per https request
+     *         made by this client. By default, this value is 0 (no connect timeout).
+     *         The value is expected to be of type {@code int}.
      *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
@@ -452,6 +468,16 @@ public class InternalClient
                 case SET_SAS_TOKEN_EXPIRY_TIME:
                 {
                     setOption_SetSASTokenExpiryTime(value);
+                    break;
+                }
+                case SET_HTTPS_CONNECT_TIMEOUT:
+                {
+                    setOption_SetHttpsConnectTimeout(value);
+                    break;
+                }
+                case SET_HTTPS_READ_TIMEOUT:
+                {
+                    setOption_SetHttpsReadTimeout(value);
                     break;
                 }
                 default:
@@ -654,6 +680,46 @@ public class InternalClient
         if (value != null)
         {
             this.config.getAuthenticationProvider().setPathToIotHubTrustedCert((String) value);
+        }
+    }
+
+    void setOption_SetHttpsConnectTimeout(Object value)
+    {
+        if (value != null)
+        {
+            if (this.config.getProtocol() != HTTPS)
+            {
+                throw new UnsupportedOperationException("Cannot set the https connect timeout when using protocol " + this.config.getProtocol());
+            }
+
+            if (value instanceof Integer)
+            {
+                this.config.setHttpsConnectTimeout((int) value);
+            }
+            else
+            {
+                throw new IllegalArgumentException("value is not int = " + value);
+            }
+        }
+    }
+
+    void setOption_SetHttpsReadTimeout(Object value)
+    {
+        if (value != null)
+        {
+            if (this.config.getProtocol() != HTTPS)
+            {
+                throw new UnsupportedOperationException("Cannot set the https read timeout when using protocol " + this.config.getProtocol());
+            }
+
+            if (value instanceof Integer)
+            {
+                this.config.setHttpsReadTimeout((int) value);
+            }
+            else
+            {
+                throw new IllegalArgumentException("value is not int = " + value);
+            }
         }
     }
 

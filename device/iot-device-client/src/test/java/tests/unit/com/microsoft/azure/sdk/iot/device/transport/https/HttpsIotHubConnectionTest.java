@@ -228,7 +228,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getReadTimeoutMillis();
+                mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
@@ -243,7 +243,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockRequest.setReadTimeoutMillis(expectedReadTimeoutMillis);
+                mockRequest.setReadTimeout(expectedReadTimeoutMillis);
             }
         };
     }
@@ -655,7 +655,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getReadTimeoutMillis();
+                mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
             }
         };
@@ -667,7 +667,33 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockRequest.setReadTimeoutMillis(expectedReadTimeoutMillis);
+                mockRequest.setReadTimeout(expectedReadTimeoutMillis);
+            }
+        };
+    }
+
+    @Test
+    public void sendHttpsMessageSetsConnectTimeout(@Mocked final IotHubUri mockUri) throws TransportException
+    {
+        final int readTimeoutMillis = 10;
+        final String uriPath = "/files";
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getHttpsConnectTimeout();
+                result = readTimeoutMillis;
+            }
+        };
+
+        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
+        conn.sendHttpsMessage(mockMsg, httpsMethod, uriPath, new HashMap<String, String>());
+
+        final int expectedReadTimeoutMillis = readTimeoutMillis;
+        new Verifications()
+        {
+            {
+                mockRequest.setConnectTimeout(expectedReadTimeoutMillis);
             }
         };
     }
@@ -935,7 +961,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getReadTimeoutMillis();
+                mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
             }
         };
@@ -947,7 +973,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockRequest.setReadTimeoutMillis(expectedReadTimeoutMillis);
+                mockRequest.setReadTimeout(expectedReadTimeoutMillis);
             }
         };
     }
@@ -960,7 +986,7 @@ public class HttpsIotHubConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockConfig.getReadTimeoutMillis();
+                mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
                 mockConfig.getProxySettings();
                 result = mockProxySettings;
@@ -1627,7 +1653,7 @@ public class HttpsIotHubConnectionTest
                 result = IotHubStatusCode.OK_EMPTY;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
-                mockConfig.getReadTimeoutMillis();
+                mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
             }
         };
@@ -1641,7 +1667,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockRequest.setReadTimeoutMillis(expectedReadTimeoutMillis);
+                mockRequest.setReadTimeout(expectedReadTimeoutMillis);
             }
         };
     }
@@ -1746,7 +1772,7 @@ public class HttpsIotHubConnectionTest
                 result = IotHubStatusCode.OK_EMPTY;
                 mockResponse.getHeaderField(withMatch("(?i)etag"));
                 result = eTag;
-                mockConfig.getReadTimeoutMillis();
+                mockConfig.getHttpsReadTimeout();
                 result = readTimeoutMillis;
                 mockConfig.getSasTokenAuthentication().getSSLContext();
                 result = mockedContext;
