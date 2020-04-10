@@ -547,20 +547,33 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
+     *
      *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
      *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
+     *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
      *	      The value is expected to be of type {@code String}.
+     *
      *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
      *         AMQP/MQTT. This option specifies the interval in seconds after which
      *         SASToken expires. If the transport is already open then setting this
      *         option will restart the transport with the updated expiry time, and
      *         will use that expiry time length for all subsequently generated sas tokens.
      *         The value is expected to be of type {@code long}.
+     *
+     *      - <b>SetHttpsReadTimeout</b> - this option is applicable for HTTPS.
+     *         This option specifies the read timeout in milliseconds per https request
+     *         made by this client. By default, this value is 4 minutes.
+     *         The value is expected to be of type {@code int}.
+     *
+     *      - <b>SetHttpsConnectTimeout</b> - this option is applicable for HTTPS.
+     *         This option specifies the connect timeout in milliseconds per https request
+     *         made by this client. By default, this value is 0 (no connect timeout).
+     *         The value is expected to be of type {@code int}.
      *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value

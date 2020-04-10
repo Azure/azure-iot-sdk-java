@@ -513,9 +513,9 @@ public class DeviceClientConfigTest
         assertThat(testContextDM, is(expectedDMContext));
         assertEquals(config.getDeviceMethodsMessageCallback(), mockCallback);
     }
-    // Tests_SRS_DEVICECLIENTCONFIG_11_012: [The function shall return 240000ms.]
+
     @Test
-    public void getReadTimeoutMillisReturnsConstant() throws URISyntaxException, IOException
+    public void getReadTimeoutMillis()
     {
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
@@ -530,10 +530,42 @@ public class DeviceClientConfigTest
                         sharedAccessToken);
 
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString);
-        int testReadTimeoutMillis = config.getReadTimeoutMillis();
+        int testReadTimeoutMillis = config.getHttpsReadTimeout();
 
-        final int expectedReadTimeoutMillis = 240000;
-        assertThat(testReadTimeoutMillis, is(expectedReadTimeoutMillis));
+        final int expectedDefaultReadTimeoutMillis = 240000;
+        assertThat(testReadTimeoutMillis, is(expectedDefaultReadTimeoutMillis));
+
+        int newValue = 444;
+        config.setHttpsReadTimeout(newValue);
+
+        assertThat(config.getHttpsReadTimeout(), is(newValue));
+    }
+
+    @Test
+    public void getConnectTimeoutMillis()
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+        final IotHubConnectionString iotHubConnectionString =
+                Deencapsulation.newInstance(IotHubConnectionString.class,
+                        new Class[] {String.class, String.class, String.class, String.class},
+                        iotHubHostname,
+                        deviceId,
+                        deviceKey,
+                        sharedAccessToken);
+
+        DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, iotHubConnectionString);
+        int testConnectTimeoutMillis = config.getHttpsConnectTimeout();
+
+        final int expectedDefaultConnectTimeoutMillis = 0;
+        assertThat(testConnectTimeoutMillis, is(expectedDefaultConnectTimeoutMillis));
+
+        int newValue = 444;
+        config.setHttpsConnectTimeout(newValue);
+
+        assertThat(config.getHttpsConnectTimeout(), is(newValue));
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_25_038: [The function shall save useWebsocket.]

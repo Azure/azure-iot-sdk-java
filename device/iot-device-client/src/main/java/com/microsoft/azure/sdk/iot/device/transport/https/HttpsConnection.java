@@ -182,10 +182,19 @@ public class HttpsConnection
      *
      * @param timeout the read timeout.
      */
-    public void setReadTimeoutMillis(int timeout)
+    public void setReadTimeout(int timeout)
     {
         // Codes_SRS_HTTPSCONNECTION_11_023: [The function shall set the read timeout to the given value.]
         this.connection.setReadTimeout(timeout);
+    }
+
+    /**
+     * Sets the connect timeout in milliseconds.
+     * @param timeout the connect timeout in milliseconds.
+     */
+    public void setConnectTimeout(int timeout)
+    {
+        this.connection.setConnectTimeout(timeout);
     }
 
     /**
