@@ -136,7 +136,7 @@ Open a command prompt and use the following commands:
 	cd azure-iot-sdk-java/device
 	mvn install
 ```
-The compiled JAR file with all dependencies bundled in can then be found at:
+The compiled JAR file can then be found at:
 ```
 {IoT SDK for Java root}/device/iot-device-client/target/iot-device-client-{version}.jar
 ```
