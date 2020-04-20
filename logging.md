@@ -15,7 +15,7 @@ specify what package's logs will be captured, and at what log level. An example 
 file can be seen in a device client sample [here](device/iot-device-samples/send-event/src/main/resources/log4j.properties)
 
 Note that the log4j.properties file has an opt-in policy for collecting logs. Packages to collect
-logs from must be explicitly specified in the properties file. Specified packages will include the logs
+logs from must be specified in the properties file. Specified packages will include the logs
 of any subpackages, but do not include the logs of their dependencies. As an example, adding the package 
 ```com.microsoft.azure.sdk.iot.service``` will collect logs from classes like ```com.microsoft.azure.sdk.iot.service.ServiceClient```, 
 and will collect logs for classes like ```com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler``` but will not
