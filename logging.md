@@ -1,7 +1,7 @@
 ## Azure IoT SDK Logging
 
 The Azure IoT SDK uses the [SLF4j](http://www.slf4j.org/faq.html) logging facade. In order to capture the SDK's logs, 
-you will need to provide a consumer for this logging facade. As an example, the samples in this repo use
+you will need to provide a consumer for this logging facade. As an example, the sample projects in this repo use
 the library org.slf4j.slf4j-log4j12
       
         <dependency>
