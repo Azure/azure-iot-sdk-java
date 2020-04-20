@@ -31,7 +31,7 @@ log4j.logger.com.microsoft.azure.sdk.iot.provisioning.service = DEBUG
 log4j.logger.com.microsoft.azure.sdk.iot.provisioning.security = DEBUG 
 ```
 
-or for simplicity
+Or for simplicity:
 ```
 log4j.logger.com.microsoft.azure.sdk.iot = DEBUG 
 ```
