@@ -10,7 +10,7 @@ the library org.slf4j.slf4j-log4j12
             <version>1.7.29</version>
         </dependency>
 
-With the above library, you can add log4j.properties files into your code's resources folder that
+Alongside the above dependency, you need to add log4j.properties files into your code's resources folder that
 specify what package's logs will be captured, and at what log level. An example log4j.properties
 file can be seen in a device client sample [here](device/iot-device-samples/send-event/src/main/resources/log4j.properties)
 
