@@ -14,7 +14,7 @@ With the above library, you can add log4j.properties files into your code's reso
 specify what package's logs will be captured, and at what log level. An example log4j.properties
 file can be seen in a device client sample [here](device/iot-device-samples/send-event/src/main/resources/log4j.properties)
 
-Note that the log4j.properties file has an opt-in policy for collecting logs. Packages to collect
+Note that the log4j.properties file requires you to explicitly choose which packages to collect logs from. Packages to collect
 logs from must be specified in the properties file. Specified packages will include the logs
 of any subpackages, but do not include the logs of their dependencies. As an example, adding the package 
 ```com.microsoft.azure.sdk.iot.service``` will collect logs from classes like ```com.microsoft.azure.sdk.iot.service.ServiceClient```, 
