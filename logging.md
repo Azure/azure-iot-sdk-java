@@ -36,7 +36,18 @@ or for simplicity
 log4j.logger.com.microsoft.azure.sdk.iot = DEBUG 
 ```
 
-Another notable logging consumer that works with SLF4j is [logback](http://logback.qos.ch/)
+This SDK does print logs at TRACE, DEBUG, INFO, WARN, and ERROR levels, and your log4j.properties file
+allows you to choose these levels for each package. For example, to get trace level logs in the deps package,
+but info level logs in the device and service packages, your log4j.properties file would include
+
+```
+log4j.logger.com.microsoft.azure.sdk.iot.device = INFO 
+log4j.logger.com.microsoft.azure.sdk.iot.service = INFO 
+log4j.logger.com.microsoft.azure.sdk.iot.deps = TRACE 
+```
+
+Another notable logging consumer that works with SLF4j is [logback](http://logback.qos.ch/). For more information on 
+using logback with SLF4j, see [this tutorial](https://mkyong.com/logging/slf4j-logback-tutorial/)
 
 You can also make your existing logging framework compatible with SLF4j as documented [here](http://www.slf4j.org/faq.html#slf4j_compatible)
 
