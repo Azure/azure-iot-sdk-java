@@ -97,10 +97,13 @@ This repository contains [provisioning service client SDK](./provisioning/provis
 | Query enrollments                                  | :heavy_check_mark: | Programmatically query registration states with the service SDK.  Please visit the [samples folder](./provisioning/provisioning-samples/) to learn more about this feature.                                                                            |
 
 ## Samples
-Whithin the repository, you can find various types of simple samples that can help you get started.
+Within the repository, you can find various types of simple samples that can help you get started.
 * [Device SDK Samples](./device/iot-device-samples/)
 * [Service SDK Samples](./service/iot-service-samples/)
 * [Provisioning SDK Samples](./provisioning/provisioning-samples/)
+
+## Logging
+In order to learn more about logging within this SDK and how to capture its logs, see [here](./logging.md)
 
 ## Contribution, feedback and issues
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
