@@ -598,6 +598,8 @@ public final class DeviceClient extends InternalClient implements Closeable
             // Codes_SRS_DEVICECLIENT_02_016: ["SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.]
             case SET_MINIMUM_POLLING_INTERVAL:
             case SET_RECEIVE_INTERVAL:
+            case SET_HTTPS_CONNECT_TIMEOUT:
+            case SET_HTTPS_READ_TIMEOUT:
             {
                 break;
             }
