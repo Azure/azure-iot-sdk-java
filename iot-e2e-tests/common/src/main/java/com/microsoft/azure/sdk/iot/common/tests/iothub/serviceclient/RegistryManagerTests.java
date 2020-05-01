@@ -47,7 +47,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
 
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
-    protected static int testProxyPort = 8899;
+    protected static int testProxyPort = 8879;
     
     private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
     
@@ -119,11 +119,11 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     @Test (timeout=MAX_TEST_MILLISECONDS)
     public void deviceLifecycleWithProxy() throws Exception
     {
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         testInstance.registryManager.setProxy(testProxy);
 
         //-Create-//
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceAdded = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
@@ -460,16 +460,16 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("Security scopes did not match", hostName), deviceRetrieved.getScope(), edgeDevice.getScope());
     }
     
-    private void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException, InterruptedException
+    private static void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException, InterruptedException
     {
         try
         {
-            Tools.getDeviceWithRetry(testInstance.registryManager, deviceId);
+            Tools.getDeviceWithRetry(registryManager, deviceId);
 
             //if no exception yet, identity exists so it can be deleted
             try
             {
-                testInstance.registryManager.removeDevice(deviceId);
+                registryManager.removeDevice(deviceId);
             }
             catch (IotHubException | IOException e)
             {
@@ -481,16 +481,16 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         }
     }
 
-    private void deleteModuleIfItExistsAlready(RegistryManager registryManager, String deviceId, String moduleId) throws IOException, InterruptedException
+    private static void deleteModuleIfItExistsAlready(RegistryManager registryManager, String deviceId, String moduleId) throws IOException, InterruptedException
     {
         try
         {
-            Tools.getModuleWithRetry(testInstance.registryManager, deviceId, moduleId);
+            Tools.getModuleWithRetry(registryManager, deviceId, moduleId);
 
             //if no exception yet, identity exists so it can be deleted
             try
             {
-                testInstance.registryManager.removeModule(deviceId, moduleId);
+                registryManager.removeModule(deviceId, moduleId);
             }
             catch (IotHubException | IOException e)
             {
@@ -502,11 +502,11 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         }
     }
 
-    private boolean deviceWasDeletedSuccessfully(RegistryManager registryManager, String deviceId) throws IOException
+    private static boolean deviceWasDeletedSuccessfully(RegistryManager registryManager, String deviceId) throws IOException
     {
         try
         {
-            testInstance.registryManager.getDevice(deviceId);
+            registryManager.getDevice(deviceId);
         }
         catch (IotHubException e)
         {
@@ -518,11 +518,11 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         return false;
     }
 
-    private boolean moduleWasDeletedSuccessfully(RegistryManager registryManager, String deviceId, String moduleId) throws IOException
+    private static boolean moduleWasDeletedSuccessfully(RegistryManager registryManager, String deviceId, String moduleId) throws IOException
     {
         try
         {
-            testInstance.registryManager.getModule(deviceId, moduleId);
+            registryManager.getModule(deviceId, moduleId);
         }
         catch (IotHubException e)
         {
@@ -534,11 +534,11 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         return false;
     }
 
-    private boolean configWasDeletedSuccessfully(RegistryManager registryManager, String configId) throws IOException
+    private static boolean configWasDeletedSuccessfully(RegistryManager registryManager, String configId) throws IOException
     {
         try
         {
-            testInstance.registryManager.getConfiguration(configId);
+            registryManager.getConfiguration(configId);
         }
         catch (IotHubException e)
         {
