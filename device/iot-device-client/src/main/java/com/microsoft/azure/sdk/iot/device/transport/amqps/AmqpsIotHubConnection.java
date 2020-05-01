@@ -63,7 +63,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
     //sending messages is done on reactor thread, but we don't want to hog that thread indefinitely, so there is a limit
     // on how many messages to send per reactor callback
     private final static int MAX_MESSAGES_TO_SEND_PER_CALLBACK = 1000;
-    private final static int MAX_MESSAGE_PAYLOAD_SIZE = 256*1000; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at least that much space
+    private final static int MAX_MESSAGE_PAYLOAD_SIZE = 256*1024; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at least that much space
     private final Boolean useWebSockets;
     private final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> inProgressMessages = new ConcurrentHashMap<>();
     private final Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();

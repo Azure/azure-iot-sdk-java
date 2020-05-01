@@ -51,7 +51,7 @@ public class SendMessagesCommon extends IotHubIntegrationTest
     protected static final Integer NUM_KEYS_PER_MESSAGE = 3;
 
     // Max IoT Hub message size is 256 kb, but that includes headers, not just payload
-    protected static final int MAX_MESSAGE_PAYLOAD_SIZE = 255*1000;
+    protected static final int MAX_MESSAGE_PAYLOAD_SIZE = 255*1024;
 
     // https://github.com/Azure/azure-iot-sdk-java/issues/742
     // Sending messages over 15 kb over AMQPS_WS causes the connection to drop, likely an issue with proton-j-extensions
