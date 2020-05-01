@@ -1289,7 +1289,7 @@ public class AmqpsIotHubConnectionTest {
                 result = mockConnection;
                 mockConnection.getTransport();
                 result = mockTransportInternal;
-                new WebSocketImpl();
+                new WebSocketImpl(anyInt);
                 result = mockWebSocket;
                 mockWebSocket.configure(anyString, anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
                 mockTransportInternal.addTransportLayer(mockWebSocket);
