@@ -50,6 +50,13 @@ public class SendMessagesCommon extends IotHubIntegrationTest
     //How many keys each message will cary.
     protected static final Integer NUM_KEYS_PER_MESSAGE = 3;
 
+    // Max IoT Hub message size is 256 kb, but that includes headers, not just payload
+    protected static final int MAX_MESSAGE_PAYLOAD_SIZE = 255*1000;
+
+    // https://github.com/Azure/azure-iot-sdk-java/issues/742
+    // Sending messages over 15 kb over AMQPS_WS causes the connection to drop, likely an issue with proton-j-extensions
+    protected static final int MAX_MESSAGE_PAYLOAD_SIZE_AMQPS_WS = 15*1000;
+
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60 * 1000;
 
@@ -62,6 +69,8 @@ public class SendMessagesCommon extends IotHubIntegrationTest
 
     //The messages to be sent in these tests. Some contain error injection messages surrounded by normal messages
     protected List<MessageAndResult> NORMAL_MESSAGES_TO_SEND = new ArrayList<>();
+    protected List<MessageAndResult> LARGE_MESSAGES_TO_SEND = new ArrayList<>();
+    protected List<MessageAndResult> LARGE_MESSAGES_TO_SEND_AMQPS_WS = new ArrayList<>();
     protected List<MessageAndResult> TCP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> AMQP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> AMQP_SESSION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
@@ -508,6 +517,8 @@ public class SendMessagesCommon extends IotHubIntegrationTest
          AMQP_TWIN_RESP_LINK_DROP_MESSAGES_TO_SEND = new ArrayList<>();
         AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND = new ArrayList<>();
         MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND = new ArrayList<>();
+        LARGE_MESSAGES_TO_SEND = new ArrayList<>();
+        LARGE_MESSAGES_TO_SEND_AMQPS_WS = new ArrayList<>();
 
         MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
         for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; i++)
@@ -573,6 +584,8 @@ public class SendMessagesCommon extends IotHubIntegrationTest
             }
 
             NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY));
+            LARGE_MESSAGES_TO_SEND.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]), IotHubStatusCode.OK_EMPTY));
+            LARGE_MESSAGES_TO_SEND_AMQPS_WS.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE_AMQPS_WS]), IotHubStatusCode.OK_EMPTY));
         }
     }
 

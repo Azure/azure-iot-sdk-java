@@ -50,9 +50,6 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
     private static final int MAX_WAIT_TO_OPEN_WORKER_LINKS = 60 * 1000; // 60 second timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
     private static final int SEND_MESSAGES_PERIOD_MILLIS = 50; //every 50 seconds, the method onTimerTask will fire to send queued messages
-    /**
-     * The {@link Delivery} tag.
-     */
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final String WEBSOCKET_QUERY = "iothub-no-client-cert=true";
@@ -66,6 +63,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
     //sending messages is done on reactor thread, but we don't want to hog that thread indefinitely, so there is a limit
     // on how many messages to send per reactor callback
     private final static int MAX_MESSAGES_TO_SEND_PER_CALLBACK = 1000;
+    private final static int MAX_MESSAGE_PAYLOAD_SIZE = 256*1000; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at least that much space
     private final Boolean useWebSockets;
     private final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> inProgressMessages = new ConcurrentHashMap<>();
     private final Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
@@ -572,7 +570,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
     private void addWebsocketLayer(Transport transport)
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_25_049: [If websocket enabled the event handler shall configure the transport layer for websocket.]
-        WebSocketImpl webSocket = new WebSocketImpl();
+        WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
         webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEBSOCKET_QUERY, WEBSOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
         ((TransportInternal) transport).addTransportLayer(webSocket);
     }
