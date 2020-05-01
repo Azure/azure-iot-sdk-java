@@ -44,8 +44,8 @@ public class RegistryManager
     private ExecutorService executor;
     private IotHubConnectionString iotHubConnectionString;
 
-    @Setter
     @Getter
+    @Setter
     private Proxy proxy;
 
     /**
