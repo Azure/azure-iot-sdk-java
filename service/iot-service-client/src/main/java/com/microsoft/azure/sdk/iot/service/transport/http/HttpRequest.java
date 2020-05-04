@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service.transport.http;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -32,10 +33,29 @@ public class HttpRequest
      */
     public HttpRequest(URL url, HttpMethod method, byte[] body) throws IOException
     {
+        this(url, method, body, null);
+    }
+
+    /**
+     * Constructor. Takes a URL as an argument and returns an HTTPS request that
+     * is ready to be sent through an optional proxy.
+     *
+     * @param url The URL for the request.
+     * @param method The HTTPS request method (i.e. GET).
+     * @param body The request body. Must be an array of size 0 if the request method is GET or DELETE.
+     * @param proxy The proxy to send the request through. May be null if no proxy should be used
+     *
+     * @throws IOException This exception thrown if an IOException occurs
+     * in setting up the HTTPS connection.
+     * @throws IllegalArgumentException This exception thrown if the endpoint
+     * given does not use the HTTPS protocol.
+     */
+    public HttpRequest(URL url, HttpMethod method, byte[] body, Proxy proxy) throws IOException
+    {
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_001: [The function shall open a connection with the given URL as the endpoint.]
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_003: [The function shall use the given HTTPS method (i.e. GET) as the request method.]
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_004: [If an IOException occurs in setting up the HTTPS connection, the function shall throw an IOException.]
-        this.connection = new HttpConnection(url, method);
+        this.connection = new HttpConnection(url, method, proxy);
         this.connection.setRequestHeader("User-Agent", TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPREQUEST_12_002: [The function shall write the body to the connection.]
         this.connection.writeOutput(body);

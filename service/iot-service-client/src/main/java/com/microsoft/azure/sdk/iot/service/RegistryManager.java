@@ -16,6 +16,8 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -23,6 +25,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -40,6 +43,10 @@ public class RegistryManager
     private static final int EXECUTOR_THREAD_POOL_SIZE = 10;
     private ExecutorService executor;
     private IotHubConnectionString iotHubConnectionString;
+
+    @Getter
+    @Setter
+    private Proxy proxy;
 
     /**
      * Static constructor to create instance from connection string
@@ -64,6 +71,8 @@ public class RegistryManager
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall start this object's executor service]
         iotHubRegistryManager.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
+
+        iotHubRegistryManager.proxy = null;
 
         return iotHubRegistryManager;
     }
@@ -1595,7 +1604,7 @@ public class RegistryManager
 
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException
     {
-        HttpRequest request = new HttpRequest(url, method, payload);
+        HttpRequest request = new HttpRequest(url, method, payload, proxy);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("Request-Id", "1001");

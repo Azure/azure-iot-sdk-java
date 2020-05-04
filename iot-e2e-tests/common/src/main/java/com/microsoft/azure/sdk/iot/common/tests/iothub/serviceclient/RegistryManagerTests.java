@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.*;
@@ -16,9 +14,14 @@ import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.UUID;
@@ -37,17 +40,19 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     private static String moduleIdPrefix = "java-crud-module-e2e-test-";
     private static String configIdPrefix = "java-crud-adm-e2e-test-";
     private static String hostName;
-    private static RegistryManager registryManager;
     private static final String primaryThumbprint =   "0000000000000000000000000000000000000000";
     private static final String secondaryThumbprint = "1111111111111111111111111111111111111111";
     private static final String primaryThumbprint2 =   "2222222222222222222222222222222222222222";
     private static final String secondaryThumbprint2 = "3333333333333333333333333333333333333333";
 
+    protected static HttpProxyServer proxyServer;
+    protected static String testProxyHostname = "127.0.0.1";
+    protected static int testProxyPort = 8879;
+    
     private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
     
     public static void setUp() throws IOException
     {
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
     }
 
@@ -58,6 +63,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         public String deviceId;
         public String moduleId;
         public String configId;
+        private RegistryManager registryManager;
 
         public RegistryManagerTestInstance() throws InterruptedException, IOException, IotHubException, URISyntaxException
         {
@@ -65,43 +71,78 @@ public class RegistryManagerTests extends IotHubIntegrationTest
             deviceId = deviceIdPrefix + uuid;
             moduleId = moduleIdPrefix + uuid;
             configId = configIdPrefix + uuid;
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         }
     }
+
+    @BeforeClass
+    public static void startProxy()
+    {
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+                .withPort(testProxyPort)
+                .start();
+    }
+
 
     @AfterClass
-    public static void tearDown()
+    public static void stopProxy()
     {
-        if (registryManager != null)
-        {
-            registryManager.close();
-            registryManager = null;
-        }
+        proxyServer.stop();
     }
-
+    
     @Test (timeout=MAX_TEST_MILLISECONDS)
-    public void crud_device_e2e() throws Exception
+    public void deviceLifecycle() throws Exception
     {
         //-Create-//
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceAdded = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
-        Tools.addDeviceWithRetry(registryManager, deviceAdded);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
         //-Read-//
-        Device deviceRetrieved = registryManager.getDevice(testInstance.deviceId);
+        Device deviceRetrieved = testInstance.registryManager.getDevice(testInstance.deviceId);
 
         //-Update-//
-        Device deviceUpdated = registryManager.getDevice(testInstance.deviceId);
+        Device deviceUpdated = testInstance.registryManager.getDevice(testInstance.deviceId);
         deviceUpdated.setStatus(DeviceStatus.Disabled);
-        deviceUpdated = registryManager.updateDevice(deviceUpdated);
+        deviceUpdated = testInstance.registryManager.updateDevice(deviceUpdated);
 
         //-Delete-//
-        registryManager.removeDevice(testInstance.deviceId);
+        testInstance.registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceAdded.getDeviceId());
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceRetrieved.getDeviceId());
         assertEquals(buildExceptionMessage("", hostName), DeviceStatus.Disabled, deviceUpdated.getStatus());
-        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, testInstance.deviceId));
+        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId));
+    }
+
+    @Test (timeout=MAX_TEST_MILLISECONDS)
+    public void deviceLifecycleWithProxy() throws Exception
+    {
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+        testInstance.registryManager.setProxy(testProxy);
+
+        //-Create-//
+        Device deviceAdded = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
+
+        //-Read-//
+        Device deviceRetrieved = testInstance.registryManager.getDevice(testInstance.deviceId);
+
+        //-Update-//
+        Device deviceUpdated = testInstance.registryManager.getDevice(testInstance.deviceId);
+        deviceUpdated.setStatus(DeviceStatus.Disabled);
+        deviceUpdated = testInstance.registryManager.updateDevice(deviceUpdated);
+
+        //-Delete-//
+        testInstance.registryManager.removeDevice(testInstance.deviceId);
+
+        // Assert
+        assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceAdded.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceRetrieved.getDeviceId());
+        assertEquals(buildExceptionMessage("", hostName), DeviceStatus.Disabled, deviceUpdated.getStatus());
+        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId));
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
@@ -110,18 +151,18 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         //-Create-//
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceAdded = Device.createDevice(testInstance.deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
-        Tools.addDeviceWithRetry(registryManager, deviceAdded);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
         //-Read-//
-        Device deviceRetrieved = registryManager.getDevice(testInstance.deviceId);
+        Device deviceRetrieved = testInstance.registryManager.getDevice(testInstance.deviceId);
 
         //-Update-//
-        Device deviceUpdated = registryManager.getDevice(testInstance.deviceId);
+        Device deviceUpdated = testInstance.registryManager.getDevice(testInstance.deviceId);
         deviceUpdated.setStatus(DeviceStatus.Disabled);
-        deviceUpdated = registryManager.updateDevice(deviceUpdated);
+        deviceUpdated = testInstance.registryManager.updateDevice(deviceUpdated);
 
         //-Delete-//
-        registryManager.removeDevice(testInstance.deviceId);
+        testInstance.registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceAdded.getDeviceId());
@@ -132,7 +173,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertNull(buildExceptionMessage("", hostName), deviceAdded.getSecondaryKey());
         assertNull(buildExceptionMessage("", hostName), deviceRetrieved.getPrimaryThumbprint());
         assertNull(buildExceptionMessage("", hostName), deviceRetrieved.getSecondaryThumbprint());
-        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, testInstance.deviceId));
+        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId));
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
@@ -142,18 +183,18 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceAdded = Device.createDevice(testInstance.deviceId, AuthenticationType.SELF_SIGNED);
         deviceAdded.setThumbprintFinal(primaryThumbprint, secondaryThumbprint);
-        Tools.addDeviceWithRetry(registryManager, deviceAdded);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
         //-Read-//
-        Device deviceRetrieved = registryManager.getDevice(testInstance.deviceId);
+        Device deviceRetrieved = testInstance.registryManager.getDevice(testInstance.deviceId);
 
         //-Update-//
-        Device deviceUpdated = registryManager.getDevice(testInstance.deviceId);
+        Device deviceUpdated = testInstance.registryManager.getDevice(testInstance.deviceId);
         deviceUpdated.setThumbprintFinal(primaryThumbprint2, secondaryThumbprint2);
-        deviceUpdated = registryManager.updateDevice(deviceUpdated);
+        deviceUpdated = testInstance.registryManager.updateDevice(deviceUpdated);
 
         //-Delete-//
-        registryManager.removeDevice(testInstance.deviceId);
+        testInstance.registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, deviceAdded.getDeviceId());
@@ -166,7 +207,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, deviceRetrieved.getSecondaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), primaryThumbprint2, deviceUpdated.getPrimaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint2, deviceUpdated.getSecondaryThumbprint());
-        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(registryManager, testInstance.deviceId));
+        assertTrue(buildExceptionMessage("", hostName), deviceWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId));
     }
 
     //TODO what is this testing?
@@ -187,24 +228,24 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         SymmetricKey expectedSymmetricKey = new SymmetricKey();
 
         Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
-        Tools.addDeviceWithRetry(registryManager, deviceSetup);
-        deleteModuleIfItExistsAlready(registryManager, testInstance.deviceId, testInstance.moduleId);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
+        deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
         Module moduleAdded = Module.createFromId(testInstance.deviceId, testInstance.moduleId, null);
-        Tools.addModuleWithRetry(registryManager, moduleAdded);
+        Tools.addModuleWithRetry(testInstance.registryManager, moduleAdded);
 
         //-Read-//
-        Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        Module moduleRetrieved = testInstance.registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
 
         //-Update-//
-        Module moduleUpdated = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        Module moduleUpdated = testInstance.registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
         moduleUpdated.getSymmetricKey().setPrimaryKeyFinal(expectedSymmetricKey.getPrimaryKey());
-        moduleUpdated = registryManager.updateModule(moduleUpdated);
+        moduleUpdated = testInstance.registryManager.updateModule(moduleUpdated);
 
         //-Delete-//
-        registryManager.removeModule(testInstance.deviceId, testInstance.moduleId);
-        registryManager.removeDevice(testInstance.deviceId);
+        testInstance.registryManager.removeModule(testInstance.deviceId, testInstance.moduleId);
+        testInstance.registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, moduleAdded.getDeviceId());
@@ -212,7 +253,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, moduleRetrieved.getDeviceId());
         assertEquals(buildExceptionMessage("", hostName), testInstance.moduleId, moduleRetrieved.getId());
         assertEquals(buildExceptionMessage("", hostName), expectedSymmetricKey.getPrimaryKey(), moduleUpdated.getPrimaryKey());
-        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, testInstance.deviceId, testInstance.moduleId));
+        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId));
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
@@ -221,21 +262,21 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     {
         // Arrange
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        deleteModuleIfItExistsAlready(registryManager, testInstance.deviceId, testInstance.moduleId);
+        deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
         Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
-        Tools.addDeviceWithRetry(registryManager, deviceSetup);
-        deleteModuleIfItExistsAlready(registryManager, testInstance.deviceId, testInstance.moduleId);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
+        deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
         Module moduleAdded = Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.CERTIFICATE_AUTHORITY);
-        Tools.addModuleWithRetry(registryManager, moduleAdded);
+        Tools.addModuleWithRetry(testInstance.registryManager, moduleAdded);
 
         //-Read-//
-        Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        Module moduleRetrieved = testInstance.registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
 
         //-Delete-//
-        registryManager.removeModule(testInstance.deviceId, testInstance.moduleId);
-        registryManager.removeDevice(testInstance.deviceId);
+        testInstance.registryManager.removeModule(testInstance.deviceId, testInstance.moduleId);
+        testInstance.registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, moduleAdded.getDeviceId());
@@ -246,7 +287,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertNull(buildExceptionMessage("", hostName), moduleAdded.getSecondaryThumbprint());
         assertNull(buildExceptionMessage("", hostName), moduleRetrieved.getPrimaryThumbprint());
         assertNull(buildExceptionMessage("", hostName), moduleRetrieved.getSecondaryThumbprint());
-        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, testInstance.deviceId, testInstance.moduleId));
+        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId));
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
@@ -256,24 +297,24 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         // Arrange
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
-        Tools.addDeviceWithRetry(registryManager, deviceSetup);
-        deleteModuleIfItExistsAlready(registryManager, testInstance.deviceId, testInstance.moduleId);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
+        deleteModuleIfItExistsAlready(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId);
 
         //-Create-//
         Module moduleAdded = Module.createModule(testInstance.deviceId, testInstance.moduleId, AuthenticationType.SELF_SIGNED);
         moduleAdded.setThumbprintFinal(primaryThumbprint, secondaryThumbprint);
-        Tools.addModuleWithRetry(registryManager, moduleAdded);
+        Tools.addModuleWithRetry(testInstance.registryManager, moduleAdded);
 
         //-Read-//
-        Module moduleRetrieved = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        Module moduleRetrieved = testInstance.registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
 
         //-Update-//
-        Module moduleUpdated = registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
+        Module moduleUpdated = testInstance.registryManager.getModule(testInstance.deviceId, testInstance.moduleId);
         moduleUpdated.setThumbprintFinal(primaryThumbprint2, secondaryThumbprint2);
-        moduleUpdated = registryManager.updateModule(moduleUpdated);
+        moduleUpdated = testInstance.registryManager.updateModule(moduleUpdated);
 
         //-Delete-//
-        registryManager.removeModule(testInstance.deviceId, testInstance.moduleId);
+        testInstance.registryManager.removeModule(testInstance.deviceId, testInstance.moduleId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.deviceId, moduleAdded.getDeviceId());
@@ -288,7 +329,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint, moduleRetrieved.getSecondaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), primaryThumbprint2, moduleUpdated.getPrimaryThumbprint());
         assertEquals(buildExceptionMessage("", hostName), secondaryThumbprint2, moduleUpdated.getSecondaryThumbprint());
-        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(registryManager, testInstance.deviceId, testInstance.moduleId));
+        assertTrue(buildExceptionMessage("", hostName), moduleWasDeletedSuccessfully(testInstance.registryManager, testInstance.deviceId, testInstance.moduleId));
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
@@ -321,18 +362,18 @@ public class RegistryManagerTests extends IotHubIntegrationTest
                 "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'");}});
         configAdded.setTargetCondition("properties.reported.chillerProperties.model=\'4000x\'");
         configAdded.setPriority(20);
-        registryManager.addConfiguration(configAdded);
+        testInstance.registryManager.addConfiguration(configAdded);
 
         //-Read-//
-        Configuration configRetrieved = registryManager.getConfiguration(testInstance.configId);
+        Configuration configRetrieved = testInstance.registryManager.getConfiguration(testInstance.configId);
 
         //-Update-//
-        Configuration configUpdated = registryManager.getConfiguration(testInstance.configId);
+        Configuration configUpdated = testInstance.registryManager.getConfiguration(testInstance.configId);
         configUpdated.setPriority(1);
-        configUpdated = registryManager.updateConfiguration(configUpdated);
+        configUpdated = testInstance.registryManager.updateConfiguration(configUpdated);
 
         //-Delete-//
-        registryManager.removeConfiguration(testInstance.configId);
+        testInstance.registryManager.removeConfiguration(testInstance.configId);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), testInstance.configId, configAdded.getId());
@@ -355,7 +396,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("", hostName), new Integer(20), configRetrieved.getPriority());
         assertEquals(buildExceptionMessage("", hostName), testInstance.configId, configUpdated.getId());
         assertEquals(buildExceptionMessage("", hostName), new Integer(1), configUpdated.getPriority());
-        assertTrue(buildExceptionMessage("", hostName), configWasDeletedSuccessfully(registryManager, testInstance.configId));
+        assertTrue(buildExceptionMessage("", hostName), configWasDeletedSuccessfully(testInstance.registryManager, testInstance.configId));
     }
 
     @Test (expected = IotHubBadFormatException.class)
@@ -365,7 +406,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         // Arrange
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceSetup = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
-        Tools.addDeviceWithRetry(registryManager, deviceSetup);
+        Tools.addDeviceWithRetry(testInstance.registryManager, deviceSetup);
         final HashMap<String, Object> testDeviceContent = new HashMap<String, Object>()
         {
             {
@@ -383,7 +424,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         content.setDeviceContent(testDeviceContent);
 
         // Act
-        registryManager.applyConfigurationContentOnDevice(testInstance.deviceId, content);
+        testInstance.registryManager.applyConfigurationContentOnDevice(testInstance.deviceId, content);
     }
 
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
@@ -392,26 +433,26 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     {
         // Arrange
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        deleteDeviceIfItExistsAlready(registryManager, testInstance.deviceId);
+        deleteDeviceIfItExistsAlready(testInstance.registryManager, testInstance.deviceId);
 
         //-Create-//
         Device edgeDevice = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
         DeviceCapabilities capabilities = new DeviceCapabilities();
         capabilities.setIotEdge(true);
         edgeDevice.setCapabilities(capabilities);
-        edgeDevice = Tools.addDeviceWithRetry(registryManager, edgeDevice);
+        edgeDevice = Tools.addDeviceWithRetry(testInstance.registryManager, edgeDevice);
 
         Device leafDevice = Device.createFromId(testInstance.deviceId + "-leaf", DeviceStatus.Enabled, null);
         assertNotNull(edgeDevice.getScope());
         leafDevice.setScope(edgeDevice.getScope());
-        Tools.addDeviceWithRetry(registryManager, leafDevice);
+        Tools.addDeviceWithRetry(testInstance.registryManager, leafDevice);
 
 
         //-Read-//
-        Device deviceRetrieved = registryManager.getDevice(testInstance.deviceId);
+        Device deviceRetrieved = testInstance.registryManager.getDevice(testInstance.deviceId);
 
         //-Delete-//
-        registryManager.removeDevice(testInstance.deviceId);
+        testInstance.registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
         assertEquals(buildExceptionMessage("Registered device id is not correct", hostName), testInstance.deviceId, edgeDevice.getDeviceId());
@@ -419,7 +460,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("Security scopes did not match", hostName), deviceRetrieved.getScope(), edgeDevice.getScope());
     }
     
-    private void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException, InterruptedException
+    private static void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException, InterruptedException
     {
         try
         {
@@ -440,7 +481,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         }
     }
 
-    private void deleteModuleIfItExistsAlready(RegistryManager registryManager, String deviceId, String moduleId) throws IOException, InterruptedException
+    private static void deleteModuleIfItExistsAlready(RegistryManager registryManager, String deviceId, String moduleId) throws IOException, InterruptedException
     {
         try
         {
@@ -461,7 +502,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         }
     }
 
-    private boolean deviceWasDeletedSuccessfully(RegistryManager registryManager, String deviceId) throws IOException
+    private static boolean deviceWasDeletedSuccessfully(RegistryManager registryManager, String deviceId) throws IOException
     {
         try
         {
@@ -477,7 +518,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         return false;
     }
 
-    private boolean moduleWasDeletedSuccessfully(RegistryManager registryManager, String deviceId, String moduleId) throws IOException
+    private static boolean moduleWasDeletedSuccessfully(RegistryManager registryManager, String deviceId, String moduleId) throws IOException
     {
         try
         {
@@ -493,7 +534,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         return false;
     }
 
-    private boolean configWasDeletedSuccessfully(RegistryManager registryManager, String configId) throws IOException
+    private static boolean configWasDeletedSuccessfully(RegistryManager registryManager, String configId) throws IOException
     {
         try
         {
