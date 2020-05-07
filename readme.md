@@ -14,7 +14,8 @@ This repository contains the following:
 * **Azure IoT Device Provisioning device SDK for Java**: provision devices to Azure IoT Hub using Azure IoT Device Provisioning
 * **Azure IoT Device Provisioning service SDK for Java**: manage your Provisioning service instance from a back-end Java application
 
-Note: The Device Client library no longer supports Java 7. Customers are advised to upgrade to Java 8.
+Note: The Device Client library no longer supports Java 7. Customers are advised to upgrade to Java 8. The last Java 7
+compatible version of the Device Client library was version 1.17.1, but there were security concerns that have been fixed since this version.
 
 To find SDKs in other languages for Azure IoT, please refer to the [azure-iot-sdks][azure-iot-sdks] repository
 
