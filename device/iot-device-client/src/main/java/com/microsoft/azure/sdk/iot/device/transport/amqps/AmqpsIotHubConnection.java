@@ -1303,6 +1303,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
                     else if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
                     {
                         this.amqpsSessionManager.subscribeDeviceToMessageType(DEVICE_TWIN, message.getConnectionDeviceId());
+                        this.processMessage(message);
                         this.listener.onMessageSent(message, null);
                         handled = true;
                     }
