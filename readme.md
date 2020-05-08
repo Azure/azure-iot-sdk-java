@@ -36,7 +36,7 @@ Devices and data sources in an IoT solution can range from a simple network-conn
    * **Working with the SDKs code**: if you are working with the SDKs code to modify it or contribute changes, then you can clone the repository and build the libraries:
       * [Build Device SDK from code][device-code]
       * [Build Service SDK from code][service-code]
-* On Android: our Java device SDK can be used on Android using the API version 17 and higher:
+* On Android: our Java device SDK can be used on Android using the API version 24 and higher:
    * [Device SDK][device-android]
 
 ## API reference
