@@ -44,6 +44,10 @@ public class RegistryManager
 
     private RegistryManagerOptions options;
 
+    /**
+     * As of release 1.22.0, replaced by {@link #createFromConnectionString()}
+     */
+    @Deprecated
     public RegistryManager()
     {
         options = RegistryManagerOptions.builder().build();
