@@ -53,7 +53,7 @@ public class RegistryManager
      */
     public static RegistryManager createFromConnectionString(String connectionString) throws IOException
     {
-        return createFromConnectionString(connectionString, null);
+        return createFromConnectionString(connectionString, RegistryManagerOptions.builder().build());
     }
 
     /**
@@ -1614,7 +1614,7 @@ public class RegistryManager
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException
     {
         Proxy proxy = null;
-        if (this.options != null && this.options.getProxyOptions() != null)
+        if (this.options.getProxyOptions() != null)
         {
             proxy = this.options.getProxyOptions().getProxy();
         }

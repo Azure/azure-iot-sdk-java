@@ -41,7 +41,7 @@ public class ServiceClient
      */
     public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol) throws IOException
     {
-        return createFromConnectionString(connectionString, iotHubServiceClientProtocol, null);
+        return createFromConnectionString(connectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
     }
 
     /**
@@ -76,7 +76,7 @@ public class ServiceClient
      */
     protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        this(iotHubConnectionString, iotHubServiceClientProtocol, null);
+        this(iotHubConnectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
     }
 
     /**
@@ -104,20 +104,13 @@ public class ServiceClient
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
 
-        if (this.options != null && this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
+        if (this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
         {
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_007: [The constructor shall create a new instance of AmqpSend object]
-        if (options != null)
-        {
-            this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options.getProxyOptions());
-        }
-        else
-        {
-            this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol);
-        }
+        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options.getProxyOptions());
     }
 
     /**
