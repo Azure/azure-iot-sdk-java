@@ -110,7 +110,14 @@ public class ServiceClient
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_007: [The constructor shall create a new instance of AmqpSend object]
-        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options != null ? options.getProxyOptions() : null);
+        if (options != null)
+        {
+            this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options.getProxyOptions());
+        }
+        else
+        {
+            this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol);
+        }
     }
 
     /**

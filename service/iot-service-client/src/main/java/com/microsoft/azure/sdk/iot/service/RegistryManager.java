@@ -23,6 +23,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -1612,7 +1613,13 @@ public class RegistryManager
 
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException
     {
-        HttpRequest request = new HttpRequest(url, method, payload, this.options != null && this.options.getProxyOptions() != null ? this.options.getProxyOptions().getProxy() : null);
+        Proxy proxy = null;
+        if (this.options != null && this.options.getProxyOptions() != null)
+        {
+            proxy = this.options.getProxyOptions().getProxy();
+        }
+
+        HttpRequest request = new HttpRequest(url, method, payload, proxy);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("Request-Id", "1001");
