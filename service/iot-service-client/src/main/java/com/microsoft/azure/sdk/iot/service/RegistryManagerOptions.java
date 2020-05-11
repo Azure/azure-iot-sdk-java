@@ -2,7 +2,6 @@ package com.microsoft.azure.sdk.iot.service;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Configurable options for all registry manager operations
