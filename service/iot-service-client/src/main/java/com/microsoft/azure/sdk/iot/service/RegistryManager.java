@@ -41,7 +41,7 @@ public class RegistryManager
     private ExecutorService executor;
     private IotHubConnectionString iotHubConnectionString;
 
-    private ProxyOptions proxyOptions;
+    private RegistryManagerOptions options;
 
     /**
      * Static constructor to create instance from connection string
@@ -59,11 +59,11 @@ public class RegistryManager
      * Static constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
-     * @param proxyOptions The proxy options to use when connecting to the service. May be null if no proxy will be used.
+     * @param options The connection options to use when connecting to the service. May be null if no custom options will be used.
      * @return The instance of RegistryManager
      * @throws IOException This exception is thrown if the object creation failed
      */
-    public static RegistryManager createFromConnectionString(String connectionString, ProxyOptions proxyOptions) throws IOException
+    public static RegistryManager createFromConnectionString(String connectionString, RegistryManagerOptions options) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(connectionString))
@@ -80,7 +80,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall start this object's executor service]
         iotHubRegistryManager.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
 
-        iotHubRegistryManager.proxyOptions = proxyOptions;
+        iotHubRegistryManager.options = options;
 
         return iotHubRegistryManager;
     }
@@ -1612,7 +1612,7 @@ public class RegistryManager
 
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException
     {
-        HttpRequest request = new HttpRequest(url, method, payload, this.proxyOptions != null ? this.proxyOptions.getProxy() : null);
+        HttpRequest request = new HttpRequest(url, method, payload, this.options != null && this.options.getProxyOptions() != null ? this.options.getProxyOptions().getProxy() : null);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("Request-Id", "1001");

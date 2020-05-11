@@ -30,7 +30,7 @@ public class ServiceClient
     protected IotHubConnectionString iotHubConnectionString;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
 
-    private ProxyOptions proxyOptions;
+    private ServiceClientOptions options;
 
     /**
      * Create ServiceClient from the specified connection string
@@ -48,11 +48,11 @@ public class ServiceClient
      * Create ServiceClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
-     * @param proxyOptions The proxy options to use when connecting to the service. May be null if no proxy will be used.
+     * @param options The connection options to use when connecting to the service. May be null if no custom options will be used.
      * @return The created ServiceClient object
      * @throws IOException This exception is thrown if the object creation failed
      */
-    public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions) throws IOException
+    public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))
@@ -64,7 +64,7 @@ public class ServiceClient
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_003: [The constructor shall create a new instance of ServiceClient using the created IotHubConnectionString object and return with it]
-        ServiceClient iotServiceClient = new ServiceClient(iotHubConnectionString, iotHubServiceClientProtocol, proxyOptions);
+        ServiceClient iotServiceClient = new ServiceClient(iotHubConnectionString, iotHubServiceClientProtocol, options);
         return iotServiceClient;
     }
 
@@ -85,7 +85,7 @@ public class ServiceClient
      * @param iotHubConnectionString The ConnectionString object for the IotHub
      * @param iotHubServiceClientProtocol protocol to use
      */
-    protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_004: [The constructor shall throw IllegalArgumentException if the input object is null]
         if (iotHubConnectionString == null)
@@ -102,15 +102,15 @@ public class ServiceClient
         this.userName = iotHubConnectionString.getUserString();
         this.sasToken = iotHubServiceSasToken.toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.proxyOptions = proxyOptions;
+        this.options = options;
 
-        if (this.proxyOptions != null && this.proxyOptions.getProxy() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
+        if (this.options != null && this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
         {
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_007: [The constructor shall create a new instance of AmqpSend object]
-        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, proxyOptions);
+        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options != null ? options.getProxyOptions() : null);
     }
 
     /**
@@ -261,7 +261,7 @@ public class ServiceClient
      */
     @Deprecated public FeedbackReceiver getFeedbackReceiver(String deviceId)
     {
-        if (proxyOptions != null)
+        if (options != null)
         {
             throw new UnsupportedOperationException("This deprecated API does not support proxies. Use the non-deprecated version of this API for proxy enabled feedback receiving");
         }
@@ -280,7 +280,7 @@ public class ServiceClient
     
      public FeedbackReceiver getFeedbackReceiver()
     {
-        return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
+        return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options != null ? options.getProxyOptions() : null);
     }
 
     /**
@@ -290,7 +290,7 @@ public class ServiceClient
      */
     public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
     {
-        return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
+        return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options != null ? options.getProxyOptions() : null);
     }
     
 }
