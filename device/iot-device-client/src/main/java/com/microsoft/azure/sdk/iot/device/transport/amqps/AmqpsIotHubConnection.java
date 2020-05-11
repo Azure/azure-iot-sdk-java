@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.ArrayList;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
@@ -88,6 +89,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
     private Reactor reactor;
     private TransportException savedException;
     private Queue<com.microsoft.azure.sdk.iot.device.Message> messagesToSend = new ConcurrentLinkedQueue<>();
+    private ArrayList<com.microsoft.azure.sdk.iot.device.Message> subscribeMessages = new ArrayList<>();
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -235,6 +237,10 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
                 {
                     closeConnectionWithException("Timed out waiting for worker links to open", true);
                 }
+
+                // In case this is a recovery from a prematurely closed connection, we will re-queue subscribe messages that were sent within this connection.
+                requeueSubscribeMessages();
+
             }
             catch (InterruptedException e)
             {
@@ -249,6 +255,12 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
         this.state = IotHubConnectionStatus.CONNECTED;
 
         this.log.debug("AMQP connection opened successfully");
+    }
+
+    private void requeueSubscribeMessages()
+    {
+        messagesToSend.addAll(subscribeMessages);
+        subscribeMessages.clear();
     }
 
     /**
@@ -1303,6 +1315,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
                     else if (((IotHubTransportMessage) message).getDeviceOperationType() == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
                     {
                         this.amqpsSessionManager.subscribeDeviceToMessageType(DEVICE_TWIN, message.getConnectionDeviceId());
+                        this.subscribeMessages.add(message);
                         this.processMessage(message);
                         this.listener.onMessageSent(message, null);
                         handled = true;
