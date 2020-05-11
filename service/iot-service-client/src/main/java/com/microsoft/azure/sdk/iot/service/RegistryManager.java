@@ -44,6 +44,11 @@ public class RegistryManager
 
     private RegistryManagerOptions options;
 
+    public RegistryManager()
+    {
+        options = RegistryManagerOptions.builder().build();
+    }
+
     /**
      * Static constructor to create instance from connection string
      *
