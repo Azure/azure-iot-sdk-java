@@ -67,7 +67,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
 
         public RegistryManagerTestInstance() throws InterruptedException, IOException, IotHubException, URISyntaxException
         {
-            this(null);
+            this(RegistryManagerOptions.builder().build());
         }
 
         public RegistryManagerTestInstance(RegistryManagerOptions options) throws InterruptedException, IOException, IotHubException, URISyntaxException

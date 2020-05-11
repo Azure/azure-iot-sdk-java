@@ -84,6 +84,12 @@ public class RegistryManager
         {
             throw new IllegalArgumentException("The provided connection string cannot be null or empty");
         }
+
+        if (options == null)
+        {
+            throw new IllegalArgumentException("RegistryManagerOptions cannot be null for this constructor");
+        }
+
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_002: [The constructor shall create an IotHubConnectionString object from the given connection string]
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 

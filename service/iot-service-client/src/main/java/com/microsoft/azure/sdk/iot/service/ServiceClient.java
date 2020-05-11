@@ -60,6 +60,11 @@ public class ServiceClient
             throw new IllegalArgumentException(connectionString);
         }
 
+        if (options == null)
+        {
+            throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
+        }
+
         // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_002: [The constructor shall create IotHubConnectionString object using the IotHubConnectionStringBuilder]
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 

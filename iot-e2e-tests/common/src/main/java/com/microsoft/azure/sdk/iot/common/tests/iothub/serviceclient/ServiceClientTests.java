@@ -135,13 +135,14 @@ public class ServiceClientTests extends IotHubIntegrationTest
         // Act
 
         // Create service client
-        ServiceClientOptions serviceClientOptions = null;
+        ProxyOptions proxyOptions = null;
         if (withProxy)
         {
             Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            ProxyOptions proxyOptions = new ProxyOptions(testProxy);
-            serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).build();
+            proxyOptions = new ProxyOptions(testProxy);
         }
+
+        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).build();
 
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
