@@ -45,11 +45,15 @@ public class RegistryManager
     private RegistryManagerOptions options;
 
     /**
-     * As of release 1.22.0, replaced by {@link #createFromConnectionString()}
+     * Previously was the java default constructor, should not be used.
+     *
+     * @deprecated As of release 1.22.0, replaced by {@link #createFromConnectionString(String)}
      */
     @Deprecated
     public RegistryManager()
     {
+        // This constructor was previously a default constructor that users could use because there was no other constructor declared.
+        // However, we still prefer users use the createFromConnectionString method to build their clients.
         options = RegistryManagerOptions.builder().build();
     }
 
