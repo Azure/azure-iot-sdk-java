@@ -261,7 +261,7 @@ public class ServiceClient
      */
     @Deprecated public FeedbackReceiver getFeedbackReceiver(String deviceId)
     {
-        if (options != null)
+        if (options.getProxyOptions() != null)
         {
             throw new UnsupportedOperationException("This deprecated API does not support proxies. Use the non-deprecated version of this API for proxy enabled feedback receiving");
         }
