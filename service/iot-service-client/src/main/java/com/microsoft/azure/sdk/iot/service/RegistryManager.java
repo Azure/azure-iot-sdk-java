@@ -16,8 +16,6 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import lombok.Getter;
-import lombok.Setter;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -25,7 +23,6 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -44,9 +41,7 @@ public class RegistryManager
     private ExecutorService executor;
     private IotHubConnectionString iotHubConnectionString;
 
-    @Getter
-    @Setter
-    private Proxy proxy;
+    private ProxyOptions proxyOptions;
 
     /**
      * Static constructor to create instance from connection string
@@ -56,6 +51,19 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the object creation failed
      */
     public static RegistryManager createFromConnectionString(String connectionString) throws IOException
+    {
+        return createFromConnectionString(connectionString, null);
+    }
+
+    /**
+     * Static constructor to create instance from connection string
+     *
+     * @param connectionString The iot hub connection string
+     * @param proxyOptions The proxy options to use when connecting to the service. May be null if no proxy will be used.
+     * @return The instance of RegistryManager
+     * @throws IOException This exception is thrown if the object creation failed
+     */
+    public static RegistryManager createFromConnectionString(String connectionString, ProxyOptions proxyOptions) throws IOException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(connectionString))
@@ -72,7 +80,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall start this object's executor service]
         iotHubRegistryManager.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
 
-        iotHubRegistryManager.proxy = null;
+        iotHubRegistryManager.proxyOptions = proxyOptions;
 
         return iotHubRegistryManager;
     }
@@ -1604,7 +1612,7 @@ public class RegistryManager
 
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException
     {
-        HttpRequest request = new HttpRequest(url, method, payload, proxy);
+        HttpRequest request = new HttpRequest(url, method, payload, this.proxyOptions != null ? this.proxyOptions.getProxy() : null);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("Request-Id", "1001");

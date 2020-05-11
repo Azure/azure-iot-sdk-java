@@ -8,10 +8,10 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class
@@ -27,6 +27,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FileUploadNotification fileUploadNotification;
+    private ProxyOptions proxyOptions;
 
     /**
      * Constructor to set up connection parameters
@@ -37,11 +38,25 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      */
     public AmqpFileUploadNotificationReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     */
+    public AmqpFileUploadNotificationReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_001: [The constructor shall copy all input parameters to private member variables for event processing]
         this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
     }
 
     /**
@@ -53,7 +68,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_003: [The function shall create an AmqpsReceiveHandler object to handle reactor events]
         if (amqpReceiveHandler == null)
         {
-            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this);
+            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this, this.proxyOptions);
         }
     }
 

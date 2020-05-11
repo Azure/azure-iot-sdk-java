@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class AmqpSend
     protected final String sasToken;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private ProxyOptions proxyOptions;
 
     /**
      * Constructor to set up connection parameters
@@ -37,7 +39,19 @@ public class AmqpSend
      */
     public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     */
+    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
@@ -50,17 +64,17 @@ public class AmqpSend
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
         }
-        
+
         if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_002: [The constructor shall copy all input parameters to private member variables for event processing]
         this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
     }
 
     /**
@@ -69,7 +83,7 @@ public class AmqpSend
     public void open()
     {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_004: [The function shall create an AmqpsSendHandler object to handle reactor events]
-        amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol);
+        amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this.proxyOptions);
     }
 
     /**

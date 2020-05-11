@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,6 @@ public class AmqpSendHandler extends AmqpConnectionHandler
 
     private int nextTag = 0;
 
-
     /**
      * Constructor to set up connection parameters and initialize handshaker for transport
      *
@@ -55,7 +55,21 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      */
     public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        super(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters and initialize handshaker for transport
+     *
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     */
+    public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
+        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
         add(new Handshaker());
     }
 

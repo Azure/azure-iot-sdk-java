@@ -1084,21 +1084,21 @@ public class RegistryManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_058: [The function shall verify the response status and throw proper Exception]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_059: [The function shall create a new RegistryStatistics object from the response and return with it]
     @Test
-    public void getStatistics_good_case(@Mocked Proxy mockProxy) throws Exception
+    public void getStatistics_good_case(@Mocked Proxy mockProxy, @Mocked ProxyOptions mockProxyOptions) throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         String deviceId = "somedevice";
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
-        registryManager.setProxy(mockProxy);
-        RegistryStatistics statistics = registryManager.getStatistics();
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString, mockProxyOptions);
 
-        new VerificationsInOrder()
+        new Expectations()
         {
             {
                 iotHubConnectionString.getUrlDeviceStatistics();
+                mockProxyOptions.getProxy();
+                result = mockProxy;
                 new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], mockProxy);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1110,6 +1110,10 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
+
+        // act
+        RegistryStatistics statistics = registryManager.getStatistics();
+
         assertNotNull(statistics);
     }
 
