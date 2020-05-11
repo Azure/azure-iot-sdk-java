@@ -140,8 +140,7 @@ public class ServiceClientTests extends IotHubIntegrationTest
         {
             Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
             ProxyOptions proxyOptions = new ProxyOptions(testProxy);
-            serviceClientOptions = new ServiceClientOptions();
-            serviceClientOptions.setProxyOptions(proxyOptions);
+            serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).build();
         }
 
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);

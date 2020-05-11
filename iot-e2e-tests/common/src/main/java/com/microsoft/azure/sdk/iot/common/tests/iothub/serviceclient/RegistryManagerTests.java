@@ -126,8 +126,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     {
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         ProxyOptions proxyOptions = new ProxyOptions(testProxy);
-        RegistryManagerOptions registryManagerOptions = new RegistryManagerOptions();
-        registryManagerOptions.setProxyOptions(proxyOptions);
+        RegistryManagerOptions registryManagerOptions = RegistryManagerOptions.builder().proxyOptions(proxyOptions).build();
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(registryManagerOptions);
 
         //-Create-//
