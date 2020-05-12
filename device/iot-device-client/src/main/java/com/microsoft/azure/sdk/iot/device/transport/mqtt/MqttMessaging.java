@@ -154,6 +154,7 @@ public class MqttMessaging extends Mqtt
 
                 if (isApplicationProperty)
                 {
+                    // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
                     stringBuilder.append(URLEncoder.encode(propertyKey, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
                 }
                 else
@@ -162,6 +163,8 @@ public class MqttMessaging extends Mqtt
                 }
 
                 stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+
+                // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
                 stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
 
                 return true;
