@@ -93,7 +93,8 @@ public class SendMessagesTests extends SendMessagesCommon
         Message msg = new Message("asdf");
 
         //All of these characters should be allowed within application properties
-        msg.setProperty("TestKey1234!#$%&'*+-^_`|~", "TestValue1234!#$%&'*+-^_`|~");
+        msg.setProperty("TestKey1234!#$%&'*+-^_`|~", "TestValue1234!#$%&'*+-^_`|~()<>@,;:\\\"[]?={} \t");
+        // ()<>@,;:\"[]?={}
         IotHubServicesCommon.sendMessageAndWaitForResponse(this.testInstance.client, new MessageAndResult(msg, IotHubStatusCode.OK_EMPTY), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.protocol);
         this.testInstance.client.closeNow();
     }
