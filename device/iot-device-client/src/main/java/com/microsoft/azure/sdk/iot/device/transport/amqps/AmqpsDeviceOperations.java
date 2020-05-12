@@ -385,6 +385,7 @@ public abstract class AmqpsDeviceOperations
     /**
      * Identify if the given link is owned by the operation
      *
+     * @param linkName Name of the link being opened.
      * @return true if the link is owned by the operation, false otherwise
      */
     protected boolean onLinkRemoteOpen(String linkName)
