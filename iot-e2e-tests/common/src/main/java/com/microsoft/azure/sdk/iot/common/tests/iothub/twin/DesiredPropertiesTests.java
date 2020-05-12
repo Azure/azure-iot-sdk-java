@@ -68,8 +68,8 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     {
         subscribeToDesiredPropertiesAndVerify(
                 MAX_PROPERTIES_TO_TEST,
+                jsonParser.parse(PROPERTY_VALUE_ARRAY),
                 jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY),
-                jsonParser.parse(PROPERTY_VALUE_UPDATE),
                 PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
     }
 
@@ -79,8 +79,8 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     {
         // arrange
         testSubscribeToDesiredPropertiesWithVersionFlow(
+                jsonParser.parse(PROPERTY_VALUE_ARRAY),
                 jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY),
-                jsonParser.parse(PROPERTY_VALUE_UPDATE),
                 PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
     }
 
