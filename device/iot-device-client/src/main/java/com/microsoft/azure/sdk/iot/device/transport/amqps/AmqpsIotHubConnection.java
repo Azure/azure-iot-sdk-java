@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.ArrayList;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
@@ -236,7 +235,6 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
                 {
                     closeConnectionWithException("Timed out waiting for worker links to open", true);
                 }
-
             }
             catch (InterruptedException e)
             {

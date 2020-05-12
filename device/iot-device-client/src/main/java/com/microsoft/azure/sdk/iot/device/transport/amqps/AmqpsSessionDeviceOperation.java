@@ -339,7 +339,9 @@ public class AmqpsSessionDeviceOperation
                 {
                     if (entry.getKey() == MessageType.DEVICE_TWIN)
                     {
-                        sendMessage(entry.getValue().buildSubscribeToDesiredPropertiesProtonMessage(), entry.getKey(), deviceClientConfig.getDeviceId());
+                        // since we have already checked the message type, we can safely cast it
+                        AmqpsDeviceTwin deviceTwinOperations = (AmqpsDeviceTwin)entry.getValue();
+                        sendMessage(deviceTwinOperations.buildSubscribeToDesiredPropertiesProtonMessage(), entry.getKey(), deviceClientConfig.getDeviceId());
                     }
 
                     return true;

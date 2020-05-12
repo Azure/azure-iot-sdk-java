@@ -70,7 +70,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
 
         this.deviceClientConfig = deviceClientConfig;
 
-        
+
         // Codes_SRS_AMQPSDEVICETWIN_12_006: [The constructor shall add the API version key to the amqpProperties.]
         this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
         // Codes_SRS_AMQPSDEVICETWIN_12_007: [The constructor shall generate a UUID amd add it as a correlation ID to the amqpProperties.]
@@ -146,7 +146,7 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
     protected AmqpsConvertFromProtonReturnValue convertFromProton(AmqpsMessage amqpsMessage, DeviceClientConfig deviceClientConfig) throws TransportException
     {
         if ((amqpsMessage.getAmqpsMessageType() == MessageType.DEVICE_TWIN) &&
-            (this.deviceClientConfig.getDeviceId().equals(deviceClientConfig.getDeviceId())))
+                (this.deviceClientConfig.getDeviceId().equals(deviceClientConfig.getDeviceId())))
         {
             // Codes_SRS_AMQPSDEVICETWIN_12_016: [The function shall convert the amqpsMessage to IoTHubTransportMessage.]
             IotHubTransportMessage message = protonMessageToIoTHubMessage(amqpsMessage);
@@ -192,7 +192,12 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
         }
     }
 
-    @Override
+    /**
+     * Creates a proton message for subscribing to desired properties on DeviceTwins
+     *
+     * @throws TransportException if the conversion fails
+     * @return The constructed proton message
+     */
     protected MessageImpl buildSubscribeToDesiredPropertiesProtonMessage()
     {
         MessageImpl protonMessage = (MessageImpl) Proton.message();
@@ -204,14 +209,19 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
 
         protonMessage.setProperties(properties);
 
-        Map<Symbol, Object> messageAnnotationsMap = new HashMap<>();
-
-        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_OPERATION), MESSAGE_ANNOTATION_FIELD_VALUE_PUT);
-        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED);
-
-        MessageAnnotations messageAnnotations = new MessageAnnotations(messageAnnotationsMap);
-
-        protonMessage.setMessageAnnotations(messageAnnotations);
+        try
+        {
+            setMessageAnnotationMapOnProtonMessage(
+                    protonMessage,
+                    DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST,
+                    null
+            );
+        }
+        // We are catching this exception so it would not bubble up in the stack.
+        // Since we are using a known and supported DeviceOperation in the parameters we do not ever expect the method invocation to throw
+        catch (TransportException ex){
+            return protonMessage;
+        }
 
         return protonMessage;
     }
@@ -324,8 +334,18 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
             this.correlationIdList.put(deviceTwinMessage.getCorrelationId(), deviceTwinMessage.getDeviceOperationType());
         }
 
+        setMessageAnnotationMapOnProtonMessage(protonMessage, deviceTwinMessage.getDeviceOperationType(), deviceTwinMessage.getVersion());
+
+        return protonMessage;
+    }
+
+    private void setMessageAnnotationMapOnProtonMessage(
+            MessageImpl protonMessage,
+            DeviceOperations deviceOperationType,
+            String deviceTwinMessageVersion) throws TransportException
+    {
         Map<Symbol, Object> messageAnnotationsMap = new HashMap<>();
-        switch (deviceTwinMessage.getDeviceOperationType())
+        switch (deviceOperationType)
         {
             case DEVICE_OPERATION_TWIN_GET_REQUEST:
                 // Codes_SRS_AMQPSDEVICETWIN_12_033: [The function shall set the proton message annotation operation field to GET if the IotHubTransportMessage operation type is GET_REQUEST.]
@@ -337,11 +357,11 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
                 // Codes_SRS_AMQPSDEVICETWIN_12_035: [The function shall set the proton message annotation resource field to "/properties/reported" if the IotHubTransportMessage operation type is UPDATE_REPORTED_PROPERTIES_REQUEST.]
                 messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED);
                 // Codes_SRS_AMQPSDEVICETWIN_21_049: [If the version is provided, the function shall set the proton message annotation resource field to "version" if the message version.]
-                if(deviceTwinMessage.getVersion() != null)
+                if(deviceTwinMessageVersion != null)
                 {
                     try
                     {
-                        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_VERSION), Long.parseLong(deviceTwinMessage.getVersion()));
+                        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_VERSION), Long.parseLong(deviceTwinMessageVersion));
                     }
                     catch (NumberFormatException e)
                     {
@@ -375,7 +395,5 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
 
         MessageAnnotations messageAnnotations = new MessageAnnotations(messageAnnotationsMap);
         protonMessage.setMessageAnnotations(messageAnnotations);
-
-        return protonMessage;
     }
 }
