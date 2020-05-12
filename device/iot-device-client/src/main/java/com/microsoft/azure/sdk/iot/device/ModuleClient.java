@@ -403,9 +403,10 @@ public class ModuleClient extends InternalClient
      * reported properties and desired properties. After that callback, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
      * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
-     * on the twin, and the PATCH will cause this module client to receive the full desired properties set. Similarly, the version
-     * of each desired property will be incremented from a PATCH call, and only the actually updated desired property will
-     * have its version incremented from a PUT call.
+     * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
+     * will cause this module client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call.
      *
      * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacemoduletwin">PUT</a> and
      * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatemoduletwin">PATCH</a>
@@ -431,9 +432,10 @@ public class ModuleClient extends InternalClient
      * reported properties and desired properties. After that callback, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
      * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
-     * on the twin, and the PATCH will cause this module client to receive the full desired properties set. Similarly, the version
-     * of each desired property will be incremented from a PATCH call, and only the actually updated desired property will
-     * have its version incremented from a PUT call.
+     * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
+     * will cause this module client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call.
      *
      * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacemoduletwin">PUT</a> and
      * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatemoduletwin">PATCH</a>
