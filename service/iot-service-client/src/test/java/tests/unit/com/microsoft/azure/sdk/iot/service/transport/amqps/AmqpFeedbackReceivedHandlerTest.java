@@ -94,7 +94,7 @@ public class AmqpFeedbackReceivedHandlerTest
         final String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
         AmqpFeedbackReceivedEvent _amqpFeedbackReceivedEvent = Deencapsulation.getField(amqpReceiveHandler, "amqpFeedbackReceivedEvent");
         // Assert
-        assertEquals(hostName + ":5671", _hostName);
+        assertEquals(hostName, _hostName);
         assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(amqpFeedbackReceivedEvent, _amqpFeedbackReceivedEvent);
@@ -189,7 +189,7 @@ public class AmqpFeedbackReceivedHandlerTest
                 result = transportInternal;
                 new WebSocketImpl();
                 result = webSocket;
-                webSocket.configure(anyString, anyString, 0, anyString, null, null);
+                webSocket.configure(anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
                 sasl.plain(anyString, anyString);
                 Proton.sslDomain();
@@ -215,7 +215,6 @@ public class AmqpFeedbackReceivedHandlerTest
         final String hostName = "aaa";
         final String userName = "bbb";
         final String sasToken = "ccc";
-        final String hostAddr = hostName + ":5671";
         final String receiver_tag = "receiver";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
@@ -224,7 +223,7 @@ public class AmqpFeedbackReceivedHandlerTest
         {
             {
                 connection = event.getConnection();
-                connection.setHostname(hostAddr);
+                connection.setHostname(hostName);
                 session = connection.session();
                 receiver = session.receiver(receiver_tag);
                 connection.open();

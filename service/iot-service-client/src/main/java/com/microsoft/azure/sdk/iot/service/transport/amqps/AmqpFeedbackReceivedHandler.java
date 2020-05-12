@@ -5,10 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandler;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -16,13 +14,10 @@ import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.messaging.Source;
-import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +37,7 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
     private AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
     private Receiver feedbackReceiverLink;
 
+
     /**
      * Constructor to set up connection parameters and initialize
      * handshaker and flow controller for transport
@@ -53,7 +49,22 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      */
     public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
     {
-        super(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters and initialize
+     * handshaker and flow controller for transport
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
+     * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     */
+    public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions)
+    {
+        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
 
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
 

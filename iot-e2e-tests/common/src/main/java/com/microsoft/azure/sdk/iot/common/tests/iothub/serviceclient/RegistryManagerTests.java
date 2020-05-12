@@ -67,11 +67,16 @@ public class RegistryManagerTests extends IotHubIntegrationTest
 
         public RegistryManagerTestInstance() throws InterruptedException, IOException, IotHubException, URISyntaxException
         {
+            this(RegistryManagerOptions.builder().build());
+        }
+
+        public RegistryManagerTestInstance(RegistryManagerOptions options) throws InterruptedException, IOException, IotHubException, URISyntaxException
+        {
             String uuid = UUID.randomUUID().toString();
             deviceId = deviceIdPrefix + uuid;
             moduleId = moduleIdPrefix + uuid;
             configId = configIdPrefix + uuid;
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, options);
         }
     }
 
@@ -119,9 +124,10 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     @Test (timeout=MAX_TEST_MILLISECONDS)
     public void deviceLifecycleWithProxy() throws Exception
     {
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-        testInstance.registryManager.setProxy(testProxy);
+        ProxyOptions proxyOptions = new ProxyOptions(testProxy);
+        RegistryManagerOptions registryManagerOptions = RegistryManagerOptions.builder().proxyOptions(proxyOptions).build();
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(registryManagerOptions);
 
         //-Create-//
         Device deviceAdded = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);

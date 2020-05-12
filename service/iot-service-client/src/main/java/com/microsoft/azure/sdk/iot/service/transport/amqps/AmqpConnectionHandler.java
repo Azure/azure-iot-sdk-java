@@ -5,23 +5,30 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
+import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
+import org.apache.qpid.proton.reactor.Reactor;
 
 import java.io.IOException;
 
+@Slf4j
 public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
 {
     public static final String WEBSOCKET_PATH = "/$iothub/websocket";
     public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
-    public static final String AMQPS_PORT = ":5671";
-    public static final String AMQPS_WS_PORT = ":443";
+    public static final int AMQPS_PORT = 5671;
+    public static final int AMQPS_WS_PORT = 443;
 
     protected Exception savedException;
     protected boolean connectionOpenedRemotely;
@@ -32,9 +39,9 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     protected final String userName;
     protected final String sasToken;
     protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    protected final String webSocketHostName;
+    protected final ProxyOptions proxyOptions;
 
-    protected AmqpConnectionHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    protected AmqpConnectionHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -60,16 +67,8 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
         this.linkOpenedRemotely = false;
 
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.webSocketHostName = hostName;
-        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
-        {
-            this.hostName = hostName + AMQPS_WS_PORT;
-        }
-        else
-        {
-            this.hostName = hostName + AMQPS_PORT;
-        }
-
+        this.proxyOptions = proxyOptions;
+        this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
     }
@@ -77,7 +76,24 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     @Override
     public void onReactorInit(Event event)
     {
-        event.getReactor().connection(this);
+        Reactor reactor = event.getReactor();
+
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
+        if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            if (proxyOptions != null)
+            {
+                reactor.connectionToHost(proxyOptions.getHostName(), proxyOptions.getPort(), this);
+            }
+            else
+            {
+                reactor.connectionToHost(this.hostName, AMQPS_WS_PORT, this);
+            }
+        }
+        else
+        {
+            reactor.connectionToHost(this.hostName, AMQPS_PORT, this);
+        }
     }
 
     /**
@@ -93,15 +109,21 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
             if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
             {
                 WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.webSocketHostName, WEBSOCKET_PATH, 0, WEBSOCKET_SUB_PROTOCOL, null, null);
+                webSocket.configure(this.hostName, WEBSOCKET_PATH, AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
+
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
             SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
             domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
             Ssl ssl = transport.ssl(domain);
+
+            if (this.proxyOptions != null)
+            {
+                addProxyLayer(transport, this.hostName, AMQPS_WS_PORT);
+            }
         }
     }
 
@@ -171,5 +193,14 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
         domain.init(mode);
 
         return domain;
+    }
+
+    private void addProxyLayer(Transport transport, String hostName, int port)
+    {
+        log.trace("Adding proxy layer to amqp_ws connection");
+        ProxyImpl proxy = new ProxyImpl();
+        final ProxyHandler proxyHandler = new ProxyHandlerImpl();
+        proxy.configure(hostName + ":" + port, null, proxyHandler, transport);
+        ((TransportInternal) transport).addTransportLayer(proxy);
     }
 }

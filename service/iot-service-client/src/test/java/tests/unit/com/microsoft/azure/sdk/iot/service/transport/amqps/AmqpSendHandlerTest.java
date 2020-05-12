@@ -105,7 +105,7 @@ public class AmqpSendHandlerTest
         String _sasToken = Deencapsulation.getField(amqpSendHandler, "sasToken");
         IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSendHandler, "iotHubServiceClientProtocol");
         // Assert
-        assertEquals(hostName + ":5671", _hostName);
+        assertEquals(hostName, _hostName);
         assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(iotHubServiceClientProtocol, _ioIotHubServiceClientProtocol);
@@ -369,7 +369,7 @@ public class AmqpSendHandlerTest
                 result = transportInternal;
                 new WebSocketImpl();
                 result = webSocket;
-                webSocket.configure(anyString, anyString, 0, anyString, null, null);
+                webSocket.configure(anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
                 sasl.plain(anyString, anyString);
                 Proton.sslDomain();
@@ -397,7 +397,6 @@ public class AmqpSendHandlerTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Assert
@@ -405,7 +404,7 @@ public class AmqpSendHandlerTest
         {
             {
                 connection = event.getConnection();
-                connection.setHostname(hostAddr);
+                connection.setHostname(hostName);
                 session = connection.session();
                 sender = session.sender(anyString);
                 connection.open();
@@ -427,7 +426,6 @@ public class AmqpSendHandlerTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
         String endpoint = "/messages/devicebound";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
