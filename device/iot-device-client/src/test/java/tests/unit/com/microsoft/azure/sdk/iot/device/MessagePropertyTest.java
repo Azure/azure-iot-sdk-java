@@ -59,16 +59,6 @@ public class MessagePropertyTest
         assertThat(testValue, is(expectedValue));
     }
     
-    // Tests_SRS_MESSAGEPROPERTY_11_002: [If the name contains a character that is not in US-ASCII the function shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorRejectsInvalidPropertyName()
-    {
-        final String invalidName = "Price in £"; 
-        final String value = "test-value";
-
-        new MessageProperty(invalidName, value);
-    }
-
     // Tests_SRS_MESSAGEPROPERTY_11_008: [If the name is a reserved property name, the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
     public void constructorRejectsReservedPropertyName()
@@ -77,16 +67,6 @@ public class MessagePropertyTest
         final String value = "test-value";
 
         new MessageProperty(invalidName, value);
-    }
-
-    // Tests_SRS_MESSAGEPROPERTY_11_003: [If the value contains a character that is not in US-ASCII, the function shall throw an IllegalArgumentException.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorRejectsInvalidPropertyValue()
-    {
-        final String name = "test-,name";
-        final String invalidValue = "t\u0130est-value";
-
-        new MessageProperty(name, invalidValue);
     }
 
     // Tests_SRS_MESSAGEPROPERTY_11_006: [The function shall return true if and only if the property has the given name, where the names are compared in a case-insensitive manner.]
@@ -133,20 +113,6 @@ public class MessagePropertyTest
 
     // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII and the name is not a reserved property name.]
     @Test
-    public void isValidAppPropertyReturnsFalseForInvalidAppProperty()
-    {
-        final String name = "test-name";
-        final String illegalValue = "परीक्षण"; // Unicode is not supported in MessageProperty value
-
-        boolean testIsValidAppProperty =
-                MessageProperty.isValidAppProperty(name, illegalValue);
-
-        final boolean expectedIsValidAppProperty = false;
-        assertThat(testIsValidAppProperty, is(expectedIsValidAppProperty));
-    }
-
-    // Tests_SRS_MESSAGEPROPERTY_11_007: [The function shall return true if and only if the name and value only use characters in: US-ASCII and the name is not a reserved property name.]
-    @Test
     public void isValidAppPropertyReturnsFalseForReservedProperty()
     {
         final String reservedName = "iothub-to";
@@ -157,49 +123,5 @@ public class MessagePropertyTest
 
         final boolean expectedIsValidAppProperty = false;
         assertThat(testIsValidAppProperty, is(expectedIsValidAppProperty));
-    }
-
-    @Test
-    public void isValidAppPropertyReturnsTrueForUnusualAppPropertyKey()
-    {
-        final String name = "Test1234!#$%&'*+-.^_`|~";
-        final String value = "test-value";
-
-        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
-
-        assertTrue(isValidProperty);
-    }
-
-    @Test
-    public void isValidAppPropertyReturnsTrueForUnusualAppPropertyValue()
-    {
-        final String name = "test-key";
-        final String value = "Test1234!#$%&'*+-.^_`|~";
-
-        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
-
-        assertTrue(isValidProperty);
-    }
-
-    @Test
-    public void isValidAppPropertyReturnsFalseForUnusualAppPropertyKey()
-    {
-        final String name = "Test1234 Test1234";
-        final String value = "test-value";
-
-        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
-
-        assertFalse(isValidProperty);
-    }
-
-    @Test
-    public void isValidAppPropertyReturnsFalseForUnusualAppPropertyValue()
-    {
-        final String name = "test-key";
-        final String value = "\"someQuotedValue\"";
-
-        boolean isValidProperty = MessageProperty.isValidAppProperty(name, value);
-
-        assertFalse(isValidProperty);
     }
 }
