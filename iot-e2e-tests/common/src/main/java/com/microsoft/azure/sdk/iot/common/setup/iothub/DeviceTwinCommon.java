@@ -184,6 +184,15 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
             }
         }
 
+        public synchronized void createNewReportedArrayProperties(int maximumPropertiesToCreate)
+        {
+            JsonParser jsonParser = new JsonParser();
+            for (int i = 0; i < maximumPropertiesToCreate; i++)
+            {
+                this.setReportedProp(new Property(PROPERTY_KEY + UUID.randomUUID(), jsonParser.parse(PROPERTY_VALUE_ARRAY)));
+            }
+        }
+
         public synchronized void updateAllExistingReportedProperties()
         {
             Set<Property> reportedProp = this.getReportedProp();
@@ -515,6 +524,38 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("Expected " + expectedReportedPropCount + " but had " + actualCount, internalClient), expectedReportedPropCount, actualCount);
     }
 
+    protected void readReportedArrayPropertiesAndVerify(DeviceState deviceState, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
+    {
+        int actualCount = 0;
+
+        // Check status periodically for success or until timeout
+        long startTime = System.currentTimeMillis();
+        long timeElapsed;
+        while (expectedReportedPropCount != actualCount)
+        {
+            Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
+            timeElapsed = System.currentTimeMillis() - startTime;
+            if (timeElapsed > MAX_WAIT_TIME_FOR_VERIFICATION)
+            {
+                break;
+            }
+
+            actualCount = 0;
+            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
+            Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
+
+            for (Pair p : repProperties)
+            {
+                // If the contents of the properties are arrays with values, we count them as an correctly set reported property.
+                ArrayList<String> val = (ArrayList<String>)p.getValue();
+                if (val.size() != 0){
+                    actualCount ++;
+                }
+            }
+        }
+        assertEquals(buildExceptionMessage("Expected " + expectedReportedPropCount + " but had " + actualCount, internalClient), expectedReportedPropCount, actualCount);
+    }
+
     protected void waitAndVerifyTwinStatusBecomesSuccess() throws InterruptedException
     {
         // Check status periodically for success or until timeout
@@ -543,6 +584,19 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, numOfProp);
+    }
+
+    protected void sendReportedArrayPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException
+    {
+        // Act
+        // send max_prop RP all at once
+        deviceUnderTest.dCDeviceForTwin.createNewReportedArrayProperties(numOfProp);
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+
+        // Assert
+        waitAndVerifyTwinStatusBecomesSuccess();
+        // verify if they are received by SC
+        readReportedArrayPropertiesAndVerify(deviceUnderTest, numOfProp);
     }
 
     protected void waitAndVerifyDesiredPropertyCallback(String propPrefix, boolean withVersion) throws InterruptedException

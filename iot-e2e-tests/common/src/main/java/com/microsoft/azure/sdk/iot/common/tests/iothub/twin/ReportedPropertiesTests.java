@@ -54,6 +54,13 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void testSendReportedArrayProperties() throws IOException, IotHubException, InterruptedException
+    {
+        sendReportedArrayPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
+    }
+
+    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSendReportedPropertiesMultiThreaded() throws IOException, IotHubException, InterruptedException
     {
         // arrange
