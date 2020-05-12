@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
+import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.MessageAnnotations;
 import org.apache.qpid.proton.amqp.messaging.Properties;
@@ -189,6 +190,30 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
             // Codes_SRS_AMQPSDEVICETWIN_12_029: [*The function shall return null if the message type is not DEVICE_TWIN.]
             return null;
         }
+    }
+
+    @Override
+    protected MessageImpl buildSubscribeToDesiredPropertiesProtonMessage()
+    {
+        MessageImpl protonMessage = (MessageImpl) Proton.message();
+
+        Properties properties = new Properties();
+
+        properties.setMessageId(UUID.randomUUID());
+        properties.setCorrelationId(UUID.randomUUID());
+
+        protonMessage.setProperties(properties);
+
+        Map<Symbol, Object> messageAnnotationsMap = new HashMap<>();
+
+        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_OPERATION), MESSAGE_ANNOTATION_FIELD_VALUE_PUT);
+        messageAnnotationsMap.put(Symbol.valueOf(MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE), MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED);
+
+        MessageAnnotations messageAnnotations = new MessageAnnotations(messageAnnotationsMap);
+
+        protonMessage.setMessageAnnotations(messageAnnotations);
+
+        return protonMessage;
     }
 
     /**

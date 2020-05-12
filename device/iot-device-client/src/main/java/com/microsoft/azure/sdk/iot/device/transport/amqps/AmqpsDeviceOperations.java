@@ -427,6 +427,11 @@ public abstract class AmqpsDeviceOperations
      */
     abstract protected AmqpsConvertToProtonReturnValue convertToProton(Message message) throws TransportException;
 
+    protected MessageImpl buildSubscribeToDesiredPropertiesProtonMessage()
+    {
+        return null;
+    }
+
     /**
      * Convert a proton message to an IotHub transport message
      *

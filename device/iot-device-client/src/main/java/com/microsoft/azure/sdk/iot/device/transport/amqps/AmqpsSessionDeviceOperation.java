@@ -337,6 +337,11 @@ public class AmqpsSessionDeviceOperation
             {
                 if (entry.getValue().onLinkRemoteOpen(linkName))
                 {
+                    if (entry.getKey() == MessageType.DEVICE_TWIN)
+                    {
+                        sendMessage(entry.getValue().buildSubscribeToDesiredPropertiesProtonMessage(), entry.getKey(), deviceClientConfig.getDeviceId());
+                    }
+
                     return true;
                 }
             }
