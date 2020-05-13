@@ -36,6 +36,7 @@ public class AmqpsSessionDeviceOperation
      *
      * @param deviceClientConfig the configuration of teh device.
      * @param amqpsDeviceAuthentication the authentication object associated with the device.
+     * @param subscriptionMessageRequestSentCallback the callback to fire each time a subscription message is sent
      * @throws IllegalArgumentException if deviceClientConfig or amqpsDeviceAuthentication is null
      */
     public AmqpsSessionDeviceOperation(final DeviceClientConfig deviceClientConfig, AmqpsDeviceAuthentication amqpsDeviceAuthentication, SubscriptionMessageRequestSentCallback subscriptionMessageRequestSentCallback) throws IllegalArgumentException

@@ -31,6 +31,7 @@ public class AmqpsSessionManager
      *
      * @param deviceClientConfig the device configuration to use for 
      *                           session management.
+     * @param subscriptionMessageRequestSentCallback the callback to fire each time a subscription message is sent
      */
     public AmqpsSessionManager(DeviceClientConfig deviceClientConfig, SubscriptionMessageRequestSentCallback subscriptionMessageRequestSentCallback)
     {
