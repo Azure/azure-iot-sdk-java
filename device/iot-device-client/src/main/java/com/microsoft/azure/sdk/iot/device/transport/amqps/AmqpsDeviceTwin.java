@@ -195,7 +195,6 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
     /**
      * Creates a proton message for subscribing to desired properties on DeviceTwins
      *
-     * @throws TransportException if the conversion fails
      * @return The constructed proton message
      */
     protected MessageImpl buildSubscribeToDesiredPropertiesProtonMessage()
