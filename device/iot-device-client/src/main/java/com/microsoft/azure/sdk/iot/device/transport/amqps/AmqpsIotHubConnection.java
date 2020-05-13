@@ -692,7 +692,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
                     else if (this.inProgressSubscriptionMessages.containsKey(deliveryTag))
                     {
                         SubscriptionType subscriptionType = this.inProgressSubscriptionMessages.remove(deliveryTag);
-                        log.debug("Successfully re-sent amqp subscription message of type {}", subscriptionType);
+                        log.debug("Successfully sent amqp subscription message of type {}", subscriptionType);
                     }
                     else
                     {
