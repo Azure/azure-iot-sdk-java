@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothub.twin;
 
+import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
@@ -36,9 +37,12 @@ import static org.junit.Assert.*;
  */
 public class DesiredPropertiesTests extends DeviceTwinCommon
 {
+    private JsonParser jsonParser = new JsonParser();
+
     public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        jsonParser = new JsonParser();
     }
 
     @Before
@@ -51,12 +55,46 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException
     {
-        subscribeToDesiredPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
+        subscribeToDesiredPropertiesAndVerify(
+                MAX_PROPERTIES_TO_TEST,
+                PROPERTY_VALUE,
+                PROPERTY_VALUE_UPDATE,
+                PROPERTY_VALUE_UPDATE);
+    }
+
+    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void testSubscribeToDesiredArrayProperties() throws IOException, InterruptedException, IotHubException
+    {
+        subscribeToDesiredPropertiesAndVerify(
+                MAX_PROPERTIES_TO_TEST,
+                jsonParser.parse(PROPERTY_VALUE_ARRAY),
+                jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY),
+                PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
+    }
+
+    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void testSubscribeToDesiredArrayPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
+    {
+        // arrange
+        testSubscribeToDesiredPropertiesWithVersionFlow(
+                jsonParser.parse(PROPERTY_VALUE_ARRAY),
+                jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY),
+                PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
+    {
+        testSubscribeToDesiredPropertiesWithVersionFlow(
+                PROPERTY_VALUE,
+                PROPERTY_VALUE_UPDATE,
+                PROPERTY_VALUE_UPDATE);
+    }
+
+    public void testSubscribeToDesiredPropertiesWithVersionFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException
     {
         // arrange
         deviceUnderTest.sCDeviceForTwin.clearTwin();
@@ -67,7 +105,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
             propertyState.propertyNewVersion = -1;
-            propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
+            propertyState.property = new Property(PROPERTY_KEY + i, propertyValue);
             deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
         }
@@ -79,19 +117,31 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
-            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
+            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, updatePropertyValue));
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
-        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);
+        waitAndVerifyDesiredPropertyCallback(updatePropertyPrefix, true);
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
+    {
+        testSubscribeToDesiredPropertiesMultiThreadedFlow(PROPERTY_VALUE, PROPERTY_VALUE_UPDATE, PROPERTY_VALUE_UPDATE);
+    }
+
+    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void testSubscribeToDesiredArrayPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
+    {
+        testSubscribeToDesiredPropertiesMultiThreadedFlow(jsonParser.parse(PROPERTY_VALUE_ARRAY), jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY), PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
+    }
+
+    public void testSubscribeToDesiredPropertiesMultiThreadedFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException
     {
         // arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
@@ -102,7 +152,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
-            propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
+            propertyState.property = new Property(PROPERTY_KEY + i, propertyValue);
             deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
@@ -125,7 +175,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
                     try
                     {
                         Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-                        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + index, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
+                        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + index, updatePropertyValue));
                         synchronized (desiredPropertiesUpdateLock)
                         {
                             Set currentDesiredProperties = deviceUnderTest.sCDeviceForTwin.getDesiredProperties();
@@ -151,12 +201,30 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
-        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
+        waitAndVerifyDesiredPropertyCallback(updatePropertyPrefix, false);
     }
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException
+    {
+        testSubscribeToDesiredPropertiesSequentiallyFlow(PROPERTY_VALUE, PROPERTY_VALUE_UPDATE, PROPERTY_VALUE_UPDATE);
+    }
+
+    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void testSubscribeToDesiredArrayPropertiesSequentially() throws IOException, InterruptedException, IotHubException
+    {
+        testSubscribeToDesiredPropertiesSequentiallyFlow(
+                jsonParser.parse(PROPERTY_VALUE_ARRAY),
+                jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY),
+                PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
+    }
+
+    public void testSubscribeToDesiredPropertiesSequentiallyFlow(
+            Object propertyValue,
+            Object updatePropertyValue,
+            String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException
     {
         // arrange
         deviceUnderTest.sCDeviceForTwin.clearTwin();
@@ -165,7 +233,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
-            propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
+            propertyState.property = new Property(PROPERTY_KEY + i, propertyValue);
             deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
@@ -177,7 +245,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
+            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, updatePropertyValue));
             deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
             sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
@@ -185,7 +253,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
-        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
+        waitAndVerifyDesiredPropertyCallback(updatePropertyPrefix, false);
     }
 
     @Test

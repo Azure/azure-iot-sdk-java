@@ -15,6 +15,6 @@ public class TransportUtils
     private static String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
 
     public static final String USER_AGENT_STRING = javaServiceClientIdentifier + serviceVersion + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
-    public static final String IOTHUB_API_VERSION = "2019-03-30";
+    public static final String IOTHUB_API_VERSION = "2019-10-01";
     public static final String IOTHUB_API_VERSION_LIMITED_AVAILIBILITY = "2020-03-13";
 }

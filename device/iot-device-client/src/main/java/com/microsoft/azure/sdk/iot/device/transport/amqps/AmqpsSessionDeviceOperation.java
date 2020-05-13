@@ -337,6 +337,14 @@ public class AmqpsSessionDeviceOperation
             {
                 if (entry.getValue().onLinkRemoteOpen(linkName))
                 {
+                    // If the link that is being opened is a sender link and the operation is a DeviceTwin operation, we will send a subscribe message on the opened link
+                    if (entry.getKey() == MessageType.DEVICE_TWIN && linkName.equals(entry.getValue().getSenderLinkTag()))
+                    {
+                        // since we have already checked the message type, we can safely cast it
+                        AmqpsDeviceTwin deviceTwinOperations = (AmqpsDeviceTwin)entry.getValue();
+                        sendMessage(deviceTwinOperations.buildSubscribeToDesiredPropertiesProtonMessage(), entry.getKey(), deviceClientConfig.getDeviceId());
+                    }
+
                     return true;
                 }
             }
