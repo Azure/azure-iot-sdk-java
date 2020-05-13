@@ -29,6 +29,8 @@ public class AmqpsSessionDeviceOperation
 
     private List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
 
+    private SubscriptionMessageRequestSentCallback subscriptionMessageRequestSentCallback;
+
     /**
      * Create logical device entity to handle all operation.
      *
@@ -36,7 +38,7 @@ public class AmqpsSessionDeviceOperation
      * @param amqpsDeviceAuthentication the authentication object associated with the device.
      * @throws IllegalArgumentException if deviceClientConfig or amqpsDeviceAuthentication is null
      */
-    public AmqpsSessionDeviceOperation(final DeviceClientConfig deviceClientConfig, AmqpsDeviceAuthentication amqpsDeviceAuthentication) throws IllegalArgumentException
+    public AmqpsSessionDeviceOperation(final DeviceClientConfig deviceClientConfig, AmqpsDeviceAuthentication amqpsDeviceAuthentication, SubscriptionMessageRequestSentCallback subscriptionMessageRequestSentCallback) throws IllegalArgumentException
     {
         // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig or the amqpsDeviceAuthentication parameter is null.]
         if (deviceClientConfig == null)
@@ -65,6 +67,8 @@ public class AmqpsSessionDeviceOperation
             // Codes_SRS_AMQPSESSIONDEVICEOPERATION_12_047[The constructor shall set the authentication state to authenticated if the authentication type is not CBS.]
             this.amqpsAuthenticatorState = AmqpsDeviceAuthenticationState.AUTHENTICATED;
         }
+
+        this.subscriptionMessageRequestSentCallback = subscriptionMessageRequestSentCallback;
     }
 
     /**
@@ -342,7 +346,8 @@ public class AmqpsSessionDeviceOperation
                     {
                         // since we have already checked the message type, we can safely cast it
                         AmqpsDeviceTwin deviceTwinOperations = (AmqpsDeviceTwin)entry.getValue();
-                        sendMessage(deviceTwinOperations.buildSubscribeToDesiredPropertiesProtonMessage(), entry.getKey(), deviceClientConfig.getDeviceId());
+                        int deliveryTag = sendMessage(deviceTwinOperations.buildSubscribeToDesiredPropertiesProtonMessage(), entry.getKey(), deviceClientConfig.getDeviceId());
+                        this.subscriptionMessageRequestSentCallback.onSubscriptionMessageSent(deliveryTag, SubscriptionMessageRequestSentCallback.SubscriptionType.DESIRED_PROPERTIES_SUBSCRIPTION);
                     }
 
                     return true;
