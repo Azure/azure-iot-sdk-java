@@ -394,7 +394,7 @@ public abstract class AmqpsDeviceOperations
         if (linkName.equals(this.getSenderLinkTag()))
         {
             this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            this.log.debug("{} sender link with link correlation id {} was successfully opened {}", getLinkInstanceType(), this.linkCorrelationId);
+            this.log.debug("{} sender link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
             return true;
         }
 
