@@ -548,7 +548,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
      *
-     *      - <b>SetSendInterval</b> - this option is applicable to all protocols.
+     *	    - <b>SetSendInterval</b> - this option is applicable to all protocols.
      *	      This value sets the period (in milliseconds) that this SDK spawns a thread to send a queued message.
      *	      Even if no message is queued, this thread will be spawned.
      *
