@@ -549,7 +549,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      is expected to be of type {@code long}.
      *
      *	    - <b>SetSendInterval</b> - this option is applicable to all protocols.
-     *	      This value sets the period (in milliseconds) that this SDK spawns a thread to send a queued message.
+     *	      This value sets the period (in milliseconds) that this SDK spawns threads to send queued messages.
      *	      Even if no message is queued, this thread will be spawned.
      *
      *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
