@@ -623,7 +623,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = mockAuthLatch;
 
-                new AmqpsSessionManager(mockConfig);
+                new AmqpsSessionManager(mockConfig, (SubscriptionMessageRequestSentCallback) any);
                 result = mockAmqpsSessionManager;
 
                 mockAuthLatch.await(anyLong, TimeUnit.MILLISECONDS);
@@ -670,7 +670,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = mockAuthLatch;
 
-                new AmqpsSessionManager(mockConfig);
+                new AmqpsSessionManager(mockConfig, (SubscriptionMessageRequestSentCallback) any);
                 result = mockAmqpsSessionManager;
 
                 mockAuthLatch.await(anyLong, TimeUnit.MILLISECONDS);
@@ -2451,7 +2451,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = mockAuthLatch;
 
-                new AmqpsSessionManager(mockConfig);
+                new AmqpsSessionManager(mockConfig, (SubscriptionMessageRequestSentCallback) any);
                 result = mockAmqpsSessionManager;
 
                 mockAuthLatch.await(anyLong, TimeUnit.MILLISECONDS);

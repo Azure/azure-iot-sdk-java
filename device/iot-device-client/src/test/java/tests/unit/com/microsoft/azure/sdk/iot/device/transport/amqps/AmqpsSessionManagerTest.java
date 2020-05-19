@@ -80,13 +80,16 @@ public class AmqpsSessionManagerTest
 
     @Mocked
     AmqpsConvertFromProtonReturnValue mockAmqpsConvertFromProtonReturnValue;
+    
+    @Mocked
+    SubscriptionMessageRequestSentCallback mockedSubscriptionMessageRequestSentCallback;
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsIfDeviceClientIsNull() throws IllegalArgumentException, TransportException
     {
         // act
-        new AmqpsSessionManager(null);
+        new AmqpsSessionManager(null, mockedSubscriptionMessageRequestSentCallback);
     }
 
     // Tests_SRS_AMQPSESSIONMANAGER_12_002: [The constructor shall save the deviceClientConfig parameter value to a member variable.]
@@ -94,7 +97,7 @@ public class AmqpsSessionManagerTest
     public void constructorSavesDeviceClientConfig() throws IllegalArgumentException, TransportException
     {
         // act
-        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
 
         // assert
         DeviceClientConfig actualDeviceClientConfig = Deencapsulation.getField(amqpsSessionManager, "deviceClientConfig");
@@ -110,7 +113,7 @@ public class AmqpsSessionManagerTest
         baseExpectationsSAS();
 
         // act
-        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
 
         // assert
         ArrayList<AmqpsSessionDeviceOperation> actualList =  Deencapsulation.getField(amqpsSessionManager, "amqpsDeviceSessionList");
@@ -122,7 +125,7 @@ public class AmqpsSessionManagerTest
     public void addDeviceOperationSessionSuccess() throws IllegalArgumentException, TransportException
     {
         // arrange
-        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         // act
@@ -135,7 +138,7 @@ public class AmqpsSessionManagerTest
         new Verifications()
         {
             {
-                new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
+                new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS, mockedSubscriptionMessageRequestSentCallback);
                 times = 1;
             }
         };
@@ -150,7 +153,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         baseExpectationsSAS();
-        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
@@ -197,7 +200,7 @@ public class AmqpsSessionManagerTest
     public void authenticateDoesNothing() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         new NonStrictExpectations()
@@ -217,7 +220,7 @@ public class AmqpsSessionManagerTest
     public void authenticateSuccess() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
@@ -255,7 +258,7 @@ public class AmqpsSessionManagerTest
     public void openWorkerLinksDoesNothing() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", null);
 
@@ -269,7 +272,7 @@ public class AmqpsSessionManagerTest
     public void openWorkerLinksSuccess() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -296,7 +299,7 @@ public class AmqpsSessionManagerTest
     public void onConnectionInitOpensSession() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         new NonStrictExpectations()
@@ -328,7 +331,7 @@ public class AmqpsSessionManagerTest
     public void onSessionRemoteOpenCallsAuthOpenLinks() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -350,7 +353,7 @@ public class AmqpsSessionManagerTest
     public void onSessionRemoteOpenCallsOpenWorkerLinksForX509() throws IllegalArgumentException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationX509);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -384,7 +387,7 @@ public class AmqpsSessionManagerTest
     public void onConnectionInitCallsDeviceSessionsOpenLinks() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         new NonStrictExpectations()
@@ -413,7 +416,7 @@ public class AmqpsSessionManagerTest
     public void onConnectionBoundCallsAuthSetSslDomain() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -436,7 +439,7 @@ public class AmqpsSessionManagerTest
     public void onLinkInitCallsDeviceSessionInitLink() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -473,7 +476,7 @@ public class AmqpsSessionManagerTest
     public void onLinkInitCallsAuthInitLink() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -504,7 +507,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         new NonStrictExpectations()
@@ -539,7 +542,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         new Expectations()
@@ -566,7 +569,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -598,7 +601,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -630,7 +633,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         new Expectations()
@@ -655,7 +658,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         new Expectations()
@@ -679,7 +682,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
@@ -716,7 +719,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
@@ -747,7 +750,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
@@ -785,7 +788,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
 
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
@@ -814,7 +817,7 @@ public class AmqpsSessionManagerTest
     public void getExpectedWorkerLinkCountWithOneSession()
     {
         //arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
         sessionList.add(mockAmqpsSessionDeviceOperation);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceSessionList", sessionList);
@@ -838,7 +841,7 @@ public class AmqpsSessionManagerTest
     public void getExpectedWorkerLinkCountWithMultipleSession()
     {
         //arrange
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         ArrayList<AmqpsSessionDeviceOperation> sessionList = new ArrayList<>();
         sessionList.add(mockAmqpsSessionDeviceOperation);
         sessionList.add(mockAmqpsSessionDeviceOperation1);
@@ -868,7 +871,7 @@ public class AmqpsSessionManagerTest
         // arrange
         final String expectedDeviceId = "aDeviceId";
         final MessageType expectedMessageType = MessageType.DEVICE_TWIN;
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationX509);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -909,7 +912,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String expectedLinkName = "someTelemetryLink";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -944,7 +947,7 @@ public class AmqpsSessionManagerTest
     {
         // arrange
         final String expectedLinkName = "someTelemetryLink";
-        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig);
+        final AmqpsSessionManager amqpsSessionManager = new AmqpsSessionManager(mockDeviceClientConfig, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionManager, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthenticationCBS);
         Deencapsulation.setField(amqpsSessionManager, "session", mockSession);
 
@@ -992,7 +995,7 @@ public class AmqpsSessionManagerTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
                 new AmqpsDeviceAuthenticationCBS(mockDeviceClientConfig);
                 result = mockAmqpsDeviceAuthenticationCBS;
-                new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
+                new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS, mockedSubscriptionMessageRequestSentCallback);
                 result = mockAmqpsSessionDeviceOperation;
             }
         };

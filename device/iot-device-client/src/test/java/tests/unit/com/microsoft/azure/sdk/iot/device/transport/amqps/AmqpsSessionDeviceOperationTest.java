@@ -99,6 +99,9 @@ public class AmqpsSessionDeviceOperationTest
 
     @Mocked
     Event mockEvent;
+    
+    @Mocked
+    SubscriptionMessageRequestSentCallback mockedSubscriptionMessageRequestSentCallback;
 
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig or the amqpsDeviceAuthentication parameter is null.]
@@ -107,7 +110,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         // act
-        new AmqpsSessionDeviceOperation(null, mockAmqpsDeviceAuthentication);
+        new AmqpsSessionDeviceOperation(null, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
     }
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig or the amqpsDeviceAuthentication parameter is null.]
@@ -116,7 +119,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         // act
-        new AmqpsSessionDeviceOperation(mockDeviceClientConfig, null);
+        new AmqpsSessionDeviceOperation(mockDeviceClientConfig, null, mockedSubscriptionMessageRequestSentCallback);
     }
 
     // Tests_SRS_AMQPSESSIONDEVICEOPERATION_12_002: [The constructor shall save the deviceClientConfig and amqpsDeviceAuthentication parameter value to a member variable.]
@@ -126,7 +129,7 @@ public class AmqpsSessionDeviceOperationTest
     public void constructorSuccessSAS() throws IllegalArgumentException, TransportException
     {
         // act
-        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
+        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS, mockedSubscriptionMessageRequestSentCallback);
 
         // assert
         DeviceClientConfig actualDeviceClientConfig = Deencapsulation.getField(amqpsSessionDeviceOperation, "deviceClientConfig");
@@ -174,7 +177,7 @@ public class AmqpsSessionDeviceOperationTest
         };
 
         // act
-        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS);
+        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthenticationCBS, mockedSubscriptionMessageRequestSentCallback);
 
         // assert
         DeviceClientConfig actualDeviceClientConfig = Deencapsulation.getField(amqpsSessionDeviceOperation, "deviceClientConfig");
@@ -203,7 +206,7 @@ public class AmqpsSessionDeviceOperationTest
     public void close() throws TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "deviceClientConfig", mockDeviceClientConfig);
 
         // act
@@ -230,7 +233,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final int MAX_WAIT_TO_AUTHENTICATE = 10*1000;
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "deviceClientConfig", mockDeviceClientConfig);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", mockListUUID);
 
@@ -267,7 +270,7 @@ public class AmqpsSessionDeviceOperationTest
     public void openLinks() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         // act
@@ -288,7 +291,7 @@ public class AmqpsSessionDeviceOperationTest
     public void closeLinks() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
 
         // act
         Deencapsulation.invoke(amqpsSessionDeviceOperation, "closeLinks");
@@ -308,7 +311,7 @@ public class AmqpsSessionDeviceOperationTest
     public void initLink() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         // act
@@ -329,7 +332,7 @@ public class AmqpsSessionDeviceOperationTest
     public void sendMessageNotAuthenticated() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
 
         // act
@@ -344,7 +347,7 @@ public class AmqpsSessionDeviceOperationTest
     public void sendMessageDeviceIdMismatch() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         new NonStrictExpectations()
@@ -372,7 +375,7 @@ public class AmqpsSessionDeviceOperationTest
     public void sendMessageNoDelivery() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
         final byte[] bytes = new byte[1024];
         new NonStrictExpectations()
@@ -417,7 +420,7 @@ public class AmqpsSessionDeviceOperationTest
     public void sendMessageSuccess() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
         final byte[] bytes = new byte[1024];
         new NonStrictExpectations()
@@ -461,7 +464,7 @@ public class AmqpsSessionDeviceOperationTest
     public void sendMessageDoublesBufferIfEncodeThrowsBufferOverflowException() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
         final byte[] bytes = new byte[1024];
         new NonStrictExpectations()
@@ -508,7 +511,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.NOT_AUTHENTICATED);
 
         new NonStrictExpectations()
@@ -532,7 +535,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         new NonStrictExpectations()
@@ -556,7 +559,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         new NonStrictExpectations()
@@ -591,7 +594,7 @@ public class AmqpsSessionDeviceOperationTest
         final String propertyKey = "status-code";
         final Integer propertyValue = 200;
         final List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
@@ -629,7 +632,7 @@ public class AmqpsSessionDeviceOperationTest
         final Integer propertyValue = 200;
         final List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
         cbsCorrelationIdList.add(mockUUID);
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATING);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceAuthentication", mockAmqpsDeviceAuthentication);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "cbsCorrelationIdList", cbsCorrelationIdList);
@@ -671,7 +674,7 @@ public class AmqpsSessionDeviceOperationTest
         final Integer propertyValue = 200;
         final List<UUID> cbsCorrelationIdList = Collections.synchronizedList(new ArrayList<UUID>());
         cbsCorrelationIdList.add(mockUUID);
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.UNKNOWN);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
@@ -706,7 +709,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         new NonStrictExpectations()
@@ -730,7 +733,7 @@ public class AmqpsSessionDeviceOperationTest
     {
         // arrange
         final String linkName = "linkName";
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsAuthenticatorState", AmqpsDeviceAuthenticationState.AUTHENTICATED);
 
         new NonStrictExpectations()
@@ -754,7 +757,7 @@ public class AmqpsSessionDeviceOperationTest
     public void convertToProtonSuccess() throws IllegalArgumentException, InterruptedException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
 
         new NonStrictExpectations()
         {
@@ -779,7 +782,7 @@ public class AmqpsSessionDeviceOperationTest
     public void convertFromProtonSuccess() throws IllegalArgumentException, TransportException
     {
         // arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
 
         new NonStrictExpectations()
         {
@@ -802,7 +805,7 @@ public class AmqpsSessionDeviceOperationTest
     public void handleAuthenticationMessageSuccess()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         List<UUID> cbsCorrelationIdList = Deencapsulation.getField(amqpsSessionDeviceOperation, "cbsCorrelationIdList");
         final UUID uuid = UUID.randomUUID();
         cbsCorrelationIdList.add(0, uuid);
@@ -826,7 +829,7 @@ public class AmqpsSessionDeviceOperationTest
     public void handleAuthenticationMessageWithNoSavedUUID()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
 
         //intentionally leave this list empty
         List<UUID> cbsCorrelationIdList = Deencapsulation.getField(amqpsSessionDeviceOperation, "cbsCorrelationIdList");
@@ -842,7 +845,7 @@ public class AmqpsSessionDeviceOperationTest
     public void handleAuthenticationMessageFailure()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         List<UUID> cbsCorrelationIdList = Deencapsulation.getField(amqpsSessionDeviceOperation, "cbsCorrelationIdList");
         final UUID uuid = UUID.randomUUID();
         cbsCorrelationIdList.add(0, uuid);
@@ -866,7 +869,7 @@ public class AmqpsSessionDeviceOperationTest
     public void getExpectedWorkerLinkCountWithTelemetry()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
@@ -882,7 +885,7 @@ public class AmqpsSessionDeviceOperationTest
     public void getExpectedWorkerLinkCountWithTwin()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
@@ -898,7 +901,7 @@ public class AmqpsSessionDeviceOperationTest
     public void getExpectedWorkerLinkCountWithMethods()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
@@ -914,7 +917,7 @@ public class AmqpsSessionDeviceOperationTest
     public void getExpectedWorkerLinkCountWithTelemetryAndMethods()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
         amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
@@ -931,7 +934,7 @@ public class AmqpsSessionDeviceOperationTest
     public void getExpectedWorkerLinkCountWithTelemetryAndMethodsAndTwin()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         amqpsDeviceOperationsMap.put(DEVICE_TELEMETRY, mockAmqpsDeviceTelemetry);
         amqpsDeviceOperationsMap.put(DEVICE_METHODS, mockAmqpsDeviceMethods);
@@ -949,7 +952,7 @@ public class AmqpsSessionDeviceOperationTest
     public void subscribeToMessageTypeForMethodsSavesInMapAndCallsOpenLinks()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
 
@@ -979,7 +982,7 @@ public class AmqpsSessionDeviceOperationTest
     public void subscribeToMessageTypeForTwinSavesInMapAndCallsOpenLinks()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);
 
@@ -1009,7 +1012,7 @@ public class AmqpsSessionDeviceOperationTest
     public void subscribeToMessageTypeForTwinDoesNothingIfAlreadySubscribed()
     {
         //arrange
-        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication);
+        final AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(mockDeviceClientConfig, mockAmqpsDeviceAuthentication, mockedSubscriptionMessageRequestSentCallback);
         Map<MessageType, AmqpsDeviceOperations> amqpsDeviceOperationsMap = new HashMap<MessageType, AmqpsDeviceOperations>();
         amqpsDeviceOperationsMap.put(DEVICE_TWIN, mockAmqpsDeviceTwin);
         Deencapsulation.setField(amqpsSessionDeviceOperation, "amqpsDeviceOperationsMap", amqpsDeviceOperationsMap);

@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.common.setup.iothub;
 
+import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.*;
@@ -70,9 +71,14 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
     protected static final String PROPERTY_KEY = "Key";
     protected static final String PROPERTY_KEY_QUERY = "KeyQuery";
     protected static final String PROPERTY_VALUE = "Value";
+    protected static final String PROPERTY_VALUE_ARRAY = "[\"Value\",\"Value2\"]" ;
     protected static final String PROPERTY_VALUE_QUERY = "ValueQuery";
     protected static final String PROPERTY_VALUE_UPDATE = "Update";
     protected static final String PROPERTY_VALUE_UPDATE2 = "Update2";
+    protected static final String PROPERTY_VALUE_UPDATE_ARRAY = "[\"1stUpdate1\",\"1stUpdate2\"]";
+    protected static final String PROPERTY_VALUE_UPDATE2_ARRAY = "[\"2ndUpdate1\",\"2ndUpdate2\"]";
+    protected static final String PROPERTY_VALUE_UPDATE_ARRAY_PREFIX = "1stUpdate";
+    protected static final String PROPERTY_VALUE_UPDATE2_ARRAY_PREFIX = "2ndUpdate";
     protected static final String TAG_KEY = "Tag_Key";
     protected static final String TAG_VALUE = "Tag_Value";
     protected static final String TAG_VALUE_UPDATE = "Tag_Value_Update";
@@ -175,6 +181,15 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
             {
                 UUID randomUUID = UUID.randomUUID();
                 this.setReportedProp(new Property(PROPERTY_KEY + randomUUID, PROPERTY_VALUE + randomUUID));
+            }
+        }
+
+        public synchronized void createNewReportedArrayProperties(int maximumPropertiesToCreate)
+        {
+            JsonParser jsonParser = new JsonParser();
+            for (int i = 0; i < maximumPropertiesToCreate; i++)
+            {
+                this.setReportedProp(new Property(PROPERTY_KEY + UUID.randomUUID(), jsonParser.parse(PROPERTY_VALUE_ARRAY)));
             }
         }
 
@@ -509,6 +524,38 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         assertEquals(buildExceptionMessage("Expected " + expectedReportedPropCount + " but had " + actualCount, internalClient), expectedReportedPropCount, actualCount);
     }
 
+    protected void readReportedArrayPropertiesAndVerify(DeviceState deviceState, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
+    {
+        int actualCount = 0;
+
+        // Check status periodically for success or until timeout
+        long startTime = System.currentTimeMillis();
+        long timeElapsed;
+        while (expectedReportedPropCount != actualCount)
+        {
+            Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
+            timeElapsed = System.currentTimeMillis() - startTime;
+            if (timeElapsed > MAX_WAIT_TIME_FOR_VERIFICATION)
+            {
+                break;
+            }
+
+            actualCount = 0;
+            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
+            Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
+
+            for (Pair p : repProperties)
+            {
+                // If the contents of the properties are arrays with values, we count them as an correctly set reported property.
+                ArrayList<String> val = (ArrayList<String>)p.getValue();
+                if (val.size() != 0){
+                    actualCount ++;
+                }
+            }
+        }
+        assertEquals(buildExceptionMessage("Expected " + expectedReportedPropCount + " but had " + actualCount, internalClient), expectedReportedPropCount, actualCount);
+    }
+
     protected void waitAndVerifyTwinStatusBecomesSuccess() throws InterruptedException
     {
         // Check status periodically for success or until timeout
@@ -539,6 +586,19 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, numOfProp);
     }
 
+    protected void sendReportedArrayPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException
+    {
+        // Act
+        // send max_prop RP all at once
+        deviceUnderTest.dCDeviceForTwin.createNewReportedArrayProperties(numOfProp);
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+
+        // Assert
+        waitAndVerifyTwinStatusBecomesSuccess();
+        // verify if they are received by SC
+        readReportedArrayPropertiesAndVerify(deviceUnderTest, numOfProp);
+    }
+
     protected void waitAndVerifyDesiredPropertyCallback(String propPrefix, boolean withVersion) throws InterruptedException
     {
         // Check status periodically for success or until timeout
@@ -548,7 +608,7 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
             PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
-            while (!propertyState.callBackTriggered || propertyState.propertyNewValue == null || !((String) propertyState.propertyNewValue).startsWith(propPrefix))
+            while (!propertyState.callBackTriggered || propertyState.propertyNewValue == null)
             {
                 Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
                 timeElapsed = System.currentTimeMillis() - startTime;
@@ -558,7 +618,21 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
                 }
             }
             assertTrue(buildExceptionMessage("Callback was not triggered for one or more properties", internalClient), propertyState.callBackTriggered);
-            assertTrue(buildExceptionMessage("Missing the expected prefix, was " + propertyState.propertyNewValue, internalClient), ((String) propertyState.propertyNewValue).startsWith(propPrefix));
+
+            if(propertyState.propertyNewValue instanceof ArrayList)
+            {
+                ArrayList<String> propertyValues = (ArrayList<String>)propertyState.propertyNewValue;
+                for (String propValue: propertyValues)
+                {
+                    assertTrue(buildExceptionMessage("Missing the expected prefix, was " + propertyState.propertyNewValue, internalClient), propValue.startsWith(propPrefix));
+                }
+            }
+
+            if(propertyState.propertyNewValue instanceof String)
+            {
+                assertTrue(buildExceptionMessage("Missing the expected prefix, was " + propertyState.propertyNewValue, internalClient), ((String) propertyState.propertyNewValue).startsWith(propPrefix));
+            }
+
             if (withVersion)
             {
                 assertNotEquals(buildExceptionMessage("Version was not set in the callback", internalClient), (int) propertyState.propertyNewVersion, -1);
@@ -566,7 +640,7 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         }
     }
 
-    protected void subscribeToDesiredPropertiesAndVerify(int numOfProp) throws IOException, InterruptedException, IotHubException
+    protected void subscribeToDesiredPropertiesAndVerify(int numOfProp, Object propertyValue, Object propertyUpdateValue, String propertyNewValuePrefix) throws IOException, InterruptedException, IotHubException
     {
         // arrange
         if (deviceUnderTest != null)
@@ -586,7 +660,7 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         {
             PropertyState propertyState = new PropertyState();
             propertyState.callBackTriggered = false;
-            propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
+            propertyState.property = new Property(PROPERTY_KEY + i, propertyValue);
             deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
             deviceUnderTest.dCDeviceForTwin.setDesiredPropertyCallback(propertyState.property, deviceUnderTest.dCDeviceForTwin, propertyState);
         }
@@ -598,14 +672,14 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
         Set<Pair> desiredProperties = new HashSet<>();
         for (int i = 0; i < numOfProp; i++)
         {
-            desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
+            desiredProperties.add(new Pair(PROPERTY_KEY + i, propertyUpdateValue));
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
         sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
-        waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, false);
+        waitAndVerifyDesiredPropertyCallback(propertyNewValuePrefix, false);
     }
 
     protected void setConnectionStatusCallBack(final List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)

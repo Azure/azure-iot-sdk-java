@@ -44,7 +44,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // Remote binary dependency
-    api ('com.microsoft.azure.sdk.iot:iot-device-client:1.21.1') {
+    api ('com.microsoft.azure.sdk.iot:iot-device-client:1.22.0') {
         exclude module: 'slf4j-api'
         exclude module:'azure-storage'
     }

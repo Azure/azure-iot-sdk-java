@@ -136,7 +136,7 @@ public class MqttMessaging extends Mqtt
     /**
      * Appends the property to the provided stringbuilder if the property value is not null.
      * @param stringBuilder the builder to build upon
-     * @param separatorNeeded if a seperator should precede the new property
+     * @param separatorNeeded if a separator should precede the new property
      * @param propertyKey the mqtt topic string property key
      * @param propertyValue the property value (message id, correlation id, etc.)
      * @return true if a separator will be needed for any later properties appended on
@@ -154,7 +154,8 @@ public class MqttMessaging extends Mqtt
 
                 if (isApplicationProperty)
                 {
-                    stringBuilder.append(URLEncoder.encode(propertyKey, StandardCharsets.UTF_8.name()));
+                    // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
+                    stringBuilder.append(URLEncoder.encode(propertyKey, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
                 }
                 else
                 {
@@ -162,7 +163,9 @@ public class MqttMessaging extends Mqtt
                 }
 
                 stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
-                stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()));
+
+                // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
+                stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
 
                 return true;
             }

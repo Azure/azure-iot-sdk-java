@@ -385,6 +385,7 @@ public abstract class AmqpsDeviceOperations
     /**
      * Identify if the given link is owned by the operation
      *
+     * @param linkName Name of the link being opened.
      * @return true if the link is owned by the operation, false otherwise
      */
     protected boolean onLinkRemoteOpen(String linkName)
@@ -393,7 +394,7 @@ public abstract class AmqpsDeviceOperations
         if (linkName.equals(this.getSenderLinkTag()))
         {
             this.amqpsSendLinkState = AmqpsDeviceOperationLinkState.OPENED;
-            this.log.debug("{} sender link with link correlation id {} was successfully opened {}", getLinkInstanceType(), this.linkCorrelationId);
+            this.log.debug("{} sender link with link correlation id {} was successfully opened", getLinkInstanceType(), this.linkCorrelationId);
             return true;
         }
 
