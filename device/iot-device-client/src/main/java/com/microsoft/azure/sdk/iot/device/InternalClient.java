@@ -179,7 +179,19 @@ public class InternalClient
     }
 
     /**
-     * Subscribes to desired properties
+     * Subscribes to desired properties.
+     *
+     * This client will receive a callback each time a desired property is updated. That callback will either contain
+     * the full desired properties set, or only the updated desired property depending on how the desired property was changed.
+     * IoT Hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * will cause this device client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
      *
      * @param onDesiredPropertyChange the Map for desired properties and their corresponding callback and context. Can be {@code null}.
      *
