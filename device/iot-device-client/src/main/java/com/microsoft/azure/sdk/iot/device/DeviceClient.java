@@ -464,7 +464,7 @@ public final class DeviceClient extends InternalClient implements Closeable
 
     /**
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback, this device client will receive a callback
+     * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
      * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
@@ -495,7 +495,7 @@ public final class DeviceClient extends InternalClient implements Closeable
 
     /**
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
-     * reported properties and desired properties. After that callback, this device client will receive a callback
+     * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
      * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
