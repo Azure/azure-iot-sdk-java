@@ -470,7 +470,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call.
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
      *
      * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
      * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
@@ -499,7 +501,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
-     * have its version incremented from a PATCH call.
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
      *
      * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
      * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
