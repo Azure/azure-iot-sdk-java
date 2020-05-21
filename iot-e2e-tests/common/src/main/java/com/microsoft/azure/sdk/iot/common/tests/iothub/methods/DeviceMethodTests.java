@@ -44,7 +44,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     {
         super.cleanToStart();
     }
-/*
+
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodSucceed() throws Exception
@@ -379,7 +379,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
             deviceTestManger.restartDevice(registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
         }
     }
-*/
+
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void invokeMethodOnOfflineDevice() throws Exception
