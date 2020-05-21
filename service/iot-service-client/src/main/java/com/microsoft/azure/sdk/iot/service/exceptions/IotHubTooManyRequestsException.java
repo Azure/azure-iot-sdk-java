@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create too many requests exception
  */
@@ -14,8 +16,14 @@ public class IotHubTooManyRequestsException extends IotHubException
     {
         this(null);
     }
+
     public IotHubTooManyRequestsException(String message)
     {
         super(message);
+    }
+
+    IotHubTooManyRequestsException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

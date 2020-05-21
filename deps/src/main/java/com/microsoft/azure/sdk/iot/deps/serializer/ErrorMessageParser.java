@@ -3,9 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -81,5 +79,45 @@ public class ErrorMessageParser
         }
 
         return rootMessage;
+    }
+
+    /**
+     * Get the fully qualified error code from the http response message errorReason, if one exists.
+     * @param fullErrorMessage the http response message error reason
+     * @return the fully qualified error code, or 0 if no error code was provided.
+     */
+    public static int bestErrorCode(String fullErrorMessage)
+    {
+        String errorCodeJsonKey = "errorCode";
+        if((fullErrorMessage == null) || fullErrorMessage.isEmpty())
+        {
+            return getDefaultErrorCode();
+        }
+
+        try
+        {
+            JsonObject errorMessageJson = new GsonBuilder().create().fromJson(fullErrorMessage, JsonObject.class);
+
+            if (errorMessageJson.has(errorCodeJsonKey) && errorMessageJson.get(errorCodeJsonKey).isJsonPrimitive())
+            {
+                JsonPrimitive errorCodeJson = errorMessageJson.getAsJsonPrimitive(errorCodeJsonKey);
+
+                if (errorCodeJson.isNumber())
+                {
+                    return errorCodeJson.getAsInt();
+                }
+            }
+        }
+        catch (JsonParseException e)
+        {
+            return getDefaultErrorCode();
+        }
+
+        return getDefaultErrorCode();
+    }
+
+    public static int getDefaultErrorCode()
+    {
+        return 0;
     }
 }
