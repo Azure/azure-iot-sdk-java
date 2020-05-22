@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create internal server error exception
  */
@@ -14,8 +16,14 @@ public class IotHubInternalServerErrorException extends IotHubException
     {
         this(null);
     }
+
     public IotHubInternalServerErrorException(String message)
     {
         super(message);
+    }
+
+    IotHubInternalServerErrorException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

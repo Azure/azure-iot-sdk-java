@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create iot hub not found exception
  */
@@ -18,5 +20,10 @@ public class IotHubNotSupportedException extends IotHubException
     public IotHubNotSupportedException(String message)
     {
         super(message);
+    }
+
+    IotHubNotSupportedException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

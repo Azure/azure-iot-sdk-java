@@ -266,7 +266,15 @@ public class AmqpSendHandler extends AmqpConnectionHandler
             {
                 //By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
                 // onLinkLocalClose closes the session locally and eventually the connection and reactor
-                log.debug("Closing amqp cloud to device message sender link since the message was delivered");
+                if (remoteState.getClass().equals(Accepted.class))
+                {
+                    log.debug("Closing AMQP cloud to device message sender link since the message was delivered");
+                }
+                else
+                {
+                    log.debug("Closing AMQP cloud to device message sender link since the message failed to be delivered");
+                }
+
                 snd.close();
             }
         }

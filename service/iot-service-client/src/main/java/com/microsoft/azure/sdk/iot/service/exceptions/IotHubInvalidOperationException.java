@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create iot hub invalid operation exception
  */
@@ -18,5 +20,10 @@ public class IotHubInvalidOperationException extends IotHubException
     public IotHubInvalidOperationException(String message)
     {
         super(message);
+    }
+
+    IotHubInvalidOperationException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }
