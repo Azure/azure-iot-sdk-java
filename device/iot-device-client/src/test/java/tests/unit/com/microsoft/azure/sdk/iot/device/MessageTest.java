@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -386,7 +387,8 @@ public class MessageTest
         final Date testTime = new Date();
         final String DATE_TIME_FORMAT = Deencapsulation.getField(Message.class, "DATE_TIME_FORMAT");
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FORMAT);
-        String expectedCreationTimeUtcString = sdf.format(testTime).replace("_", "T");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String expectedCreationTimeUtcString = sdf.format(testTime).replace("_", "T") + "Z";
         Message message = new Message();
         message.setCreationTimeUTC(testTime);
 
