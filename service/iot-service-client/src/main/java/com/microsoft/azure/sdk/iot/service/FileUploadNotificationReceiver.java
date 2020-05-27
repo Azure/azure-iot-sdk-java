@@ -30,7 +30,20 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     FileUploadNotificationReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_001: [** The constructor shall throw IllegalArgumentException if any the input string is null or empty **]**
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+    }
+
+    /**
+     * Constructor to verify initialization parameters
+     * Create instance of AmqpReceive
+     * @param hostName The iot hub host name
+     * @param userName The iot hub user name
+     * @param sasToken The iot hub SAS token for the given device
+     * @param iotHubServiceClientProtocol The iot hub protocol name
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     */
+    FileUploadNotificationReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
@@ -49,7 +62,7 @@ public class FileUploadNotificationReceiver extends Receiver
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_002: [** The constructor shall create a new instance of AmqpFileUploadNotificationReceive object **]**
-        this.amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        this.amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
     }
 
     /**

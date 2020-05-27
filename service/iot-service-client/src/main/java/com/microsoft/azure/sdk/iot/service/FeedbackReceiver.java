@@ -56,8 +56,6 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
         
-               
-        
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_002: [The constructor shall store deviceId]
         this.deviceId = deviceId;
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
@@ -72,11 +70,26 @@ public class FeedbackReceiver extends Receiver
      * @param userName The iot hub user name
      * @param sasToken The iot hub SAS token for the given device
      * @param iotHubServiceClientProtocol protocol to be used
-     * 
+     *
      */
     public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, (ProxyOptions) null);
+    }
+
+    /**
+     * Constructor to verify initialization parameters
+     * Create instance of AmqpReceive
+     *
+     * @param hostName The iot hub host name
+     * @param userName The iot hub user name
+     * @param sasToken The iot hub SAS token for the given device
+     * @param iotHubServiceClientProtocol protocol to be used
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     * 
+     */
+    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
@@ -96,7 +109,7 @@ public class FeedbackReceiver extends Receiver
         }
                 
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
-        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
     }
         
     /**

@@ -43,7 +43,7 @@ import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
  * a message, and logic to re-establish the connection with the IoTHub in case it gets lost.
  */
 @Slf4j
-public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler implements IotHubTransportConnection
+public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler implements IotHubTransportConnection, SubscriptionMessageRequestSentCallback
 {
     private static final int MAX_WAIT_TO_CLOSE_CONNECTION = 60 * 1000; // 60 second timeout
     private static final int MAX_WAIT_TO_OPEN_CBS_LINKS = 20 * 1000; // 20 second timeout
@@ -66,6 +66,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
     private final static int MAX_MESSAGE_PAYLOAD_SIZE = 256*1024; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at least that much space
     private final Boolean useWebSockets;
     private final Map<Integer, com.microsoft.azure.sdk.iot.device.Message> inProgressMessages = new ConcurrentHashMap<>();
+    private final Map<Integer, SubscriptionType> inProgressSubscriptionMessages = new ConcurrentHashMap<>();
     private final Map<com.microsoft.azure.sdk.iot.device.Message, AmqpsMessage> sendAckMessages = new ConcurrentHashMap<>();
     public String connectionId;
     public AmqpsSessionManager amqpsSessionManager;
@@ -139,7 +140,7 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_006: [The constructor shall set its state to DISCONNECTED.]
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        this.amqpsSessionManager = new AmqpsSessionManager(this.deviceClientConfig);
+        this.amqpsSessionManager = new AmqpsSessionManager(this.deviceClientConfig, this);
 
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", useWebSockets ? AMQP_WEB_SOCKET_PORT : AMQP_PORT);
     }
@@ -687,6 +688,11 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
                             transportException.setRetryable(true);
                             this.listener.onMessageSent(inProgressMessages.remove(deliveryTag), transportException);
                         }
+                    }
+                    else if (this.inProgressSubscriptionMessages.containsKey(deliveryTag))
+                    {
+                        SubscriptionType subscriptionType = this.inProgressSubscriptionMessages.remove(deliveryTag);
+                        log.debug("Successfully sent amqp subscription message of type {}", subscriptionType);
                     }
                     else
                     {
@@ -1322,6 +1328,12 @@ public final class AmqpsIotHubConnection extends ErrorLoggingBaseHandler impleme
         {
             latch.countDown();
         }
+    }
+
+    @Override
+    public void onSubscriptionMessageSent(int deliveryTag, SubscriptionType subscriptionType)
+    {
+        this.inProgressSubscriptionMessages.put(deliveryTag, subscriptionType);
     }
 
     /**

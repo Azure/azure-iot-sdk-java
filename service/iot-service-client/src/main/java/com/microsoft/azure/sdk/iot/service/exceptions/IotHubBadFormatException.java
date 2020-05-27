@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create bad message format exception
  */
@@ -14,8 +16,14 @@ public class IotHubBadFormatException extends IotHubException
     {
         this(null);
     }
+
     public IotHubBadFormatException(String message)
     {
         super(message);
+    }
+
+    IotHubBadFormatException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }
