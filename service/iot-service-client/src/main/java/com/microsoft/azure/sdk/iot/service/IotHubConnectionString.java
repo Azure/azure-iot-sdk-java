@@ -41,7 +41,6 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     private static final String URL_PATH_DEVICES = "devices";
     private static final String URL_PATH_MODULES = "modules";
     private static final String URL_PATH_CONFIG = "configurations";
-    private static final String URL_API_VERSION_LIMITED_AVAILABILITY = "api-version=" + TransportUtils.IOTHUB_API_VERSION_LIMITED_AVAILIBILITY;
     private static final String URL_API_VERSION = "api-version=" + TransportUtils.IOTHUB_API_VERSION;
     private static final String URL_MAX_COUNT = "top=";
     private static final String URL_PATH_DEVICESTATISTICS = "statistics";
@@ -66,18 +65,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     // configurations
     private static final String URL_PATH_APPLY_CONTENT_CONFIGURATION = "applyConfigurationContent";
 
-    protected String storageIdentity;
-    boolean IsStorageIdentityEnabled;
-
     protected IotHubConnectionString() {
-
-        // For import/export devices jobs, a new parameter is available in a
-        // new api-version, which is only available in a few initial regions.
-        // Control access via an environment variable. If a user wishes to try it out,
-        // they can set "EnabledStorageIdentity" to "1". Otherwise, the SDK will still
-        // default to the latest, broadly-supported api-version used in this SDK.
-        storageIdentity = System.getenv().get("EnableStorageIdentity");
-        IsStorageIdentityEnabled = "1".equalsIgnoreCase(storageIdentity);
     }
 
     /**
@@ -647,19 +635,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_SEPARATOR_0);
         stringBuilder.append("create");
         stringBuilder.append(URL_SEPARATOR_1);
-        // The new api-version is only available in a few initial regions
-        // Control access via an environment variable. If a user wishes to try it out,
-        // they can set "EnabledStorageIdentity" to "1". Otherwise, the SDK will still
-        // default to the latest, broadly-supported api-version used in this SDK.
-        IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
-        if (iotHubConnectionString.IsStorageIdentityEnabled)
-        {
-            stringBuilder.append(URL_API_VERSION_LIMITED_AVAILABILITY);
-        }
-        else
-        {
-            stringBuilder.append(URL_API_VERSION);
-        }
+        stringBuilder.append(URL_API_VERSION);
         return new URL(stringBuilder.toString());
     }
 
