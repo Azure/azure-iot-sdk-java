@@ -42,7 +42,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final String API_VERSION = "?api-version=" + TransportUtils.IOTHUB_API_VERSION;
+    private static String ModelIdParam = "digital-twin-model-id";
 
     private String connectionId;
     private String webSocketQueryString;
@@ -151,7 +151,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     clientId += "/" + moduleId;
                 }
 
-                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/" + API_VERSION + "&" + clientUserAgentIdentifier;
+                String apiVersion;
+                String modelId = this.config.getModelId();
+                if(modelId == null)
+                {
+                    apiVersion = TransportUtils.IOTHUB_API_VERSION;
+                }
+                else
+                {
+                    apiVersion = TransportUtils.PNP_IOTHUB_API_VERSION + "&" + ModelIdParam + "=" + modelId;
+                }
+
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + apiVersion + "&" + clientUserAgentIdentifier;
 
                 String host = this.config.getGatewayHostname();
                 if (host == null || host.isEmpty())

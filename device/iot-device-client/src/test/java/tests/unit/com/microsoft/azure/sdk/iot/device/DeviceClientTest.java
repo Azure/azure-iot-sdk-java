@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.sun.security.ntlm.Client;
 import mockit.*;
 import org.junit.Test;
 
@@ -147,6 +148,34 @@ public class DeviceClientTest
         };
     }
 
+    @Test
+    public void constructorWithClientOptionsSuccess() throws URISyntaxException, IOException
+    {
+        // arrange
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;deviceId=testdevice;SharedAccessKey=adjkl234j52=;";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        final ClientOptions clientOptions = new ClientOptions();
+        clientOptions.setModelId("dtmi:Company:device:1");
+
+        // act
+        final DeviceClient client = new DeviceClient(connString, protocol, clientOptions);
+
+        // assert
+        new Verifications()
+        {
+            {
+                IotHubConnectionString iotHubConnectionString = Deencapsulation.newInstance(IotHubConnectionString.class, connString);
+                times = 1;
+
+                IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
+                assertEquals(SINGLE_CLIENT, ioTHubConnectionType);
+
+                TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
+                assertNull(transportClient);
+            }
+        };
+    }
+
     // Tests_SRS_DEVICECLIENT_34_058: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
     // Tests_SRS_DEVICECLIENT_12_013: [The constructor shall set the connection type to SINGLE_CLIENT.]
     // Tests_SRS_DEVICECLIENT_12_014: [The constructor shall set the transportClient to null.]
@@ -222,6 +251,42 @@ public class DeviceClientTest
         };
     }
 
+    @Test
+    public void constructorWithSSLContextClientOptionsSuccess(@Mocked final SSLContext mockedSSLContext) throws URISyntaxException
+    {
+        // arrange
+        final String connString =
+                "HostName=iothub.device.com;deviceId=testdevice;x509=true";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        final ClientOptions clientOptions = new ClientOptions();
+        clientOptions.setModelId("dtmi:Company:device:1");
+
+        new Expectations()
+        {
+            {
+                new IotHubConnectionString(connString);
+                result = mockIotHubConnectionString;
+            }
+        };
+
+        // act
+        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext, clientOptions);
+
+        // assert
+        new Verifications()
+        {
+            {
+                IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
+                assertEquals(SINGLE_CLIENT, ioTHubConnectionType);
+
+                TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
+                assertNull(transportClient);
+
+                new DeviceClientConfig(mockIotHubConnectionString, mockedSSLContext);
+            }
+        };
+    }
+
     //Tests_SRS_DEVICECLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
     //Tests_SRS_DEVICECLIENT_34_066: [The provided security provider will be saved in config.]
     //Tests_SRS_DEVICECLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
@@ -232,6 +297,28 @@ public class DeviceClientTest
         final String expectedUri = "some uri";
         final String expectedDeviceId = "some device id";
         final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
+
+        //act
+        DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol);
+
+        //assert
+        new Verifications()
+        {
+            {
+                //TODO add check for super() call
+            }
+        };
+    }
+
+    @Test
+    public void createFromSecurityProviderUsesUriAndDeviceIdAndSavesSecurityProviderAndCreatesDeviceIOWithClientOptions() throws URISyntaxException, IOException
+    {
+        //arrange
+        final String expectedUri = "some uri";
+        final String expectedDeviceId = "some device id";
+        final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
+        final ClientOptions clientOptions = new ClientOptions();
+        clientOptions.setModelId("dtmi:Company:device:1");
 
         //act
         DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol);
