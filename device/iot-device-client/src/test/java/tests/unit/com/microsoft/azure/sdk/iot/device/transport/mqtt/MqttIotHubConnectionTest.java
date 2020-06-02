@@ -358,53 +358,6 @@ public class MqttIotHubConnectionTest
         };
     }
 
-    @Test
-    public void openEstablishesConnectionWithoutModelIdSetsCorrectLatestApiVersion() throws IOException, TransportException
-    {
-        final String expectedSasToken = "someToken";
-        final String serverUri = SSL_PREFIX + iotHubHostName + SSL_PORT_SUFFIX;
-        baseExpectations();
-
-        new Expectations()
-        {
-            {
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
-                result = expectedSasToken;
-                mockConfig.isUseWebsocket();
-                result = false;
-                mockConfig.getModelId();
-                result = null;
-            }
-        };
-
-        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
-        connection.open(mockedQueue, mockedScheduledExecutorService);
-
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION));
-
-        final String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
-
-        assertEquals(expectedSasToken, actualUserPassword);
-
-        IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
-        IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
-        assertEquals(expectedState, actualState);
-
-        new Verifications()
-        {
-            {
-                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, any, any, null);
-                times = 1;
-            }
-        };
-    }
-
     //Tests_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
     @Test
     public void openEstablishesWSConnectionUsingCorrectConfig(@Mocked final ProxySettings mockedProxySettings) throws IOException, TransportException
