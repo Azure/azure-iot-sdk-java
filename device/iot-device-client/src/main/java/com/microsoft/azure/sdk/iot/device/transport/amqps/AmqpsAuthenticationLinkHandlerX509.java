@@ -48,11 +48,6 @@ public class AmqpsAuthenticationLinkHandlerX509 extends AmqpsAuthenticationLinkH
     @Override
     protected void setSslDomain(Transport transport, SSLContext sslContext)
     {
-        if (transport == null)
-        {
-            throw new IllegalArgumentException("Input parameter transport cannot be null.");
-        }
-
         SslDomain domain = makeDomain(sslContext);
         transport.ssl(domain);
     }
