@@ -28,9 +28,6 @@ public final class IotHubUri
     /** The API version will be passed as a param in the URI. */
     public static final String API_VERSION = "api-version=" + TransportUtils.IOTHUB_API_VERSION;
 
-    /** The API version will be passed as a param in the URI for PnP. */
-    public static final String PNP_API_VERSION = "api-version=" + TransportUtils.PNP_IOTHUB_API_VERSION;
-
     /** The charset used when URL-encoding the IoT Hub name and device ID. */
     private static final Charset IOTHUB_URL_ENCODING_CHARSET =
             StandardCharsets.UTF_8;

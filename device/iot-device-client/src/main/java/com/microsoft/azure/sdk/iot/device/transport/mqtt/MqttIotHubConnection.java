@@ -151,18 +151,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     clientId += "/" + moduleId;
                 }
 
-                String apiVersion;
+                String serviceParams;
                 String modelId = this.config.getModelId();
-                if(modelId == null)
+                if(modelId == null || modelId.isEmpty())
                 {
-                    apiVersion = TransportUtils.IOTHUB_API_VERSION;
+                    serviceParams = TransportUtils.IOTHUB_API_VERSION;
                 }
                 else
                 {
-                    apiVersion = TransportUtils.PNP_IOTHUB_API_VERSION + "&" + ModelIdParam + "=" + modelId;
+                    serviceParams = TransportUtils.IOTHUB_API_VERSION_PREVIEW + "&" + ModelIdParam + "=" + modelId;
                 }
 
-                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + apiVersion + "&" + clientUserAgentIdentifier;
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
 
                 String host = this.config.getGatewayHostname();
                 if (host == null || host.isEmpty())

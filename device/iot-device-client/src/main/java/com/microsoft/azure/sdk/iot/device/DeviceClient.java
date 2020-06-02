@@ -172,15 +172,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException
     {
-        // Codes_SRS_DEVICECLIENT_21_001: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
-        super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
-
-        // Codes_SRS_DEVICECLIENT_34_075: [If the provided connection string contains a module id field, this function shall throw an UnsupportedOperationException.]
-        commonConstructorVerifications();
-
-        // Codes_SRS_DEVICECLIENT_12_012: [The constructor shall set the connection type to SINGLE_CLIENT.]
-        // Codes_SRS_DEVICECLIENT_12_015: [The constructor shall set the transportClient to null.]
-        commonConstructorSetup();
+        new DeviceClient(connString, protocol, (ClientOptions) null);
     }
 
     /**
@@ -255,9 +247,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
-        super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
-        commonConstructorVerifications();
-        commonConstructorSetup();
+        new DeviceClient(connString, protocol, sslContext, null);
     }
 
     /**
@@ -282,7 +272,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
@@ -298,7 +288,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
@@ -334,7 +324,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub

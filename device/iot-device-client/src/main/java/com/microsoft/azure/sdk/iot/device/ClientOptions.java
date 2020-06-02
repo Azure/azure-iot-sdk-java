@@ -6,10 +6,14 @@ package com.microsoft.azure.sdk.iot.device;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Options that allow configuration of the device client instance during initialization.
+ */
 public final class ClientOptions
 {
     /**
-     * The Plug and Play Model Id associated with the device identity.
+     * The Digital Twin Model Id associated with the device identity.
+     * Non plug and play users should not set this value
      */
     @Setter
     @Getter
