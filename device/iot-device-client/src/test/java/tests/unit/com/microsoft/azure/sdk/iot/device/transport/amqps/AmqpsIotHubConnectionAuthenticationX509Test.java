@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.ProductInfo;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.*;
-import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Properties;
 import org.apache.qpid.proton.amqp.messaging.Section;
@@ -28,11 +27,11 @@ import java.util.UUID;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for AmqpsDeviceAuthenticationX509
+ * Unit tests for AmqpsAuthenticationLinkHandlerX509
  * methods: 100%
  * lines: 84%
  */
-public class AmqpsDeviceAuthenticationX509Test
+public class AmqpsIotHubConnectionAuthenticationX509Test
 {
     private final String CBS_TO = "$cbs";
     private final String CBS_REPLY = "cbs";
@@ -109,59 +108,12 @@ public class AmqpsDeviceAuthenticationX509Test
     @Mocked
     SslDomain mockSSLDomain;
 
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_34_007: [This constructor shall call super with the provided user agent string.]
-    @Test
-    public void constructorCallsSuperWithConfigUserAgentString()
-    {
-        //arrange
-        final String expectedUserAgentString = "asdf";
-
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceClientConfig.getProductInfo();
-                result = mockedProductInfo;
-
-                mockedProductInfo.getUserAgentString();
-                result = expectedUserAgentString;
-            }
-        };
-
-        //act
-        AmqpsDeviceAuthenticationX509 actual = Deencapsulation.newInstance(AmqpsDeviceAuthenticationX509.class, mockDeviceClientConfig);
-
-        //assert
-        Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
-        assertTrue(amqpProperties.containsValue(expectedUserAgentString));
-    }
-
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_001: [The constructor shall throw IllegalArgumentException if the  deviceClientConfig parameter is null.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsForNullConfig()
-    {
-        new AmqpsDeviceAuthenticationX509(null);
-    }
-
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_002: [The constructor shall save the deviceClientConfig parameter value to a member variable.]
-    // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_003: [The constructor shall set both the sender and the receiver link state to OPENED.]
-    @Test
-    public void constructorSavesConfigAndSetsLinksToOpen()
-    {
-        //act
-        AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
-
-        //assert
-        assertEquals(AmqpsDeviceOperationLinkState.OPENED, Deencapsulation.getField(auth, "amqpsSendLinkState"));
-        assertEquals(AmqpsDeviceOperationLinkState.OPENED, Deencapsulation.getField(auth, "amqpsRecvLinkState"));
-        assertEquals(mockDeviceClientConfig, Deencapsulation.getField(auth, "deviceClientConfig"));
-    }
-
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_004: [The function shall override the default behaviour and return null.]
     @Test
     public void sendMessageAndGetDeliveryHashReturnsNull()
     {
         //arrange
-        AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
+        AmqpsAuthenticationLinkHandlerX509 auth = new AmqpsAuthenticationLinkHandlerX509();
 
         //act
         AmqpsSendReturnValue result = Deencapsulation.invoke(auth, "sendMessageAndGetDeliveryTag",
@@ -177,7 +129,7 @@ public class AmqpsDeviceAuthenticationX509Test
     public void getMessageFromReceiverLinkReturnsNull()
     {
         //arrange
-        AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
+        AmqpsAuthenticationLinkHandlerX509 auth = new AmqpsAuthenticationLinkHandlerX509();
 
         //act
         AmqpsSendReturnValue result = Deencapsulation.invoke(auth, "getMessageFromReceiverLink",
@@ -193,7 +145,7 @@ public class AmqpsDeviceAuthenticationX509Test
     public void setSSLContextThrowsForNullTransport()
     {
         //arrange
-        AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
+        AmqpsAuthenticationLinkHandlerX509 auth = new AmqpsAuthenticationLinkHandlerX509();
         final Transport nullTransport = null;
 
         //act
@@ -206,21 +158,18 @@ public class AmqpsDeviceAuthenticationX509Test
     public void setSSLContextCallsMakeDomainAndSetsDomain() throws IOException, TransportException
     {
         //arrange
-        final AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
+        final AmqpsAuthenticationLinkHandlerX509 auth = new AmqpsAuthenticationLinkHandlerX509();
 
         new StrictExpectations(auth)
         {
             {
-                mockDeviceClientConfig.getAuthenticationProvider().getSSLContext();
-                result = mockSSLContext;
-
                 Deencapsulation.invoke(auth, "makeDomain", mockSSLContext);
                 result = mockSSLDomain;
             }
         };
 
         //act
-        Deencapsulation.invoke(auth, "setSslDomain", new Class[]{Transport.class}, mockTransport);
+        Deencapsulation.invoke(auth, "setSslDomain", new Class[]{Transport.class, SSLContext.class}, mockTransport, mockSSLContext);
 
         //assert
         new Verifications()
@@ -234,13 +183,13 @@ public class AmqpsDeviceAuthenticationX509Test
 
     // Tests_SRS_AMQPSDEVICEAUTHENTICATIONX509_12_012: [The function shall override the default behaviour and return true.]
     @Test
-    public void onLinkRemoteOpenReturnsFalse()
+    public void onLinkRemoteOpenReturnsFalse(@Mocked final Link mockLink)
     {
         //arrange
-        final AmqpsDeviceAuthenticationX509 auth = new AmqpsDeviceAuthenticationX509(mockDeviceClientConfig);
+        final AmqpsAuthenticationLinkHandlerX509 auth = new AmqpsAuthenticationLinkHandlerX509();
 
         //act
-        boolean result = Deencapsulation.invoke(auth, "onLinkRemoteOpen", new Class[] {String.class}, "");
+        boolean result = Deencapsulation.invoke(auth, "onLinkRemoteOpen", new Class[] {Link.class}, mockLink);
 
         //assert
         assertFalse(result);

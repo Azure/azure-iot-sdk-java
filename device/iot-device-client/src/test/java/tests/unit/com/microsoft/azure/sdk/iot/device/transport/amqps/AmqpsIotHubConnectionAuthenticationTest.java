@@ -2,32 +2,31 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsDeviceAuthentication;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsAuthenticationLinkHandler;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.amqp.Symbol;
+import org.apache.qpid.proton.engine.Link;
 import org.apache.qpid.proton.engine.SslDomain;
 import org.apache.qpid.proton.engine.Transport;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 
-import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Unit tests for AmqpsDeviceAuthentication.
+ * Unit tests for AmqpsAuthenticationLinkHandler.
  * Methods: 100%
  * Lines: 100%
  */
-public class AmqpsDeviceAuthenticationTest
+public class AmqpsIotHubConnectionAuthenticationTest
 {
     @Mocked
     Proton mockProton;
@@ -41,21 +40,21 @@ public class AmqpsDeviceAuthenticationTest
     @Mocked
     DeviceClientConfig mockDeviceClientConfig;
 
-    private class AmqpsDeviceAuthenticationMock extends AmqpsDeviceAuthentication
+    private class AmqpsAuthenticationLinkHandlerMock extends AmqpsAuthenticationLinkHandler
     {
-        public AmqpsDeviceAuthenticationMock(DeviceClientConfig config)
+        public AmqpsAuthenticationLinkHandlerMock()
         {
-            super(config);
+            super();
         }
 
         @Override
-        protected void setSslDomain(Transport transport) throws TransportException
+        protected void setSslDomain(Transport transport, SSLContext sslContext)
         {
             //do nothing
         }
 
         @Override
-        protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
+        protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId)
         {
             //do nothing
         }
@@ -73,7 +72,7 @@ public class AmqpsDeviceAuthenticationTest
         }
 
         @Override
-        protected boolean onLinkRemoteOpen(String linkName)
+        protected boolean onLinkRemoteOpen(Link link)
         {
             return false;
         }
@@ -88,7 +87,7 @@ public class AmqpsDeviceAuthenticationTest
     public void makeDomainSuccess()
     {
         // arrange
-        final AmqpsDeviceAuthenticationMock amqpsDeviceAuthentication = new AmqpsDeviceAuthenticationMock(mockDeviceClientConfig);
+        final AmqpsAuthenticationLinkHandlerMock amqpsDeviceAuthentication = new AmqpsAuthenticationLinkHandlerMock();
 
         new NonStrictExpectations()
         {

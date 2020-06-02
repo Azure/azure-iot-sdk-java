@@ -8,8 +8,9 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSessionManager;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpSasTokenRenewalHandler;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSessionHandler;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Mocked;
@@ -23,7 +24,7 @@ import static junit.framework.TestCase.assertEquals;
 public class AmqpSasTokenRenewalHandlerTest
 {
     @Mocked
-    AmqpsSessionManager mockedAmqpsSessionManager;
+    AmqpsIotHubConnection mockedAmqpsIotHubConnection;
 
     @Mocked
     DeviceClientConfig mockedConfig;
@@ -37,22 +38,25 @@ public class AmqpSasTokenRenewalHandlerTest
     @Mocked
     IotHubSasTokenAuthenticationProvider mockSasTokenAuthentication;
 
+    @Mocked
+    AmqpsSessionHandler mockAmqpsSessionHandler;
+
     @Test
     public void constructorSavesArguments()
     {
         //act
-        AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
+        AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsIotHubConnection, mockAmqpsSessionHandler);
 
         //assert
-        assertEquals(mockedConfig, Deencapsulation.getField(sasTokenRenewalHandler, "config"));
-        assertEquals(mockedAmqpsSessionManager, Deencapsulation.getField(sasTokenRenewalHandler, "amqpsSessionManager"));
+        assertEquals(mockAmqpsSessionHandler, Deencapsulation.getField(sasTokenRenewalHandler, "sessionHandler"));
+        assertEquals(mockedAmqpsIotHubConnection, Deencapsulation.getField(sasTokenRenewalHandler, "amqpsIotHubConnection"));
     }
 
     @Test
     public void timerTaskSchedulesNextTimerTask()
     {
         //arrange
-        final AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
+        final AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsIotHubConnection, mockAmqpsSessionHandler);
 
         final int renewalPeriod = 1234;
 
@@ -61,6 +65,9 @@ public class AmqpSasTokenRenewalHandlerTest
             {
                 mockEvent.getReactor();
                 result = mockReactor;
+
+                mockAmqpsSessionHandler.getDeviceClientConfig();
+                result = mockedConfig;
 
                 mockedConfig.getSasTokenAuthentication();
                 result = mockSasTokenAuthentication;
@@ -85,7 +92,7 @@ public class AmqpSasTokenRenewalHandlerTest
     public void timerTaskAuthenticatesUsingSessionManager() throws TransportException
     {
         //arrange
-        final AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsSessionManager, mockedConfig);
+        final AmqpSasTokenRenewalHandler sasTokenRenewalHandler = new AmqpSasTokenRenewalHandler(mockedAmqpsIotHubConnection, mockAmqpsSessionHandler);
 
         final int renewalPeriod = 1234;
 
@@ -95,8 +102,12 @@ public class AmqpSasTokenRenewalHandlerTest
                 mockEvent.getReactor();
                 result = mockReactor;
 
+                mockAmqpsSessionHandler.getDeviceClientConfig();
+                result = mockedConfig;
+
                 mockedConfig.getSasTokenAuthentication();
                 result = mockSasTokenAuthentication;
+
                 mockSasTokenAuthentication.getMillisecondsBeforeProactiveRenewal();
                 result = renewalPeriod;
             }
@@ -109,7 +120,7 @@ public class AmqpSasTokenRenewalHandlerTest
         new Verifications()
         {
             {
-                mockedAmqpsSessionManager.authenticate();
+                mockedAmqpsIotHubConnection.authenticate(mockAmqpsSessionHandler);
                 times = 1;
             }
         };

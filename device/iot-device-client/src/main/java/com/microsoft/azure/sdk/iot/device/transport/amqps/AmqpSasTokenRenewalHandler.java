@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.engine.BaseHandler;
@@ -14,31 +13,30 @@ import org.apache.qpid.proton.engine.Event;
 @Slf4j
 public class AmqpSasTokenRenewalHandler extends BaseHandler
 {
-    AmqpsSessionManager amqpsSessionManager;
-    DeviceClientConfig config;
+    AmqpsIotHubConnection amqpsIotHubConnection;
+    AmqpsSessionHandler sessionHandler;
     private int retryPeriodMilliseconds = 5000;
 
-    public AmqpSasTokenRenewalHandler(AmqpsSessionManager amqpsSessionManager, DeviceClientConfig config)
+    public AmqpSasTokenRenewalHandler(AmqpsIotHubConnection amqpsIotHubConnection, AmqpsSessionHandler sessionHandler)
     {
-        this.amqpsSessionManager = amqpsSessionManager;
-        this.config = config;
+        this.amqpsIotHubConnection = amqpsIotHubConnection;
+        this.sessionHandler = sessionHandler;
     }
 
     @Override
     public void onTimerTask(Event event)
     {
-        //add message to session manager queue
         try
         {
             this.log.trace("AmqpSasTokenRenewalHandler OnTimerTask called, sending authentication message");
-            amqpsSessionManager.authenticate();
+            amqpsIotHubConnection.authenticate(sessionHandler);
 
             //schedule next renewal to take place at some recommended percentage before the latest token expires
-            event.getReactor().schedule(this.config.getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal(), this);
+            int millisecondDelayUntilNextAuthentication = this.sessionHandler.getDeviceClientConfig().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();
+            event.getReactor().schedule(millisecondDelayUntilNextAuthentication, this);
         }
         catch (TransportException e)
         {
-
             if (e.isRetryable())
             {
                 this.log.warn("Failed to send authentication message, trying again in {} milliseconds", retryPeriodMilliseconds, e);

@@ -5,10 +5,8 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Properties;
@@ -18,14 +16,19 @@ import org.apache.qpid.proton.engine.SslDomain;
 import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Defines the authentication session that exists in every SAS based amqp connection. There is one CBS sender link to send
+ * SAS tokens over, and one CBS receiver link to receive authentication status from.
+ */
 @Slf4j
-public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthentication
+public final class AmqpsAuthenticationLinkHandlerCBS extends AmqpsAuthenticationLinkHandler
 {
     private String PROP_KEY_STATUS_CODE = "status-code";
 
@@ -49,37 +52,20 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
 
     private long nextTag = 0;
 
-    private final DeviceClientConfig deviceClientConfig;
-
     /**
-     * This constructor creates an instance of AmqpsDeviceAuthenticationCBS class and initializes member variables
+     * This constructor creates an instance of AmqpsAuthenticationLinkHandlerCBS class and initializes member variables
      *
-     * @param deviceClientConfig the device config to use for authentication.
      * @throws IllegalArgumentException if deviceClientConfig is null.
      */
-    public AmqpsDeviceAuthenticationCBS(DeviceClientConfig deviceClientConfig) throws IllegalArgumentException
+    public AmqpsAuthenticationLinkHandlerCBS() throws IllegalArgumentException
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_050: [This constructor shall call super with the provided user agent string.]
-        super(deviceClientConfig);
+        super();
 
-        this.deviceClientConfig = deviceClientConfig;
-
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_001: [The constructor shall set the sender and receiver endpoint path to IoTHub specific values.]
-        this.senderLinkEndpointPath = SENDER_LINK_ENDPOINT_PATH;
-        this.receiverLinkEndpointPath = RECEIVER_LINK_ENDPOINT_PATH;
-
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_002: [The constructor shall concatenate a sender specific prefix to the sender link tag's current value.]
         this.senderLinkTag = SENDER_LINK_TAG_PREFIX + senderLinkTag;
         this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX + receiverLinkTag;
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_003: [The constructor shall set the sender and receiver endpoint path.]
-        this.senderLinkAddress = senderLinkEndpointPath;
-        this.receiverLinkAddress = receiverLinkEndpointPath;
-
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_004: [The constructor shall add API version key and API version value to the amqpProperties.*]
-        this.amqpProperties.put(Symbol.getSymbol(API_VERSION_KEY), TransportUtils.IOTHUB_API_VERSION);
-
-        this.amqpProperties.put(Symbol.getSymbol(MessageProperty.CONNECTION_DEVICE_ID), deviceClientConfig.getDeviceId());
+        this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
+        this.receiverLinkAddress = RECEIVER_LINK_ENDPOINT_PATH;
     }
 
     @Override
@@ -107,15 +93,14 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
 
             if (amqpsMessage.getCorrelationId() != null)
             {
-                this.log.debug("Received amqp message on cbs receiver link with link correlation id {} and message correlation id {}", this.linkCorrelationId, amqpsMessage.getCorrelationId());
+                this.log.trace("Received amqp message on cbs receiver link with link correlation id {} and message correlation id {}", this.linkCorrelationId, amqpsMessage.getCorrelationId());
             }
             else
             {
-                this.log.debug("Received amqp message on cbs receiver link with link correlation id {}", this.linkCorrelationId);
+                this.log.trace("Received amqp message on cbs receiver link with link correlation id {}", this.linkCorrelationId);
             }
         }
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_025: [The function shall return the message.]
         return amqpsMessage;
     }
 
@@ -129,19 +114,16 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
     @Override
     protected boolean handleAuthenticationMessage(AmqpsMessage amqpsMessage, UUID authenticationCorrelationId)
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_026: [The function shall return false if the amqpdMessage parameter is null or does not have Properties and Application properties.]
         if (amqpsMessage != null)
         {
             if (amqpsMessage.getApplicationProperties() != null && amqpsMessage.getProperties() != null)
             {
-                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_027: [The function shall read the correlationId property and compare it to the given correlationId and if they are different return false.]
                 Properties properties = amqpsMessage.getProperties();
                 Object correlationIdValue = properties.getCorrelationId();
                 if (correlationIdValue.equals(authenticationCorrelationId))
                 {
                     Map<String, Object> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
 
-                    // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_028: [The function shall read the application properties and if the status code property is not 200 return false.]
                     for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
                     {
                         String propertyKey = entry.getKey();
@@ -150,11 +132,8 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
                             int propertyValue = (int) entry.getValue();
                             if (propertyValue == 200)
                             {
-                                this.log.debug("CBS authentication message was acknowledged with status 200, authentication for one cbs link pair was successful");
-                                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_34_035: [If the correlationId and status code matches, this function will acknowledge the provided amqpsMessage.]
                                 amqpsMessage.acknowledge(AmqpsMessage.ACK_TYPE.COMPLETE);
 
-                                // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_029: [The function shall return true If both the correlationID and status code matches.]
                                 return true;
                             }
                             else
@@ -187,31 +166,16 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
 
     /**
      * Create domain from the SSLContext, set the sasl mechanism to 
-     * ANONYMUS and set domain on the transport 
+     * ANONYMOUS and set domain on the transport
      * 
      * @param transport Proton-J Transport object
-     * @throws TransportException if Proton throws IOException
      */
     @Override
-    protected void setSslDomain(Transport transport) throws TransportException
+    protected void setSslDomain(Transport transport, SSLContext sslContext)
     {
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_011: [The function shall set get the sasl layer from the transport.]
         Sasl sasl = transport.sasl();
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_012: [The function shall set the sasl mechanism to PLAIN.]
         sasl.setMechanisms("ANONYMOUS");
-
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_013: [The function shall set the SslContext on the domain.]
-        SslDomain domain = null;
-        try
-        {
-            domain = makeDomain(this.deviceClientConfig.getAuthenticationProvider().getSSLContext());
-        }
-        catch (IOException e)
-        {
-            log.error("setSslDomain has thrown an exception", e);
-            throw new TransportException(e);
-        }
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_014: [The function shall set the domain on the transport.]
+        SslDomain domain = makeDomain(sslContext);
         transport.ssl(domain);
     }
 
@@ -226,7 +190,7 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
     @Override
     protected void authenticate(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
     {
-        this.log.trace("authenticate called in AmqpsDeviceAuthenticationCBS");
+        this.log.trace("authenticate called in AmqpsAuthenticationLinkHandlerCBS");
         MessageImpl outgoingMessage = createCBSAuthenticationMessage(deviceClientConfig, correlationId);
         byte[] msgData = new byte[1024];
         int length;
@@ -269,7 +233,6 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
     {
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_016: [The function shall set the CBS related properties on the message.]
         Properties properties = new Properties();
         properties.setMessageId(messageId);
 
@@ -277,7 +240,6 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         properties.setReplyTo(CBS_REPLY);
         outgoingMessage.setProperties(properties);
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_017: [The function shall set the CBS related application properties on the message.]
         Map<String, Object> userProperties = new HashMap<>(3);
         userProperties.put(OPERATION_KEY, OPERATION_VALUE);
         userProperties.put(TYPE_KEY, TYPE_VALUE);
@@ -292,7 +254,6 @@ public final class AmqpsDeviceAuthenticationCBS extends AmqpsDeviceAuthenticatio
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 
-        // Codes_SRS_AMQPSDEVICEAUTHENTICATIONCBS_12_018: [The function shall set the the SAS token to the message body.]
         Section section;
         try
         {

@@ -13,10 +13,7 @@ import mockit.*;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.*;
-import org.apache.qpid.proton.engine.Delivery;
-import org.apache.qpid.proton.engine.Receiver;
-import org.apache.qpid.proton.engine.Sender;
-import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Test;
 
@@ -28,11 +25,11 @@ import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.*;
 import static org.junit.Assert.*;
 
 /**
-*  Unit tests for AmqpsDeviceTwin
+*  Unit tests for AmqpsTwinLinksHandler
 * 100% methods covered
 * 97% lines covered
 */
-public class AmqpsDeviceTwinTest
+public class AmqpsTwinLinksHandlerTest
 {
     @Mocked
     Session mockSession;
@@ -60,7 +57,7 @@ public class AmqpsDeviceTwinTest
     public void constructorThrowsIfDeviceIdEmpty()
     {
         //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, "");
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, "");
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_34_051: [This constructor shall call super with the provided user agent string.]
@@ -82,7 +79,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsDeviceTwin actual = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        AmqpsTwinLinksHandler actual = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
 
         //assert
         Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
@@ -117,27 +114,22 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        String API_VERSION_KEY = Deencapsulation.getField(amqpsDeviceTwin, "API_VERSION_KEY");
-        String CORRELATION_ID_KEY = Deencapsulation.getField(amqpsDeviceTwin, "CORRELATION_ID_KEY");
-        String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTwin, "SENDER_LINK_ENDPOINT_PATH");
-        String RECEIVER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTwin, "RECEIVER_LINK_ENDPOINT_PATH");
-        String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceTwin, "SENDER_LINK_TAG_PREFIX");
-        String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceTwin, "RECEIVER_LINK_TAG_PREFIX");
-        String senderLinkEndpointPath = Deencapsulation.getField(amqpsDeviceTwin, "senderLinkEndpointPath");
-        String receiverLinkEndpointPath = Deencapsulation.getField(amqpsDeviceTwin, "receiverLinkEndpointPath");
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        String API_VERSION_KEY = Deencapsulation.getField(amqpsTwinLinksManager, "API_VERSION_KEY");
+        String CORRELATION_ID_KEY = Deencapsulation.getField(amqpsTwinLinksManager, "CORRELATION_ID_KEY");
+        String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsTwinLinksManager, "DEVICE_SENDER_LINK_ENDPOINT_PATH");
+        String RECEIVER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsTwinLinksManager, "DEVICE_RECEIVER_LINK_ENDPOINT_PATH");
+        String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsTwinLinksManager, "SENDER_LINK_TAG_PREFIX");
+        String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsTwinLinksManager, "RECEIVER_LINK_TAG_PREFIX");
 
-        Map<Symbol, Object> amqpsProperties = Deencapsulation.invoke(amqpsDeviceTwin, "getAmqpProperties");
-        String senderLinkTag = Deencapsulation.invoke(amqpsDeviceTwin, "getSenderLinkTag");
-        String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceTwin, "getReceiverLinkTag");
-        String senderLinkAddress = Deencapsulation.invoke(amqpsDeviceTwin, "getSenderLinkAddress");
-        String receiverLinkAddress = Deencapsulation.invoke(amqpsDeviceTwin, "getReceiverLinkAddress");
+        Map<Symbol, Object> amqpsProperties = Deencapsulation.invoke(amqpsTwinLinksManager, "getAmqpProperties");
+        String senderLinkTag = Deencapsulation.invoke(amqpsTwinLinksManager, "getSenderLinkTag");
+        String receiverLinkTag = Deencapsulation.invoke(amqpsTwinLinksManager, "getReceiverLinkTag");
+        String senderLinkAddress = Deencapsulation.invoke(amqpsTwinLinksManager, "getSenderLinkAddress");
+        String receiverLinkAddress = Deencapsulation.invoke(amqpsTwinLinksManager, "getReceiverLinkAddress");
 
         //assert
-        assertNotNull(amqpsDeviceTwin);
-
-        assertTrue(SENDER_LINK_ENDPOINT_PATH.equals(senderLinkEndpointPath));
-        assertTrue(RECEIVER_LINK_ENDPOINT_PATH.equals(receiverLinkEndpointPath));
+        assertNotNull(amqpsTwinLinksManager);
 
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
@@ -151,7 +143,7 @@ public class AmqpsDeviceTwinTest
         assertTrue(amqpsProperties.containsKey(Symbol.getSymbol(API_VERSION_KEY)));
         assertTrue(amqpsProperties.containsKey(Symbol.getSymbol(CORRELATION_ID_KEY)));
 
-        Map<String, DeviceOperations> correlationIdList = Deencapsulation.getField(amqpsDeviceTwin, "correlationIdList");
+        Map<String, DeviceOperations> correlationIdList = Deencapsulation.getField(amqpsTwinLinksManager, "correlationIdList");
         assertNotNull(correlationIdList);
     }
 
@@ -183,15 +175,13 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsDeviceTwin amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        AmqpsTwinLinksHandler amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
 
 
-        String SENDER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_ENDPOINT_PATH_MODULES");
-        String RECEIVER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_ENDPOINT_PATH_MODULES");
+        String SENDER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "MODULE_SENDER_LINK_ENDPOINT_PATH");
+        String RECEIVER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "MODULE_RECEIVER_LINK_ENDPOINT_PATH");
         String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_TAG_PREFIX");
         String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_TAG_PREFIX");
-        String senderLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "senderLinkEndpointPath");
-        String receiverLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "receiverLinkEndpointPath");
 
         String senderLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getSenderLinkTag");
         String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getReceiverLinkTag");
@@ -200,9 +190,6 @@ public class AmqpsDeviceTwinTest
 
         //assert
         assertNotNull(amqpsDeviceMethods);
-
-        assertTrue(SENDER_LINK_ENDPOINT_PATH_MODULES.equals(senderLinkEndpointPath));
-        assertTrue(RECEIVER_LINK_ENDPOINT_PATH_MODULES.equals(receiverLinkEndpointPath));
 
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
@@ -225,17 +212,17 @@ public class AmqpsDeviceTwinTest
     public void classHasAnnotationFieldsValues()
     {
         //act
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        String MESSAGE_ANNOTATION_FIELD_KEY_OPERATION = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_OPERATION");
-        String MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE");
-        String MESSAGE_ANNOTATION_FIELD_KEY_STATUS = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_STATUS");
-        String MESSAGE_ANNOTATION_FIELD_KEY_VERSION = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_VERSION");
-        String MESSAGE_ANNOTATION_FIELD_VALUE_GET = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_GET");
-        String MESSAGE_ANNOTATION_FIELD_VALUE_PATCH = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_PATCH");
-        String MESSAGE_ANNOTATION_FIELD_VALUE_PUT = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_PUT");
-        String MESSAGE_ANNOTATION_FIELD_VALUE_DELETE = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_DELETE");
-        String MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED");
-        String MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED");
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        String MESSAGE_ANNOTATION_FIELD_KEY_OPERATION = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_KEY_OPERATION");
+        String MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE");
+        String MESSAGE_ANNOTATION_FIELD_KEY_STATUS = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_KEY_STATUS");
+        String MESSAGE_ANNOTATION_FIELD_KEY_VERSION = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_KEY_VERSION");
+        String MESSAGE_ANNOTATION_FIELD_VALUE_GET = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_VALUE_GET");
+        String MESSAGE_ANNOTATION_FIELD_VALUE_PATCH = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_VALUE_PATCH");
+        String MESSAGE_ANNOTATION_FIELD_VALUE_PUT = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_VALUE_PUT");
+        String MESSAGE_ANNOTATION_FIELD_VALUE_DELETE = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_VALUE_DELETE");
+        String MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_REPORTED");
+        String MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_VALUE_NOTIFICATIONS_TWIN_PROPERTIES_DESIRED");
 
         //assert
         assertTrue(MESSAGE_ANNOTATION_FIELD_KEY_OPERATION.equals("operation"));
@@ -256,7 +243,7 @@ public class AmqpsDeviceTwinTest
     @Test
     public void sendMessageAndGetDeliveryTagCallsSuper() throws IOException
     {
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -268,6 +255,12 @@ public class AmqpsDeviceTwinTest
                 mockSession.sender(anyString);
                 result = mockSender;
 
+                mockSender.getRemoteState();
+                result = EndpointState.ACTIVE;
+
+                mockSender.getLocalState();
+                result = EndpointState.ACTIVE;
+
                 mockSender.send(msgData, offset, length);
                 result = length;
 
@@ -276,10 +269,10 @@ public class AmqpsDeviceTwinTest
             }
         };
 
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TWIN, msgData, offset, length, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TWIN, msgData, offset, length, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
         deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
@@ -296,11 +289,11 @@ public class AmqpsDeviceTwinTest
         String deviceId = "deviceId";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, bytes, 0, 1, bytes);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
         byte[] deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
@@ -320,11 +313,11 @@ public class AmqpsDeviceTwinTest
         String linkName = "receiver";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
-        Deencapsulation.setField(amqpsDeviceTwin, "receiverLink", mockReceiver);
-        Deencapsulation.setField(amqpsDeviceTwin, "senderLink", mockSender);
-        Deencapsulation.setField(amqpsDeviceTwin, "receiverLinkTag", linkName);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
+        Deencapsulation.setField(amqpsTwinLinksManager, "receiverLink", mockReceiver);
+        Deencapsulation.setField(amqpsTwinLinksManager, "senderLink", mockSender);
+        Deencapsulation.setField(amqpsTwinLinksManager, "receiverLinkTag", linkName);
 
         new NonStrictExpectations()
         {
@@ -339,7 +332,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsDeviceTwin, "getMessageFromReceiverLink", linkName);
+        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "getMessageFromReceiverLink", linkName);
 
         //assert
         assertNotNull(amqpsMessage);
@@ -366,11 +359,11 @@ public class AmqpsDeviceTwinTest
         String linkName = "receiver";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
-        Deencapsulation.setField(amqpsDeviceTwin, "receiverLink", mockReceiver);
-        Deencapsulation.setField(amqpsDeviceTwin, "senderLink", mockSender);
-        Deencapsulation.setField(amqpsDeviceTwin, "receiverLinkTag", linkName);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
+        Deencapsulation.setField(amqpsTwinLinksManager, "receiverLink", mockReceiver);
+        Deencapsulation.setField(amqpsTwinLinksManager, "senderLink", mockSender);
+        Deencapsulation.setField(amqpsTwinLinksManager, "receiverLinkTag", linkName);
 
         new NonStrictExpectations()
         {
@@ -385,7 +378,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsDeviceTwin, "getMessageFromReceiverLink", linkName);
+        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "getMessageFromReceiverLink", linkName);
 
         //assert
         assertNull(amqpsMessage);
@@ -404,7 +397,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_015: [The function shall return null if the message type is null or not DEVICE_TWIN.]
     @Test
-    public void convertFromProtonReturnsNull(
+    public void protonMessageToIoTHubMessageReturnsNull(
             @Mocked final AmqpsMessage mockAmqpsMessage,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
     ) throws IOException
@@ -413,8 +406,8 @@ public class AmqpsDeviceTwinTest
         String deviceId = "deviceId";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -425,7 +418,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
+        IotHubTransportMessage amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", mockAmqpsMessage, mockDeviceClientConfig);
 
         //assert
         assertNull(amqpsConvertFromProtonReturnValue);
@@ -436,7 +429,7 @@ public class AmqpsDeviceTwinTest
     // Tests_SRS_AMQPSDEVICETWIN_12_027: [The function shall create a AmqpsConvertFromProtonReturnValue and set the message field to the new IotHubTransportMessage.]
     // Tests_SRS_AMQPSDEVICETWIN_12_028: [The function shall create a AmqpsConvertFromProtonReturnValue and copy the DeviceClientConfig callback and context to it.]
     @Test
-    public void convertFromProtonEmptyBodySuccess(
+    public void protonMessageToIoTHubMessageEmptyBodySuccess(
             @Mocked final AmqpsMessage mockAmqpsMessage,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
     ) throws IOException
@@ -446,8 +439,8 @@ public class AmqpsDeviceTwinTest
         byte[] bytes = new byte[1];
         final Object messageContext = "context";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -470,10 +463,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", mockAmqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -484,7 +476,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_020: [The function shall read the proton message annotations and set the status to the value of STATUS key.]
     @Test
-    public void convertFromProtonSuccessWithStatusAnnotation(
+    public void protonMessageToIoTHubMessageSuccessWithStatusAnnotation(
             @Mocked final Symbol mockSymbol,
             @Mocked final Map<Symbol, Object> mockMapSymbolObject,
             @Mocked final MessageAnnotations mockMessageAnnotations,
@@ -506,9 +498,9 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(mockMessageAnnotations);
         amqpsMessage.setProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        final String MESSAGE_ANNOTATION_FIELD_KEY_STATUS = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_STATUS");
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        final String MESSAGE_ANNOTATION_FIELD_KEY_STATUS = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_KEY_STATUS");
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -536,13 +528,13 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
+
         //assert
         assertNotNull(actualMessage);
-        assertEquals(status, ((IotHubTransportMessage)actualMessage).getStatus());
+        assertEquals(status, actualMessage.getStatus());
 
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
@@ -551,7 +543,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_021: [The function shall read the proton message annotations and set the version to the value of VERSION key.]
     @Test
-    public void convertFromProtonSuccessWithVersionAnnotation(
+    public void protonMessageToIoTHubMessageSuccessWithVersionAnnotation(
             @Mocked final Symbol mockSymbol,
             @Mocked final Map<Symbol, Object> mockMapSymbolObject,
             @Mocked final MessageAnnotations mockMessageAnnotations,
@@ -573,9 +565,9 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(mockMessageAnnotations);
         amqpsMessage.setProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        final String MESSAGE_ANNOTATION_FIELD_KEY_VERSION = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_VERSION");
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        final String MESSAGE_ANNOTATION_FIELD_KEY_VERSION = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_KEY_VERSION");
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -603,14 +595,13 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
-        assertEquals(version, ((IotHubTransportMessage)actualMessage).getVersion());
+        assertEquals(version, actualMessage.getVersion());
 
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
@@ -619,7 +610,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_022: [The function shall read the proton message annotations and set the operation type to SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if the PROPERTIES_DESIRED resource exist.]
     @Test
-    public void convertFromProtonSuccessWithResourceAnnotation(
+    public void protonMessageToIoTHubMessageSuccessWithResourceAnnotation(
             @Mocked final Symbol mockSymbol,
             @Mocked final Map<Symbol, Object> mockMapSymbolObject,
             @Mocked final MessageAnnotations mockMessageAnnotations,
@@ -640,10 +631,10 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(mockMessageAnnotations);
         amqpsMessage.setProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        final String MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE");
-        final String MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED = Deencapsulation.getField(amqpsDeviceTwin, "MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED");
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        final String MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE");
+        final String MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED = Deencapsulation.getField(amqpsTwinLinksManager, "MESSAGE_ANNOTATION_FIELD_VALUE_PROPERTIES_DESIRED");
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -671,11 +662,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
-
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -688,7 +677,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_024: [The function shall set the operation type to SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE if the proton correlation ID is not present.]
     @Test
-    public void convertFromProtonPropertiesCorrelationIdNull(
+    public void protonMessageToIoTHubMessagePropertiesCorrelationIdNull(
             @Mocked final Properties mockProperties,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
     ) throws IOException
@@ -706,8 +695,8 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -732,10 +721,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -748,7 +736,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_044: [The function shall set the IotHubTransportMessage correlationID to the proton correlationId.]
     @Test
-    public void convertFromProtonPropertiesCorrelationIdSet(
+    public void protonMessageToIoTHubMessagePropertiesCorrelationIdSet(
             @Mocked final Properties mockProperties,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
     ) throws IOException
@@ -767,8 +755,8 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -792,10 +780,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -808,7 +795,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_023: [The function shall find the proton correlation ID in the correlationIdList and if it is found, set the operation type to the related response.]
     @Test
-    public void convertFromProtonPropertiesCorrelationIdGetRequest(
+    public void protonMessageToIoTHubMessagePropertiesCorrelationIdGetRequest(
             @Mocked final Properties mockProperties,
             @Mocked final Map<String, DeviceOperations> mockCorrelationIdList,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
@@ -828,9 +815,9 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTwinLinksManager, "correlationIdList", mockCorrelationIdList);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -860,10 +847,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -877,7 +863,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_023: [The function shall find the proton correlation ID in the correlationIdList and if it is found, set the operation type to the related response.]
     @Test
-    public void convertFromProtonPropertiesCorrelationIdUpdateReportedPropertiesRequest(
+    public void protonMessageToIoTHubMessagePropertiesCorrelationIdUpdateReportedPropertiesRequest(
             @Mocked final Properties mockProperties,
             @Mocked final Map<String, DeviceOperations> mockCorrelationIdList,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
@@ -897,9 +883,9 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTwinLinksManager, "correlationIdList", mockCorrelationIdList);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -929,10 +915,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -946,7 +931,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_023: [The function shall find the proton correlation ID in the correlationIdList and if it is found, set the operation type to the related response.]
     @Test
-    public void convertFromProtonPropertiesCorrelationIdSubscribeDesiredPropertiesRequest(
+    public void protonMessageToIoTHubMessagePropertiesCorrelationIdSubscribeDesiredPropertiesRequest(
             @Mocked final Properties mockProperties,
             @Mocked final Map<String, DeviceOperations> mockCorrelationIdList,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
@@ -966,9 +951,9 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTwinLinksManager, "correlationIdList", mockCorrelationIdList);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -998,24 +983,15 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
 
         //assert
-        assertNotNull(actualMessage);
-        assertEquals(correlationId, (actualMessage).getCorrelationId());
-        assertEquals(DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE, ((IotHubTransportMessage)actualMessage).getDeviceOperationType());
-
-        assertEquals(bytes.length, actualMessage.getBytes().length);
-        assertEquals(mockMessageCallback, actualMessageCallback);
-        assertEquals(messageContext, actualMessageContext);
+        assertEquals(bytes.length, amqpsConvertFromProtonReturnValue.getBytes().length);
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_023: [The function shall find the proton correlation ID in the correlationIdList and if it is found, set the operation type to the related response.]
     @Test
-    public void convertFromProtonPropertiesCorrelationIdUnSubscribeDesiredPropertiesRequest(
+    public void protonMessageToIoTHubMessagePropertiesCorrelationIdUnSubscribeDesiredPropertiesRequest(
             @Mocked final Properties mockProperties,
             @Mocked final Map<String, DeviceOperations> mockCorrelationIdList,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
@@ -1035,9 +1011,9 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTwinLinksManager, "correlationIdList", mockCorrelationIdList);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1067,10 +1043,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -1084,7 +1059,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_043: [The function shall remove the correlation from the correlationId list.]
     @Test
-    public void convertFromProtonPropertiesCorrelationIdRemoves(
+    public void protonMessageToIoTHubMessagePropertiesCorrelationIdRemoves(
             @Mocked final Properties mockProperties,
             @Mocked final Map<String, DeviceOperations> mockCorrelationIdList,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
@@ -1104,9 +1079,9 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setMessageAnnotations(null);
         amqpsMessage.setProperties(mockProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTwinLinksManager, "correlationIdList", mockCorrelationIdList);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1136,10 +1111,9 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         new Verifications()
@@ -1161,7 +1135,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_025: [The function shall copy the correlationId, messageId, To and userId properties to the IotHubTransportMessage properties.]
     @Test
-    public void convertFromProtonPropertiesSet(
+    public void protonMessageToIoTHubMessagePropertiesSet(
             @Mocked final Properties mockProperties,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
     ) throws IOException
@@ -1182,11 +1156,11 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setProperties(mockProperties);
         amqpsMessage.setApplicationProperties(null);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        final String AMQPS_APP_PROPERTY_PREFIX = Deencapsulation.getField(amqpsDeviceTwin, "AMQPS_APP_PROPERTY_PREFIX");
-        final String TO_KEY = Deencapsulation.getField(amqpsDeviceTwin, "TO_KEY");
-        final String USER_ID_KEY = Deencapsulation.getField(amqpsDeviceTwin, "USER_ID_KEY");
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        final String AMQPS_APP_PROPERTY_PREFIX = Deencapsulation.getField(amqpsTwinLinksManager, "AMQPS_APP_PROPERTY_PREFIX");
+        final String TO_KEY = Deencapsulation.getField(amqpsTwinLinksManager, "TO_KEY");
+        final String USER_ID_KEY = Deencapsulation.getField(amqpsTwinLinksManager, "USER_ID_KEY");
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1210,16 +1184,15 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
-        assertEquals(messageId, ((IotHubTransportMessage)actualMessage).getMessageId());
-        assertEquals(to, ((IotHubTransportMessage)actualMessage).getProperty(AMQPS_APP_PROPERTY_PREFIX + TO_KEY));
-        assertEquals(userId.toString(), ((IotHubTransportMessage)actualMessage).getProperty(AMQPS_APP_PROPERTY_PREFIX + USER_ID_KEY));
+        assertEquals(messageId, actualMessage.getMessageId());
+        assertEquals(to, actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + TO_KEY));
+        assertEquals(userId.toString(), actualMessage.getProperty(AMQPS_APP_PROPERTY_PREFIX + USER_ID_KEY));
 
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
@@ -1228,7 +1201,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
     @Test
-    public void convertFromProtonApplicationPropertiesReservedNotSet(
+    public void protonMessageToIoTHubMessageApplicationPropertiesReservedNotSet(
             @Mocked final Map<String, String> mockMapStringString,
             @Mocked final ApplicationProperties mockApplicationProperties,
             @Mocked final Map.Entry<String, String> mockStringStringEntry,
@@ -1251,8 +1224,8 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setProperties(null);
         amqpsMessage.setApplicationProperties(mockApplicationProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1276,14 +1249,13 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
-        assertEquals(null, ((IotHubTransportMessage)actualMessage).getProperty(propertyKey));
+        assertEquals(null, actualMessage.getProperty(propertyKey));
 
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
@@ -1292,7 +1264,7 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_026: [The function shall copy the Proton application properties to IotHubTransportMessage properties excluding the reserved property names.]
     @Test
-    public void convertFromProtonApplicationPropertiesSet(
+    public void protonMessageToIoTHubMessageApplicationPropertiesSet(
             @Mocked final Map<String, String> mockMapStringString,
             @Mocked final ApplicationProperties mockApplicationProperties,
             @Mocked final Map.Entry<String, String> mockStringStringEntry,
@@ -1315,8 +1287,8 @@ public class AmqpsDeviceTwinTest
         amqpsMessage.setProperties(null);
         amqpsMessage.setApplicationProperties(mockApplicationProperties);
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1340,14 +1312,13 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertFromProton", amqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTwinLinksManager, "protonMessageToIoTHubMessage", amqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
-        assertEquals(propertyValue, ((IotHubTransportMessage)actualMessage).getProperty(propertyKey));
+        assertEquals(propertyValue, actualMessage.getProperty(propertyKey));
 
         assertEquals(bytes.length, actualMessage.getBytes().length);
         assertEquals(mockMessageCallback, actualMessageCallback);
@@ -1356,15 +1327,15 @@ public class AmqpsDeviceTwinTest
 
     // Tests_SRS_AMQPSDEVICETWIN_12_029: [*The function shall return null if the message type is null or not DEVICE_TWIN.]
     @Test
-    public void convertToProtonReturnsNull(
+    public void iotHubMessageToProtonMessageReturnsNull(
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage
     ) throws IOException
     {
         //arrange
         String deviceId = "deviceId";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1375,7 +1346,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         assertNull(amqpsConvertToProtonReturnValue);
@@ -1385,15 +1356,15 @@ public class AmqpsDeviceTwinTest
     // Tests_SRS_AMQPSDEVICETWIN_12_041: [The function shall create a AmqpsConvertToProtonReturnValue and set the message field to the new proton message.]
     // Tests_SRS_AMQPSDEVICETWIN_12_042: [The function shall create a AmqpsConvertToProtonReturnValue and set the message type to DEVICE_TWIN.]
     @Test
-    public void convertToProtonReturnsProtonMessage(
+    public void iotHubMessageToProtonMessageReturnsProtonMessage(
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage
     ) throws IOException
     {
         //arrange
         String deviceId = "deviceId";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1404,14 +1375,10 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
-        MessageImpl actualMessageImpl = Deencapsulation.getField(amqpsConvertToProtonReturnValue, "messageImpl");
-        MessageType actualMessageType = Deencapsulation.getField(amqpsConvertToProtonReturnValue, "messageType");
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(actualMessageImpl);
-        assertEquals(MessageType.DEVICE_TWIN, actualMessageType);
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_031: [The function shall copy the correlationId, messageId properties to the Proton message properties.]
@@ -1419,7 +1386,7 @@ public class AmqpsDeviceTwinTest
     // Tests_SRS_AMQPSDEVICETWIN_34_052: [If the message has an outputName saved, this function shall set that
     // value to the "iothub-outputname" application property in the proton message.]
     @Test
-    public void convertToProtonSetsProperties(
+    public void iotHubMessageToProtonMessageSetsProperties(
             @Mocked final Properties mockProperties,
             @Mocked final Map<String, DeviceOperations> mockCorrelationIdList,
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage,
@@ -1431,9 +1398,9 @@ public class AmqpsDeviceTwinTest
         final String messageId = "messageId";
         final String correlationId = "correlationId";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTwin, "correlationIdList", mockCorrelationIdList);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTwinLinksManager, "correlationIdList", mockCorrelationIdList);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1451,7 +1418,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         new Verifications()
@@ -1469,13 +1436,11 @@ public class AmqpsDeviceTwinTest
         };
 
         assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageImpl"));
-        assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_032: [The function shall copy the user properties to Proton message application properties excluding the reserved property names.]
     @Test
-    public void convertToProtonSetsUserProperties(
+    public void iotHubMessageToProtonMessageSetsUserProperties(
             @Mocked final Properties mockProtonProperties,
             @Mocked final MessageProperty mockMessageProperty,
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage,
@@ -1492,8 +1457,8 @@ public class AmqpsDeviceTwinTest
         final String propertyKey = "testPropertyKey";
         final String propertyValue = "testPropertyValue";
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1522,7 +1487,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         new Verifications()
@@ -1534,13 +1499,11 @@ public class AmqpsDeviceTwinTest
         };
 
         assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageImpl"));
-        assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_033: [The function shall set the proton message annotation operation field to GET if the IotHubTransportMessage operation type is GET_REQUEST.]
     @Test
-    public void convertToProtonSetsMessageAnnotationsGetRequest(
+    public void iotHubMessageToProtonMessageSetsMessageAnnotationsGetRequest(
             @Mocked final Properties mockProtonProperties,
             @Mocked final MessageProperty mockMessageProperty,
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage,
@@ -1555,8 +1518,8 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1583,7 +1546,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         new Verifications()
@@ -1595,13 +1558,11 @@ public class AmqpsDeviceTwinTest
         };
 
         assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageImpl"));
-        assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_033: [The function shall set the proton message annotation operation field to GET if the IotHubTransportMessage operation type is GET_REQUEST.]
     @Test
-    public void convertToProtonSetsMessageAnnotationsUpdateReportedPropertiesRequest(
+    public void iotHubMessageToProtonMessageSetsMessageAnnotationsUpdateReportedPropertiesRequest(
             @Mocked final Properties mockProtonProperties,
             @Mocked final MessageProperty mockMessageProperty,
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage,
@@ -1616,8 +1577,8 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1644,7 +1605,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         new Verifications()
@@ -1656,13 +1617,11 @@ public class AmqpsDeviceTwinTest
         };
 
         assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageImpl"));
-        assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_033: [The function shall set the proton message annotation operation field to GET if the IotHubTransportMessage operation type is GET_REQUEST.]
     @Test
-    public void convertToProtonSetsMessageAnnotationsSubscribeDesiredPropertiesRequest(
+    public void iotHubMessageToProtonMessageSetsMessageAnnotationsSubscribeDesiredPropertiesRequest(
             @Mocked final Properties mockProtonProperties,
             @Mocked final MessageProperty mockMessageProperty,
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage,
@@ -1677,8 +1636,8 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1705,7 +1664,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         new Verifications()
@@ -1717,13 +1676,11 @@ public class AmqpsDeviceTwinTest
         };
 
         assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageImpl"));
-        assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
     }
 
     // Tests_SRS_AMQPSDEVICETWIN_12_033: [The function shall set the proton message annotation operation field to GET if the IotHubTransportMessage operation type is GET_REQUEST.]
     @Test
-    public void convertToProtonSetsMessageAnnotationsUnSubscribeDesiredPropertiesRequest(
+    public void iotHubMessageToProtonMessageSetsMessageAnnotationsUnSubscribeDesiredPropertiesRequest(
             @Mocked final Properties mockProtonProperties,
             @Mocked final MessageProperty mockMessageProperty,
             @Mocked final IotHubTransportMessage mockIotHubTransportMessage,
@@ -1738,8 +1695,8 @@ public class AmqpsDeviceTwinTest
         final MessageProperty[] properties = new MessageProperty[1];
         properties[0] = mockMessageProperty;
 
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTwin, "openLinks", mockSession);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTwinLinksManager, "openLinks", mockSession);
 
         new NonStrictExpectations()
         {
@@ -1766,7 +1723,7 @@ public class AmqpsDeviceTwinTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTwin, "convertToProton", mockIotHubTransportMessage);
+        MessageImpl amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockIotHubTransportMessage);
 
         //assert
         new Verifications()
@@ -1778,8 +1735,6 @@ public class AmqpsDeviceTwinTest
         };
 
         assertNotNull(amqpsConvertToProtonReturnValue);
-        assertNotNull(Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageImpl"));
-        assertEquals(MessageType.DEVICE_TWIN, Deencapsulation.invoke(amqpsConvertToProtonReturnValue, "getMessageType"));
     }
 
     // Codes_SRS_AMQPSDEVICETWIN_12_034: [The function shall set the proton message annotation operation field to PATCH if the IotHubTransportMessage operation type is UPDATE_REPORTED_PROPERTIES_REQUEST.]
@@ -1790,7 +1745,7 @@ public class AmqpsDeviceTwinTest
             @Mocked final IotHubTransportMessage mockedIotHubTransportMessage)
     {
         // arrange
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
         final MessageProperty[] messageProperties = new MessageProperty[] {};
 
         new NonStrictExpectations()
@@ -1806,11 +1761,13 @@ public class AmqpsDeviceTwinTest
                 result = DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST;
                 mockedIotHubTransportMessage.getVersion();
                 result = "10";
+                mockedIotHubTransportMessage.getMessageType();
+                result = MessageType.DEVICE_TWIN;
             }
         };
 
         // act
-        MessageImpl result = Deencapsulation.invoke(amqpsDeviceTwin, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
+        MessageImpl result = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
 
         // assert
         MessageAnnotations annotations = result.getMessageAnnotations();
@@ -1828,7 +1785,7 @@ public class AmqpsDeviceTwinTest
             @Mocked final IotHubTransportMessage mockedIotHubTransportMessage)
     {
         // arrange
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
         final MessageProperty[] messageProperties = new MessageProperty[] {};
 
         new NonStrictExpectations()
@@ -1842,11 +1799,13 @@ public class AmqpsDeviceTwinTest
                 result = messageProperties;
                 mockedIotHubTransportMessage.getDeviceOperationType();
                 result = DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
+                mockedIotHubTransportMessage.getMessageType();
+                result = MessageType.DEVICE_TWIN;
             }
         };
 
         // act
-        MessageImpl result = Deencapsulation.invoke(amqpsDeviceTwin, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
+        MessageImpl result = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
 
         // assert
         MessageAnnotations annotations = result.getMessageAnnotations();
@@ -1863,7 +1822,7 @@ public class AmqpsDeviceTwinTest
             @Mocked final IotHubTransportMessage mockedIotHubTransportMessage)
     {
         // arrange
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
+        AmqpsTwinLinksHandler amqpsTwinLinksManager = Deencapsulation.newInstance(AmqpsTwinLinksHandler.class, mockDeviceClientConfig);
         final MessageProperty[] messageProperties = new MessageProperty[] {};
 
         new NonStrictExpectations()
@@ -1877,11 +1836,13 @@ public class AmqpsDeviceTwinTest
                 result = messageProperties;
                 mockedIotHubTransportMessage.getDeviceOperationType();
                 result = DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST;
+                mockedIotHubTransportMessage.getMessageType();
+                result = MessageType.DEVICE_TWIN;
             }
         };
 
         // act
-        MessageImpl result = Deencapsulation.invoke(amqpsDeviceTwin, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
+        MessageImpl result = Deencapsulation.invoke(amqpsTwinLinksManager, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
 
         // assert
         MessageAnnotations annotations = result.getMessageAnnotations();
@@ -1889,34 +1850,5 @@ public class AmqpsDeviceTwinTest
         assertEquals(2, map.size());
         assertEquals("DELETE", map.get(Symbol.valueOf("operation")));
         assertEquals("/notifications/twin/properties/desired", map.get(Symbol.valueOf("resource")));
-    }
-
-    // Codes_SRS_AMQPSDEVICETWIN_21_050: [If the provided version is not `Long`, the function shall throw TransportException.]
-    @Test (expected = TransportException.class)
-    public void iotHubMessageToProtonMessageThrowsIfVersionIsNotLong(
-            @Mocked final IotHubTransportMessage mockedIotHubTransportMessage)
-    {
-        // arrange
-        AmqpsDeviceTwin amqpsDeviceTwin = Deencapsulation.newInstance(AmqpsDeviceTwin.class, mockDeviceClientConfig);
-        final MessageProperty[] messageProperties = new MessageProperty[] {};
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedIotHubTransportMessage.getMessageId();
-                result = null;
-                mockedIotHubTransportMessage.getCorrelationId();
-                result = null;
-                mockedIotHubTransportMessage.getProperties();
-                result = messageProperties;
-                mockedIotHubTransportMessage.getDeviceOperationType();
-                result = DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST;
-                mockedIotHubTransportMessage.getVersion();
-                result = "not number";
-            }
-        };
-
-        // act - assert
-        Deencapsulation.invoke(amqpsDeviceTwin, "iotHubMessageToProtonMessage", mockedIotHubTransportMessage);
     }
 }

@@ -120,7 +120,7 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
 
     public int getMillisecondsBeforeProactiveRenewal()
     {
-        return (int) this.tokenValidSecs * this.timeBufferPercentage;
+        return (int) ((this.tokenValidSecs * 1000) * (this.timeBufferPercentage / 100.0));
     }
 
     public long getTokenValidSecs()

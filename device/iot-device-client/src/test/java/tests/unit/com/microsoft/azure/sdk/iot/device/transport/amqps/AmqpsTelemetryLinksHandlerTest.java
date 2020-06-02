@@ -5,24 +5,21 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
 import mockit.*;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.amqp.messaging.MessageAnnotations;
 import org.apache.qpid.proton.amqp.messaging.Properties;
-import org.apache.qpid.proton.engine.Delivery;
-import org.apache.qpid.proton.engine.Receiver;
-import org.apache.qpid.proton.engine.Sender;
-import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -32,11 +29,11 @@ import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
 
 /**
-*  Unit tests for AmqpsDeviceTelemetryTest
+*  Unit tests for AmqpsTelemetryLinksHandlerTest
 * 100% methods covered
 * 86% lines covered
 */
-public class AmqpsDeviceTelemetryTest
+public class AmqpsTelemetryLinksHandlerTest
 {
     final String deviceId = "test-deviceId";
 
@@ -87,22 +84,17 @@ public class AmqpsDeviceTelemetryTest
         };
 
         //act
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_ENDPOINT_PATH_DEVICES");
-        String RECEIVER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsDeviceTelemetry, "RECEIVER_LINK_ENDPOINT_PATH_DEVICES");
-        String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceTelemetry, "SENDER_LINK_TAG_PREFIX");
-        String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceTelemetry, "RECEIVER_LINK_TAG_PREFIX");
-        String senderLinkEndpointPath = Deencapsulation.getField(amqpsDeviceTelemetry, "senderLinkEndpointPath");
-        String receiverLinkEndpointPath = Deencapsulation.getField(amqpsDeviceTelemetry, "receiverLinkEndpointPath");
-        String senderLinkTag = Deencapsulation.invoke(amqpsDeviceTelemetry, "getSenderLinkTag");
-        String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceTelemetry, "getReceiverLinkTag");
-        String senderLinkAddress = Deencapsulation.invoke(amqpsDeviceTelemetry, "getSenderLinkAddress");
-        String receiverLinkAddress = Deencapsulation.invoke(amqpsDeviceTelemetry, "getReceiverLinkAddress");
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
+        String SENDER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsTelemetryLinksManager, "DEVICE_SENDER_LINK_ENDPOINT_PATH");
+        String RECEIVER_LINK_ENDPOINT_PATH = Deencapsulation.getField(amqpsTelemetryLinksManager, "DEVICE_RECEIVER_LINK_ENDPOINT_PATH");
+        String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsTelemetryLinksManager, "SENDER_LINK_TAG_PREFIX");
+        String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsTelemetryLinksManager, "RECEIVER_LINK_TAG_PREFIX");
+        String senderLinkTag = Deencapsulation.invoke(amqpsTelemetryLinksManager, "getSenderLinkTag");
+        String receiverLinkTag = Deencapsulation.invoke(amqpsTelemetryLinksManager, "getReceiverLinkTag");
+        String senderLinkAddress = Deencapsulation.invoke(amqpsTelemetryLinksManager, "getSenderLinkAddress");
+        String receiverLinkAddress = Deencapsulation.invoke(amqpsTelemetryLinksManager, "getReceiverLinkAddress");
 
-        assertNotNull(amqpsDeviceTelemetry);
-
-        assertTrue(SENDER_LINK_ENDPOINT_PATH.equals(senderLinkEndpointPath));
-        assertTrue(RECEIVER_LINK_ENDPOINT_PATH.equals(receiverLinkEndpointPath));
+        assertNotNull(amqpsTelemetryLinksManager);
 
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
@@ -142,15 +134,13 @@ public class AmqpsDeviceTelemetryTest
         };
 
         //act
-        AmqpsDeviceTelemetry amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler amqpsDeviceMethods = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
 
 
-        String SENDER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_ENDPOINT_PATH_MODULES");
-        String RECEIVER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_ENDPOINT_PATH_MODULES");
+        String SENDER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "MODULE_SENDER_LINK_ENDPOINT_PATH");
+        String RECEIVER_LINK_ENDPOINT_PATH_MODULES = Deencapsulation.getField(amqpsDeviceMethods, "MODULE_RECEIVER_LINK_ENDPOINT_PATH");
         String SENDER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "SENDER_LINK_TAG_PREFIX");
         String RECEIVER_LINK_TAG_PREFIX = Deencapsulation.getField(amqpsDeviceMethods, "RECEIVER_LINK_TAG_PREFIX");
-        String senderLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "senderLinkEndpointPath");
-        String receiverLinkEndpointPath = Deencapsulation.getField(amqpsDeviceMethods, "receiverLinkEndpointPath");
 
         String senderLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getSenderLinkTag");
         String receiverLinkTag = Deencapsulation.invoke(amqpsDeviceMethods, "getReceiverLinkTag");
@@ -159,9 +149,6 @@ public class AmqpsDeviceTelemetryTest
 
         //assert
         assertNotNull(amqpsDeviceMethods);
-
-        assertTrue(SENDER_LINK_ENDPOINT_PATH_MODULES.equals(senderLinkEndpointPath));
-        assertTrue(RECEIVER_LINK_ENDPOINT_PATH_MODULES.equals(receiverLinkEndpointPath));
 
         assertTrue(senderLinkTag.startsWith(SENDER_LINK_TAG_PREFIX));
         assertTrue(receiverLinkTag.startsWith(RECEIVER_LINK_TAG_PREFIX));
@@ -198,7 +185,7 @@ public class AmqpsDeviceTelemetryTest
         };
 
         //act
-        AmqpsDeviceTelemetry actual = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler actual = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
 
         //assert
         Map<Symbol, Object> amqpProperties = Deencapsulation.getField(actual, "amqpProperties");
@@ -207,56 +194,39 @@ public class AmqpsDeviceTelemetryTest
 
     // Tests_SRS_AMQPSDEVICETELEMETRY_12_026: [The function shall return true and set the sendLinkState to OPENED if the senderLinkTag is equal to the given linkName.]
     @Test
-    public void onLinkRemoteOpenReturnsTrueIfSenderLinkTagMatches()
+    public void onLinkRemoteOpenReturnsTrueIfSenderLinkTagMatches(@Mocked final Sender mockLink)
     {
-        // arrange
-        String linkName = "linkName";
-
         //act
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "senderLinkTag", linkName);
-        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsSendLinkState");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTelemetry, "onLinkRemoteOpen", linkName);
-        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsSendLinkState");
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "senderLink", mockLink);
+        Boolean retVal = Deencapsulation.invoke(amqpsTelemetryLinksManager, "onLinkRemoteOpen", mockLink);
 
         // assert
         assertTrue(retVal);
-        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
-        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
     }
 
     // Tests_SRS_AMQPSDEVICETELEMETRY_12_027: [The function shall return true and set the recvLinkState to OPENED if the receiverLinkTag is equal to the given linkName.]
     @Test
-    public void onLinkRemoteOpenReturnsTrueIfReceiverLinkTagMatches()
+    public void onLinkRemoteOpenReturnsTrueIfReceiverLinkTagMatches(@Mocked final Receiver mockLink)
     {
-        // arrange
-        String linkName = "linkName";
-
         //act
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLinkTag", linkName);
-        AmqpsDeviceOperationLinkState linkSate1 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsRecvLinkState");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTelemetry, "onLinkRemoteOpen", linkName);
-        AmqpsDeviceOperationLinkState linkSate2 = Deencapsulation.getField(amqpsDeviceTelemetry, "amqpsRecvLinkState");
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "receiverLink", mockLink);
+        Boolean retVal = Deencapsulation.invoke(amqpsTelemetryLinksManager, "onLinkRemoteOpen", mockLink);
 
         // assert
         assertTrue(retVal);
-        assertEquals(linkSate1, AmqpsDeviceOperationLinkState.CLOSED);
-        assertEquals(linkSate2, AmqpsDeviceOperationLinkState.OPENED);
     }
 
     // Tests_SRS_AMQPSDEVICETELEMETRY_12_028: [The function shall return false if neither the senderLinkTag nor the receiverLinkTag is matcing with the given linkName.]
     @Test
-    public void onLinkRemoteOpenReturnsFalseIfThereIsNoMatch()
+    public void onLinkRemoteOpenReturnsFalseIfThereIsNoMatch(@Mocked final Sender mockLink)
     {
         // arrange
-        String linkName = "linkName";
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
 
-        //act
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "senderLinkTag", "xxx");
-        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLinkTag", "yyy");
-        Boolean retVal = Deencapsulation.invoke(amqpsDeviceTelemetry, "onLinkRemoteOpen", linkName);
+        // act
+        Boolean retVal = Deencapsulation.invoke(amqpsTelemetryLinksManager, "onLinkRemoteOpen", mockLink);
 
         // assert
         Assert.assertFalse(retVal);
@@ -269,14 +239,14 @@ public class AmqpsDeviceTelemetryTest
     public void sendMessageAndGetDeliveryTagReturnsFalseIfMessageTypeIsNotDeviceTelemetry() throws IOException
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
         byte[] deliveryTag = "0".getBytes();
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, msgData, offset, length, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsTelemetryLinksManager, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_METHODS, msgData, offset, length, deliveryTag);
         boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
         deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
@@ -293,7 +263,7 @@ public class AmqpsDeviceTelemetryTest
     public void sendMessageAndGetDeliveryTagReturnsWithSuperResult() throws IOException
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -305,6 +275,12 @@ public class AmqpsDeviceTelemetryTest
                 mockSession.sender(anyString);
                 result = mockSender;
 
+                mockSender.getRemoteState();
+                result = EndpointState.ACTIVE;
+
+                mockSender.getLocalState();
+                result = EndpointState.ACTIVE;
+
                 mockSender.send(msgData, offset, length);
                 result = length;
 
@@ -313,10 +289,10 @@ public class AmqpsDeviceTelemetryTest
             }
         };
 
-        Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
+        Deencapsulation.invoke(amqpsTelemetryLinksManager, "openLinks", mockSession);
 
         //act
-        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
+        AmqpsSendReturnValue amqpsSendReturnValue = Deencapsulation.invoke(amqpsTelemetryLinksManager, "sendMessageAndGetDeliveryTag", MessageType.DEVICE_TELEMETRY, msgData, offset, length, deliveryTag);
             boolean deliverySuccessful = Deencapsulation.invoke(amqpsSendReturnValue, "isDeliverySuccessful");
             deliveryTag = Deencapsulation.invoke(amqpsSendReturnValue, "getDeliveryTag");
 
@@ -329,12 +305,12 @@ public class AmqpsDeviceTelemetryTest
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_008: [**The function shall return null if the Proton message type is not null or DeviceTelemetry.**]**
     */
     @Test
-    public void convertFromProtonReturnsNullIfNotDeviceTelemetry(
+    public void protonMessageToIoTHubMessageReturnsNullIfNotDeviceTelemetry(
             @Mocked final  AmqpsMessage mockAmqpsMessage
     )
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
 
         new NonStrictExpectations()
         {
@@ -345,14 +321,14 @@ public class AmqpsDeviceTelemetryTest
         };
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
+        IotHubTransportMessage amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsTelemetryLinksManager, "protonMessageToIoTHubMessage", mockAmqpsMessage, mockDeviceClientConfig);
 
         //assert
         assertEquals(null, amqpsConvertFromProtonReturnValue);
     }
 
     @Test
-    public void convertFromProtonEmptyBodySuccess(
+    public void protonMessageToIoTHubMessageEmptyBodySuccess(
             @Mocked final AmqpsMessage mockAmqpsMessage,
             @Mocked final DeviceClientConfig mockDeviceClientConfig
     )
@@ -382,14 +358,13 @@ public class AmqpsDeviceTelemetryTest
                 result = "deviceId";            }
         };
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTelemetryLinksManager, "openLinks", mockSession);
 
         //act
-        AmqpsConvertFromProtonReturnValue amqpsConvertFromProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertFromProton", mockAmqpsMessage, mockDeviceClientConfig);
-        Message actualMessage = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "message");
-        MessageCallback actualMessageCallback = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageCallback");
-        Object actualMessageContext = Deencapsulation.getField(amqpsConvertFromProtonReturnValue, "messageContext");
+        IotHubTransportMessage actualMessage = Deencapsulation.invoke(amqpsTelemetryLinksManager, "protonMessageToIoTHubMessage", mockAmqpsMessage, mockDeviceClientConfig);
+        MessageCallback actualMessageCallback = actualMessage.getMessageCallback();
+        Object actualMessageContext = actualMessage.getMessageCallbackContext();
 
         //assert
         assertNotNull(actualMessage);
@@ -402,14 +377,14 @@ public class AmqpsDeviceTelemetryTest
     **Tests_SRS_AMQPSDEVICETELEMETRY_12_014: [**The function shall return null if the Proton message type is not null or DeviceTelelemtry.**]**
     */
     @Test
-    public void convertToProtonReturnsNullIfNotDeviceTelemetry(
+    public void iotHubMessageToProtonMessageReturnsNullIfNotDeviceTelemetry(
             @Mocked final Message mockMessage,
             @Mocked final Properties properties,
             @Mocked final  AmqpsMessage mockAmqpsMessage
     )
     {
         //arrange
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
         final byte[] msgData = new byte[1];
         final int offset = 0;
         final int length = 1;
@@ -424,7 +399,7 @@ public class AmqpsDeviceTelemetryTest
         };
 
         //act
-        AmqpsConvertToProtonReturnValue amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsDeviceTelemetry, "convertToProton", mockMessage);
+        IotHubTransportMessage amqpsConvertToProtonReturnValue = Deencapsulation.invoke(amqpsTelemetryLinksManager, "iotHubMessageToProtonMessage", mockMessage);
 
         //assert
         assertNull(amqpsConvertToProtonReturnValue);
@@ -443,11 +418,11 @@ public class AmqpsDeviceTelemetryTest
         String linkName = "receiver";
         byte[] bytes = new byte[1];
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLink", mockReceiver);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "senderLink", mockSender);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLinkTag", linkName);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTelemetryLinksManager, "openLinks", mockSession);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "receiverLink", mockReceiver);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "senderLink", mockSender);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "receiverLinkTag", linkName);
 
         new NonStrictExpectations()
         {
@@ -462,7 +437,7 @@ public class AmqpsDeviceTelemetryTest
         };
 
         //act
-        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsDeviceTelemetry, "getMessageFromReceiverLink", linkName);
+        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsTelemetryLinksManager, "getMessageFromReceiverLink", linkName);
 
         //assert
         assertNotNull(amqpsMessage);
@@ -490,11 +465,11 @@ public class AmqpsDeviceTelemetryTest
         byte[] bytes = new byte[1];
 
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
-        Deencapsulation.invoke(amqpsDeviceTelemetry, "openLinks", mockSession);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLink", mockReceiver);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "senderLink", mockSender);
-        Deencapsulation.setField(amqpsDeviceTelemetry, "receiverLinkTag", linkName);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
+        Deencapsulation.invoke(amqpsTelemetryLinksManager, "openLinks", mockSession);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "receiverLink", mockReceiver);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "senderLink", mockSender);
+        Deencapsulation.setField(amqpsTelemetryLinksManager, "receiverLinkTag", linkName);
 
         new NonStrictExpectations()
         {
@@ -509,7 +484,7 @@ public class AmqpsDeviceTelemetryTest
         };
 
         //act
-        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsDeviceTelemetry, "getMessageFromReceiverLink", linkName);
+        AmqpsMessage amqpsMessage = Deencapsulation.invoke(amqpsTelemetryLinksManager, "getMessageFromReceiverLink", linkName);
 
         //assert
         assertNull(amqpsMessage);
@@ -530,7 +505,7 @@ public class AmqpsDeviceTelemetryTest
     // "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
     @Test
     public void protonMessageToIoTHubMessageWithInputName(
-            @Mocked final MessageImpl mockMessage,
+            @Mocked final AmqpsMessage mockMessage,
             @Mocked final MessageAnnotations mockedAnnotations,
             @Mocked final Data mockData,
             @Mocked final Properties mockProperties,
@@ -539,7 +514,7 @@ public class AmqpsDeviceTelemetryTest
         //arrange
         final String expectedInputName = "some input name";
         final Map<Symbol, Object> mockedAnnotationsMap = new HashMap<>();
-        mockedAnnotationsMap.put(Deencapsulation.newInstance(Symbol.class, Deencapsulation.getField(AmqpsDeviceTelemetry.class, "INPUT_NAME_PROPERTY_KEY")), expectedInputName);
+        mockedAnnotationsMap.put(Deencapsulation.newInstance(Symbol.class, Deencapsulation.getField(AmqpsTelemetryLinksHandler.class, "INPUT_NAME_PROPERTY_KEY")), expectedInputName);
         new NonStrictExpectations()
         {
             {
@@ -560,13 +535,19 @@ public class AmqpsDeviceTelemetryTest
 
                 mockedAnnotations.getValue();
                 result = mockedAnnotationsMap;
+
+                mockDeviceClientConfig.getDeviceId();
+                result = deviceId;
+
+                mockMessage.getAmqpsMessageType();
+                result = MessageType.DEVICE_TELEMETRY;
             }
         };
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
 
         //act
-        Message message = Deencapsulation.invoke(amqpsDeviceTelemetry, "protonMessageToIoTHubMessage", mockMessage);
+        Message message = Deencapsulation.invoke(amqpsTelemetryLinksManager, "protonMessageToIoTHubMessage", mockMessage, mockDeviceClientConfig);
 
         //assert
         assertEquals(expectedInputName, message.getInputName());
@@ -583,13 +564,16 @@ public class AmqpsDeviceTelemetryTest
             {
                 mockMessage.getOutputName();
                 result = expectedOutputName;
+
+                mockMessage.getMessageType();
+                result = MessageType.DEVICE_TELEMETRY;
             }
         };
 
-        AmqpsDeviceTelemetry amqpsDeviceTelemetry = Deencapsulation.newInstance(AmqpsDeviceTelemetry.class, mockDeviceClientConfig);
+        AmqpsTelemetryLinksHandler amqpsTelemetryLinksManager = Deencapsulation.newInstance(AmqpsTelemetryLinksHandler.class, mockDeviceClientConfig);
 
         //act
-        MessageImpl message = Deencapsulation.invoke(amqpsDeviceTelemetry, "iotHubMessageToProtonMessage", mockMessage);
+        MessageImpl message = Deencapsulation.invoke(amqpsTelemetryLinksManager, "iotHubMessageToProtonMessage", mockMessage);
 
         //assert
         assertTrue(message.getApplicationProperties().getValue().containsKey(OUTPUT_NAME_PROPERTY));
