@@ -272,7 +272,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The hostname of iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of the iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
@@ -288,7 +288,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The hostname of iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of the iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
