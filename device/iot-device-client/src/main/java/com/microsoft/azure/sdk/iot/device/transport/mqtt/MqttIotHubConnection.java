@@ -42,7 +42,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static String ModelIdParam = "digital-twin-model-id";
+    private static final String ModelIdParam = "digital-twin-model-id";
 
     private String connectionId;
     private String webSocketQueryString;
