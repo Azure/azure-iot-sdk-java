@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create iot hub Message too large exception
  */
@@ -18,5 +20,10 @@ public class IotHubMessageTooLargeException extends IotHubException
     public IotHubMessageTooLargeException(String message)
     {
         super(message);
+    }
+
+    IotHubMessageTooLargeException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

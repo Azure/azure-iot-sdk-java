@@ -8,6 +8,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -22,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -1082,22 +1084,24 @@ public class RegistryManagerTest
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_058: [The function shall verify the response status and throw proper Exception]
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_059: [The function shall create a new RegistryStatistics object from the response and return with it]
     @Test
-    public void getStatistics_good_case() throws Exception
+    public void getStatistics_good_case(@Mocked Proxy mockProxy, @Mocked ProxyOptions mockProxyOptions, @Mocked RegistryManagerOptions registryManagerOptions) throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         String deviceId = "somedevice";
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString, registryManagerOptions);
 
-        RegistryStatistics statistics = registryManager.getStatistics();
-
-        new VerificationsInOrder()
+        new Expectations()
         {
             {
                 iotHubConnectionString.getUrlDeviceStatistics();
-                new HttpRequest(mockUrl, HttpMethod.GET, new byte[0]);
+                registryManagerOptions.getProxyOptions();
+                result = mockProxyOptions;
+                mockProxyOptions.getProxy();
+                result = mockProxy;
+                new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], mockProxy);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -1108,6 +1112,10 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
+
+        // act
+        RegistryStatistics statistics = registryManager.getStatistics();
+
         assertNotNull(statistics);
     }
 
@@ -1129,7 +1137,7 @@ public class RegistryManagerTest
         {
             {
                 iotHubConnectionString.getUrlDeviceStatistics();
-                new HttpRequest(mockUrl, HttpMethod.GET, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -1162,7 +1170,74 @@ public class RegistryManagerTest
         registryManager.getStatisticsAsync();
     }
 
+    @Test
+    public void exportDevices_jobProperties_good_case() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        new NonStrictExpectations()
+        {
+            {
+                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                result = iotHubConnectionString;
+                iotHubConnectionString.getUrlCreateExportImportJob();
+                result = mockUrl;
+                mockHttpRequest.send();
+                result = mockHttpResponse;
+                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                mockHttpResponse.getBody();
+                result = jobPropertiesJson.getBytes();
+            }
+        };
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        JobProperties exportJobProperties =
+                JobProperties.createForExportJob("blob1", true, StorageAuthenticationType.IDENTITY);
+        JobProperties jobProperties = registryManager.exportDevices(exportJobProperties);
+
+        new VerificationsInOrder()
+        {
+            {
+                iotHubConnectionString.getUrlCreateExportImportJob();
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
+                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setHeaderField("authorization", anyString);
+                mockHttpRequest.setHeaderField("Request-Id", "1001");
+                mockHttpRequest.setHeaderField("Accept", "application/json");
+                mockHttpRequest.setHeaderField("Content-Type", "application/json");
+                mockHttpRequest.setHeaderField("charset", "utf-8");
+                mockHttpRequest.send();
+                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+            }
+        };
+        assertNotNull(jobProperties);
+    }
+
+    @Test (expected = Exception.class)
+    public void exportDevicesAsync_jobProperties_future_throw() throws Exception
+    {
+        new MockUp<RegistryManager>()
+        {
+            @Mock
+            public JobProperties exportDevices(JobProperties jobProperties)
+                    throws IllegalArgumentException, IOException, IotHubException
+            {
+                throw new IllegalArgumentException();
+            }
+        };
+
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        JobProperties exportJobProperties =
+                JobProperties.createForExportJob("blah", true, StorageAuthenticationType.IDENTITY);
+
+        CompletableFuture<JobProperties> completableFuture =  registryManager.exportDevicesAsync(exportJobProperties);
+        completableFuture.get();
+    }
+
+
     // TESTS_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_061: [The function shall throw IllegalArgumentException if any of the input parameters is null]
+    @Test (expected = IllegalArgumentException.class)
     public void exportDevices_blob_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
@@ -1215,7 +1290,7 @@ public class RegistryManagerTest
         {
             {
                 iotHubConnectionString.getUrlCreateExportImportJob();
-                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -1304,7 +1379,7 @@ public class RegistryManagerTest
         {
             {
                 iotHubConnectionString.getUrlCreateExportImportJob();
-                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any);
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -1337,6 +1412,71 @@ public class RegistryManagerTest
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         CompletableFuture<JobProperties> completableFuture =  registryManager.importDevicesAsync("importblob", "outputblob");
+        completableFuture.get();
+    }
+
+    @Test
+    public void importDevices_jobProperties_good_case() throws Exception
+    {
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+
+        new NonStrictExpectations()
+        {
+            {
+                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                result = iotHubConnectionString;
+                iotHubConnectionString.getUrlCreateExportImportJob();
+                result = mockUrl;
+                mockHttpRequest.send();
+                result = mockHttpResponse;
+                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                mockHttpResponse.getBody();
+                result = jobPropertiesJson.getBytes();
+            }
+        };
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        JobProperties inputParameters =
+                JobProperties.createForImportJob("blob1", "blob2", StorageAuthenticationType.IDENTITY);
+        JobProperties importJobProperties = registryManager.importDevices(inputParameters);
+
+        new VerificationsInOrder()
+        {
+            {
+                iotHubConnectionString.getUrlCreateExportImportJob();
+                new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
+                mockHttpRequest.setReadTimeoutMillis(anyInt);
+                mockHttpRequest.setHeaderField("authorization", anyString);
+                mockHttpRequest.setHeaderField("Request-Id", "1001");
+                mockHttpRequest.setHeaderField("Accept", "application/json");
+                mockHttpRequest.setHeaderField("Content-Type", "application/json");
+                mockHttpRequest.setHeaderField("charset", "utf-8");
+                mockHttpRequest.send();
+                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+            }
+        };
+        assertNotNull(importJobProperties);
+    }
+
+    @Test (expected = Exception.class)
+    public void importDevicesAsync_jobProperties_future_throw() throws Exception
+    {
+        new MockUp<RegistryManager>()
+        {
+            @Mock
+            public JobProperties importDevices(JobProperties importJobProperties)
+                    throws IllegalArgumentException, IOException, IotHubException
+            {
+                throw new IllegalArgumentException();
+            }
+        };
+
+        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        JobProperties inputParameters =
+                JobProperties.createForImportJob("importblob", "outputblob", StorageAuthenticationType.IDENTITY);
+
+        CompletableFuture<JobProperties> completableFuture =  registryManager.importDevicesAsync(inputParameters);
         completableFuture.get();
     }
 
@@ -1384,7 +1524,7 @@ public class RegistryManagerTest
         {
             {
                 iotHubConnectionString.getUrlImportExportJob(jobId);
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -2287,7 +2427,7 @@ public class RegistryManagerTest
                 iotHubConnectionString.getUrlApplyConfigurationContent(expectedDeviceId);
                 times = 1;
 
-                new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes());
+                new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes(), (Proxy) any);
                 times = 1;
 
                 new IotHubServiceSasToken(iotHubConnectionString);
@@ -2329,7 +2469,7 @@ public class RegistryManagerTest
         {
             {
                 iotHubConnectionString.getUrlDevice(requestDeviceId);
-                new HttpRequest(mockUrl, httpMethod, (byte[]) any);
+                new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -2368,7 +2508,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlDeviceList(numberOfDevices);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2408,7 +2548,7 @@ public class RegistryManagerTest
         {
             {
                 iotHubConnectionString.getUrlModule(requestDeviceId, requestModuleId);
-                new HttpRequest(mockUrl, httpMethod, (byte[]) any);
+                new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -2447,7 +2587,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlModulesOnDevice(deviceId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2487,7 +2627,7 @@ public class RegistryManagerTest
         {
             {
                 iotHubConnectionString.getUrlConfiguration(requestConfigId);
-                new HttpRequest(mockUrl, httpMethod, (byte[]) any);
+                new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
                 mockHttpRequest.setHeaderField("Request-Id", "1001");
@@ -2526,7 +2666,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlConfigurationsList(numOfConfigs);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any);
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);

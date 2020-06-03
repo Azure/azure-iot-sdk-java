@@ -47,7 +47,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -106,7 +105,7 @@ public class AmqpSendHandlerTest
         String _sasToken = Deencapsulation.getField(amqpSendHandler, "sasToken");
         IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSendHandler, "iotHubServiceClientProtocol");
         // Assert
-        assertEquals(hostName + ":5671", _hostName);
+        assertEquals(hostName, _hostName);
         assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(iotHubServiceClientProtocol, _ioIotHubServiceClientProtocol);
@@ -370,7 +369,7 @@ public class AmqpSendHandlerTest
                 result = transportInternal;
                 new WebSocketImpl();
                 result = webSocket;
-                webSocket.configure(anyString, anyString, 0, anyString, null, null);
+                webSocket.configure(anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
                 sasl.plain(anyString, anyString);
                 Proton.sslDomain();
@@ -398,7 +397,6 @@ public class AmqpSendHandlerTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Assert
@@ -406,7 +404,7 @@ public class AmqpSendHandlerTest
         {
             {
                 connection = event.getConnection();
-                connection.setHostname(hostAddr);
+                connection.setHostname(hostName);
                 session = connection.session();
                 sender = session.sender(anyString);
                 connection.open();
@@ -428,7 +426,6 @@ public class AmqpSendHandlerTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String hostAddr = hostName + ":5671";
         String endpoint = "/messages/devicebound";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
@@ -501,9 +498,7 @@ public class AmqpSendHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         createProtonObjects();
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        Queue<Message> testMessagesToBeSent = new LinkedBlockingQueue<>();
-        testMessagesToBeSent.add(messageWithException);
-        Deencapsulation.setField(amqpSendHandler,"messagesToBeSent", testMessagesToBeSent );
+        Deencapsulation.setField(amqpSendHandler,"messageToBeSent", messageWithException);
         // Assert
         new Expectations()
         {
@@ -551,10 +546,9 @@ public class AmqpSendHandlerTest
                 result = mockedDelivery;
                 mockedDelivery.getRemoteState();
                 result = mockedDeliveryState;
+                sender.getLocalState();
+                result = EndpointState.ACTIVE;
                 sender.close();
-                session = sender.getSession();
-                connection = session.getConnection();
-                connection.close();
             }
         };
         // Act
@@ -577,10 +571,10 @@ public class AmqpSendHandlerTest
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        Queue<AmqpResponseVerification> testsendStatusQueue = new LinkedBlockingQueue<>();
-        testsendStatusQueue.add(mockedVerification);
-        Deencapsulation.setField(amqpSendHandler,"sendStatusQueue", testsendStatusQueue );
-        Deencapsulation.setField(amqpSendHandler, "connectionWasOpened", true);
+        Deencapsulation.setField(amqpSendHandler,"amqpResponse", mockedVerification );
+        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
+        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
+        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", true);
 
         // Assert
         new Expectations()
@@ -591,7 +585,7 @@ public class AmqpSendHandlerTest
             }
         };
         // Act
-        amqpSendHandler.sendComplete();
+        amqpSendHandler.verifySendSucceeded();
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [** The event handler shall get the exception from the response and throw is it is not null **]**
@@ -605,10 +599,10 @@ public class AmqpSendHandlerTest
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        Queue<AmqpResponseVerification> testsendStatusQueue = new LinkedBlockingQueue<>();
-        testsendStatusQueue.add(mockedVerification);
-        Deencapsulation.setField(amqpSendHandler,"sendStatusQueue", testsendStatusQueue );
-        Deencapsulation.setField(amqpSendHandler, "connectionWasOpened", true);
+        Deencapsulation.setField(amqpSendHandler,"amqpResponse", mockedVerification );
+        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
+        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
+        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", true);
 
         // Assert
         new Expectations()
@@ -619,7 +613,7 @@ public class AmqpSendHandlerTest
             }
         };
         // Act
-        amqpSendHandler.sendComplete();
+        amqpSendHandler.verifySendSucceeded();
 
     }
 
@@ -639,7 +633,7 @@ public class AmqpSendHandlerTest
         amqpSendHandler.onTransportError(mockedEvent);
 
         // Act
-        amqpSendHandler.sendComplete();
+        amqpSendHandler.verifySendSucceeded();
 
     }
 
@@ -675,9 +669,9 @@ public class AmqpSendHandlerTest
         };
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_033: [This function shall set the variable 'connectionWasOpened' to true]
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_033: [This function shall set the variable 'verifyConnectionWasOpened' to true]
     @Test
-    public void onLinkRemoteOpenedFlagsConnectionWasOpened()
+    public void onConnectionRemoteOpenedFlagsVerifyConnectionOpened(@Mocked Event mockEvent)
     {
         // Arrange
         String hostName = "aaa";
@@ -687,13 +681,13 @@ public class AmqpSendHandlerTest
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
 
         // Act
-        amqpSendHandler.onLinkRemoteOpen(null);
+        amqpSendHandler.onConnectionRemoteOpen(mockEvent);
 
         // Assert
-        assertTrue(Deencapsulation.getField(amqpSendHandler, "connectionWasOpened"));
+        assertTrue(Deencapsulation.getField(amqpSendHandler, "connectionOpenedRemotely"));
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
     public void sendCompleteChecksForSavedException() throws IOException, IotHubException
     {
@@ -704,16 +698,18 @@ public class AmqpSendHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
 
-        Deencapsulation.setField(amqpSendHandler, "connectionWasOpened", true);
+        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", true);
+        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", true);
+        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", true);
         Deencapsulation.setField(amqpSendHandler, "savedException", new SSLHandshakeException("some nonsense exception"));
 
         // Act
-        amqpSendHandler.sendComplete();
+        amqpSendHandler.verifySendSucceeded();
     }
 
-    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'connectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
+    //Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_034: [if 'verifyConnectionWasOpened' is false, or 'isConnectionError' is true, this function shall throw an IOException]
     @Test (expected = IOException.class)
-    public void sendCompleteChecksThatConnectionWasOpened() throws IOException, IotHubException
+    public void sendCompleteChecksThatverifyConnectionOpened() throws IOException, IotHubException
     {
         // Arrange
         String hostName = "aaa";
@@ -722,11 +718,13 @@ public class AmqpSendHandlerTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
 
-        Deencapsulation.setField(amqpSendHandler, "connectionWasOpened", false);
+        Deencapsulation.setField(amqpSendHandler, "connectionOpenedRemotely", false);
+        Deencapsulation.setField(amqpSendHandler, "sessionOpenedRemotely", false);
+        Deencapsulation.setField(amqpSendHandler, "linkOpenedRemotely", false);
         Deencapsulation.setField(amqpSendHandler, "savedException", null);
 
         // Act
-        amqpSendHandler.sendComplete();
+        amqpSendHandler.verifySendSucceeded();
     }
 
     private void createProtonObjects()

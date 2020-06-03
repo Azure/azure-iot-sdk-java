@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create iot hub device maximum queue depth exceeded exception
  */
@@ -18,5 +20,10 @@ public class IotHubDeviceMaximumQueueDepthExceededException extends IotHubExcept
     public IotHubDeviceMaximumQueueDepthExceededException(String message)
     {
         super(message);
+    }
+
+    IotHubDeviceMaximumQueueDepthExceededException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

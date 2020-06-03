@@ -11,6 +11,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -25,8 +27,9 @@ import java.util.Map;
 @Slf4j
 public final class DeviceClientConfig
 {
-    /** The default value for readTimeoutMillis. */
-    private static final int DEFAULT_READ_TIMEOUT_MILLIS = 240000;
+    private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
+    private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
+
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
 
@@ -34,6 +37,14 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
     private ProxySettings proxySettings;
+
+    @Getter
+    @Setter
+    private int httpsReadTimeout;
+
+    @Getter
+    @Setter
+    private int httpsConnectTimeout;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -229,6 +240,8 @@ public final class DeviceClientConfig
 
         this.productInfo = new ProductInfo();
         this.useWebsocket = false;
+        this.httpsReadTimeout = DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
+        this.httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
     }
 
     private void assertConnectionStringIsX509(IotHubConnectionString iotHubConnectionString)
@@ -403,19 +416,6 @@ public final class DeviceClientConfig
     {
         // Codes_SRS_DEVICECLIENTCONFIG_34_050: [This function return the saved moduleId.]
         return this.authenticationProvider.getModuleId();
-    }
-
-    /**
-     * Getter for the timeout, in milliseconds, after a connection is
-     * established for the server to respond to the request.
-     *
-     * @return the timeout, in milliseconds, after a connection is established
-     * for the server to respond to the request.
-     */
-    public int getReadTimeoutMillis()
-    {
-        // Codes_SRS_DEVICECLIENTCONFIG_11_012: [The function shall return 240000ms.]
-        return DEFAULT_READ_TIMEOUT_MILLIS;
     }
 
     /**

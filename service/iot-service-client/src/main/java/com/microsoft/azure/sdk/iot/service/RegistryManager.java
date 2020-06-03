@@ -23,6 +23,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -41,6 +42,21 @@ public class RegistryManager
     private ExecutorService executor;
     private IotHubConnectionString iotHubConnectionString;
 
+    private RegistryManagerOptions options;
+
+    /**
+     * Previously was the java default constructor, should not be used.
+     *
+     * @deprecated As of release 1.22.0, replaced by {@link #createFromConnectionString(String)}
+     */
+    @Deprecated
+    public RegistryManager()
+    {
+        // This constructor was previously a default constructor that users could use because there was no other constructor declared.
+        // However, we still prefer users use the createFromConnectionString method to build their clients.
+        options = RegistryManagerOptions.builder().build();
+    }
+
     /**
      * Static constructor to create instance from connection string
      *
@@ -50,11 +66,30 @@ public class RegistryManager
      */
     public static RegistryManager createFromConnectionString(String connectionString) throws IOException
     {
+        return createFromConnectionString(connectionString, RegistryManagerOptions.builder().build());
+    }
+
+    /**
+     * Static constructor to create instance from connection string
+     *
+     * @param connectionString The iot hub connection string
+     * @param options The connection options to use when connecting to the service. May be null if no custom options will be used.
+     * @return The instance of RegistryManager
+     * @throws IOException This exception is thrown if the object creation failed
+     */
+    public static RegistryManager createFromConnectionString(String connectionString, RegistryManagerOptions options) throws IOException
+    {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
         if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("The provided connection string cannot be null or empty");
         }
+
+        if (options == null)
+        {
+            throw new IllegalArgumentException("RegistryManagerOptions cannot be null for this constructor");
+        }
+
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_002: [The constructor shall create an IotHubConnectionString object from the given connection string]
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
@@ -64,6 +99,8 @@ public class RegistryManager
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_34_090: [The function shall start this object's executor service]
         iotHubRegistryManager.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
+
+        iotHubRegistryManager.options = options;
 
         return iotHubRegistryManager;
     }
@@ -719,6 +756,79 @@ public class RegistryManager
     }
 
     /**
+     * Create a bulk export job.
+     *
+     * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
+     *                                This API also supports identity based storage authentication, identity authentication
+     *                                support is currently available in limited regions. If a user wishes to try it out,
+     *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
+     *                                otherwise default key based authentication is used for storage
+     *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
+     *
+     * @return A JobProperties object for the newly created bulk export job
+     *
+     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties exportDevices(JobProperties exportDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_062: [The function shall get the URL for the bulk export job creation]
+        URL url = iotHubConnectionString.getUrlCreateExportImportJob();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_063: [The function shall create a new SAS token for the bulk export job]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_064: [The function shall create a new HttpRequest for the bulk export job creation ]
+        exportDevicesParameters.setType(JobProperties.JobType.EXPORT);
+        String jobPropertiesJson = exportDevicesParameters.toJobPropertiesParser().toJson();
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_065: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_066: [The function shall verify the response status and throw proper Exception]
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_067: [The function shall create a new JobProperties object from the response and return it]
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Async wrapper for exportDevices() operation
+     * @param exportDevicesParameters A JobProperties object containing input parameters for export Devices job
+     *                                This API also supports identity based storage authentication, identity authentication
+     *                                support is currently available in limited regions. If a user wishes to try it out,
+     *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
+     *                                otherwise default key based authentication is used for storage
+     *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
+     * @return The future object for the requested operation
+     *
+     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public CompletableFuture<JobProperties> exportDevicesAsync(JobProperties exportDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_068: [The function shall create an async wrapper around the
+        // exportDevices() function call, handle the return value or delegate exception]
+        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
+        executor.submit(() ->
+        {
+            try
+            {
+                JobProperties responseJobProperties = exportDevices(exportDevicesParameters);
+                future.complete(responseJobProperties);
+            }
+            catch (IllegalArgumentException | IotHubException | IOException e)
+            {
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    /**
      * Create a bulk import job.
      *
      * @param importBlobContainerUri URI containing SAS token to a blob container that contains registry data to sync
@@ -779,6 +889,80 @@ public class RegistryManager
             try
             {
                 JobProperties responseJobProperties = importDevices(importBlobContainerUri, outputBlobContainerUri);
+                future.complete(responseJobProperties);
+            }
+            catch (IllegalArgumentException | IotHubException | IOException e)
+            {
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    /**
+     * Create a bulk import job.
+     *
+     * @param importDevicesParameters A JobProperties object containing input parameters for import Devices job
+     *                                This API also supports identity based storage authentication, identity authentication
+     *                                support is currently available in limited regions. If a user wishes to try it out,
+     *                                they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
+     *                                otherwise default key based authentication is used for storage
+     *                                <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
+     *
+     * @return A JobProperties object for the newly created bulk import job
+     *
+     * @throws IllegalArgumentException This exception is thrown if the importBlobContainerUri or outputBlobContainerUri parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public JobProperties importDevices(JobProperties importDevicesParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        //CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_070: [The function shall get the URL for the bulk import job creation]
+        URL url = iotHubConnectionString.getUrlCreateExportImportJob();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_071: [The function shall create a new SAS token for the bulk import job]
+        String sasTokenString = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_072: [The function shall create a new HttpRequest for the bulk import job creation]
+        importDevicesParameters.setType(JobProperties.JobType.IMPORT);
+        String jobPropertiesJson = importDevicesParameters.toJobPropertiesParser().toJson();
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), sasTokenString);
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_073: [The function shall send the created request and get the response]
+        HttpResponse response = request.send();
+
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_074: [The function shall verify the response status and throw proper Exception]
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_075: [The function shall create a new JobProperties object from the response and return it]
+        return ProcessJobResponse(response);
+    }
+
+    /**
+     * Async wrapper for importDevices() operation
+     *
+     * @param importParameters A JobProperties object containing input parameters for import Devices job
+     *                         This API also supports identity based storage authentication, identity authentication
+     *                         support is currently available in limited regions. If a user wishes to try it out,
+     *                         they will need to set an Environment Variable of "EnabledStorageIdentity" and set it to "1"
+     *                         otherwise default key based authentication is used for storage
+     *                         <a href="https://docs.microsoft.com/en-us/azure/iot-hub/virtual-network-support"> More details here </a>
+     * @return The future object for the requested operation
+     *
+     * @throws IllegalArgumentException This exception is thrown if the exportBlobContainerUri or excludeKeys parameters are null
+     * @throws IOException This exception is thrown if the IO operation failed
+     * @throws IotHubException This exception is thrown if the response verification failed
+     */
+    public CompletableFuture<JobProperties> importDevicesAsync(JobProperties importParameters)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    {
+        // CODES_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_15_076: [The function shall create an async wrapper around
+        // the importDevices() function call, handle the return value or delegate exception]
+        final CompletableFuture<JobProperties> future = new CompletableFuture<>();
+        executor.submit(() ->
+        {
+            try
+            {
+                JobProperties responseJobProperties = importDevices(importParameters);
                 future.complete(responseJobProperties);
             }
             catch (IllegalArgumentException | IotHubException | IOException e)
@@ -1448,7 +1632,13 @@ public class RegistryManager
 
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException
     {
-        HttpRequest request = new HttpRequest(url, method, payload);
+        Proxy proxy = null;
+        if (this.options.getProxyOptions() != null)
+        {
+            proxy = this.options.getProxyOptions().getProxy();
+        }
+
+        HttpRequest request = new HttpRequest(url, method, payload, proxy);
         request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("Request-Id", "1001");

@@ -440,7 +440,8 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
     private HttpsResponse sendRequest(HttpsRequest request) throws TransportException
     {
-        request.setReadTimeoutMillis(this.config.getReadTimeoutMillis());
+        request.setReadTimeout(this.config.getHttpsReadTimeout());
+        request.setConnectTimeout(this.config.getHttpsConnectTimeout());
 
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {

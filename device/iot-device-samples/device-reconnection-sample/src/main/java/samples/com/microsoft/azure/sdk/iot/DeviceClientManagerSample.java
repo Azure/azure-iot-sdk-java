@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class DeviceClientManagerSample {
      * Sends a number of messages to an IoT. Default protocol is to use AMQP transport.
      */
     public static void main(String[] args)
-            throws URISyntaxException {
+            throws URISyntaxException, IOException {
         log.debug("Starting the sample...");
         log.debug("Using communication protocol: {}", protocol.name());
 
@@ -37,7 +38,6 @@ public class DeviceClientManagerSample {
 
         deviceClientManager = new DeviceClientManager(client);
         deviceClientManager.setOperationTimeout(DEVICE_OPERATION_TIMEOUT_IN_MINUTES);
-        deviceClientManager.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeLogger(), deviceClientManager);
 
         deviceClientManager.open();
         log.debug("Opened connection to IoT Hub.");

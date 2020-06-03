@@ -127,6 +127,12 @@ public class DeviceTwin
     /**
      * This method updates device twin for the specified device.
      *
+     * This API uses the IoT Hub PATCH API when sending updates, but it sends the full twin with each patch update.
+     * As a result, devices subscribed to twin will receive notifications that each property is changed when this API is called, even
+     * if only some of the properties were changed.
+     *
+     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a> for more details
+     *
      * @param device The device with a valid id for which device twin is to be updated.
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed

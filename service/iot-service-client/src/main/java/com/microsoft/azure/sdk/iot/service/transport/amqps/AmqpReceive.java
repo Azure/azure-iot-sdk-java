@@ -8,10 +8,8 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.engine.BaseHandler;
-import org.apache.qpid.proton.engine.Event;
-import org.apache.qpid.proton.reactor.Reactor;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
@@ -20,16 +18,16 @@ import java.io.IOException;
  * overriding the events what are needed to handle
  * high level open, close methods and feedback received event.
  */
-public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEvent
+@Slf4j
+public class AmqpReceive implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;
     private final String userName;
     private final String sasToken;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    private Reactor reactor = null;
     private FeedbackBatch feedbackBatch;
-    private static final int REACTOR_TIMEOUT = 3141; // reactor timeout in milliseconds
+    private ProxyOptions proxyOptions;
 
     /**
      * Constructor to set up connection parameters
@@ -40,28 +38,25 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
      */
     public AmqpReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     */
+    public AmqpReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_001: [The constructor shall copy all input parameters to private member variables for event processing]
         this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-    }
-
-    /**
-     * Event handler for the reactor init event
-     * @param event The proton event object
-     */
-    @Override
-    public void onReactorInit(Event event) {
-        // You can use the connection method to create AMQP connections.
-
-        // This connection's handler is the AmqpSendHandler object. All the events
-        // for this connection will go to the AmqpSendHandler object instead of
-        // going to the reactor. If you were to omit the AmqpSendHandler object,
-        // all the events would go to the reactor.
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_002: [The event handler shall set the member AmqpsReceiveHandler object to handle the given connection events]
-        event.getReactor().connection(amqpReceiveHandler);
+        this.proxyOptions = proxyOptions;
     }
 
     /**
@@ -69,8 +64,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
      */
     public void open()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_003: [The function shall create an AmqpsReceiveHandler object to handle reactor events]
-        amqpReceiveHandler = new AmqpFeedbackReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this);
+        amqpReceiveHandler = new AmqpFeedbackReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this, this.proxyOptions);
     }
 
     /**
@@ -78,7 +72,6 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
      */
     public void close()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_004: [The function shall invalidate the member AmqpsReceiveHandler object]
         amqpReceiveHandler = null;
     }
 
@@ -95,26 +88,14 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
         feedbackBatch = null;
         if  (amqpReceiveHandler != null)
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_005: [The function shall initialize the Proton reactor object]
-            this.reactor = Proton.reactor(this);
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [The function shall start the Proton reactor object]
-            this.reactor.setTimeout(REACTOR_TIMEOUT);
-            this.reactor.start();
-            
+            log.info("Receiving on feedback receiver for up to {} milliseconds", timeoutMs);
+
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [The function shall wait for specified timeout to check for any feedback message]
-            long startTime = System.currentTimeMillis();
-            long endTime = startTime + timeoutMs;
-            
-            while(this.reactor.process())
-            {
-                if (System.currentTimeMillis() > endTime) break;
-            }
-            
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall stop and free the Proton reactor object]
-            this.reactor.stop();
-            this.reactor.process();
-            this.reactor.free();   
-            this.amqpReceiveHandler.receiveComplete();
+            new ReactorRunner(this.amqpReceiveHandler, "AmqpFeedbackReceiver").run(timeoutMs);
+
+            log.trace("Feedback receiver reactor finished running, verifying that the connection opened correctly");
+            this.amqpReceiveHandler.verifyConnectionWasOpened();
+            log.trace("Feedback receiver reactor did successfully open the connection, returning without exception");
         }
         else
         {
@@ -132,9 +113,9 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
      */
     public void onFeedbackReceived(String feedbackJson)
     {
+        log.info("Feedback message received: {}", feedbackJson);
+
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_010: [The function shall parse the received Json string to FeedbackBath object]
         feedbackBatch = FeedbackBatchMessage.parse(feedbackJson);
-    
     }
-
 }

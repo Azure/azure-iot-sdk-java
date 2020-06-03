@@ -1215,7 +1215,7 @@ public class MqttTest
     {
         //arrange
         final byte[] payload = {0x61, 0x62, 0x63};
-        final String mockParseTopicWithUnusualCharacters = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=%24&property2=%26&%25=%22&finalProperty=%3d";
+        final String mockParseTopicWithUnusualCharacters = "devices/deviceID/messages/devicebound/%24.mid=69ea4caf-d83e-454b-81f2-caafda4c81c8&%24.exp=0&%24.to=%2Fdevices%2FdeviceID%2Fmessages%2FdeviceBound&%24.cid=169c34b3-99b0-49f9-b0f6-8fa9d2c99345&iothub-ack=full&property1=%24&property2=%26&%25=_&finalProperty=.";
         baseConstructorExpectations();
         baseConnectExpectation();
         new MockUp<MqttMessaging>()
@@ -1253,8 +1253,8 @@ public class MqttTest
         assertEquals("$", receivedMessage.getProperties()[0].getValue());
         assertEquals("&", receivedMessage.getProperties()[1].getValue());
         assertEquals("%", receivedMessage.getProperties()[2].getName());
-        assertEquals("\"", receivedMessage.getProperties()[2].getValue());
-        assertEquals("=", receivedMessage.getProperties()[3].getValue());
+        assertEquals("_", receivedMessage.getProperties()[2].getValue());
+        assertEquals(".", receivedMessage.getProperties()[3].getValue());
     }
 
     //Tests_SRS_Mqtt_34_057: [This function shall parse the messageId, correlationId, outputname, content encoding and content type from the provided property string]
@@ -1270,7 +1270,7 @@ public class MqttTest
         final String contentType = "application/json";
         final String outputName = "outputChannel1";
         final String to = "/devices/deviceID/messages/deviceBound";
-        final String mockParseTopicWithUnusualCharacters = "devices/deviceID/messages/devicebound/%24.mid=" + msgId + "&%24.exp=" + expTime + "&%24.to=" + URLEncoder.encode(to, StandardCharsets.UTF_8.name()) + "&%24.cid=" + corId + "&iothub-ack=full&%24.ce=" + contentEncoding + "&%24.ct=" + URLEncoder.encode(contentType, StandardCharsets.UTF_8.name()) + "&%24.on=" + outputName + "&property1=%24&property2=%26&%25=%22&finalProperty=%3d";
+        final String mockParseTopicWithUnusualCharacters = "devices/deviceID/messages/devicebound/%24.mid=" + msgId + "&%24.exp=" + expTime + "&%24.to=" + URLEncoder.encode(to, StandardCharsets.UTF_8.name()) + "&%24.cid=" + corId + "&iothub-ack=full&%24.ce=" + contentEncoding + "&%24.ct=" + URLEncoder.encode(contentType, StandardCharsets.UTF_8.name()) + "&%24.on=" + outputName + "&property1=%24&property2=%26&%25=_&finalProperty=.";
         baseConstructorExpectations();
         baseConnectExpectation();
         new MockUp<MqttMessaging>()

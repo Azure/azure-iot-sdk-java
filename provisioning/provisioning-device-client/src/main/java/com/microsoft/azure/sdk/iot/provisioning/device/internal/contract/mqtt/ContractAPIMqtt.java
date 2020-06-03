@@ -96,7 +96,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         catch (InterruptedException e)
         {
             // SRS_ProvisioningAmqpOperations_07_012: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
-            throw new ProvisioningDeviceClientException("Provisioning service failed to reply is alloted time.");
+            throw new ProvisioningDeviceClientException("Provisioning service failed to reply is allotted time.");
         }
 
     }

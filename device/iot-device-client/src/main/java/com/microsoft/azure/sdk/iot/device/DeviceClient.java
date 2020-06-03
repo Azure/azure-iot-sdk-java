@@ -463,7 +463,19 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Starts the device twin.
+     * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
+     * reported properties and desired properties. After that callback is received, this device client will receive a callback
+     * each time a desired property is updated. That callback will either contain the full desired properties set, or
+     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * will cause this device client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
      *
      * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
@@ -482,7 +494,19 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Starts the device twin.
+     * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
+     * reported properties and desired properties. After that callback is received, this device client will receive a callback
+     * each time a desired property is updated. That callback will either contain the full desired properties set, or
+     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * will cause this device client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
      *
      * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
@@ -547,16 +571,37 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
+     *
+     *	    - <b>SetSendInterval</b> - this option is applicable to all protocols.
+     *	      This value sets the period (in milliseconds) that this SDK spawns threads to send queued messages.
+     *	      Even if no message is queued, this thread will be spawned.
+     *
+     *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
+     *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
+     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
+     *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
+     *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
      *	      The value is expected to be of type {@code String}.
+     *
      *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
      *         AMQP/MQTT. This option specifies the interval in seconds after which
      *         SASToken expires. If the transport is already open then setting this
      *         option will restart the transport with the updated expiry time, and
      *         will use that expiry time length for all subsequently generated sas tokens.
      *         The value is expected to be of type {@code long}.
+     *
+     *      - <b>SetHttpsReadTimeout</b> - this option is applicable for HTTPS.
+     *         This option specifies the read timeout in milliseconds per https request
+     *         made by this client. By default, this value is 4 minutes.
+     *         The value is expected to be of type {@code int}.
+     *
+     *      - <b>SetHttpsConnectTimeout</b> - this option is applicable for HTTPS.
+     *         This option specifies the connect timeout in milliseconds per https request
+     *         made by this client. By default, this value is 0 (no connect timeout).
+     *         The value is expected to be of type {@code int}.
      *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
@@ -580,13 +625,10 @@ public final class DeviceClient extends InternalClient implements Closeable
         {
             // Codes_SRS_DEVICECLIENT_02_016: ["SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.]
             case SET_MINIMUM_POLLING_INTERVAL:
+            case SET_RECEIVE_INTERVAL:
+            case SET_HTTPS_CONNECT_TIMEOUT:
+            case SET_HTTPS_READ_TIMEOUT:
             {
-                // Codes_SRS_DEVICECLIENT_12_023: [If the client configured to use TransportClient the SetMinimumPollingInterval shall throw IOException.]
-                if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
-                {
-                    throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
-                            "only works with HTTP protocol");
-                }
                 break;
             }
             // Codes_SRS_DEVICECLIENT_21_040: ["SetSendInterval" - time in milliseconds between 2 consecutive message sends.]

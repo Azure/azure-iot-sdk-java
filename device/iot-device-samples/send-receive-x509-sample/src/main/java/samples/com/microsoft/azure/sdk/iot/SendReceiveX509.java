@@ -160,7 +160,7 @@ public class SendReceiveX509
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<host_name>;DeviceId=<device_id>;x509=true\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
+                            + "3. (mqtt | https | amqps  | mqtt_ws)\n",
                     args.length);
             return;
         }
@@ -187,7 +187,11 @@ public class SendReceiveX509
         else
         {
             String protocolStr = args[2].toLowerCase();
-            if (protocolStr.equals("amqps"))
+            if (protocolStr.equals("https"))
+            {
+                protocol = IotHubClientProtocol.HTTPS;
+            }
+            else if (protocolStr.equals("amqps"))
             {
                 protocol = IotHubClientProtocol.AMQPS;
             }
@@ -195,9 +199,20 @@ public class SendReceiveX509
             {
                 protocol = IotHubClientProtocol.MQTT;
             }
+            else if (protocolStr.equals("mqtt_ws"))
+            {
+                protocol = IotHubClientProtocol.MQTT_WS;
+            }
             else
             {
-                throw new UnsupportedOperationException("The protocol " + protocolStr + " does not support x509 authentication");
+                System.out.format(
+                        "Expected argument 3 to be one of 'mqtt', 'mqtt_ws', 'https', or 'amqps' but received %s\n"
+                                + "The program should be called with the following args: \n"
+                                + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<host_name>;DeviceId=<device_id>;x509=true\n"
+                                + "2. [number of requests to send]\n"
+                                + "3. (mqtt | https | amqps | mqtt_ws)\n",
+                        protocolStr);
+                return;
             }
         }
 

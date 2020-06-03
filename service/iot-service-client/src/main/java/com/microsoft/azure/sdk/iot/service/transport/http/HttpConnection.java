@@ -9,6 +9,7 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProtocolException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +49,20 @@ public class HttpConnection
      */
     public HttpConnection(URL url, HttpMethod method) throws IOException
     {
+        this(url, method, null);
+    }
+
+    /**
+     * Constructor. Opens a connection to the given URL.
+     *
+     * @param url The URL for the HTTPS connection.
+     * @param method The HTTPS method (i.e. GET).
+     * @param proxy The proxy to send the connection through
+     *
+     * @throws IOException  This exception is thrown if the connection was unable to be opened.
+     */
+    public HttpConnection(URL url, HttpMethod method, Proxy proxy) throws IOException
+    {
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_004: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]
         String protocol = url.getProtocol();
         if (!protocol.equalsIgnoreCase("HTTPS"))
@@ -59,9 +74,15 @@ public class HttpConnection
             throw new IllegalArgumentException(errMsg);
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_001: [The constructor shall open a connection to the given URL.]
-        // Coses_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_002: [The constructor shall throw an IOException if the connection was unable to be opened.]
-        this.connection = (HttpsURLConnection) url.openConnection();
+
+        if (proxy != null)
+        {
+            this.connection = (HttpsURLConnection) url.openConnection(proxy);
+        }
+        else
+        {
+            this.connection = (HttpsURLConnection) url.openConnection();
+        }
         // Codes_SRS_SERVICE_SDK_JAVA_HTTPCONNECTION_12_003: [The constructor shall set the HTTPS method to the given method.]
 
         if (method == HttpMethod.PATCH)

@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create bad gateway exception (device sent malformed response)
  */
@@ -14,8 +16,14 @@ public class IotHubBadGatewayException extends IotHubException
     {
         this(null);
     }
+
     public IotHubBadGatewayException(String message)
     {
         super(message);
+    }
+
+    IotHubBadGatewayException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

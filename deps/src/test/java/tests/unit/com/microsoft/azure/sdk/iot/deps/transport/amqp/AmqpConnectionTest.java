@@ -8,11 +8,14 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.transport.amqp;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.*;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
 import mockit.Deencapsulation;
+import mockit.Verifications;
 import org.apache.qpid.proton.Proton;
 
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.integration.junit4.JMockit;
+import org.apache.qpid.proton.amqp.messaging.Rejected;
+import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.reactor.*;
@@ -300,34 +303,6 @@ public class AmqpConnectionTest
     }
 
     @Test
-    public void onConnectionInitThrowOnOpenLinks() throws IOException, InterruptedException
-    {
-        AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedEvent.getConnection();
-                result = mockedConnection;
-
-                mockedConnection.session();
-                result = mockedSession;
-
-                mockedConnection.open();
-                mockedSession.open();
-
-                mockedProvisionOperations.openLinks(mockedSession);
-                result = new Exception();
-            }
-        };
-
-        // Act
-        amqpsConnection.onConnectionInit(mockedEvent);
-
-        //assert
-    }
-
-    @Test
     public void onConnectionInitSucceeds() throws IOException, InterruptedException
     {
         AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
@@ -382,31 +357,6 @@ public class AmqpConnectionTest
     }
 
     @Test
-    public void onConnectionBoundThrowOnSslDomain() throws IOException, InterruptedException
-    {
-        AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedEvent.getConnection();
-                result = mockedConnection;
-
-                mockedConnection.getTransport();
-                result = mockedTransport;
-
-                mockedProton.sslDomain();
-                result = new IOException();
-            }
-        };
-
-        // Act
-        amqpsConnection.onConnectionBound(mockedEvent);
-
-        //assert
-    }
-
-    @Test
     public void onConnectionUnboundSucceeds() throws IOException, InterruptedException
     {
         AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
@@ -430,25 +380,6 @@ public class AmqpConnectionTest
                 result = mockedLink;
 
                 mockedProvisionOperations.initLink(mockedLink);
-            }
-        };
-
-        // Act
-        amqpsConnection.onLinkInit(mockedEvent);
-
-        //assert
-    }
-
-    @Test
-    public void onLinkInitThrowsOnGetLink() throws IOException, InterruptedException
-    {
-        AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedEvent.getLink();
-                result = new Exception();
             }
         };
 
@@ -591,6 +522,43 @@ public class AmqpConnectionTest
         amqpsConnection.onDelivery(mockedEvent);
 
         //assert
+    }
+
+    @Test
+    public void onDeliveryNotifiesListenerIfMessageSendFailsSucceeds(final @Mocked Sender mockedSender) throws IOException, InterruptedException
+    {
+        AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
+
+        Deencapsulation.setField(amqpsConnection, "msgListener", mockedAmqpListener);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockedProvisionOperations.receiverMessageFromLink(anyString);
+                result = mockedMessage;
+
+                mockedEvent.getLink();
+                result = mockedSender;
+
+                mockedEvent.getDelivery();
+                result = mockedDelivery;
+
+                mockedDelivery.getRemoteState();
+                result = Released.getInstance();
+            }
+        };
+
+        // Act
+        amqpsConnection.onDelivery(mockedEvent);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedAmqpListener.messageSendFailed(anyString);
+                times = 1;
+            }
+        };
     }
 
     @Test

@@ -41,6 +41,8 @@ In our SDK, a retry policy is a combination of 2 things:
 
 Currently, the default error filter cannot be altered. 
 
+* NOTE: The list of Exceptions marked as retry-able by the SDK can be found [here](./transport/transportExceptions.md).
+
 ### Retry algorithms
 
 When an error occurs and the retry policy kicks in, it calculates a delay to wait before retrying. The idea is that if an error happens very quickly, you don't want to retry immediately and keep hammering the network, or your IoT Hub, and make the problem worse (especially if the error is a `ThrottlingError` for example!).

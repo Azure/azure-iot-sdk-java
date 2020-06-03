@@ -623,7 +623,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = mockAuthLatch;
 
-                new AmqpsSessionManager(mockConfig);
+                new AmqpsSessionManager(mockConfig, (SubscriptionMessageRequestSentCallback) any);
                 result = mockAmqpsSessionManager;
 
                 mockAuthLatch.await(anyLong, TimeUnit.MILLISECONDS);
@@ -670,7 +670,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = mockAuthLatch;
 
-                new AmqpsSessionManager(mockConfig);
+                new AmqpsSessionManager(mockConfig, (SubscriptionMessageRequestSentCallback) any);
                 result = mockAmqpsSessionManager;
 
                 mockAuthLatch.await(anyLong, TimeUnit.MILLISECONDS);
@@ -1252,7 +1252,7 @@ public class AmqpsIotHubConnectionTest {
                 result = mockConnection;
                 mockConnection.getTransport();
                 result = mockTransportInternal;
-                new WebSocketImpl();
+                new WebSocketImpl(anyInt);
                 result = mockWebSocket;
                 mockWebSocket.configure(anyString, anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
                 mockTransportInternal.addTransportLayer(mockWebSocket);
@@ -1289,7 +1289,7 @@ public class AmqpsIotHubConnectionTest {
                 result = mockConnection;
                 mockConnection.getTransport();
                 result = mockTransportInternal;
-                new WebSocketImpl();
+                new WebSocketImpl(anyInt);
                 result = mockWebSocket;
                 mockWebSocket.configure(anyString, anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
                 mockTransportInternal.addTransportLayer(mockWebSocket);
@@ -2226,17 +2226,17 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getReceiver();
                 result = null;
                 mockEvent.getTransport();
-                result = mockTransport;
+                result = null;
                 mockEvent.getSession();
                 result = null;
                 mockEvent.getConnection();
                 result = null;
                 mockEvent.getLink();
-                result = null;
-                mockTransport.getCondition();
+                result = mockLink;
+                mockLink.getCondition();
                 result = null;
 
-                mockTransport.getRemoteCondition();
+                mockLink.getRemoteCondition();
                 result = mockedErrorCondition;
                 mockedErrorCondition.getCondition();
                 result = mockedSymbol;
@@ -2451,7 +2451,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = mockAuthLatch;
 
-                new AmqpsSessionManager(mockConfig);
+                new AmqpsSessionManager(mockConfig, (SubscriptionMessageRequestSentCallback) any);
                 result = mockAmqpsSessionManager;
 
                 mockAuthLatch.await(anyLong, TimeUnit.MILLISECONDS);

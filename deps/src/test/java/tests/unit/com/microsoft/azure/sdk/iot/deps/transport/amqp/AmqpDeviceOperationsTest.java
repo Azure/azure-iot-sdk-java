@@ -232,26 +232,6 @@ public class AmqpDeviceOperationsTest
         //assert
     }
 
-    @Test (expected = IOException.class)
-    public void openLinksThrowsOnSessionReceiver() throws IOException, IllegalArgumentException
-    {
-        // Arrange
-        AmqpDeviceOperations amqpDeviceOperation = new AmqpDeviceOperations();
-
-        new NonStrictExpectations()
-        {
-            {
-                mockedSession.receiver(anyString);
-                result = new Exception();
-            }
-        };
-
-        // Act
-        amqpDeviceOperation.openLinks(mockedSession);
-
-        //assert
-    }
-
     @Test
     public void isRecieverLinkTagFalseSucceeds() throws IOException, IllegalArgumentException
     {
