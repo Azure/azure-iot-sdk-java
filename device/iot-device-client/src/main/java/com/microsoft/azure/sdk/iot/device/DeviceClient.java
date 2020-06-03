@@ -172,7 +172,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException
     {
-        new DeviceClient(connString, protocol, (ClientOptions) null);
+        this(connString, protocol, (ClientOptions) null);
     }
 
     /**
@@ -247,7 +247,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
-        new DeviceClient(connString, protocol, sslContext, null);
+        this(connString, protocol, sslContext, null);
     }
 
     /**
