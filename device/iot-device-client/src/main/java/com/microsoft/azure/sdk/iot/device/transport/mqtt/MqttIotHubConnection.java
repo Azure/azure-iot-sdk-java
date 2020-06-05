@@ -393,7 +393,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * @throws TransportException if the ACK could not be sent successfully
      */
     @Override
-    public boolean sendMessageResult(Message message, IotHubMessageResult result) throws TransportException
+    public boolean sendMessageResult(IotHubTransportMessage message, IotHubMessageResult result) throws TransportException
     {
         if (message == null || result == null)
         {
