@@ -8,7 +8,7 @@ Write-Host "##vso[task.setvariable variable=task.android.needToRunTestGroup]no"
 $targetBranch = ($env:TARGET_BRANCH)
 if (!($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
 {
-    if ($env:IS_BASIC_TIER_HUB)
+    if ($env:IS_BASIC_TIER_HUB -eq $true)
     {
         #Nightly builds cover this scenario, since it has so little coverage
         Write-Host "This build is a pull request build and is for basic tier hub, so all android tests will be skipped"
