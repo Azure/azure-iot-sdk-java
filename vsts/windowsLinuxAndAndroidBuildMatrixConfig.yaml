@@ -173,7 +173,7 @@ jobs:
       targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
     
 - job: AndroidTest
-  timeoutInMinutes: 180
+  timeoutInMinutes: 80
   pool:
     vmImage: 'macOS-latest'
   strategy:
