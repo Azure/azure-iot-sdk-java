@@ -9,6 +9,9 @@ public class TransportUtils
 {
     public static String IOTHUB_API_VERSION = "2019-10-01";
 
+    // The preview API version support has been added to enable support for PnP features. This will be removed once the service goes GA.
+    public static String IOTHUB_API_VERSION_PREVIEW = "2020-05-31-preview";
+
     private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
     private static final String CLIENT_VERSION = "1.22.0";
 
