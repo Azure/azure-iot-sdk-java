@@ -269,6 +269,7 @@ jobs:
       filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
     env:
       TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
       TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
   - task: PowerShell@2
