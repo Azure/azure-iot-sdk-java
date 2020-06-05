@@ -42,8 +42,11 @@ public class MqttIotHubConnectionTest
     final String iotHubHostName = "test.host.name";
     final String hubName = "test.iothub";
     final String deviceId = "test-deviceId";
+    final String modelId = "dtmi:my:company:namespace;1";
     final String deviceKey = "test-devicekey?&test";
-    final String API_VERSION = Deencapsulation.getField(MqttIotHubConnection.class, "API_VERSION");
+    final String apiVersionPrefix = "?api-version=";
+    final String API_VERSION = apiVersionPrefix + TransportUtils.IOTHUB_API_VERSION;
+    final String PNP_API_VERSION = apiVersionPrefix + TransportUtils.IOTHUB_API_VERSION_PREVIEW + "&digital-twin-model-id=" + modelId;
     final String resourceUri = "test-resource-uri";
     final int qos = 1;
     final String publishTopic = "devices/test-deviceId/messages/events/";
@@ -290,6 +293,53 @@ public class MqttIotHubConnectionTest
 
         String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
         assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION));
+
+        final String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
+
+        assertEquals(expectedSasToken, actualUserPassword);
+
+        IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
+        IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
+        assertEquals(expectedState, actualState);
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, any, any, null);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void openEstablishesConnectionUsingModelIdSetsCorrectPreviewApiVersion() throws IOException, TransportException
+    {
+        final String expectedSasToken = "someToken";
+        final String serverUri = SSL_PREFIX + iotHubHostName + SSL_PORT_SUFFIX;
+        baseExpectations();
+
+        new Expectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+                mockConfig.getSasTokenAuthentication().getRenewedSasToken(false, false);
+                result = expectedSasToken;
+                mockConfig.isUseWebsocket();
+                result = false;
+                mockConfig.getModelId();
+                result = modelId;
+            }
+        };
+
+        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
+
+        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
+
+        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
+        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + PNP_API_VERSION));
 
         final String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
 

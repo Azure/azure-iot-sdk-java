@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,10 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
     private ProxySettings proxySettings;
+
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    String modelId;
 
     @Getter
     @Setter

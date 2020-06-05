@@ -172,14 +172,32 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException
     {
-        // Codes_SRS_DEVICECLIENT_21_001: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
-        super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        this(connString, protocol, (ClientOptions) null);
+    }
 
-        // Codes_SRS_DEVICECLIENT_34_075: [If the provided connection string contains a module id field, this function shall throw an UnsupportedOperationException.]
+    /**
+     * Constructor that takes a connection string as an argument.
+     *
+     * @param connString the connection string. The connection string is a set
+     * of key-value pairs that are separated by ';', with the keys and values
+     * separated by '='. It should contain values for the following keys:
+     * {@code HostName}, {@code DeviceId}, and {@code SharedAccessKey}.
+     * @param protocol the communication protocol used (i.e. HTTPS)
+     * @param clientOptions The options that allow configuration of the device client instance during initialization
+     *
+     * @throws IllegalArgumentException if any of {@code connString} or
+     * {@code protocol} are {@code null}; or if {@code connString} is missing
+     * one of the following attributes:{@code HostName}, {@code DeviceId}, or
+     * {@code SharedAccessKey} or if the IoT hub hostname does not conform to
+     * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     */
+    public DeviceClient(String connString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IllegalArgumentException
+    {
+        super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+
         commonConstructorVerifications();
 
-        // Codes_SRS_DEVICECLIENT_12_012: [The constructor shall set the connection type to SINGLE_CLIENT.]
-        // Codes_SRS_DEVICECLIENT_12_015: [The constructor shall set the transportClient to null.]
         commonConstructorSetup();
     }
 
@@ -229,7 +247,24 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
-        super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        this(connString, protocol, sslContext, null);
+    }
+
+    /**
+     * Creates a device client that uses the provided SSLContext for SSL negotiation
+     * @param connString the connection string for the device. May be an x509 connection string (format: "HostName=...;DeviceId=...;x509=true")
+     *                   and it may be a SAS connection string (format: "HostName=...;DeviceId=...;SharedAccessKey=..."). If
+     *                   this connection string is an x509 connection string, the client will use the provided SSLContext for authentication.
+     * @param protocol the protocol to use when communicating with IotHub
+     * @param sslContext the ssl context that will be used during authentication. If the provided connection string does not contain
+     *                   SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
+     *                   does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
+     * @param clientOptions The options that allow configuration of the device client instance during initialization
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     */
+    public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext, ClientOptions clientOptions) throws URISyntaxException
+    {
+        super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorVerifications();
         commonConstructorSetup();
     }
@@ -237,7 +272,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of the iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
@@ -247,7 +282,24 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public static DeviceClient createFromSecurityProvider(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException
     {
-        return new DeviceClient(uri, deviceId, securityProvider, protocol);
+        return new DeviceClient(uri, deviceId, securityProvider, protocol, null);
+    }
+
+    /**
+     * Creates a device client that uses the provided security provider for authentication.
+     *
+     * @param uri The hostname of the iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param deviceId The id for the device to use
+     * @param securityProvider The security provider for the device
+     * @param protocol The protocol the device shall use for communication to the IoT Hub
+     * @param clientOptions The options that allow configuration of the device client instance during initialization
+     * @return The created device client instance
+     * @throws URISyntaxException If the provided connString could not be parsed.
+     * @throws IOException If the SecurityProvider throws any exception while authenticating
+     */
+    public static DeviceClient createFromSecurityProvider(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
+    {
+        return new DeviceClient(uri, deviceId, securityProvider, protocol, clientOptions);
     }
 
     /**
@@ -272,16 +324,16 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @throws URISyntaxException If the provided connString could not be parsed.
      * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
-    private DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    private DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
     {
-        super(uri, deviceId, securityProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        super(uri, deviceId, securityProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorSetup();
     }
 
