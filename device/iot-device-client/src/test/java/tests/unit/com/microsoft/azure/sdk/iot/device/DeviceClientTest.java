@@ -129,7 +129,7 @@ public class DeviceClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
         // act
-        final DeviceClient client = new DeviceClient(connString, protocol);
+        final DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
 
         // assert
         new Verifications()
@@ -205,7 +205,7 @@ public class DeviceClientTest
         };
 
         // act
-        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext);
+        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext, null);
 
         // assert
         new Verifications()
@@ -234,7 +234,7 @@ public class DeviceClientTest
         final IotHubClientProtocol expectedProtocol = IotHubClientProtocol.HTTPS;
 
         //act
-        DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol);
+        DeviceClient.createFromSecurityProvider(expectedUri, expectedDeviceId, mockSecurityProvider, expectedProtocol, null);
 
         //assert
         new Verifications()
@@ -645,7 +645,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.MQTT;
             }
         };
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
 
         // act
         client.setOption("SetReceiveInterval", someMilliseconds);
@@ -677,7 +677,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.HTTPS;
             }
         };
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
 
         // act
         client.setOption("SetMinimumPollingInterval", "thisIsNotALong");
@@ -701,7 +701,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.HTTPS;
             }
         };
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         client.open();
         long value = 3;
 
@@ -727,7 +727,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.HTTPS;
             }
         };
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         final long value = 3L;
 
         // act
@@ -760,7 +760,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.HTTPS;
             }
         };
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         final long value = 3L;
 
         // act
@@ -839,7 +839,7 @@ public class DeviceClientTest
                 result = IotHubClientProtocol.HTTPS;
             }
         };
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
 
         // act
         client.setOption("SetSASTokenExpiryTime", "thisIsNotALong");
@@ -865,7 +865,7 @@ public class DeviceClientTest
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
             }
         };
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         final long value = 60;
 
         // act
@@ -905,7 +905,7 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         client.open();
         final long value = 60;
 
@@ -952,7 +952,7 @@ public class DeviceClientTest
         final String connString = "some string";
         final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         client.open();
         final long value = 60;
 
@@ -994,7 +994,7 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         final long value = 60;
 
         // act
@@ -1034,7 +1034,7 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         client.open();
         final long value = 60;
 
@@ -1077,7 +1077,7 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         final long value = 60;
 
         // act
@@ -1117,7 +1117,7 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
         final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
-        DeviceClient client = new DeviceClient(connString, protocol);
+        DeviceClient client = new DeviceClient(connString, protocol, (ClientOptions) null);
         client.open();
         final long value = 60;
 
@@ -1637,7 +1637,7 @@ public class DeviceClientTest
         final long streamLength = 100;
 
         deviceClientInstanceExpectation(protocol);
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, null, mockedPropertyCB);
@@ -1654,7 +1654,7 @@ public class DeviceClientTest
         final long streamLength = 100;
 
         deviceClientInstanceExpectation(protocol);
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, (InputStream) null, streamLength, mockedStatusCB, mockedPropertyCB);
@@ -1671,7 +1671,7 @@ public class DeviceClientTest
         final String destinationBlobName = "valid/blob/name.txt";
 
         deviceClientInstanceExpectation(protocol);
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, -1, mockedStatusCB, mockedPropertyCB);
@@ -1688,7 +1688,7 @@ public class DeviceClientTest
         final long streamLength = 100;
 
         deviceClientInstanceExpectation(protocol);
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", new Class[] {String.class, InputStream.class, long.class, IotHubEventCallback.class, Object.class}, null, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
@@ -1705,7 +1705,7 @@ public class DeviceClientTest
         final long streamLength = 100;
 
         deviceClientInstanceExpectation(protocol);
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", "", mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
@@ -1723,7 +1723,7 @@ public class DeviceClientTest
         final long streamLength = 100;
 
         deviceClientInstanceExpectation(protocol);
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
@@ -1751,7 +1751,7 @@ public class DeviceClientTest
 
         deviceClientInstanceExpectation(protocol);
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
@@ -1808,7 +1808,7 @@ public class DeviceClientTest
                         destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
             }
         };
-        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class, ClientOptions.class}, "some conn string", protocol, null);
         Deencapsulation.invoke(client, "open");
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
 
@@ -1847,7 +1847,7 @@ public class DeviceClientTest
 
         deviceClientInstanceExpectation(protocol);
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD);
+        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
         Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
