@@ -247,24 +247,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
-        this(connString, protocol, sslContext, null);
-    }
-
-    /**
-     * Creates a device client that uses the provided SSLContext for SSL negotiation
-     * @param connString the connection string for the device. May be an x509 connection string (format: "HostName=...;DeviceId=...;x509=true")
-     *                   and it may be a SAS connection string (format: "HostName=...;DeviceId=...;SharedAccessKey=..."). If
-     *                   this connection string is an x509 connection string, the client will use the provided SSLContext for authentication.
-     * @param protocol the protocol to use when communicating with IotHub
-     * @param sslContext the ssl context that will be used during authentication. If the provided connection string does not contain
-     *                   SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
-     *                   does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
-     * @param clientOptions The options that allow configuration of the device client instance during initialization
-     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
-     */
-    public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext, ClientOptions clientOptions) throws URISyntaxException
-    {
-        super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+        super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
         commonConstructorVerifications();
         commonConstructorSetup();
     }
