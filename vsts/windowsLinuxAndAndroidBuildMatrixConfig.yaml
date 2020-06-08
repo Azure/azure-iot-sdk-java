@@ -173,7 +173,7 @@ jobs:
       targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
     
 - job: AndroidTest
-  timeoutInMinutes: 180
+  timeoutInMinutes: 80
   pool:
     vmImage: 'macOS-latest'
   strategy:
@@ -269,6 +269,7 @@ jobs:
       filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
     env:
       TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+      IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
       TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
   - task: PowerShell@2
