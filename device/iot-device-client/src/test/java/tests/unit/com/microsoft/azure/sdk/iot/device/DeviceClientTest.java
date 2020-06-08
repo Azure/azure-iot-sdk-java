@@ -245,7 +245,7 @@ public class DeviceClientTest
         new DeviceClientConfig(mockIotHubConnectionString, mockedClientOptions);
 
         // act
-        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext, null);
+        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext);
 
         // assert
         new Verifications()
