@@ -18,7 +18,7 @@ Please follow the instructions and template below to save us time requesting add
 
 1. Search existing issues to avoid creating duplicates.
 
-2. If possible test using the [latest release](https://github.com/Azure/azure-iot-sdk-java/releases) to make sure your issues has not already been fixed.
+2. If possible test using the [latest release](https://github.com/Azure/azure-iot-sdk-java/releases) to make sure your issue has not already been fixed.
 
 3. Do not share information from your Azure subscription here (connection strings, service names (IoT Hub name, Device Provisioning Service scope ID), etc...). If you need to share any of this information, you can create a ticket and [get assistance from Microsoft Support](https://docs.microsoft.com/en-us/azure/azure-supportability/how-to-create-azure-support-request).
 
