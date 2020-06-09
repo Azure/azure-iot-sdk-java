@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
+title: '[Bug Report]'
+labels: 'bug'
 assignees: ''
 
 ---
@@ -28,6 +28,7 @@ Please follow the instructions and template below to save us time requesting add
    -  Console logs.
 
 5. Delete these instructions before submitting the bug.
+
 Below is a generic bug report format. We recommend you use it as a template and replace the information below each header with your own. 
 
 ------------------------------- delete above -------------------------------
@@ -37,7 +38,7 @@ Below is a generic bug report format. We recommend you use it as a template and 
 
 - **OS and version used:** <VERSION> (Windows 10, Ubuntu 18.04, etc. )
 - **Java runtime used:** <VERSION> (in a command prompt: java -version )
-- **SDK version used:** <VERSION>
+- **SDK version used:** <VERSION> (Please include the version of the SDK used)
 
 ## Description of the issue
 Please be as detailed as possible: which feature has a problem, how often does it fail, etc.
