@@ -132,7 +132,7 @@ public class ModuleClient extends InternalClient
      */
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, SSLContext sslContext) throws ModuleClientException, URISyntaxException
     {
-        super(new IotHubConnectionString(connectionString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
+        super(new IotHubConnectionString(connectionString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());
     }
 

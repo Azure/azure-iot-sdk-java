@@ -247,7 +247,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
-        super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
+        super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications();
         commonConstructorSetup();
     }
