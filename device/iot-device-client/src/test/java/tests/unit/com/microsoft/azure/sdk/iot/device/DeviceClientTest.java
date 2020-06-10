@@ -4,6 +4,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
@@ -37,6 +38,9 @@ public class DeviceClientTest
 
     @Mocked
     IotHubConnectionString mockIotHubConnectionString;
+
+    @Mocked
+    ClientOptions mockClientOptions;
 
     @Mocked
     DeviceIO mockDeviceIO;
@@ -189,7 +193,7 @@ public class DeviceClientTest
     }
 
     @Test
-    public void constructorWithSSLContextSuccess(@Mocked final SSLContext mockedSSLContext) throws URISyntaxException
+    public void constructorWithClientOptionsSuccess(@Mocked final ClientOptions mockedClientOptions) throws URISyntaxException
     {
         // arrange
         final String connString =
@@ -205,7 +209,7 @@ public class DeviceClientTest
         };
 
         // act
-        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext, null);
+        final DeviceClient client = new DeviceClient(connString, protocol, mockedClientOptions);
 
         // assert
         new Verifications()
@@ -217,7 +221,43 @@ public class DeviceClientTest
                 TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
                 assertNull(transportClient);
 
-                new DeviceClientConfig(mockIotHubConnectionString, mockedSSLContext);
+                new DeviceClientConfig(mockIotHubConnectionString, mockedClientOptions);
+            }
+        };
+    }
+
+    @Test
+    public void constructorWithSSLContextSuccess(@Mocked final SSLContext mockedSSLContext, @Mocked final ClientOptions mockedClientOptions) throws URISyntaxException
+    {
+        // arrange
+        final String connString =
+                "HostName=iothub.device.com;deviceId=testdevice;x509=true";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
+
+        new Expectations()
+        {
+            {
+                new IotHubConnectionString(connString);
+                result = mockIotHubConnectionString;
+            }
+        };
+
+        new DeviceClientConfig(mockIotHubConnectionString, mockedClientOptions);
+
+        // act
+        final DeviceClient client = new DeviceClient(connString, protocol, mockedSSLContext);
+
+        // assert
+        new Verifications()
+        {
+            {
+                IoTHubConnectionType ioTHubConnectionType = Deencapsulation.getField(client, "ioTHubConnectionType");
+                assertEquals(SINGLE_CLIENT, ioTHubConnectionType);
+
+                TransportClient transportClient = Deencapsulation.getField(client, "transportClient");
+                assertNull(transportClient);
+
+                new DeviceClientConfig(mockIotHubConnectionString, mockedClientOptions);
             }
         };
     }
@@ -1636,6 +1676,7 @@ public class DeviceClientTest
         final String destinationBlobName = "valid/blob/name.txt";
         final long streamLength = 100;
 
+        Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
         deviceClientInstanceExpectation(protocol);
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
@@ -1653,6 +1694,7 @@ public class DeviceClientTest
         final String destinationBlobName = "valid/blob/name.txt";
         final long streamLength = 100;
 
+        DeviceClientConfig clientConfig = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
         deviceClientInstanceExpectation(protocol);
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
@@ -1670,6 +1712,7 @@ public class DeviceClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final String destinationBlobName = "valid/blob/name.txt";
 
+        DeviceClientConfig clientConfig = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
         deviceClientInstanceExpectation(protocol);
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
@@ -1687,6 +1730,7 @@ public class DeviceClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final long streamLength = 100;
 
+        DeviceClientConfig clientConfig = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
         deviceClientInstanceExpectation(protocol);
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
@@ -1704,6 +1748,7 @@ public class DeviceClientTest
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
         final long streamLength = 100;
 
+        DeviceClientConfig clientConfig = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
         deviceClientInstanceExpectation(protocol);
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
@@ -1722,6 +1767,7 @@ public class DeviceClientTest
         final String destinationBlobName = "valid\u1234/blob/name.txt";
         final long streamLength = 100;
 
+        DeviceClientConfig clientConfig = Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
         deviceClientInstanceExpectation(protocol);
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
@@ -1748,13 +1794,13 @@ public class DeviceClientTest
         }
         bigBlobName.append("image.jpg");
         final String destinationBlobName = bigBlobName.toString();
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class}, "some conn string", protocol);
+        Deencapsulation.newInstance(DeviceClientConfig.class, new Class[] {String.class}, mockIotHubConnectionString);
 
         deviceClientInstanceExpectation(protocol);
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-
         // act
-        Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+        client.uploadToBlobAsync(destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
     }
 
     /* Tests_SRS_INTERNALCLIENT_21_044: [The uploadToBlobAsync shall asynchronously upload the stream in `inputStream` to the blob in `destinationBlobName`.] */
@@ -1829,7 +1875,8 @@ public class DeviceClientTest
     @Test (expected = IllegalArgumentException.class)
     public void startFileUploadInvalidPathBlobNameThrows(@Mocked final InputStream mockInputStream,
                                                          @Mocked final IotHubEventCallback mockedStatusCB,
-                                                         @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, TransportException
+                                                         @Mocked final PropertyCallBack mockedPropertyCB,
+                                                         @Mocked final ClientOptions clientOptions) throws IOException, URISyntaxException, TransportException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -1844,13 +1891,12 @@ public class DeviceClientTest
         }
         bigBlobName.append("image.jpg");
         final String destinationBlobName = bigBlobName.toString();
+        DeviceClient deviceClient = Deencapsulation.newInstance(DeviceClient.class, new Class[] {String.class, IotHubClientProtocol.class}, mockIotHubConnectionString, protocol);
 
         deviceClientInstanceExpectation(protocol);
 
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-
         // act
-        Deencapsulation.invoke(client, "uploadToBlobAsync", destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
+        deviceClient.uploadToBlobAsync(destinationBlobName, mockInputStream, streamLength, mockedStatusCB, mockedPropertyCB);
     }
 
     /* Tests_SRS_INTERNALCLIENT_21_049: [If uploadToBlobAsync failed to create a new instance of the FileUpload, it shall bypass the exception.] */
@@ -1995,7 +2041,7 @@ public class DeviceClientTest
                 break;
         }
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);

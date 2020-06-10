@@ -2644,10 +2644,10 @@ public class InternalClientTest
         //arrange
         final String expectedCertificatePath = "some certificate path";
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                new DeviceClientConfig(mockIotHubConnectionString);
+                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
                 result = mockConfig;
 
                 Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
@@ -2655,12 +2655,8 @@ public class InternalClientTest
 
                 mockDeviceIO.getProtocol();
                 result = protocol;
-
-                mockConfig.getAuthenticationProvider();
-                result = mockIotHubAuthenticationProvider;
             }
         };
-
         InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
 
         // act
@@ -2680,20 +2676,14 @@ public class InternalClientTest
     public void setProxyThrowsIfClientAlreadyOpen()
     {
         //arrange
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                new DeviceClientConfig(mockIotHubConnectionString);
+                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
                 result = mockConfig;
 
                 Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
                 result = mockDeviceIO;
-
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.MQTT_WS;
-
-                mockConfig.getAuthenticationProvider();
-                result = mockIotHubAuthenticationProvider;
 
                 mockDeviceIO.isOpen();
                 result = true;
@@ -2722,10 +2712,10 @@ public class InternalClientTest
     private void setProxyThrowsIfClientUsingUnsupportedProtocol(final IotHubClientProtocol protocol)
     {
         //arrange
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                new DeviceClientConfig(mockIotHubConnectionString);
+                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
                 result = mockConfig;
 
                 Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
@@ -2736,9 +2726,6 @@ public class InternalClientTest
 
                 mockDeviceIO.getProtocol();
                 result = protocol;
-
-                mockConfig.getAuthenticationProvider();
-                result = mockIotHubAuthenticationProvider;
 
                 mockDeviceIO.isOpen();
                 result = false;
@@ -2755,10 +2742,10 @@ public class InternalClientTest
     public void setProxySavesHostnameAndPortToConfig()
     {
         //arrange
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
-                new DeviceClientConfig(mockIotHubConnectionString);
+                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
                 result = mockConfig;
 
                 Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
@@ -2766,9 +2753,6 @@ public class InternalClientTest
 
                 mockDeviceIO.getProtocol();
                 result = IotHubClientProtocol.HTTPS;
-
-                mockConfig.getAuthenticationProvider();
-                result = mockIotHubAuthenticationProvider;
 
                 mockDeviceIO.isOpen();
                 result = false;

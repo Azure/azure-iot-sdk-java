@@ -176,9 +176,6 @@ public class ModuleClientTest
                 new IotHubConnectionString(connString);
                 result = mockedIotHubConnectionString;
 
-                new DeviceClientConfig(mockedIotHubConnectionString, mockedSSLContext);
-                result = mockedDeviceClientConfig;
-
                 mockedDeviceClientConfig.getModuleId();
                 result = "some module id";
             }
@@ -734,9 +731,6 @@ public class ModuleClientTest
                 new IotHubConnectionString(expectedEdgeHubConnectionString);
                 result = mockedIotHubConnectionString;
 
-                new DeviceClientConfig(mockedIotHubConnectionString);
-                result = mockedDeviceClientConfig;
-
                 mockedDeviceClientConfig.getModuleId();
                 result = "someModuleId";
             }
@@ -778,10 +772,6 @@ public class ModuleClientTest
 
                 new IotHubConnectionString(expectedIotHubConnectionString);
                 result = mockedIotHubConnectionString;
-
-                new DeviceClientConfig(mockedIotHubConnectionString);
-                result = mockedDeviceClientConfig;
-
                 mockedDeviceClientConfig.getModuleId();
                 result = "someModuleId";
             }
