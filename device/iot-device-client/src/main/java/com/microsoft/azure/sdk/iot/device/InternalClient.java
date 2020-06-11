@@ -47,7 +47,7 @@ public class InternalClient
         /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
         commonConstructorVerification(iotHubConnectionString, protocol);
 
-        this.config = new DeviceClientConfig(iotHubConnectionString);
+        this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
         this.config.setProtocol(protocol);
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();
@@ -76,15 +76,12 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext, long sendPeriodMillis, long receivePeriod, ClientOptions clientOptions)
+    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext, long sendPeriodMillis, long receivePeriod)
     {
         commonConstructorVerification(iotHubConnectionString, protocol);
 
         this.config = new DeviceClientConfig(iotHubConnectionString, sslContext);
         this.config.setProtocol(protocol);
-        if (clientOptions != null) {
-            this.config.modelId = clientOptions.getModelId();
-        }
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
     }
 
