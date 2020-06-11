@@ -23,10 +23,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
@@ -50,8 +47,8 @@ public class TransportClientTests extends IotHubIntegrationTest
     private static final int NUM_MESSAGES_PER_CONNECTION = 3;
 
     private static final long RETRY_MILLISECONDS = 100; //.1 seconds
-    private static final long SEND_TIMEOUT_MILLISECONDS = 5 * 60 * 1000; // 5 minutes
-    private static final long RECEIVE_MESSAGE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+    private static final long SEND_TIMEOUT_MILLISECONDS = 20 * 1000; // 20 seconds
+    private static final long RECEIVE_MESSAGE_TIMEOUT = 20 * 1000; // 20 seconds
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 10 * 1000; // 10 seconds
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION = 500; // .5 seconds
     private static final long RESPONSE_TIMEOUT_SECONDS = 200; // 200 seconds
@@ -251,20 +248,21 @@ public class TransportClientTests extends IotHubIntegrationTest
     }
 
     @Test
-    public void sendMessagesMultithreaded() throws InterruptedException, URISyntaxException, IOException
+    public void sendMessagesMultithreaded() throws InterruptedException, IOException
     {
-        CountDownLatch cdl = new CountDownLatch(testInstance.clientArrayList.size());
-
         testInstance.transportClient.open();
+        Thread[] threads = new Thread[testInstance.clientArrayList.size()];
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
-            new Thread(
-                    new MultiplexRunnable(
-                            testInstance.devicesList[i], testInstance.clientArrayList.get(i), NUM_MESSAGES_PER_CONNECTION, NUM_KEYS_PER_MESSAGE, SEND_TIMEOUT_MILLISECONDS, cdl, testInstance.succeed))
-                    .start();
+            threads[i] = new Thread(new MultiplexRunnable(testInstance.devicesList[i], testInstance.clientArrayList.get(i), testInstance.succeed));
+            threads[i].start();
         }
-        cdl.await(3, TimeUnit.MINUTES);
+
+        for (int i = 0; i < testInstance.clientArrayList.size(); i++)
+        {
+            threads[i].join(SEND_TIMEOUT_MILLISECONDS);
+        }
 
         if(!testInstance.succeed.get())
         {
@@ -767,12 +765,7 @@ public class TransportClientTests extends IotHubIntegrationTest
     {
         private InternalClient client;
         private String messageString;
-
-        private long numMessagesPerDevice;
-        private long sendTimeout;
-        private long numKeys;
-        private CountDownLatch latch;
-        private AtomicBoolean succeed;
+        private AtomicBoolean success;
 
         @Override
         public void run()
@@ -783,42 +776,25 @@ public class TransportClientTests extends IotHubIntegrationTest
             }
             catch (Exception e)
             {
-                succeed.set(false);
-                for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
-                {
-                    //test has already failed, don't need to wait for other threads to finish
-                    this.latch.countDown();
-                }
+                this.success.lazySet(false);
             }
-            latch.countDown();
         }
 
-        private MultiplexRunnable(Device deviceAmqps,
-                                 InternalClient client,
-                                 long numMessagesPerConnection,
-                                 long numKeys,
-                                 long sendTimeout,
-                                 CountDownLatch latch,
-                                 AtomicBoolean succeed)
+        private MultiplexRunnable(Device deviceAmqps, InternalClient client, AtomicBoolean success)
         {
             this.client = client;
-            this.numMessagesPerDevice = numMessagesPerConnection;
-            this.sendTimeout = sendTimeout;
-            this.numKeys = numKeys;
-            this.latch = latch;
-            this.succeed = succeed;
-            this.succeed.set(true);
+            this.success = success;
 
             messageString = "Java client " + deviceAmqps.getDeviceId() + " test e2e message over AMQP protocol";
         }
 
         private void sendMessages() throws Exception
         {
-            for (int i = 0; i < numMessagesPerDevice; ++i)
+            for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; ++i)
             {
                 Message msgSend = new Message(messageString);
                 msgSend.setProperty("messageCount", Integer.toString(i));
-                for (int j = 0; j < numKeys; j++)
+                for (int j = 0; j < NUM_KEYS_PER_MESSAGE; j++)
                 {
                     msgSend.setProperty("key"+j, "value"+j);
                 }
@@ -828,10 +804,10 @@ public class TransportClientTests extends IotHubIntegrationTest
                 client.sendEventAsync(msgSend, callback, messageSent);
 
                 long startTime = System.currentTimeMillis();
-                while(!messageSent.wasCallbackFired())
+                while (!messageSent.wasCallbackFired())
                 {
                     Thread.sleep(RETRY_MILLISECONDS);
-                    if ((System.currentTimeMillis() - startTime) > sendTimeout)
+                    if ((System.currentTimeMillis() - startTime) > SEND_TIMEOUT_MILLISECONDS)
                     {
                         fail(buildExceptionMessage("Timed out waiting for OK_EMPTY response for sent message", client));
                     }
@@ -842,6 +818,8 @@ public class TransportClientTests extends IotHubIntegrationTest
                     fail(buildExceptionMessage("Unexpected iot hub status code! Expected OK_EMPTY but got " + messageSent.getCallbackStatusCode(), client));
                 }
             }
+
+            this.success.lazySet(true);
         }
     }
 
