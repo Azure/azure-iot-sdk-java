@@ -1,8 +1,8 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.fileupload;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadRequestParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadResponseParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadStatusParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
@@ -44,13 +44,13 @@ public class FileUploadTaskTest
     private HttpsTransportManager mockHttpsTransportManager;
 
     @Mocked
-    private FileUploadRequestParser mockFileUploadRequestParser;
+    private FileUploadSasUriRequest mockFileUploadSasUriRequest;
 
     @Mocked
-    private FileUploadResponseParser mockFileUploadResponseParser;
+    private FileUploadSasUriResponse mockFileUploadSasUriResponse;
 
     @Mocked
-    private FileUploadStatusParser mockFileUploadStatusParser;
+    private FileUploadCompletionNotification mockFileUploadStatusParser;
 
     @Mocked
     private IotHubTransportMessage mockMessageRequest;
@@ -98,9 +98,9 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadRequestParser(blobName);
-                result = mockFileUploadRequestParser;
-                mockFileUploadRequestParser.toJson();
+                new FileUploadSasUriRequest(blobName);
+                result = mockFileUploadSasUriRequest;
+                mockFileUploadSasUriRequest.toJson();
                 result = requestJson;
                 new IotHubTransportMessage(requestJson);
                 result = mockMessageRequest;
@@ -119,8 +119,8 @@ public class FileUploadTaskTest
                 result = IotHubStatusCode.OK;
                 mockResponseMessage.getBytes();
                 result = responseJson.getBytes();
-                new FileUploadResponseParser(responseJson);
-                result = mockFileUploadResponseParser;
+                new FileUploadSasUriResponse(responseJson);
+                result = mockFileUploadSasUriResponse;
             }
         };
     }
@@ -130,15 +130,15 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                mockFileUploadResponseParser.getBlobName();
+                mockFileUploadSasUriResponse.getBlobName();
                 result = blobName;
-                mockFileUploadResponseParser.getCorrelationId();
+                mockFileUploadSasUriResponse.getCorrelationId();
                 result = correlationId;
-                mockFileUploadResponseParser.getHostName();
+                mockFileUploadSasUriResponse.getHostName();
                 result = hostName;
-                mockFileUploadResponseParser.getContainerName();
+                mockFileUploadSasUriResponse.getContainerName();
                 result = containerName;
-                mockFileUploadResponseParser.getSasToken();
+                mockFileUploadSasUriResponse.getSasToken();
                 result = sasToken;
             }
         };
@@ -160,7 +160,7 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadStatusParser(correlationId, true, 0, (String)any);
+                new FileUploadCompletionNotification(correlationId, true, 0, (String)any);
                 result = mockFileUploadStatusParser;
                 mockFileUploadStatusParser.toJson();
                 result = notificationJson;
@@ -177,7 +177,7 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadStatusParser(correlationId, false, -1, (String)any);
+                new FileUploadCompletionNotification(correlationId, false, -1, (String)any);
                 result = mockFileUploadStatusParser;
                 mockFileUploadStatusParser.toJson();
                 result = notificationJson;
@@ -296,7 +296,7 @@ public class FileUploadTaskTest
         assertEquals(Deencapsulation.getField(fileUploadTask, "httpsTransportManager"), mockHttpsTransportManager);
     }
 
-    /* Tests_SRS_FILEUPLOADTASK_21_007: [The run shall create a FileUpload request message, by using the FileUploadRequestParser.] */
+    /* Tests_SRS_FILEUPLOADTASK_21_007: [The run shall create a FileUpload request message, by using the FileUploadSasUriRequest.] */
     @Test
     public void runCreateRequest() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
     {
@@ -378,7 +378,7 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                mockHttpsTransportManager.sendFileUploadMessage(mockMessageRequest);
+                mockHttpsTransportManager.getFileUploadSasUri(mockMessageRequest);
                 times = 1;
             }
         };
@@ -410,7 +410,7 @@ public class FileUploadTaskTest
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_015: [If the iothub accepts the request, it shall provide a `responseMessage` with the blob information with a correlationId.] */
-    /* Tests_SRS_FILEUPLOADTASK_21_017: [The run shall parse and store the blobName and correlationId in the response, by use the FileUploadResponseParser.] */
+    /* Tests_SRS_FILEUPLOADTASK_21_017: [The run shall parse and store the blobName and correlationId in the response, by use the FileUploadSasUriResponse.] */
     @Test
     public void runSetBlobNameAndCorrelationId() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
     {
@@ -428,9 +428,9 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockFileUploadResponseParser, "getCorrelationId");
+                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getCorrelationId");
                 times = 1;
-                Deencapsulation.invoke(mockFileUploadResponseParser, "getBlobName");
+                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getBlobName");
                 times = 1;
             }
         };
@@ -457,11 +457,11 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockFileUploadResponseParser, "getHostName");
+                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getHostName");
                 times = 1;
-                Deencapsulation.invoke(mockFileUploadResponseParser, "getContainerName");
+                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getContainerName");
                 times = 1;
-                Deencapsulation.invoke(mockFileUploadResponseParser, "getSasToken");
+                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getSasToken");
                 times = 1;
             }
         };
@@ -617,7 +617,7 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadRequestParser(VALID_BLOB_NAME);
+                new FileUploadSasUriRequest(VALID_BLOB_NAME);
                 result = new IllegalArgumentException();
             }
         };
@@ -647,9 +647,9 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadRequestParser(VALID_BLOB_NAME);
-                result = mockFileUploadRequestParser;
-                mockFileUploadRequestParser.toJson();
+                new FileUploadSasUriRequest(VALID_BLOB_NAME);
+                result = mockFileUploadSasUriRequest;
+                mockFileUploadSasUriRequest.toJson();
                 result = VALID_REQUEST_JSON;
                 new IotHubTransportMessage(VALID_REQUEST_JSON);
                 result = new IllegalArgumentException();
@@ -681,13 +681,13 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadRequestParser(VALID_BLOB_NAME);
-                result = mockFileUploadRequestParser;
-                mockFileUploadRequestParser.toJson();
+                new FileUploadSasUriRequest(VALID_BLOB_NAME);
+                result = mockFileUploadSasUriRequest;
+                mockFileUploadSasUriRequest.toJson();
                 result = VALID_REQUEST_JSON;
                 new IotHubTransportMessage(VALID_REQUEST_JSON);
                 result = mockMessageRequest;
-                mockHttpsTransportManager.sendFileUploadMessage(mockMessageRequest);
+                mockHttpsTransportManager.getFileUploadSasUri(mockMessageRequest);
                 result = new IOException();
             }
         };
@@ -703,7 +703,7 @@ public class FileUploadTaskTest
         new Verifications()
         {
             {
-                mockHttpsTransportManager.sendFileUploadMessage(mockMessageRequest);
+                mockHttpsTransportManager.getFileUploadSasUri(mockMessageRequest);
                 times = 1;
                 mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
                 times = 1;
@@ -895,7 +895,7 @@ public class FileUploadTaskTest
                 result = IotHubStatusCode.OK;
                 mockResponseMessage.getBytes();
                 result = VALID_RESPONSE_JSON.getBytes();
-                new FileUploadResponseParser(VALID_RESPONSE_JSON);
+                new FileUploadSasUriResponse(VALID_RESPONSE_JSON);
                 result = new IllegalArgumentException();
             }
         };
@@ -1027,7 +1027,7 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadStatusParser(VALID_CORRELATION_ID, true, 0, (String)any);
+                new FileUploadCompletionNotification(VALID_CORRELATION_ID, true, 0, (String)any);
                 result = new IllegalArgumentException();
             }
         };
@@ -1061,7 +1061,7 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadStatusParser(VALID_CORRELATION_ID, true, 0, (String)any);
+                new FileUploadCompletionNotification(VALID_CORRELATION_ID, true, 0, (String)any);
                 result = mockFileUploadStatusParser;
                 mockFileUploadStatusParser.toJson();
                 result = VALID_NOTIFICATION_JSON;
@@ -1090,7 +1090,7 @@ public class FileUploadTaskTest
         new NonStrictExpectations()
         {
             {
-                new FileUploadStatusParser(VALID_CORRELATION_ID, true, 0, (String)any);
+                new FileUploadCompletionNotification(VALID_CORRELATION_ID, true, 0, (String)any);
                 result = mockFileUploadStatusParser;
                 mockFileUploadStatusParser.toJson();
                 result = VALID_NOTIFICATION_JSON;

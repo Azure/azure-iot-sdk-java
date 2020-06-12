@@ -3,7 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadResponseParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNotNull;
  * Unit tests for File Upload Response deserializer
  * 100% methods, 100% lines covered
  */
-public class FileUploadResponseParserTest
+public class FileUploadSasUriResponseTest
 {
     private static final String VALID_CORRELATION_ID = "somecorrelationid";
     private static final String INVALID_CORRELATION_ID = "some\u1234correlationid";
@@ -27,15 +27,15 @@ public class FileUploadResponseParserTest
     private static final String VALID_SAS_TOKEN = "1234asdfSAStoken";
     private static final String INVALID_SAS_TOKEN = "\u1234asdfSAStoken";
 
-    private static void assertFileUploadResponse(FileUploadResponseParser fileUploadResponseParser, String expectedHostName, String expectedContainerName, String expectedCorrelationId, String expectedBlobName, String expectedSasToken)
+    private static void assertFileUploadResponse(FileUploadSasUriResponse fileUploadSasUriResponse, String expectedHostName, String expectedContainerName, String expectedCorrelationId, String expectedBlobName, String expectedSasToken)
     {
-        assertNotNull(fileUploadResponseParser);
+        assertNotNull(fileUploadSasUriResponse);
 
-        String correlationId = Deencapsulation.getField(fileUploadResponseParser, "correlationId");
-        String hostName = Deencapsulation.getField(fileUploadResponseParser, "hostName");
-        String containerName = Deencapsulation.getField(fileUploadResponseParser, "containerName");
-        String blobName = Deencapsulation.getField(fileUploadResponseParser, "blobName");
-        String sasToken = Deencapsulation.getField(fileUploadResponseParser, "sasToken");
+        String correlationId = Deencapsulation.getField(fileUploadSasUriResponse, "correlationId");
+        String hostName = Deencapsulation.getField(fileUploadSasUriResponse, "hostName");
+        String containerName = Deencapsulation.getField(fileUploadSasUriResponse, "containerName");
+        String blobName = Deencapsulation.getField(fileUploadSasUriResponse, "blobName");
+        String sasToken = Deencapsulation.getField(fileUploadSasUriResponse, "sasToken");
 
         assertEquals(expectedCorrelationId, correlationId);
         assertEquals(expectedHostName, hostName);
@@ -86,7 +86,7 @@ public class FileUploadResponseParserTest
             new TestParameters(){{ correlationId = VALID_CORRELATION_ID; hostName = VALID_HOST_NAME; containerName = VALID_CONTAINER_NAME; blobName = VALID_BLOB_NAME; sasToken = INVALID_SAS_TOKEN; }},
     };
 
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_001: [The constructor shall create an instance of the FileUploadResponseParser.] */
+    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_001: [The constructor shall create an instance of the FileUploadSasUriResponse.] */
     /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_002: [The constructor shall parse the provided json and initialize `correlationId`, `hostName`, `containerName`, `blobName`, and `sasToken` using the information in the json.] */
     @Test
     public void constructor_json_succeed()
@@ -95,10 +95,10 @@ public class FileUploadResponseParserTest
         String validJson = createJson(VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_CORRELATION_ID, VALID_BLOB_NAME, VALID_SAS_TOKEN);
 
         // act
-        FileUploadResponseParser fileUploadResponseParser = new FileUploadResponseParser(validJson);
+        FileUploadSasUriResponse fileUploadSasUriResponse = new FileUploadSasUriResponse(validJson);
 
         // assert
-        assertFileUploadResponse(fileUploadResponseParser, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_CORRELATION_ID, VALID_BLOB_NAME, VALID_SAS_TOKEN);
+        assertFileUploadResponse(fileUploadSasUriResponse, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_CORRELATION_ID, VALID_BLOB_NAME, VALID_SAS_TOKEN);
     }
 
     /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_003: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
@@ -106,7 +106,7 @@ public class FileUploadResponseParserTest
     public void constructor_null_json_failed()
     {
         // act
-        new FileUploadResponseParser(null);
+        new FileUploadSasUriResponse(null);
     }
 
     /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_003: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
@@ -114,7 +114,7 @@ public class FileUploadResponseParserTest
     public void constructor_empty_json_failed()
     {
         // act
-        new FileUploadResponseParser("");
+        new FileUploadSasUriResponse("");
     }
 
     /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_003: [If the provided json is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
@@ -122,7 +122,7 @@ public class FileUploadResponseParserTest
     public void constructor_invalid_json_failed()
     {
         // act
-        new FileUploadResponseParser("{&*");
+        new FileUploadSasUriResponse("{&*");
     }
 
     /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_004: [If the provided json do not contains a valid `correlationId`, `hostName`, `containerName`, `blobName`, and `sasToken`, the constructor shall throws IllegalArgumentException.] */
@@ -137,7 +137,7 @@ public class FileUploadResponseParserTest
             // act
             try
             {
-                new FileUploadResponseParser(invalidJson);
+                new FileUploadSasUriResponse(invalidJson);
                 System.out.println("Test failed: hostName=" + test.hostName + ", containerName=" + test.containerName +
                         ", correlationId=" + test.correlationId + ", blobName=" + test.blobName + ", sasToken=" + test.sasToken);
                 assert false;
@@ -154,7 +154,7 @@ public class FileUploadResponseParserTest
     public void constructor_json_missing_correlationId_failed()
     {
         // act
-        new FileUploadResponseParser("{\n" +
+        new FileUploadSasUriResponse("{\n" +
                 "    \"hostName\": \"" + VALID_HOST_NAME + "\",\n" +
                 "    \"containerName\": \"" + VALID_CONTAINER_NAME + "\",\n" +
                 "    \"blobName\": \"" + VALID_BLOB_NAME + "\",\n" +
@@ -167,7 +167,7 @@ public class FileUploadResponseParserTest
     public void constructor_json_missing_hostName_failed()
     {
         // act
-        new FileUploadResponseParser("{\n" +
+        new FileUploadSasUriResponse("{\n" +
                 "    \"correlationId\": \"" + VALID_CORRELATION_ID + "\",\n" +
                 "    \"containerName\": \"" + VALID_CONTAINER_NAME + "\",\n" +
                 "    \"blobName\": \"" + VALID_BLOB_NAME + "\",\n" +
@@ -180,7 +180,7 @@ public class FileUploadResponseParserTest
     public void constructor_json_missing_containerName_failed()
     {
         // act
-        new FileUploadResponseParser("{\n" +
+        new FileUploadSasUriResponse("{\n" +
                 "    \"correlationId\": \"" + VALID_CORRELATION_ID + "\",\n" +
                 "    \"hostName\": \"" + VALID_HOST_NAME + "\",\n" +
                 "    \"blobName\": \"" + VALID_BLOB_NAME + "\",\n" +
@@ -193,7 +193,7 @@ public class FileUploadResponseParserTest
     public void constructor_json_missing_blobName_failed()
     {
         // act
-        new FileUploadResponseParser("{\n" +
+        new FileUploadSasUriResponse("{\n" +
                 "    \"correlationId\": \"" + VALID_CORRELATION_ID + "\",\n" +
                 "    \"hostName\": \"" + VALID_HOST_NAME + "\",\n" +
                 "    \"containerName\": \"" + VALID_CONTAINER_NAME + "\",\n" +
@@ -206,7 +206,7 @@ public class FileUploadResponseParserTest
     public void constructor_json_missing_sasToken_failed()
     {
         // act
-        new FileUploadResponseParser("{\n" +
+        new FileUploadSasUriResponse("{\n" +
                 "    \"correlationId\": \"" + VALID_CORRELATION_ID + "\",\n" +
                 "    \"hostName\": \"" + VALID_HOST_NAME + "\",\n" +
                 "    \"containerName\": \"" + VALID_CONTAINER_NAME + "\",\n" +
@@ -224,14 +224,14 @@ public class FileUploadResponseParserTest
     {
         // arrange
         String validJson = createJson(VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_CORRELATION_ID, VALID_BLOB_NAME, VALID_SAS_TOKEN);
-        FileUploadResponseParser fileUploadResponseParser = new FileUploadResponseParser(validJson);
+        FileUploadSasUriResponse fileUploadSasUriResponse = new FileUploadSasUriResponse(validJson);
 
         // act
         // assert
-        assertEquals(VALID_CORRELATION_ID, fileUploadResponseParser.getCorrelationId());
-        assertEquals(VALID_HOST_NAME, fileUploadResponseParser.getHostName());
-        assertEquals(VALID_CONTAINER_NAME, fileUploadResponseParser.getContainerName());
-        assertEquals(VALID_BLOB_NAME, fileUploadResponseParser.getBlobName());
-        assertEquals(VALID_SAS_TOKEN, fileUploadResponseParser.getSasToken());
+        assertEquals(VALID_CORRELATION_ID, fileUploadSasUriResponse.getCorrelationId());
+        assertEquals(VALID_HOST_NAME, fileUploadSasUriResponse.getHostName());
+        assertEquals(VALID_CONTAINER_NAME, fileUploadSasUriResponse.getContainerName());
+        assertEquals(VALID_BLOB_NAME, fileUploadSasUriResponse.getBlobName());
+        assertEquals(VALID_SAS_TOKEN, fileUploadSasUriResponse.getSasToken());
     }
 }

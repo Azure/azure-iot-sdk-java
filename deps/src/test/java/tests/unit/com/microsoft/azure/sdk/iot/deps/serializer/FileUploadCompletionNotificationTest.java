@@ -3,7 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadStatusParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotNull;
  * Unit tests for File Upload Status serializer
  * 100% methods, 100% lines covered
  */
-public class FileUploadStatusParserTest
+public class FileUploadCompletionNotificationTest
 {
     private static final String VALID_CORRELATION_ID = "somecorrelationid";
     private static final String INVALID_CORRELATION_ID = "some\u1234correlationid";
@@ -24,7 +24,7 @@ public class FileUploadStatusParserTest
     private static final Boolean VALID_IS_SUCCESS = true;
     private static final Integer VALID_STATUS_CODE = 200;
 
-    private static void assertFileUploadStatus(FileUploadStatusParser fileUploadStatusParser, String expectedCorrelationId, Boolean expectedIsSuccess, Integer expectedStatusCode, String expectedStatusDescription)
+    private static void assertFileUploadStatus(FileUploadCompletionNotification fileUploadStatusParser, String expectedCorrelationId, Boolean expectedIsSuccess, Integer expectedStatusCode, String expectedStatusDescription)
     {
         assertNotNull(fileUploadStatusParser);
 
@@ -77,7 +77,7 @@ public class FileUploadStatusParserTest
     public void constructor_succeed()
     {
         // act
-        FileUploadStatusParser fileUploadStatusParser = new FileUploadStatusParser(VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
+        FileUploadCompletionNotification fileUploadStatusParser = new FileUploadCompletionNotification(VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
 
         // assert
         assertFileUploadStatus(fileUploadStatusParser, VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
@@ -92,7 +92,7 @@ public class FileUploadStatusParserTest
             // act
             try
             {
-                new FileUploadStatusParser(test.correlationId, test.isSuccess, test.statusCode, test.statusDescription);
+                new FileUploadCompletionNotification(test.correlationId, test.isSuccess, test.statusCode, test.statusDescription);
                 System.out.println("Test failed: correlationId=" + test.correlationId + ", isSuccess=" + test.isSuccess +
                         ", statusCode=" + test.statusCode + ", statusDescription=" + test.statusDescription);
                 assert false;
@@ -109,7 +109,7 @@ public class FileUploadStatusParserTest
     public void toJson_succeed()
     {
         // arrange
-        FileUploadStatusParser fileUploadStatusParser = new FileUploadStatusParser(VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
+        FileUploadCompletionNotification fileUploadStatusParser = new FileUploadCompletionNotification(VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
         String expectedJson = createJson(VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
 
         // act

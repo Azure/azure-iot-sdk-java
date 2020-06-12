@@ -3,7 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadRequestParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.deps.Helpers;
@@ -15,29 +15,29 @@ import static org.junit.Assert.assertNotNull;
  * Unit tests for File Upload Request serializer
  * 100% methods, 100% lines covered
  */
-public class FileUploadRequestParserTest
+public class FileUploadSasUriRequestTest
 {
     private static final String VALID_BLOB_NAME = "test-device1/image.jpg";
     private static final String INVALID_BLOB_NAME = "\u1234 test-device1/image.jpg";
 
-    private static void assertFileUploadRequest(FileUploadRequestParser fileUploadRequestParser, String expectedBlobName)
+    private static void assertFileUploadRequest(FileUploadSasUriRequest fileUploadSasUriRequest, String expectedBlobName)
     {
-        assertNotNull(fileUploadRequestParser);
+        assertNotNull(fileUploadSasUriRequest);
 
-        String blobName = Deencapsulation.getField(fileUploadRequestParser, "blobName");
+        String blobName = Deencapsulation.getField(fileUploadSasUriRequest, "blobName");
         assertEquals(expectedBlobName, blobName);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_001: [The constructor shall create an instance of the FileUploadRequestParser.] */
+    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_001: [The constructor shall create an instance of the FileUploadSasUriRequest.] */
     /* Tests_SRS_FILE_UPLOAD_REQUEST_21_002: [The constructor shall set the `blobName` in the new class with the provided blob name.] */
     @Test
     public void constructor_succeed()
     {
         // act
-        FileUploadRequestParser fileUploadRequestParser = new FileUploadRequestParser(VALID_BLOB_NAME);
+        FileUploadSasUriRequest fileUploadSasUriRequest = new FileUploadSasUriRequest(VALID_BLOB_NAME);
 
         // assert
-        assertFileUploadRequest(fileUploadRequestParser, VALID_BLOB_NAME);
+        assertFileUploadRequest(fileUploadSasUriRequest, VALID_BLOB_NAME);
     }
 
     /* Tests_SRS_FILE_UPLOAD_REQUEST_21_003: [If the provided blob name is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
@@ -45,7 +45,7 @@ public class FileUploadRequestParserTest
     public void constructor_null_name_failed()
     {
         // act
-        new FileUploadRequestParser(null);
+        new FileUploadSasUriRequest(null);
     }
 
     /* Tests_SRS_FILE_UPLOAD_REQUEST_21_003: [If the provided blob name is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
@@ -53,7 +53,7 @@ public class FileUploadRequestParserTest
     public void constructor_empty_name_failed()
     {
         // act
-        new FileUploadRequestParser("");
+        new FileUploadSasUriRequest("");
     }
 
     /* Tests_SRS_FILE_UPLOAD_REQUEST_21_003: [If the provided blob name is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
@@ -61,19 +61,19 @@ public class FileUploadRequestParserTest
     public void constructor_invalid_name_failed()
     {
         // act
-        new FileUploadRequestParser(INVALID_BLOB_NAME);
+        new FileUploadSasUriRequest(INVALID_BLOB_NAME);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadResponseParser.] */
+    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadSasUriResponse.] */
     @Test
     public void toJson_succeed()
     {
         // arrange
-        FileUploadRequestParser fileUploadRequestParser = new FileUploadRequestParser(VALID_BLOB_NAME);
-        assertFileUploadRequest(fileUploadRequestParser, VALID_BLOB_NAME);
+        FileUploadSasUriRequest fileUploadSasUriRequest = new FileUploadSasUriRequest(VALID_BLOB_NAME);
+        assertFileUploadRequest(fileUploadSasUriRequest, VALID_BLOB_NAME);
 
         // act
-        String json = fileUploadRequestParser.toJson();
+        String json = fileUploadSasUriRequest.toJson();
 
         // assert
         Helpers.assertJson("{\"blobName\":\"" + VALID_BLOB_NAME + "\"}", json);
