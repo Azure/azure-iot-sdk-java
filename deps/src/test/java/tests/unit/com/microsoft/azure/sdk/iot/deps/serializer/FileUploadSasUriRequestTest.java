@@ -40,30 +40,6 @@ public class FileUploadSasUriRequestTest
         assertFileUploadRequest(fileUploadSasUriRequest, VALID_BLOB_NAME);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_003: [If the provided blob name is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_null_name_failed()
-    {
-        // act
-        new FileUploadSasUriRequest(null);
-    }
-
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_003: [If the provided blob name is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_empty_name_failed()
-    {
-        // act
-        new FileUploadSasUriRequest("");
-    }
-
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_003: [If the provided blob name is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_invalid_name_failed()
-    {
-        // act
-        new FileUploadSasUriRequest(INVALID_BLOB_NAME);
-    }
-
     /* Tests_SRS_FILE_UPLOAD_REQUEST_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadSasUriResponse.] */
     @Test
     public void toJson_succeed()

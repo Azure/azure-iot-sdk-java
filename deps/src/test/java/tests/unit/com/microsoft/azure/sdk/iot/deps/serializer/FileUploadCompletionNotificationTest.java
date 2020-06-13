@@ -83,27 +83,6 @@ public class FileUploadCompletionNotificationTest
         assertFileUploadStatus(fileUploadStatusParser, VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_STATUS_21_003: [If one of the provided parameters is null, empty, or not valid, the constructor shall throws IllegalArgumentException.] */
-    @Test
-    public void constructor_failed()
-    {
-        for (TestParameters test:tests)
-        {
-            // act
-            try
-            {
-                new FileUploadCompletionNotification(test.correlationId, test.isSuccess, test.statusCode, test.statusDescription);
-                System.out.println("Test failed: correlationId=" + test.correlationId + ", isSuccess=" + test.isSuccess +
-                        ", statusCode=" + test.statusCode + ", statusDescription=" + test.statusDescription);
-                assert false;
-            }
-            catch (IllegalArgumentException expected)
-            {
-                // Don't do anything, expected throw.
-            }
-        }
-    }
-
     /* Tests_SRS_FILE_UPLOAD_STATUS_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadStatusParser.] */
     @Test
     public void toJson_succeed()
