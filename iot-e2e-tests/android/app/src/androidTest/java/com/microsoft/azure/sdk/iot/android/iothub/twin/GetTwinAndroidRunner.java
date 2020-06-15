@@ -5,17 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.twin;
 
-import com.microsoft.appcenter.espresso.Factory;
-import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup23;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup16;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothub.twin.GetTwinTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,19 +20,15 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
-import java.util.Collections;
 
-@TestGroup23
+@TestGroup16
 @RunWith(Parameterized.class)
-public class GetTwinModuleAndroidRunner extends GetTwinTests
+public class GetTwinAndroidRunner extends GetTwinTests
 {
     @Rule
     public Rerun count = new Rerun(3);
 
-    @Rule
-    public ReportHelper reportHelper = Factory.getReportHelper();
-
-    public GetTwinModuleAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public GetTwinAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
@@ -46,20 +39,6 @@ public class GetTwinModuleAndroidRunner extends GetTwinTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-
-        if (!isBasicTierHub)
-        {
-            return inputsCommon(ClientType.MODULE_CLIENT);
-        }
-        else
-        {
-            return Collections.EMPTY_LIST;
-        }
-    }
-
-    @After
-    public void labelSnapshot()
-    {
-        reportHelper.label("Stopping App");
+        return inputsCommon();
     }
 }

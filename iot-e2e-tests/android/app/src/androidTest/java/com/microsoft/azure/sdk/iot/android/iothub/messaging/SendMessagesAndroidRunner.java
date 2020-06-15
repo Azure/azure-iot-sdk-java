@@ -5,10 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.messaging;
 
-import com.microsoft.appcenter.espresso.Factory;
-import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup33;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup9;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothub.telemetry.SendMessagesTests;
@@ -17,7 +15,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,19 +23,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collection;
-import java.util.Collections;
 
-@TestGroup33
+@TestGroup9
 @RunWith(Parameterized.class)
-public class SendMessagesModuleAndroidRunner extends SendMessagesTests
+public class SendMessagesAndroidRunner extends SendMessagesTests
 {
     @Rule
     public Rerun count = new Rerun(3);
 
-    @Rule
-    public ReportHelper reportHelper = Factory.getReportHelper();
-
-    public SendMessagesModuleAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy) throws Exception
+    public SendMessagesAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy) throws Exception
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
     }
@@ -49,20 +42,6 @@ public class SendMessagesModuleAndroidRunner extends SendMessagesTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-
-        if (!isBasicTierHub)
-        {
-            return inputsCommon(ClientType.MODULE_CLIENT);
-        }
-        else
-        {
-            return Collections.EMPTY_LIST;
-        }
-    }
-
-    @After
-    public void labelSnapshot()
-    {
-        reportHelper.label("Stopping App");
+        return inputsCommon();
     }
 }

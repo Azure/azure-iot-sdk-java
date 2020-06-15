@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.android.provisioning;
 
-import com.microsoft.appcenter.espresso.Factory;
-import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup2;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
@@ -14,7 +12,6 @@ import com.microsoft.azure.sdk.iot.common.setup.provisioning.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.common.tests.provisioning.ProvisioningTests;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,9 +24,6 @@ public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
 {
     @Rule
     public Rerun count = new Rerun(3);
-
-    @Rule
-    public ReportHelper reportHelper = Factory.getReportHelper();
 
     public ProvisioningClientX509AndroidRunner(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
     {
@@ -50,11 +44,5 @@ public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
         customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
 
         return ProvisioningCommon.inputs(AttestationType.X509); //tpm tests can't be run on Android until infrastructure is setup
-    }
-
-    @After
-    public void labelSnapshot()
-    {
-        reportHelper.label("Stopping App");
     }
 }

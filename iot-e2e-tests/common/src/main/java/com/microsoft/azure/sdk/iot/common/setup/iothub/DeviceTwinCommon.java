@@ -48,9 +48,9 @@ public class DeviceTwinCommon extends IotHubIntegrationTest
 {
     // Max time to wait to see it on Hub
     protected static final long PERIODIC_WAIT_TIME_FOR_VERIFICATION = 1000; // 1 sec
-    protected static final long MAX_WAIT_TIME_FOR_VERIFICATION = 180000; // 180 sec
+    protected static final long MAX_WAIT_TIME_FOR_VERIFICATION = 3000; // 30 sec
     protected static final long DELAY_BETWEEN_OPERATIONS = 200; // 0.2 sec
-    public static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes
+    public static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 30 * 1000; // 30 seconds
 
     public static final long DESIRED_PROPERTIES_PROPAGATION_TIME_MILLIS = 5 * 1000; //5 seconds
 
