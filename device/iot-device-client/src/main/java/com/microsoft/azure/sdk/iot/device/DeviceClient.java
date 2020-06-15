@@ -3,10 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
@@ -104,6 +109,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     private TransportClient transportClient;
 
     private FileUpload fileUpload;
+    private FileUploadTask fileUploadTask;
 
     /**
      * Constructor that takes a connection string and a transport client as an argument.
@@ -326,6 +332,11 @@ public final class DeviceClient extends InternalClient implements Closeable
         {
             this.fileUpload.closeNow();
         }
+
+        if (this.fileUploadTask != null)
+        {
+            this.fileUploadTask.close();
+        }
     }
 
     private void commonConstructorSetup()
@@ -459,7 +470,11 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @throws IllegalArgumentException if the provided blob name, or the file path is {@code null},
      *          empty or not valid, or if the callback is {@code null}.
      * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
+     * @deprecated Use {@link #getFileUploadSasUri(FileUploadSasUriRequest)} to get the SAS URI, use the azure storage SDK to upload a file
+     * to that SAS URI, and then use {@link #completeFileUploadAsync(FileUploadCompletionNotification)} to notify Iot Hub that
+     * your file upload has completed, successfully or otherwise. This method does all three of these tasks for you, but has limited configuration options.
      */
+    @Deprecated
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
                                   IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException
     {
@@ -478,14 +493,44 @@ public final class DeviceClient extends InternalClient implements Closeable
             throw new IllegalArgumentException("Invalid stream size.");
         }
 
-        ParserUtility.validateBlobName(destinationBlobName);
-
         if (this.fileUpload == null)
         {
             this.fileUpload = new FileUpload(this.config);
         }
 
         this.fileUpload.uploadToBlobAsync(destinationBlobName, inputStream, streamLength, callback, callbackContext);
+    }
+
+    /**
+     * Get a file upload SAS URI which the Azure Storage SDK can use to upload a file to blob for this device. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#initialize-a-file-upload">this documentation</a> for more details.
+     * @param request The request details for getting the SAS URI, including the destination blob name.
+     * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
+     * @throws IOException If this HTTPS request fails to send.
+     * @throws URISyntaxException If the returned sas uri cannot be constructed correctly
+     */
+    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException, URISyntaxException
+    {
+        if (this.fileUploadTask == null)
+        {
+            this.fileUploadTask = new FileUploadTask(new HttpsTransportManager(this.config));
+        }
+
+        return fileUploadTask.getFileUploadSasUri(request);
+    }
+
+    /**
+     * Notify IoT Hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
+     * @param notification The notification details, including if the file upload succeeded.
+     * @throws IOException If this HTTPS request fails to send.
+     */
+    public void completeFileUploadAsync(FileUploadCompletionNotification notification) throws IOException
+    {
+        if (this.fileUploadTask == null)
+        {
+            this.fileUploadTask = new FileUploadTask(new HttpsTransportManager(this.config));
+        }
+
+        fileUploadTask.sendNotification(notification);
     }
 
     /**

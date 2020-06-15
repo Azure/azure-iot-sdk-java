@@ -7,10 +7,15 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import org.junit.*;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
@@ -419,6 +424,38 @@ public class FileUploadTests extends IotHubIntegrationTest
         }
         waitForFileUploadStatusCallbackTriggered(0, deviceClient);
         assertEquals(buildExceptionMessage("File upload status expected SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
+        tearDownDeviceClient(deviceClient);
+    }
+
+    @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    public void uploadToBlobAsyncSingleFileGranular() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException
+    {
+        // arrange
+        DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
+
+        // act
+        FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(testInstance.fileUploadState[0].blobName));
+
+        CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
+        blob.upload(testInstance.fileUploadState[0].fileInputStream, testInstance.fileUploadState[0].fileLength);
+        FileUploadCompletionNotification fileUploadCompletionNotification = new FileUploadCompletionNotification();
+        fileUploadCompletionNotification.setCorrelationId(sasUriResponse.getCorrelationId());
+        fileUploadCompletionNotification.setStatusCode(0);
+        fileUploadCompletionNotification.setSuccess(true);
+        fileUploadCompletionNotification.setStatusDescription("Succeed to upload to storage.");
+
+        deviceClient.completeFileUploadAsync(fileUploadCompletionNotification);
+
+        // assert
+        if (!isBasicTierHub)
+        {
+            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(deviceClient, (int) testInstance.fileUploadState[0].fileLength);
+            assertNotNull(buildExceptionMessage("file upload notification was null", deviceClient), fileUploadNotification);
+            verifyNotification(fileUploadNotification, testInstance.fileUploadState[0], deviceClient);
+        }
+
+        assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
+
         tearDownDeviceClient(deviceClient);
     }
 
