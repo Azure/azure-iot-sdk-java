@@ -90,9 +90,6 @@ public class FileUploadTaskTest
     private static final long VALID_STREAM_LENGTH = 100;
     private static final Map<String, Object> VALID_CALLBACK_CONTEXT = new HashMap<>();
 
-
-
-
     private void requestExpectations(final String blobName, final String requestJson) throws IOException
     {
         new NonStrictExpectations()
@@ -104,8 +101,10 @@ public class FileUploadTaskTest
                 result = requestJson;
                 new IotHubTransportMessage(requestJson);
                 result = mockMessageRequest;
-                mockHttpsTransportManager.send(mockMessageRequest, (Map) any);
+                mockHttpsTransportManager.getFileUploadSasUri(mockMessageRequest);
                 result = mockResponseMessage;
+                new FileUploadSasUriResponse(anyString);
+                result = mockFileUploadSasUriResponse;
             }
         };
     }
@@ -409,65 +408,6 @@ public class FileUploadTaskTest
         };
     }
 
-    /* Tests_SRS_FILEUPLOADTASK_21_015: [If the iothub accepts the request, it shall provide a `responseMessage` with the blob information with a correlationId.] */
-    /* Tests_SRS_FILEUPLOADTASK_21_017: [The run shall parse and store the blobName and correlationId in the response, by use the FileUploadSasUriResponse.] */
-    @Test
-    public void runSetBlobNameAndCorrelationId() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
-                VALID_REQUEST_JSON, VALID_RESPONSE_JSON, VALID_NOTIFICATION_JSON);
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getCorrelationId");
-                times = 1;
-                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getBlobName");
-                times = 1;
-            }
-        };
-        assertEquals(VALID_CORRELATION_ID, Deencapsulation.getField(fileUploadTask, "correlationId"));
-        assertEquals(VALID_BLOB_NAME, Deencapsulation.getField(fileUploadTask, "blobName"));
-    }
-
-    /* Tests_SRS_FILEUPLOADTASK_21_015: [If the iothub accepts the request, it shall provide a `responseMessage` with the blob information with a correlationId.] */
-    /* Tests_SRS_FILEUPLOADTASK_21_018: [The run shall create a blob URI `blobUri` with the format `https://[hostName]/[containerName]/[blobName,UTF-8][sasToken]`.] */
-    @Test
-    public void runCreatesBlobURI() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
-                VALID_REQUEST_JSON, VALID_RESPONSE_JSON, VALID_NOTIFICATION_JSON);
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getHostName");
-                times = 1;
-                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getContainerName");
-                times = 1;
-                Deencapsulation.invoke(mockFileUploadSasUriResponse, "getSasToken");
-                times = 1;
-            }
-        };
-        assertEquals(VALID_URI_STRING, ((URI)Deencapsulation.getField(fileUploadTask, "blobURI")).toString());
-    }
-
     /* Tests_SRS_FILEUPLOADTASK_21_019: [The run shall create a `CloudBlockBlob` using the `blobUri`.] */
     @Test
     public void runCreateCloudBlockBlob() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
@@ -585,30 +525,6 @@ public class FileUploadTaskTest
         };
     }
 
-    /* Tests_SRS_FILEUPLOADTASK_21_029: [The run shall call the `userCallback` with the final response status.] */
-    @Test
-    public void runCallUserCallback() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
-                VALID_REQUEST_JSON, VALID_RESPONSE_JSON, VALID_NOTIFICATION_JSON);
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockIotHubEventCallback.execute(IotHubStatusCode.OK, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
     /* Tests_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */
     @Test
     public void runFileUploadRequestParserThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
@@ -711,177 +627,6 @@ public class FileUploadTaskTest
         };
     }
 
-    /* Tests_SRS_FILEUPLOADTASK_21_013: [If result status for the blob request is not `OK`, or `OK_EMPTY`, the run shall call the userCallback bypassing the received status, and abort the upload.] */
-    @Test
-    public void runRequestReceivedInternalServerError() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        new NonStrictExpectations()
-        {
-            {
-                mockResponseMessage.getStatus();
-                result = IotHubStatusCode.INTERNAL_SERVER_ERROR;
-            }
-        };
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockResponseMessage.getStatus();
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.INTERNAL_SERVER_ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_FILEUPLOADTASK_21_014: [If result status for the blob request is `OK_EMPTY`, the run shall call the userCallback with the stratus `ERROR`, and abort the upload.] */
-    @Test
-    public void runIoTHubResponseDoNotContainsMessage() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        new NonStrictExpectations()
-        {
-            {
-                mockResponseMessage.getStatus();
-                result = IotHubStatusCode.OK_EMPTY;
-            }
-        };
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockResponseMessage.getStatus();
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_FILEUPLOADTASK_21_016: [If the `responseMessage` is null, empty, do not contains a valid json, or if the information in json is not correct, the run shall call the `userCallback` reporting the error, and abort the upload.] */
-    @Test
-    public void runIoTHubResponseNullBytesInMessage() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        new NonStrictExpectations()
-        {
-            {
-                mockResponseMessage.getStatus();
-                result = IotHubStatusCode.OK;
-                mockResponseMessage.getBytes();
-                result = null;
-            }
-        };
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockResponseMessage.getBytes();
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_FILEUPLOADTASK_21_016: [If the `responseMessage` is null, empty, do not contains a valid json, or if the information in json is not correct, the run shall call the `userCallback` reporting the error, and abort the upload.] */
-    @Test
-    public void runIoTHubResponseEmptyMessage() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        new NonStrictExpectations()
-        {
-            {
-                mockResponseMessage.getStatus();
-                result = IotHubStatusCode.OK;
-                mockResponseMessage.getBytes();
-                result = new byte[]{};
-            }
-        };
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockResponseMessage.getBytes();
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_FILEUPLOADTASK_21_016: [If the `responseMessage` is null, empty, do not contains a valid json, or if the information in json is not correct, the run shall call the `userCallback` reporting the error, and abort the upload.] */
-    @Test
-    public void runIoTHubResponseInvalidMessage() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        new NonStrictExpectations()
-        {
-            {
-                mockResponseMessage.getStatus();
-                result = IotHubStatusCode.OK;
-                mockResponseMessage.getBytes();
-                result = new byte[]{'1','2','3'};
-            }
-        };
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockResponseMessage.getBytes();
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
     /* Tests_SRS_FILEUPLOADTASK_21_016: [If the `responseMessage` is null, empty, do not contains a valid json, or if the information in json is not correct, the run shall call the `userCallback` reporting the error, and abort the upload.] */
     @Test
     public void runFileUploadResponseParserThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
@@ -906,39 +651,6 @@ public class FileUploadTaskTest
 
         // act
         Deencapsulation.invoke(fileUploadTask, "run");
-    }
-
-    /* Tests_SRS_FILEUPLOADTASK_21_032: [If create the blob URI failed, the run shall call the `userCallback` reporting the error, and abort the upload.] */
-    @Test
-    public void runMakeURIThrows(@Mocked final URI mockURI) throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        responseExpectations(VALID_RESPONSE_JSON);
-        responseParserExpectations(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN);
-        new NonStrictExpectations()
-        {
-            {
-                new URI((String)any);
-                result = new URISyntaxException("", "");
-            }
-        };
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
     }
 
     /* Tests_SRS_FILEUPLOADTASK_21_022: [If the upload to blob failed, the run shall create a notification the IoT Hub with `isSuccess` equals false, `statusCode` equals -1.] */
@@ -1066,7 +778,7 @@ public class FileUploadTaskTest
                 mockFileUploadStatusParser.toJson();
                 result = VALID_NOTIFICATION_JSON;
                 new IotHubTransportMessage(VALID_NOTIFICATION_JSON);
-                result = new IllegalArgumentException();
+                result = new IOException();
             }
         };
 

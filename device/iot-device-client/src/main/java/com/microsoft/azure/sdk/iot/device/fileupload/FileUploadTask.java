@@ -121,14 +121,14 @@ public final class FileUploadTask implements Runnable
     {
         Thread.currentThread().setName(THREAD_NAME);
 
-        FileUploadCompletionNotification fileUploadStatusParser = null;
+        FileUploadCompletionNotification fileUploadCompletionNotification = null;
         FileUploadSasUriResponse sasUriResponse = null;
 
         try
         {
             sasUriResponse = getFileUploadSasUri(new FileUploadSasUriRequest(this.blobName));
         }
-        catch (IOException | IllegalArgumentException | URISyntaxException | NullPointerException e) //Nobody will handle exception from this thread, so, convert it to an failed code in the user callback.
+        catch (IOException | IllegalArgumentException e)
         {
             log.error("File upload failed to get a SAS URI from Iot Hub", e);
             userCallback.execute(IotHubStatusCode.ERROR, userCallbackContext);
@@ -139,27 +139,18 @@ public final class FileUploadTask implements Runnable
         {
             CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
             blob.upload(inputStream, streamLength);
-            fileUploadStatusParser = new FileUploadCompletionNotification();
-            fileUploadStatusParser.setCorrelationId(sasUriResponse.getCorrelationId());
-            fileUploadStatusParser.setStatusCode(0);
-            fileUploadStatusParser.setSuccess(true);
-            fileUploadStatusParser.setStatusDescription("Succeed to upload to storage.");
+            fileUploadCompletionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true, 0, "Succeed to upload to storage.");
         }
-        catch (StorageException | IOException | IllegalArgumentException | URISyntaxException e) //Nobody will handle exception from this thread, so, convert it to an failed code in the user callback.
+        catch (StorageException | IOException | IllegalArgumentException | URISyntaxException e)
         {
             log.error("File upload failed to upload the stream to the blob", e);
-            fileUploadStatusParser = new FileUploadCompletionNotification();
-            fileUploadStatusParser.setCorrelationId(sasUriResponse.getCorrelationId());
-            fileUploadStatusParser.setStatusCode(-1);
-            fileUploadStatusParser.setSuccess(false);
-            fileUploadStatusParser.setStatusDescription("Failed to upload to storage.");
+            fileUploadCompletionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false, -1, "Failed to upload to storage.");
         }
         finally
         {
-            IotHubStatusCode notificationResultStatus = null;
             try
             {
-                notificationResultStatus = sendNotification(fileUploadStatusParser);
+                sendNotification(fileUploadCompletionNotification);
             }
             catch (IOException e)
             {
@@ -167,7 +158,7 @@ public final class FileUploadTask implements Runnable
             }
         }
 
-        if (fileUploadStatusParser.getSuccess())
+        if (fileUploadCompletionNotification.getSuccess())
         {
             userCallback.execute(IotHubStatusCode.OK, userCallbackContext);
         }
@@ -177,7 +168,7 @@ public final class FileUploadTask implements Runnable
         }
     }
 
-    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException, URISyntaxException
+    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(request.toJson());
         message.setIotHubMethod(IotHubMethod.POST);
@@ -186,6 +177,11 @@ public final class FileUploadTask implements Runnable
         httpsTransportManager.open();
         responseMessage = httpsTransportManager.getFileUploadSasUri(message);
         httpsTransportManager.close();
+
+        if (responseMessage.getBytes() == null || responseMessage.getBytes().length == 0)
+        {
+            throw new IOException("Sas URI response message had no payload");
+        }
 
         return new FileUploadSasUriResponse(new String(responseMessage.getBytes(), DEFAULT_IOTHUB_MESSAGE_CHARSET));
     }
