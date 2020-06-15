@@ -71,8 +71,6 @@ public class FileUploadCompletionNotificationTest
             new TestParameters(){{ correlationId = VALID_CORRELATION_ID; isSuccess = true; statusCode = 200; statusDescription = INVALID_STATUS_DESCRIPTION; }},
     };
     
-    /* Tests_SRS_FILE_UPLOAD_STATUS_21_001: [The constructor shall create an instance of the FileUploadStatusParser.] */
-    /* Tests_SRS_FILE_UPLOAD_STATUS_21_002: [The constructor shall set the `correlationId`, `isSuccess`, `statusCode`, and `statusDescription` in the new class with the provided parameters.] */
     @Test
     public void constructor_succeed()
     {
@@ -83,7 +81,6 @@ public class FileUploadCompletionNotificationTest
         assertFileUploadStatus(fileUploadStatusParser, VALID_CORRELATION_ID, VALID_IS_SUCCESS, VALID_STATUS_CODE, VALID_STATUS_DESCRIPTION);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_STATUS_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadStatusParser.] */
     @Test
     public void toJson_succeed()
     {

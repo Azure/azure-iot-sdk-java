@@ -40,10 +40,8 @@ public class FileUploadCompletionNotification
      * @param correlationId the correlationId that correlates this FileUploadCompletionNotification to the earlier request to get the SAS URI
      *                      for this upload from IoT Hub. This field is mandatory. Must equal {@link FileUploadSasUriResponse#getCorrelationId()}.
      * @param isSuccess whether the file was uploaded successfully. This field is mandatory.
-     * @throws IllegalArgumentException if one of the parameters is null, empty, or not valid.
      */
     public FileUploadCompletionNotification(String correlationId, Boolean isSuccess)
-            throws IllegalArgumentException
     {
         setCorrelationId(correlationId);
         updateStatus(isSuccess, statusCode, statusDescription);
@@ -57,10 +55,8 @@ public class FileUploadCompletionNotification
      * @param isSuccess whether the file was uploaded successfully. This field is mandatory.
      * @param statusCode is the status for the upload of the file to storage.
      * @param statusDescription is the description of the status code.
-     * @throws IllegalArgumentException if one of the parameters is null, empty, or not valid.
      */
     public FileUploadCompletionNotification(String correlationId, Boolean isSuccess, Integer statusCode, String statusDescription)
-            throws IllegalArgumentException
     {
         setCorrelationId(correlationId);
         updateStatus(isSuccess, statusCode, statusDescription);
@@ -81,7 +77,7 @@ public class FileUploadCompletionNotification
         }
         catch (Exception malformed)
         {
-            throw new IllegalArgumentException("Malformed json:" + malformed);
+            throw new IllegalArgumentException("Malformed json", malformed);
         }
 
         this.correlationId = fileUploadCompletionNotification.getCorrelationId();
@@ -90,14 +86,6 @@ public class FileUploadCompletionNotification
         this.statusDescription = fileUploadCompletionNotification.getStatusDescription();
     }
 
-    /**
-     * Update the status information in the collection, and return the new json.
-     *
-     * @param isSuccess is a Boolean representing whether the file was uploaded successfully.
-     * @param statusCode is the status for the upload of the file to storage.
-     * @param statusDescription is the description of the status code.
-     * @throws IllegalArgumentException if one of the parameters is null, empty, or not valid.
-     */
     private void updateStatus(Boolean isSuccess, Integer statusCode, String statusDescription) throws IllegalArgumentException
     {
         this.isSuccess = isSuccess;
@@ -106,9 +94,9 @@ public class FileUploadCompletionNotification
     }
 
     /**
-     * Convert this class in a valid json.
+     * Convert this class to json.
      *
-     * @return a valid json that represents the content of this class.
+     * @return json that represents the content of this class.
      */
     public String toJson()
     {
@@ -128,7 +116,7 @@ public class FileUploadCompletionNotification
     }
 
     /**
-     * @return Get the correlationId that correlates this FileUploadCompletionNotification to the earlier request to get the SAS URI
+     * @return the correlationId that correlates this FileUploadCompletionNotification to the earlier request to get the SAS URI
      */
     public String getCorrelationId()
     {

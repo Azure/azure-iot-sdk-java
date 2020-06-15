@@ -66,7 +66,7 @@ public class FileUploadSasUriResponse
         }
         catch (JsonSyntaxException malformed)
         {
-            throw new IllegalArgumentException("Malformed json:" + malformed);
+            throw new IllegalArgumentException("Malformed json", malformed);
         }
 
         this.hostName = newFileUploadSasUriResponse.hostName;

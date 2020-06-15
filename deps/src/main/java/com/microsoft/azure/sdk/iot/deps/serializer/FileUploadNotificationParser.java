@@ -79,7 +79,7 @@ public class FileUploadNotificationParser
         }
         catch (Exception malformed)
         {
-            throw new IllegalArgumentException("Malformed json:" + malformed);
+            throw new IllegalArgumentException("Malformed json", malformed);
         }
 
         /* Codes_SRS_FILE_UPLOAD_NOTIFICATION_21_004: [If the provided json do not contains a valid `deviceId`, `blobUri`, `blobName`, `lastUpdatedTime`, `enqueuedTimeUtc`, and `blobSizeInBytes`, the constructor shall throws IllegalArgumentException.] */

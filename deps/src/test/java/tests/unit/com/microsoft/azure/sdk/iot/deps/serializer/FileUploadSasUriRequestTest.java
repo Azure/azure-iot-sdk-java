@@ -28,8 +28,6 @@ public class FileUploadSasUriRequestTest
         assertEquals(expectedBlobName, blobName);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_001: [The constructor shall create an instance of the FileUploadSasUriRequest.] */
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_002: [The constructor shall set the `blobName` in the new class with the provided blob name.] */
     @Test
     public void constructor_succeed()
     {
@@ -40,7 +38,6 @@ public class FileUploadSasUriRequestTest
         assertFileUploadRequest(fileUploadSasUriRequest, VALID_BLOB_NAME);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_REQUEST_21_004: [The toJson shall return a string with a json that represents the contend of the FileUploadSasUriResponse.] */
     @Test
     public void toJson_succeed()
     {

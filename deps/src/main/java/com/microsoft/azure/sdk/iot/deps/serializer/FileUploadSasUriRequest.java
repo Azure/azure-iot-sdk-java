@@ -48,9 +48,9 @@ public class FileUploadSasUriRequest
     }
 
     /**
-     * Convert this class in a valid json.
+     * Convert this class to json.
      *
-     * @return a valid json that represents the content of this class.
+     * @return json that represents the content of this class.
      */
     public String toJson()
     {

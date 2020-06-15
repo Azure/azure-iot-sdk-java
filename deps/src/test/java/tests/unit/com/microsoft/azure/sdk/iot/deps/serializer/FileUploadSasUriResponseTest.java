@@ -86,8 +86,6 @@ public class FileUploadSasUriResponseTest
             new TestParameters(){{ correlationId = VALID_CORRELATION_ID; hostName = VALID_HOST_NAME; containerName = VALID_CONTAINER_NAME; blobName = VALID_BLOB_NAME; sasToken = INVALID_SAS_TOKEN; }},
     };
 
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_001: [The constructor shall create an instance of the FileUploadSasUriResponse.] */
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_002: [The constructor shall parse the provided json and initialize `correlationId`, `hostName`, `containerName`, `blobName`, and `sasToken` using the information in the json.] */
     @Test
     public void constructor_json_succeed()
     {
@@ -101,11 +99,6 @@ public class FileUploadSasUriResponseTest
         assertFileUploadResponse(fileUploadSasUriResponse, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_CORRELATION_ID, VALID_BLOB_NAME, VALID_SAS_TOKEN);
     }
 
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_006: [The getCorrelationId shall return the string stored in `correlationId`.] */
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_007: [The getHostName shall return the string stored in `hostName`.] */
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_008: [The getContainerName shall return the string stored in `containerName`.] */
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_009: [The getBlobName shall return the string stored in `blobName`.] */
-    /* Tests_SRS_FILE_UPLOAD_RESPONSE_21_010: [The getSasToken shall return the string stored in `sasToken`.] */
     @Test
     public void getters_succeed()
     {
