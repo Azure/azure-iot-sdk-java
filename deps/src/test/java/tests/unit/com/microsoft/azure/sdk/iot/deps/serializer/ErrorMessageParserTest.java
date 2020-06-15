@@ -3,6 +3,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
 import org.junit.Test;
 
@@ -27,6 +28,20 @@ public class ErrorMessageParserTest
 
         // assert
         assertEquals("ErrorCode:IotHubUnauthorizedAccess;Unauthorized Tracking ID:(tracking id)-TimeStamp:12/14/2016 03:15:17", bestMessage);
+    }
+
+    @Test
+    public void bestErrorCodeParse()
+    {
+        // arrange
+        int expectedErrorCode = 404001;
+        final String errorReason = "{\"errorCode\":" + expectedErrorCode + ",\"trackingId\":\"191306c3cfda487ebe0988aa7663fb0f-TimeStamp:05/21/2020 20:14:49\",\"message\":\"thisDeviceDoesNotExistObviously\",\"timestampUtc\":\"2020-05-21T20:14:49.3270481Z\"} ";
+
+        // act
+        int errorCodeDescription = ErrorMessageParser.bestErrorCode(errorReason);
+
+        // assert
+        assertEquals(expectedErrorCode, errorCodeDescription);
     }
 
     /* Codes_SRS_ERROR_MESSAGE_PARSER_21_002: [If the bestErrorMessage failed to parse the fullErrorMessage as json, it shall return the fullErrorMessage as is.] */

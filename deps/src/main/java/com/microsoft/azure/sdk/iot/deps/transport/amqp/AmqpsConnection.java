@@ -5,9 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
-import com.microsoft.azure.sdk.iot.deps.util.CustomLogger;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -23,7 +23,8 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.concurrent.*;
 
-public class AmqpsConnection extends ErrorLoggingBaseHandler
+@Slf4j
+public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 {
     private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
@@ -61,8 +62,6 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
 
     private SSLContext sslContext;
 
-    private CustomLogger logger = new CustomLogger();
-
     /**
      * Constructor for the Amqp library
      * @param hostName Name of the AMQP Endpoint
@@ -95,24 +94,16 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
         this.closeLock  = new ObjectLock();
 
         this.sslContext = sslContext;
-        this.isOpen  = false;
+        this.isOpen = false;
         this.fullHostAddress = String.format("%s:%d", hostName, this.useWebSockets ? AMQP_WEB_SOCKET_PORT : AMQP_PORT );
         this.hostName = hostName;
 
         add(new Handshaker());
         add(new FlowController());
 
-        try
-        {
-            ReactorOptions options = new ReactorOptions();
-            options.setEnableSaslByDefault(false);
-            reactor = Proton.reactor(options, this);
-        }
-        catch (IOException e)
-        {
-            logger.LogError(e);
-            throw new IOException("Could not create Proton reactor", e);
-        }
+        ReactorOptions options = new ReactorOptions();
+        options.setEnableSaslByDefault(false);
+        reactor = Proton.reactor(options, this);
     }
 
     /**
@@ -139,6 +130,11 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
             throw this.saslListener.getSavedException();
         }
 
+        if (this.protonJExceptionParser != null && this.protonJExceptionParser.getError() != null)
+        {
+            throw new IOException("Encountered exception during amqp connection: " + protonJExceptionParser.getError() + " with description " + protonJExceptionParser.getErrorDescription());
+        }
+
         return this.isOpen;
     }
 
@@ -148,18 +144,19 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
      */
     public void open() throws IOException
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
         if(!this.isOpen)
         {
             try
             {
+                log.debug("Opening amqp connection asynchronously");
                 openAmqpAsync();
             }
             catch(Exception e)
             {
-                logger.LogError(e);
+                String errorMessage = "Error opening Amqp connection: ";
+                log.error(errorMessage, e);
                 this.close();
-                throw new IOException("Error opening Amqp connection: ", e);
+                throw new IOException(errorMessage, e);
             }
 
             try
@@ -168,18 +165,21 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
             }
             catch (InterruptedException e)
             {
-                logger.LogError(e);
+                String errorMessage = "Amqp connection was interrupted while opening.";
+                log.error(errorMessage, e);
                 this.close();
-                throw new IOException("Waited too long for the connection to open.");
+                throw new IOException(errorMessage, e);
             }
+        }
+        else
+        {
+            log.trace("Open called while amqp connection was already open");
         }
 
         if (!this.isOpen)
         {
-            throw new IOException("Failed to open the connection");
+            throw new IOException("Timed out  to open the amqp connection");
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -188,8 +188,6 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
      */
     public void openAmqpAsync()
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         this.openLatch = new CountDownLatch(1);
 
         if (executorService == null)
@@ -197,11 +195,10 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
             executorService = Executors.newFixedThreadPool(THREAD_POOL_MAX_NUMBER);
         }
 
+        log.debug("Starting amqp reactor thread...");
         AmqpReactor amqpReactor = new AmqpReactor(this.reactor);
-        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor, this.logger);
+        ReactorRunner reactorRunner = new ReactorRunner(amqpReactor);
         executorService.submit(reactorRunner);
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -210,10 +207,9 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
      */
     public void close() throws IOException
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         if (this.isOpen)
         {
+            log.debug("Closing amqp connection");
             this.amqpDeviceOperations.closeLinks();
 
             // Close Proton
@@ -239,8 +235,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
             }
             catch (InterruptedException e)
             {
-                logger.LogError(e);
-                throw new IOException("Waited too long for the connection to open.");
+                throw new IOException("Waited too long for the connection to close.", e);
             }
 
             if (this.executorService != null)
@@ -255,7 +250,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
                         // Wait a while for tasks to respond to being cancelled
                         if (!this.executorService.awaitTermination(MAX_WAIT_TO_TERMINATE_EXECUTOR, TimeUnit.SECONDS))
                         {
-                            logger.LogInfo("Pool did not terminate");
+                            log.info("Pool did not terminate");
                         }
                     }
                 }
@@ -266,7 +261,6 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
             }
             this.isOpen = false;
         }
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -276,21 +270,18 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     @Override
     public void onReactorInit(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
         event.getReactor().connectionToHost(this.hostName, this.useWebSockets ? AMQP_WEB_SOCKET_PORT : AMQP_PORT, this);
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     @Override
     public void onReactorFinal(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
+        super.onReactorFinal(event);
         this.reactor = null;
         synchronized (closeLock)
         {
             closeLock.notifyLock();
         }
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -300,7 +291,6 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     @Override
     public void onConnectionInit(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
         this.connection = event.getConnection();
         this.connection.setHostname(this.fullHostAddress);
 
@@ -309,22 +299,14 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
         this.connection.open();
         this.session.open();
 
-        try
-        {
-            this.amqpDeviceOperations.openLinks(this.session);
-        }
-        catch (Exception e)
-        {
-            logger.LogDebug("openLinks has thrown exception: %s", e.getMessage());
-        }
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
+        this.amqpDeviceOperations.openLinks(this.session);
     }
 
     /**
      * Create Proton SslDomain object from Address using the given Ssl mode
      * @return the created Ssl domain
      */
-    private SslDomain makeDomain() throws IOException
+    private SslDomain makeDomain()
     {
         SslDomain domain = Proton.sslDomain();
         domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
@@ -337,43 +319,34 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     @Override
     public void onConnectionBound(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
         Transport transport = event.getConnection().getTransport();
         if (transport != null)
         {
             if (this.saslListener != null)
             {
+                log.debug("Setting up sasl negotiator");
                 //Calling sasl here adds a transport layer for handling sasl negotiation
                 transport.sasl().setListener(this.saslListener);
             }
 
             if (this.useWebSockets)
             {
+                log.debug("Adding websocket layer");
                 WebSocketImpl webSocket = new WebSocketImpl();
                 webSocket.configure(this.hostName, WEB_SOCKET_PATH, 0, WEB_SOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
-            try
-            {
-                SslDomain domain = makeDomain();
-                transport.ssl(domain);
-            }
-            catch (IOException e)
-            {
-                logger.LogDebug("onConnectionBound has thrown exception while creating ssl context: %s", e.getMessage());
-            }
+            SslDomain domain = makeDomain();
+            transport.ssl(domain);
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     @Override
     public void onConnectionUnbound(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
+        log.trace("Amqp connection unbound");
         this.isOpen = false;
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -383,17 +356,8 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     @Override
     public void onLinkInit(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-        try
-        {
-            Link link = event.getLink();
-            amqpDeviceOperations.initLink(link);
-        }
-        catch (Exception e)
-        {
-            logger.LogDebug("Exception in onLinkInit: %s", e.getMessage());
-        }
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
+        Link link = event.getLink();
+        amqpDeviceOperations.initLink(link);
     }
 
     /**
@@ -404,7 +368,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     @Override
     public void onLinkRemoteOpen(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
+        super.onLinkRemoteOpen(event);
         String linkName = event.getLink().getName();
 
         if (amqpDeviceOperations.isReceiverLinkTag(linkName))
@@ -418,7 +382,6 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
                 openLatch.countDown();
             }
         }
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -429,18 +392,10 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
      */
     public boolean sendAmqpMessage(AmqpMessage message) throws Exception
     {
-        if (this.saslListener != null && this.saslListener.getSavedException() != null)
-        {
-            throw this.saslListener.getSavedException();
-        }
-
-        boolean result;
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
-
         // credit, the function shall return -1.]
-        if (!this.isOpen)
+        if (!this.isConnected())
         {
-            result = false;
+            return false;
         }
         else
         {
@@ -476,15 +431,13 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
                 }
 
                 amqpDeviceOperations.sendMessage(tag, msgData, length, 0);
-                result = true;
+                return true;
             }
             else
             {
-                result = false;
+                return false;
             }
         }
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
-        return result;
     }
 
     /**
@@ -494,31 +447,45 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     @Override
     public void onDelivery(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
+        Link link = event.getLink();
 
-        AmqpMessage message = amqpDeviceOperations.receiverMessageFromLink(event.getLink().getName());
-        if (message == null)
+        if (link instanceof Sender)
         {
-            //Sender specific section for dispositions it receives
-            if (event.getType() == Event.Type.DELIVERY)
-            {
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
-                Delivery d = event.getDelivery();
-                DeliveryState remoteState = d.getRemoteState();
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
+            Delivery d = event.getDelivery();
+            DeliveryState remoteState = d.getRemoteState();
 
-                // Codes_SRS_AMQPSIOTHUBCONNECTION_15_039: [The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.]
-                boolean state = remoteState.equals(Accepted.getInstance());
-                //let any listener know that the message was received by the server
-                // release the delivery object which created in sendMessage().
-                d.free();
+            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_039: [The event handler shall note the remote delivery state and use it and the Delivery (Proton) hash code to inform the AmqpsIotHubConnection of the message receipt.]
+            boolean messageAcknowledgedAsSuccess = remoteState.equals(Accepted.getInstance());
+
+            if (!messageAcknowledgedAsSuccess)
+            {
+                String error = "Amqp message was not accepted by service, remote state was " + remoteState.getType();
+                this.msgListener.messageSendFailed(error);
+            }
+
+            //let any listener know that the message was received by the server
+            // release the delivery object which created in sendMessage().
+            d.free();
+        }
+        else if (link instanceof Receiver)
+        {
+            AmqpMessage message = amqpDeviceOperations.receiverMessageFromLink(event.getLink().getName());
+
+            if (message != null)
+            {
+                log.debug("Amqp connection received message");
+                msgListener.messageReceived(message);
+            }
+            else
+            {
+                log.warn("onDelivery executed on a receiver link but no message could be received");
             }
         }
         else
         {
-            msgListener.messageReceived(message);
+            log.warn("onDelivery executed on a link that is neither a sender or a receiver");
         }
-
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
     }
 
     /**
@@ -528,10 +495,8 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     @Override
     public void onLinkFlow(Event event)
     {
-        logger.LogDebug("Entered in method %s", logger.getMethodName());
         this.linkCredit = event.getLink().getCredit();
-        logger.LogDebug("The link credit value is %s, method name is %s", this.linkCredit, logger.getMethodName());
-        logger.LogDebug("Exited from method %s", logger.getMethodName());
+        log.trace("Amqp link received {} link credit", this.linkCredit);
     }
 
     /**
@@ -549,6 +514,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     public void onTransportHeadClosed(Event event)
     {
         this.openLatch.countDown();
+        log.trace("Amqp transport head closed");
     }
 
     /**
@@ -558,18 +524,17 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
     {
         private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final AmqpReactor amqpReactor;
-        private final CustomLogger logger;
 
-        ReactorRunner(AmqpReactor reactor, CustomLogger logger)
+        ReactorRunner(AmqpReactor reactor)
         {
             this.amqpReactor = reactor;
-            this.logger = logger;
         }
 
         @Override
         public Object call()
         {
             Thread.currentThread().setName(THREAD_NAME);
+            log.trace("Amqp reactor thread {} has finished", THREAD_NAME);
 
             try
             {
@@ -577,9 +542,11 @@ public class AmqpsConnection extends ErrorLoggingBaseHandler
             }
             catch (HandlerException e)
             {
-                logger.LogError(e);
+                log.error("Encountered an exception while running the AMQP reactor", e);
                 throw e;
             }
+
+            log.trace("Amqp reactor thread {} has finished", THREAD_NAME);
 
             return null;
         }

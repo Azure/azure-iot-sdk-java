@@ -6,12 +6,14 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 public class FileUploadNotificationReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
@@ -28,7 +30,20 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     FileUploadNotificationReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_001: [** The constructor shall throw IllegalArgumentException if any the input string is null or empty **]**
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
+    }
+
+    /**
+     * Constructor to verify initialization parameters
+     * Create instance of AmqpReceive
+     * @param hostName The iot hub host name
+     * @param userName The iot hub user name
+     * @param sasToken The iot hub SAS token for the given device
+     * @param iotHubServiceClientProtocol The iot hub protocol name
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     */
+    FileUploadNotificationReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
@@ -47,7 +62,7 @@ public class FileUploadNotificationReceiver extends Receiver
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_002: [** The constructor shall create a new instance of AmqpFileUploadNotificationReceive object **]**
-        this.amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        this.amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
     }
 
     /**
@@ -57,8 +72,12 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     public void open() throws IOException
     {
+        log.info("Opening file upload notification receiver");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_004: [** The function shall call open() on the member AmqpFileUploadNotificationReceive object **]**
         this.amqpFileUploadNotificationReceive.open();
+
+        log.info("Opened file upload notification receiver");
     }
 
     /**
@@ -68,8 +87,12 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     public void close() throws IOException
     {
+        log.info("Closing file upload notification receiver");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_006: [** The function shall call close() on the member AmqpFileUploadNotificationReceive object **]**
         this.amqpFileUploadNotificationReceive.close();
+
+        log.info("Closed file upload notification receiver");
     }
 
     /**

@@ -7,6 +7,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.transport.http;
 
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpConnection;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -18,6 +19,7 @@ import org.junit.runner.RunWith;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -112,6 +114,25 @@ public class HttpConnectionTest
                 mockUrl.openConnection();
             }
         };
+    }
+
+    // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_003: [The constructor shall set the HTTPS method to the given method.]
+    @Test
+    public void constructorSetsProxy(@Mocked Proxy mockProxy) throws IOException
+    {
+        // Arrange
+        final HttpMethod httpsMethod = HttpMethod.PUT;
+        new Expectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection(mockProxy);
+                result = mockUrlConn;
+            }
+        };
+        // Act
+        new HttpConnection(mockUrl, httpsMethod, mockProxy);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_004: [If the URI given does not use the HTTPS protocol, the constructor shall throw an IllegalArgumentException.]

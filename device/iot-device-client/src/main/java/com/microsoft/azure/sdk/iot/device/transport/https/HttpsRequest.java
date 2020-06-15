@@ -22,7 +22,8 @@ public class HttpsRequest
     private HttpsMethod method;
     private URL url;
     private Map<String, List<String>> headers;
-    private int connectionTimeout;
+    private int readTimeout;
+    private int connectTimeout;
     private SSLContext sslContext;
     private ProxySettings proxySettings;
 
@@ -115,10 +116,14 @@ public class HttpsRequest
             connection.setSSLContext(this.sslContext);
         }
 
-
-        if (this.connectionTimeout != 0)
+        if (this.readTimeout != 0)
         {
-            connection.setReadTimeoutMillis(this.connectionTimeout);
+            connection.setReadTimeout(this.readTimeout);
+        }
+
+        if (this.connectTimeout != 0)
+        {
+            connection.setConnectTimeout(this.connectTimeout);
         }
 
         int responseStatus = -1;
@@ -175,10 +180,23 @@ public class HttpsRequest
      *
      * @return itself, for fluent setting.
      */
-    public HttpsRequest setReadTimeoutMillis(int timeout)
+    public HttpsRequest setReadTimeout(int timeout)
     {
         // Codes_SRS_HTTPSREQUEST_11_014: [The function shall set the read timeout for the request to the given value.]
-        this.connectionTimeout = timeout;
+        this.readTimeout = timeout;
+        return this;
+    }
+
+    /**
+     * Sets the connect timeout, in milliseconds, for the request.
+     *
+     * @param timeout the connect timeout in milliseconds.
+     *
+     * @return itself, for fluent setting.
+     */
+    public HttpsRequest setConnectTimeout(int timeout)
+    {
+        this.connectTimeout = timeout;
         return this;
     }
 

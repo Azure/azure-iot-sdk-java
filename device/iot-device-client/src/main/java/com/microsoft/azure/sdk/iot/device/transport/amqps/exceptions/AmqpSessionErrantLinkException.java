@@ -19,20 +19,24 @@ public class AmqpSessionErrantLinkException extends ProtocolException
     public AmqpSessionErrantLinkException()
     {
         super();
+        this.isRetryable = true;
     }
 
     public AmqpSessionErrantLinkException(String message)
     {
         super(message);
+        this.isRetryable = true;
     }
 
     public AmqpSessionErrantLinkException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = true;
     }
 
     public AmqpSessionErrantLinkException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = true;
     }
 }

@@ -359,6 +359,41 @@ public class MqttIotHubConnectionTest
         };
     }
 
+    @Test
+    public void websocketOpenHasNoQueryStringIfX509Auth(@Mocked final ProxySettings mockedProxySettings) throws IOException, TransportException
+    {
+        final String WS_RAW_PATH = "/$iothub/websocket";
+        final String WS_SSLPrefix = "wss://";
+        final String serverUri = WS_SSLPrefix + iotHubHostName + WS_RAW_PATH;
+
+        baseExpectations();
+
+        new Expectations()
+        {
+            {
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+                mockConfig.isUseWebsocket();
+                result = true;
+                mockConfig.getProxySettings();
+                result = mockedProxySettings;
+                Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, serverUri, deviceId, any, null, any, mockedProxySettings);
+            }
+        };
+
+        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+        connection.open(mockedQueue, mockedScheduledExecutorService);
+
+        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
+
+        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&"));
+
+        IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
+        IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
+        assertEquals(expectedState, actualState);
+    }
+
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established for any reason,
     // the function shall throw a TransportException.]
     @Test(expected = TransportException.class)
@@ -1042,26 +1077,6 @@ public class MqttIotHubConnectionTest
                 times = 0;
             }
         };
-    }
-
-    //Tests_SRS_MQTTIOTHUBCONNECTION_34_027: [If this function is called while using websockets and x509 authentication, an UnsupportedOperationException shall be thrown.]
-    @Test (expected = UnsupportedOperationException.class)
-    public void websocketWithX509ThrowsAtOpen() throws TransportException
-    {
-        baseExpectations();
-
-        new Expectations()
-        {
-            {
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
-                mockConfig.isUseWebsocket();
-                result = true;
-            }
-        };
-
-        MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
-        connection.open(mockedQueue, mockedScheduledExecutorService);
     }
 
     //Tests_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listeners.]

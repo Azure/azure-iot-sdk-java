@@ -529,7 +529,12 @@ public class AmqpsDeviceTelemetryTest
     // Tests_SRS_AMQPSDEVICETELEMETRY_34_052: [If the amqp message contains an application property of
     // "x-opt-input-name", this function shall assign its value to the IotHub message's input name.]
     @Test
-    public void protonMessageToIoTHubMessageWithInputName(@Mocked final MessageImpl mockMessage, @Mocked final MessageAnnotations mockedAnnotations, @Mocked final Data mockData)
+    public void protonMessageToIoTHubMessageWithInputName(
+            @Mocked final MessageImpl mockMessage,
+            @Mocked final MessageAnnotations mockedAnnotations,
+            @Mocked final Data mockData,
+            @Mocked final Properties mockProperties,
+            @Mocked final Binary mockBinary)
     {
         //arrange
         final String expectedInputName = "some input name";
@@ -543,6 +548,15 @@ public class AmqpsDeviceTelemetryTest
 
                 mockMessage.getMessageAnnotations();
                 result = mockedAnnotations;
+
+                mockMessage.getProperties();
+                result = mockProperties;
+
+                mockProperties.getUserId();
+                result = mockBinary;
+
+                mockBinary.toString();
+                result = "someUserId";
 
                 mockedAnnotations.getValue();
                 result = mockedAnnotationsMap;

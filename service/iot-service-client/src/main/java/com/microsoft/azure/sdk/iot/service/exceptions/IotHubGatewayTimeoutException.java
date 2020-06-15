@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create gateway timeout exception (device does not answer in time)
  */
@@ -14,8 +16,14 @@ public class IotHubGatewayTimeoutException extends IotHubException
     {
         this(null);
     }
+
     public IotHubGatewayTimeoutException(String message)
     {
         super(message);
+    }
+
+    IotHubGatewayTimeoutException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

@@ -13,4 +13,6 @@ public interface AmqpListener
     void connectionLost();
 
     void messageSent();
+
+    void messageSendFailed(String exceptionMessage);
 }

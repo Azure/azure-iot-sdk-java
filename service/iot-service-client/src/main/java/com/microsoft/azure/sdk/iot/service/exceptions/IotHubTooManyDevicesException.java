@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create too many devices exception
  */
@@ -14,8 +16,14 @@ public class IotHubTooManyDevicesException extends IotHubException
     {
         this(null);
     }
+
     public IotHubTooManyDevicesException(String message)
     {
         super(message);
+    }
+
+    IotHubTooManyDevicesException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

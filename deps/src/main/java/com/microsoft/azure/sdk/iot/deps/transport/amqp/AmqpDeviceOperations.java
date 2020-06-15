@@ -79,30 +79,22 @@ public class AmqpDeviceOperations
     /**
      * Open the Session links for session
      * @param session the {@link Session} endpoint.
-     * @throws IOException if the function failed to open the links for the provided session.
      * @throws IllegalArgumentException if the session is {@code null}.
      */
-    public void openLinks(Session session) throws IOException, IllegalArgumentException
+    public void openLinks(Session session) throws IllegalArgumentException
     {
         if (session == null)
         {
             throw new IllegalArgumentException("The session cannot be null.");
         }
 
-        try
-        {
-            this.receiverLink = session.receiver(this.receiverLinkTag);
-            this.receiverLink.setProperties(this.amqpProperties);
-            this.receiverLink.open();
+        this.receiverLink = session.receiver(this.receiverLinkTag);
+        this.receiverLink.setProperties(this.amqpProperties);
+        this.receiverLink.open();
 
-            this.senderLink = session.sender(this.senderLinkTag);
-            this.senderLink.setProperties(this.amqpProperties);
-            this.senderLink.open();
-        }
-        catch (Exception e)
-        {
-            throw new IOException("Proton exception", e);
-        }
+        this.senderLink = session.sender(this.senderLinkTag);
+        this.senderLink.setProperties(this.amqpProperties);
+        this.senderLink.open();
     }
 
     /**
@@ -126,34 +118,26 @@ public class AmqpDeviceOperations
      * Initializes the link's other endpoint according to its type
      * @param link The link which shall be initialize.
      * @throws IllegalArgumentException if link argument is null
-     * @throws IOException if Proton throws
      */
-    public synchronized void initLink(Link link) throws IOException, IllegalArgumentException
+    public synchronized void initLink(Link link) throws IllegalArgumentException
     {
         if (link == null)
         {
             throw new IllegalArgumentException("The link cannot be null.");
         }
 
-        try
+        if (link.getName().equals(this.senderLinkTag))
         {
-            if (link.getName().equals(this.senderLinkTag))
-            {
-                Target target = new Target();
-                target.setAddress(this.amqpLinkAddress);
-                link.setTarget(target);
-                link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
-            }
-            if (link.getName().equals(this.receiverLinkTag))
-            {
-                Source source = new Source();
-                source.setAddress(this.amqpLinkAddress);
-                link.setSource(source);
-            }
+            Target target = new Target();
+            target.setAddress(this.amqpLinkAddress);
+            link.setTarget(target);
+            link.setSenderSettleMode(SenderSettleMode.UNSETTLED);
         }
-        catch (Exception e)
+        else if (link.getName().equals(this.receiverLinkTag))
         {
-            throw new IOException("Proton exception: " + e.getMessage());
+            Source source = new Source();
+            source.setAddress(this.amqpLinkAddress);
+            link.setSource(source);
         }
     }
 

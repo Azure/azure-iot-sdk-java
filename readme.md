@@ -97,10 +97,13 @@ This repository contains [provisioning service client SDK](./provisioning/provis
 | Query enrollments                                  | :heavy_check_mark: | Programmatically query registration states with the service SDK.  Please visit the [samples folder](./provisioning/provisioning-samples/) to learn more about this feature.                                                                            |
 
 ## Samples
-Whithin the repository, you can find various types of simple samples that can help you get started.
+Within the repository, you can find various types of simple samples that can help you get started.
 * [Device SDK Samples](./device/iot-device-samples/)
 * [Service SDK Samples](./service/iot-service-samples/)
 * [Provisioning SDK Samples](./provisioning/provisioning-samples/)
+
+## Logging
+In order to learn more about logging within this SDK and how to capture its logs, see [here](./logging.md)
 
 ## Contribution, feedback and issues
 If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](.github/CONTRIBUTING.md).
@@ -122,6 +125,7 @@ Here is what you can expect Microsoft Support to be able to help with:
 * [Prepare your development environment to use the Azure IoT device SDK for Java][devbox-setup]
 * [Setup IoT Hub][setup-iothub]
 * [Java SDKs API reference][java-api-reference]
+* [Configure TLS Protocol Version and Ciphers](./configure_tls_protocol_version_and_ciphers.md)
 
 ## SDK folder structure
 
@@ -168,8 +172,8 @@ Below is a table showing the mapping of the LTS branches to the packages release
 
 | Maven Package | Github Branch | LTS Status | LTS Start Date | Maintenance End Date | Removed Date |
 | :-----------: | :-----------: | :--------: | :------------: | :------------------: | :----------: |
-| [LTS_01_2018_Rev01](https://github.com/Azure/azure-iot-sdk-java/releases/tag/LTS_01_2018_Rev01) <br><br> [2018-02-9](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2018-2-9) | lts_01_2018   | Active     | 2018-02-09     | 2018-06-30            | 2018-12-31   |
-| [2017-07-24](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2017-3-24) | lts_07_2017 | Deprecated | 2017-07-01 | 2017-12-31 | 2018-06-30 |
+| [2020-01-27](https://github.com/Azure/azure-iot-sdk-java/releases/tag/LTS_01_2020) | lts_01_2020   | Active     | 2020-01-27     | 2020-06-30            | 2020-12-31   |
+| [2019-01-24](https://github.com/Azure/azure-iot-sdk-java/releases/tag/LTS_01_2019_Rev01) | LTS_01_2019_Rev01 | Deprecated | 2019-01-24 | 2019-06-30 | 2019-12-31 |
 
 * <sup>1</sup> All scheduled dates are subject to change by the Azure IoT SDK team.
 

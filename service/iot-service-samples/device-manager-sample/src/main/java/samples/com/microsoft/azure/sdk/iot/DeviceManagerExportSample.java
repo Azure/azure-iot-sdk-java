@@ -17,7 +17,7 @@ import java.io.FileOutputStream;
 
 public class DeviceManagerExportSample
 {
-    private static final Boolean excludeKeys = false;
+    private static final boolean excludeKeys = false;
     public static final String sampleContainerName = "exportsample";
 
     public static void main(String[] args) throws Exception

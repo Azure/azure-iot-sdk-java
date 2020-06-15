@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +17,7 @@ import java.util.concurrent.Executors;
  * FeedbackReceiver is a specialized receiver whose ReceiveAsync
  * method returns a FeedbackBatch instead of a Message.
  */
+@Slf4j
 public class FeedbackReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
@@ -54,8 +56,6 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
         
-               
-        
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_002: [The constructor shall store deviceId]
         this.deviceId = deviceId;
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
@@ -70,11 +70,26 @@ public class FeedbackReceiver extends Receiver
      * @param userName The iot hub user name
      * @param sasToken The iot hub SAS token for the given device
      * @param iotHubServiceClientProtocol protocol to be used
-     * 
+     *
      */
     public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, (ProxyOptions) null);
+    }
+
+    /**
+     * Constructor to verify initialization parameters
+     * Create instance of AmqpReceive
+     *
+     * @param hostName The iot hub host name
+     * @param userName The iot hub user name
+     * @param sasToken The iot hub SAS token for the given device
+     * @param iotHubServiceClientProtocol protocol to be used
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     * 
+     */
+    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
@@ -94,7 +109,7 @@ public class FeedbackReceiver extends Receiver
         }
                 
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
-        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
+        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
     }
         
     /**
@@ -109,8 +124,13 @@ public class FeedbackReceiver extends Receiver
         {
             throw new IOException("AMQP receiver is not initialized");
         }
+
+        log.info("Opening feedback receiver client");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_005: [The function shall call open() on the member AMQPReceive object]
         this.amqpReceive.open();
+
+        log.info("Opened feedback receiver client");
     }
 
     /**
@@ -125,8 +145,13 @@ public class FeedbackReceiver extends Receiver
         {
             throw new IOException("AMQP receiver is not initialized");
         }
+
+        log.info("Closing feedback receiver client");
+
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_007: [The function shall call close() on the member AMQPReceive object]
         this.amqpReceive.close();
+
+        log.info("Closed feedback receiver client");
     }
 
     /**

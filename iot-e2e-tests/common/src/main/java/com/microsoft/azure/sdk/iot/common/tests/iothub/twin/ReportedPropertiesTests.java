@@ -54,6 +54,13 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void testSendReportedArrayProperties() throws IOException, IotHubException, InterruptedException
+    {
+        sendReportedArrayPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
+    }
+
+    @Test
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void testSendReportedPropertiesMultiThreaded() throws IOException, IotHubException, InterruptedException
     {
         // arrange
@@ -147,25 +154,25 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         // Update RP
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
-            final int index = i;
-            executor.submit(new Runnable()
+        final int index = i;
+        executor.submit(new Runnable()
+        {
+            @Override
+            public void run()
             {
-                @Override
-                public void run()
+                try
                 {
-                    try
-                    {
-                        deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(index);
-                        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-                        waitAndVerifyTwinStatusBecomesSuccess();
-                    }
-                    catch (IOException | InterruptedException e)
-                    {
-                        fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), internalClient));
-                    }
+                    deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(index);
+                    internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+                    waitAndVerifyTwinStatusBecomesSuccess();
                 }
-            });
-        }
+                catch (IOException | InterruptedException e)
+                {
+                    fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), internalClient));
+                }
+            }
+        });
+    }
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         executor.shutdown();
         if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))

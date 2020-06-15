@@ -496,7 +496,7 @@ public class HttpsRequestTest
 
         HttpsRequest request =
                 new HttpsRequest(mockUrl, httpsMethod, body, "");
-        request.setReadTimeoutMillis(readTimeout);
+        request.setReadTimeout(readTimeout);
 
         final int expectedReadTimeout = readTimeout;
 
@@ -504,7 +504,39 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                mockConn.setReadTimeoutMillis(expectedReadTimeout);
+                mockConn.setReadTimeout(expectedReadTimeout);
+            }
+        };
+    }
+
+    @Test
+    public void setConnectTimeoutSetsConnectTimeout(@Mocked final HttpsConnection mockConn, final @Mocked URL mockUrl) throws TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.POST;
+        final byte[] body = new byte[0];
+        final int readTimeout = 1;
+        new NonStrictExpectations()
+        {
+            {
+                new HttpsConnection(mockUrl, httpsMethod, null);
+                result = mockConn;
+
+                mockUrl.getProtocol();
+                result = "https";
+            }
+        };
+
+        HttpsRequest request =
+                new HttpsRequest(mockUrl, httpsMethod, body, "");
+        request.setConnectTimeout(readTimeout);
+
+        final int expectedConnectTimeout = readTimeout;
+
+        request.send();
+        new Verifications()
+        {
+            {
+                mockConn.setConnectTimeout(expectedConnectTimeout);
             }
         };
     }

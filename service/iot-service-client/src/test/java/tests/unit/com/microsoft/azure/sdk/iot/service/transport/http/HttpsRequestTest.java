@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -49,7 +50,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                new HttpConnection(mockUrl, (HttpMethod) any);
+                new HttpConnection(mockUrl, (HttpMethod) any, (Proxy) any);
             }
         };
     }
@@ -75,7 +76,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                new HttpConnection(mockUrl, (HttpMethod) any)
+                new HttpConnection(mockUrl, (HttpMethod) any, (Proxy) any)
                         .writeOutput(expectedBody);
             }
         };
@@ -101,7 +102,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                new HttpConnection((URL) any, httpsMethod);
+                new HttpConnection((URL) any, httpsMethod, (Proxy) any);
             }
         };
     }
@@ -119,7 +120,7 @@ public class HttpsRequestTest
             {
                 mockUrl.getProtocol();
                 result = "http";
-                new HttpConnection(mockUrl, httpsMethod);
+                new HttpConnection(mockUrl, httpsMethod, (Proxy) any);
                 result = new IOException();
             }
         };
@@ -139,7 +140,7 @@ public class HttpsRequestTest
             HttpMethod testMethod;
 
             @Mock
-            public void $init(URL url, HttpMethod method)
+            public void $init(URL url, HttpMethod method, Proxy proxy)
             {
                 this.testMethod = method;
             }
@@ -195,7 +196,7 @@ public class HttpsRequestTest
             }
         };
         // Assert
-        HttpRequest request = new HttpRequest(new URL("http://www.microsoft.com"), expectedMethod, body);
+        HttpRequest request = new HttpRequest(new URL("https://www.microsoft.com"), expectedMethod, body);
         // Act
         request.send();
     }
@@ -277,7 +278,7 @@ public class HttpsRequestTest
         };
         // Assert
         // Act
-        HttpRequest request = new HttpRequest(new URL("http://www.microsoft.com"), expectedMethod, body);
+        HttpRequest request = new HttpRequest(new URL("https://www.microsoft.com"), expectedMethod, body);
         request.setHeaderField(field0, value0);
         request.setHeaderField(field1, value1);
         request.send();
@@ -350,7 +351,7 @@ public class HttpsRequestTest
             }
         };
         // Act
-        HttpRequest request = new HttpRequest(new URL("http://www.microsoft.com"), httpsMethod, expectedBody);
+        HttpRequest request = new HttpRequest(new URL("https://www.microsoft.com"), httpsMethod, expectedBody);
         request.send();
     }
 

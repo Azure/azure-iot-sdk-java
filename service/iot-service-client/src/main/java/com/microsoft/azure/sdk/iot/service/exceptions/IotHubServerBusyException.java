@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.exceptions;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
+
 /**
  * Create server busy exception
  */
@@ -14,8 +16,14 @@ public class IotHubServerBusyException extends IotHubException
     {
         this(null);
     }
+
     public IotHubServerBusyException(String message)
     {
         super(message);
+    }
+
+    IotHubServerBusyException(String message, int errorCode, ErrorCodeDescription errorCodeDescription)
+    {
+        super(message, errorCode, errorCodeDescription);
     }
 }

@@ -400,7 +400,7 @@ public class IotHubServicesCommon
             }
         }
 
-        //Wait for first connect
+        // Wait for first connect
         while (actualStatusUpdates.size() == 0)
         {
             Thread.sleep(200);
@@ -425,7 +425,9 @@ public class IotHubServicesCommon
         int numOfUpdates = 0;
         if (actualStatusUpdates != null)
         {
-            while (numOfUpdates == 0 || numOfUpdates != actualStatusUpdates.size() || actualStatusUpdates.get(actualStatusUpdates.size() - 1).getKey() != IotHubConnectionStatus.CONNECTED)
+            while (numOfUpdates == 0
+                    || numOfUpdates != actualStatusUpdates.size()
+                    || actualStatusUpdates.get(actualStatusUpdates.size() - 1).getKey() != IotHubConnectionStatus.CONNECTED)
             {
                 numOfUpdates = actualStatusUpdates.size();
                 Thread.sleep(3 * 1000);

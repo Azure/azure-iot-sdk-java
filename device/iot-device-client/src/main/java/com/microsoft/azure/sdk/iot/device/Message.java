@@ -10,10 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 public class Message
@@ -25,6 +22,8 @@ public class Message
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd_HH:mm:ss.SSSSSSS";
 
     private static final String SECURITY_CLIENT_JSON_ENCODING = "application/json";
+
+    private static final String UTC_TIMEZONE = "UTC";
 
     // ----- Data Fields -----
 
@@ -645,9 +644,10 @@ public class Message
             return null;
         }
 
-        // Codes_SRS_MESSAGE_34_064: [The function shall return the saved creationTimeUTC as a string in the format "yyyy-MM-dd_HH:mm:ss.SSSSSSS".]
+        // Codes_SRS_MESSAGE_34_064: [The function shall return the saved creationTimeUTC as a string in the format "yyyy-MM-dd_HH:mm:ss.SSSSSSSZ".]
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FORMAT);
-        return sdf.format(this.creationTimeUTC).replace("_", "T");
+        sdf.setTimeZone(TimeZone.getTimeZone(UTC_TIMEZONE));
+        return sdf.format(this.creationTimeUTC).replace("_", "T") + "Z";
     }
 
     public final void setCreationTimeUTC(Date creationTimeUTC)

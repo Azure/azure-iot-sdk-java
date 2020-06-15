@@ -18,38 +18,30 @@ public class ProvisioningDeviceClientExceptionManager
     {
         int responseStatus = httpResponse.getStatus();
 
-        String errorMessage = ErrorMessageParser.bestErrorMessage(new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8));
+        byte[] errorReason = httpResponse.getErrorReason();
+
+        String errorMessage = httpResponse.getStatus() + " : " + new String(errorReason, StandardCharsets.UTF_8);
 
         switch (responseStatus)
         {
             case 400:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 401:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 403:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 404:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 412:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 429:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 500:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 502:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 503:
-                throw new ProvisioningDeviceHubException(errorMessage);
             case 504:
-                throw new ProvisioningDeviceHubException(errorMessage);
             default:
                 if (responseStatus > 300)
                 {
-                    throw new ProvisioningDeviceHubException(errorMessage);
+                    throw new ProvisioningDeviceHubException(httpResponse.getStatus() + " : " + errorMessage);
                 }
                 else
                 {
-                    // good case move forward
+                    // no error
                     break;
                 }
         }

@@ -24,14 +24,16 @@ public class AmqpsSessionManager
 
     private AmqpsDeviceAuthentication amqpsDeviceAuthentication;
     private ArrayList<AmqpsSessionDeviceOperation> amqpsDeviceSessionList = new ArrayList<>();
+    private SubscriptionMessageRequestSentCallback subscriptionMessageRequestSentCallback;
 
     /**
      * Constructor that takes a device configuration.
      *
      * @param deviceClientConfig the device configuration to use for 
      *                           session management.
+     * @param subscriptionMessageRequestSentCallback the callback to fire each time a subscription message is sent
      */
-    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig)
+    public AmqpsSessionManager(DeviceClientConfig deviceClientConfig, SubscriptionMessageRequestSentCallback subscriptionMessageRequestSentCallback)
     {
         // Codes_SRS_AMQPSESSIONMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the deviceClientConfig parameter is null.]
         if (deviceClientConfig == null)
@@ -55,6 +57,8 @@ public class AmqpsSessionManager
                 break;
         }
 
+        this.subscriptionMessageRequestSentCallback = subscriptionMessageRequestSentCallback;
+
         // Codes_SRS_AMQPSESSIONMANAGER_12_007: [The constructor shall add the create a AmqpsSessionDeviceOperation with the given deviceClientConfig.]
         this.addDeviceOperationSession(this.deviceClientConfig);
     }
@@ -73,7 +77,7 @@ public class AmqpsSessionManager
         }
 
         // Codes_SRS_AMQPSESSIONMANAGER_12_009: [The function shall create a new  AmqpsSessionDeviceOperation with the given deviceClientConfig and add it to the session list.]
-        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(deviceClientConfig, this.amqpsDeviceAuthentication);
+        AmqpsSessionDeviceOperation amqpsSessionDeviceOperation = new AmqpsSessionDeviceOperation(deviceClientConfig, this.amqpsDeviceAuthentication, this.subscriptionMessageRequestSentCallback);
         this.amqpsDeviceSessionList.add(amqpsSessionDeviceOperation);
     }
 
@@ -301,8 +305,14 @@ public class AmqpsSessionManager
                     break;
                 }
             }
-
-            log.trace("Attempt to send message over amqp failed because no session handled it ({})", message);
+            if (deliveryTag == -1)
+            {
+                log.trace("Attempt to send message over amqp failed because no session handled it ({})", message);
+            }
+        }
+        else
+        {
+            log.trace("Attempt to send message over amqp failed because the associated session is null ({})", message);
         }
 
         return deliveryTag;

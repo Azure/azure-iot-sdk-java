@@ -10,10 +10,16 @@ import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.service.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +40,10 @@ public class ServiceClientTests extends IotHubIntegrationTest
     private static String deviceIdPrefix = "java-service-client-e2e-test";
     private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
     private static String hostName;
+
+    protected static HttpProxyServer proxyServer;
+    protected static String testProxyHostname = "127.0.0.1";
+    protected static int testProxyPort = 8869;
 
     private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
 
@@ -75,9 +85,42 @@ public class ServiceClientTests extends IotHubIntegrationTest
         return inputs;
     }
 
+    @BeforeClass
+    public static void startProxy()
+    {
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+                        .withPort(testProxyPort)
+                        .start();
+    }
+
+
+    @AfterClass
+    public static void stopProxy()
+    {
+        proxyServer.stop();
+    }
+
     @Test (timeout=MAX_TEST_MILLISECONDS)
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void cloudToDeviceTelemetry() throws Exception
+    {
+        cloudToDeviceTelemetry(false);
+    }
+
+    @Test (timeout=MAX_TEST_MILLISECONDS)
+    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    public void cloudToDeviceTelemetryWithProxy() throws Exception
+    {
+        if (testInstance.protocol != IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            //Proxy support only exists for AMQPS_WS currently
+            return;
+        }
+
+        cloudToDeviceTelemetry(true);
+    }
+
+    public void cloudToDeviceTelemetry(boolean withProxy) throws Exception
     {
         // Arrange
 
@@ -92,7 +135,16 @@ public class ServiceClientTests extends IotHubIntegrationTest
         // Act
 
         // Create service client
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol);
+        ProxyOptions proxyOptions = null;
+        if (withProxy)
+        {
+            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+            proxyOptions = new ProxyOptions(testProxy);
+        }
+
+        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).build();
+
+        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 
