@@ -37,7 +37,7 @@ if grep -q "$InstrumentationFailureMessage" <<< "$TestLogs"; then
 fi
 
 AnotherInstrumentationFailureMessage='INSTRUMENTATION_FAILED'
-if grep -q "$InstrumentationFailureMessage" <<< "$TestLogs"; then
+if grep -q "$AnotherInstrumentationFailureMessage" <<< "$TestLogs"; then
     echo 'Instrumentation failures detected, exiting...'
     exit -1
 fi
