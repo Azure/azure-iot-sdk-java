@@ -7,6 +7,9 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -33,7 +36,8 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to identity CRUD. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class RegistryManagerTests extends IotHubIntegrationTest
+@IotHubTest
+public class RegistryManagerTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     private static String deviceIdPrefix = "java-crud-e2e-test-";
@@ -226,7 +230,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void crud_module_e2e() throws Exception
     {
         // Arrange
@@ -263,7 +267,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void crud_module_e2e_X509_CA_signed() throws Exception
     {
         // Arrange
@@ -297,7 +301,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void crud_module_e2e_X509_self_signed() throws Exception
     {
         // Arrange
@@ -339,7 +343,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void crud_adm_configuration_e2e() throws Exception
     {
         // Arrange
@@ -406,7 +410,7 @@ public class RegistryManagerTests extends IotHubIntegrationTest
     }
 
     @Test (expected = IotHubBadFormatException.class)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void apply_configuration_e2e() throws Exception
     {
         // Arrange
@@ -433,8 +437,9 @@ public class RegistryManagerTests extends IotHubIntegrationTest
         testInstance.registryManager.applyConfigurationContentOnDevice(testInstance.deviceId, content);
     }
 
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     @Test
+    @ContinuousIntegrationTest
     public void deviceCreationWithSecurityScope() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         // Arrange

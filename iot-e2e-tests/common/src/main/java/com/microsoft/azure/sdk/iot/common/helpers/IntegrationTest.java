@@ -5,15 +5,15 @@
 
 package com.microsoft.azure.sdk.iot.common.helpers;
 
-import org.junit.Before;
+import com.microsoft.azure.sdk.iot.common.helpers.rules.*;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
-import org.junit.rules.Timeout;
 import org.junit.runner.Description;
 
-import static org.junit.Assume.assumeTrue;
-
+/**
+ * Common rules and flags for all integration tests
+ */
 public abstract class IntegrationTest
 {
     @Rule
@@ -30,37 +30,30 @@ public abstract class IntegrationTest
         }
     };
 
+    // Need to define all the rules here so that every integration test validates that it should run.
     @Rule
-    public final ConditionalIgnoreRule mConditionalIgnore = new ConditionalIgnoreRule();
+    public BasicTierHubOnlyTestRule basicTierHubOnlyTestRule = new BasicTierHubOnlyTestRule();
 
-    public static final int E2E_TEST_TIMEOUT_MS = 15 * 60 * 1000;
-
-    //This timeout applies to all individual tests in classes that inherit from this class
     @Rule
-    public Timeout timeout = new Timeout(E2E_TEST_TIMEOUT_MS);
+    public StandardTierHubOnlyTestRule standardTierHubOnlyTestRule = new StandardTierHubOnlyTestRule();
+
+    @Rule
+    public IotHubTestRule iotHubTestRule = new IotHubTestRule();
+
+    @Rule
+    public DeviceProvisioningServiceTestRule deviceProvisioningServiceTestRule = new DeviceProvisioningServiceTestRule();
+
+    @Rule
+    public ContinuousIntegrationTestRule continuousIntegrationTestRule = new ContinuousIntegrationTestRule();
+
+    @Rule
+    public FlakeyTestRule flakeyTestRule = new FlakeyTestRule();
 
     public static boolean isBasicTierHub;
+    public static boolean isPullRequest;
 
     //By default, run all tests. Even if env vars aren't set
     public static boolean runIotHubTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_IOTHUB_TESTS", "true"));
     public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
 
-    public abstract boolean isProvisioningTest();
-    public abstract boolean isIotHubTest();
-
-    @Before
-    public void checkIfTestShouldBeRun()
-    {
-        if (isIotHubTest())
-        {
-            //If it is an iot hub test, will skip the test when told to skip iot hub tests
-            assumeTrue(runIotHubTests);
-        }
-
-        if (isProvisioningTest())
-        {
-            //If it is a provisioning test, will skip the test when told to skip provisioning tests
-            assumeTrue(runProvisioningTests);
-        }
-    }
 }

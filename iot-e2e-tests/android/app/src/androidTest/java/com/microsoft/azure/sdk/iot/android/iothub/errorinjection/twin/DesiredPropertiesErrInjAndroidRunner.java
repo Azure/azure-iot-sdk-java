@@ -39,6 +39,7 @@ public class DesiredPropertiesErrInjAndroidRunner extends DesiredPropertiesErrIn
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return inputsCommon();
     }
 }

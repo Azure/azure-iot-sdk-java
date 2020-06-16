@@ -38,6 +38,7 @@ public class TwinTagsAndroidRunner extends TwinTagsTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return inputsCommon();
     }
 }

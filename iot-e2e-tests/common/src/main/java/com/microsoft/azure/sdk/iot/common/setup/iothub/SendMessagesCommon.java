@@ -39,7 +39,7 @@ import static junit.framework.TestCase.fail;
  * Utility functions, setup and teardown for all D2C telemetry integration tests. This class should not contain any tests,
  * but any child class should.
  */
-public class SendMessagesCommon extends IotHubIntegrationTest
+public class SendMessagesCommon extends IntegrationTest
 {
     //How much sequential connections each device will open and close in the multithreaded test.
     protected static final Integer NUM_CONNECTIONS_PER_DEVICE = 5;

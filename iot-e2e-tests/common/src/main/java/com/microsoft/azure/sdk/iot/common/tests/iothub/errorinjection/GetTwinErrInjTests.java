@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.errorinjection;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -26,6 +29,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  * Test class containing all error injection tests to be run on JVM and android pertaining to GetDeviceTwin/GetTwin. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class GetTwinErrInjTests extends DeviceTwinCommon
 {
     public GetTwinErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
@@ -34,7 +38,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void getDeviceTwinRecoveredFromTcpConnectionDrop() throws Exception
     {
         super.setUpNewDeviceAndModule();
@@ -44,7 +48,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -59,7 +64,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -74,7 +80,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -95,7 +102,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -116,7 +124,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -131,7 +140,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -154,7 +164,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -177,7 +188,8 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -200,7 +212,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void getDeviceTwinRecoveredFromGracefulShutdownAmqp() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -215,7 +227,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void getDeviceTwinRecoveredFromGracefulShutdownMqtt() throws Exception
     {
         if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))

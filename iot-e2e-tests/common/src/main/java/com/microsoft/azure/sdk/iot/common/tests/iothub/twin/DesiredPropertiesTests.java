@@ -7,8 +7,9 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.twin;
 
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -35,6 +36,7 @@ import static org.junit.Assert.*;
  * Test class containing all non error injection tests to be run on JVM and android pertaining to DesiredProperties. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class DesiredPropertiesTests extends DeviceTwinCommon
 {
     private JsonParser jsonParser = new JsonParser();
@@ -52,7 +54,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException
     {
         subscribeToDesiredPropertiesAndVerify(
@@ -63,7 +65,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredArrayProperties() throws IOException, InterruptedException, IotHubException
     {
         subscribeToDesiredPropertiesAndVerify(
@@ -74,7 +76,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredArrayPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -85,7 +87,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
     {
         testSubscribeToDesiredPropertiesWithVersionFlow(
@@ -128,14 +130,16 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testSubscribeToDesiredPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
     {
         testSubscribeToDesiredPropertiesMultiThreadedFlow(PROPERTY_VALUE, PROPERTY_VALUE_UPDATE, PROPERTY_VALUE_UPDATE);
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testSubscribeToDesiredArrayPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
     {
         testSubscribeToDesiredPropertiesMultiThreadedFlow(jsonParser.parse(PROPERTY_VALUE_ARRAY), jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY), PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
@@ -205,14 +209,14 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         testSubscribeToDesiredPropertiesSequentiallyFlow(PROPERTY_VALUE, PROPERTY_VALUE_UPDATE, PROPERTY_VALUE_UPDATE);
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredArrayPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         testSubscribeToDesiredPropertiesSequentiallyFlow(
@@ -257,7 +261,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testUpdateDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

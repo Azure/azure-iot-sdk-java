@@ -21,6 +21,7 @@ public class RegistryManagerAndroidRunner extends RegistryManagerTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         RegistryManagerTests.setUp();
     }
 }

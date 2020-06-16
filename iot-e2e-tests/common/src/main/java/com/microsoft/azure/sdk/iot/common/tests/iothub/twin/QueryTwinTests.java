@@ -8,8 +8,9 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.twin;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -36,6 +37,7 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to Queries. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class QueryTwinTests extends DeviceTwinCommon
 {
     public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
@@ -50,7 +52,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -87,7 +89,8 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -194,7 +197,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);
@@ -232,7 +235,8 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(PAGE_SIZE + 1);
@@ -299,7 +303,8 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void queryCollectionCanReturnEmptyQueryResults() {
         try
         {
@@ -319,7 +324,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

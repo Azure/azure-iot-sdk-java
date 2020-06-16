@@ -33,7 +33,7 @@ import static org.junit.Assert.fail;
  * Utility functions, setup and teardown for all C2D telemetry integration tests. This class should not contain any tests,
  * but any child class should.
  */
-public class ReceiveMessagesCommon extends IotHubIntegrationTest
+public class ReceiveMessagesCommon extends IntegrationTest
 {
     protected static Map<String, String> messageProperties = new HashMap<>(3);
 

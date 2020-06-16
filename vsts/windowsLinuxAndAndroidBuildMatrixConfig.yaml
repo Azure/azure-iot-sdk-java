@@ -129,7 +129,7 @@ jobs:
 
   ### Android, Multi configuration build (12 different test groups to cover) ###
   - job: AndroidBuild
-    timeoutInMinutes: 45
+    timeoutInMinutes: 15
     pool:
       name: Hosted VS2017
     displayName: Android Build
@@ -154,6 +154,7 @@ jobs:
           CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
         condition: always()
 
       - task: CopyFiles@2
@@ -234,13 +235,17 @@ jobs:
           targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk
 
       - task: Bash@3
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
+        timeoutInMinutes: 15
         inputs:
           targetType: 'filePath'
           filePath: '$(Build.SourcesDirectory)/vsts/StartEmulator.sh'
 
       - task: Bash@3
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Run tests on emulator'
+        timeoutInMinutes: 45
         inputs:
           targetType: 'filePath'
           filePath: '$(Build.SourcesDirectory)/vsts/RunTestsOnEmulator.sh'
