@@ -42,7 +42,7 @@ ForEach ($line in $($paths -split "`r`n"))
 	# ignore dex, class, etc files.
 	if ($line.toLower().Contains("androidrunner.java"))
 	{
-		if ($line.toLower().Contains("dummyandroidrunner.java"))
+		if ($line.toLower().Contains("fakeandroidrunner.java"))
 		{
 			# Ignore this file, it has no bearing on which tests should be run
 		}
@@ -65,7 +65,7 @@ ForEach ($line in $($paths -split "`r`n"))
 	{
 		if ($testRunnerFilePaths.Contains($line))
 		{
-			if ($line.toLower().Contains("dummyandroidrunner.java"))
+			if ($line.toLower().Contains("fakeandroidrunner.java"))
 			{
 				# Ignore this file, it has no bearing on which tests should be run
 			}
