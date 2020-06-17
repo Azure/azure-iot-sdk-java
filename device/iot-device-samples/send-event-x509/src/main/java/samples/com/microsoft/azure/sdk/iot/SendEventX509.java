@@ -137,8 +137,10 @@ public class SendEventX509
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
-        SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificateString, privateKeyString);
-        DeviceClient client = new DeviceClient(connectionString, protocol, sslContext);
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey());
+        ClientOptions clientOptions = new ClientOptions();
+        clientOptions.setSslContext(sslContext);
+        DeviceClient client = new DeviceClient(deviceConnectionString, IotHubClientProtocol.MQTT, clientOptions);
 
         System.out.println("Successfully created an IoT Hub client.");
 

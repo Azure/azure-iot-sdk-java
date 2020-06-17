@@ -226,8 +226,9 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param isCertificatePath if the provided publicKeyCertificate is a path to a file containing the PEM formatted public key certificate
      * @param privateKey the PEM formatted private key or the path to a PEM formatted private key file
      * @param isPrivateKeyPath if the provided privateKey is a path to a file containing the PEM formatted private key
-     * @deprecated For x509 authentication, use {@link #DeviceClient(String, IotHubClientProtocol, SSLContext)}. For a
-     * sample on how to build this SSLContext, see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * @deprecated For x509 authentication, use {@link #DeviceClient(String, IotHubClientProtocol, ClientOptions)} and provide
+     * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
      * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
      * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
      * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
@@ -256,7 +257,15 @@ public final class DeviceClient extends InternalClient implements Closeable
      *                   SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
      *                   does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     * @deprecated For x509 authentication, use {@link #DeviceClient(String, IotHubClientProtocol, ClientOptions)} and provide
+     * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
+     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
+    @Deprecated
     public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
         super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
