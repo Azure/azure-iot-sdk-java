@@ -222,6 +222,7 @@ public class RegistryManagerTests extends IntegrationTest
 
     //TODO what is this testing?
     @Test
+    @ContinuousIntegrationTest
     public void getDeviceStatisticsTest() throws Exception
     {
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
@@ -268,6 +269,7 @@ public class RegistryManagerTests extends IntegrationTest
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
     @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void crud_module_e2e_X509_CA_signed() throws Exception
     {
         // Arrange
@@ -302,6 +304,7 @@ public class RegistryManagerTests extends IntegrationTest
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
     @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void crud_module_e2e_X509_self_signed() throws Exception
     {
         // Arrange

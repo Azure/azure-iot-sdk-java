@@ -61,6 +61,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
@@ -273,6 +274,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws Exception
     {
         if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS) || testInstance.useHttpProxy)

@@ -325,6 +325,7 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES);

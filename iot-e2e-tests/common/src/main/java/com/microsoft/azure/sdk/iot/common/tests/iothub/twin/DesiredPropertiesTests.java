@@ -77,6 +77,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testSubscribeToDesiredArrayPropertiesWithVersion() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -217,6 +218,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testSubscribeToDesiredArrayPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         testSubscribeToDesiredPropertiesSequentiallyFlow(
