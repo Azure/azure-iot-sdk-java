@@ -41,6 +41,9 @@
             <artifactId>${iot-device-client-artifact-id}</artifactId>
             <version>${iot-device-client-version}</version>
             <exclusions>
+                <!--These bouncycastle jars are only needed if you are using the deprecated constructors that take
+                certificates as strings, rather than taking an SSLContext directly. Since this sample does not use
+                those deprecated constructors, these are safe to exclude.-->
                 <exclusion>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcmail-jdk15on</artifactId>
