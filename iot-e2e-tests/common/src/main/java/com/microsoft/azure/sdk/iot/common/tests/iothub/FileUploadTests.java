@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.FlakeyTest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
@@ -47,6 +48,7 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to FileUpload. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@FlakeyTest
 @IotHubTest
 public class FileUploadTests extends IntegrationTest
 {
