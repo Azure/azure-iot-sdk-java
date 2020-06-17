@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -41,15 +42,12 @@ public class SendMessagesTests extends SendMessagesCommon
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, withProxy);
     }
 
+    //TODO this test doesn't seem to check anything that the basic sendMessages test already checks. It just has a different payload. Needs
+    // to check that something actually happened downstream because it was a security message
+    @Ignore
     @Test
     public void sendSecurityMessages() throws Exception
     {
-        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
-        {
-            //mqtt_ws does not support x509 auth currently
-            return;
-        }
-
         this.testInstance.setup();
 
         IotHubServicesCommon.sendSecurityMessages(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, null);
@@ -58,12 +56,6 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void sendMessages() throws Exception
     {
-        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
-        {
-            //mqtt_ws does not support x509 auth currently
-            return;
-        }
-
         this.testInstance.setup();
 
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
@@ -197,12 +189,6 @@ public class SendMessagesTests extends SendMessagesCommon
         if (testInstance.authenticationType != SAS)
         {
             //only testing sas based auth with custom ssl context here
-            return;
-        }
-
-        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
-        {
-            //mqtt_ws does not support x509 auth currently
             return;
         }
 
