@@ -87,6 +87,34 @@ public class ModuleClient extends InternalClient
     }
 
     /**
+     * Constructor for a ModuleClient instance.
+     * @param connectionString The connection string for the edge module to connect to. Must be in format
+     *                         HostName=xxxx;deviceId=xxxx;SharedAccessKey=
+     *                         xxxx;moduleId=xxxx;
+     *
+     *                         or
+     *
+     *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
+     *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
+     * @param protocol The protocol to use when communicating with the module
+     * @param clientOptions The options that allow configuration of the device client instance during initialization
+     * @throws ModuleClientException if an exception is encountered when parsing the connection string
+     * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
+     * the "moduleId" field, or if the connection string uses x509
+     * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
+     * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
+     */
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    {
+        //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
+        super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+
+        //Codes_SRS_MODULECLIENT_34_007: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
+        //Codes_SRS_MODULECLIENT_34_004: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
+        commonConstructorVerifications(protocol, this.config);
+    }
+
+    /**
      * Create a module client instance that uses x509 authentication.
      *
      * <p>Note! Communication from a module to another EdgeHub using x509 authentication is not currently supported and
