@@ -11,7 +11,7 @@ assignees: ''
 
 Thank you for asking a technical question! If your question is "why doesn't my code work?", please see [submit a bug report](https://github.com/Azure/azure-iot-sdk-java/issues/new?assignees=&labels=bug&template=bug-report.md&title=) instead.
 
-For quick and reliable answers on your technical product questions from Microsoft Engineers, Azure Most Valuable Professionals (MVPs), or our expert community, engage with us on [Microsoft Q&A](https://aka.ms/azureqa), Azure’s preferred destination for community support. Please tag your question with "azure-iot-sdk".
+For quick and reliable answers on your technical product questions from Microsoft engineers, Azure Most Valuable Professionals (MVPs), or our expert community, engage with us on [Microsoft Q&A](https://aka.ms/azureqa), Azure’s preferred destination for community support. Please tag your question with "azure-iot-sdk".
 
 For answers on your developer questions from the largest community developer ecosystem, ask your question on Stack Overflow. We actively monitor all questions tagged wtih "azure-iot-sdk".
 
