@@ -141,8 +141,12 @@ jobs:
           COMMIT_FROM: $(COMMIT_FROM)
         condition: always()
 
-      - powershell: ./vsts/android_java.cmd
-        displayName: 'Android Build'
+      - powershell: ./vsts/build_e2e_tests.cmd
+        displayName: 'E2E Tests Build'
+        condition: always()
+
+      - powershell: ./vsts/gradle_build.cmd
+        displayName: 'Gradle Build'
         env:
           IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
           STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
@@ -237,7 +241,7 @@ jobs:
       - task: Bash@3
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
-        timeoutInMinutes: 15
+        timeoutInMinutes: 10
         inputs:
           targetType: 'filePath'
           filePath: '$(Build.SourcesDirectory)/vsts/StartEmulator.sh'
