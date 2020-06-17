@@ -106,11 +106,7 @@ public class ModuleClient extends InternalClient
      */
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
-        //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
-
-        //Codes_SRS_MODULECLIENT_34_007: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
-        //Codes_SRS_MODULECLIENT_34_004: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
         commonConstructorVerifications(protocol, this.config);
     }
 
