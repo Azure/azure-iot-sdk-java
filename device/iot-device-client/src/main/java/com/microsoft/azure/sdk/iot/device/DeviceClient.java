@@ -226,8 +226,14 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param isCertificatePath if the provided publicKeyCertificate is a path to a file containing the PEM formatted public key certificate
      * @param privateKey the PEM formatted private key or the path to a PEM formatted private key file
      * @param isPrivateKeyPath if the provided privateKey is a path to a file containing the PEM formatted private key
+     * @deprecated For x509 authentication, use {@link #DeviceClient(String, IotHubClientProtocol, SSLContext)}. For a
+     * sample on how to build this SSLContext, see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
+     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
+    @Deprecated
     public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws URISyntaxException
     {
         // Codes_SRS_DEVICECLIENT_34_058: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]

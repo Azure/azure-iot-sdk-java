@@ -5,8 +5,10 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +65,7 @@ public class SendEventX509
      * args[1] = number of requests to send
      * args[2] = IoT Hub protocol to use, optional and defaults to MQTT
      */
-    public static void main(String[] args) throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -135,7 +137,8 @@ public class SendEventX509
         System.out.println("Successfully read input parameters.");
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
-        DeviceClient client = new DeviceClient(connectionString, protocol, publicKeyCertificateString, false, privateKeyString, false);
+        SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificateString, privateKeyString);
+        DeviceClient client = new DeviceClient(connectionString, protocol, sslContext);
 
         System.out.println("Successfully created an IoT Hub client.");
 

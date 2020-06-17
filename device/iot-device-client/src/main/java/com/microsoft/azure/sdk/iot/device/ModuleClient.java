@@ -108,7 +108,13 @@ public class ModuleClient extends InternalClient
      * @param isPrivateKeyPath 'false' if the privateKey argument is a path to the PEM, and 'true' if it is the PEM string itself,
      * @throws URISyntaxException If the connString cannot be parsed
      * @throws ModuleClientException if any other exception occurs while building the module client
+     * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, SSLContext)}. For a
+     * sample on how to build this SSLContext, see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
+     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      */
+    @Deprecated
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws ModuleClientException, URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
