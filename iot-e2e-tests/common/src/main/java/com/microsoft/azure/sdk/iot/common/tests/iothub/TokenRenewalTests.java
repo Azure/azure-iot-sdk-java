@@ -19,6 +19,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
@@ -46,6 +47,13 @@ public class TokenRenewalTests extends IntegrationTest
 
     private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
     private static final Integer RETRY_MILLISECONDS = 100;
+
+    private static final int TOKEN_RENEWAL_TEST_TIMEOUT_MILLIS = 17 * 60 * 1000;
+
+    public TokenRenewalTests()
+    {
+        timeout = new Timeout(TOKEN_RENEWAL_TEST_TIMEOUT_MILLIS);
+    }
 
     public static void setup() throws IOException
     {

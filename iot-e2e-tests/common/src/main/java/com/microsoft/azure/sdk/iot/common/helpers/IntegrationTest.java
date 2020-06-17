@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.common.helpers.rules.*;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
+import org.junit.rules.Timeout;
 import org.junit.runner.Description;
 
 /**
@@ -48,6 +49,13 @@ public abstract class IntegrationTest
 
     @Rule
     public FlakeyTestRule flakeyTestRule = new FlakeyTestRule();
+
+    int E2E_TEST_TIMEOUT_MS = 5 * 60 * 1000;
+
+    // Each test must finish in under 5 minutes. Only the token renewal test should last longer,
+    // but that test overrides this value to fit its needs as a very long test.
+    @Rule
+    public Timeout timeout = new Timeout(E2E_TEST_TIMEOUT_MS);
 
     public static boolean isBasicTierHub;
     public static boolean isPullRequest;
