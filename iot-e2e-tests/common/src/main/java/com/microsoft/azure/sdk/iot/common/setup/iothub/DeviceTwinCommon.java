@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
  * Utility functions, setup and teardown for all device twin integration tests. This class should not contain any tests,
  * but any child class should.
  */
-public class DeviceTwinCommon extends IotHubIntegrationTest
+public class DeviceTwinCommon extends IntegrationTest
 {
     // Max time to wait to see it on Hub
     protected static final long PERIODIC_WAIT_TIME_FOR_VERIFICATION = 1000; // 1 sec

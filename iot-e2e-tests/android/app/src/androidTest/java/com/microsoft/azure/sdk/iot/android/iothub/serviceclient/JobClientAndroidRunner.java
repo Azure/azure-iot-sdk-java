@@ -24,6 +24,7 @@ public class JobClientAndroidRunner extends JobClientTests
     public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         JobClientTests.setUp();
     }
 }

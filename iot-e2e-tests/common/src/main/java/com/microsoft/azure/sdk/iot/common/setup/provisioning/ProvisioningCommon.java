@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.common.setup.provisioning;
 
 import com.microsoft.azure.sdk.iot.common.helpers.CorrelationDetailsLoggingAssert;
-import com.microsoft.azure.sdk.iot.common.helpers.ProvisioningIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
 import com.microsoft.azure.sdk.iot.common.helpers.X509CertificateGenerator;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
@@ -48,7 +48,7 @@ import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDevice
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
-public class ProvisioningCommon extends ProvisioningIntegrationTest
+public class ProvisioningCommon extends IntegrationTest
 {
     public enum AttestationType
     {

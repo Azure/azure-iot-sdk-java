@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.android.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup16;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup10;
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothub.twin.TwinTagsTests;
@@ -20,7 +20,7 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.Collection;
 
-@TestGroup16
+@TestGroup10
 @RunWith(Parameterized.class)
 public class TwinTagsAndroidRunner extends TwinTagsTests
 {
@@ -32,7 +32,7 @@ public class TwinTagsAndroidRunner extends TwinTagsTests
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method	
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws IOException
     {

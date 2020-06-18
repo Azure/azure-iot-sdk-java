@@ -44,7 +44,7 @@ import static org.junit.Assert.assertNotNull;
  * Utility functions, setup and teardown for all device method integration tests. This class should not contain any tests,
  * but any children class should.
  */
-public class DeviceMethodCommon extends IotHubIntegrationTest
+public class DeviceMethodCommon extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
 

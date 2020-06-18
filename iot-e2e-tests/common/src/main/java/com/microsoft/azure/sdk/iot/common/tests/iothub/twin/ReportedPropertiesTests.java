@@ -6,9 +6,10 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -32,6 +33,7 @@ import static org.junit.Assert.fail;
  * Test class containing all non error injection tests to be run on JVM and android pertaining to Reported properties. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class ReportedPropertiesTests extends DeviceTwinCommon
 {
     public ReportedPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
@@ -46,21 +48,23 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSendReportedProperties() throws IOException, IotHubException, InterruptedException
     {
         sendReportedPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testSendReportedArrayProperties() throws IOException, IotHubException, InterruptedException
     {
         sendReportedArrayPropertiesAndVerify(MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testSendReportedPropertiesMultiThreaded() throws IOException, IotHubException, InterruptedException
     {
         // arrange
@@ -99,7 +103,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testSendReportedPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -117,7 +121,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testUpdateReportedProperties() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -139,7 +143,8 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testUpdateReportedPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -188,7 +193,8 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void testUpdateReportedPropertiesSequential() throws IOException, InterruptedException, IotHubException
     {
         // arrange

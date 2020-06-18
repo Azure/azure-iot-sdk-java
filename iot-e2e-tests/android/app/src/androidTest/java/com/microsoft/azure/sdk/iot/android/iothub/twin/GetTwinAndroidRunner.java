@@ -39,6 +39,7 @@ public class GetTwinAndroidRunner extends GetTwinTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return inputsCommon();
     }
 }

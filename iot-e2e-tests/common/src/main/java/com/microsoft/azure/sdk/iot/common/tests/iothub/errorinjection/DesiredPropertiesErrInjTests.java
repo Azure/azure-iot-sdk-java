@@ -7,6 +7,9 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.errorinjection;
 
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -28,6 +31,7 @@ import static org.junit.Assert.assertEquals;
  * Test class containing all error injection tests to be run on JVM and android pertaining to DesiredProperties. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
 {
     private JsonParser jsonParser = new JsonParser();
@@ -39,7 +43,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void subscribeToDesiredPropertiesRecoveredFromTcpConnectionDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromTcpConnectionDropFlow(
@@ -52,7 +56,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromTcpConnectionDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromTcpConnectionDropFlow(
@@ -84,7 +89,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsConnectionDropFlow(
@@ -96,7 +101,7 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsConnectionDropFlow(
@@ -133,7 +138,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsSessionDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsSessionDropFlow(
@@ -145,7 +151,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromAmqpsSessionDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsSessionDropFlow(
@@ -182,7 +189,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSReqLinkrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsCBSReqLinkropFlow(
@@ -194,7 +202,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSReqLinkropFlow() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsCBSReqLinkropFlow(
@@ -237,7 +246,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsCBSRespLinkDropFlow(
@@ -249,7 +259,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsCBSRespLinkDropFlow(
@@ -292,7 +303,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsD2CDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsD2CDropFlow(
@@ -304,7 +316,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromAmqpsD2CDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsD2CDropFlow(
@@ -342,7 +355,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromC2DDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromC2DDropFlow(
@@ -354,7 +368,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromC2DDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromC2DDropFlow(
@@ -398,7 +413,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsTwinReqLinkDropFlow(
@@ -410,7 +426,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsTwinReqLinkDropFlow(
@@ -454,7 +471,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredPropertiesRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsTwinRespLinkDropFlow(
@@ -466,7 +484,8 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void subscribeToDesiredArrayPropertiesRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
         subscribeToDesiredPropertiesRecoveredFromAmqpsTwinRespLinkDropFlow(

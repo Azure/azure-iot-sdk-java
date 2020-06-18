@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.common.tests.provisioning;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.DeviceProvisioningServiceTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.provisioning.ProvisioningCommon;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -44,6 +47,7 @@ import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDevice
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
+@DeviceProvisioningServiceTest
 public class ProvisioningTests extends ProvisioningCommon
 {
     public ProvisioningTests(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
@@ -52,6 +56,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
@@ -88,13 +93,14 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void groupEnrollmentReprovisioningCanKeepTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -108,7 +114,8 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void groupEnrollmentReprovisioningCanResetTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -119,6 +126,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void groupEnrollmentCanBlockReprovisioning() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -134,7 +142,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void individualEnrollmentReprovisioningCanKeepTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -145,7 +153,8 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void individualEnrollmentReprovisioningCanResetTwin() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
@@ -156,6 +165,7 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void individualEnrollmentCanBlockReprovisioning() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();

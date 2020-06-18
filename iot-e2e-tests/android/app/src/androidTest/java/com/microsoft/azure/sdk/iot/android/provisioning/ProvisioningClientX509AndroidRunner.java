@@ -42,6 +42,7 @@ public class ProvisioningClientX509AndroidRunner extends ProvisioningTests
         provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
         farAwayIotHubConnectionString = BuildConfig.FarAwayIotHubConnectionString;
         customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
 
         return ProvisioningCommon.inputs(AttestationType.X509); //tpm tests can't be run on Android until infrastructure is setup
     }

@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.methods;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceMethodCommon;
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -32,6 +35,7 @@ import static org.junit.Assert.assertNotNull;
  * Test class containing all non error injection tests to be run on JVM and android pertaining to Device methods. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class DeviceMethodTests extends DeviceMethodCommon
 {
     public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
@@ -46,14 +50,15 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void invokeMethodSucceed() throws Exception
     {
         super.invokeMethodSucceed();
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
         // Arrange
@@ -87,7 +92,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodStandardTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -114,7 +120,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodNullPayloadSucceed() throws Exception
     {
         // Arrange
@@ -140,7 +147,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodNumberSucceed() throws Exception
     {
         // Arrange
@@ -166,7 +174,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodThrowsNumberFormatExceptionFailed() throws Exception
     {
         // Arrange
@@ -192,7 +201,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void invokeMethodUnknownFailed() throws Exception
     {
         // Arrange
@@ -218,7 +227,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoverFromTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -261,7 +271,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodDefaultResponseTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -287,7 +298,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodDefaultConnectionTimeoutSucceed() throws Exception
     {
         // Arrange
@@ -313,7 +325,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test (expected = IotHubGatewayTimeoutException.class)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodResponseTimeoutFailed() throws Exception
     {
         // Arrange
@@ -329,7 +342,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test(expected = IotHubNotFoundException.class)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodUnknownDeviceFailed() throws Exception
     {
         if (testInstance.identity instanceof Module)
@@ -343,7 +357,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodResetDeviceFailed() throws Exception
     {
         // Arrange
@@ -381,7 +396,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodOnOfflineDevice() throws Exception
     {
         if (testInstance.protocol != IotHubClientProtocol.HTTPS || testInstance.authenticationType != AuthenticationType.SAS)
@@ -416,7 +432,8 @@ public class DeviceMethodTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodOnUnregisteredDevice() throws Exception
     {
         if (testInstance.authenticationType != AuthenticationType.SAS)
