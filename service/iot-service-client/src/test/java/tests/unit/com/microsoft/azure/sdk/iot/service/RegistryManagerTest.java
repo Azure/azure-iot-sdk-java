@@ -945,7 +945,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlDevice(deviceId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -999,7 +999,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlDevice(deviceId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1048,7 +1048,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlDevice(deviceId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1888,7 +1888,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlModule(deviceId, moduleId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2010,7 +2010,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlModule(deviceId, moduleId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2333,7 +2333,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlConfiguration(configId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2364,7 +2364,7 @@ public class RegistryManagerTest
             {
                 iotHubConnectionString.getUrlConfiguration(configId);
                 times = 1;
-                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0]);
+                new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2439,6 +2439,53 @@ public class RegistryManagerTest
                 mockIotHubExceptionManager.httpResponseVerification(mockHttpResponse);
                 times = 1;
 
+            }
+        };
+    }
+
+    @Test
+    public void getDevicesWithCustomHttpTimeouts(@Mocked final IotHubConnectionString mockIotHubConnectionString,
+                                                    @Mocked final DeviceParser mockDeviceParser,
+                                                    @Mocked final Device mockDevice) throws IOException, IotHubException
+    {
+        // arrange
+        final int expectedHttpConnectTimeout = 1234;
+        final int expectedHttpReadTimeout = 5678;
+        final String mockDeviceId = "someDeviceToGet";
+
+        RegistryManagerOptions options = RegistryManagerOptions.builder()
+                .httpConnectTimeout(expectedHttpConnectTimeout)
+                .httpReadTimeout(expectedHttpReadTimeout)
+                .build();
+
+        String mockConnectionString = "someValidConnectionString";
+
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getUrlDevice(mockDeviceId);
+                result = mockUrl;
+                new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
+                result = mockHttpRequest;
+                new DeviceParser(anyString);
+                result = mockDeviceParser;
+                Deencapsulation.newInstance(Device.class, mockDeviceParser);
+                result = mockDevice;
+            }
+        };
+
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(mockConnectionString, options);
+        Deencapsulation.setField(registryManager, "iotHubConnectionString", mockIotHubConnectionString);
+
+        // act
+        registryManager.getDevice(mockDeviceId);
+
+        // assert
+        new Verifications()
+        {
+            {
+                mockHttpRequest.setConnectTimeoutMillis(expectedHttpConnectTimeout);
+                mockHttpRequest.setReadTimeoutMillis(expectedHttpReadTimeout);
             }
         };
     }

@@ -615,4 +615,31 @@ public class HttpsRequestTest
             }
         };
     }
+
+    @Test
+    public void setConnectTimeoutSetsConnectTimeout(@Mocked final HttpConnection mockConn, final @Mocked URL mockUrl) throws IOException
+    {
+        // Arrange
+        final HttpMethod httpsMethod = HttpMethod.POST;
+        final byte[] body = new byte[0];
+        final int readTimeout = 1;
+        final int expectedReadTimeout = readTimeout;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "http";
+            }
+        };
+        HttpRequest request = new HttpRequest(mockUrl, httpsMethod, body);
+        // Act
+        request.setConnectTimeoutMillis(readTimeout);
+        // Assert
+        new Verifications()
+        {
+            {
+                mockConn.setConnectTimeoutMillis(expectedReadTimeout);
+            }
+        };
+    }
 }
