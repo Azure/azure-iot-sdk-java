@@ -589,7 +589,7 @@ public class RegistryManager
         String sasToken = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_049: [The function shall create a new HttpRequest for removing the device from IotHub]
-        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], sasToken); //TODO
+        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], sasToken);
         request.setHeaderField("If-Match", etag);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_050: [The function shall send the created request and get the response]
