@@ -7,8 +7,10 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceEmulator;
 import com.microsoft.azure.sdk.iot.common.helpers.DeviceTestManager;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -36,7 +38,8 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to method and twin jobs. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class JobClientTests extends IotHubIntegrationTest
+@IotHubTest
+public class JobClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     public static boolean isBasicTierHub;
@@ -358,6 +361,7 @@ public class JobClientTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=TEST_TIMEOUT_MS)
+    @ContinuousIntegrationTest
     public void mixScheduleInFutureSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange
@@ -480,6 +484,7 @@ public class JobClientTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=TEST_TIMEOUT_MS)
+    @ContinuousIntegrationTest
     public void cancelScheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
         // Arrange

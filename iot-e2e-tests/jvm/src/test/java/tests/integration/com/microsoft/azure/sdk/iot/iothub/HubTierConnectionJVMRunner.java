@@ -37,6 +37,7 @@ public class HubTierConnectionJVMRunner extends HubTierConnectionTests
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         Collection inputs = inputsCommon();
         identities = getIdentities(inputs);
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST, "false"));
         return inputs;
     }
 

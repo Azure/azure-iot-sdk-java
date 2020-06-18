@@ -5,7 +5,8 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
@@ -18,7 +19,8 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.Assert.assertTrue;
 
 /** Integration tests for HttpsBatchMessage. */
-public class HttpsBatchMessageJVMRunner extends IotHubIntegrationTest
+@IotHubTest
+public class HttpsBatchMessageJVMRunner extends IntegrationTest
 {
     protected Charset UTF8 = StandardCharsets.UTF_8;
 

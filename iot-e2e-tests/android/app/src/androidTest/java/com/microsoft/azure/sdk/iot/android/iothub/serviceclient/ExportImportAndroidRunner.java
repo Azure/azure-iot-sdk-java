@@ -26,6 +26,7 @@ public class ExportImportAndroidRunner extends ExportImportTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         storageAccountConnectionString = BuildConfig.StorageAccountConnectionString;
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         ExportImportTests.setUp();
     }
 }

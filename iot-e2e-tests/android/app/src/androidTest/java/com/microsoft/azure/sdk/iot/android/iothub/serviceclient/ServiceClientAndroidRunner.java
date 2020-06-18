@@ -26,6 +26,7 @@ public class ServiceClientAndroidRunner extends ServiceClientTests
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         invalidCertificateServerConnectionString = BuildConfig.IotHubInvalidCertConnectionString;
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return ServiceClientTests.inputsCommon();
     }
 

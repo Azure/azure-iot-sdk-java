@@ -6,8 +6,8 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.common.helpers.ClientType;
-import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceTwinCommon;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -24,6 +24,7 @@ import java.security.GeneralSecurityException;
  * Test class containing all non error injection tests to be run on JVM and android pertaining to getDeviceTwin/getTwin. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class GetTwinTests extends DeviceTwinCommon
 {
     public GetTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
@@ -38,7 +39,7 @@ public class GetTwinTests extends DeviceTwinCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         super.testGetDeviceTwin();

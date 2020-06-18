@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.telemetry;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.BasicTierHubOnlyTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -35,6 +38,7 @@ import static junit.framework.TestCase.fail;
  * Test class containing all non error injection tests to be run on JVM and android pertaining to sending messages from a device/module. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class SendMessagesTests extends SendMessagesCommon
 {
     public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
@@ -62,6 +66,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendLargestMessages() throws Exception
     {
         this.testInstance.setup();
@@ -78,6 +83,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesWithUnusualApplicationProperties() throws Exception
     {
         this.testInstance.setup();
@@ -92,6 +98,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, IOException, IotHubException
     {
         if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS && testInstance.clientType.equals(ClientType.DEVICE_CLIENT)))
@@ -145,6 +152,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void tokenExpiredAfterOpenButBeforeSendHttp() throws Exception
     {
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
@@ -170,6 +178,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void expiredMessagesAreNotSent() throws Exception
     {
         if (testInstance.useHttpProxy)

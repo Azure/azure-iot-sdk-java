@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.errorinjection;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.DeviceMethodCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -25,6 +28,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  * Test class containing all error injection tests to be run on JVM and android pertaining to Device methods. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class DeviceMethodErrInjTests extends DeviceMethodCommon
 {
     public DeviceMethodErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
@@ -33,7 +37,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void invokeMethodRecoveredFromTcpConnectionDrop() throws Exception
     {
         super.cleanToStart();
@@ -43,7 +47,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -58,7 +63,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -73,7 +79,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -94,7 +101,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -115,7 +123,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -130,7 +139,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -152,7 +162,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -174,7 +185,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -196,7 +208,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void invokeMethodRecoveredFromGracefulShutdownAmqp() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
@@ -211,7 +223,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void invokeMethodRecoveredFromGracefulShutdownMqtt() throws Exception
     {
         if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))

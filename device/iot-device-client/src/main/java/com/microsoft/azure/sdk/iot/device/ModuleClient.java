@@ -87,6 +87,30 @@ public class ModuleClient extends InternalClient
     }
 
     /**
+     * Constructor for a ModuleClient instance.
+     * @param connectionString The connection string for the edge module to connect to. Must be in format
+     *                         HostName=xxxx;deviceId=xxxx;SharedAccessKey=
+     *                         xxxx;moduleId=xxxx;
+     *
+     *                         or
+     *
+     *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
+     *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
+     * @param protocol The protocol to use when communicating with the module
+     * @param clientOptions The options that allow configuration of the module client instance during initialization
+     * @throws ModuleClientException if an exception is encountered when parsing the connection string
+     * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
+     * the "moduleId" field, or if the connection string uses x509
+     * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
+     * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
+     */
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    {
+        super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+        commonConstructorVerifications(protocol, this.config);
+    }
+
+    /**
      * Create a module client instance that uses x509 authentication.
      *
      * <p>Note! Communication from a module to another EdgeHub using x509 authentication is not currently supported and

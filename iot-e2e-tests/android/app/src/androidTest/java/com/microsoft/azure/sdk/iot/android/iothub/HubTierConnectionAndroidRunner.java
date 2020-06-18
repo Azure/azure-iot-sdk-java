@@ -43,6 +43,7 @@ public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         Collection inputs = inputsCommon();
         identities = getIdentities(inputs);
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return inputs;
     }
 

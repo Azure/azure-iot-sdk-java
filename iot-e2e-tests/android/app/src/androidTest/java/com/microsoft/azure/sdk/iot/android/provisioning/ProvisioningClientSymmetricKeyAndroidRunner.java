@@ -42,6 +42,7 @@ public class ProvisioningClientSymmetricKeyAndroidRunner extends ProvisioningTes
         provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
         farAwayIotHubConnectionString = BuildConfig.FarAwayIotHubConnectionString;
         customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
 
         return ProvisioningCommon.inputs(AttestationType.SYMMETRIC_KEY);
     }

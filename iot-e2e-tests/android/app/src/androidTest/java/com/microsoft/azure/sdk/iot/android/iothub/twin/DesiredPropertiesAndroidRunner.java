@@ -33,7 +33,7 @@ public class DesiredPropertiesAndroidRunner extends DesiredPropertiesTests
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
+    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method	
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputsCommons() throws IOException, GeneralSecurityException
     {
