@@ -42,7 +42,7 @@ public class HttpsIotHubConnectionTest
     @Mocked
     HttpsSingleMessage mockMsg;
     @Mocked
-    Message mockedMessage;
+    IotHubTransportMessage mockedMessage;
     @Mocked
     HttpsRequest mockRequest;
     @Mocked

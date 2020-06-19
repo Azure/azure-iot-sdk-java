@@ -3,10 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
+import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
@@ -104,6 +109,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     private TransportClient transportClient;
 
     private FileUpload fileUpload;
+    private FileUploadTask fileUploadTask;
 
     /**
      * Constructor that takes a connection string and a transport client as an argument.
@@ -172,14 +178,32 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException, IllegalArgumentException
     {
-        // Codes_SRS_DEVICECLIENT_21_001: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
-        super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        this(connString, protocol, (ClientOptions) null);
+    }
 
-        // Codes_SRS_DEVICECLIENT_34_075: [If the provided connection string contains a module id field, this function shall throw an UnsupportedOperationException.]
+    /**
+     * Constructor that takes a connection string as an argument.
+     *
+     * @param connString the connection string. The connection string is a set
+     * of key-value pairs that are separated by ';', with the keys and values
+     * separated by '='. It should contain values for the following keys:
+     * {@code HostName}, {@code DeviceId}, and {@code SharedAccessKey}.
+     * @param protocol the communication protocol used (i.e. HTTPS)
+     * @param clientOptions The options that allow configuration of the device client instance during initialization
+     *
+     * @throws IllegalArgumentException if any of {@code connString} or
+     * {@code protocol} are {@code null}; or if {@code connString} is missing
+     * one of the following attributes:{@code HostName}, {@code DeviceId}, or
+     * {@code SharedAccessKey} or if the IoT hub hostname does not conform to
+     * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     */
+    public DeviceClient(String connString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IllegalArgumentException
+    {
+        super(new IotHubConnectionString(connString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
+
         commonConstructorVerifications();
 
-        // Codes_SRS_DEVICECLIENT_12_012: [The constructor shall set the connection type to SINGLE_CLIENT.]
-        // Codes_SRS_DEVICECLIENT_12_015: [The constructor shall set the transportClient to null.]
         commonConstructorSetup();
     }
 
@@ -202,8 +226,15 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param isCertificatePath if the provided publicKeyCertificate is a path to a file containing the PEM formatted public key certificate
      * @param privateKey the PEM formatted private key or the path to a PEM formatted private key file
      * @param isPrivateKeyPath if the provided privateKey is a path to a file containing the PEM formatted private key
+     * @deprecated For x509 authentication, use {@link #DeviceClient(String, IotHubClientProtocol, ClientOptions)} and provide
+     * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
+     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
+    @Deprecated
     public DeviceClient(String connString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws URISyntaxException
     {
         // Codes_SRS_DEVICECLIENT_34_058: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
@@ -226,7 +257,15 @@ public final class DeviceClient extends InternalClient implements Closeable
      *                   SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
      *                   does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     * @deprecated For x509 authentication, use {@link #DeviceClient(String, IotHubClientProtocol, ClientOptions)} and provide
+     * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
+     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      */
+    @Deprecated
     public DeviceClient(String connString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
         super(new IotHubConnectionString(connString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
@@ -237,7 +276,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of the iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
@@ -247,7 +286,24 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public static DeviceClient createFromSecurityProvider(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException
     {
-        return new DeviceClient(uri, deviceId, securityProvider, protocol);
+        return new DeviceClient(uri, deviceId, securityProvider, protocol, null);
+    }
+
+    /**
+     * Creates a device client that uses the provided security provider for authentication.
+     *
+     * @param uri The hostname of the iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param deviceId The id for the device to use
+     * @param securityProvider The security provider for the device
+     * @param protocol The protocol the device shall use for communication to the IoT Hub
+     * @param clientOptions The options that allow configuration of the device client instance during initialization
+     * @return The created device client instance
+     * @throws URISyntaxException If the provided connString could not be parsed.
+     * @throws IOException If the SecurityProvider throws any exception while authenticating
+     */
+    public static DeviceClient createFromSecurityProvider(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
+    {
+        return new DeviceClient(uri, deviceId, securityProvider, protocol, clientOptions);
     }
 
     /**
@@ -272,16 +328,16 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Creates a device client that uses the provided security provider for authentication.
      *
-     * @param uri The connection string for iot hub to connect to (format: "yourHubName.azure-devices.net")
+     * @param uri The hostname of iot hub to connect to (format: "yourHubName.azure-devices.net")
      * @param deviceId The id for the device to use
      * @param securityProvider The security provider for the device
      * @param protocol The protocol the device shall use for communication to the IoT Hub
      * @throws URISyntaxException If the provided connString could not be parsed.
      * @throws IOException If the SecurityProvider throws any exception while authenticating
      */
-    private DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws URISyntaxException, IOException
+    private DeviceClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws URISyntaxException, IOException
     {
-        super(uri, deviceId, securityProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        super(uri, deviceId, securityProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorSetup();
     }
 
@@ -290,6 +346,11 @@ public final class DeviceClient extends InternalClient implements Closeable
         if (this.fileUpload != null)
         {
             this.fileUpload.closeNow();
+        }
+
+        if (this.fileUploadTask != null)
+        {
+            this.fileUploadTask.close();
         }
     }
 
@@ -424,7 +485,11 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @throws IllegalArgumentException if the provided blob name, or the file path is {@code null},
      *          empty or not valid, or if the callback is {@code null}.
      * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
+     * @deprecated Use {@link #getFileUploadSasUri(FileUploadSasUriRequest)} to get the SAS URI, use the azure storage SDK to upload a file
+     * to that SAS URI, and then use {@link #completeFileUploadAsync(FileUploadCompletionNotification)} to notify Iot Hub that
+     * your file upload has completed, successfully or otherwise. This method does all three of these tasks for you, but has limited configuration options.
      */
+    @Deprecated
     public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
                                   IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException
     {
@@ -443,14 +508,44 @@ public final class DeviceClient extends InternalClient implements Closeable
             throw new IllegalArgumentException("Invalid stream size.");
         }
 
-        ParserUtility.validateBlobName(destinationBlobName);
-
         if (this.fileUpload == null)
         {
             this.fileUpload = new FileUpload(this.config);
         }
 
         this.fileUpload.uploadToBlobAsync(destinationBlobName, inputStream, streamLength, callback, callbackContext);
+    }
+
+    /**
+     * Get a file upload SAS URI which the Azure Storage SDK can use to upload a file to blob for this device. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#initialize-a-file-upload">this documentation</a> for more details.
+     * @param request The request details for getting the SAS URI, including the destination blob name.
+     * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
+     * @throws IOException If this HTTPS request fails to send.
+     * @throws URISyntaxException If the returned sas uri cannot be constructed correctly
+     */
+    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException, URISyntaxException
+    {
+        if (this.fileUploadTask == null)
+        {
+            this.fileUploadTask = new FileUploadTask(new HttpsTransportManager(this.config));
+        }
+
+        return fileUploadTask.getFileUploadSasUri(request);
+    }
+
+    /**
+     * Notify IoT Hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
+     * @param notification The notification details, including if the file upload succeeded.
+     * @throws IOException If this HTTPS request fails to send.
+     */
+    public void completeFileUploadAsync(FileUploadCompletionNotification notification) throws IOException
+    {
+        if (this.fileUploadTask == null)
+        {
+            this.fileUploadTask = new FileUploadTask(new HttpsTransportManager(this.config));
+        }
+
+        fileUploadTask.sendNotification(notification);
     }
 
     /**

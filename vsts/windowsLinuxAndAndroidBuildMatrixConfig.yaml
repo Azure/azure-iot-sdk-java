@@ -1,6 +1,6 @@
-  name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
-  jobs:
+jobs:
   ### Windows ###
   - job: Windows
     timeoutInMinutes: 180
@@ -9,59 +9,59 @@
     displayName: Windows
     condition: succeeded()
     steps:
-    - powershell: ./vsts/echo_versions.ps1
-      displayName: 'Echo Versions'
-      env:
-        COMMIT_FROM: $(COMMIT_FROM)
-      condition: always()
-      
-    - powershell: ./vsts/start_tpm_windows.ps1
-      displayName: 'Start TPM Simulator'
-      env:
-        COMMIT_FROM: $(COMMIT_FROM)
-      condition: always()
-      
-    - powershell: ./vsts/build_repo.ps1
-      displayName: 'Build and Test'
-      env:
-        IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(WINDOWS-IOT-DPS-ID-SCOPE)
-        IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
-        FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
-        IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
-        EVENT_HUB_CONNECTION_STRING: $(WINDOWS-EVENT-HUB-CONNECTION-STRING)
-        TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-      condition: always()
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+        condition: always()
 
-    - task: CopyFiles@2
-      displayName: 'Copy Test Results to Artifact Staging Directory'
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)'
-        Contents: |
-        **/*.trx
-        **/*.xml
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      continueOnError: true
-      condition: always()
+      - powershell: ./vsts/start_tpm_windows.ps1
+        displayName: 'Start TPM Simulator'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+        condition: always()
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact Staging Directory'
-      continueOnError: true
-      condition: always()
+      - powershell: ./vsts/build_repo.ps1
+        displayName: 'Build and Test'
+        env:
+          IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
+          IOT_DPS_ID_SCOPE: $(WINDOWS-IOT-DPS-ID-SCOPE)
+          IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
+          STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+          IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+          IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+          DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+          PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+          CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+          FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+          IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          EVENT_HUB_CONNECTION_STRING: $(WINDOWS-EVENT-HUB-CONNECTION-STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+        condition: always()
 
-    - task: PublishTestResults@2
-      displayName: 'Publish Test Results'
-      inputs:
-        mergeTestResults: true
-      continueOnError: true
-      condition: always()
-      
+      - task: CopyFiles@2
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/*.trx
+            **/*.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        inputs:
+          mergeTestResults: true
+        continueOnError: true
+        condition: always()
+
   ### Linux ###
   - job: Linux
     timeoutInMinutes: 180
@@ -70,117 +70,121 @@
     displayName: Linux
     condition: succeeded()
     steps:
-    - powershell: ./vsts/echo_versions.ps1
-      displayName: 'Echo Versions'
-      env:
-        COMMIT_FROM: $(COMMIT_FROM)
-      condition: always()
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+        condition: always()
 
-    - task: Docker@1
-      displayName: 'Start TPM Simulator'
-      inputs:
-        containerregistrytype: 'Container Registry'
-        command: 'Run an image'
-        imageName: aziotbld/testtpm
-        containerName: 'testtpm-instance'
-        ports: |
-        127.0.0.1:2321:2321
-        127.0.0.1:2322:2322
-        restartPolicy: unlessStopped      
-        
-    - powershell: ./vsts/build_repo.ps1
-      displayName: 'Build and Test'
-      env:
-        IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
-        IOT_DPS_ID_SCOPE: $(LINUX-IOT-DPS-ID-SCOPE)
-        IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
-        CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
-        FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
-        IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
-        EVENT_HUB_CONNECTION_STRING: $(LINUX-EVENT-HUB-CONNECTION-STRING)
-        TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-      condition: always()
+      - task: Docker@1
+        displayName: 'Start TPM Simulator'
+        inputs:
+          containerregistrytype: 'Container Registry'
+          command: 'Run an image'
+          imageName: aziotbld/testtpm
+          containerName: 'testtpm-instance'
+          ports: |
+            127.0.0.1:2321:2321
+            127.0.0.1:2322:2322
+          restartPolicy: unlessStopped
 
-    - task: CopyFiles@2
-      displayName: 'Copy Test Results to Artifact Staging Directory'
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)'
-        Contents: |
-        **/*.trx
-        **/*.xml
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      continueOnError: true
-      condition: always()
+      - powershell: ./vsts/build_repo.ps1
+        displayName: 'Build and Test'
+        env:
+          IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
+          IOT_DPS_ID_SCOPE: $(LINUX-IOT-DPS-ID-SCOPE)
+          IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
+          STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+          IOTHUB_DEVICE_CONN_STRING_INVALIDCERT: $(IOTHUB-DEVICE-CONN-STRING-INVALIDCERT)
+          IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+          DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+          PROVISIONING_CONNECTION_STRING_INVALIDCERT: $(PROVISIONING-CONNECTION-STRING-INVALIDCERT)
+          CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+          FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+          IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          EVENT_HUB_CONNECTION_STRING: $(LINUX-EVENT-HUB-CONNECTION-STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+        condition: always()
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact Staging Directory'
-      continueOnError: true
-      condition: always()
+      - task: CopyFiles@2
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/*.trx
+            **/*.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+        condition: always()
 
-    - task: PublishTestResults@2
-      displayName: 'Publish Test Results'
-      inputs:
-        mergeTestResults: true
-      continueOnError: true
-      condition: always()  
-      
-  ### IoTHub and Provisioning Android E2E Tests, Multi configuration build (12 different test groups to cover) ###
-  - job: AndroidBuildIoTHubProvisioning
-    timeoutInMinutes: 45
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        inputs:
+          mergeTestResults: true
+        continueOnError: true
+        condition: always()
+
+  ### Android, Multi configuration build (12 different test groups to cover) ###
+  - job: AndroidBuild
+    timeoutInMinutes: 15
     pool:
       name: Hosted VS2017
-    displayName: Android Build - IoTHub and Provisioning
+    displayName: Android Build
 
     steps:
-    - powershell: ./vsts/echo_versions.ps1
-      displayName: 'Echo Versions'
-      env:
-        COMMIT_FROM: $(COMMIT_FROM)
-      condition: always()
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+        condition: always()
 
-    - powershell: ./vsts/android_iothub_provisioning.cmd
-      displayName: 'Android Build - IoTHub and Provisioning'
-      env:
-        IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
-        STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
-        IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        APPCENTER_APP_SECRET: $(APPCENTER-APP-SECRET)
-        DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
-        IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
-        INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
-        INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
-        CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
-        FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
-        IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
-        EVENT_HUB_CONNECTION_STRING: $(ANDROID-EVENT-HUB-CONNECTION-STRING) 
-      condition: always()
-        
-    - task: CopyFiles@2
-      displayName: 'Copy Test Results to Artifact Staging Directory'
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk'
-        Contents: |
-        *.*
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      continueOnError: true
-      condition: always()
-      
-    - task: PublishPipelineArtifact@0
-      inputs:
-        artifactName: 'androidBuildFilesIoTHubProvisioning'
-        targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
-      
-  - job: AndroidTestIoTHubProvisioning
-    timeoutInMinutes: 180
+      - powershell: ./vsts/build_e2e_tests.cmd
+        displayName: 'E2E Tests Build'
+        condition: always()
+
+      - powershell: ./vsts/gradle_build.cmd
+        displayName: 'Gradle Build'
+        env:
+          IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+          STORAGE_ACCOUNT_CONNECTION_STRING: $(STORAGE-ACCOUNT-CONNECTION-STRING)
+          IOTHUB_CONN_STRING_INVALIDCERT: $(IOTHUB-CONN-STRING-INVALIDCERT)
+          DEVICE_PROVISIONING_SERVICE_ID_SCOPE: $(ANDROID-IOT-DPS-ID-SCOPE)
+          IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+          INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT: $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+          INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING: $(IOTHUB-CONN-STRING-INVALIDCERT)
+          CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
+          FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
+          IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          EVENT_HUB_CONNECTION_STRING: $(ANDROID-EVENT-HUB-CONNECTION-STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+        condition: always()
+
+      - task: CopyFiles@2
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk'
+          Contents: |
+            *.*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishPipelineArtifact@0
+        inputs:
+          artifactName: 'androidBuildFiles'
+          targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
+
+  - job: AndroidTest
+    timeoutInMinutes: 80
     pool:
       vmImage: 'macOS-latest'
     strategy:
-      maxParallel: 12
+      maxParallel: 17
       matrix:
         TestGroup1:
           ANDROID_TEST_GROUP_ID: TestGroup1
@@ -216,157 +220,41 @@
           ANDROID_TEST_GROUP_ID: TestGroup16
         TestGroup17:
           ANDROID_TEST_GROUP_ID: TestGroup17
-        TestGroup18:
-          ANDROID_TEST_GROUP_ID: TestGroup18
-        TestGroup19:
-          ANDROID_TEST_GROUP_ID: TestGroup19
-        TestGroup20:
-          ANDROID_TEST_GROUP_ID: TestGroup20
-        TestGroup21:
-          ANDROID_TEST_GROUP_ID: TestGroup21
-        TestGroup22:
-          ANDROID_TEST_GROUP_ID: TestGroup22
-        TestGroup23:
-          ANDROID_TEST_GROUP_ID: TestGroup23
-        TestGroup24:
-          ANDROID_TEST_GROUP_ID: TestGroup24
-        TestGroup25:
-          ANDROID_TEST_GROUP_ID: TestGroup25
-        TestGroup26:
-          ANDROID_TEST_GROUP_ID: TestGroup26
-        TestGroup27:
-          ANDROID_TEST_GROUP_ID: TestGroup27
-        TestGroup28:
-          ANDROID_TEST_GROUP_ID: TestGroup28
-        TestGroup29:
-          ANDROID_TEST_GROUP_ID: TestGroup29
-        TestGroup30:
-          ANDROID_TEST_GROUP_ID: TestGroup30
-        TestGroup31:
-          ANDROID_TEST_GROUP_ID: TestGroup31
-        TestGroup32:
-          ANDROID_TEST_GROUP_ID: TestGroup32
-        TestGroup33:
-          ANDROID_TEST_GROUP_ID: TestGroup33
-        TestGroup34:
-          ANDROID_TEST_GROUP_ID: TestGroup34
-        TestGroup35:
-          ANDROID_TEST_GROUP_ID: TestGroup35
-        TestGroup36:
-          ANDROID_TEST_GROUP_ID: TestGroup36
-        TestGroup37:
-          ANDROID_TEST_GROUP_ID: TestGroup37
-        TestGroup38:
-          ANDROID_TEST_GROUP_ID: TestGroup38
-        TestGroup39:
-          ANDROID_TEST_GROUP_ID: TestGroup39
 
-    displayName: Android Test - IoTHub and Provisioning
-    dependsOn: AndroidBuildIoTHubProvisioning
+    displayName: Android Test
+    dependsOn: AndroidBuild
     steps:
-    - task: PowerShell@2
-      displayName: 'determine if testing needed'
-      condition: always()
-      inputs:
-        targetType: 'filePath'
-        filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
-      env:
-        TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
-        TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+      - task: PowerShell@2
+        displayName: 'determine if testing needed'
+        condition: always()
+        inputs:
+          targetType: 'filePath'
+          filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
+        env:
+          TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+          IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
-    - task: PowerShell@2
-      displayName: 'Install app center cli'
-      condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
-      inputs:
-        targetType: 'filePath'
-        filePath: './vsts/install_appcenter_cli.ps1'
+      - task: DownloadPipelineArtifact@0
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        inputs:
+          artifactName: 'androidBuildFiles'
+          targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk
 
-    - task: DownloadPipelineArtifact@0
-      condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
-      inputs:
-        artifactName: 'androidBuildFilesIoTHubProvisioning'
-        targetPath: $(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk
-    
-    - task: AppCenterTest@1
-      condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
-      displayName: 'E2E with Visual Studio App Center'
-      inputs:
-        appFile: '$(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk/debug/app-debug.apk'
-        frameworkOption: espresso
-        espressoBuildDirectory: '$(Build.ArtifactStagingDirectory)/iot-e2e-tests/android/app/build/outputs/apk/androidTest/debug'
-        serverEndpoint: 'AppCenter connection aziotclb'
-        appSlug: 'Azure-Iot-Sdk/androide2e'
-        devices: 'Azure-Iot-Sdk/api28_2'
-        runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.android.helper.$(ANDROID_TEST_GROUP_ID)'
-        showDebugOutput: true
+      - task: Bash@3
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        displayName: 'Start Android Emulator'
+        timeoutInMinutes: 10
+        inputs:
+          targetType: 'filePath'
+          filePath: '$(Build.SourcesDirectory)/vsts/StartEmulator.sh'
 
-  ### Digital Twin Android E2E Tests ###
-  - job: AndroidBuildDigitalTwin
-    timeoutInMinutes: 45
-    pool:
-      name: Hosted VS2017
-    displayName: Android Build - Digital Twin
-
-    steps:
-    - powershell: ./vsts/echo_versions.ps1
-      displayName: 'Echo Versions'
-      env:
-        COMMIT_FROM: $(COMMIT_FROM)
-      condition: always()
-
-    - powershell: ./vsts/android_digitaltwin.cmd
-      displayName: 'Android Build - Digital Twin'
-      env:
-        APPCENTER_DIGITAL_TWIN_APP_SECRET: $(APPCENTER-DIGITAL-TWIN-APP-SECRET)
-        IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
-        EVENT_HUB_CONNECTION_STRING: $(ANDROID-EVENT-HUB-CONNECTION-STRING)
-      condition: always()
-
-    - task: CopyFiles@2
-      displayName: 'Copy Test Results to Artifact Staging Directory'
-      inputs:
-        SourceFolder: '$(Build.SourcesDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk'
-        Contents: |
-        *.*
-        TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      continueOnError: true
-      condition: always()
-
-    - task: PublishPipelineArtifact@0
-      inputs:
-        artifactName: 'androidBuildFilesDigitalTwin'
-        targetPath: 'digital-twin/e2e-tests/android/apk/build/outputs/apk'
-
-  #- job: AndroidTestDigitalTwin
-  #  timeoutInMinutes: 180
-  #  pool:
-  #    vmImage: 'macOS-latest'
-  #  strategy:
-  #    maxParallel: 12
-  #    matrix:
-  #      TestGroupDigitalTwin1:
-  #        ANDROID_TEST_GROUP_ID: TestGroupDigitalTwin1
-
-  #  displayName: Android Test  - Digital Twin
-  #  dependsOn: AndroidBuildDigitalTwin
-  #  steps:
-  #  - powershell: ./vsts/install_appcenter_cli.ps1
-  #    displayName: 'Install app center cli'
-  #    condition: always()
-
-  #  - task: DownloadPipelineArtifact@0
-  #    inputs:
-  #      artifactName: 'androidBuildFilesDigitalTwin'
-  #      targetPath: $(Build.ArtifactStagingDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk
-
-  #  - task: AppCenterTest@1
-  #    displayName: 'E2E with Visual Studio App Center'
-  #    inputs:
-  #      appFile: '$(Build.ArtifactStagingDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk/debug/apk-debug.apk'
-  #      frameworkOption: espresso
-  #      espressoBuildDirectory: '$(Build.ArtifactStagingDirectory)/digital-twin/e2e-tests/android/apk/build/outputs/apk/androidTest/debug'
-  #      serverEndpoint: 'AppCenter connection aziotclb'
-  #      appSlug: 'Azure-Iot-Sdk/digital-twin-androide2e'
-  #      devices: 'Azure-Iot-Sdk/api28_2'
-  #      runOptions: '--test-parameter annotation=com.microsoft.azure.sdk.iot.digitaltwin.android.helper.$(ANDROID_TEST_GROUP_ID)'
-  #      showDebugOutput: true
+      - task: Bash@3
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        displayName: 'Run tests on emulator'
+        timeoutInMinutes: 45
+        inputs:
+          targetType: 'filePath'
+          filePath: '$(Build.SourcesDirectory)/vsts/RunTestsOnEmulator.sh'
+        env:
+          TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)

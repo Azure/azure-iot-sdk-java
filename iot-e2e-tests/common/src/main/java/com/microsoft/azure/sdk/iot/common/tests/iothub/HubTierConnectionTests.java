@@ -1,6 +1,8 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.BasicTierHubOnlyTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
@@ -31,7 +33,8 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static junit.framework.TestCase.fail;
 
-public class HubTierConnectionTests extends IotHubIntegrationTest
+@IotHubTest
+public class HubTierConnectionTests extends IntegrationTest
 {
     protected static final long WAIT_FOR_DISCONNECT_TIMEOUT = 1 * 60 * 1000; // 1 minute
 
@@ -190,7 +193,7 @@ public class HubTierConnectionTests extends IotHubIntegrationTest
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = BasicTierOnlyRule.class)
+    @BasicTierHubOnlyTest
     public void enableMethodFailedWithBasicTier() throws IOException, InterruptedException
     {
         //arrange

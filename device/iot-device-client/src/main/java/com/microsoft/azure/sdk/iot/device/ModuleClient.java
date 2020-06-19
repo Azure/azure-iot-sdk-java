@@ -79,10 +79,34 @@ public class ModuleClient extends InternalClient
     public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
         //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
-        super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
 
         //Codes_SRS_MODULECLIENT_34_007: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
         //Codes_SRS_MODULECLIENT_34_004: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
+        commonConstructorVerifications(protocol, this.config);
+    }
+
+    /**
+     * Constructor for a ModuleClient instance.
+     * @param connectionString The connection string for the edge module to connect to. Must be in format
+     *                         HostName=xxxx;deviceId=xxxx;SharedAccessKey=
+     *                         xxxx;moduleId=xxxx;
+     *
+     *                         or
+     *
+     *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
+     *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
+     * @param protocol The protocol to use when communicating with the module
+     * @param clientOptions The options that allow configuration of the module client instance during initialization
+     * @throws ModuleClientException if an exception is encountered when parsing the connection string
+     * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
+     * the "moduleId" field, or if the connection string uses x509
+     * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
+     * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
+     */
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    {
+        super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorVerifications(protocol, this.config);
     }
 
@@ -108,7 +132,15 @@ public class ModuleClient extends InternalClient
      * @param isPrivateKeyPath 'false' if the privateKey argument is a path to the PEM, and 'true' if it is the PEM string itself,
      * @throws URISyntaxException If the connString cannot be parsed
      * @throws ModuleClientException if any other exception occurs while building the module client
+     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, ClientOptions)} and provide
+     * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
+     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      */
+    @Deprecated
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws ModuleClientException, URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
@@ -129,7 +161,14 @@ public class ModuleClient extends InternalClient
      *                   SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
      *                   does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
+     * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, ClientOptions)} and provide
+     * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
+     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
+     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
+     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
+     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      */
+    @Deprecated
     public ModuleClient(String connectionString, IotHubClientProtocol protocol, SSLContext sslContext) throws ModuleClientException, URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));

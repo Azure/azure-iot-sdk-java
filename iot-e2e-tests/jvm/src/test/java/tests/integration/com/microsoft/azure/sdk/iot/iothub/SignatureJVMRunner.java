@@ -5,7 +5,8 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.auth.Signature;
 import org.junit.Test;
@@ -13,7 +14,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /** Integration tests for Signature. */
-public class SignatureJVMRunner extends IotHubIntegrationTest
+@IotHubTest
+public class SignatureJVMRunner extends IntegrationTest
 {
     @Test
     public void signatureIsCorrect()

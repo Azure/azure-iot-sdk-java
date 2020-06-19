@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.errorinjection;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.ReceiveMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
@@ -30,6 +33,7 @@ import static org.junit.Assert.assertTrue;
  * Test class containing all error injection tests to be run on JVM and android pertaining to receiving messages. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 {
     public ReceiveMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
@@ -38,7 +42,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void receiveMessagesWithTCPConnectionDrop() throws Exception
     {
         if (testInstance.protocol == HTTPS)
@@ -52,7 +56,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsConnectionDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -66,7 +71,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsSessionDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -80,7 +86,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsCBSReqLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -100,7 +107,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsCBSRespLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -120,7 +128,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsD2CLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -134,7 +143,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsC2DLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -154,7 +164,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void receiveMessagesWithGracefulShutdownAmqp() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
@@ -168,7 +178,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void receiveMessagesWithGracefulShutdownMqtt() throws Exception
     {
         if (testInstance.protocol != MQTT && testInstance.protocol != MQTT_WS)

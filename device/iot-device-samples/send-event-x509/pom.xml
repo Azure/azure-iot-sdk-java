@@ -35,4 +35,24 @@
             </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>${iot-device-client-artifact-id}</artifactId>
+            <version>${iot-device-client-version}</version>
+            <exclusions>
+                <!--These bouncycastle jars are only needed if you are using the deprecated constructors that take
+                certificates as strings, rather than taking an SSLContext directly. Since this sample does not use
+                those deprecated constructors, these are safe to exclude.-->
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcmail-jdk15on</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 </project>

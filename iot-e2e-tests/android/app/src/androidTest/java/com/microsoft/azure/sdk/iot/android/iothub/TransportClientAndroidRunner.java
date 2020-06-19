@@ -5,16 +5,13 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub;
 
-import com.microsoft.appcenter.espresso.Factory;
-import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup32;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup16;
 import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
 import com.microsoft.azure.sdk.iot.common.tests.iothub.TransportClientTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
-import org.junit.After;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,15 +20,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 
-@TestGroup32
+@TestGroup16
 @RunWith(Parameterized.class)
 public class TransportClientAndroidRunner extends TransportClientTests
 {
     @Rule
     public Rerun count = new Rerun(3);
-
-    @Rule
-    public ReportHelper reportHelper = Factory.getReportHelper();
 
     public TransportClientAndroidRunner(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
     {
@@ -43,12 +37,7 @@ public class TransportClientAndroidRunner extends TransportClientTests
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return TransportClientTests.inputs();
-    }
-
-    @After
-    public void labelSnapshot()
-    {
-        reportHelper.label("Stopping App");
     }
 }

@@ -8,7 +8,6 @@ import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
 import com.microsoft.azure.sdk.iot.device.exceptions.HubOrDeviceIdNotFoundException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
@@ -635,7 +634,7 @@ public class HttpsTransportManagerTest
         };
 
         //act
-        transportManager.sendFileUploadMessage(mockedTransportMessage);
+        transportManager.getFileUploadSasUri(mockedTransportMessage);
     }
 
     //Tests_SRS_HTTPSTRANSPORTMANAGER_34_028 [This function shall set the uri path of the provided message to the
@@ -666,7 +665,7 @@ public class HttpsTransportManagerTest
         };
 
         //act
-        transportManager.sendFileUploadMessage(mockedTransportMessage);
+        transportManager.getFileUploadSasUri(mockedTransportMessage);
     }
 
     //Tests_SRS_HTTPSTRANSPORTMANAGER_34_029 [This function shall set the uri path of the provided message to the

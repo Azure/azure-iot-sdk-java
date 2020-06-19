@@ -3,12 +3,13 @@
 
 package com.microsoft.azure.sdk.iot.device.fileupload;
 
-import com.google.gson.JsonIOException;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadRequestParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadResponseParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadStatusParser;
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubMethod;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.storage.StorageException;
@@ -17,10 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -52,9 +50,6 @@ import java.nio.charset.StandardCharsets;
 public final class FileUploadTask implements Runnable
 {
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
-    private static final String HTTPS_URL_STRING = "https://";
-    private static final String PATH_SEPARATOR_STRING = "/";
-    private static final String UTF_8_STRING = "UTF-8";
 
     private HttpsTransportManager httpsTransportManager;
 
@@ -63,11 +58,6 @@ public final class FileUploadTask implements Runnable
     private long streamLength;
     private IotHubEventCallback userCallback;
     private Object userCallbackContext;
-
-    private String correlationId;
-    private URI blobURI;
-
-    private static final ObjectLock FILE_UPLOAD_LOCK = new ObjectLock();
 
     private static final String THREAD_NAME = "azure-iot-sdk-FileUploadTask";
 
@@ -85,32 +75,27 @@ public final class FileUploadTask implements Runnable
     FileUploadTask(String blobName, InputStream inputStream, long streamLength, HttpsTransportManager httpsTransportManager,
                     IotHubEventCallback userCallback, Object userCallbackContext) throws IllegalArgumentException
     {
-        /* Codes_SRS_FILEUPLOADTASK_21_001: [If the `blobName` is null or empty, the constructor shall throw IllegalArgumentException.] */
-        if((blobName == null) || blobName.isEmpty())
+        if ((blobName == null) || blobName.isEmpty())
         {
             throw new IllegalArgumentException("blobName is null or empty");
         }
 
-        /* Codes_SRS_FILEUPLOADTASK_21_002: [If the `inputStream` is null, the constructor shall throw IllegalArgumentException.] */
-        if(inputStream == null)
+        if (inputStream == null)
         {
             throw new IllegalArgumentException("inputStream is null or empty");
         }
 
-        /* Codes_SRS_FILEUPLOADTASK_21_003: [If the `streamLength` is negative, the constructor shall throw IllegalArgumentException.] */
-        if(streamLength < 0)
+        if (streamLength < 0)
         {
             throw new IllegalArgumentException("streamLength is negative");
         }
 
-        /* Codes_SRS_FILEUPLOADTASK_21_004: [If the `httpsTransportManager` is null, the constructor shall throw IllegalArgumentException.] */
-        if(httpsTransportManager == null)
+        if (httpsTransportManager == null)
         {
             throw new IllegalArgumentException("httpsTransportManager is null");
         }
 
-        /* Codes_SRS_FILEUPLOADTASK_21_005: [If the `userCallback` is null, the constructor shall throw IllegalArgumentException.] */
-        if(userCallback == null)
+        if (userCallback == null)
         {
             throw new IllegalArgumentException("statusCallback is null");
         }
@@ -126,152 +111,95 @@ public final class FileUploadTask implements Runnable
         log.trace("HttpsFileUpload object is created successfully");
     }
 
-    /**
-     * Runnable
-     */
+    public FileUploadTask(HttpsTransportManager httpsTransportManager)
+    {
+        this.httpsTransportManager = httpsTransportManager;
+    }
+
     @Override
     public void run()
     {
         Thread.currentThread().setName(THREAD_NAME);
 
-        FileUploadStatusParser fileUploadStatusParser = null;
-        IotHubStatusCode resultStatus = IotHubStatusCode.OK;
+        FileUploadCompletionNotification fileUploadCompletionNotification = null;
+        FileUploadSasUriResponse sasUriResponse = null;
 
         try
         {
-            resultStatus = getContainer();
+            sasUriResponse = getFileUploadSasUri(new FileUploadSasUriRequest(this.blobName));
         }
-        catch (IOException | IllegalArgumentException | URISyntaxException | NullPointerException e) //Nobody will handel exception from this thread, so, convert it to an failed code in the user callback.
+        catch (IOException | IllegalArgumentException e)
         {
-            /* Codes_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */
-            log.error("File upload failed to upload the stream to the blob", e);
-            resultStatus = IotHubStatusCode.ERROR;
+            log.error("File upload failed to get a SAS URI from Iot Hub", e);
+            userCallback.execute(IotHubStatusCode.ERROR, userCallbackContext);
+            return;
         }
 
-        if(resultStatus == IotHubStatusCode.OK)
+        try
+        {
+            CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
+            blob.upload(inputStream, streamLength);
+            fileUploadCompletionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true, 0, "Succeed to upload to storage.");
+        }
+        catch (StorageException | IOException | IllegalArgumentException | URISyntaxException e)
+        {
+            log.error("File upload failed to upload the stream to the blob", e);
+            fileUploadCompletionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false, -1, "Failed to upload to storage.");
+        }
+        finally
         {
             try
             {
-            /* Codes_SRS_FILEUPLOADTASK_21_019: [The run shall create a `CloudBlockBlob` using the `blobUri`.] */
-                CloudBlockBlob blob = new CloudBlockBlob(blobURI);
-            /* Codes_SRS_FILEUPLOADTASK_21_020: [The run shall upload the `inputStream` with the `streamLength` to the created `CloudBlockBlob`.] */
-                blob.upload(inputStream, streamLength);
-            /* Codes_SRS_FILEUPLOADTASK_21_021: [If the upload to blob succeed, the run shall create a notification the IoT Hub with `isSuccess` equals true, `statusCode` equals 0.] */
-                fileUploadStatusParser = new FileUploadStatusParser(correlationId, true, 0, "Succeed to upload to storage.");
-                resultStatus = IotHubStatusCode.OK;
+                sendNotification(fileUploadCompletionNotification);
             }
-            catch (StorageException | IOException | IllegalArgumentException e) //Nobody will handel exception from this thread, so, convert it to an failed code in the user callback.
+            catch (IOException e)
             {
-                log.error("File upload failed to upload the stream to the blob", e);
-            /* Codes_SRS_FILEUPLOADTASK_21_030: [If the upload to blob failed, the run shall call the `userCallback` reporting an error status `ERROR`.] */
-                resultStatus = IotHubStatusCode.ERROR;
-            /* Codes_SRS_FILEUPLOADTASK_21_022: [If the upload to blob failed, the run shall create a notification the IoT Hub with `isSuccess` equals false, `statusCode` equals -1.] */
-                fileUploadStatusParser = new FileUploadStatusParser(correlationId, false, -1, "Failed to upload to storage.");
-            }
-            finally
-            {
-                IotHubStatusCode notificationResultStatus = sendNotification(fileUploadStatusParser);
-                if (resultStatus == IotHubStatusCode.OK)
-                {
-                    resultStatus = notificationResultStatus;
-                }
+                log.error("Failed to send file upload status", e);
             }
         }
 
-        /* Codes_SRS_FILEUPLOADTASK_21_029: [The run shall call the `userCallback` with the final response status.] */
-        userCallback.execute(resultStatus, userCallbackContext);
+        if (fileUploadCompletionNotification.getSuccess())
+        {
+            userCallback.execute(IotHubStatusCode.OK, userCallbackContext);
+        }
+        else
+        {
+            userCallback.execute(IotHubStatusCode.ERROR, userCallbackContext);
+        }
     }
 
-    private void addBlobInformation(Message responseMessage) throws IllegalArgumentException, URISyntaxException, UnsupportedEncodingException
+    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException
     {
-        /* Codes_SRS_FILEUPLOADTASK_21_015: [If the iothub accepts the request, it shall provide a `responseMessage` with the blob information with a correlationId.] */
-        /* Codes_SRS_FILEUPLOADTASK_21_016: [If the `responseMessage` is null, empty, do not contains a valid json, or if the information in json is not correct, the run shall call the `userCallback` reporting the error, and abort the upload.] */
-        String json = new String(responseMessage.getBytes(), DEFAULT_IOTHUB_MESSAGE_CHARSET);
-        FileUploadResponseParser fileUploadResponseParser = new FileUploadResponseParser(json);
-
-        /* Codes_SRS_FILEUPLOADTASK_21_017: [The run shall parse and store the blobName and correlationId in the response, by use the FileUploadResponseParser.] */
-        this.correlationId = fileUploadResponseParser.getCorrelationId();
-        this.blobName = fileUploadResponseParser.getBlobName();
-        String hostName = fileUploadResponseParser.getHostName();
-        String containerName = fileUploadResponseParser.getContainerName();
-        String sasToken = fileUploadResponseParser.getSasToken();
-
-        /* Codes_SRS_FILEUPLOADTASK_21_018: [The run shall create a blob URI `blobUri` with the format `https://[hostName]/[containerName]/[blobName,UTF-8][sasToken]`.] */
-        /* Codes_SRS_FILEUPLOADTASK_21_032: [If create the blob URI failed, the run shall call the `userCallback` reporting the error, and abort the upload.] */
-        String putString = HTTPS_URL_STRING +
-                hostName + PATH_SEPARATOR_STRING +
-                containerName + PATH_SEPARATOR_STRING +
-                URLEncoder.encode(blobName, UTF_8_STRING) + // Pass URL encoded blob name to support special characters
-                sasToken;
-        this.blobURI = new URI(putString);
-    }
-
-    private IotHubStatusCode getContainer() throws IOException, IllegalArgumentException, URISyntaxException
-    {
-        /* Codes_SRS_FILEUPLOADTASK_21_007: [The run shall create a FileUpload request message, by using the FileUploadRequestParser.] */
-        FileUploadRequestParser fileUploadRequestParser = new FileUploadRequestParser(blobName);
-
-        IotHubTransportMessage message = new IotHubTransportMessage(fileUploadRequestParser.toJson());
-        /* Codes_SRS_FILEUPLOADTASK_21_008: [The run shall set the message method as `POST`.] */
+        IotHubTransportMessage message = new IotHubTransportMessage(request.toJson());
         message.setIotHubMethod(IotHubMethod.POST);
 
         ResponseMessage responseMessage;
-        synchronized (FILE_UPLOAD_LOCK)
+        httpsTransportManager.open();
+        responseMessage = httpsTransportManager.getFileUploadSasUri(message);
+        httpsTransportManager.close();
+
+        if (responseMessage.getBytes() == null || responseMessage.getBytes().length == 0)
         {
-            /* Codes_SRS_FILEUPLOADTASK_21_010: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
-            httpsTransportManager.open();
-            /* Codes_SRS_FILEUPLOADTASK_21_011: [The run shall send the blob request message to the iothub, using the httpsTransportManager.] */
-            responseMessage = httpsTransportManager.sendFileUploadMessage(message);
-            /* Codes_SRS_FILEUPLOADTASK_21_012: [The run shall close the connection with the iothub, using the httpsTransportManager.] */
-            httpsTransportManager.close();
+            throw new IOException("Sas URI response message had no payload");
         }
 
-        IotHubStatusCode resultStatus = responseMessage.getStatus();
-
-        /* Codes_SRS_FILEUPLOADTASK_21_013: [If result status for the blob request is not `OK`, or `OK_EMPTY`, the run shall call the userCallback bypassing the received status, and abort the upload.] */
-        if(resultStatus == IotHubStatusCode.OK)
-        {
-            addBlobInformation(responseMessage);
-        }
-        else if(resultStatus == IotHubStatusCode.OK_EMPTY)
-        {
-            /* Codes_SRS_FILEUPLOADTASK_21_014: [If result status for the blob request is `OK_EMPTY`, the run shall call the userCallback with the stratus `ERROR`, and abort the upload.] */
-            resultStatus = IotHubStatusCode.ERROR;
-        }
-
-        return resultStatus;
+        return new FileUploadSasUriResponse(new String(responseMessage.getBytes(), DEFAULT_IOTHUB_MESSAGE_CHARSET));
     }
 
-    private IotHubStatusCode sendNotification(FileUploadStatusParser fileUploadStatusParser)
+    public IotHubStatusCode sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IOException
     {
-        IotHubStatusCode responseStatus;
-        try
-        {
-            /* Codes_SRS_FILEUPLOADTASK_21_023: [The run shall create a FileUpload status notification message, by using the FileUploadStatusParser.] */
-            IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());
-            /* Codes_SRS_FILEUPLOADTASK_21_024: [The run shall set the message method as `POST`.] */
-            message.setIotHubMethod(IotHubMethod.POST);
+        IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());
+        message.setIotHubMethod(IotHubMethod.POST);
 
-            ResponseMessage responseMessage;
-            synchronized (FILE_UPLOAD_LOCK)
-            {
-            /* Codes_SRS_FILEUPLOADTASK_21_026: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
-                httpsTransportManager.open();
-            /* Codes_SRS_FILEUPLOADTASK_21_027: [The run shall send the blob request message to the iothub, using the httpsTransportManager.] */
-                responseMessage = httpsTransportManager.sendFileUploadNotification(message);
-            /* Codes_SRS_FILEUPLOADTASK_21_028: [The run shall close the connection with the iothub, using the httpsTransportManager.] */
-                httpsTransportManager.close();
-            }
+        httpsTransportManager.open();
+        ResponseMessage responseMessage = httpsTransportManager.sendFileUploadNotification(message);
+        httpsTransportManager.close();
 
-            responseStatus = responseMessage.getStatus();
-        }
-        catch (IllegalArgumentException |IOException | JsonIOException e) //Nobody will handel exception from this thread, so, convert it to an failed code in the user callback.
-        {
-            /* Codes_SRS_FILEUPLOADTASK_21_033: [If run failed to send the notification, it shall call the userCallback with the stratus `ERROR`, and abort the upload.] */
-            log.error("File upload failed to report status to the iothub", e);
-            responseStatus = IotHubStatusCode.ERROR;
-        }
+        return responseMessage.getStatus();
+    }
 
-        return responseStatus;
+    public void close()
+    {
+        this.httpsTransportManager.close();
     }
 }

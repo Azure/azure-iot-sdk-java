@@ -42,7 +42,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final String API_VERSION = "?api-version=" + TransportUtils.IOTHUB_API_VERSION;
+    private static final String ModelIdParam = "digital-twin-model-id";
 
     private String connectionId;
     private String webSocketQueryString;
@@ -151,7 +151,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     clientId += "/" + moduleId;
                 }
 
-                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/" + API_VERSION + "&" + clientUserAgentIdentifier;
+                String serviceParams;
+                String modelId = this.config.getModelId();
+                if(modelId == null || modelId.isEmpty())
+                {
+                    serviceParams = TransportUtils.IOTHUB_API_VERSION;
+                }
+                else
+                {
+                    serviceParams = TransportUtils.IOTHUB_API_VERSION_PREVIEW + "&" + ModelIdParam + "=" + modelId;
+                }
+
+                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
 
                 String host = this.config.getGatewayHostname();
                 if (host == null || host.isEmpty())
@@ -382,7 +393,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * @throws TransportException if the ACK could not be sent successfully
      */
     @Override
-    public boolean sendMessageResult(Message message, IotHubMessageResult result) throws TransportException
+    public boolean sendMessageResult(IotHubTransportMessage message, IotHubMessageResult result) throws TransportException
     {
         if (message == null || result == null)
         {

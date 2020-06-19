@@ -5,6 +5,18 @@
 
 Write-Host "##vso[task.setvariable variable=task.android.needToRunTestGroup]no"
 
+$targetBranch = ($env:TARGET_BRANCH)
+if (!($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
+{
+    if ($env:IS_BASIC_TIER_HUB -eq $true)
+    {
+        #Nightly builds cover this scenario, since it has so little coverage
+        Write-Host "This build is a pull request build and is for basic tier hub, so all android tests will be skipped"
+        Write-Host "##vso[task.setvariable variable=task.android.needToRunTestGroup]no"
+        exit 0
+    }
+}
+
 # "TestGroup12", for instance
 $testGroupString = $env:TEST_GROUP_ID
 
@@ -30,7 +42,7 @@ ForEach ($line in $($paths -split "`r`n"))
 	# ignore dex, class, etc files.
 	if ($line.toLower().Contains("androidrunner.java"))
 	{
-		if ($line.toLower().Contains("dummyandroidrunner.java"))
+		if ($line.toLower().Contains("fakeandroidrunner.java"))
 		{
 			# Ignore this file, it has no bearing on which tests should be run
 		}
@@ -53,7 +65,7 @@ ForEach ($line in $($paths -split "`r`n"))
 	{
 		if ($testRunnerFilePaths.Contains($line))
 		{
-			if ($line.toLower().Contains("dummyandroidrunner.java"))
+			if ($line.toLower().Contains("fakeandroidrunner.java"))
 			{
 				# Ignore this file, it has no bearing on which tests should be run
 			}

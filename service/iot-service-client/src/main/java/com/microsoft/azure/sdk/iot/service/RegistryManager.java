@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
  */
 public class RegistryManager
 {
-    private final Integer DEFAULT_HTTP_TIMEOUT_MS = 24000;
     private static final int EXECUTOR_THREAD_POOL_SIZE = 10;
     private ExecutorService executor;
     private IotHubConnectionString iotHubConnectionString;
@@ -54,7 +53,10 @@ public class RegistryManager
     {
         // This constructor was previously a default constructor that users could use because there was no other constructor declared.
         // However, we still prefer users use the createFromConnectionString method to build their clients.
-        options = RegistryManagerOptions.builder().build();
+        options = RegistryManagerOptions.builder()
+                .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .build();
     }
 
     /**
@@ -66,7 +68,12 @@ public class RegistryManager
      */
     public static RegistryManager createFromConnectionString(String connectionString) throws IOException
     {
-        return createFromConnectionString(connectionString, RegistryManagerOptions.builder().build());
+        RegistryManagerOptions options = RegistryManagerOptions.builder()
+                .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .build();
+
+        return createFromConnectionString(connectionString, options);
     }
 
     /**
@@ -582,9 +589,7 @@ public class RegistryManager
         String sasToken = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_049: [The function shall create a new HttpRequest for removing the device from IotHub]
-        HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
-        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
-        request.setHeaderField("authorization", sasToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], sasToken);
         request.setHeaderField("If-Match", etag);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_050: [The function shall send the created request and get the response]
@@ -1303,9 +1308,7 @@ public class RegistryManager
         String sasToken = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_038: [The function shall create a new HttpRequest for removing the module from IotHub]
-        HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
-        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
-        request.setHeaderField("authorization", sasToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], sasToken);
         request.setHeaderField("If-Match", etag);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_039: [The function shall send the created request and get the response]
@@ -1564,9 +1567,7 @@ public class RegistryManager
         String sasToken = new IotHubServiceSasToken(this.iotHubConnectionString).toString();
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_076: [The function shall create a new HttpRequest for removing the configuration from IotHub]
-        HttpRequest request = new HttpRequest(url, HttpMethod.DELETE, new byte[0]);
-        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
-        request.setHeaderField("authorization", sasToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], sasToken);
         request.setHeaderField("If-Match", etag);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_077: [The function shall send the created request and get the response]
@@ -1639,7 +1640,8 @@ public class RegistryManager
         }
 
         HttpRequest request = new HttpRequest(url, method, payload, proxy);
-        request.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
+        request.setReadTimeoutMillis(options.getHttpReadTimeout());
+        request.setConnectTimeoutMillis(options.getHttpConnectTimeout());
         request.setHeaderField("authorization", sasToken);
         request.setHeaderField("Request-Id", "1001");
         request.setHeaderField("Accept", "application/json");

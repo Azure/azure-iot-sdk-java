@@ -330,7 +330,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
      */
 
     @Override
-    public boolean sendMessageResult(Message message, IotHubMessageResult result) throws TransportException
+    public boolean sendMessageResult(IotHubTransportMessage message, IotHubMessageResult result) throws TransportException
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
