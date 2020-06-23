@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * The BaseDevice class
@@ -314,6 +316,13 @@ public class BaseDevice
     protected String lastActivityTime;
 
     /**
+     * To Do: Binal
+     */
+    @Getter
+    @Setter
+    protected String modelId;
+
+    /**
      * Getter for last activity time
      *
      * @return The string containing the time when the lastActivity parameter was updated
@@ -393,6 +402,7 @@ public class BaseDevice
         deviceParser.seteTag(this.eTag);
         deviceParser.setLastActivityTime(ParserUtility.getDateTimeUtc(this.lastActivityTime));
         deviceParser.setGenerationId(this.generationId);
+        deviceParser.setModelId(this.modelId);
 
         deviceParser.setAuthenticationParser(new AuthenticationParser());
         deviceParser.getAuthenticationParser().setType(AuthenticationTypeParser.valueOf(this.authentication.getAuthenticationType().toString()));
@@ -472,6 +482,11 @@ public class BaseDevice
         if (parser.getConnectionState() != null)
         {
             this.connectionState = DeviceConnectionState.valueOf(parser.getConnectionState());
+        }
+
+        if (parser.getModelId() != null)
+        {
+
         }
 
         this.authentication = new AuthenticationMechanism(authenticationType);

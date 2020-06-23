@@ -9,6 +9,8 @@ import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -34,6 +36,9 @@ public class DeviceTwinDevice
     private Map<String, ConfigurationInfo> configurations = null;
     private DeviceCapabilities capabilities = null;
     private String connectionState;
+    @Getter
+    @Setter
+    private String modelId;
 
     /**
      * Constructor to create instance for a device
@@ -47,6 +52,7 @@ public class DeviceTwinDevice
         this.moduleId = null;
         this.eTag = null;
         this.version = null;
+        this.modelId = null;
     }
 
     /**
@@ -535,6 +541,10 @@ public class DeviceTwinDevice
         if(this.getVersion() != null)
         {
             thisDevice.append("Version: " + this.getVersion() + "\n");
+        }
+        if(this.modelId != null && !this.modelId.isEmpty())
+        {
+            thisDevice.append("Model ID: " + this.getModelId() + "\n");
         }
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());

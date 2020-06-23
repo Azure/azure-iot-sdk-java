@@ -292,6 +292,7 @@ public class DeviceParserTest
         long cloudToDeviceMessageCount = 2;
         String managedBy = "someentity";
         String scope = "securityscope";
+        String modelId = "testModelId";
 
         //act
         parser.setAuthenticationParser(new AuthenticationParser());
@@ -308,6 +309,7 @@ public class DeviceParserTest
         parser.setManagedBy(managedBy);
         parser.setCapabilities(new DeviceCapabilitiesParser());
         parser.setScope(scope);
+        parser.setModelId(modelId);
 
         //assert
         assertEquals(new AuthenticationParser().getType(), parser.getAuthenticationParser().getType());
@@ -326,6 +328,7 @@ public class DeviceParserTest
         assertEquals(managedBy, parser.getManagedBy());
         assertEquals(new DeviceCapabilitiesParser().getIotEdge(), parser.getCapabilities().getIotEdge());
         assertEquals(scope, parser.getScope());
+        assertEquals(modelId, parser.getModelId());
     }
 
     //Tests_SRS_DEVICE_PARSER_34_004: [For each of this parser's properties, if the setter is called with a null argument, an IllegalArgumentException shall be thrown.]

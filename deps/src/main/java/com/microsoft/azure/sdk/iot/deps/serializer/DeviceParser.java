@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
@@ -89,6 +91,13 @@ public class DeviceParser
     @Expose(serialize = true, deserialize = true)
     @SerializedName(SCOPE_NAME)
     private String scope;
+
+    private static final String MODEL_ID_NAME = "digital-twin-model-id";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(MODEL_ID_NAME)
+    @Setter
+    @Getter
+    private String modelId;
 
     private transient Gson gson = new Gson();
 
@@ -174,6 +183,7 @@ public class DeviceParser
         this.managedBy = deviceParser.managedBy;
         this.capabilities = deviceParser.capabilities;
         this.scope = deviceParser.scope;
+        this.modelId = deviceParser.modelId;
 
         //convert to date format
         if (deviceParser.lastActivityTimeString != null)
