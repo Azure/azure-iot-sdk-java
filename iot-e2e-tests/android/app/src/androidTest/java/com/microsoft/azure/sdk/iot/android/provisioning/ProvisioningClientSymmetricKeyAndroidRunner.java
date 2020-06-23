@@ -7,9 +7,6 @@ package com.microsoft.azure.sdk.iot.android.provisioning;
 
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup1;
-import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.setup.provisioning.ProvisioningCommon;
-import com.microsoft.azure.sdk.iot.common.tests.provisioning.ProvisioningTests;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 
 import org.junit.Rule;
@@ -17,6 +14,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
+
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Rerun;
+import tests.integration.com.microsoft.azure.sdk.iot.provisioning.ProvisioningTests;
+import tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.ProvisioningCommon;
 
 @TestGroup1
 @RunWith(Parameterized.class)
@@ -30,20 +31,10 @@ public class ProvisioningClientSymmetricKeyAndroidRunner extends ProvisioningTes
         super(protocol, attestationType);
     }
 
-    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{0} with {1}")
-    public static Collection inputs() throws Exception
+    //This overrides the inputs defined in the super class. This is done to split this large test group into symmetric key and x509 runners.
+    @Parameterized.Parameters(name = "{0}_{1}")
+    public static Collection inputs()
     {
-        iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        provisioningServiceConnectionString = BuildConfig.DeviceProvisioningServiceConnectionString;
-        provisioningServiceIdScope = BuildConfig.DeviceProvisioningServiceIdScope;
-        provisioningServiceGlobalEndpointWithInvalidCert = BuildConfig.InvalidDeviceProvisioningServiceGlobalEndpoint;
-        provisioningServiceWithInvalidCertConnectionString = BuildConfig.InvalidDeviceProvisioningServiceConnectionString;
-        farAwayIotHubConnectionString = BuildConfig.FarAwayIotHubConnectionString;
-        customAllocationWebhookUrl = BuildConfig.CustomAllocationWebhookUrl;
-        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
-
         return ProvisioningCommon.inputs(AttestationType.SYMMETRIC_KEY);
     }
 }

@@ -170,28 +170,6 @@ public class AmqpConnectionTest
 
         //assert
     }
-
-    @Test (expected = IOException.class)
-    public void OpenThrowsOnWaitLock() throws IOException, InterruptedException
-    {
-        AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
-
-        new NonStrictExpectations()
-        {
-            {
-                new AmqpReactor((Reactor)any);
-                result = mockedAmqpReactor;
-
-                mockedObjectLock.waitLock(anyLong);
-                result = new InterruptedException();
-            }
-        };
-
-        // Act
-        amqpsConnection.open();
-
-        //assert
-    }
     
     @Test (expected = IOException.class)
     public void closeThrowsOnWaitLock() throws IOException, InterruptedException

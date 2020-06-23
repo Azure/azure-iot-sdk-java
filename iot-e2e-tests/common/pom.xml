@@ -20,14 +20,8 @@
     </developers>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skipITs>true</skipITs>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>${iot-device-client-artifact-id}</artifactId>
-            <version>${iot-device-client-version}</version>
-        </dependency>
         <!-- test dependencies -->
         <dependency>
             <groupId>org.jmockit</groupId>
@@ -43,6 +37,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>${iot-device-client-artifact-id}</artifactId>
+            <version>${iot-device-client-version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
@@ -53,25 +53,21 @@
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>${provisioning-device-client-artifact-id}</artifactId>
             <version>${provisioning-device-client-version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
             <artifactId>${provisioning-service-client-artifact-id}</artifactId>
             <version>${provisioning-service-client-version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>${tpm-provider-emulator-artifact-id}</artifactId>
             <version>${tpm-provider-emulator-version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>${x509-provider-artifact-id}</artifactId>
             <version>${x509-provider-version}</version>
-            <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.littleshoot/littleproxy -->
         <dependency>
@@ -102,6 +98,20 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!--This plugin will generate a jar file that contains all the test code so that the android
+                            test code can reference it.-->
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.22.0</version>
                 <executions>
@@ -113,10 +123,17 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <skipITs>${skipITs}</skipITs>
-                    <argLine>
-                        -javaagent:${settings.localRepository}/org/jmockit/jmockit/1.24/jmockit-1.24.jar
-                    </argLine>
+                    <includes>
+                        <!--By default, only test files that end in ___Test.java are recognized as tests. This statement extends that to ___Tests.java files-->
+                        <include>*Tests.java</include>
+                    </includes>
+                    <forkCount>1</forkCount>
+
+                    <!--Tests can be run in parallel with tests within their own test class as well as in parallel with tests from other test classes-->
+                    <parallel>both</parallel>
+
+                    <!--Maven will spawn up as many threads as it wants/can while running tests in parallel-->
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
                 </configuration>
             </plugin>
             <plugin>
@@ -131,6 +148,15 @@
                         <configuration>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>with-deps</shadedClassifierName>
+                            <artifactSet>
+                                <excludes>
+                                    <!--Android testing will use this jar, but android testing doesn't want these dependencies. It will import
+                                    android compatible versions of these libraries instead-->
+                                    <exclude>junit:junit</exclude>
+                                    <exclude>com.microsoft.azure:azure-storage</exclude>
+                                    <exclude>org.apache.commons:commons-lang3</exclude>
+                                </excludes>
+                            </artifactSet>
                         </configuration>
                     </execution>
                 </executions>

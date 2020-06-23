@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.android.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup13;
-import com.microsoft.azure.sdk.iot.common.tests.iothub.twin.DeviceTwinWithVersionTests;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.DeviceTwinWithVersionTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
 import org.junit.runner.RunWith;
@@ -23,15 +23,5 @@ public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTes
     public DeviceTwinWithVersionAndroidRunner(IotHubClientProtocol protocol) throws IOException
     {
         super(protocol);
-    }
-
-    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection inputs() throws IOException
-    {
-        iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
-        return inputsCommon();
     }
 }

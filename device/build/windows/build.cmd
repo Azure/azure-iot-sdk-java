@@ -9,6 +9,6 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- Java --
 cd %build-root%\java\device
-call mvn verify -DskipITs=false
+call mvn verify
 if errorlevel 1 goto :eof
 cd %build-root%

@@ -7,10 +7,6 @@ set build-root=%~dp0..
 @REM // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
-@REM -- Delete m2 folder--
-
-call RD /S /Q "c:/users/%USERNAME%/.m2/repository/com/microsoft/azure/sdk/iot"
-
 @REM -- E2E Test Build --
 cd %build-root%
-mvn -Dmaven.test.skip=true -Dmaven.javadoc.skip=true --projects :iot-e2e-common --also-make clean install
+mvn -DskipTests=true -Dmaven.javadoc.skip=true --projects :iot-e2e-common --also-make clean install

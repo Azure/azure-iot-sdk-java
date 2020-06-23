@@ -2,8 +2,8 @@ package com.microsoft.azure.sdk.iot.android.iothub;
 
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup13;
-import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.tests.iothub.HubTierConnectionTests;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Rerun;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.HubTierConnectionTests;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -25,31 +25,11 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
 {
-    static Collection<BaseDevice> identities;
-
     @Rule
     public Rerun count = new Rerun(3);
 
     public HubTierConnectionAndroidRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
     {
         super(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
-    }
-
-    //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
-    @Parameterized.Parameters(name = "{1} with {3} with proxy? {7}")
-    public static Collection inputs() throws IOException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, InterruptedException
-    {
-        iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        Collection inputs = inputsCommon();
-        identities = getIdentities(inputs);
-        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
-        return inputs;
-    }
-
-    @AfterClass
-    public static void cleanUpResources()
-    {
-        tearDown(identities);
     }
 }
