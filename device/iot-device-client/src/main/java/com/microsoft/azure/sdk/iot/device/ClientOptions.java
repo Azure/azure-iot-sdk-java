@@ -25,7 +25,8 @@ public final class ClientOptions
     /**
      * The ssl context that will be used during authentication. If the provided connection string does not contain
      *  SAS based credentials, then the sslContext will be used for x509 authentication. If the provided connection string
-     *  does contain SAS based credentials, the sslContext will still be used during SSL negotiation.
+     *  does contain SAS based credentials, the sslContext will still be used during SSL negotiation. By default, this SDK will
+     *  create an SSLContext instance for you that trusts the IoT Hub public certificates.
      */
     @Setter
     @Getter

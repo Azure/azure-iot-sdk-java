@@ -31,6 +31,7 @@ public class DeviceTwinWithVersionAndroidRunner extends DeviceTwinWithVersionTes
     {
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return inputsCommon();
     }
 }

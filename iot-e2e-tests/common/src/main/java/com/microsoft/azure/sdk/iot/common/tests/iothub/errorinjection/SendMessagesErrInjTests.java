@@ -6,6 +6,8 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.errorinjection;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
@@ -35,6 +37,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
  * Test class containing all error injection tests to be run on JVM and android pertaining to sending messages to the cloud. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class SendMessagesErrInjTests extends SendMessagesCommon
 {
     public SendMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
@@ -58,6 +61,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithConnectionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
@@ -72,6 +76,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithSessionDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
@@ -86,6 +91,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithCbsRequestLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS || testInstance.useHttpProxy)
@@ -106,6 +112,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithCbsResponseLinkDrop() throws Exception
     {
         if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS || testInstance.useHttpProxy)
@@ -126,6 +133,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithD2CLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
@@ -140,6 +148,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithC2DLinkDrop() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
@@ -181,6 +190,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
     @Ignore
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesWithThrottlingNoRetry() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
@@ -218,6 +228,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
     @Ignore
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesWithQuotaExceeded() throws Exception
     {
         if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
@@ -263,6 +274,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws Exception
     {
         if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS) || testInstance.useHttpProxy)

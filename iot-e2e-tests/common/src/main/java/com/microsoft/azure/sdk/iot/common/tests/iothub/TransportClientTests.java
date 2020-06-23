@@ -7,6 +7,9 @@ package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -38,7 +41,8 @@ import static junit.framework.TestCase.fail;
  * Test class containing all tests to be run on JVM and android pertaining to multiplexing with the TransportClient class.
  * Class needs to be extended in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class TransportClientTests extends IotHubIntegrationTest
+@IotHubTest
+public class TransportClientTests extends IntegrationTest
 {
     //how many devices to test multiplexing with
     private static final int MAX_DEVICE_MULTIPLEX = 3;
@@ -227,7 +231,7 @@ public class TransportClientTests extends IotHubIntegrationTest
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void receiveMessagesIncludingProperties() throws Exception
     {
         testInstance.transportClient.open();
@@ -248,6 +252,7 @@ public class TransportClientTests extends IotHubIntegrationTest
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesMultithreaded() throws InterruptedException, IOException
     {
         testInstance.transportClient.open();
@@ -273,6 +278,7 @@ public class TransportClientTests extends IotHubIntegrationTest
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void uploadToBlobAsyncSingleFileAndTelemetry() throws Exception
     {
         // arrange
@@ -340,7 +346,7 @@ public class TransportClientTests extends IotHubIntegrationTest
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void invokeMethodSucceed() throws Exception
     {
         testInstance.transportClient.open();
@@ -364,7 +370,8 @@ public class TransportClientTests extends IotHubIntegrationTest
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
         testInstance.transportClient.open();
@@ -398,7 +405,7 @@ public class TransportClientTests extends IotHubIntegrationTest
     }
 
     @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         testInstance.transportClient = setUpTwin();

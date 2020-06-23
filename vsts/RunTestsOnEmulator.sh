@@ -29,5 +29,18 @@ if grep -q "$FailureMessage" <<< "$TestLogs"; then
     exit -1
 fi
 
+InstrumentationFailureMessage='INSTRUMENTATION_STATUS_CODE: -1'
+
+if grep -q "$InstrumentationFailureMessage" <<< "$TestLogs"; then
+    echo 'Instrumentation failures detected, exiting...'
+    exit -1
+fi
+
+AnotherInstrumentationFailureMessage='INSTRUMENTATION_FAILED'
+if grep -q "$AnotherInstrumentationFailureMessage" <<< "$TestLogs"; then
+    echo 'Instrumentation failures detected, exiting...'
+    exit -1
+fi
+
 # adb also supports running all tests that do not have a given annotation
 # adb -e shell am instrument -w -e notAnnotation com.microsoft.azure.sdk.iot.android.helper.TestGroup39 com.iothub.azure.microsoft.com.androide2e.test/android.support.test.runner.AndroidJUnitRunner

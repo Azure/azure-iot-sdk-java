@@ -364,6 +364,38 @@ public class HttpConnectionTest
         };
     }
 
+    @Test
+    public void setConnectTimeoutSetsRequestTimeout() throws IOException
+    {
+        // Arrange
+        final HttpMethod httpsMethod = HttpMethod.POST;
+        final int timeout = 1;
+        final int expectedTimeout = timeout;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+                mockUrlConn.getRequestMethod();
+                result = httpsMethod.name();
+            }
+        };
+        HttpConnection conn = new HttpConnection(mockUrl, httpsMethod);
+
+        // Act
+        conn.setConnectTimeoutMillis(timeout);
+
+        // Assert
+        new Verifications()
+        {
+            {
+                mockUrl.openConnection().setConnectTimeout(expectedTimeout);
+            }
+        };
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_012: [The function shall save the body to be sent with the request.]
     // Assert
     @Test(expected = IllegalArgumentException.class)
