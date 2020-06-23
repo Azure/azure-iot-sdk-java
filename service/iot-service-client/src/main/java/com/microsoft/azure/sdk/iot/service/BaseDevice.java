@@ -316,7 +316,7 @@ public class BaseDevice
     protected String lastActivityTime;
 
     /**
-     * To Do: Binal
+     * Digital Twin model Id for the device and module
      */
     @Getter
     @Setter
@@ -486,7 +486,7 @@ public class BaseDevice
 
         if (parser.getModelId() != null)
         {
-
+            this.modelId = parser.getModelId();
         }
 
         this.authentication = new AuthenticationMechanism(authenticationType);

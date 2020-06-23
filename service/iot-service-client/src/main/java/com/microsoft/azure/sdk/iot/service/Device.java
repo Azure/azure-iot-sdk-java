@@ -216,7 +216,10 @@ public class Device extends BaseDevice
         deviceParser.setStatus(this.status.toString());
         deviceParser.setStatusReason(this.statusReason);
         deviceParser.setStatusUpdatedTime(ParserUtility.getDateTimeUtc(this.statusUpdatedTime));
-        deviceParser.setModelId(this.modelId);
+        if (this.modelId != null)
+        {
+            deviceParser.setModelId(this.modelId);
+        }
 
         if (this.capabilities != null)
         {
@@ -263,7 +266,6 @@ public class Device extends BaseDevice
         {
             this.modelId = parser.getModelId();
         }
-
 
         this.scope = parser.getScope();
     }

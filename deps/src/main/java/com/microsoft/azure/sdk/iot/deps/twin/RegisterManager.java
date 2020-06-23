@@ -126,7 +126,9 @@ public class RegisterManager
     protected DeviceCapabilities capabilities = null;
 
     /**
-     * To Do Binal
+     * The Digital Twin model id of the device and module
+     * The value will be null for a non-pnp device.
+     * The value will be null for a pnp device until the device connects and registers with the model id.
      */
     private static final String MODEL_ID = "digital-twin-model-id";
     @Expose(serialize = true, deserialize = true)
@@ -134,7 +136,6 @@ public class RegisterManager
     @Setter
     @Getter
     protected String modelId = null;
-
     /**
      * Setter for the DeviceId
      *
