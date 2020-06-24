@@ -74,8 +74,8 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		}
 
         # E2E common code can be used in any test, so we must run every test
-		if ($line.toLower().Contains("iot-e2e-tests/common/src/main/java/com/microsoft/azure/sdk/iot/common/helpers"))
-        {
+		if ($line.toLower().Contains("iot-e2e-tests/common/src/test/java/tests/integration/com/microsoft/azure/sdk/iot/helpers"))
+		{
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
         }

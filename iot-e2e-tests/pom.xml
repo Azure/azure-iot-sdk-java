@@ -23,7 +23,6 @@
     </developers>
     <modules>
         <module>common</module>
-        <module>jvm</module>
         <module>edge-e2e</module>
     </modules>
     <build>
