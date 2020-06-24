@@ -104,7 +104,7 @@ public class DigitalTwinServiceClientE2ETests extends DigitalTwinE2ETests {
         digitalTwinServiceClient.getModel(INVALID_INTERFACE_URN);
     }
 
-    @Test
+    @Test @Ignore
     public void testGetAllDigitalTwinInterfacesValidDigitalTwinId() throws IOException {
         String digitalTwin = digitalTwinServiceClient.getDigitalTwin(testDevice.getDeviceId());
         JsonNode digitalTwinObject = convertJsonStringToJsonNode(digitalTwin);
@@ -117,11 +117,13 @@ public class DigitalTwinServiceClientE2ETests extends DigitalTwinE2ETests {
 
     // TODO: Autorest currently does not throw Exception for GET 404 status
     @Test(expected = NoSuchElementException.class)
+    @Ignore
     public void testGetAllDigitalTwinInterfacesInvalidDigitalTwinId() {
         digitalTwinServiceClient.getDigitalTwin(INVALID_DEVICE_ID);
     }
 
     @Test(expected = IOException.class)
+    @Ignore
     public void testUpdateDigitalTwinPropertiesInvalidPropertyPatch() throws IOException {
         String randomUuid = UUID.randomUUID().toString();
         String componentName = "testComponentName";
@@ -140,6 +142,7 @@ public class DigitalTwinServiceClientE2ETests extends DigitalTwinE2ETests {
 
     // Service throws a 404 Not Found
     @Test(expected = RestException.class)
+    @Ignore
     public void testInvokeCommandOnInvalidDevice() {
         String samplePayload = "samplePayload";
         digitalTwinServiceClient.invokeCommand(INVALID_DEVICE_ID, TEST_COMPONENT_NAME, SYNC_COMMAND_WITH_PAYLOAD, samplePayload);

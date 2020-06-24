@@ -84,7 +84,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         this.httpsIotHubConnection = null;
     }
 
-    public ResponseMessage sendFileUploadMessage(IotHubTransportMessage message) throws IOException
+    public ResponseMessage getFileUploadSasUri(IotHubTransportMessage message) throws IOException
     {
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_028 [This function shall set the uri path of the provided message to the
         // format devices/<deviceid>/modules/<moduleid>/files if a moduleId is present or
@@ -96,9 +96,6 @@ public class HttpsTransportManager implements IotHubTransportManager
 
     public ResponseMessage sendFileUploadNotification(IotHubTransportMessage message) throws IOException
     {
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_34_029 [This function shall set the uri path of the provided message to the
-        // format devices/<deviceid>/modules/<moduleid>/files/notifications if a moduleId is present or
-        // devices/<deviceid>/modules/<moduleid>/files/notifications otherwise, and then send it.]
         String uri = new IotHubUri("", this.config.getDeviceId(), PATH_NOTIFICATIONS_STRING, this.config.getModuleId()).toStringWithoutApiVersion();
         message.setUriPath(uri);
         return this.send(message, new HashMap<String, String>());
@@ -115,8 +112,6 @@ public class HttpsTransportManager implements IotHubTransportManager
      */
     public ResponseMessage send(IotHubTransportMessage message, Map<String, String> additionalHeaders) throws IOException, IllegalArgumentException
     {
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_007: [The send shall create a new instance of the `HttpMessage`, by parsing the Message with `parseHttpsJsonMessage` from `HttpsSingleMessage`.]
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_008: [If send failed to parse the message, it shall bypass the exception.]
         HttpsMessage httpsMessage = HttpsSingleMessage.parseHttpsJsonMessage(message);
 
         if((message.getIotHubMethod() == null) || (message.getUriPath() == null))
@@ -128,23 +123,17 @@ public class HttpsTransportManager implements IotHubTransportManager
         switch (message.getIotHubMethod())
         {
             case GET:
-                //Codes_SRS_HTTPSTRANSPORTMANAGER_21_009: [If the IotHubMethod is `GET`, the send shall set the httpsMethod as `GET`.]
                 httpsMethod = HttpsMethod.GET;
                 break;
             case POST:
-                //Codes_SRS_HTTPSTRANSPORTMANAGER_21_010: [If the IotHubMethod is `POST`, the send shall set the httpsMethod as `POST`.]
                 httpsMethod = HttpsMethod.POST;
                 break;
             default:
-                //Codes_SRS_HTTPSTRANSPORTMANAGER_21_011: [If the IotHubMethod is not `GET` or `POST`, the send shall throws IllegalArgumentException.]
                 throw new IllegalArgumentException("Unknown IoT Hub type " + message.getIotHubMethod().toString());
         }
 
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_012: [The send shall set the httpsPath with the uriPath in the message.]
         String httpsPath = message.getUriPath();
 
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_013: [The send shall call `sendHttpsMessage` from `HttpsIotHubConnection` to send the message.]
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_014: [If `sendHttpsMessage` failed, the send shall bypass the exception.]
         try
         {
             return this.httpsIotHubConnection.sendHttpsMessage(httpsMessage, httpsMethod, httpsPath, additionalHeaders);
@@ -163,8 +152,6 @@ public class HttpsTransportManager implements IotHubTransportManager
      */
     public Message receive() throws IOException
     {
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_015: [The receive shall receive and bypass message from `HttpsIotHubConnection`, by calling `receiveMessage`.]
-        //Codes_SRS_HTTPSTRANSPORTMANAGER_21_016: [If `receiveMessage` failed, the receive shall bypass the exception.]
         try
         {
             return this.httpsIotHubConnection.receiveMessage();

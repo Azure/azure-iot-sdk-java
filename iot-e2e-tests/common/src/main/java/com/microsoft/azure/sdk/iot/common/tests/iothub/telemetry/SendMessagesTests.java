@@ -6,6 +6,9 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub.telemetry;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.BasicTierHubOnlyTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.common.setup.iothub.SendMessagesCommon;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -14,6 +17,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -34,6 +38,7 @@ import static junit.framework.TestCase.fail;
  * Test class containing all non error injection tests to be run on JVM and android pertaining to sending messages from a device/module. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
+@IotHubTest
 public class SendMessagesTests extends SendMessagesCommon
 {
     public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
@@ -41,15 +46,12 @@ public class SendMessagesTests extends SendMessagesCommon
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, withProxy);
     }
 
+    //TODO this test doesn't seem to check anything that the basic sendMessages test already checks. It just has a different payload. Needs
+    // to check that something actually happened downstream because it was a security message
+    @Ignore
     @Test
     public void sendSecurityMessages() throws Exception
     {
-        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
-        {
-            //mqtt_ws does not support x509 auth currently
-            return;
-        }
-
         this.testInstance.setup();
 
         IotHubServicesCommon.sendSecurityMessages(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, null);
@@ -58,18 +60,13 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void sendMessages() throws Exception
     {
-        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
-        {
-            //mqtt_ws does not support x509 auth currently
-            return;
-        }
-
         this.testInstance.setup();
 
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendLargestMessages() throws Exception
     {
         this.testInstance.setup();
@@ -86,6 +83,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesWithUnusualApplicationProperties() throws Exception
     {
         this.testInstance.setup();
@@ -100,6 +98,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, IOException, IotHubException
     {
         if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS && testInstance.clientType.equals(ClientType.DEVICE_CLIENT)))
@@ -153,6 +152,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void tokenExpiredAfterOpenButBeforeSendHttp() throws Exception
     {
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
@@ -178,6 +178,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void expiredMessagesAreNotSent() throws Exception
     {
         if (testInstance.useHttpProxy)
@@ -197,12 +198,6 @@ public class SendMessagesTests extends SendMessagesCommon
         if (testInstance.authenticationType != SAS)
         {
             //only testing sas based auth with custom ssl context here
-            return;
-        }
-
-        if (testInstance.protocol == MQTT_WS && (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY))
-        {
-            //mqtt_ws does not support x509 auth currently
             return;
         }
 

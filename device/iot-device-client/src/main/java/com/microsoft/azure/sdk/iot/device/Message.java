@@ -301,7 +301,6 @@ public class Message
             this.properties.remove(messageProperty);
         }
 
-        log.trace("Setting message property");
         this.properties.add(new MessageProperty(name, value));
     }
 

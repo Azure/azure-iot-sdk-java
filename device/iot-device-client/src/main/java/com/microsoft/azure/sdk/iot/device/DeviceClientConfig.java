@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,10 @@ public final class DeviceClientConfig
 
     private boolean useWebsocket;
     private ProxySettings proxySettings;
+
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    String modelId;
 
     @Getter
     @Setter
@@ -97,6 +102,10 @@ public final class DeviceClientConfig
      */
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString) throws IllegalArgumentException
     {
+        configSasAuth(iotHubConnectionString);
+    }
+
+    private void configSasAuth(IotHubConnectionString iotHubConnectionString) {
         commonConstructorSetup(iotHubConnectionString);
         assertConnectionStringIsNotX509(iotHubConnectionString);
 
@@ -148,8 +157,24 @@ public final class DeviceClientConfig
         log.debug("Device configured to use software based x509 authentication provider");
     }
 
+    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, ClientOptions clientOptions)
+    {
+        if (clientOptions != null && clientOptions.sslContext != null)
+        {
+            configSsl(iotHubConnectionString, clientOptions.sslContext);
+        }
+        else
+        {
+            configSasAuth(iotHubConnectionString);
+        }
+    }
+
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, SSLContext sslContext)
     {
+        configSsl(iotHubConnectionString, sslContext);
+    }
+
+    private void configSsl(IotHubConnectionString iotHubConnectionString, SSLContext sslContext) {
         commonConstructorSetup(iotHubConnectionString);
 
         if (iotHubConnectionString.isUsingX509())

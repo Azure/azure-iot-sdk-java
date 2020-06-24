@@ -5,10 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.common.helpers.ConditionalIgnoreRule;
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
-import com.microsoft.azure.sdk.iot.common.helpers.StandardTierOnlyRule;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
 import com.microsoft.azure.sdk.iot.common.helpers.Tools;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.StandardTierHubOnlyTest;
 import com.microsoft.azure.sdk.iot.service.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -33,7 +34,8 @@ import static org.junit.Assert.*;
  * Test class containing all tests to be run on JVM and android pertaining to C2D communication using the service client. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class ServiceClientTests extends IotHubIntegrationTest
+@IotHubTest
+public class ServiceClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";
@@ -93,7 +95,6 @@ public class ServiceClientTests extends IotHubIntegrationTest
                         .start();
     }
 
-
     @AfterClass
     public static void stopProxy()
     {
@@ -101,14 +102,14 @@ public class ServiceClientTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
         cloudToDeviceTelemetry(false);
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithProxy() throws Exception
     {
         if (testInstance.protocol != IotHubServiceClientProtocol.AMQPS_WS)
@@ -168,6 +169,7 @@ public class ServiceClientTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
+    @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException
     {
         boolean expectedExceptionWasCaught = false;
@@ -192,6 +194,7 @@ public class ServiceClientTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
+    @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFeedbackReceiver() throws IOException
     {
         boolean expectedExceptionWasCaught = false;
@@ -218,6 +221,7 @@ public class ServiceClientTests extends IotHubIntegrationTest
     }
 
     @Test (timeout=MAX_TEST_MILLISECONDS)
+    @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFileUploadFeedbackReceiver() throws IOException
     {
         boolean expectedExceptionWasCaught = false;

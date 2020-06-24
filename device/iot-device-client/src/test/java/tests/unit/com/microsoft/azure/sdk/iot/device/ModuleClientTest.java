@@ -176,9 +176,6 @@ public class ModuleClientTest
                 new IotHubConnectionString(connString);
                 result = mockedIotHubConnectionString;
 
-                new DeviceClientConfig(mockedIotHubConnectionString, mockedSSLContext);
-                result = mockedDeviceClientConfig;
-
                 mockedDeviceClientConfig.getModuleId();
                 result = "some module id";
             }
@@ -186,6 +183,28 @@ public class ModuleClientTest
 
         // act
         final ModuleClient client = new ModuleClient(connString, protocol, mockedSSLContext);
+    }
+
+    @Test
+    public void constructorWithModelIdSuccess(@Mocked final ClientOptions mockedClientOptions) throws URISyntaxException, ModuleClientException {
+        // arrange
+        final String connString =
+                "TestConnectionString";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
+
+        new Expectations()
+        {
+            {
+                new IotHubConnectionString(connString);
+                result = mockedIotHubConnectionString;
+
+                mockedDeviceClientConfig.getModuleId();
+                result = "some module id";
+            }
+        };
+
+        // act
+        new ModuleClient(connString, protocol, mockedClientOptions);
     }
 
     //Tests_SRS_MODULECLIENT_34_001: [If the provided outputName is null or empty, this function shall throw an IllegalArgumentException.]
@@ -734,9 +753,6 @@ public class ModuleClientTest
                 new IotHubConnectionString(expectedEdgeHubConnectionString);
                 result = mockedIotHubConnectionString;
 
-                new DeviceClientConfig(mockedIotHubConnectionString);
-                result = mockedDeviceClientConfig;
-
                 mockedDeviceClientConfig.getModuleId();
                 result = "someModuleId";
             }
@@ -778,10 +794,6 @@ public class ModuleClientTest
 
                 new IotHubConnectionString(expectedIotHubConnectionString);
                 result = mockedIotHubConnectionString;
-
-                new DeviceClientConfig(mockedIotHubConnectionString);
-                result = mockedDeviceClientConfig;
-
                 mockedDeviceClientConfig.getModuleId();
                 result = "someModuleId";
             }

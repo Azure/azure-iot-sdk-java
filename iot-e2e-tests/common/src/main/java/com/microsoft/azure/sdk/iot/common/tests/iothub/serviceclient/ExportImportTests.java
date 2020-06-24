@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.common.helpers.IotHubIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.IntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
@@ -36,7 +38,8 @@ import static junit.framework.TestCase.fail;
  * Test class containing all tests to be run on JVM and android pertaining to Export and Import jobs. Class needs to be extended
  * in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
-public class ExportImportTests extends IotHubIntegrationTest
+@IotHubTest
+public class ExportImportTests extends IntegrationTest
 {
     private static final long IMPORT_EXPORT_TEST_TIMEOUT = 8 * 60 * 1000;
     private static final long IMPORT_JOB_TIMEOUT = 6 * 60 * 1000;
@@ -102,6 +105,7 @@ public class ExportImportTests extends IotHubIntegrationTest
     }
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    @ContinuousIntegrationTest
     public void export_import_e2e() throws Exception
     {
 
@@ -135,12 +139,14 @@ public class ExportImportTests extends IotHubIntegrationTest
     }
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    @ContinuousIntegrationTest
     public void export_import_key_based_storage_auth_e2e() throws Exception
     {
         export_import_storage_auth_e2e(StorageAuthenticationType.KEY);
     }
 
     @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    @ContinuousIntegrationTest
     public void export_import_identity_based_storage_auth_e2e() throws Exception
     {
         export_import_storage_auth_e2e(StorageAuthenticationType.IDENTITY);

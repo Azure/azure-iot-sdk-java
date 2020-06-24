@@ -90,7 +90,7 @@ public class DigitalTwinRegisterComponentsE2ETests extends DigitalTwinE2ETests {
                                                                .build();
     }
 
-    @Test
+    @Test @Ignore
     public void testRegisterSingleComponentSuccess() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
@@ -111,7 +111,7 @@ public class DigitalTwinRegisterComponentsE2ETests extends DigitalTwinE2ETests {
         assertThat(componentList.get(TEST_COMPONENT_NAME_2).asText()).isEqualTo(TestComponent2.TEST_INTERFACE_ID);
     }
 
-    @Test
+    @Test @Ignore
     public void testRegisterMultipleComponentsSuccess() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
@@ -134,7 +134,7 @@ public class DigitalTwinRegisterComponentsE2ETests extends DigitalTwinE2ETests {
         assertThat(componentList.get(TEST_COMPONENT_NAME_2).asText()).isEqualTo(TestComponent2.TEST_INTERFACE_ID);
     }
 
-    @Test
+    @Test @Ignore
     public void testRegisterComponentsMultipleTimesSequentially() throws IotHubException, IOException, URISyntaxException {
         digitalTwinId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         testDevice = new TestDigitalTwinDevice(digitalTwinId, protocol);
@@ -156,7 +156,7 @@ public class DigitalTwinRegisterComponentsE2ETests extends DigitalTwinE2ETests {
         assertThat(componentList.get(TEST_COMPONENT_NAME_2).asText()).isEqualTo(TestComponent2.TEST_INTERFACE_ID);
     }
 
-    @Test
+    @Test @Ignore
     public void testRegisterComponentsMultipleTimesInParallel() throws IotHubException, IOException, URISyntaxException, InterruptedException {
         final Semaphore semaphore = new Semaphore(0);
         final List<DigitalTwinClientResult> registrationResults = synchronizedList(new ArrayList<>());

@@ -4,28 +4,21 @@
  */
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
-import com.microsoft.appcenter.espresso.Factory;
-import com.microsoft.appcenter.espresso.ReportHelper;
 import com.microsoft.azure.sdk.iot.android.BuildConfig;
-import com.microsoft.azure.sdk.iot.android.helper.TestGroup38;
+import com.microsoft.azure.sdk.iot.android.helper.TestGroup13;
 import com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient.ServiceClientTests;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 
-import org.junit.After;
-import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.Collection;
 
-@TestGroup38
+@TestGroup13
 @RunWith(Parameterized.class)
 public class ServiceClientAndroidRunner extends ServiceClientTests
 {
-    @Rule
-    public ReportHelper reportHelper = Factory.getReportHelper();
-
     //This function is run before even the @BeforeClass annotation, so it is used as the @BeforeClass method
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputsCommon() throws IOException
@@ -33,17 +26,12 @@ public class ServiceClientAndroidRunner extends ServiceClientTests
         iotHubConnectionString = BuildConfig.IotHubConnectionString;
         isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
         invalidCertificateServerConnectionString = BuildConfig.IotHubInvalidCertConnectionString;
+        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
         return ServiceClientTests.inputsCommon();
     }
 
     public ServiceClientAndroidRunner(IotHubServiceClientProtocol protocol)
     {
         super(protocol);
-    }
-
-    @After
-    public void labelSnapshot()
-    {
-        reportHelper.label("Stopping App");
     }
 }

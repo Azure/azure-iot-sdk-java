@@ -60,7 +60,7 @@ public interface IotHubTransportConnection
      * @return true if the acknowledgement was sent successfully, and false otherwise
      * @throws TransportException if an exception occurred while sending the acknowledgement
      */
-    boolean sendMessageResult(Message message, IotHubMessageResult result) throws TransportException;
+    boolean sendMessageResult(IotHubTransportMessage message, IotHubMessageResult result) throws TransportException;
 
     /**
      * Gives the UUID associated with this connection instance. This string is used in conjunction with the callbacks

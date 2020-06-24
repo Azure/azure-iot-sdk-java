@@ -42,13 +42,16 @@ public class InternalClient
     private DeviceTwin twin;
     private DeviceMethod method;
 
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis)
+    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
     {
         /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
         commonConstructorVerification(iotHubConnectionString, protocol);
 
-        this.config = new DeviceClientConfig(iotHubConnectionString);
+        this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
         this.config.setProtocol(protocol);
+        if (clientOptions != null) {
+            this.config.modelId = clientOptions.getModelId();
+        }
 
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
@@ -82,7 +85,7 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
     }
 
-    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException, IOException
+    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions) throws URISyntaxException, IOException
     {
         if (protocol == null)
         {
@@ -114,6 +117,9 @@ public class InternalClient
         //Codes_SRS_INTERNALCLIENT_34_066: [The provided security provider will be saved in config.]
         this.config = new DeviceClientConfig(connectionString, securityProvider);
         this.config.setProtocol(protocol);
+        if (clientOptions != null) {
+            this.config.modelId = clientOptions.getModelId();
+        }
 
         //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);

@@ -15,10 +15,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -168,7 +165,7 @@ public class DigitalTwinTelemetryParameterizedE2ETests extends DigitalTwinE2ETes
         assertThat(digitalTwinDeviceClient.bindComponents(singletonList(testComponent))).isEqualTo(DIGITALTWIN_CLIENT_OK);
     }
 
-    @Test
+    @Test @Ignore
     public void testSendTelemetryDifferentSchema() throws IOException, InterruptedException {
         log.debug("Sending telemetry: telemetryProperties={}", telemetryProperties);
         DigitalTwinClientResult digitalTwinClientResult = testComponent.sendTelemetryPropertiesAsync(telemetryProperties).blockingGet();

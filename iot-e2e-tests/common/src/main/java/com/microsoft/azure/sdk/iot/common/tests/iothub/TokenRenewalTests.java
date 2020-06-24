@@ -6,6 +6,8 @@
 package com.microsoft.azure.sdk.iot.common.tests.iothub;
 
 import com.microsoft.azure.sdk.iot.common.helpers.*;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.ContinuousIntegrationTest;
+import com.microsoft.azure.sdk.iot.common.helpers.annotations.IotHubTest;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -17,6 +19,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
@@ -31,7 +34,8 @@ import java.util.UUID;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.assertTrue;
 
-public class TokenRenewalTests extends IotHubIntegrationTest
+@IotHubTest
+public class TokenRenewalTests extends IntegrationTest
 {
     protected static String iotHubConnectionString;
     private static RegistryManager registryManager;
@@ -43,6 +47,13 @@ public class TokenRenewalTests extends IotHubIntegrationTest
 
     private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
     private static final Integer RETRY_MILLISECONDS = 100;
+
+    private static final int TOKEN_RENEWAL_TEST_TIMEOUT_MILLIS = 17 * 60 * 1000;
+
+    public TokenRenewalTests()
+    {
+        timeout = new Timeout(TOKEN_RENEWAL_TEST_TIMEOUT_MILLIS);
+    }
 
     public static void setup() throws IOException
     {
@@ -73,6 +84,7 @@ public class TokenRenewalTests extends IotHubIntegrationTest
      * @throws Exception if the test fails in any way
      */
     @Test
+    @ContinuousIntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
