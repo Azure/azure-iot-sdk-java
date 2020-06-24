@@ -5,16 +5,15 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.twin;
 
-import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup13;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.DeviceTwinWithVersionTests;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.util.Collection;
+
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.DeviceTwinWithVersionTests;
 
 @TestGroup13
 @RunWith(Parameterized.class)

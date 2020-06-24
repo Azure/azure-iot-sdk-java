@@ -5,17 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup11;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.ExportImportTests;
-import com.microsoft.azure.storage.StorageException;
 
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.ExportImportTests;
 
 @Ignore
 @TestGroup11
