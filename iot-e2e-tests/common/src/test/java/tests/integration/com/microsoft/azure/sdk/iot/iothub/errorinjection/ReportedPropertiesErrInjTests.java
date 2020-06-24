@@ -20,7 +20,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Standar
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
@@ -228,7 +227,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, internalClient);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient);
         // add one new reported property
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());

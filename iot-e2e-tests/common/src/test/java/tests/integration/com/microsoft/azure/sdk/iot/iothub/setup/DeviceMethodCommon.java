@@ -76,7 +76,7 @@ public class DeviceMethodCommon extends IntegrationTest
     private List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates;
 
     protected DeviceMethodTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
 
     protected static Collection inputsCommon() throws IOException
     {

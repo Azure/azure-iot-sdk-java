@@ -105,9 +105,9 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final long PERIODIC_WAIT_TIME_FOR_VERIFICATION = 1000; // 1 sec
     protected static final long MAX_WAIT_TIME_FOR_VERIFICATION = 3000; // 30 sec
     protected static final long DELAY_BETWEEN_OPERATIONS = 200; // 0.2 sec
-    public static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 30 * 1000; // 30 seconds
+    public static final long MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS = 30 * 1000; // 30 seconds
 
-    public static final long DESIRED_PROPERTIES_PROPAGATION_TIME_MILLIS = 5 * 1000; //5 seconds
+    public static final long DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS = 5 * 1000; //5 seconds
 
     protected static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = 5000; // 5 sec
 
@@ -151,7 +151,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected DeviceState[] devicesUnderTest;
 
     protected DeviceTwinTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
 
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;

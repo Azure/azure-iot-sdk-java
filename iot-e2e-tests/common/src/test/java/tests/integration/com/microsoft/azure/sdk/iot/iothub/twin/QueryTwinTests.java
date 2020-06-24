@@ -66,7 +66,7 @@ public class QueryTwinTests extends DeviceTwinCommon
 
         setDesiredProperties(queryProperty, queryPropertyValue, MAX_DEVICES);
 
-        Thread.sleep(DESIRED_PROPERTIES_PROPAGATION_TIME_MILLIS);
+        Thread.sleep(DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS);
 
         // Raw Query for multiple devices having same property
         final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
@@ -189,7 +189,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         });
 
         executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
         }
@@ -442,7 +442,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         });
 
         executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
         }

@@ -111,7 +111,7 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String DPS_ID_SCOPE_ENV_VAR_NAME = "IOT_DPS_ID_SCOPE";
     public static String provisioningServiceIdScope = "";
 
-    public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION = 60 * 1000;
+    public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION_MILLISECONDS = 60 * 1000;
 
     public static final String HMAC_SHA256 = "HmacSHA256";
 
@@ -315,7 +315,7 @@ public class ProvisioningCommon extends IntegrationTest
 
             System.out.println("Waiting for Provisioning Service to register");
 
-            if (System.currentTimeMillis() - startTime > MAX_TIME_TO_WAIT_FOR_REGISTRATION)
+            if (System.currentTimeMillis() - startTime > MAX_TIME_TO_WAIT_FOR_REGISTRATION_MILLISECONDS)
             {
                 fail("Timed out waiting for registration to succeed");
             }

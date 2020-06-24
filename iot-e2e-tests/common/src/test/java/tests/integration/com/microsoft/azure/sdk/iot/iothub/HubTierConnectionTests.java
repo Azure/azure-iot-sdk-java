@@ -36,7 +36,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class HubTierConnectionTests extends IntegrationTest
 {
-    protected static final long WAIT_FOR_DISCONNECT_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    protected static final long WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
 
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 180000;
@@ -217,7 +217,7 @@ public class HubTierConnectionTests extends IntegrationTest
         testInstance.client.subscribeToDeviceMethod(new DeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
 
         //assert
-        waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT, testInstance.client);
+        waitForDisconnect(connectionStatusUpdates, WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS, testInstance.client);
         testInstance.client.closeNow();
     }
 

@@ -23,7 +23,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinComm
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -94,7 +93,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
             });
         }
         executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
         }
@@ -181,7 +180,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     }
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
         }

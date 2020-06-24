@@ -108,11 +108,11 @@ public class ReceiveMessagesCommon extends IntegrationTest
     protected static ServiceClient serviceClient;
 
     // How much to wait until receiving a message from the server, in milliseconds
-    protected static final int RECEIVE_TIMEOUT = 3 * 60 * 1000; // 3 minutes
+    protected static final int RECEIVE_TIMEOUT_MILLISECONDS = 3 * 60 * 1000; // 3 minutes
 
     protected static String expectedCorrelationId = "1234";
     protected static String expectedMessageId = "5678";
-    protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
 
     public ReceiveMessagesTestInstance testInstance;
 
@@ -357,7 +357,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             {
                 Thread.sleep(300);
 
-                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
+                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT_MILLISECONDS)
                 {
                     Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Timed out waiting to receive message", testInstance.client));
                 }
@@ -385,7 +385,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             {
                 Thread.sleep(100);
 
-                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT)
+                if (System.currentTimeMillis() - startTime > RECEIVE_TIMEOUT_MILLISECONDS)
                 {
                     Assert.fail(buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Receiving messages timed out.", testInstance.client));
                 }

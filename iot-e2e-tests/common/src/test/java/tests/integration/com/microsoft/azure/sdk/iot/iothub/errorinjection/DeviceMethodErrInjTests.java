@@ -21,7 +21,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Standar
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceMethodCommon;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -258,7 +257,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, this.testInstance.deviceTestManager.client);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, this.testInstance.deviceTestManager.client);
         invokeMethodSucceed();
     }
 }

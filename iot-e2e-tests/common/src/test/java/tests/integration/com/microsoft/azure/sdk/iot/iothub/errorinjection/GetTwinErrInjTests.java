@@ -22,7 +22,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Standar
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -262,7 +261,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT, internalClient);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient);
         for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
             PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];

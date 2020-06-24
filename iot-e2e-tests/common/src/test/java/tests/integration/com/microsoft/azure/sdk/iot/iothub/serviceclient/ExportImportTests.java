@@ -40,9 +40,9 @@ import static junit.framework.TestCase.fail;
 @IotHubTest
 public class ExportImportTests extends IntegrationTest
 {
-    private static final long IMPORT_EXPORT_TEST_TIMEOUT = 8 * 60 * 1000;
-    private static final long IMPORT_JOB_TIMEOUT = 6 * 60 * 1000;
-    private static final long EXPORT_JOB_TIMEOUT = 6 * 60 * 1000;
+    private static final long IMPORT_EXPORT_TEST_TIMEOUT_MILLISECONDS = 8 * 60 * 1000;
+    private static final long IMPORT_JOB_TIMEOUT_MILLISECONDS = 6 * 60 * 1000;
+    private static final long EXPORT_JOB_TIMEOUT_MILLISECONDS = 6 * 60 * 1000;
 
     protected static String iotHubConnectionString = "";
     public static boolean isBasicTierHub;
@@ -58,24 +58,11 @@ public class ExportImportTests extends IntegrationTest
     @BeforeClass
     public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
     {
-        if (iotHubConnectionString == null || iotHubConnectionString.isEmpty())
-        {
-            iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-            isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
-            storageAccountConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.STORAGE_ACCOUNT_CONNECTION_STRING_ENV_VAR_NAME);
-            isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        }
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        storageAccountConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.STORAGE_ACCOUNT_CONNECTION_STRING_ENV_VAR_NAME);
+        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        // If the environment variable isn't set, then it is likely because it is an android device running these tests
-        // If running these tests on android, a different method will get the environment variables, and then call setUpCommon().
-        if (iotHubConnectionString != null && iotHubConnectionString != "")
-        {
-            setUpCommon();
-        }
-    }
-
-    public static void setUpCommon() throws URISyntaxException, InvalidKeyException, StorageException, IOException
-    {
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
@@ -122,7 +109,7 @@ public class ExportImportTests extends IntegrationTest
         }
     }
 
-    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT_MILLISECONDS)
     @ContinuousIntegrationTest
     @Ignore
     public void export_import_e2e() throws Exception
@@ -157,7 +144,7 @@ public class ExportImportTests extends IntegrationTest
         }
     }
 
-    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT_MILLISECONDS)
     @ContinuousIntegrationTest
     @Ignore
     public void export_import_key_based_storage_auth_e2e() throws Exception
@@ -165,7 +152,7 @@ public class ExportImportTests extends IntegrationTest
         export_import_storage_auth_e2e(StorageAuthenticationType.KEY);
     }
 
-    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT)
+    @Test (timeout = IMPORT_EXPORT_TEST_TIMEOUT_MILLISECONDS)
     @ContinuousIntegrationTest
     @Ignore
     public void export_import_identity_based_storage_auth_e2e() throws Exception
@@ -272,7 +259,7 @@ public class ExportImportTests extends IntegrationTest
                 break;
             }
 
-            if (System.currentTimeMillis() - startTime > EXPORT_JOB_TIMEOUT)
+            if (System.currentTimeMillis() - startTime > EXPORT_JOB_TIMEOUT_MILLISECONDS)
             {
                 fail("Timed out waiting for the export job to complete");
             }
@@ -377,7 +364,7 @@ public class ExportImportTests extends IntegrationTest
                 break;
             }
 
-            if (System.currentTimeMillis() - startTime > IMPORT_JOB_TIMEOUT)
+            if (System.currentTimeMillis() - startTime > IMPORT_JOB_TIMEOUT_MILLISECONDS)
             {
                 fail("Timed out waiting for the import job to complete");
             }

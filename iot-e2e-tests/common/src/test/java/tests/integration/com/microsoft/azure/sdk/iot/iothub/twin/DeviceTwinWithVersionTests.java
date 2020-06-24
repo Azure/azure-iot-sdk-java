@@ -72,7 +72,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
     private static final long BREATHE_TIME = 100; // 0.1 sec
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 1000; // 1 sec
-    private static final long EXPECTED_PROPERTIES_MAX_WAIT_MS = 60 * 1000; //1 minute
+    private static final long EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS = 60 * 1000; //1 minute
     protected static String iotHubConnectionString = "";
 
     private static final String PROPERTY_KEY_1 = "Key1";
@@ -282,7 +282,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
-            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS)
             {
                 fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
@@ -320,7 +320,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
-            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS)
             {
                 fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
@@ -371,7 +371,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
             startTime = System.currentTimeMillis();
             while(!testInstance.testDevice.expectedProperties.isEmpty())
             {
-                if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+                if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS)
                 {
                     fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
                 }
@@ -409,7 +409,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
-            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS)
             {
                 fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
@@ -457,7 +457,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         startTime = System.currentTimeMillis();
         while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
-            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS)
             {
                 fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
@@ -496,7 +496,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         long startTime = System.currentTimeMillis();
         while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
-            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS)
             {
                 fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }
@@ -544,7 +544,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         startTime = System.currentTimeMillis();
         while(!testInstance.testDevice.expectedProperties.isEmpty())
         {
-            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MS)
+            if (System.currentTimeMillis() - startTime > EXPECTED_PROPERTIES_MAX_WAIT_MILLISECONDS)
             {
                 fail(buildExceptionMessage("Timed out waiting for expected property change", testInstance.testDevice.deviceClient));
             }

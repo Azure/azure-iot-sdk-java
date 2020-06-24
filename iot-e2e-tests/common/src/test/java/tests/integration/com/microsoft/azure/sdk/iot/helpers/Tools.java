@@ -5,24 +5,24 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class Tools
 {
-    private static final long RETRY_TIMEOUT_ON_NETWORK_FAILURE = 60 * 1000;
+    private static final long RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS = 60 * 1000;
     private static final long WAIT_FOR_RETRY = 2000;
 
     private static final String ANDROID_BUILD_CONFIG_CLASS = "com.iothub.azure.microsoft.com.androide2e.test.BuildConfig";
@@ -81,13 +81,13 @@ public class Tools
                 }
                 catch (IllegalAccessException e)
                 {
-                    // disregard
+                    log.error("Cannot access the following field: {}", field.getName(), e);
                 }
             });
         }
         catch (ClassNotFoundException e)
         {
-            // Running JVM, not android. Will get the environment variables from the environment instead of from the android build.config
+            log.debug("Likely running the JVM tests, ignoring ClassNotFoundException");
         }
 
         return envVariables;
@@ -108,7 +108,7 @@ public class Tools
     {
         long startTime = System.currentTimeMillis();
         Device ret = null;
-        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
         {
             try
             {
@@ -120,7 +120,7 @@ public class Tools
                 System.out.println("Failed to add device " + device.getDeviceId());
                 e.printStackTrace();
                 Thread.sleep(WAIT_FOR_RETRY);
-                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
                 }
@@ -135,7 +135,7 @@ public class Tools
     {
         long startTime = System.currentTimeMillis();
         Module ret = null;
-        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
         {
             try
             {
@@ -147,7 +147,7 @@ public class Tools
                 System.out.println("Failed to add module " + module.getId());
                 e.printStackTrace();
                 Thread.sleep(WAIT_FOR_RETRY);
-                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
                 }
@@ -159,7 +159,7 @@ public class Tools
     public static void getStatisticsWithRetry(RegistryManager registryManager) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
         {
             try
             {
@@ -171,7 +171,7 @@ public class Tools
                 System.out.println("Failed to get statistics ");
                 e.printStackTrace();
                 Thread.sleep(WAIT_FOR_RETRY);
-                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
                 }
@@ -183,7 +183,7 @@ public class Tools
     {
         long startTime = System.currentTimeMillis();
         Device ret = null;
-        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
         {
             try
             {
@@ -195,7 +195,7 @@ public class Tools
                 System.out.println("Failed to get device ");
                 e.printStackTrace();
                 Thread.sleep(WAIT_FOR_RETRY);
-                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
                 }
@@ -209,7 +209,7 @@ public class Tools
     {
         long startTime = System.currentTimeMillis();
         Module ret = null;
-        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+        while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
         {
             try
             {
@@ -221,7 +221,7 @@ public class Tools
                 System.out.println("Failed to get module ");
                 e.printStackTrace();
                 Thread.sleep(WAIT_FOR_RETRY);
-                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE)
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
                 }

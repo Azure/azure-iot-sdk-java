@@ -23,7 +23,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessage
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -233,7 +232,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
             //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
             // want the connection to be re-established before sending anything from service client
-            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT, testInstance.client);
+            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS, testInstance.client);
 
             if (testInstance.client instanceof DeviceClient)
             {

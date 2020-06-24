@@ -59,15 +59,15 @@ public class TransportClientTests extends IntegrationTest
 
     private static final long RETRY_MILLISECONDS = 100; //.1 seconds
     private static final long SEND_TIMEOUT_MILLISECONDS = 20 * 1000; // 20 seconds
-    private static final long RECEIVE_MESSAGE_TIMEOUT = 20 * 1000; // 20 seconds
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 10 * 1000; // 10 seconds
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION = 500; // .5 seconds
+    private static final long RECEIVE_MESSAGE_TIMEOUT_MILLISECONDS = 20 * 1000; // 20 seconds
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS = 10 * 1000; // 10 seconds
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS = 500; // .5 seconds
     private static final long RESPONSE_TIMEOUT_SECONDS = 200; // 200 seconds
     private static final long CONNECTION_TIMEOUT_SECONDS = 5; //5 seconds
-    private static final long MULTITHREADED_WAIT_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes
-    private static final long MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION = 10 * 1000; // 10 secs
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS = 1000; // 1 second
-    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION * 10; // 2 sec
+    private static final long MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS = 5 * 60 * 1000; // 5 minutes
+    private static final long MAX_TIMEOUT_FLUSH_NOTIFICATIONS_MILLISECONDS = 10 * 1000; // 10 secs
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MILLISECONDS = 1000; // 1 second
+    private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS_MILLISECONDS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS * 10; // 2 sec
     private static final long REGISTRY_MANAGER_DEVICE_CREATION_DELAY_MILLISECONDS = 3 * 1000;
 
     protected static String iotHubConnectionString = "";
@@ -331,7 +331,7 @@ public class TransportClientTests extends IntegrationTest
                 });
 
                 // assert
-                FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB);
+                FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
                 Assert.assertNotNull(buildExceptionMessage("file upload notification was null", testInstance.clientArrayList.get(indexJ)), fileUploadNotification);
                 verifyNotification(fileUploadNotification, testInstance.fileUploadState[i], testInstance.clientArrayList.get(indexJ));
                 Assert.assertTrue(buildExceptionMessage("File upload callback was not triggered for file upload attempt " + i, testInstance.clientArrayList.get(indexJ)), testInstance.fileUploadState[i].isCallBackTriggered);
@@ -341,7 +341,7 @@ public class TransportClientTests extends IntegrationTest
         }
 
         executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS))
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
         }
@@ -401,7 +401,7 @@ public class TransportClientTests extends IntegrationTest
         }
         countDownLatch.await(3, TimeUnit.MINUTES);
 
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MS * MAX_DEVICE_MULTIPLEX);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MILLISECONDS * MAX_DEVICE_MULTIPLEX);
 
         for (RunnableInvoke runnableInvoke:runs)
         {
@@ -437,7 +437,7 @@ public class TransportClientTests extends IntegrationTest
 
             // act
             testInstance.devicesUnderTest[i].deviceClient.subscribeToDesiredProperties(testInstance.devicesUnderTest[i].dCDeviceForTwin.getDesiredProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
 
             Set<Pair> desiredProperties = new HashSet<>();
             for (int j = 0; j < MAX_PROPERTIES_TO_TEST; j++)
@@ -446,7 +446,7 @@ public class TransportClientTests extends IntegrationTest
             }
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
             sCDeviceTwin.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
 
             // assert
             Assert.assertEquals(buildExceptionMessage("Device twin status expected to be SUCCESS, but was: " + testInstance.devicesUnderTest[i].deviceTwinStatus, testInstance.devicesUnderTest[i].deviceClient), SUCCESS, testInstance.devicesUnderTest[i].deviceTwinStatus);
@@ -465,19 +465,19 @@ public class TransportClientTests extends IntegrationTest
             // send max_prop RP all at once
             testInstance.devicesUnderTest[i].dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
             testInstance.devicesUnderTest[i].deviceClient.sendReportedProperties(testInstance.devicesUnderTest[i].dCDeviceForTwin.getReportedProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
 
             // act
             // Update RP
             testInstance.devicesUnderTest[i].dCDeviceForTwin.updateAllExistingReportedProperties();
             testInstance.devicesUnderTest[i].deviceClient.sendReportedProperties(testInstance.devicesUnderTest[i].dCDeviceForTwin.getReportedProp());
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
 
             // assert
             Assert.assertEquals(buildExceptionMessage("Expected status SUCCESS but was " + testInstance.devicesUnderTest[i].deviceTwinStatus, testInstance.devicesUnderTest[i].deviceClient), SUCCESS, testInstance.devicesUnderTest[i].deviceTwinStatus);
 
             // verify if they are received by SC
-            Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
+            Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS_MILLISECONDS);
             int actualReportedPropFound = readReportedProperties(testInstance.devicesUnderTest[i], PROPERTY_KEY, PROPERTY_VALUE_UPDATE);
             Assert.assertEquals(buildExceptionMessage("Missing reported properties on the " + (i+1) + " device out of " + MAX_DEVICE_MULTIPLEX,testInstance.devicesUnderTest[i].deviceClient), MAX_PROPERTIES_TO_TEST.intValue(), actualReportedPropFound);
         }
@@ -517,9 +517,9 @@ public class TransportClientTests extends IntegrationTest
                 }
             });
         }
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
         executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MS, TimeUnit.MILLISECONDS)) //4 minutes
+        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS)) //4 minutes
         {
             executor.shutdownNow();
             fail(buildExceptionMessage("Test threads did not finish before timeout", testInstance.devicesUnderTest[0].deviceClient));
@@ -621,7 +621,7 @@ public class TransportClientTests extends IntegrationTest
             {
                 Thread.sleep(100);
 
-                if (System.currentTimeMillis() - startTime > RECEIVE_MESSAGE_TIMEOUT)
+                if (System.currentTimeMillis() - startTime > RECEIVE_MESSAGE_TIMEOUT_MILLISECONDS)
                 {
                     fail("Timed out waiting for message to be received");
                 }
@@ -924,7 +924,7 @@ public class TransportClientTests extends IntegrationTest
                 deviceState.connectionString = registryManager.getDeviceConnectionString(deviceState.sCDeviceForRegistryManager);
                 testInstance.devicesUnderTest[i] = deviceState;
 
-                Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+                Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
             }
 
             transportClient = new TransportClient(IotHubClientProtocol.AMQPS);
@@ -946,7 +946,7 @@ public class TransportClientTests extends IntegrationTest
                 testInstance.devicesUnderTest[i].deviceTwinStatus = SUCCESS;
                 testInstance.devicesUnderTest[i].sCDeviceForTwin = new DeviceTwinDevice(testInstance.devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
                 sCDeviceTwin.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
-                Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+                Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
             }
         }
         catch (Exception e)
@@ -976,7 +976,7 @@ public class TransportClientTests extends IntegrationTest
     {
         // Start receiver for a test
         testInstance.fileUploadNotificationReceiver.open();
-        testInstance.fileUploadNotificationReceiver.receive(MAX_MILLISECS_TIMEOUT_FLUSH_NOTIFICATION);
+        testInstance.fileUploadNotificationReceiver.receive(MAX_TIMEOUT_FLUSH_NOTIFICATIONS_MILLISECONDS);
         testInstance.fileUploadNotificationReceiver.close();
         testInstance.fileUploadNotificationReceiver.open();
 
@@ -1009,7 +1009,7 @@ public class TransportClientTests extends IntegrationTest
     private int readReportedProperties(DeviceState deviceState, String startsWithKey, String startsWithValue) throws IOException , IotHubException, InterruptedException
     {
         int totalCount = 0;
-        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION);
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
         sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
         Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
 
