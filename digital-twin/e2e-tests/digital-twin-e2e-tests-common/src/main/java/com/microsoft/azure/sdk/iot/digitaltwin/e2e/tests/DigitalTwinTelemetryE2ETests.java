@@ -88,7 +88,7 @@ public class DigitalTwinTelemetryE2ETests extends DigitalTwinE2ETests {
         assertThat(digitalTwinClientResult).isEqualTo(DigitalTwinClientResult.DIGITALTWIN_CLIENT_ERROR);
     }
 
-    @Test
+    @Test @Ignore
     public void testMultipleThreadsSameInterfaceSameTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
         final Semaphore semaphore = new Semaphore(0);
         List<Integer> telemetryList = generateRandomIntegerList(MAX_THREADS_MULTITHREADED_TEST);
@@ -112,7 +112,7 @@ public class DigitalTwinTelemetryE2ETests extends DigitalTwinE2ETests {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void testMultipleThreadsSameInterfaceDifferentTelemetryNameSendTelemetryAsync() throws IOException, InterruptedException {
         final Semaphore semaphore = new Semaphore(0);
 
@@ -134,7 +134,7 @@ public class DigitalTwinTelemetryE2ETests extends DigitalTwinE2ETests {
         assertThat(verifyThatMessageWasReceived(testDevice.getDeviceId(), expectedPayloadResult2)).as("Verify EventHub received the sent telemetry").isTrue();
     }
 
-    @Test
+    @Test @Ignore
     public void testTelemetryOperationAfterClientCloseAndOpen() throws IOException, InterruptedException {
         int telemetryValue1 = nextInt();
         log.debug("Sending telemetry: telemetryName={}, telemetryValue={}", TELEMETRY_NAME_INTEGER, telemetryValue1);
