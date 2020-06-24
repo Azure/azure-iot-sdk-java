@@ -37,7 +37,6 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
@@ -56,12 +55,12 @@ import static tests.integration.com.microsoft.azure.sdk.iot.iothub.FileUploadTes
 public class FileUploadTests extends IntegrationTest
 {
     // Max time to wait to see it on Hub
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB = 180000; // 3 minutes
-    private static final long FILE_UPLOAD_QUEUE_POLLING_INTERVAL = 4000; // 4 sec
-    private static final long MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK = 5000; // 5 sec
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS = 180000; // 3 minutes
+    private static final long FILE_UPLOAD_QUEUE_POLLING_INTERVAL_MILLISECONDS = 4000; // 4 sec
+    private static final long MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK_MILLISECONDS = 5000; // 5 sec
 
     //Max time to wait before timing out test
-    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB + 50000; // 50 secs
+    private static final long MAX_MILLISECS_TIMEOUT_KILL_TEST = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS + 50000; // 50 secs
 
     //Max devices to test
     private static final Integer MAX_FILES_TO_UPLOAD = 5;
@@ -410,19 +409,15 @@ public class FileUploadTests extends IntegrationTest
         for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
         {
             final int index = i;
-            executor.submit(new Runnable()
+            executor.submit(() ->
             {
-                @Override
-                public void run()
+                try
                 {
-                    try
-                    {
-                        deviceClient.uploadToBlobAsync(testInstance.fileUploadState[index].blobName, testInstance.fileUploadState[index].fileInputStream, testInstance.fileUploadState[index].fileLength, new FileUploadCallback(), testInstance.fileUploadState[index]);
-                    }
-                    catch (IOException e)
-                    {
-                        fail(buildExceptionMessage("IOException occurred during upload: " + e.getMessage(), deviceClient));
-                    }
+                    deviceClient.uploadToBlobAsync(testInstance.fileUploadState[index].blobName, testInstance.fileUploadState[index].fileInputStream, testInstance.fileUploadState[index].fileLength, new FileUploadCallback(), testInstance.fileUploadState[index]);
+                }
+                catch (IOException e)
+                {
+                    fail(buildExceptionMessage("IOException occurred during upload: " + Tools.getStackTraceFromThrowable(e), deviceClient));
                 }
             });
 
@@ -472,14 +467,14 @@ public class FileUploadTests extends IntegrationTest
                 }
             }
 
-            FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(FILE_UPLOAD_QUEUE_POLLING_INTERVAL);
+            FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(FILE_UPLOAD_QUEUE_POLLING_INTERVAL_MILLISECONDS);
 
             if (fileUploadNotification != null)
             {
                 activeFileUploadNotifications.add(fileUploadNotification);
             }
 
-            if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB)
+            if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS)
             {
                 Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Timed out waiting for file upload notification for device", deviceClient));
             }
@@ -503,7 +498,7 @@ public class FileUploadTests extends IntegrationTest
             while (!testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered)
             {
                 Thread.sleep(300);
-                if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK)
+                if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK_MILLISECONDS)
                 {
                     assertTrue(buildExceptionMessage("File upload callback was not triggered", deviceClient), testInstance.fileUploadState[fileUploadStateIndex].isCallBackTriggered);
                 }
