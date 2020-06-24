@@ -26,6 +26,6 @@ The commands in the comments can be run directly in a command prompt.
 
 # Need Support?
 * Have a feature request for SDKs? Please post it on [User Voice](https://feedback.azure.com/forums/321918-azure-iot) to help us prioritize.
-* Have a technical question? Ask on [Stack Overflow](https://stackoverflow.com/questions/tagged/azure-iot-hub) with tag “azure-iot-hub”
+* Have a technical question? Please see the [Azure IoT help](https://aka.ms/IoTHelp) for options on getting posting questions on Microsoft Q&A or Stack Overflow. 
 * Need Support? Every customer with an active Azure subscription has access to support with guaranteed response time.  Consider submitting a ticket and get assistance from Microsoft support team
 * Found a bug? Please help us fix it by thoroughly documenting it and filing an issue on GitHub (C, Java, .NET, Node.js, Python).
