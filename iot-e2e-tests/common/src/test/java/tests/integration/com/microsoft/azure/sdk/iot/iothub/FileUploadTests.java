@@ -75,7 +75,6 @@ public class FileUploadTests extends IntegrationTest
     // States of SDK
     private static RegistryManager registryManager;
     private static ServiceClient serviceClient;
-    private static FileUploadNotificationReceiver fileUploadNotificationReceiver;
 
     private static String publicKeyCertificate;
     private static String privateKeyCertificate;
@@ -87,46 +86,7 @@ public class FileUploadTests extends IntegrationTest
     protected static final String testProxyUser = "proxyUsername";
     protected static final char[] testProxyPass = "1234".toCharArray();
 
-    static Set<FileUploadNotification> activeFileUploadNotifications = new ConcurrentSkipListSet<>(new Comparator<FileUploadNotification>()
-    {
-        @Override
-        public int compare(FileUploadNotification o1, FileUploadNotification o2) {
-            if (!o1.getDeviceId().equals(o2.getDeviceId()))
-            {
-                return -1;
-            }
-
-            if (!o1.getBlobName().equals(o2.getBlobName()))
-            {
-                return -1;
-            }
-
-            if (!o1.getBlobSizeInBytes().equals(o2.getBlobSizeInBytes()))
-            {
-                return -1;
-            }
-
-            if (!o1.getBlobUri().equals(o2.getBlobUri()))
-            {
-                return -1;
-            }
-
-            if (!o1.getEnqueuedTimeUtcDate().equals(o2.getEnqueuedTimeUtcDate()))
-            {
-                return -1;
-            }
-
-            if (!o1.getLastUpdatedTimeDate().equals(o2.getLastUpdatedTimeDate()))
-            {
-                return -1;
-            }
-
-            return 0;
-        }
-    });
-    static Thread fileUploadNotificationListenerThread;
-    static AtomicBoolean hasFileUploadNotificationReceiverThreadFailed = new AtomicBoolean(false);
-    static Exception fileUploadNotificationReceiverThreadException = null;
+    static Queue<FileUploadNotification> activeFileUploadNotifications = new ConcurrentLinkedQueue<>();
 
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs() throws Exception
@@ -145,8 +105,6 @@ public class FileUploadTests extends IntegrationTest
         privateKeyCertificate = certificateGenerator.getPrivateKey();
         x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        fileUploadNotificationListenerThread = createFileUploadNotificationListenerThread();
-
         return Arrays.asList(
                 new Object[][]
                         {
@@ -160,7 +118,7 @@ public class FileUploadTests extends IntegrationTest
                         });
     }
 
-    public FileUploadTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
+    public FileUploadTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException
     {
         this.testInstance = new FileUploadTestInstance(protocol, authenticationType, withProxy);
     }
@@ -174,12 +132,15 @@ public class FileUploadTests extends IntegrationTest
         private FileUploadState[] fileUploadState;
         private MessageState[] messageStates;
         private boolean withProxy;
+        private FileUploadNotificationReceiver fileUploadNotificationReceiver;
 
-        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
+        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.withProxy = withProxy;
+            fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
+            fileUploadNotificationReceiver.open();
         }
     }
 
@@ -242,62 +203,6 @@ public class FileUploadTests extends IntegrationTest
         }
     }
 
-    private static class FileUploadNotificationListener implements Runnable
-    {
-        @Override
-        public void run()
-        {
-            try
-            {
-                // flush pending notifications before every test to prevent random test failures
-                // because of notifications received from other failed test
-                fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
-
-                // Start receiver for a test
-                fileUploadNotificationReceiver.open();
-
-                while (true)
-                {
-                    FileUploadNotification notification = fileUploadNotificationReceiver.receive(FILE_UPLOAD_QUEUE_POLLING_INTERVAL);
-                    if (notification != null)
-                    {
-                        System.out.println("Received notification for device " + notification.getDeviceId());
-                        activeFileUploadNotifications.add(notification);
-                    }
-                }
-            }
-            catch (IOException e)
-            {
-                fileUploadNotificationReceiverThreadException = e;
-                hasFileUploadNotificationReceiverThreadFailed.set(true);
-            }
-            catch (InterruptedException e)
-            {
-                try
-                {
-                    fileUploadNotificationReceiver.close();
-                }
-                catch (IOException e1)
-                {
-                    fileUploadNotificationReceiverThreadException = e1;
-                    hasFileUploadNotificationReceiverThreadFailed.set(true);
-                }
-            }
-        }
-    }
-
-    /**
-     * Spawn a thread to constantly listen for file upload notifications. When one is found, it adds it to the active set of
-     * notifications for the tests in this class to consume.
-     */
-    private static Thread createFileUploadNotificationListenerThread()
-    {
-        FileUploadNotificationListener fileUploadNotificationListener = new FileUploadNotificationListener();
-        fileUploadNotificationListenerThread = new Thread(fileUploadNotificationListener);
-        fileUploadNotificationListenerThread.start();
-        return fileUploadNotificationListenerThread;
-    }
-
     @Before
     public void setUpFileUploadState() throws Exception
     {
@@ -322,7 +227,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @AfterClass
-    public static void tearDown() throws IotHubException, IOException, InterruptedException
+    public static void tearDown()
     {
         if (registryManager != null)
         {
@@ -331,9 +236,6 @@ public class FileUploadTests extends IntegrationTest
         }
 
         serviceClient = null;
-
-        fileUploadNotificationListenerThread.interrupt();
-        fileUploadNotificationListenerThread.stop();
     }
 
     @BeforeClass
@@ -552,7 +454,7 @@ public class FileUploadTests extends IntegrationTest
         tearDownDeviceClient(deviceClient);
     }
 
-    private FileUploadNotification getFileUploadNotificationForThisDevice(DeviceClient deviceClient, int expectedBlobSizeInBytes) throws IOException, InterruptedException
+    private FileUploadNotification getFileUploadNotificationForThisDevice(DeviceClient deviceClient, int expectedBlobSizeInBytes) throws InterruptedException, IOException
     {
         //wait until the notification is added to the set of retrieved notifications, or until a timeout
         long startTime = System.currentTimeMillis();
@@ -570,25 +472,17 @@ public class FileUploadTests extends IntegrationTest
                 }
             }
 
+            FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(FILE_UPLOAD_QUEUE_POLLING_INTERVAL);
+
+            if (fileUploadNotification != null)
+            {
+                activeFileUploadNotifications.add(fileUploadNotification);
+            }
+
             if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB)
             {
                 Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Timed out waiting for file upload notification for device", deviceClient));
             }
-
-            //If the notification polling thread has died, the test cannot complete
-            if (hasFileUploadNotificationReceiverThreadFailed.get())
-            {
-                if (fileUploadNotificationReceiverThreadException != null)
-                {
-                    Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("File upload notification listener thread has died from exception " + Tools.getStackTraceFromThrowable(fileUploadNotificationReceiverThreadException), deviceClient));
-                }
-                else
-                {
-                    Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("File upload notification listener thread has died from an unknown exception", deviceClient));
-                }
-            }
-
-            Thread.sleep(2000);
 
         } while (matchingNotification == null);
 
