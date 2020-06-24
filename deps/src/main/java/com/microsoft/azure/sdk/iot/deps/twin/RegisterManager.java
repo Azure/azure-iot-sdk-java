@@ -136,6 +136,7 @@ public class RegisterManager
     @Setter
     @Getter
     protected String modelId = null;
+
     /**
      * Setter for the DeviceId
      *
