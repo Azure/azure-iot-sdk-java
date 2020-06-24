@@ -69,6 +69,7 @@ public class TransportClientTests extends IntegrationTest
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MILLISECONDS = 1000; // 1 second
     private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS_MILLISECONDS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS * 10; // 2 sec
     private static final long REGISTRY_MANAGER_DEVICE_CREATION_DELAY_MILLISECONDS = 3 * 1000;
+    private static final long METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 15 * 1000; // 15 seconds
 
     protected static String iotHubConnectionString = "";
 
@@ -363,7 +364,20 @@ public class TransportClientTests extends IntegrationTest
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
-            ((DeviceClient)testInstance.clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            DeviceMethodStatusCallBack subscribedCallback = new DeviceMethodStatusCallBack();
+
+            ((DeviceClient)testInstance.clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, subscribedCallback, null);
+
+            long startTime = System.currentTimeMillis();
+            while (!subscribedCallback.isSubscribed)
+            {
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS)
+                {
+                    fail(buildExceptionMessage("Timed out waiting for device to subscribe to methods", testInstance.clientArrayList.get(i)));
+                }
+            }
 
             CountDownLatch countDownLatch = new CountDownLatch(1);
             RunnableInvoke runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.devicesList[i].getDeviceId(), METHOD_NAME, METHOD_PAYLOAD, countDownLatch);
@@ -388,7 +402,20 @@ public class TransportClientTests extends IntegrationTest
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
         {
-            ((DeviceClient)testInstance.clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, new DeviceMethodStatusCallBack(), null);
+            DeviceMethodStatusCallBack subscribedCallback = new DeviceMethodStatusCallBack();
+
+            ((DeviceClient)testInstance.clientArrayList.get(i)).subscribeToDeviceMethod(new SampleDeviceMethodCallback(), null, subscribedCallback, null);
+
+            long startTime = System.currentTimeMillis();
+            while (!subscribedCallback.isSubscribed)
+            {
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS)
+                {
+                    fail(buildExceptionMessage("Timed out waiting for device to subscribe to methods", testInstance.clientArrayList.get(i)));
+                }
+            }
         }
 
         List<RunnableInvoke> runs = new LinkedList<>();
@@ -717,9 +744,12 @@ public class TransportClientTests extends IntegrationTest
 
     protected static class DeviceMethodStatusCallBack implements IotHubEventCallback
     {
+        public boolean isSubscribed = false;
+
         public void execute(IotHubStatusCode status, Object context)
         {
             System.out.println("Device Client: IoT Hub responded to device method operation with status " + status.name());
+            isSubscribed = status == OK_EMPTY || status == OK;
         }
     }
 
