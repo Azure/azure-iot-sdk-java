@@ -138,8 +138,6 @@ public class Device extends BaseDevice
 
     private String scope;
 
-    private String modelId;
-
     /**
      * Getter for status reason
      *

@@ -9,8 +9,6 @@ import com.microsoft.azure.sdk.iot.deps.serializer.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * The BaseDevice class
@@ -314,13 +312,6 @@ public class BaseDevice
      * Datetime of last time the device authenticated, received, or sent a message.
      */
     protected String lastActivityTime;
-
-    /**
-     * Digital Twin model Id for the device and module
-     */
-    @Getter
-    @Setter
-    protected String modelId;
 
     /**
      * Getter for last activity time
