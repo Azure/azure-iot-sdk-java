@@ -406,7 +406,7 @@ public class TransportClientTests extends IntegrationTest
 
     @Test
     @Ignore //Disabling amqp due to service side issues with preview api version
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
+    @StandardTierHubOnlyTest
     public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         testInstance.transportClient = setUpTwin();
