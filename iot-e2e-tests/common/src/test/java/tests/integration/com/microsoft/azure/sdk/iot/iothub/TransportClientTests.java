@@ -141,7 +141,7 @@ public class TransportClientTests extends IntegrationTest
         private FileUploadNotificationReceiver fileUploadNotificationReceiver;
         private DeviceTwin deviceTwinClient;
 
-        public TransportClientTestInstance(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
+        public TransportClientTestInstance(IotHubClientProtocol protocol)
         {
             this.protocol = protocol;
         }
