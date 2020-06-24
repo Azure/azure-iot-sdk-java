@@ -91,6 +91,8 @@ public class TransportClientTests extends IntegrationTest
     private static final String METHOD_NAME = "methodName";
     private static final String METHOD_PAYLOAD = "This is a good payload";
 
+    private static DeviceTwin sCDeviceTwin;
+
     private static final String PROPERTY_KEY = "Key";
     private static final String PROPERTY_VALUE = "Value";
     private static final String PROPERTY_VALUE_UPDATE = "Update";
@@ -139,7 +141,6 @@ public class TransportClientTests extends IntegrationTest
         private FileUploadState[] fileUploadState;
         private MessageState[] messageStates;
         private FileUploadNotificationReceiver fileUploadNotificationReceiver;
-        private DeviceTwin deviceTwinClient;
 
         public TransportClientTestInstance(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
         {
@@ -150,8 +151,6 @@ public class TransportClientTests extends IntegrationTest
         {
             fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
             Assert.assertNotNull(fileUploadNotificationReceiver);
-
-            deviceTwinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
 
             String uuid = UUID.randomUUID().toString();
 
@@ -446,7 +445,7 @@ public class TransportClientTests extends IntegrationTest
                 desiredProperties.add(new Pair(PROPERTY_KEY + j, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
             }
             testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
-            testInstance.deviceTwinClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            sCDeviceTwin.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
 
             // assert
@@ -916,6 +915,8 @@ public class TransportClientTests extends IntegrationTest
         TransportClient transportClient = null;
         try
         {
+            sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+
             for (int i = 0; i < MAX_DEVICES; i++)
             {
                 DeviceState deviceState = new DeviceState();
@@ -944,7 +945,7 @@ public class TransportClientTests extends IntegrationTest
                 testInstance.devicesUnderTest[i].deviceClient.startDeviceTwin(new DeviceTwinStatusCallBack(), testInstance.devicesUnderTest[i], testInstance.devicesUnderTest[i].dCDeviceForTwin, testInstance.devicesUnderTest[i]);
                 testInstance.devicesUnderTest[i].deviceTwinStatus = SUCCESS;
                 testInstance.devicesUnderTest[i].sCDeviceForTwin = new DeviceTwinDevice(testInstance.devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
-                testInstance.deviceTwinClient.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+                sCDeviceTwin.getTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
                 Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
             }
         }
@@ -967,6 +968,8 @@ public class TransportClientTests extends IntegrationTest
             // No need to fail the test just because cleanup failed.
             e.printStackTrace();
         }
+
+        sCDeviceTwin = null;
     }
 
     private void setUpFileUploadState() throws Exception
@@ -1007,7 +1010,7 @@ public class TransportClientTests extends IntegrationTest
     {
         int totalCount = 0;
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);
-        testInstance.deviceTwinClient.getTwin(deviceState.sCDeviceForTwin);
+        sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
         Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
 
         for (Pair p : repProperties)
