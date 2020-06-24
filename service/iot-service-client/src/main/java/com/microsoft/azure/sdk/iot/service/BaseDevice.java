@@ -402,7 +402,6 @@ public class BaseDevice
         deviceParser.seteTag(this.eTag);
         deviceParser.setLastActivityTime(ParserUtility.getDateTimeUtc(this.lastActivityTime));
         deviceParser.setGenerationId(this.generationId);
-        deviceParser.setModelId(this.modelId);
 
         deviceParser.setAuthenticationParser(new AuthenticationParser());
         deviceParser.getAuthenticationParser().setType(AuthenticationTypeParser.valueOf(this.authentication.getAuthenticationType().toString()));
@@ -482,11 +481,6 @@ public class BaseDevice
         if (parser.getConnectionState() != null)
         {
             this.connectionState = DeviceConnectionState.valueOf(parser.getConnectionState());
-        }
-
-        if (parser.getModelId() != null)
-        {
-            this.modelId = parser.getModelId();
         }
 
         this.authentication = new AuthenticationMechanism(authenticationType);
