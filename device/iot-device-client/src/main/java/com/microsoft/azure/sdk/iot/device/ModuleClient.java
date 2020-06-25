@@ -187,11 +187,34 @@ public class ModuleClient extends InternalClient
 
     /**
      * Create a module client instance from your environment variables
+     * @param clientOptions The options that allow configuration of the module client instance during initialization
+     * @return the created module client instance
+     * @throws ModuleClientException if the module client cannot be created
+     */
+    public static ModuleClient createFromEnvironment(ClientOptions clientOptions) throws ModuleClientException
+    {
+        return createFromEnvironment(IotHubClientProtocol.AMQPS, clientOptions);
+    }
+
+    /**
+     * Create a module client instance from your environment variables
      * @param protocol the protocol the module client instance will use
      * @return the created module client instance
      * @throws ModuleClientException if the module client cannot be created
      */
     public static ModuleClient createFromEnvironment(IotHubClientProtocol protocol) throws ModuleClientException
+    {
+        return createFromEnvironment(protocol, null);
+    }
+
+    /**
+     * Create a module client instance from your environment variables
+     * @param protocol the protocol the module client instance will use
+     * @param clientOptions The options that allow configuration of the module client instance during initialization
+     * @return the created module client instance
+     * @throws ModuleClientException if the module client cannot be created
+     */
+    public static ModuleClient createFromEnvironment(IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException
     {
         log.info("Creating module client from environment with protocol {}...", protocol);
         Map<String, String> envVariables = System.getenv();
@@ -215,7 +238,7 @@ public class ModuleClient extends InternalClient
             ModuleClient moduleClient = null;
             try
             {
-                moduleClient = new ModuleClient(connectionString, protocol);
+                moduleClient = new ModuleClient(connectionString, protocol, clientOptions);
             }
             catch (URISyntaxException e)
             {
