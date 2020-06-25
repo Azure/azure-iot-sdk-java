@@ -15,10 +15,8 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpHsmSignatureProvider;
 import com.microsoft.azure.sdk.iot.device.hsm.IotHubSasTokenHsmAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.*;
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
@@ -29,10 +27,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType.SINGLE_CLIENT;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for ModuleClient.java
