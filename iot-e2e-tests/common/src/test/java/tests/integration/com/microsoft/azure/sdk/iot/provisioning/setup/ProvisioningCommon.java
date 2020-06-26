@@ -139,8 +139,9 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType}
                             });
         }
-        else if (attestationType == AttestationType.TPM)
+        else if (attestationType == AttestationType.TPM && !isPullRequest)
         {
+            //TODO TPM tests are flakey, so only run them for CI and nightly builds
             return Arrays.asList(
                     new Object[][]
                             {
@@ -176,12 +177,10 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
 
-                                    //TODO tpm tests are flakey, so skip them for PR runs
-                                    //{ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM},
-                                    //{ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM},
-                                    //{ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM}
+                                    // Intentionally not doing TPM tests here. There is a separate class for running those
+                                    // tests in serial
                             });
         }
         else
@@ -199,10 +198,10 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM}
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
+
+                                    // Intentionally not doing TPM tests here. There is a separate class for running those
+                                    // tests in serial
                             });
         }
     }
