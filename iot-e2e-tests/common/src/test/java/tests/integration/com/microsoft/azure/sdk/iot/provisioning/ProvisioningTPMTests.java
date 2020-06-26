@@ -19,7 +19,7 @@ import java.util.Collection;
 @NotThreadSafe
 @DeviceProvisioningServiceTest
 @RunWith(Parameterized.class)
-public class ProvisioningTPMTests extends ProvisioningCommon
+public class ProvisioningTPMTests extends ProvisioningTests
 {
     public ProvisioningTPMTests(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
     {
