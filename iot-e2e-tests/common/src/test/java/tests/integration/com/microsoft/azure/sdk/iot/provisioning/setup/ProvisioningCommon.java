@@ -141,17 +141,29 @@ public class ProvisioningCommon extends IntegrationTest
         }
         else if (attestationType == AttestationType.TPM)
         {
-            return Arrays.asList(
-                    new Object[][]
-                            {
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
+            if (!isPullRequest)
+            {
+                //TODO TPM tests are flakey, so only run them for CI and nightly builds
+                return Arrays.asList(
+                        new Object[][]
+                                {
+                                        {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
+                                        {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
+                                        {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
 
-                                    //MQTT/MQTT_WS does not support tpm attestation
-                                    //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
-                                    //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
-                            });
+                                        //MQTT/MQTT_WS does not support tpm attestation
+                                        //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
+                                        //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
+                                });
+            }
+            else
+            {
+                return Arrays.asList(
+                        new Object[][]
+                                {
+                                        //no tests to run for pull request builds
+                                });
+            }
         }
         else
         {
@@ -176,12 +188,10 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
 
-                                    //TODO tpm tests are flakey, so skip them for PR runs
-                                    //{ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM},
-                                    //{ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM},
-                                    //{ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM}
+                                    // Intentionally not doing TPM tests here. There is a separate class for running those
+                                    // tests in serial
                             });
         }
         else
@@ -199,10 +209,10 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
                                     {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.TPM},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.TPM},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.TPM}
+                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
+
+                                    // Intentionally not doing TPM tests here. There is a separate class for running those
+                                    // tests in serial
                             });
         }
     }
