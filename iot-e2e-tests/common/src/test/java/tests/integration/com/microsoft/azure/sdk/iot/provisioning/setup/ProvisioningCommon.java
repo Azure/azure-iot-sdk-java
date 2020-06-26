@@ -139,7 +139,7 @@ public class ProvisioningCommon extends IntegrationTest
                                     {ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType}
                             });
         }
-        else if (attestationType == AttestationType.TPM && !isPullRequest)
+        else if (attestationType == AttestationType.TPM)
         {
             if (!isPullRequest)
             {
