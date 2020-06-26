@@ -373,7 +373,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    public void tearDownTwin(DeviceState deviceState) throws IOException
+    public void tearDownTwin(DeviceState deviceState)
     {
         // tear down twin on device client
         if (deviceState != null)
@@ -394,7 +394,14 @@ public class DeviceTwinCommon extends IntegrationTest
         }
         if (internalClient != null)
         {
-            internalClient.closeNow();
+            try
+            {
+                internalClient.closeNow();
+            }
+            catch (IOException e)
+            {
+                // Ignore, the test isn't about being able to close the client
+            }
             internalClient = null;
         }
     }
