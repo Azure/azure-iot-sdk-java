@@ -105,6 +105,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final long PERIODIC_WAIT_TIME_FOR_VERIFICATION = 1000; // 1 sec
     protected static final long MAX_WAIT_TIME_FOR_VERIFICATION_MILLISECONDS = 60 * 1000; // 1 minute
     protected static final long DELAY_BETWEEN_OPERATIONS = 200; // 0.2 sec
+    protected static final long REPORTED_PROPERTIES_PROPAGATION_DELAY_MILLISECONDS = 2000; // 2 seconds
     public static final long MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     public static final long DESIRED_PROPERTIES_PROPAGATION_TIME_MILLISECONDS = 5 * 1000; //5 seconds
@@ -159,25 +160,20 @@ public class DeviceTwinCommon extends IntegrationTest
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
 
-    public enum STATUS
-    {
-        SUCCESS, FAILURE, UNKNOWN
-    }
-
     public class DeviceTwinStatusCallBack implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
             DeviceState state = (DeviceState) context;
 
-            //On failure, Don't update status any further
-            if ((status == OK || status == OK_EMPTY) && state.deviceTwinStatus != STATUS.FAILURE)
+            if (status == OK_EMPTY)
             {
-                state.deviceTwinStatus = STATUS.SUCCESS;
+                // MQTT returns OK_EMPTY, but AMQP returns OK. Consolidate them for consistency here
+                state.deviceTwinStatus = OK;
             }
             else
             {
-                state.deviceTwinStatus = STATUS.FAILURE;
+                state.deviceTwinStatus = status;
             }
         }
     }
@@ -189,7 +185,7 @@ public class DeviceTwinCommon extends IntegrationTest
         public DeviceTwinDevice sCDeviceForTwin;
         public DeviceExtension dCDeviceForTwin;
         public OnProperty dCOnProperty = new OnProperty();
-        public STATUS deviceTwinStatus;
+        public IotHubStatusCode deviceTwinStatus;
     }
 
     public class PropertyState
@@ -230,13 +226,18 @@ public class DeviceTwinCommon extends IntegrationTest
             }
         }
 
-        public synchronized void createNewReportedProperties(int maximumPropertiesToCreate)
+        public synchronized Set<Property> createNewReportedProperties(int maximumPropertiesToCreate)
         {
+            Set<Property> newProperties = new HashSet<>();
             for (int i = 0; i < maximumPropertiesToCreate; i++)
             {
                 UUID randomUUID = UUID.randomUUID();
-                this.setReportedProp(new Property(PROPERTY_KEY + randomUUID, PROPERTY_VALUE + randomUUID));
+                Property newReportedProperty = new Property(PROPERTY_KEY + randomUUID, PROPERTY_VALUE + randomUUID);
+                this.setReportedProp(newReportedProperty);
+                newProperties.add(newReportedProperty);
             }
+
+            return newProperties;
         }
 
         public synchronized void createNewReportedArrayProperties(int maximumPropertiesToCreate)
@@ -259,8 +260,9 @@ public class DeviceTwinCommon extends IntegrationTest
             }
         }
 
-        public synchronized void updateExistingReportedProperty(int index)
+        public synchronized Set<Property> updateExistingReportedProperty(int index)
         {
+            Set<Property> updatedProp = new HashSet<>();
             Set<Property> reportedProp = this.getReportedProp();
             int i = 0;
             for (Property p : reportedProp)
@@ -269,10 +271,13 @@ public class DeviceTwinCommon extends IntegrationTest
                 {
                     UUID randomUUID = UUID.randomUUID();
                     p.setValue(PROPERTY_VALUE_UPDATE + randomUUID);
+                    updatedProp.add(p);
                     break;
                 }
                 i++;
             }
+
+            return updatedProp;
         }
     }
 
@@ -300,7 +305,6 @@ public class DeviceTwinCommon extends IntegrationTest
         {
             tearDownTwin(devicesUnderTest[i]);
             registryManager.removeDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
-            Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
     }
 
@@ -348,7 +352,8 @@ public class DeviceTwinCommon extends IntegrationTest
             {
                 ((ModuleClient) internalClient).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             }
-            deviceState.deviceTwinStatus = STATUS.UNKNOWN;
+
+            deviceState.deviceTwinStatus = IotHubStatusCode.ERROR;
         }
 
         // set up twin on ServiceClient
@@ -562,7 +567,7 @@ public class DeviceTwinCommon extends IntegrationTest
         // Check status periodically for success or until timeout
         long startTime = System.currentTimeMillis();
         long timeElapsed = 0;
-        while (STATUS.SUCCESS != deviceUnderTest.deviceTwinStatus)
+        while (deviceUnderTest.deviceTwinStatus != OK)
         {
             Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
             timeElapsed = System.currentTimeMillis() - startTime;
@@ -571,7 +576,7 @@ public class DeviceTwinCommon extends IntegrationTest
                 break;
             }
         }
-        assertEquals(buildExceptionMessage("Expected SUCCESS but was " + deviceUnderTest.deviceTwinStatus, internalClient), STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+        assertEquals(buildExceptionMessage("Expected OK but was " + deviceUnderTest.deviceTwinStatus, internalClient), OK, deviceUnderTest.deviceTwinStatus);
     }
 
     protected void sendReportedPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException

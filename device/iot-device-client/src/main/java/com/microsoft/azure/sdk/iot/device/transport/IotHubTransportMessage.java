@@ -293,6 +293,11 @@ public class IotHubTransportMessage extends Message
             base.append("Request Id [").append(this.requestId).append("] ");
         }
 
+        if (this.getDeviceOperationType() != null && this.getDeviceOperationType() != DeviceOperations.DEVICE_OPERATION_UNKNOWN)
+        {
+            base.append("Device Operation Type [").append(this.getDeviceOperationType()).append("] ");
+        }
+
         return base.toString();
     }
 }
