@@ -304,7 +304,8 @@ public class FileUploadTests extends IntegrationTest
         try (InputStream inputStream = u.openStream())
         {
             byte[] testBuf = new byte[(int)fileUploadState.fileLength];
-            int testLen = inputStream.read(testBuf,  0, (int)fileUploadState.fileLength);
+            inputStream.read(testBuf,  0, (int)fileUploadState.fileLength);
+            int testLen = (int)fileUploadState.fileLength;
             byte[] actualBuf = new byte[(int)fileUploadState.fileLength];
             fileUploadState.fileInputStream.reset();
             int actualLen = (fileUploadState.fileLength == 0) ? (int) fileUploadState.fileLength : fileUploadState.fileInputStream.read(actualBuf, 0, (int) fileUploadState.fileLength);
