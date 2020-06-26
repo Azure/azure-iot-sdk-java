@@ -141,18 +141,29 @@ public class ProvisioningCommon extends IntegrationTest
         }
         else if (attestationType == AttestationType.TPM && !isPullRequest)
         {
-            //TODO TPM tests are flakey, so only run them for CI and nightly builds
-            return Arrays.asList(
-                    new Object[][]
-                            {
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
+            if (!isPullRequest)
+            {
+                //TODO TPM tests are flakey, so only run them for CI and nightly builds
+                return Arrays.asList(
+                        new Object[][]
+                                {
+                                        {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
+                                        {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
+                                        {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
 
-                                    //MQTT/MQTT_WS does not support tpm attestation
-                                    //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
-                                    //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
-                            });
+                                        //MQTT/MQTT_WS does not support tpm attestation
+                                        //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
+                                        //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
+                                });
+            }
+            else
+            {
+                return Arrays.asList(
+                        new Object[][]
+                                {
+                                        //no tests to run for pull request builds
+                                });
+            }
         }
         else
         {
