@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
@@ -68,14 +69,8 @@ import java.util.concurrent.TimeUnit;
  * The task scheduler for sending and receiving messages for the Device Client
  */
 @Slf4j
-public final class DeviceIO
+public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 {
-    /** The state of the IoT Hub client's connection with the IoT Hub. */
-    protected enum IotHubClientState
-    {
-        OPEN, CLOSED
-    }
-
     private long sendPeriodInMilliseconds;
     private long receivePeriodInMilliseconds;
 
@@ -86,7 +81,7 @@ public final class DeviceIO
     private IotHubClientProtocol protocol = null;
 
     private ScheduledExecutorService taskScheduler;
-    private IotHubClientState state;
+    private IotHubConnectionStatus state;
 
     private List<DeviceClientConfig> deviceClientConfigs = new LinkedList<>();
 
@@ -119,14 +114,14 @@ public final class DeviceIO
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
         /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
-        this.state = IotHubClientState.CLOSED;
+        this.state = IotHubConnectionStatus.DISCONNECTED;
 
         if (protocol == IotHubClientProtocol.AMQPS_WS || protocol == IotHubClientProtocol.MQTT_WS)
         {
             this.config.setUseWebsocket(true);
         }
 
-        this.transport = new IotHubTransport(config);
+        this.transport = new IotHubTransport(config, this);
 
         /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
@@ -134,7 +129,7 @@ public final class DeviceIO
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
 
         /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
-        this.state = IotHubClientState.CLOSED;
+        this.state = IotHubConnectionStatus.DISCONNECTED;
     }
 
     /**
@@ -146,7 +141,7 @@ public final class DeviceIO
     void open() throws IOException
     {
         /* Codes_SRS_DEVICE_IO_21_007: [If the client is already open, the open shall do nothing.] */
-        if (this.state == IotHubClientState.OPEN)
+        if (this.state == IotHubConnectionStatus.CONNECTED || this.state == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
             return;
         }
@@ -161,10 +156,6 @@ public final class DeviceIO
         {
             throw new IOException("Could not open the connection", e);
         }
-
-        /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
-        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
-        commonOpenSetup();
     }
 
     /**
@@ -185,7 +176,7 @@ public final class DeviceIO
     /**
      * Handles logic common to all open functions.
      */
-    private void commonOpenSetup()
+    private void startWorkerThreads()
     {
         this.sendTask = new IotHubSendTask(this.transport);
         this.receiveTask = new IotHubReceiveTask(this.transport);
@@ -207,7 +198,7 @@ public final class DeviceIO
                 receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
 
         /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
-        this.state = IotHubClientState.OPEN;
+        this.state = IotHubConnectionStatus.CONNECTED;
     }
 
     /**
@@ -234,12 +225,12 @@ public final class DeviceIO
         }
         catch (DeviceClientException e)
         {
-            this.state = IotHubClientState.CLOSED;
+            this.state = IotHubConnectionStatus.DISCONNECTED;
             throw new IOException(e);
         }
 
         /* Codes_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
-        this.state = IotHubClientState.CLOSED;
+        this.state = IotHubConnectionStatus.DISCONNECTED;
     }
 
     /**
@@ -275,7 +266,7 @@ public final class DeviceIO
                                String deviceId)
     {
         /* Codes_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
-        if (this.state == IotHubClientState.CLOSED)
+        if (this.state == IotHubConnectionStatus.DISCONNECTED)
         {
             throw new IllegalStateException(
                     "Cannot send event from "
@@ -328,10 +319,10 @@ public final class DeviceIO
         this.receivePeriodInMilliseconds = newIntervalInMilliseconds;
 
         /* Codes_SRS_DEVICE_IO_21_028: [If the task scheduler already exists, the setReceivePeriodInMilliseconds shall change the `scheduleAtFixedRate` for the receiveTask to the new value.] */
-        if(this.taskScheduler != null)
+        if (this.taskScheduler != null)
         {
             /* Codes_SRS_DEVICE_IO_21_029: [If the `receiveTask` is null, the setReceivePeriodInMilliseconds shall throw IOException.] */
-            if(this.receiveTask == null)
+            if (this.receiveTask == null)
             {
                 throw new IOException("transport receive task not set");
             }
@@ -403,7 +394,7 @@ public final class DeviceIO
     public boolean isOpen()
     {
         /* Codes_SRS_DEVICE_IO_21_031: [The isOpen shall return the connection state, true if connection is open, false if it is closed.] */
-        return (this.state == IotHubClientState.OPEN);
+        return (this.state == IotHubConnectionStatus.CONNECTED);
     }
 
     /**
@@ -433,5 +424,26 @@ public final class DeviceIO
     {
         //Codes_SRS_DEVICE_IO_34_020: [This function shall register the callback with the transport.]
         this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext);
+    }
+
+    /*
+     * IotHubTransport layer will notify this layer when the connection is established and when it is lost. This layer should start/stop
+     * the send/receive threads accordingly
+     */
+    @Override
+    public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
+    {
+        if (status == IotHubConnectionStatus.DISCONNECTED || status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+        {
+            // No need to keep spawning send/receive tasks during reconnection or when the client is closed
+            this.taskScheduler.shutdown();
+        }
+        else if (status == IotHubConnectionStatus.CONNECTED)
+        {
+            // Restart the task scheduler so that send/receive tasks start spawning again
+            this.startWorkerThreads();
+        }
+
+        this.state = status;
     }
 }

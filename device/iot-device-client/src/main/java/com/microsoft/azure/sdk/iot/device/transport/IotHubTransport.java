@@ -53,6 +53,10 @@ public class IotHubTransport implements IotHubListener
     private IotHubConnectionStatusChangeCallback connectionStatusChangeCallback;
     private Object connectionStatusChangeCallbackContext;
 
+    // Callback for notifying the DeviceIO layer of connection status change events. The deviceIO layer
+    // should stop spawning send/receive threads when this layer is disconnected or disconnected retrying
+    private IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback;
+
     //Lock on reading and writing on the inProgressPackets map
     final private Object inProgressMessagesLock = new Object();
 
@@ -81,7 +85,7 @@ public class IotHubTransport implements IotHubListener
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
      * @throws IllegalArgumentException if defaultConfig is null
      */
-    public IotHubTransport(DeviceClientConfig defaultConfig) throws IllegalArgumentException
+    public IotHubTransport(DeviceClientConfig defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback) throws IllegalArgumentException
     {
         if (defaultConfig == null)
         {
@@ -97,6 +101,8 @@ public class IotHubTransport implements IotHubListener
         // current retry attempt to 0.]
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
         this.currentReconnectionAttempt = 0;
+
+        this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
     }
 
     public Object getSendThreadLock()
@@ -1128,6 +1134,7 @@ public class IotHubTransport implements IotHubListener
             this.log.debug("Invoking connection status callbacks with new status details");
             invokeConnectionStateCallback(newConnectionStatus, reason);
             invokeConnectionStatusChangeCallback(newConnectionStatus, reason, throwable);
+            this.deviceIOConnectionStatusChangeCallback.execute(newConnectionStatus, reason, throwable, null);
 
             if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
             {
