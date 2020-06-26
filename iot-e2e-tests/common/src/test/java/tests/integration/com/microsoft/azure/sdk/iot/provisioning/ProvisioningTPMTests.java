@@ -26,7 +26,7 @@ public class ProvisioningTPMTests extends ProvisioningCommon
         super(protocol, attestationType);
     }
 
-    //This overrides the inputs defined in the super class. This is done to split this large test group into symmetric key and x509 runners.
+    //This overrides the inputs defined in the super class. This is done to only run the TPM tests.
     @Parameterized.Parameters(name = "{0}_{1}")
     public static Collection inputs()
     {
