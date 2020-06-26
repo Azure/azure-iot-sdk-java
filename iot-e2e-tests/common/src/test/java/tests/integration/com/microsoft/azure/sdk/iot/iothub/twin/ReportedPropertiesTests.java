@@ -5,7 +5,9 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -23,10 +25,12 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinComm
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static org.junit.Assert.fail;
 
 /**
@@ -81,14 +85,14 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
                 {
                     try
                     {
-                        deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-                        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+                        Set<Property> newReportedProperties = deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
+                        internalClient.sendReportedProperties(newReportedProperties);
                     }
                     catch (IOException e)
                     {
                         fail(e.getMessage());
                     }
-                    Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected SUCCESS but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), DeviceTwinCommon.STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+                    Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected OK but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), OK, deviceUnderTest.deviceTwinStatus);
                 }
             });
         }
@@ -99,7 +103,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         }
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST.intValue());
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -112,12 +116,12 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         // verify if they are updated by SC
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
-            deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-            internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+            Set<Property> createdProperties = deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
+            internalClient.sendReportedProperties(createdProperties);
             waitAndVerifyTwinStatusBecomesSuccess();
         }
 
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST.intValue());
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -128,7 +132,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
+        Thread.sleep(REPORTED_PROPERTIES_PROPAGATION_DELAY_MILLISECONDS);
 
         // act
         // Update RP
@@ -139,7 +143,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         waitAndVerifyTwinStatusBecomesSuccess();
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -153,31 +157,31 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
+        Thread.sleep(REPORTED_PROPERTIES_PROPAGATION_DELAY_MILLISECONDS);
 
         // act
         // Update RP
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
-        final int index = i;
-        executor.submit(new Runnable()
-        {
-            @Override
-            public void run()
+            final int index = i;
+            executor.submit(new Runnable()
             {
-                try
+                @Override
+                public void run()
                 {
-                    deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(index);
-                    internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-                    waitAndVerifyTwinStatusBecomesSuccess();
+                    try
+                    {
+                        Set<Property> updatedProperties = deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(index);
+                        internalClient.sendReportedProperties(updatedProperties);
+                        waitAndVerifyTwinStatusBecomesSuccess();
+                    }
+                    catch (IOException | InterruptedException e)
+                    {
+                        fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), internalClient));
+                    }
                 }
-                catch (IOException | InterruptedException e)
-                {
-                    fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), internalClient));
-                }
-            }
-        });
-    }
+            });
+        }
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         executor.shutdown();
         if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
@@ -186,10 +190,10 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         }
 
         // assert
-        Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected SUCCESS but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), DeviceTwinCommon.STATUS.SUCCESS, deviceUnderTest.deviceTwinStatus);
+        Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected OK but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), OK, deviceUnderTest.deviceTwinStatus);
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -201,20 +205,22 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         // send max_prop RP all at once
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
+
+        Thread.sleep(REPORTED_PROPERTIES_PROPAGATION_DELAY_MILLISECONDS);
 
         // act
         // Update RP
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(i);
-            internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
         }
+
+        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST.intValue());
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
     }
 }
