@@ -15,6 +15,14 @@ public final class IotHubSendTask implements Runnable
     private static final String THREAD_NAME = "azure-iot-sdk-IotHubSendTask";
     private final IotHubTransport transport;
 
+    // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
+    // wait until a message or callback is queued in that layer before continuing. This means that if the transport layer
+    // has no outgoing messages and no callbacks queueing, then this thread will do nothing and cost nothing. This is useful
+    // as this SDK would otherwise periodically spawn new threads of this type that would do nothing. It is the IotHubTransport
+    // layer's responsibility to notify this thread when a message is queued to be sent or when a callback is queued to be executed
+    // so that this thread can handle it.
+    private final Object sendThreadLock;
+
     public IotHubSendTask(IotHubTransport transport)
     {
         if (transport == null)
@@ -22,8 +30,8 @@ public final class IotHubSendTask implements Runnable
             throw new IllegalArgumentException("Parameter 'transport' must not be null");
         }
 
-        // Codes_SRS_IOTHUBSENDTASK_11_001: [The constructor shall save the transport.]
         this.transport = transport;
+        this.sendThreadLock = this.transport.getSendThreadLock();
     }
 
     public void run()
@@ -32,14 +40,19 @@ public final class IotHubSendTask implements Runnable
 
         try
         {
-            // Codes_SRS_IOTHUBSENDTASK_11_002: [The function shall send all messages on the transport queue.]
-            this.transport.sendMessages();
+            synchronized (this.sendThreadLock)
+            {
+                if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
+                {
+                    // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
+                    // to be executed. Until then, do nothing.
+                    this.sendThreadLock.wait();
+                }
+            }
 
-            // Codes_SRS_IOTHUBSENDTASK_11_003: [The function shall invoke all callbacks on the transport's callback queue.]
+            this.transport.sendMessages();
             this.transport.invokeCallbacks();
         }
-        // Codes_SRS_IOTHUBSENDTASK_11_005: [The function shall not crash because of an IOException thrown by the transport.]
-        // Codes_SRS_IOTHUBSENDTASK_11_008: [The function shall not crash because of any error or exception thrown by the transport.]
         catch (Throwable e)
         {
             log.warn("Send task encountered exception while sending messages", e);
