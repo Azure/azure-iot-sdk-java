@@ -26,7 +26,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS_WS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommon.ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to ReportedProperties.
@@ -219,7 +218,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
         sendReportedPropertiesAndVerify(1);
 
         // Act
-        errorInjectionMessage.setExpiryTime(ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS);
+        errorInjectionMessage.setExpiryTime(100);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
         IotHubServicesCommon.sendMessageAndWaitForResponse(internalClient,
                 errorInjectionMsgAndRet,
@@ -228,7 +227,7 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient, errorInjectionMsgAndRet);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient);
         // add one new reported property
         deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
         internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());

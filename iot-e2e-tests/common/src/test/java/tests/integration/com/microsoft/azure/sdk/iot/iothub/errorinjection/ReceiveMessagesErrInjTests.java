@@ -28,7 +28,6 @@ import java.util.List;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
 import static org.junit.Assert.assertTrue;
-import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommon.ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to receiving messages.
@@ -192,7 +191,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    public void errorInjectionTestFlow(Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
+    public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
     {
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
         testInstance.client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
@@ -228,12 +227,12 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
             //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
             // we ensure that error injection message isn't resent to service too many times. The message will still likely
             // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
-            errorInjectionMessage.setExpiryTime(ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS);
+            errorInjectionMessage.setExpiryTime(200);
             testInstance.client.sendEventAsync(errorInjectionMessage, new EventCallback(null), null);
 
             //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
             // want the connection to be re-established before sending anything from service client
-            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS, testInstance.client, new MessageAndResult(errorInjectionMessage, null));
+            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS, testInstance.client);
 
             if (testInstance.client instanceof DeviceClient)
             {
