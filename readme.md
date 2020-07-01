@@ -5,8 +5,8 @@ Due to security considerations, build logs are not publicly available.
 
 | Service Environment      | Status |
 | ---                      | ---    |
-| WestUS                   | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Prod?branchName=master)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=252&branchName=master)|
-| Canary                   | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Canary?branchName=master)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=245&branchName=master)|
+| Master                   | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Prod?branchName=master)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=252&branchName=master)|
+| Preview                  | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Canary?branchName=preview)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=245&branchName=preview)|
 
 This repository contains the following:
 * **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub (supports Java 7+)
