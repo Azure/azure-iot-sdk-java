@@ -115,6 +115,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
          */
+        device.setModelId(twinState.getModelId());
         device.setETag(twinState.getETag());
         device.setTags(twinState.getTags());
         device.setDesiredProperties(twinState.getDesiredProperty());
@@ -503,6 +504,7 @@ public class DeviceTwin
         deviceTwinDevice.setCapabilities(twinState.getCapabilities());
         deviceTwinDevice.setConnectionState(twinState.getConnectionState());
         deviceTwinDevice.setConfigurations(twinState.getConfigurations());
+        deviceTwinDevice.setModelId(twinState.getModelId());
 
         if (twinState.getModuleId() != null && !twinState.getModuleId().isEmpty())
         {
