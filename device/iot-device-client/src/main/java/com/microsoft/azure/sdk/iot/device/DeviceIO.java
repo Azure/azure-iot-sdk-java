@@ -146,7 +146,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     {
         synchronized (this.stateLock)
         {
-            if (this.state == IotHubConnectionStatus.CONNECTED || this.state == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+            if (this.isOpen())
             {
                 return;
             }
@@ -277,7 +277,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                                String deviceId)
     {
         /* Codes_SRS_DEVICE_IO_21_024: [If the client is closed, the sendEventAsync shall throw an IllegalStateException.] */
-        if (this.state == IotHubConnectionStatus.DISCONNECTED)
+        if (!this.isOpen())
         {
             throw new IllegalStateException(
                     "Cannot send event from "
@@ -373,10 +373,10 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.sendPeriodInMilliseconds = newIntervalInMilliseconds;
 
         /* Codes_SRS_DEVICE_IO_21_034: [If the task scheduler already exists, the setSendPeriodInMilliseconds shall change the `scheduleAtFixedRate` for the sendTask to the new value.] */
-        if(this.sendTaskScheduler != null)
+        if (this.sendTaskScheduler != null)
         {
             /* Codes_SRS_DEVICE_IO_21_035: [If the `sendTask` is null, the setSendPeriodInMilliseconds shall throw IOException.] */
-            if(this.sendTask == null)
+            if (this.sendTask == null)
             {
                 throw new IOException("transport send task not set");
             }
@@ -404,8 +404,9 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public boolean isOpen()
     {
-        /* Codes_SRS_DEVICE_IO_21_031: [The isOpen shall return the connection state, true if connection is open, false if it is closed.] */
-        return (this.state == IotHubConnectionStatus.CONNECTED);
+        // Although the method is called "isOpen", it has always returned true even when the client is in a reconnecting state.
+        // This allows users to still queue messages as they will be sent after the reconnection completes.
+        return (this.state == IotHubConnectionStatus.CONNECTED || this.state == IotHubConnectionStatus.DISCONNECTED_RETRYING);
     }
 
     /**
