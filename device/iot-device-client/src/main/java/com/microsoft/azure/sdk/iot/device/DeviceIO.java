@@ -400,7 +400,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     /**
      * Getter for the connection state.
      *
-     * @return a boolean true if the connection is open, or false if it is closed.
+     * @return a boolean true if the connection is open or reconnecting, and false otherwise.
      */
     public boolean isOpen()
     {
