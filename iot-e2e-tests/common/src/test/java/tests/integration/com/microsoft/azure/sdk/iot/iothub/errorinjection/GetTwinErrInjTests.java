@@ -27,6 +27,7 @@ import java.util.List;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommon.ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to GetDeviceTwin/GetTwin.
@@ -252,7 +253,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
         testGetDeviceTwin();
 
         // Act
-        errorInjectionMessage.setExpiryTime(100);
+        errorInjectionMessage.setExpiryTime(ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
         IotHubServicesCommon.sendMessageAndWaitForResponse(internalClient,
                 errorInjectionMsgAndRet,
@@ -261,7 +262,7 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient, errorInjectionMsgAndRet);
         for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
             PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];

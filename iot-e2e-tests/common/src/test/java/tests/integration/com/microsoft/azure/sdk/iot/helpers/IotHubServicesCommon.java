@@ -23,6 +23,11 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  */
 public class IotHubServicesCommon
 {
+    protected static final Integer RETRY_MILLISECONDS = 100;
+    protected static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
+
+    public static final int ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS = 200;
+
     //if error injection message has not taken effect after 1 minute, the test will timeout
     private final static long ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000;
     private final static String TEST_ASC_SECURITY_MESSAGE = "{ \"AgentVersion\": \"0.0.1\", "
@@ -60,7 +65,7 @@ public class IotHubServicesCommon
                     //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
                     // we ensure that error injection message isn't resent to service too many times. The message will still likely
                     // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
-                    messagesToSend.get(i).message.setExpiryTime(200);
+                    messagesToSend.get(i).message.setExpiryTime(ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS);
                 }
 
                 sendMessageAndWaitForResponse(client, messagesToSend.get(i), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
@@ -383,15 +388,32 @@ public class IotHubServicesCommon
         return false;
     }
 
-    public static void waitForStabilizedConnection(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client) throws InterruptedException
+    public static void waitForStabilizedConnection(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, long timeout, InternalClient client, MessageAndResult errorInjectionMsgAndRet) throws InterruptedException
     {
         //Wait until error injection takes effect
+        long millisecondsToWaitForErrorInjectionToHappen = 10 * 1000;
         long startTime = System.currentTimeMillis();
+        long timeErrorInjectionMessageSent = System.currentTimeMillis();
         while (!actualStatusUpdatesContainsStatus(actualStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING))
         {
             Thread.sleep(200);
-            long timeElapsed = System.currentTimeMillis() - startTime;
-            if (timeElapsed > timeout)
+            long timeElapsedSinceErrorInjectionMessageSent = System.currentTimeMillis() - timeErrorInjectionMessageSent;
+            if (timeElapsedSinceErrorInjectionMessageSent > millisecondsToWaitForErrorInjectionToHappen)
+            {
+                //Error injection message never took effect, likely because the message wasn't sent. Send it again and wait for the effect to take place.
+                // Extend the lifespan of the error injection message so it doesn't immediately expire
+                errorInjectionMsgAndRet.message.setExpiryTime(ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS);
+                IotHubServicesCommon.sendMessageAndWaitForResponse(
+                        client,
+                        errorInjectionMsgAndRet,
+                        RETRY_MILLISECONDS,
+                        SEND_TIMEOUT_MILLISECONDS,
+                        client.getConfig().getProtocol());
+
+                timeErrorInjectionMessageSent = System.currentTimeMillis();
+            }
+
+            if (System.currentTimeMillis() - startTime > timeout)
             {
                 Assert.fail(buildExceptionMessage("Timed out waiting for error injection message to take effect", client));
             }

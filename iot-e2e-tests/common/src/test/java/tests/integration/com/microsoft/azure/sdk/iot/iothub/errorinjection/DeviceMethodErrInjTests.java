@@ -26,6 +26,7 @@ import java.util.List;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommon.ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to Device methods.
@@ -248,7 +249,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
         invokeMethodSucceed();
 
         // Act
-        errorInjectionMessage.setExpiryTime(200);
+        errorInjectionMessage.setExpiryTime(ERROR_INJECTION_MESSAGE_TIMEOUT_MILLISECONDS);
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
         this.testInstance.deviceTestManager.sendMessageAndWaitForResponse(
                 errorInjectionMsgAndRet,
@@ -257,7 +258,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, this.testInstance.deviceTestManager.client);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, this.testInstance.deviceTestManager.client, errorInjectionMsgAndRet);
         invokeMethodSucceed();
     }
 }
