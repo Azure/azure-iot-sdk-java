@@ -542,10 +542,8 @@ public class DeviceTwinDevice
         {
             thisDevice.append("Version: " + this.getVersion() + "\n");
         }
-        if(this.modelId != null && !this.modelId.isEmpty())
-        {
-            thisDevice.append("Model ID: " + this.getModelId() + "\n");
-        }
+
+        thisDevice.append("Model ID: " + this.getModelId() + "\n");
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());
         thisDevice.append(desiredPropertiesToString());

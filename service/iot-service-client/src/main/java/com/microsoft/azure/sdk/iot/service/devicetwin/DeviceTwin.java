@@ -504,11 +504,7 @@ public class DeviceTwin
         deviceTwinDevice.setCapabilities(twinState.getCapabilities());
         deviceTwinDevice.setConnectionState(twinState.getConnectionState());
         deviceTwinDevice.setConfigurations(twinState.getConfigurations());
-
-        if (twinState.getModelId() != null && !twinState.getModelId().isEmpty())
-        {
-            deviceTwinDevice.setModelId(twinState.getModelId());
-        }
+        deviceTwinDevice.setModelId(twinState.getModelId());
 
         if (twinState.getModuleId() != null && !twinState.getModuleId().isEmpty())
         {
