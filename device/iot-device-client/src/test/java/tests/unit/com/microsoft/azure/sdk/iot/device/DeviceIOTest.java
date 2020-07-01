@@ -827,4 +827,19 @@ public class DeviceIOTest
             }
         };
     }
+    @Test
+    public void isOpenWhenReconnecting()
+            throws IOException
+    {
+        // arrange
+        final DeviceIO deviceIO = newDeviceIO();
+        openDeviceIO(deviceIO, mockedTransport, mockExecutors, mockScheduler);
+        Deencapsulation.invoke(deviceIO, "execute", IotHubConnectionStatus.DISCONNECTED_RETRYING, IotHubConnectionStatusChangeReason.CONNECTION_OK, new Exception(), new Object());
+
+        // act
+        boolean isOpen = Deencapsulation.invoke(deviceIO, "isOpen" );
+
+        // assert
+        assertTrue(isOpen);
+    }
 }
