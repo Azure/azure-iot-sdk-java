@@ -136,4 +136,9 @@ public class DeviceTestManager
     {
         deviceEmulator.sendMessageAndWaitForResponse(messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
     }
+
+    public void sendErrorInjectionMessageAndWaitForResponse(MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    {
+        deviceEmulator.sendMessageAndWaitForResponse(messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+    }
 }

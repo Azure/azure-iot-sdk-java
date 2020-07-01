@@ -8,6 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -248,9 +249,8 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
         invokeMethodSucceed();
 
         // Act
-        errorInjectionMessage.setExpiryTime(200);
-        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        this.testInstance.deviceTestManager.sendMessageAndWaitForResponse(
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK_EMPTY);
+        this.testInstance.deviceTestManager.sendErrorInjectionMessageAndWaitForResponse(
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
