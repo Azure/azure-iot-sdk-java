@@ -207,16 +207,6 @@ public class DeviceEmulator
         }
     }
 
-    public void sendMessageAndWaitForResponse(MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
-    {
-        IotHubServicesCommon.sendMessageAndWaitForResponse(this.client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
-    }
-
-    public void sendErrorInjectionMessageAndWaitForResponse(MessageAndResult messageAndResult, int RETRY_MILLISECONDS, int SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
-    {
-        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(this.client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
-    }
-
     /**
      * Clean all previous state to start a new test.
      */

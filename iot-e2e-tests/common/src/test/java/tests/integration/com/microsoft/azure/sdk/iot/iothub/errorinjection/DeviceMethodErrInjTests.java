@@ -250,11 +250,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK_EMPTY);
-        this.testInstance.deviceTestManager.sendErrorInjectionMessageAndWaitForResponse(
-                errorInjectionMsgAndRet,
-                RETRY_MILLISECONDS,
-                SEND_TIMEOUT_MILLISECONDS,
-                this.testInstance.protocol);
+        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(this.testInstance.deviceTestManager.client, errorInjectionMsgAndRet, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, this.testInstance.protocol);
 
         // Assert
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, this.testInstance.deviceTestManager.client);
