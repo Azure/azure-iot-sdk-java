@@ -68,6 +68,7 @@ public class ContractApiHttp
     private static final String HEADER_FIELD_NAME_REQUEST_ID = "Request-Id";
     private static final String HEADER_FIELD_NAME_ACCEPT = "Accept";
     private static final String HEADER_FIELD_NAME_CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_FIELD_NAME_CONTENT_LENGTH = "Content-Length";
     private static final String HEADER_FIELD_NAME_CHARSET = "charset";
 
     private static final String HEADER_FIELD_VALUE_REQUEST_ID = "1001";
@@ -183,6 +184,7 @@ public class ContractApiHttp
         request.setHeaderField(HEADER_FIELD_NAME_ACCEPT, HEADER_FIELD_VALUE_ACCEPT);
         request.setHeaderField(HEADER_FIELD_NAME_CONTENT_TYPE, HEADER_FIELD_VALUE_CONTENT_TYPE);
         request.setHeaderField(HEADER_FIELD_NAME_CHARSET, HEADER_FIELD_VALUE_CHARSET);
+        request.setHeaderField(HEADER_FIELD_NAME_CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
 
         /* SRS_HTTP_DEVICE_REGISTRATION_CLIENT_21_013: [The request shall add the headerParameters to the http header, if provided.] */
         if(headerParameters != null)

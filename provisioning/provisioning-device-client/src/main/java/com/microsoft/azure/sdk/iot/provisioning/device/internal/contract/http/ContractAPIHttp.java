@@ -46,6 +46,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private static final String ACCEPT_VALUE = "application/json";
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final Integer DEFAULT_HTTP_TIMEOUT_MS = Integer.MAX_VALUE;
     private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 401;
 
@@ -126,6 +127,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         request.setHeaderField(USER_AGENT, userAgentValue);
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
+        request.setHeaderField(CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
         if (headersMap != null)
         {
             for (Map.Entry<String, String> header : headersMap.entrySet())
