@@ -130,7 +130,7 @@ public class RegisterManager
      * The value will be null for a non-pnp device.
      * The value will be null for a pnp device until the device connects and registers with the model id.
      */
-    private static final String MODEL_ID = "digital-twin-model-id";
+    private static final String MODEL_ID = "modelId";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(MODEL_ID)
     @Setter
