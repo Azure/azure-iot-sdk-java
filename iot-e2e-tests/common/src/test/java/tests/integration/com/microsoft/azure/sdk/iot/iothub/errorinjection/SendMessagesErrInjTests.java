@@ -355,7 +355,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         client.open();
 
         // Act
-        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,null);
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,IotHubStatusCode.OK_EMPTY);
         IotHubServicesCommon.sendMessageAndWaitForResponse(
                 client,
                 errorInjectionMsgAndRet,

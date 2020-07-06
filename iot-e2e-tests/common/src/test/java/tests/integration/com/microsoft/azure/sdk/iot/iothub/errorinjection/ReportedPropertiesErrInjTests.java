@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection;
 
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -218,9 +219,8 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
         sendReportedPropertiesAndVerify(1);
 
         // Act
-        errorInjectionMessage.setExpiryTime(100);
-        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, null);
-        IotHubServicesCommon.sendMessageAndWaitForResponse(internalClient,
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK_EMPTY);
+        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(internalClient,
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,

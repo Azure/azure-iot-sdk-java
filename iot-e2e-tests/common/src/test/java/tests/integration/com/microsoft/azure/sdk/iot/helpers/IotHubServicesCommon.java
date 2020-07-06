@@ -55,12 +55,16 @@ public class IotHubServicesCommon
 
             for (int i = 0; i < messagesToSend.size(); ++i)
             {
-                if (isErrorInjectionMessage(messagesToSend.get(i)))
+                if ((protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS) && isErrorInjectionMessage(messagesToSend.get(i)))
                 {
-                    //error injection message is not guaranteed to be ack'd by service so it may be re-sent. By setting expiry time,
+                    // error injection message will not be ack'd by service if sent over MQTT/MQTT_WS, so the SDK's
+                    // retry logic will try to send it again after the connection drops. By setting expiry time,
                     // we ensure that error injection message isn't resent to service too many times. The message will still likely
                     // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
-                    messagesToSend.get(i).message.setExpiryTime(200);
+                    messagesToSend.get(i).message.setExpiryTime(1000);
+
+                    // Since the message won't be ack'd, then we don't need to validate the status code when this message's callback is fired
+                    messagesToSend.get(i).statusCode = null;
                 }
 
                 sendMessageAndWaitForResponse(client, messagesToSend.get(i), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
@@ -311,6 +315,23 @@ public class IotHubServicesCommon
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED));
 
         client.closeNow();
+    }
+
+    public static void sendErrorInjectionMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    {
+        if (protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS)
+        {
+            // error injection message will not be ack'd by service if sent over MQTT/MQTT_WS, so the SDK's
+            // retry logic will try to send it again after the connection drops. By setting expiry time,
+            // we ensure that error injection message isn't resent to service too many times. The message will still likely
+            // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
+            messageAndResult.message.setExpiryTime(1000);
+
+            // Since the message won't be ack'd, then we don't need to validate the status code when this message's callback is fired
+            messageAndResult.statusCode = null;
+        }
+
+        sendMessageAndWaitForResponse(client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
     }
 
     public static void sendMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)

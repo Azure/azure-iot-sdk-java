@@ -31,7 +31,7 @@ public class ErrorInjectionHelper
     public static final String FaultCloseReason_Boom = "Boom";
     public static final String FaultCloseReason_Bye = "byebye";
 
-    public static final int DefaultDelayInSec = 1;
+    public static final int DefaultDelayInSec = 5;
     public static final int DefaultDurationInSec = 5;
 
     public static Message tcpConnectionDropErrorInjectionMessage(int delayInSecs, int durationInSecs)
