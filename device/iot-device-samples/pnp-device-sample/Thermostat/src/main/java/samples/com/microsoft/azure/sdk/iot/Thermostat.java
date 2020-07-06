@@ -217,8 +217,8 @@ public class Thermostat {
                     double maxTemp = Collections.max(filteredReadings.values());
                     double minTemp = Collections.min(filteredReadings.values());
                     double avgTemp = runningTotal / filteredReadings.size();
-                    Date startTime = Collections.max(filteredReadings.keySet());
-                    Date endTime = Collections.min(filteredReadings.keySet());
+                    Date startTime = Collections.min(filteredReadings.keySet());
+                    Date endTime = Collections.max(filteredReadings.keySet());
                     String responsePayload = String.format(
                             "{\"maxTemp\": {%f}, {\"minTemp\": {%f}, \"avgTemp\": {%f}, \"startTime\": {%tc}, \"endTime\": {%tc}",
                             maxTemp,
@@ -226,7 +226,7 @@ public class Thermostat {
                             avgTemp,
                             startTime,
                             endTime);
-                    log.debug("Command: MaxMinReport since {}: \"maxTemp\": {}, {\"minTemp\": {}, \"avgTemp\": {}, \"startTime\": {}, \"endTime\": {}",
+                    log.debug("Command: MaxMinReport since {}: \"maxTemp\": {}°C, \"minTemp\": {}°C, \"avgTemp\": {}°C, \"startTime\": {}, \"endTime\": {}",
                             since,
                             maxTemp,
                             minTemp,
