@@ -45,6 +45,10 @@ public class Thermostat {
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();
+
+    // HashMap to hold the temperature updates sent over each "Thermostat" component.
+    // NOTE: Memory constrained device should leverage storage capabilities of an external service to store this information and perform computation.
+    // See https://docs.microsoft.com/en-us/azure/event-grid/compare-messaging-services for more details.
     private static final Map<Date, Double> temperatureReadings = new HashMap<>();
 
     private static DeviceClient deviceClient;
@@ -297,7 +301,7 @@ public class Thermostat {
         String messageId = java.util.UUID.randomUUID().toString();
 
         Message message = new Message(telemetryPayload);
-        message.setContentEncoding("utf-8");
+        message.setContentEncoding(StandardCharsets.UTF_8.name());
         message.setContentTypeFinal("application/json");
         message.setMessageId(messageId);
 
