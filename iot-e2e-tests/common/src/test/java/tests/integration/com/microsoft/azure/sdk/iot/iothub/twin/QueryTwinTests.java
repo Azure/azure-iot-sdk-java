@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -32,6 +33,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.*;
 
 /**
@@ -44,6 +49,29 @@ public class QueryTwinTests extends DeviceTwinCommon
     public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+    }
+
+    // Override the input parameters that are defined in DeviceTwinCommon since these query tests are strictly service client tests.
+    // No need to parameterize these tests on device client options.
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
+    public static Collection inputs() throws Exception
+    {
+        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+        IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
+
+        sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
+
+        List inputs = Arrays.asList(
+                    new Object[][]
+                            {
+                                    //Query is only supported over http and only with sas based authentication
+                                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, null, null, null},
+                            });
+
+        return inputs;
     }
 
     @Before
@@ -82,7 +110,7 @@ public class QueryTwinTests extends DeviceTwinCommon
             if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
             {
                 double value = (double) map.get("numberOfDevices");
-                assertEquals(value, actualNumOfDevices, 0);
+                assertEquals(actualNumOfDevices, value, 0);
             }
         }
 
