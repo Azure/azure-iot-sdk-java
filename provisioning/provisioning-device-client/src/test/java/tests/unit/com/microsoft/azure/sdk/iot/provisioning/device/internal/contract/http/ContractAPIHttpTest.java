@@ -117,7 +117,7 @@ public class ContractAPIHttpTest
                 new HttpRequest((URL)any, method, (byte[])any);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 3 + headerSize;
+                times = 4 + headerSize;
             }
         };
     }
