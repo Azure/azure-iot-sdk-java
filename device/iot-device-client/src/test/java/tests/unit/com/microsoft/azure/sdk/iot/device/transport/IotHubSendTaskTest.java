@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -22,8 +23,20 @@ public class IotHubSendTaskTest
     // Tests_SRS_IOTHUBSENDTASK_11_001: [The constructor shall save the transport.]
     // Tests_SRS_IOTHUBSENDTASK_11_002: [The function shall send all messages on the transport queue.]
     @Test
-    public void runSendsAllMessages() throws DeviceClientException
+    public void runSendsAllMessages()
     {
+        final Object sendThreadLock = new Object();
+        new Expectations()
+        {
+            {
+                mockTransport.getSendThreadLock();
+                result = sendThreadLock;
+
+                mockTransport.hasMessagesToSend();
+                result = true;
+            }
+        };
+
         IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
         sendTask.run();
 
@@ -35,17 +48,31 @@ public class IotHubSendTaskTest
         };
     }
 
-    // Tests_SRS_IOTHUBSENDTASK_11_003: [The function shall invoke all callbacks on the transport's callback queue.]
     @Test
     public void runInvokesAllCallbacks()
     {
+        final Object sendThreadLock = new Object();
+        new Expectations()
+        {
+            {
+                mockTransport.getSendThreadLock();
+                result = sendThreadLock;
+
+                mockTransport.hasMessagesToSend();
+                result = false;
+
+                mockTransport.hasCallbacksToExecute();
+                result = true;
+            }
+        };
+
         IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
         sendTask.run();
 
         new Verifications()
         {
             {
-                mockTransport.invokeCallbacks();
+                mockTransport.sendMessages();
             }
         };
     }

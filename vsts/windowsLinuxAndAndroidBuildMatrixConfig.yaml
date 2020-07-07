@@ -245,6 +245,7 @@ jobs:
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
         timeoutInMinutes: 10
+        continueOnError: false
         inputs:
           targetType: 'filePath'
           filePath: '$(Build.SourcesDirectory)/vsts/StartEmulator.sh'

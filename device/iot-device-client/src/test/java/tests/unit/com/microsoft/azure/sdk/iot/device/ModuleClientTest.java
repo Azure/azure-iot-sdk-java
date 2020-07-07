@@ -41,6 +41,9 @@ public class ModuleClientTest
     DeviceClientConfig mockedDeviceClientConfig;
 
     @Mocked
+    ClientOptions mockedClientOptions;
+
+    @Mocked
     IotHubConnectionString mockedIotHubConnectionString;
 
     @Mocked
@@ -133,6 +136,38 @@ public class ModuleClientTest
 
         //act
         new ModuleClient(connectionString, IotHubClientProtocol.HTTPS);
+    }
+
+    @Test
+    public void constructorWithModelIdSuccess(final @Mocked System mockedSystem) throws URISyntaxException, IOException, ModuleClientException {
+        //arrange
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final String expectedEdgeHubConnectionString = null;
+        final String expectedIotHubConnectionString = "testConnectionString";
+        final ClientOptions clientOptions = new ClientOptions();
+        clientOptions.setModelId("testModelId");
+
+        final Map<String, String> mockedSystemVariables = new HashMap<>();
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "EdgehubConnectionstringVariableName").toString(), expectedEdgeHubConnectionString);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IothubConnectionstringVariableName").toString(), expectedIotHubConnectionString);
+
+        //assert
+        new Expectations()
+        {
+            {
+                mockedSystem.getenv();
+                result = mockedSystemVariables;
+
+                mockedDeviceClientConfig.getModuleId();
+                result = "someModuleId";
+
+                mockedClientOptions.getModelId();
+                result = "testModelId";
+            }
+        };
+
+        // act
+        ModuleClient.createFromEnvironment(protocol, clientOptions);
     }
 
     //Tests_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
