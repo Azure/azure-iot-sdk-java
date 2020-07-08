@@ -1,16 +1,20 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package samples.com.microsoft.azure.sdk.iot;
+package samples.com.microsoft.azure.sdk.iot.device;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.pnphelpers.PnpHelper;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
@@ -50,6 +54,7 @@ public class TemperatureController {
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();
+    private static final GsonBuilder gsonBuilder = new GsonBuilder();
     private static DeviceClient deviceClient;
 
     // HashMap to hold the temperature updates sent over each "Thermostat" component.
@@ -159,7 +164,7 @@ public class TemperatureController {
 
             switch (methodName) {
                 case reboot:
-                    int delay = PnpHelper.getPnpCommandRequestValue(jsonRequest).getAsInt();
+                    int delay = getCommandRequestValue(jsonRequest);
                     log.debug("Command: Received - Rebooting thermostat (resetting temperature reading to 0°C after {} seconds).", delay);
                     Thread.sleep(delay * 1000);
 
@@ -178,7 +183,7 @@ public class TemperatureController {
                     String componentName = words[0];
 
                     if (temperatureReadings.containsKey(componentName)) {
-                        String sinceString = PnpHelper.getPnpCommandRequestValue(jsonRequest).getAsString();
+                        String sinceString = getCommandRequestValue(jsonRequest);
                         DateFormat format = new SimpleDateFormat(formatPattern);
                         Date since = format.parse(sinceString);
                         log.debug("Command: Received - component=\"{}\", generating min, max, avg temperature report since {}", componentName, since);
@@ -378,5 +383,10 @@ public class TemperatureController {
         public void TwinPropertyCallBack(Property property, Object context) {
             log.debug("Property - Received property unhandled by device, key={}, value={}", property.getKey(), property.getValue());
         }
+    }
+
+    private static <T> T getCommandRequestValue(@NonNull String jsonPayload) {
+        Type cType = new TypeToken<T>(){}.getType();
+        return gsonBuilder.create().fromJson(jsonPayload, cType);
     }
 }
