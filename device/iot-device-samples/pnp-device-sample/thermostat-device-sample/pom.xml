@@ -1,6 +1,7 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
 <project>
     <modelVersion>4.0.0</modelVersion>
+<<<<<<< HEAD:device/iot-device-samples/pnp-device-sample/thermostat-device-sample/pom.xml
     <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
     <artifactId>thermostat-device-sample</artifactId>
     <name>Plug and play Thermostat device sample</name>
@@ -10,6 +11,11 @@
             <name>Microsoft</name>
         </developer>
     </developers>
+=======
+
+    <artifactId>TemperatureController</artifactId>
+
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841):device/iot-device-samples/pnp-device-sample/TemperatureController/pom.xml
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
@@ -34,7 +40,11 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
+<<<<<<< HEAD:device/iot-device-samples/pnp-device-sample/thermostat-device-sample/pom.xml
                             <mainClass>samples.com.microsoft.azure.sdk.iot.device.Thermostat</mainClass>
+=======
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.TemperatureController</mainClass>
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841):device/iot-device-samples/pnp-device-sample/TemperatureController/pom.xml
                         </manifest>
                     </archive>
                 </configuration>

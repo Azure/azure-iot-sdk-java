@@ -6,6 +6,7 @@ This folder contains simple samples showing how to use the various features of t
 
 * [Device manager sample](device-manager-sample): Shows how to work with the device ID registry of IoT Hub. 
 * [Service client sample](service-client-sample): Shows how to send Cloud to Device messages through IoT Hub. 
+* [Plug and play samples](https://github.com/Azure/azure-iot-sdk-java/tree/preview/service/iot-service-samples/pnp-service-sample): Shows how to get the plug and play model ID, update properties on the twin and invoke commands. 
 
 ## How to run the samples on Linux or Windows
 
@@ -98,6 +99,7 @@ You need to first clone the repository or download the sample project folder on 
 
 	You can verify the result of your operation by using [Device Explorer or iothub-explorer tool][lnk-manage-iot-hub].
 
+<<<<<<< HEAD
 #### Build and run the DigitalTwin(plug and play) Service Sample application for a device with no components:
 <br/>
 
@@ -106,27 +108,45 @@ You need to first clone the repository or download the sample project folder on 
 This sample uses the following simple model which has no components - [Thermostat](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json)
 
 1. Preparing the digitaltwin service sampl application:
+=======
+#### Build and run the Pnp(plug and play) Service Sample application for a device with no components:
+This sample uses the following simple model which has no components - [Thermostat](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json)
+1. Preparing the Pnp service Sample application:
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841)
    1. Set the following environment variables on the terminal from which you want to run the application.
 
       * IOTHUB_CONNECTION_STRING
       * DEVICE_ID
 
+<<<<<<< HEAD
 2. Building the digitaltwin service sampl application:
 
     To build the digitaltwin service sampl application using Maven, at a command prompt navigate to the **\service\iot-service-samples\digitaltwin-service-samples\thermostat-service-sample** folder. Then execute the following command and check for build errors:
+=======
+2. Building the Pnp Service Sample application:
+
+    To build the Pnp Service Sample application using Maven, at a command prompt navigate to the **\service\iot-service-samples\pnp-service-samples\thermostat-service-sample** folder. Then execute the following command and check for build errors:
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841)
     
     ```
     mvn clean package
     ```
 
+<<<<<<< HEAD
 3. Running the digitaltwin service sampl application:
 
 	To run the digitaltwin service sampl application using Maven, execute the following command.
+=======
+3. Running the Pnp Service Sample application:
+
+	To run the Pnp Service Sample application using Maven, execute the following command.
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841)
     
     ```
     mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.service.Thermostat"
     ```
 
+<<<<<<< HEAD
 #### Build and run the DigitalTwin(plug and play) Service Sample application for a device with components:
 <br/>
 
@@ -135,6 +155,11 @@ This sample uses the following simple model which has no components - [Thermosta
 This sample uses the following model which has components - [TemperatureController](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json)
 
 1. Preparing the digitaltwin service sampl application:
+=======
+#### Build and run the Pnp(plug and play) Service Sample application for a device with components:
+This sample uses the following model which has components - [TemperatureController](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json)
+1. Preparing the Pnp service Sample application:
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841)
    1. Set the following environment variables on the terminal from which you want to run the application.
 
       * IOTHUB_CONNECTION_STRING
@@ -142,23 +167,39 @@ This sample uses the following model which has components - [TemperatureControll
 
 2. Install dependencies:
 
+<<<<<<< HEAD
     To install required dependencies, at a command prompt navigate to the root **azure-iot-sdk-java** folder. Then execute the following command:
+=======
+    To install the pnp-helper dependency, at a command prompt navigate to the root **azure-iot-sdk-java** folder. Then execute the following command:
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841)
     
     ```
     mvn install -T 2C -DskipTests
     ```
 
+<<<<<<< HEAD
 3. Building the digitaltwin service sample application:
 
     To build the digitaltwin service sample application using Maven, at a command prompt navigate to the **\service\iot-service-samples\digitaltwin-service-samples\temperature-controller-service-sample** folder. Then execute the following command and check for build errors:
+=======
+3. Building the Pnp Service Sample application:
+
+    To build the Pnp Service Sample application using Maven, at a command prompt navigate to the **\service\iot-service-samples\pnp-service-samples\temperature-controller-service-sample** folder. Then execute the following command and check for build errors:
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841)
     
     ```
     mvn clean package
     ```
 
+<<<<<<< HEAD
 4. Running the digitaltwin service sampl application:
 
 	To run the digitaltwin service sampl application using Maven, execute the following command.
+=======
+4. Running the Pnp Service Sample application:
+
+	To run the Pnp Service Sample application using Maven, execute the following command.
+>>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841)
     
     ```
     mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.service.TemperatureController"

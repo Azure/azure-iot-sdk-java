@@ -1,23 +1,27 @@
-<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
-<project>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>pnp-service-sample</artifactId>
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
-        <artifactId>iot-device-samples</artifactId>
         <version>1.18.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
-    <artifactId>send-batch-events</artifactId>
-    <name>Send Batch Events Sample</name>
+
+    <artifactId>thermostat-service-sample</artifactId>
+
     <developers>
         <developer>
             <id>microsoft</id>
             <name>Microsoft</name>
         </developer>
     </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -28,15 +32,13 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-<<<<<<< HEAD:device/iot-device-samples/send-batch-events/pom.xml
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.SendBatchEvents</mainClass>
-=======
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.Thermostat</mainClass>
->>>>>>> 2d5a21742... feat(samples): Updating and adding samples for pnp summer refresh (#841):device/iot-device-samples/pnp-device-sample/Thermostat/pom.xml
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.service.Thermostat</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+
 </project>
