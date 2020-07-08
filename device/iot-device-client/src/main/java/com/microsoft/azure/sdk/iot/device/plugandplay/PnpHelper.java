@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.plugandplay;
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import lombok.NonNull;
 
 import java.nio.charset.StandardCharsets;

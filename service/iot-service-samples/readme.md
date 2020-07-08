@@ -6,6 +6,7 @@ This folder contains simple samples showing how to use the various features of t
 
 * [Device manager sample](device-manager-sample): Shows how to work with the device ID registry of IoT Hub. 
 * [Service client sample](service-client-sample): Shows how to send Cloud to Device messages through IoT Hub. 
+* [Plug and play samples](https://github.com/Azure/azure-iot-sdk-java/tree/preview/service/iot-service-samples/pnp-service-sample): Shows how to get the plug and play model ID, update properties on the twin and invoke commands. 
 
 ## How to run the samples on Linux or Windows
 
