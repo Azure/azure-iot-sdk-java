@@ -2,6 +2,7 @@ package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.ZoneOffset;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 // This sample uses the model - https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json.
+@Slf4j
 public class Thermostat {
     // Get connection string and device id inputs.
     private static final String iotHubConnectionString  = System.getenv("IOTHUB_CONNECTION_STRING");
@@ -24,13 +26,13 @@ public class Thermostat {
     }
 
     private static void RunSample() throws IOException, IotHubException {
-        System.out.println("Initialize the service client.");
+        log.debug("Initialize the service client.");
         InitializeServiceClient();
 
-        System.out.println("Get Twin model Id and Update Twin");
+        log.debug("Get Twin model Id and Update Twin");
         GetAndUpdateTwin();
 
-        System.out.println("Invoke a method");
+        log.debug("Invoke a method");
         InvokeMethod();
     }
 
@@ -43,7 +45,7 @@ public class Thermostat {
         // Get the twin and retrieve model Id set by Device client.
         DeviceTwinDevice twin = new DeviceTwinDevice(deviceId);
         twinClient.getTwin(twin);
-        System.out.println("Model Id of this Twin is: " + twin.getModelId());
+        log.debug("Model Id of this Twin is: " + twin.getModelId());
 
         // Update the twin.
         // The update patch for a property of a component should be in the format:
@@ -52,7 +54,7 @@ public class Thermostat {
         //        "value": "propertyValue"
         //      }
         //  }
-        System.out.println("Updating Device twin property");
+        log.debug("Updating Device twin property");
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
         twin.setDesiredProperties(Collections.singleton(new Pair(propertyName, propertyValue)));
@@ -60,13 +62,13 @@ public class Thermostat {
 
         // Get the updated twin properties.
         twinClient.getTwin(twin);
-        System.out.println("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
+        log.debug("The updated desired properties: " + twin.getDesiredProperties().iterator().next().getValue());
     }
 
     private static void InvokeMethod() throws IOException, IotHubException {
         // The method to invoke for a device without components should be "methodName" as defined in the DTDL.
         String methodToInvoke = "getMaxMinReport";
-        System.out.println("Invoking method: " + methodToInvoke);
+        log.debug("Invoking method: " + methodToInvoke);
 
         Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
         Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
@@ -79,6 +81,6 @@ public class Thermostat {
             throw new IOException("Method result is null");
         }
 
-        System.out.println("Method result status is: " + result.getStatus());
+        log.debug("Method result status is: " + result.getStatus());
     }
 }

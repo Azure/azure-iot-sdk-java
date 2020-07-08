@@ -2,8 +2,8 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.samples.device</groupId>
-    <artifactId>Thermostat</artifactId>
-    <name>Plug and play Thermostat sample</name>
+    <artifactId>thermostat-device-sample</artifactId>
+    <name>Plug and play Thermostat device sample</name>
     <developers>
         <developer>
             <id>microsoft</id>

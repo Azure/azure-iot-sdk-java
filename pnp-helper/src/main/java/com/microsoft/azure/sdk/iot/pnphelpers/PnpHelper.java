@@ -4,9 +4,6 @@
 package com.microsoft.azure.sdk.iot.pnphelpers;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
@@ -29,7 +26,6 @@ public class PnpHelper {
     private static final String PROPERTY_COMPONENT_IDENTIFIER_VALUE = "c";
 
     private static final Gson gson = new Gson();
-    private static final GsonBuilder gsonBuilder = new GsonBuilder();
 
     /**
      * Create a plug and play compatible telemetry message.
@@ -193,6 +189,7 @@ public class PnpHelper {
         return singleton(new Property(componentName, componentProperty));
     }
 
+<<<<<<< HEAD
     /**
      * Helper to retrieve the command request value from a plug and play compatible command invocation request received.
      * @param jsonPayload The command payload in json format.
@@ -245,4 +242,6 @@ public class PnpHelper {
     {
         return componentName + "*" + commandName;
     }
+=======
+>>>>>>> origin/master
 }
