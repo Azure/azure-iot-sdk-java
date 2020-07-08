@@ -56,7 +56,6 @@ public class FileUploadTests extends IntegrationTest
 {
     // Max time to wait to see it on Hub
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS = 180000; // 3 minutes
-    private static final long FILE_UPLOAD_QUEUE_POLLING_INTERVAL_MILLISECONDS = 4000; // 4 sec
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_CALLBACK_MILLISECONDS = 5000; // 5 sec
 
     //Max time to wait before timing out test
@@ -85,8 +84,6 @@ public class FileUploadTests extends IntegrationTest
     protected static final String testProxyUser = "proxyUsername";
     protected static final char[] testProxyPass = "1234".toCharArray();
 
-    static Queue<FileUploadNotification> activeFileUploadNotifications = new ConcurrentLinkedQueue<>();
-
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs() throws Exception
     {
@@ -109,11 +106,9 @@ public class FileUploadTests extends IntegrationTest
                         {
                                 //without proxy
                                 {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, false},
-                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, false},
 
                                 //with proxy
                                 {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, true},
-                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, true}
                         });
     }
 
@@ -411,14 +406,6 @@ public class FileUploadTests extends IntegrationTest
         if (!executor.awaitTermination(10000, TimeUnit.MILLISECONDS))
         {
             executor.shutdownNow();
-        }
-
-        if (!isBasicTierHub)
-        {
-            for (int i = 1; i < MAX_FILES_TO_UPLOAD; i++)
-            {
-                assertEquals(buildExceptionMessage("File" + i + " has no notification", deviceClient), testInstance.fileUploadState[i].fileUploadNotificationReceived, SUCCESS);
-            }
         }
 
         tearDownDeviceClient(deviceClient);
