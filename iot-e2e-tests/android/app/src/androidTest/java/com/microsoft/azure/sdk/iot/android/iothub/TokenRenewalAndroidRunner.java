@@ -5,28 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub;
 
-import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup17;
-import com.microsoft.azure.sdk.iot.common.helpers.Rerun;
-import com.microsoft.azure.sdk.iot.common.tests.iothub.TokenRenewalTests;
 
-import org.junit.BeforeClass;
-import org.junit.Rule;
-
-import java.io.IOException;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.TokenRenewalTests;
 
 @TestGroup17
 public class TokenRenewalAndroidRunner extends TokenRenewalTests
 {
-    @Rule
-    public Rerun count = new Rerun(3);
-
-    @BeforeClass
-    public static void setup() throws IOException
-    {
-        iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
-        TokenRenewalTests.setup();
-    }
 }

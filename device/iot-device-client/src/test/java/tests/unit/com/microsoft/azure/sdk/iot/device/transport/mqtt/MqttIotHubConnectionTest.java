@@ -46,7 +46,8 @@ public class MqttIotHubConnectionTest
     final String deviceKey = "test-devicekey?&test";
     final String apiVersionPrefix = "?api-version=";
     final String API_VERSION = apiVersionPrefix + TransportUtils.IOTHUB_API_VERSION;
-    final String PNP_API_VERSION = apiVersionPrefix + TransportUtils.IOTHUB_API_VERSION + "&digital-twin-model-id=" + modelId;
+    final String PNP_API_VERSION = apiVersionPrefix + TransportUtils.IOTHUB_API_VERSION + "&model-id=" + modelId;
+
     final String resourceUri = "test-resource-uri";
     final int qos = 1;
     final String publishTopic = "devices/test-deviceId/messages/events/";

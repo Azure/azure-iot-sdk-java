@@ -428,6 +428,8 @@ public class ContractApiHttpTest
                 times = 1;
                 mockedHttpRequest.setHeaderField("Content-Type", "application/json");
                 times = 1;
+                mockedHttpRequest.setHeaderField("Content-Length", String.valueOf(VALID_PAYLOAD.length()));
+                times = 1;
                 mockedHttpRequest.setHeaderField("charset", "utf-8");
                 times = 1;
             }

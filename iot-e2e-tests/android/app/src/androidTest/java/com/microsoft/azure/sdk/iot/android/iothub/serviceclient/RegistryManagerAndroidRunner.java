@@ -5,23 +5,11 @@
 
 package com.microsoft.azure.sdk.iot.android.iothub.serviceclient;
 
-import com.microsoft.azure.sdk.iot.android.BuildConfig;
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup14;
-import com.microsoft.azure.sdk.iot.common.tests.iothub.serviceclient.RegistryManagerTests;
 
-import org.junit.BeforeClass;
-
-import java.io.IOException;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient.RegistryManagerTests;
 
 @TestGroup14
 public class RegistryManagerAndroidRunner extends RegistryManagerTests
 {
-    @BeforeClass
-    public static void setUp() throws IOException
-    {
-        iotHubConnectionString = BuildConfig.IotHubConnectionString;
-        isBasicTierHub = Boolean.parseBoolean(BuildConfig.IsBasicTierHub);
-        isPullRequest = Boolean.parseBoolean(BuildConfig.IsPullRequest);
-        RegistryManagerTests.setUp();
-    }
 }

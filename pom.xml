@@ -20,6 +20,7 @@
         <module>iot-e2e-tests</module>
         <module>provisioning</module>
         <module>digital-twin</module>
+        <module>pnp-helper</module>
     </modules>
     <properties>
         <iot-device-client-artifact-id>iot-device-client-preview</iot-device-client-artifact-id>
