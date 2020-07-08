@@ -106,9 +106,11 @@ public class FileUploadTests extends IntegrationTest
                         {
                                 //without proxy
                                 {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, false},
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, false},
 
                                 //with proxy
                                 {IotHubClientProtocol.HTTPS, AuthenticationType.SAS, true},
+                                {IotHubClientProtocol.HTTPS, AuthenticationType.SELF_SIGNED, true}
                         });
     }
 
