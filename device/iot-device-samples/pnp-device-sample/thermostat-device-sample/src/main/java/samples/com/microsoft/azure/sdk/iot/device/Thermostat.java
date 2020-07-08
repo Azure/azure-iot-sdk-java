@@ -3,9 +3,8 @@
 
 package samples.com.microsoft.azure.sdk.iot.device;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import lombok.AllArgsConstructor;
@@ -14,7 +13,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
@@ -46,7 +44,7 @@ public class Thermostat {
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();
-    private static final GsonBuilder gsonBuilder = new GsonBuilder();
+    private static final Gson gson = new Gson();
 
     // HashMap to hold the temperature updates sent over.
     // NOTE: Memory constrained device should leverage storage capabilities of an external service to store this information and perform computation.
@@ -191,10 +189,7 @@ public class Thermostat {
             if (methodName.equalsIgnoreCase(commandName)) {
 
                 String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
-                String sinceString = getCommandRequestValue(jsonRequest);
-
-                DateFormat format = new SimpleDateFormat(formatPattern);
-                Date since = format.parse(sinceString);
+                Date since = getCommandRequestValue(jsonRequest, Date.class);
                 log.debug("Command: Received - Generating min, max, avg temperature report since {}.", since);
 
                 double runningTotal = 0;
@@ -306,9 +301,7 @@ public class Thermostat {
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
     }
 
-    private static <T> T getCommandRequestValue(@NonNull String jsonPayload) {
-        Type cType = new TypeToken<T>(){}.getType();
-        return gsonBuilder.create().fromJson(jsonPayload, cType);
+    private static <T> T getCommandRequestValue(@NonNull String jsonPayload, @NonNull Class<T> type) {
+        return gson.fromJson(jsonPayload, type);
     }
-
 }
