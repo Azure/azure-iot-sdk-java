@@ -131,15 +131,12 @@ public class FileUploadTests extends IntegrationTest
         private FileUploadState[] fileUploadState;
         private MessageState[] messageStates;
         private boolean withProxy;
-        private FileUploadNotificationReceiver fileUploadNotificationReceiver;
 
         public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.withProxy = withProxy;
-            fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
-            fileUploadNotificationReceiver.open();
         }
     }
 
@@ -328,11 +325,6 @@ public class FileUploadTests extends IntegrationTest
         deviceClient.uploadToBlobAsync(testInstance.fileUploadState[0].blobName, testInstance.fileUploadState[0].fileInputStream, testInstance.fileUploadState[0].fileLength, new FileUploadCallback(), testInstance.fileUploadState[0]);
 
         // assert
-        if (!isBasicTierHub)
-        {
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(deviceClient, 0);
-            verifyNotification(fileUploadNotification, testInstance.fileUploadState[0], deviceClient);
-        }
         waitForFileUploadStatusCallbackTriggered(0, deviceClient);
         assertEquals(buildExceptionMessage("File upload status expected SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
         tearDownDeviceClient(deviceClient);
@@ -358,13 +350,6 @@ public class FileUploadTests extends IntegrationTest
         deviceClient.completeFileUploadAsync(fileUploadCompletionNotification);
 
         // assert
-        if (!isBasicTierHub)
-        {
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(deviceClient, (int) testInstance.fileUploadState[0].fileLength);
-            assertNotNull(buildExceptionMessage("file upload notification was null", deviceClient), fileUploadNotification);
-            verifyNotification(fileUploadNotification, testInstance.fileUploadState[0], deviceClient);
-        }
-
         assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
 
         tearDownDeviceClient(deviceClient);
@@ -380,12 +365,6 @@ public class FileUploadTests extends IntegrationTest
         deviceClient.uploadToBlobAsync(testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].blobName, testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileInputStream, testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileLength, new FileUploadCallback(), testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1]);
 
         // assert
-        if (!isBasicTierHub)
-        {
-            FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(deviceClient, MAX_FILES_TO_UPLOAD - 1);
-            assertNotNull(buildExceptionMessage("file upload notification was null", deviceClient), fileUploadNotification);
-            verifyNotification(fileUploadNotification, testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1], deviceClient);
-        }
         waitForFileUploadStatusCallbackTriggered(MAX_FILES_TO_UPLOAD - 1, deviceClient);
         assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[MAX_FILES_TO_UPLOAD - 1].fileUploadStatus);
 
@@ -423,11 +402,6 @@ public class FileUploadTests extends IntegrationTest
             });
 
             // assert
-            if (!isBasicTierHub)
-            {
-                FileUploadNotification fileUploadNotification = getFileUploadNotificationForThisDevice(deviceClient, i);
-                verifyNotification(fileUploadNotification, testInstance.fileUploadState[i], deviceClient);
-            }
             waitForFileUploadStatusCallbackTriggered(i, deviceClient);
             assertEquals(buildExceptionMessage("Expected SUCCESS but file upload status " + i + " was " + testInstance.fileUploadState[i].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[i].fileUploadStatus);
             assertEquals(buildExceptionMessage("Expected SUCCESS but message status " + i + " was " + testInstance.messageStates[i].messageStatus, deviceClient), SUCCESS, testInstance.messageStates[i].messageStatus);
@@ -448,46 +422,6 @@ public class FileUploadTests extends IntegrationTest
         }
 
         tearDownDeviceClient(deviceClient);
-    }
-
-    private FileUploadNotification getFileUploadNotificationForThisDevice(DeviceClient deviceClient, int expectedBlobSizeInBytes) throws InterruptedException, IOException
-    {
-        //wait until the notification is added to the set of retrieved notifications, or until a timeout
-        long startTime = System.currentTimeMillis();
-        FileUploadNotification matchingNotification = null;
-        do
-        {
-            for (FileUploadNotification notification : activeFileUploadNotifications)
-            {
-                if (notification.getDeviceId().equals(deviceClient.getConfig().getDeviceId()))
-                {
-                    if (notification.getBlobSizeInBytes().intValue() == expectedBlobSizeInBytes)
-                    {
-                        matchingNotification = notification;
-                    }
-                }
-            }
-
-            FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(FILE_UPLOAD_QUEUE_POLLING_INTERVAL_MILLISECONDS);
-
-            if (fileUploadNotification != null)
-            {
-                activeFileUploadNotifications.add(fileUploadNotification);
-            }
-
-            if (System.currentTimeMillis() - startTime > MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS)
-            {
-                Assert.fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Timed out waiting for file upload notification for device", deviceClient));
-            }
-
-        } while (matchingNotification == null);
-
-        if (matchingNotification != null)
-        {
-            activeFileUploadNotifications.remove(matchingNotification);
-        }
-
-        return matchingNotification;
     }
 
     private void waitForFileUploadStatusCallbackTriggered(int fileUploadStateIndex, DeviceClient deviceClient) throws InterruptedException
