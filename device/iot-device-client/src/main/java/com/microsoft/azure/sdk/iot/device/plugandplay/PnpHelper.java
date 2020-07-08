@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.plugandplay;
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import lombok.NonNull;
 
 import java.nio.charset.StandardCharsets;
@@ -190,4 +191,56 @@ public class PnpHelper {
         return singleton(new Property(componentName, componentProperty));
     }
 
+    /**
+     * Helper to retrieve the command request value from a plug and play compatible command invocation request received.
+     * @param jsonPayload The command payload in json format.
+     * @return The plug and play command request value.
+     *
+     * The command request to be parsed is in the below format:
+     * {
+     *     "commandRequest": {
+     *         "value": 20
+     *     }
+     * }
+     */
+    public static JsonElement getPnpCommandRequestValue(@NonNull String jsonPayload) {
+        JsonObject jsonObject = gsonBuilder.create().fromJson(jsonPayload, JsonObject.class);
+        return jsonObject.get("commandRequest").getAsJsonObject().get("value");
+    }
+
+    /**
+     * Create a key-value property patch for twin update. This patch is to update a property on a component of a device.
+     * @param propertyName The property name, as defined in the DTDL interface.
+     * @param propertyValue The property value, in the format defined in the DTDL interface.
+     * @param componentName The name of the component on which to update the property.
+     * @return The property patch for twin update.
+     *
+     * The property patch should be in the below format:
+     *   "componentName": {
+     *      "__t": "c",
+     *      "propertyName": {
+     *        "value": "hello"
+     *      }
+     */
+    public static Set<Pair> CreateComponentPropertyPatch(@NonNull String propertyName, @NonNull double propertyValue, @NonNull String componentName)
+    {
+        JsonObject patchJson = new JsonObject();
+        patchJson.addProperty(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
+        patchJson.addProperty(propertyName, propertyValue);
+        return singleton(new Pair(componentName, patchJson));
+    }
+
+    /**
+     * Helper to construct the command to call on a component of a device..
+     * @param componentName The name of the component on which to invoke the command.
+     * @param commandName The name of the command to invoke.
+     * @return The command name to invoke.
+     *
+     * The command to invoke for components should be in the format:
+     * "componentName*commandName"
+     */
+    public static String CreateComponentCommandName(String componentName, String commandName)
+    {
+        return componentName + "*" + commandName;
+    }
 }
