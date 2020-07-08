@@ -151,9 +151,8 @@ public class TemperatureController {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
         final String getMaxMinReport2 = "thermostat2*getMaxMinReport";
-        final String formatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-        @SneakyThrows({InterruptedException.class, ParseException.class})
+        @SneakyThrows(InterruptedException.class)
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context) {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);

@@ -181,9 +181,7 @@ public class Thermostat {
      */
     private static class GetMaxMinReportMethodCallback implements DeviceMethodCallback {
         String commandName = "getMaxMinReport";
-        String formatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-        @SneakyThrows(ParseException.class)
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
