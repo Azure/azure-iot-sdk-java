@@ -26,7 +26,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.Thermostat</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.device.Thermostat</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

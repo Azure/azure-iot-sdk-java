@@ -50,6 +50,8 @@
         <x509-provider-version>1.0.1</x509-provider-version>
         <digital-twin-device-client-version>1.0.0</digital-twin-device-client-version>
         <digital-twin-service-client-version>1.0.0</digital-twin-service-client-version>
+
+        <pnp-helper-version>1.0.0</pnp-helper-version>
     </properties>
     <build>
         <plugins>
