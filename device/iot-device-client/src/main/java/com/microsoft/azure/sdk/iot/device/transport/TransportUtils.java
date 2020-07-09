@@ -7,13 +7,10 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 public class TransportUtils
 {
-    public static String IOTHUB_API_VERSION = "2019-10-01";
+    public static String IOTHUB_API_VERSION = "2020-05-31-preview";
 
-    // The preview API version support has been added to enable support for PnP features. This will be removed once the service goes GA.
-    public static String IOTHUB_API_VERSION_PREVIEW = "2020-05-31-preview";
-
-    private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
-    private static final String CLIENT_VERSION = "1.24.0";
+    private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client-preview";
+    private static final String CLIENT_VERSION = "1.1.0";
 
     private static String JAVA_RUNTIME = System.getProperty("java.version");
     private static String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");

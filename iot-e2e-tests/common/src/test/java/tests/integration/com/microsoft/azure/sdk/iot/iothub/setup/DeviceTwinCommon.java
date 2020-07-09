@@ -399,65 +399,6 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-<<<<<<< HEAD:iot-e2e-tests/common/src/test/java/tests/integration/com/microsoft/azure/sdk/iot/iothub/setup/DeviceTwinCommon.java
-=======
-    protected static Collection inputsCommon() throws IOException
-    {
-        return inputsCommon(ClientType.DEVICE_CLIENT, ClientType.MODULE_CLIENT);
-    }
-
-    protected static Collection inputsCommon(ClientType... clientTypes) throws IOException
-    {
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        return inputsCommon(certificateGenerator.getPublicCertificate(), certificateGenerator.getPrivateKey(), certificateGenerator.getX509Thumbprint(), clientTypes);
-    }
-
-    protected static Collection inputsCommon(String publicKeyCert, String privateKey, String x509Thumbprint, ClientType... clientTypes) throws IOException
-    {
-        sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
-
-        List inputs = new ArrayList();
-        for (ClientType clientType : clientTypes)
-        {
-            if (clientType == ClientType.DEVICE_CLIENT)
-            {
-                inputs.addAll(Arrays.asList(
-                        new Object[][]
-                                {
-                                        //sas token, device client
-                                        {AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                        {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                        {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                        {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-
-                                        //x509, device client
-                                        {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                        {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                }
-                ));
-            }
-            else
-            {
-                inputs.addAll(Arrays.asList(
-                        new Object[][]
-                                {
-                                        //sas token, module client
-
-                                        {AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                        {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                        {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                        {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint}
-                                }
-                ));
-            }
-        }
-
-        return inputs;
-    }
-
->>>>>>> 1d0dd641a... refactor(e2e): Disable amqp twin tests due to service bug:iot-e2e-tests/common/src/main/java/com/microsoft/azure/sdk/iot/common/setup/DeviceTwinCommon.java
     public DeviceTwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
