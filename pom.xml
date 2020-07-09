@@ -36,6 +36,7 @@
         <x509-provider-artifact-id>x509-provider-preview</x509-provider-artifact-id>
         <digital-twin-device-client-artifact-id>digital-twin-device-client-preview</digital-twin-device-client-artifact-id>
         <digital-twin-service-client-artifact-id>digital-twin-service-client-preview</digital-twin-service-client-artifact-id>
+        <pnp-helper-artifact-id>pnp-helper</pnp-helper-artifact-id>
 
         <iot-device-client-version>1.1.0</iot-device-client-version>
         <iot-service-client-version>1.1.0</iot-service-client-version>
