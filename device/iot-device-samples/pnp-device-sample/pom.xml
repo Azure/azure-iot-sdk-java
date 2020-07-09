@@ -12,8 +12,8 @@
     <artifactId>pnp-device-sample</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>Thermostat</module>
-        <module>TemperatureController</module>
+        <module>thermostat-device-sample</module>
+        <module>temperature-controller-device-sample</module>
     </modules>
 
     <properties>

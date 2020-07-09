@@ -4,9 +4,6 @@
 package com.microsoft.azure.sdk.iot.pnphelpers;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.NonNull;
@@ -28,7 +25,6 @@ public class PnpHelper {
     private static final String PROPERTY_COMPONENT_IDENTIFIER_VALUE = "c";
 
     private static final Gson gson = new Gson();
-    private static final GsonBuilder gsonBuilder = new GsonBuilder();
 
     /**
      * Create a plug and play compatible telemetry message.
@@ -190,23 +186,6 @@ public class PnpHelper {
         }};
 
         return singleton(new Property(componentName, componentProperty));
-    }
-
-    /**
-     * Helper to retrieve the command request value from a plug and play compatible command invocation request received.
-     * @param jsonPayload The command payload in json format.
-     * @return The plug and play command request value.
-     *
-     * The command request to be parsed is in the below format:
-     * {
-     *     "commandRequest": {
-     *         "value": 20
-     *     }
-     * }
-     */
-    public static JsonElement getPnpCommandRequestValue(@NonNull String jsonPayload) {
-        JsonObject jsonObject = gsonBuilder.create().fromJson(jsonPayload, JsonObject.class);
-        return jsonObject.get("commandRequest").getAsJsonObject().get("value");
     }
 
 }

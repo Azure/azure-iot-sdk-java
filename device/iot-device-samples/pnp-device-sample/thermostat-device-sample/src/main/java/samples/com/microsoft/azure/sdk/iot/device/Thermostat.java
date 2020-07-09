@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package samples.com.microsoft.azure.sdk.iot;
+package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
@@ -45,6 +44,7 @@ public class Thermostat {
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();
+    private static final Gson gson = new Gson();
 
     // HashMap to hold the temperature updates sent over.
     // NOTE: Memory constrained device should leverage storage capabilities of an external service to store this information and perform computation.
@@ -181,19 +181,13 @@ public class Thermostat {
      */
     private static class GetMaxMinReportMethodCallback implements DeviceMethodCallback {
         String commandName = "getMaxMinReport";
-        String formatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-        @SneakyThrows(ParseException.class)
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
 
                 String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
-                JsonObject jsonObject = new Gson().fromJson(jsonRequest, JsonObject.class);
-                String sinceString = jsonObject.get("commandRequest").getAsJsonObject().get("value").getAsString();
-
-                DateFormat format = new SimpleDateFormat(formatPattern);
-                Date since = format.parse(sinceString);
+                Date since = getCommandRequestValue(jsonRequest, Date.class);
                 log.debug("Command: Received - Generating min, max, avg temperature report since {}.", since);
 
                 double runningTotal = 0;
@@ -305,4 +299,7 @@ public class Thermostat {
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
     }
 
+    private static <T> T getCommandRequestValue(@NonNull String jsonPayload, @NonNull Class<T> type) {
+        return gson.fromJson(jsonPayload, type);
+    }
 }
