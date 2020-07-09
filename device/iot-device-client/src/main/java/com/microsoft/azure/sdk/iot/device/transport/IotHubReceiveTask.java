@@ -16,6 +16,10 @@ public final class IotHubReceiveTask implements Runnable
     private static final String THREAD_NAME = "azure-iot-sdk-IotHubReceiveTask";
     private final IotHubTransport transport;
 
+    // This thread should be woken up whenever a new message is received and needs to be handled. But just to be safe,
+    // this thread will wakeup periodically.
+    private static final int FAILSAFE_WAKEUP_PERIOD_MILLISECONDS = 10 * 1000;
+
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
     // wait until a message has been received in that layer before continuing. This means that if the transport layer
     // has no received messages to handle, then this thread will do nothing and cost nothing. This is useful
@@ -46,11 +50,11 @@ public final class IotHubReceiveTask implements Runnable
             {
                 synchronized (this.receiveThreadLock)
                 {
-                    if (!this.transport.hasReceivedMessagesToHandle() && !this.transport.isClosed())
+                    while (!this.transport.hasReceivedMessagesToHandle() && !this.transport.isClosed())
                     {
                         // AMQP and MQTT layers will notify the IoTHubTransport layer once a message arrives, and at
                         // that time, this thread will be notified to handle them.
-                        this.receiveThreadLock.wait();
+                        this.receiveThreadLock.wait(FAILSAFE_WAKEUP_PERIOD_MILLISECONDS);
                     }
                 }
             }

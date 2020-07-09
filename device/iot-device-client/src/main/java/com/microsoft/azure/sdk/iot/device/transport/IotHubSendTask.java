@@ -15,6 +15,10 @@ public final class IotHubSendTask implements Runnable
     private static final String THREAD_NAME = "azure-iot-sdk-IotHubSendTask";
     private final IotHubTransport transport;
 
+    // This thread should be woken up whenever a new message is queued and needs to be sent. But just to be safe,
+    // this thread will wakeup periodically.
+    private static final int FAILSAFE_WAKEUP_PERIOD_MILLISECONDS = 10 * 1000;
+
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
     // wait until a message or callback is queued in that layer before continuing. This means that if the transport layer
     // has no outgoing messages and no callbacks queueing, then this thread will do nothing and cost nothing. This is useful
@@ -42,11 +46,11 @@ public final class IotHubSendTask implements Runnable
         {
             synchronized (this.sendThreadLock)
             {
-                if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
+                while (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
                 {
                     // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
                     // to be executed. Until then, do nothing.
-                    this.sendThreadLock.wait();
+                    this.sendThreadLock.wait(FAILSAFE_WAKEUP_PERIOD_MILLISECONDS);
                 }
             }
 

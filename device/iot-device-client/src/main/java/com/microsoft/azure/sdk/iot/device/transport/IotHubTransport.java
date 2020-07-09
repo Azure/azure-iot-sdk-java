@@ -117,26 +117,17 @@ public class IotHubTransport implements IotHubListener
 
     public boolean hasMessagesToSend()
     {
-        synchronized (sendThreadLock)
-        {
-            return this.waitingPacketsQueue.size() > 0;
-        }
+        return this.waitingPacketsQueue.size() > 0;
     }
 
     public boolean hasReceivedMessagesToHandle()
     {
-        synchronized (receiveThreadLock)
-        {
-            return this.receivedMessagesQueue.size() > 0;
-        }
+        return this.receivedMessagesQueue.size() > 0;
     }
 
     public boolean hasCallbacksToExecute()
     {
-        synchronized (sendThreadLock)
-        {
-            return this.callbackPacketsQueue.size() > 0;
-        }
+        return this.callbackPacketsQueue.size() > 0;
     }
 
     public boolean isClosed()
@@ -943,8 +934,11 @@ public class IotHubTransport implements IotHubListener
         {
             this.waitingPacketsQueue.add(this.transportPacket);
 
-            // Wake up send messages thread so that it can send this message
-            this.sendThreadLock.notifyAll();
+            synchronized (this.sendThreadLock)
+            {
+                // Wake up send messages thread so that it can send this message
+                this.sendThreadLock.notifyAll();
+            }
         }
     }
 
@@ -1220,10 +1214,10 @@ public class IotHubTransport implements IotHubListener
         //Codes_SRS_IOTHUBTRANSPORT_28_002: [This function shall add the packet to the callback queue if it has a callback.]
         if (packet.getCallback() != null)
         {
+            this.callbackPacketsQueue.add(packet);
+
             synchronized (this.sendThreadLock)
             {
-                this.callbackPacketsQueue.add(packet);
-
                 //Wake up send messages thread so that it can process this new callback if it was asleep
                 this.sendThreadLock.notifyAll();
             }
@@ -1232,10 +1226,10 @@ public class IotHubTransport implements IotHubListener
 
     private void addToWaitingQueue(IotHubTransportPacket packet)
     {
+        this.waitingPacketsQueue.add(packet);
+
         synchronized (this.sendThreadLock)
         {
-            this.waitingPacketsQueue.add(packet);
-
             // Wake up IotHubSendTask so it can send this message
             this.sendThreadLock.notifyAll();
         }
@@ -1243,10 +1237,10 @@ public class IotHubTransport implements IotHubListener
 
     private void addToReceivedMessagesQueue(IotHubTransportMessage message)
     {
+        this.receivedMessagesQueue.add(message);
+
         synchronized (this.receiveThreadLock)
         {
-            this.receivedMessagesQueue.add(message);
-
             // Wake up IotHubReceiveTask so it can handle receiving this message
             this.receiveThreadLock.notifyAll();
         }
