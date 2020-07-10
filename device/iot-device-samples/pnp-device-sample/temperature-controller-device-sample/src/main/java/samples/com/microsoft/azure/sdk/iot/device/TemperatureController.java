@@ -3,10 +3,12 @@
 
 package samples.com.microsoft.azure.sdk.iot.device;
 
+import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.pnphelpers.PnpHelper;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,15 +17,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Map.*;
+import static java.util.Map.Entry;
 
 @Slf4j
 public class TemperatureController {
@@ -50,6 +49,7 @@ public class TemperatureController {
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
     private static final Random random = new Random();
+    private static final Gson gson = new Gson();
     private static DeviceClient deviceClient;
 
     // HashMap to hold the temperature updates sent over each "Thermostat" component.
@@ -150,16 +150,15 @@ public class TemperatureController {
         final String reboot = "reboot";
         final String getMaxMinReport1 = "thermostat1*getMaxMinReport";
         final String getMaxMinReport2 = "thermostat2*getMaxMinReport";
-        final String formatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-        @SneakyThrows({InterruptedException.class, ParseException.class})
+        @SneakyThrows(InterruptedException.class)
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context) {
             String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
 
             switch (methodName) {
                 case reboot:
-                    int delay = PnpHelper.getPnpCommandRequestValue(jsonRequest).getAsInt();
+                    int delay = getCommandRequestValue(jsonRequest, Integer.class);
                     log.debug("Command: Received - Rebooting thermostat (resetting temperature reading to 0°C after {} seconds).", delay);
                     Thread.sleep(delay * 1000);
 
@@ -178,9 +177,7 @@ public class TemperatureController {
                     String componentName = words[0];
 
                     if (temperatureReadings.containsKey(componentName)) {
-                        String sinceString = PnpHelper.getPnpCommandRequestValue(jsonRequest).getAsString();
-                        DateFormat format = new SimpleDateFormat(formatPattern);
-                        Date since = format.parse(sinceString);
+                        Date since = getCommandRequestValue(jsonRequest, Date.class);
                         log.debug("Command: Received - component=\"{}\", generating min, max, avg temperature report since {}", componentName, since);
 
                         Map<Date, Double> allReadings = temperatureReadings.get(componentName);
@@ -378,5 +375,9 @@ public class TemperatureController {
         public void TwinPropertyCallBack(Property property, Object context) {
             log.debug("Property - Received property unhandled by device, key={}, value={}", property.getKey(), property.getValue());
         }
+    }
+
+    private static <T> T getCommandRequestValue(@NonNull String jsonPayload, @NonNull Class<T> type) {
+        return gson.fromJson(jsonPayload, type);
     }
 }
