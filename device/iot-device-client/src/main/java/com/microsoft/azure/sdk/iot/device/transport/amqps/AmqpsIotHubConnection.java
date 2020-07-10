@@ -530,18 +530,18 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private void sendQueuedMessages()
     {
         int messagesAttemptedToBeProcessed = 0;
-        boolean lastSendSucceeded = true;
         Message message = messagesToSend.poll();
-        while (message != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK && lastSendSucceeded)
+        while (message != null && messagesAttemptedToBeProcessed < MAX_MESSAGES_TO_SEND_PER_CALLBACK)
         {
             messagesAttemptedToBeProcessed++;
-            lastSendSucceeded = sendQueuedMessage(message);
+            boolean lastSendSucceeded = sendQueuedMessage(message);
 
             if (!lastSendSucceeded)
             {
                 //message failed to send, likely due to lack of link credit available. Re-queue and try again later
                 log.trace("Amqp message failed to send, adding it back to messages to send queue ({})", message);
                 messagesToSend.add(message);
+                return;
             }
 
             message = messagesToSend.poll();
