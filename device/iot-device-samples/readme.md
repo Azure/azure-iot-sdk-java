@@ -5,9 +5,20 @@ This folder contains simple samples showing how to use the various features of t
 ## List of samples
 
 * [Simple send sample](send-event): Shows how to connect and send messages to IoT Hub, passing the protocol of your choices as a parameter.
-* [Simple send/receive sample](send-receive-sample): Shows how to connect then send and receive messages to and from IoT Hub, passing the protocol of your choices as a parameter.
+* [Simple send event from X509 device sample](send-event-x509): Shows how to connect and send messages to IoT Hub, passing the protocol of your choices as a parameter. This sample device uses X509 certificates for authentication.
+* [Simple send event with proxy sample](send-event-with-proxy): Shows how to connect and send messages to IoT Hub, passing the protocol of your choices as a parameter, and setting proxy configuration.
+* [Simple send/receive device sample](send-receive-sample): Shows how to connect then send and receive messages to and from IoT Hub, passing the protocol of your choices as a parameter.
+* [Simple send/receive module sample](send-receive-module-sample): Shows how to connect then send and receive messages to and from IoT Hub, passing the protocol of your choices as a parameter.
 * [Simple send serialized messages sample](send-serialized-event): Shows how to connect and send serialized messages to IoT Hub, passing the protocol of your choices as a parameter.
 * [Simple sample handling messages received](handle-messages): : Shows how to connect to IoT Hub and manage messages received from IoT Hub, passing the protocol of your choices as a parameter.
+* [Simple device method sample](device-method-sample): Shows how to connect a device to IoT Hub and handle method invocation requests.
+* [Simple IoT Hub module method sample](module-method-sample): Shows how to connect a hub module to IoT Hub and handle method invocation requests.
+* [Simple edge module method sample](module-invoke-method-sample): Shows how to connect an edge module to IoT Hub and handle method invocation requests.
+* [Simple device twin sample](device-twin-sample): Shows how to connect to IoT Hub, start the device twin, send reported property updates to IoT Hub, and handle desired property updates from service.
+* [Simple module twin sample](module-twin-sample): Shows how to connect to IoT Hub, start the module twin, send reported property updates to IoT Hub, and handle desired property updates from service.
+* [Simple file upload sample](file-upload-sample): Shows how to connect a device to IoT Hub and use it to upload a file.
+* [Device reconnection sample](device-reconnection-sample): Shows how to set up a device to monitor disconnection events from the service, and how to handle them.
+* [Plug and play device sample](pnp-device-sample): Shows how to model a device as a pnp device, either with only a root interface, or as one containing components.
 * [Android sample](android-sample): Shows how to connect to IoT Hub send and receive messages to and from IoT Hub.
 
 ## How to run the samples on Linux or Windows
