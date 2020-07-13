@@ -65,9 +65,6 @@ public class TwinPnPTests extends IntegrationTest
         String moduleId;
         DeviceClient deviceClient;
         ModuleClient moduleClient;
-        Set<Property> expectedProperties;
-        Set<Property> receivedProperties;
-        Integer reportedPropertyVersion;
     }
 
     public TwinPnPTests.TwinPnPTestInstance testInstance;
@@ -121,7 +118,6 @@ public class TwinPnPTests extends IntegrationTest
         testInstance.testDevice = new TestDevice();
         testInstance.testDevice.deviceId = "java-twin-PnP-e2e-test-".concat(UUID.randomUUID().toString());
         testInstance.testDevice.moduleId = "java-twin-PnP-module-e2e-test-".concat(UUID.randomUUID().toString());
-        testInstance.testDevice.receivedProperties = new HashSet<>();
 
         testInstance.deviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(testInstance.testDevice.deviceId, null, null);
         testInstance.deviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, testInstance.deviceForRegistryManager);
@@ -138,15 +134,17 @@ public class TwinPnPTests extends IntegrationTest
             testInstance.testDevice.deviceClient.closeNow();
             testInstance.testDevice.deviceClient = null;
         }
+        if (testInstance.testDevice.moduleClient != null)
+        {
+            testInstance.testDevice.moduleClient.closeNow();
+            testInstance.testDevice.moduleClient = null;
+        }
 
         if (testInstance != null && testInstance.testDevice != null)
         {
-            testInstance.testDevice.expectedProperties = null;
-            testInstance.testDevice.reportedPropertyVersion = null;
-            testInstance.testDevice.receivedProperties = null;
-
-            if (registryManager != null && testInstance.testDevice.deviceId != null)
+            if (registryManager != null && testInstance.testDevice.deviceId != null && testInstance.testDevice.moduleId !=null)
             {
+                registryManager.removeModule(testInstance.testDevice.deviceId, testInstance.testDevice.moduleId);
                 registryManager.removeDevice(testInstance.testDevice.deviceId);
             }
         }
