@@ -1,12 +1,13 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.Module;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -77,8 +78,8 @@ public class TwinPnPTests extends IntegrationTest
     public class TwinPnPTestInstance
     {
         public IotHubClientProtocol protocol;
-        private com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;
-        private com.microsoft.azure.sdk.iot.service.Module moduleForRegistryManager;
+        private Device deviceForRegistryManager;
+        private Module moduleForRegistryManager;
 
         private DeviceTwin sCDeviceTwin;
         private TwinPnPTests.TestDevice testDevice;
@@ -87,7 +88,6 @@ public class TwinPnPTests extends IntegrationTest
         {
             this.protocol = protocol;
             this.sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-            this.testDevice = new TestDevice();
         }
     }
 
