@@ -45,8 +45,6 @@ public class TwinPnPTests extends IntegrationTest
     public static Collection inputs() throws IOException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
-        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
@@ -98,7 +96,6 @@ public class TwinPnPTests extends IntegrationTest
         if (registryManager != null)
         {
             registryManager.close();
-            registryManager = null;
         }
     }
 
@@ -133,12 +130,10 @@ public class TwinPnPTests extends IntegrationTest
         if (testInstance.testDevice.deviceClient != null)
         {
             testInstance.testDevice.deviceClient.closeNow();
-            testInstance.testDevice.deviceClient = null;
         }
         if (testInstance.testDevice.moduleClient != null)
         {
             testInstance.testDevice.moduleClient.closeNow();
-            testInstance.testDevice.moduleClient = null;
         }
 
         if (testInstance != null && testInstance.testDevice != null)
