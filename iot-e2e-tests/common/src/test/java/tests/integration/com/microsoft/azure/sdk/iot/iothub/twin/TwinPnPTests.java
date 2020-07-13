@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
  * Test class containing all tests to be run for PnP.
  */
 @IotHubTest
+@StandardTierHubOnlyTest
 @RunWith(Parameterized.class)
 public class TwinPnPTests extends IntegrationTest
 {
@@ -151,7 +152,6 @@ public class TwinPnPTests extends IntegrationTest
     }
 
     @Test
-    @StandardTierHubOnlyTest
     public void testDeviceGetTwinWithModelId() throws IOException, InterruptedException, URISyntaxException, IotHubException
     {
         // arrange
@@ -168,7 +168,6 @@ public class TwinPnPTests extends IntegrationTest
     }
 
     @Test
-    @StandardTierHubOnlyTest
     public void testModuleGetTwinWithModelId() throws IOException, InterruptedException, URISyntaxException, IotHubException, ModuleClientException {
         // arrange
         ClientOptions clientOptions = new ClientOptions();
