@@ -43,6 +43,8 @@ public class TwinPnPTests extends IntegrationTest
     public static Collection inputs() throws IOException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
+
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
@@ -65,6 +67,24 @@ public class TwinPnPTests extends IntegrationTest
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
                         }
         ));
+
+        if (!isBasicTierHub)
+        {
+            inputs.addAll(Arrays.asList(
+                    new Object[][]
+                            {
+                                    //sas token module client, no proxy
+                                    {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+
+                                    //x509 module client, no proxy
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+
+                                    //sas token module client, with proxy
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                            }
+            ));
+        }
 
         return inputs;
     }
