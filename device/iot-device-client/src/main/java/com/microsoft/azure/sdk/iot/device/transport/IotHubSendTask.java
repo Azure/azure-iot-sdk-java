@@ -42,7 +42,7 @@ public final class IotHubSendTask implements Runnable
         {
             synchronized (this.sendThreadLock)
             {
-                if (!this.transport.hasMessagesToSend() && !this.transport.hasCallbacksToExecute() && !this.transport.isClosed())
+                if (!this.transport.hasMessagesToSend() && !this.transport.isClosed())
                 {
                     // IotHubTransport layer will notify this thread once a message is ready to be sent or a callback is ready
                     // to be executed. Until then, do nothing.
@@ -51,7 +51,6 @@ public final class IotHubSendTask implements Runnable
             }
 
             this.transport.sendMessages();
-            this.transport.invokeCallbacks();
         }
         catch (Throwable e)
         {

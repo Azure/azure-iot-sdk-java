@@ -225,7 +225,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
      *
      * @throws TransportException if the IoT Hub could not be reached.
      */
-    public IotHubTransportMessage receiveMessage() throws TransportException
+    public IotHubTransportMessage pollForReceivedMessage() throws TransportException
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
@@ -325,7 +325,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
      *               {@link IotHubMessageResult#ABANDON}, or {@link IotHubMessageResult#REJECT}).
      *
      * @throws TransportException if {@code sendMessageResult} is called before
-     * {@link #receiveMessage()} is called.
+     * {@link #pollForReceivedMessage()} is called.
      * @throws TransportException if the IoT Hub could not be reached.
      */
 
@@ -337,7 +337,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             this.log.trace("Checking if http layer can correlate the received iot hub message to a received etag {}", message);
             String messageEtag = this.messageToETagMap.get(message);
 
-            // Codes_SRS_HTTPSIOTHUBCONNECTION_11_039: [If the function is called before receiveMessage() returns a message, the function shall throw an IllegalStateException.]
+            // Codes_SRS_HTTPSIOTHUBCONNECTION_11_039: [If the function is called before pollForReceivedMessage() returns a message, the function shall throw an IllegalStateException.]
             if (messageEtag == null)
             {
                 throw new IllegalStateException("Cannot send a message "
@@ -400,7 +400,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             }
 
             request.setHeaderField(HTTPS_PROPERTY_IOTHUB_TO_TAG, resultPath).
-                    // Codes_SRS_HTTPSIOTHUBCONNECTION_11_035: [The function shall set the header field 'if-match' to be the e-tag saved when receiveMessage() was previously called.]
+                    // Codes_SRS_HTTPSIOTHUBCONNECTION_11_035: [The function shall set the header field 'if-match' to be the e-tag saved when pollForReceivedMessage() was previously called.]
                             setHeaderField(HTTPS_PROPERTY_IF_MATCH_TAG, messageEtag);
 
             //Codes_SRS_HTTPSIOTHUBCONNECTION_34_062: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]

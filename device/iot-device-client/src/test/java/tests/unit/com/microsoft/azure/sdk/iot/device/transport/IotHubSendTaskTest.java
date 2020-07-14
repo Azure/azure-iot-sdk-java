@@ -59,9 +59,6 @@ public class IotHubSendTaskTest
                 result = sendThreadLock;
 
                 mockTransport.hasMessagesToSend();
-                result = false;
-
-                mockTransport.hasCallbacksToExecute();
                 result = true;
             }
         };

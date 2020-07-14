@@ -183,10 +183,18 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     private void startWorkerThreads()
     {
         this.sendTask = new IotHubSendTask(this.transport);
-        this.receiveTask = new IotHubReceiveTask(this.transport);
+
+        if (protocol == IotHubClientProtocol.HTTPS)
+        {
+            this.receiveTask = new IotHubReceiveTask(this.transport);
+        }
 
         this.sendTaskScheduler = Executors.newScheduledThreadPool(1);
-        this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
+
+        if (protocol == IotHubClientProtocol.HTTPS)
+        {
+            this.receiveTaskScheduler = Executors.newScheduledThreadPool(1);
+        }
 
         // Note that even though these threads are scheduled at a fixed interval, the sender/receiver threads will wait
         // if no messages are available to process. These waiting threads will still count against the pool size defined above,
@@ -198,9 +206,13 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         /* Codes_SRS_DEVICE_IO_21_013: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.] */
         this.sendTaskScheduler.scheduleAtFixedRate(this.sendTask, 0,
                 sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
-        /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
-        this.receiveTaskScheduler.scheduleAtFixedRate(this.receiveTask, 0,
-                receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+
+        if (protocol == IotHubClientProtocol.HTTPS)
+        {
+            /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
+            this.receiveTaskScheduler.scheduleAtFixedRate(this.receiveTask, 0,
+                    receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
+        }
 
         /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
         this.state = IotHubConnectionStatus.CONNECTED;
@@ -312,7 +324,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     }
 
     /**
-     * Setter for the receive period in milliseconds.
+     * Setter for the receive period in milliseconds. This setting only matters when this client is using HTTPS
      *
      * @param newIntervalInMilliseconds is the new interval in milliseconds.
      * @throws IOException if the task schedule exist but there is no receive task function to call.
@@ -321,7 +333,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException
     {
         /* Codes_SRS_DEVICE_IO_21_030: [If the the provided interval is zero or negative, the setReceivePeriodInMilliseconds shall throw IllegalArgumentException.] */
-        if(newIntervalInMilliseconds <= 0L)
+        if (newIntervalInMilliseconds <= 0L)
         {
             throw new IllegalArgumentException("receive interval can not be zero or negative");
         }
@@ -330,7 +342,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         this.receivePeriodInMilliseconds = newIntervalInMilliseconds;
 
         /* Codes_SRS_DEVICE_IO_21_028: [If the task scheduler already exists, the setReceivePeriodInMilliseconds shall change the `scheduleAtFixedRate` for the receiveTask to the new value.] */
-        if (this.receiveTaskScheduler != null)
+        if (this.receiveTaskScheduler != null && protocol == IotHubClientProtocol.HTTPS)
         {
             /* Codes_SRS_DEVICE_IO_21_029: [If the `receiveTask` is null, the setReceivePeriodInMilliseconds shall throw IOException.] */
             if (this.receiveTask == null)

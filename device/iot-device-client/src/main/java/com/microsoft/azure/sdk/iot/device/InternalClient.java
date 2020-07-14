@@ -382,10 +382,8 @@ public class InternalClient
      *	      This value sets the period (in milliseconds) that this SDK spawns threads to send queued messages.
      *	      Even if no message is queued, this thread will be spawned.
      *
-     *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
-     *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
-     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
-     *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
+     *	    - <b>SetReceiveInterval</b> - this option is the same as {@code SetMinimumPollingInterval}.
+     *	      This setting has no effect when a client is using MQTT/MQTT_WS/AMQPS/AMQPS_WS
      *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This

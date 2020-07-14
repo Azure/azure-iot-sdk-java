@@ -926,7 +926,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         final String expectedUrl = "https://" + messageUri;
         new Verifications()
@@ -942,7 +942,7 @@ public class HttpsIotHubConnectionTest
     public void receiveMessageSendsGetRequest(@Mocked final IotHubMessageUri mockUri) throws TransportException
     {
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         final HttpsMethod expectedMethod = HttpsMethod.GET;
         new Verifications()
@@ -967,7 +967,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         final int expectedReadTimeoutMillis = readTimeoutMillis;
         new Verifications()
@@ -996,7 +996,7 @@ public class HttpsIotHubConnectionTest
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
 
         // act
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         new Verifications()
         {
@@ -1029,7 +1029,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         final String expectedTokenStr = tokenStr;
         new Verifications()
@@ -1055,7 +1055,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         final String expectedPath = path;
         new Verifications()
@@ -1081,7 +1081,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         final String expectedMessageLockTimeoutSecs =
                 Integer.toString(messageLockTimeoutSecs);
@@ -1111,7 +1111,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         new Verifications()
         {
@@ -1146,7 +1146,7 @@ public class HttpsIotHubConnectionTest
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
 
         //act
-        Message actualMessage = conn.receiveMessage();
+        Message actualMessage = conn.pollForReceivedMessage();
 
         //assert
         assertEquals(actualMessage.getBytes(), mockedMessage.getBytes());
@@ -1173,7 +1173,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         new Verifications()
         {
@@ -1198,7 +1198,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        Message testMsg = conn.receiveMessage();
+        Message testMsg = conn.pollForReceivedMessage();
 
         Message expectedMsg = null;
         assertThat(testMsg, is(expectedMsg));
@@ -1217,7 +1217,7 @@ public class HttpsIotHubConnectionTest
         };
 
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
     }
 
     // Tests_SRS_HTTPSIOTHUBCONNECTION_11_024: [If the result is COMPLETE, the function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/devicebound/[eTag]?api-version=2016-02-03'.]
@@ -1718,7 +1718,7 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_035: [The function shall set the header field 'if-match' to be the e-tag saved when receiveMessage() was previously called.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_035: [The function shall set the header field 'if-match' to be the e-tag saved when pollForReceivedMessage() was previously called.]
     @Test
     public void sendMessageResultSetsIfMatchToEtag(@Mocked final IotHubRejectUri mockUri, final @Mocked IotHubStatusCode mockStatusCode) throws TransportException
     {
@@ -1847,7 +1847,7 @@ public class HttpsIotHubConnectionTest
         conn.sendMessageResult(mockedTransportMessage, IotHubMessageResult.REJECT);
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_039: [If the function is called before receiveMessage() returns a message, the function shall throw an IllegalStateException.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_039: [If the function is called before pollForReceivedMessage() returns a message, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void sendMessageResultFailsIfReceiveNotCalled(
             @Mocked final IotHubRejectUri mockUri) throws TransportException
@@ -1856,13 +1856,13 @@ public class HttpsIotHubConnectionTest
         conn.sendMessageResult(mockedMessage, IotHubMessageResult.REJECT);
     }
 
-    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_039: [If the function is called before receiveMessage() returns a message, the function shall throw an IllegalStateException.]
+    // Tests_SRS_HTTPSIOTHUBCONNECTION_11_039: [If the function is called before pollForReceivedMessage() returns a message, the function shall throw an IllegalStateException.]
     @Test(expected = IllegalStateException.class)
     public void sendMessageResultFailsIfNoMessageReceived(
             @Mocked final IotHubRejectUri mockUri) throws TransportException
     {
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
         conn.sendMessageResult(mockedMessage, IotHubMessageResult.REJECT);
     }
 
@@ -1908,7 +1908,7 @@ public class HttpsIotHubConnectionTest
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
 
         //act
-        connection.receiveMessage();
+        connection.pollForReceivedMessage();
 
         //assert
         new Verifications()
@@ -1992,7 +1992,7 @@ public class HttpsIotHubConnectionTest
         };
 
         //act
-        conn.receiveMessage();
+        conn.pollForReceivedMessage();
 
         //assert
         new Verifications()

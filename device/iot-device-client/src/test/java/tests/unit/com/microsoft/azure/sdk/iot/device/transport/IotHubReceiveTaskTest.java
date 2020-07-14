@@ -27,20 +27,6 @@ public class IotHubReceiveTaskTest
     @Test
     public void runReceivesAllMessages() throws DeviceClientException
     {
-        final Object receiveThreadLock = new Object();
-        new Expectations()
-        {
-            {
-                mockTransport.getReceiveThreadLock();
-                result = receiveThreadLock;
-
-                mockTransport.hasReceivedMessagesToHandle();
-                result = true;
-
-                mockTransport.getProtocol();
-                result = IotHubClientProtocol.AMQPS;
-            }
-        };
         IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport);
 
         // act
@@ -49,32 +35,7 @@ public class IotHubReceiveTaskTest
         new Verifications()
         {
             {
-                mockTransport.handleMessage();
-            }
-        };
-    }
-
-    @Test
-    public void runReceivesAllMessagesHTTP()
-    {
-        new Expectations()
-        {
-            {
-                mockTransport.getProtocol();
-                result = IotHubClientProtocol.HTTPS;
-            }
-        };
-
-        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport);
-
-        // act
-        receiveTask.run();
-
-        new Verifications()
-        {
-            {
-                mockTransport.hasReceivedMessagesToHandle();
-                times = 0;
+                mockTransport.pollForReceivedMessage();
             }
         };
     }
@@ -86,7 +47,7 @@ public class IotHubReceiveTaskTest
         new NonStrictExpectations()
         {
             {
-                mockTransport.handleMessage();
+                mockTransport.pollForReceivedMessage();
                 result = new IOException();
             }
         };
@@ -102,7 +63,7 @@ public class IotHubReceiveTaskTest
         new NonStrictExpectations()
         {
             {
-                mockTransport.handleMessage();
+                mockTransport.pollForReceivedMessage();
                 result = new Throwable("Test if the receive task does not crash.");
             }
         };

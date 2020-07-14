@@ -369,7 +369,7 @@ public class HttpsTransportManagerTest
         Deencapsulation.invoke(httpsTransportManager, "send", new Class[] {IotHubTransportMessage.class, Map.class}, mockTransportMsg, new HashMap<String, String>());
     }
 
-    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_015: [The receive shall receive and bypass message from `HttpsIotHubConnection`, by calling `receiveMessage`.] */
+    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_015: [The receive shall receive and bypass message from `HttpsIotHubConnection`, by calling `pollForReceivedMessage`.] */
     @Test
     public void receiveSucceed() throws TransportException
     {
@@ -381,7 +381,7 @@ public class HttpsTransportManagerTest
             {
                 Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
                 result = httpsIotHubConnection;
-                httpsIotHubConnection.receiveMessage();
+                httpsIotHubConnection.pollForReceivedMessage();
                 result = mockedTransportMessage;
             }
         };
@@ -395,13 +395,13 @@ public class HttpsTransportManagerTest
         new Verifications()
         {
             {
-                httpsIotHubConnection.receiveMessage();
+                httpsIotHubConnection.pollForReceivedMessage();
                 times = 1;
             }
         };
     }
 
-    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_016: [If `receiveMessage` failed, the receive shall bypass the exception.] */
+    /* Tests_SRS_HTTPSTRANSPORTMANAGER_21_016: [If `pollForReceivedMessage` failed, the receive shall bypass the exception.] */
     @Test (expected = IOException.class)
     public void receiveReceiveMessageThrows() throws TransportException
     {
@@ -413,7 +413,7 @@ public class HttpsTransportManagerTest
             {
                 Deencapsulation.newInstance(HttpsIotHubConnection.class, new Class[] {DeviceClientConfig.class}, mockConfig);
                 result = httpsIotHubConnection;
-                httpsIotHubConnection.receiveMessage();
+                httpsIotHubConnection.pollForReceivedMessage();
                 result = new IOException();
             }
         };

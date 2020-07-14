@@ -575,6 +575,7 @@ public class DeviceIOTest
     {
         // arrange
         final Object deviceIO = newDeviceIO();
+        Deencapsulation.setField(deviceIO, "protocol", IotHubClientProtocol.HTTPS);
         assertEquals(RECEIVE_PERIOD_MILLIS_AMQPS, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 
         // act
@@ -593,6 +594,7 @@ public class DeviceIOTest
         final long interval = 1234L;
         final long lastInterval = 4321L;
         final Object deviceIO = newDeviceIO();
+        Deencapsulation.setField(deviceIO, "protocol", IotHubClientProtocol.HTTPS);
         Deencapsulation.invoke(deviceIO, "setReceivePeriodInMilliseconds",  lastInterval);
         assertEquals(lastInterval, Deencapsulation.getField(deviceIO, "receivePeriodInMilliseconds"));
 

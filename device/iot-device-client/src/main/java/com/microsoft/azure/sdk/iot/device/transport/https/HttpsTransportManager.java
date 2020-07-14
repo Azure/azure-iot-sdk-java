@@ -154,7 +154,7 @@ public class HttpsTransportManager implements IotHubTransportManager
     {
         try
         {
-            return this.httpsIotHubConnection.receiveMessage();
+            return this.httpsIotHubConnection.pollForReceivedMessage();
         }
         catch (TransportException e)
         {
