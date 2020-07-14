@@ -107,7 +107,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.deviceClientConfig.isUseWebsocket() ? WEB_SOCKET_PORT : AMQP_PORT);
     }
 
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService) throws TransportException
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs) throws TransportException
     {
         log.debug("Opening amqp layer...");
         reconnectionScheduled = false;

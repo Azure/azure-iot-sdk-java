@@ -69,7 +69,6 @@ public class IotHubTransport implements IotHubListener
 
     final private Object reconnectionLock = new Object();
 
-    private ScheduledExecutorService scheduledExecutorService;
     private static final int POOL_SIZE = 1;
 
     // State lock used to communicate to the IotHubSendTask thread when a message needs to be sent or a callback needs to be invoked.
@@ -355,12 +354,6 @@ public class IotHubTransport implements IotHubListener
         if (this.taskScheduler != null)
         {
             this.taskScheduler.shutdown();
-        }
-
-        if (this.scheduledExecutorService != null)
-        {
-            this.scheduledExecutorService.shutdownNow();
-            this.scheduledExecutorService = null;
         }
 
         //Codes_SRS_IOTHUBTRANSPORT_34_024: [This function shall close the connection.]
@@ -745,8 +738,6 @@ public class IotHubTransport implements IotHubListener
      */
     private void openConnection() throws TransportException
     {
-        scheduledExecutorService = Executors.newScheduledThreadPool(POOL_SIZE);
-
         if (this.iotHubTransportConnection == null)
         {
             switch (defaultConfig.getProtocol()) {
@@ -776,7 +767,7 @@ public class IotHubTransport implements IotHubListener
         this.iotHubTransportConnection.setListener(this);
 
         //Codes_SRS_IOTHUBTRANSPORT_34_039: [This function shall open the iotHubTransportConnection object with the saved list of configs.]
-        this.iotHubTransportConnection.open(this.deviceClientConfigs, scheduledExecutorService);
+        this.iotHubTransportConnection.open(this.deviceClientConfigs);
 
         //Codes_SRS_IOTHUBTRANSPORT_34_040: [This function shall invoke the method updateStatus with status CONNECTED,
         // reason CONNECTION_OK, and a null throwable.]

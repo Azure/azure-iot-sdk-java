@@ -277,7 +277,7 @@ public class AmqpsIotHubConnectionTest {
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         //act
-        connection.open(mockedQueue, mockScheduledExecutorService);
+        connection.open(mockedQueue);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_001: [The constructor shall initialize the AmqpsIotHubConnection member variable with the given config.]
@@ -349,7 +349,7 @@ public class AmqpsIotHubConnectionTest {
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
 
-        connection.open(mockedQueue, mockScheduledExecutorService);
+        connection.open(mockedQueue);
 
         new Verifications()
         {
@@ -387,7 +387,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue, mockScheduledExecutorService);
+        connection.open(mockedQueue);
     }
 
     @Test
@@ -414,7 +414,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue, mockScheduledExecutorService);
+        connection.open(mockedQueue);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall closeNow the connection and throw an IOException.]
@@ -435,7 +435,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue, mockScheduledExecutorService);
+        connection.open(mockedQueue);
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
@@ -464,7 +464,7 @@ public class AmqpsIotHubConnectionTest {
         //act
         try
         {
-            connection.open(mockedQueue, mockScheduledExecutorService);
+            connection.open(mockedQueue);
         }
         catch (TransportException e)
         {
@@ -507,7 +507,7 @@ public class AmqpsIotHubConnectionTest {
         //act
         try
         {
-            connection.open(mockedQueue, mockScheduledExecutorService);
+            connection.open(mockedQueue);
         }
         catch (TransportException e)
         {
