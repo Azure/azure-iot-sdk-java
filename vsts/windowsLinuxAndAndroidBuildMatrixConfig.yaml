@@ -127,7 +127,7 @@ jobs:
         continueOnError: true
         condition: always()
 
-  ### Android, Multi configuration build (12 different test groups to cover) ###
+  ### Android, Multi configuration build (Multiple different test groups to cover) ###
   - job: AndroidBuild
     timeoutInMinutes: 15
     pool:
@@ -241,14 +241,15 @@ jobs:
       - task: Bash@3
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
-        timeoutInMinutes: 10
+        timeoutInMinutes: 30
         continueOnError: false
         inputs:
           targetType: 'filePath'
           filePath: '$(Build.SourcesDirectory)/vsts/StartEmulator.sh'
 
       - task: Bash@3
-        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        #only run tests on emulator if tests should be run, and if the emulator boot up was successful
+        condition: and(succeeded(), eq(variables['task.android.needToRunTestGroup'], 'yes'))
         displayName: 'Run tests on emulator'
         timeoutInMinutes: 45
         inputs:
