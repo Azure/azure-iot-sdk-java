@@ -15,19 +15,6 @@
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>
         <version>1.18.0</version>
     </parent>
-
-    <properties>
-        <pnp-helper-version>1.0.0</pnp-helper-version>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>pnp-helper</artifactId>
-            <version>${pnp-helper-version}</version>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
