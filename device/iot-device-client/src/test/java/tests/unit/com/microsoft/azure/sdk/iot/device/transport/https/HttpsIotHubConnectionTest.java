@@ -2175,7 +2175,7 @@ public class HttpsIotHubConnectionTest
     public void openAndCloseDoNothing() throws IOException, TransportException
     {
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
-        connection.open(null, mockedScheduledExecutorService);
+        connection.open(null);
         connection.close();
     }
 }
