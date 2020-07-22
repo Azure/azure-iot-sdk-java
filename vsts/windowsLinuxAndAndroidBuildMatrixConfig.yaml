@@ -58,6 +58,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
+          testRunTitle: "Windows"
         continueOnError: true
         condition: always()
 
@@ -124,6 +125,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
+          testRunTitle: "Linux"
         continueOnError: true
         condition: always()
 
