@@ -292,7 +292,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     }
 
     @Override
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService)
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs)
     {
 
     }

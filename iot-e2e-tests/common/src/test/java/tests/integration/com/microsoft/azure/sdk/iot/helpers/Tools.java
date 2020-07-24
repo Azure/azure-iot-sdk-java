@@ -58,6 +58,11 @@ public class Tools
         else
         {
             environmentVariableValue = System.getenv().get(environmentVariableName);
+
+            if ((environmentVariableValue == null) || environmentVariableValue.isEmpty())
+            {
+                environmentVariableValue = System.getProperty(environmentVariableName);
+            }
         }
 
         if (environmentVariableValue == null || environmentVariableValue.isEmpty())

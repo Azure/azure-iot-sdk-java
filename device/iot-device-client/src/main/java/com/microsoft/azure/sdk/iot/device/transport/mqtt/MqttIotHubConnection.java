@@ -101,7 +101,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      *
      * @throws TransportException if a connection could not to be established.
      */
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs, ScheduledExecutorService scheduledExecutorService) throws TransportException
+    public void open(Queue<DeviceClientConfig> deviceClientConfigs) throws TransportException
     {
         connectionId = UUID.randomUUID().toString();
         if (deviceClientConfigs.size() > 1)
