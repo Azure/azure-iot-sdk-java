@@ -144,6 +144,13 @@
                         <!--By default, only test files that end in ___Test.java are recognized as tests. This statement extends that to ___Tests.java files-->
                         <include>*Tests.java</include>
                     </includes>
+                    <forkCount>1</forkCount>
+
+                    <!--Tests can be run in parallel with tests within their own test class as well as in parallel with tests from other test classes-->
+                    <parallel>classes</parallel>
+
+                    <!--Maven will spawn up as many threads as it wants/can while running tests in parallel-->
+                    <useUnlimitedThreads>true</useUnlimitedThreads>
                 </configuration>
             </plugin>
             <plugin>
