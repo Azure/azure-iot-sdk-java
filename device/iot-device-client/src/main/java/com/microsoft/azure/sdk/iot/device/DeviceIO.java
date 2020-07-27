@@ -195,14 +195,14 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         // the scheduler waits until each execution is finished before
         // scheduling the next one, so executions of a given task
         // will never overlap.
-        /* Codes_SRS_DEVICE_IO_21_013: [The open shall schedule send tasks to run every SEND_PERIOD_MILLIS milliseconds.] */
-        this.sendTaskScheduler.scheduleAtFixedRate(this.sendTask, 0,
+
+        // Note that this is scheduleWithFixedDelay, not scheduleAtFixedRate. There is no reason to spawn a new
+        // send/receive thread until after the previous one has finished.
+        this.sendTaskScheduler.scheduleWithFixedDelay(this.sendTask, 0,
                 sendPeriodInMilliseconds, TimeUnit.MILLISECONDS);
-        /* Codes_SRS_DEVICE_IO_21_014: [The open shall schedule receive tasks to run every receivePeriodInMilliseconds milliseconds.] */
-        this.receiveTaskScheduler.scheduleAtFixedRate(this.receiveTask, 0,
+        this.receiveTaskScheduler.scheduleWithFixedDelay(this.receiveTask, 0,
                 receivePeriodInMilliseconds, TimeUnit.MILLISECONDS);
 
-        /* Codes_SRS_DEVICE_IO_21_016: [The open shall set the `state` as `CONNECTED`.] */
         this.state = IotHubConnectionStatus.CONNECTED;
     }
 
