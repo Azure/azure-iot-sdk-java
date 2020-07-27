@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,10 +43,13 @@ import static org.junit.Assert.*;
 /**
  * Test class containing all tests to be run on JVM and android pertaining to Queries.
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class QueryTwinTests extends DeviceTwinCommon
 {
+    public static final int QUERY_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+
     public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
@@ -74,23 +78,17 @@ public class QueryTwinTests extends DeviceTwinCommon
         return inputs;
     }
 
-    @Before
-    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
-    {
-        super.setUpNewDeviceAndModule();
-    }
-
     @Test
     @StandardTierHubOnlyTest
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        addMultipleDevices(MAX_DEVICES);
+        addMultipleDevices(MAX_DEVICES, false);
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
 
         // Add same desired on multiple devices
         final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
         final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
-        final double actualNumOfDevices = MAX_DEVICES;
+        final int expectedNumberOfDevices = MAX_DEVICES;
 
         setDesiredProperties(queryProperty, queryPropertyValue, MAX_DEVICES);
 
@@ -100,17 +98,41 @@ public class QueryTwinTests extends DeviceTwinCommon
         final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
         final String groupBy = "properties.desired." + queryProperty;
         final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
-        Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
 
-        while (scRawTwinQueryClient.hasNext(rawTwinQuery))
+        boolean querySucceeded = false;
+        long startTime = System.currentTimeMillis();
+        while (!querySucceeded)
         {
-            String result = scRawTwinQueryClient.next(rawTwinQuery);
-            assertNotNull(result);
-            Map map = gson.fromJson(result, Map.class);
-            if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+            Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
+
+            while (scRawTwinQueryClient.hasNext(rawTwinQuery))
             {
-                double value = (double) map.get("numberOfDevices");
-                assertEquals(actualNumOfDevices, value, 0);
+                String result = scRawTwinQueryClient.next(rawTwinQuery);
+                assertNotNull(result);
+                Map map = gson.fromJson(result, Map.class);
+                if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+                {
+                    // Casting as a double first to get the value from the map, but then casting to an int because the
+                    // number of devices should always be an integer
+                    int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
+                    if (actualNumberOfDevices == expectedNumberOfDevices)
+                    {
+                        // Due to propagation delays, there will be times when the query is executed and only a
+                        // subset of the expected devices are queryable. This test will loop until all of them are queryable
+                        // to avoid this issue.
+                        querySucceeded = true;
+                    }
+                    else
+                    {
+                        log.info("Expected device count not correct, re-running query");
+                        Thread.sleep(200);
+                    }
+                }
+            }
+
+            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+            {
+                fail("Timed out waiting for query results to match expectations");
             }
         }
 
@@ -122,14 +144,14 @@ public class QueryTwinTests extends DeviceTwinCommon
     @ContinuousIntegrationTest
     public void testRawQueryMultipleInParallelTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        addMultipleDevices(MAX_DEVICES);
+        addMultipleDevices(MAX_DEVICES, false);
         final Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         // Add same desired on multiple devices
         final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
         final String queryPropertyValue = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
-        final double actualNumOfDevices = MAX_DEVICES;
+        final int expectedNumberOfDevices = MAX_DEVICES;
 
         final String queryPropertyEven = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
         final String queryPropertyValueEven = PROPERTY_VALUE_QUERY + UUID.randomUUID().toString();
@@ -161,17 +183,38 @@ public class QueryTwinTests extends DeviceTwinCommon
                     final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
                     final String groupBy = "properties.desired." + queryProperty;
                     final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
-                    Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
 
-                    while (scRawTwinQueryClient.hasNext(rawTwinQuery))
+                    boolean querySucceeded = false;
+                    long startTime = System.currentTimeMillis();
+                    while (!querySucceeded)
                     {
-                        String result = scRawTwinQueryClient.next(rawTwinQuery);
-                        assertNotNull(result);
-                        Map map = gson.fromJson(result, Map.class);
-                        if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+                        Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
+
+                        while (scRawTwinQueryClient.hasNext(rawTwinQuery))
                         {
-                            double value = (double) map.get("numberOfDevices");
-                            assertEquals(value, actualNumOfDevices, 0);
+                            String result = scRawTwinQueryClient.next(rawTwinQuery);
+                            assertNotNull(result);
+                            Map map = gson.fromJson(result, Map.class);
+                            if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+                            {
+                                // Casting as a double first to get the value from the map, but then casting to an int because the
+                                // number of devices should always be an integer
+                                int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
+                                if (actualNumberOfDevices == expectedNumberOfDevices)
+                                {
+                                    querySucceeded = true;
+                                }
+                                else
+                                {
+                                    log.info("Expected device count not correct, re-running query");
+                                    Thread.sleep(200);
+                                }
+                            }
+                        }
+
+                        if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+                        {
+                            fail("Timed out waiting for query results to match expectations");
                         }
                     }
                 }
@@ -183,7 +226,7 @@ public class QueryTwinTests extends DeviceTwinCommon
             }
         });
 
-        final double actualNumOfDevicesEven = noOfEvenDevices;
+        final double expectedNumberOfDevicesEven = noOfEvenDevices;
         executor.submit(new Runnable()
         {
             @Override
@@ -195,17 +238,38 @@ public class QueryTwinTests extends DeviceTwinCommon
                     final String select = "properties.desired." + queryPropertyEven + " AS " + queryPropertyEven + "," + " COUNT() AS numberOfDevices";
                     final String groupBy = "properties.desired." + queryPropertyEven;
                     final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
-                    Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
 
-                    while (scRawTwinQueryClient.hasNext(rawTwinQuery))
+                    boolean querySucceeded = false;
+                    long startTime = System.currentTimeMillis();
+                    while (!querySucceeded)
                     {
-                        String result = scRawTwinQueryClient.next(rawTwinQuery);
-                        assertNotNull(result);
-                        Map map = gson.fromJson(result, Map.class);
-                        if (map.containsKey("numberOfDevices") && map.containsKey(queryPropertyEven))
+                        Query rawTwinQuery = scRawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
+
+                        while (scRawTwinQueryClient.hasNext(rawTwinQuery))
                         {
-                            double value = (double) map.get("numberOfDevices");
-                            assertEquals(value, actualNumOfDevicesEven, 0);
+                            String result = scRawTwinQueryClient.next(rawTwinQuery);
+                            assertNotNull(result);
+                            Map map = gson.fromJson(result, Map.class);
+                            if (map.containsKey("numberOfDevices") && map.containsKey(queryPropertyEven))
+                            {
+                                // Casting as a double first to get the value from the map, but then casting to an int because the
+                                // number of devices should always be an integer
+                                int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
+                                if (actualNumberOfDevices == expectedNumberOfDevicesEven)
+                                {
+                                    querySucceeded = true;
+                                }
+                                else
+                                {
+                                    log.info("Expected device count not correct, re-running query");
+                                    Thread.sleep(200);
+                                }
+                            }
+                        }
+
+                        if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+                        {
+                            fail("Timed out waiting for query results to match expectations");
                         }
                     }
                 }
@@ -229,7 +293,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     @StandardTierHubOnlyTest
     public void testQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        addMultipleDevices(MAX_DEVICES);
+        addMultipleDevices(MAX_DEVICES, false);
 
         // Add same desired on multiple devices
         final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
@@ -268,7 +332,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     @ContinuousIntegrationTest
     public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        addMultipleDevices(PAGE_SIZE + 1);
+        addMultipleDevices(PAGE_SIZE + 1, false);
 
         // Add same desired on multiple devices so that they can be queried
         final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();
@@ -288,13 +352,35 @@ public class QueryTwinTests extends DeviceTwinCommon
             sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
         }
 
-        Thread.sleep(MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS);
-        QueryCollection twinQueryCollection = sCDeviceTwin.queryTwinCollection(sqlQuery.getQuery(), PAGE_SIZE);
 
-        // Run a query and save the continuation token for the second page of results
-        QueryCollectionResponse<DeviceTwinDevice> queryCollectionResponse = sCDeviceTwin.next(twinQueryCollection);
-        Collection<DeviceTwinDevice> queriedDeviceTwinDeviceCollection = queryCollectionResponse.getCollection();
-        String continuationToken = queryCollectionResponse.getContinuationToken();
+        // There is some propagation delay between when all the devices are created and have their twins set, and when
+        // they become queryable. This test assumes that eventually, the query result will have multiple pages. To
+        // avoid querying too soon, this test repeatedly queries until the continuation token is present in the return value
+        // as expected or until a timeout is hit.
+        String continuationToken = null;
+        Collection<DeviceTwinDevice> queriedDeviceTwinDeviceCollection = null;
+        long startTime = System.currentTimeMillis();
+        while (continuationToken == null)
+        {
+            QueryCollection twinQueryCollection = sCDeviceTwin.queryTwinCollection(sqlQuery.getQuery(), PAGE_SIZE);
+
+            // Run a query and save the continuation token for the second page of results
+            QueryCollectionResponse<DeviceTwinDevice> queryCollectionResponse = sCDeviceTwin.next(twinQueryCollection);
+            queriedDeviceTwinDeviceCollection = queryCollectionResponse.getCollection();
+            continuationToken = queryCollectionResponse.getContinuationToken();
+
+            if (continuationToken == null)
+            {
+                log.info("No continuation token detected yet, re-running the query");
+                Thread.sleep(200);
+            }
+
+            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+            {
+                fail("Timed out waiting for query to return a continuation token");
+            }
+        }
+
 
         // Re-run the same query using the saved continuation token. The results can be predicted since this test caused them
         QueryOptions options = new QueryOptions();
@@ -334,22 +420,16 @@ public class QueryTwinTests extends DeviceTwinCommon
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void queryCollectionCanReturnEmptyQueryResults() {
-        try
-        {
-            String fullQuery = "select * from devices where deviceId='nonexistantdevice'";
-            DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-            QueryCollection twinQuery = twinClient.queryTwinCollection(fullQuery);
-            QueryOptions options = new QueryOptions();
-            QueryCollectionResponse<DeviceTwinDevice> response = twinClient.next(twinQuery, options);
+    public void queryCollectionCanReturnEmptyQueryResults() throws IOException, IotHubException
+    {
+        String fullQuery = "select * from devices where deviceId='nonexistantdevice'";
+        DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        QueryCollection twinQuery = twinClient.queryTwinCollection(fullQuery);
+        QueryOptions options = new QueryOptions();
+        QueryCollectionResponse<DeviceTwinDevice> response = twinClient.next(twinQuery, options);
 
-            assertNull(response.getContinuationToken());
-            assertTrue(response.getCollection().isEmpty());
-        }
-        catch (Exception e)
-        {
-            Assert.fail(e.getMessage());
-        }
+        assertNull(response.getContinuationToken());
+        assertTrue(response.getCollection().isEmpty());
     }
 
     @Test
@@ -357,7 +437,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     @ContinuousIntegrationTest
     public void testMultipleQueryTwinInParallel() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
-        addMultipleDevices(MAX_DEVICES);
+        addMultipleDevices(MAX_DEVICES, false);
 
         // Add same desired on multiple devices
         final String queryProperty = PROPERTY_KEY_QUERY + UUID.randomUUID().toString();

@@ -283,6 +283,11 @@ public class DeviceTwinCommon extends IntegrationTest
 
     protected void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
+        addMultipleDevices(numberOfDevices, true);
+    }
+
+    protected void addMultipleDevices(int numberOfDevices, boolean openDeviceClients) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
         devicesUnderTest = new DeviceState[numberOfDevices];
 
         for (int i = 0; i < numberOfDevices; i++)
@@ -293,7 +298,7 @@ public class DeviceTwinCommon extends IntegrationTest
             devicesUnderTest[i].sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(id, "module", null);
             devicesUnderTest[i].sCDeviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, devicesUnderTest[i].sCDeviceForRegistryManager);
             devicesUnderTest[i].sCModuleForRegistryManager = Tools.addModuleWithRetry(registryManager, devicesUnderTest[i].sCModuleForRegistryManager);
-            setUpTwin(devicesUnderTest[i]);
+            setUpTwin(devicesUnderTest[i], openDeviceClients);
         }
 
         Thread.sleep(2000);
@@ -308,7 +313,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void setUpTwin(DeviceState deviceState) throws IOException, URISyntaxException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    protected void setUpTwin(DeviceState deviceState, boolean openDeviceClient) throws IOException, URISyntaxException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         // set up twin on DeviceClient
         if (internalClient == null)
@@ -343,14 +348,18 @@ public class DeviceTwinCommon extends IntegrationTest
                             sslContext);
                 }
             }
-            internalClient.open();
-            if (internalClient instanceof DeviceClient)
+
+            if (openDeviceClient)
             {
-                ((DeviceClient) internalClient).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
-            }
-            else
-            {
-                ((ModuleClient) internalClient).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+                internalClient.open();
+                if (internalClient instanceof DeviceClient)
+                {
+                    ((DeviceClient) internalClient).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+                }
+                else
+                {
+                    ((ModuleClient) internalClient).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+                }
             }
 
             deviceState.deviceTwinStatus = IotHubStatusCode.ERROR;
@@ -452,6 +461,11 @@ public class DeviceTwinCommon extends IntegrationTest
 
     public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
+        setUpNewDeviceAndModule(true);
+    }
+
+    public void setUpNewDeviceAndModule(boolean openDeviceClient) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
+    {
         deviceUnderTest = new DeviceState();
         this.testInstance.uuid = UUID.randomUUID().toString();
 
@@ -480,7 +494,7 @@ public class DeviceTwinCommon extends IntegrationTest
 
         Thread.sleep(2000);
 
-        setUpTwin(deviceUnderTest);
+        setUpTwin(deviceUnderTest, openDeviceClient);
     }
 
     @After
