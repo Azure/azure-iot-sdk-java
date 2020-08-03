@@ -31,6 +31,9 @@ public class DeviceEmulator
     public static final int METHOD_THROWS = 403;
     public static final int METHOD_NOT_DEFINED = 404;
 
+    private static final int DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 60 * 1000;
+    private static final int METHOD_SUBSCRIBE_CHECK_PERIOD_MILLISECONDS = 1000;
+
     private InternalClient client;
     private DeviceStatus deviceStatus = new DeviceStatus();
     private ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = new ConcurrentHashMap<>();
@@ -54,26 +57,9 @@ public class DeviceEmulator
         this.client = client;
     }
 
-    void setup() throws IOException
+    void open() throws IOException
     {
-        try
-        {
-            if (this.client != null)
-            {
-                this.client.closeNow();
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        clearStatistics();
-
-        if (this.client != null)
-        {
-            this.client.open();
-        }
+        this.client.open();
     }
 
     /**
@@ -92,9 +78,9 @@ public class DeviceEmulator
      * Enable device method on this device using the local callbacks.
      * @throws IOException if the client failed to subscribe on the device method.
      */
-    void enableDeviceMethod() throws IOException
+    void subscribeToDeviceMethod() throws IOException, InterruptedException
     {
-        enableDeviceMethod(null, null, null, null);
+        subscribeToDeviceMethod(null, null, null, null);
     }
 
     /**
@@ -110,10 +96,10 @@ public class DeviceEmulator
      *                                    deviceMethodStatusCallback is not null.
      * @throws IOException if the client failed to subscribe on the device method.
      */
-    void enableDeviceMethod(
+    void subscribeToDeviceMethod(
             DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
             IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
-            throws IOException
+            throws IOException, InterruptedException
     {
         if(deviceMethodCallback == null)
         {
@@ -149,6 +135,22 @@ public class DeviceEmulator
                     this.deviceMethodCallback, this.deviceMethodCallbackContext,
                     this.deviceMethodStatusCallback, this.deviceMethodStatusCallbackContext);
         }
+
+        long startTime = System.currentTimeMillis();
+        while (deviceStatus.statusOk == 0)
+        {
+            if (deviceStatus.statusError > 0)
+            {
+                throw new AssertionError("Subscribing to device methods failed");
+            }
+
+            Thread.sleep(METHOD_SUBSCRIBE_CHECK_PERIOD_MILLISECONDS);
+
+            if (System.currentTimeMillis() - startTime > DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS)
+            {
+                throw new AssertionError("Timed out waiting for device method subscription to be acknowledged");
+            }
+        }
     }
 
     /**
@@ -160,9 +162,9 @@ public class DeviceEmulator
      *
      * @throws IOException if failed to start the Device twin.
      */
-    void enableDeviceTwin() throws IOException
+    void subscribeToDeviceTwin() throws IOException
     {
-        enableDeviceTwin(null, null, null, null, true);
+        subscribeToDeviceTwin(null, null, null, null, true);
     }
 
     /**
@@ -175,8 +177,8 @@ public class DeviceEmulator
      * @param mustSubscribeToDesiredProperties is a boolean to define if it should or not subscribe to the desired properties.
      * @throws IOException if failed to start the Device twin.
      */
-    void enableDeviceTwin(IotHubEventCallback deviceTwinStatusCallBack, Object deviceTwinStatusCallbackContext,
-                          Device deviceTwin, Object propertyCallBackContext, boolean mustSubscribeToDesiredProperties) throws IOException
+    void subscribeToDeviceTwin(IotHubEventCallback deviceTwinStatusCallBack, Object deviceTwinStatusCallbackContext,
+                               Device deviceTwin, Object propertyCallBackContext, boolean mustSubscribeToDesiredProperties) throws IOException
     {
         // If user do not provide any status callback, use the local one.
         if(deviceTwinStatusCallBack == null)
