@@ -72,8 +72,6 @@ public class DeviceMethodCommon extends IntegrationTest
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
 
-    private List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates;
-
     protected DeviceMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
 
