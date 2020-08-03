@@ -12,4 +12,4 @@ else
     Write-Host "Pull request build detected"
 }
 
-mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" test -T 2C
+mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C `-Dmaven.javadoc.skip
