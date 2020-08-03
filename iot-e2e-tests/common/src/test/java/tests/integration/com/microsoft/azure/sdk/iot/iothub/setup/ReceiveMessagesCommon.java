@@ -39,7 +39,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
-        IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
+        IntegrationTest.isPullRequest = true;
 
         X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
         String publicKeyCert = certificateGenerator.getPublicCertificate();
