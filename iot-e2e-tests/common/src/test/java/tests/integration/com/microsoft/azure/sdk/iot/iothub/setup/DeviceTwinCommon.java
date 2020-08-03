@@ -485,7 +485,6 @@ public class DeviceTwinCommon extends IntegrationTest
             deviceUnderTest.sCDeviceForRegistryManager.setThumbprintFinal(testInstance.x509Thumbprint, testInstance.x509Thumbprint);
         }
 
-
         deviceUnderTest.sCDeviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, deviceUnderTest.sCDeviceForRegistryManager);
 
         if (deviceUnderTest.sCModuleForRegistryManager != null)

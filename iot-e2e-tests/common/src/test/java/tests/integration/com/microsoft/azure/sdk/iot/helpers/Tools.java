@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyRequestsException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -23,7 +24,12 @@ import java.util.Map;
 public class Tools
 {
     private static final long RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS = 60 * 1000;
-    private static final long WAIT_FOR_RETRY = 2000;
+    private static final long WAIT_FOR_RETRY_MILLISECONDS_DEAFULT = 2000;
+
+    // Iot Hub message says to wait for 10 seconds, but that likely is a generic message and not tied to how many
+    // seconds we should actually wait. 5 seconds should be plenty.
+    private static final long WAIT_FOR_RETRY_MILLISECONDS_THROTTLING = 5000;
+
 
     private static final String ANDROID_BUILD_CONFIG_CLASS = "com.iothub.azure.microsoft.com.androide2e.test.BuildConfig";
     private static final Map<String, String> ANDROID_ENV_VAR = retrieveAndroidEnvVariables();
@@ -122,15 +128,22 @@ public class Tools
             }
             catch (UnknownHostException | SocketException e)
             {
-                System.out.println("Failed to add device " + device.getDeviceId());
-                e.printStackTrace();
-                Thread.sleep(WAIT_FOR_RETRY);
+                log.warn("Failed to add device {}, retrying in {} milliseconds", device.getDeviceId(), WAIT_FOR_RETRY_MILLISECONDS_DEAFULT, e);
+                Thread.sleep(WAIT_FOR_RETRY_MILLISECONDS_DEAFULT);
                 if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
                 }
             }
-
+            catch (IotHubTooManyRequestsException e)
+            {
+                log.warn("Throttled while trying to add device {}, retrying in {} milliseconds" + device.getDeviceId(), WAIT_FOR_RETRY_MILLISECONDS_THROTTLING, e);
+                Thread.sleep(WAIT_FOR_RETRY_MILLISECONDS_THROTTLING);
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
+                {
+                    throw e;
+                }
+            }
         }
 
         return ret;
@@ -149,9 +162,17 @@ public class Tools
             }
             catch (UnknownHostException | SocketException e)
             {
-                System.out.println("Failed to add module " + module.getId());
-                e.printStackTrace();
-                Thread.sleep(WAIT_FOR_RETRY);
+                log.warn("Failed to add module {}, retrying in {} milliseconds", module.getId(), WAIT_FOR_RETRY_MILLISECONDS_DEAFULT, e);
+                Thread.sleep(WAIT_FOR_RETRY_MILLISECONDS_DEAFULT);
+                if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
+                {
+                    throw e;
+                }
+            }
+            catch (IotHubTooManyRequestsException e)
+            {
+                log.warn("Throttled while trying to add device {}, retrying in {} milliseconds" + module.getId(), WAIT_FOR_RETRY_MILLISECONDS_THROTTLING, e);
+                Thread.sleep(WAIT_FOR_RETRY_MILLISECONDS_THROTTLING);
                 if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
@@ -175,7 +196,7 @@ public class Tools
             {
                 System.out.println("Failed to get statistics ");
                 e.printStackTrace();
-                Thread.sleep(WAIT_FOR_RETRY);
+                Thread.sleep(WAIT_FOR_RETRY_MILLISECONDS_DEAFULT);
                 if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
@@ -199,7 +220,7 @@ public class Tools
             {
                 System.out.println("Failed to get device ");
                 e.printStackTrace();
-                Thread.sleep(WAIT_FOR_RETRY);
+                Thread.sleep(WAIT_FOR_RETRY_MILLISECONDS_DEAFULT);
                 if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
@@ -225,7 +246,7 @@ public class Tools
             {
                 System.out.println("Failed to get module ");
                 e.printStackTrace();
-                Thread.sleep(WAIT_FOR_RETRY);
+                Thread.sleep(WAIT_FOR_RETRY_MILLISECONDS_DEAFULT);
                 if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
                 {
                     throw e;
