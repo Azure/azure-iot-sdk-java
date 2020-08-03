@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
@@ -66,13 +67,16 @@ public class DeviceMethodTests extends DeviceMethodCommon
         for (int i = 0; i < NUMBER_INVOKES_PARALLEL; i++)
         {
             RunnableInvoke runnableInvoke;
+            // Create one methodServiceClient per thread since each method service client only allows one method invoke
+            // at a time. This limitation exists because the invokeMethod method is synchronized with itself
+            DeviceMethod methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
             if (testInstance.identity instanceof Module)
             {
-                runnableInvoke = new RunnableInvoke(testInstance.methodServiceClient, testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(),"Thread" + i, cdl);
+                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(),"Thread" + i, cdl);
             }
             else
             {
-                runnableInvoke = new RunnableInvoke(testInstance.methodServiceClient, testInstance.identity.getDeviceId(), null,"Thread" + i, cdl);
+                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.identity.getDeviceId(), null,"Thread" + i, cdl);
             }
             new Thread(runnableInvoke).start();
             runs.add(runnableInvoke);
