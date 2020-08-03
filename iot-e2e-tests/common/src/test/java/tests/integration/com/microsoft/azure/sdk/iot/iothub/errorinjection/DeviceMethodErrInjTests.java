@@ -44,7 +44,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
     @StandardTierHubOnlyTest
     public void invokeMethodRecoveredFromTcpConnectionDrop() throws Exception
     {
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -60,7 +60,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -76,7 +76,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -98,7 +98,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -120,7 +120,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -136,7 +136,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -159,7 +159,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -182,7 +182,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -205,7 +205,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -220,7 +220,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
@@ -235,7 +235,7 @@ public class DeviceMethodErrInjTests extends DeviceMethodCommon
             return;
         }
 
-        super.cleanToStart();
+        super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));

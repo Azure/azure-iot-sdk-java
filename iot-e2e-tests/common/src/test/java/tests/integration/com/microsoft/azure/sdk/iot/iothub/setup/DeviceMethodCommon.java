@@ -59,7 +59,6 @@ public class DeviceMethodCommon extends IntegrationTest
 
     protected static String iotHubConnectionString = "";
 
-    protected static DeviceMethod methodServiceClient;
     protected static RegistryManager registryManager;
 
     protected static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
@@ -73,8 +72,6 @@ public class DeviceMethodCommon extends IntegrationTest
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
 
-    private List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates;
-
     protected DeviceMethodTestInstance testInstance;
     protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
 
@@ -85,7 +82,6 @@ public class DeviceMethodCommon extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         Collection<Object[]> inputs = new ArrayList<>();
 
@@ -143,6 +139,7 @@ public class DeviceMethodCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
+        public DeviceMethod methodServiceClient;
 
         protected DeviceMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
         {
@@ -152,6 +149,7 @@ public class DeviceMethodCommon extends IntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
+            this.methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
         }
 
         public void setup() throws Exception {
@@ -245,7 +243,6 @@ public class DeviceMethodCommon extends IntegrationTest
     {
         try
         {
-            methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
             registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         }
         catch (IOException e)
@@ -255,36 +252,19 @@ public class DeviceMethodCommon extends IntegrationTest
         }
     }
 
-    public void cleanToStart() throws Exception
+    public void openDeviceClientAndSubscribeToMethods() throws Exception
     {
         testInstance.setup();
-        actualStatusUpdates = new ArrayList<Pair<IotHubConnectionStatus, Throwable>>();
-        setConnectionStatusCallBack(actualStatusUpdates);
+        testInstance.deviceTestManager.client.open();
 
         try
         {
-            this.testInstance.deviceTestManager.tearDown();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-
-        this.testInstance.deviceTestManager.clearDevice();
-
-        try
-        {
-            this.testInstance.deviceTestManager.setup(true, false);
-            IotHubServicesCommon.confirmOpenStabilized(actualStatusUpdates, 120000, this.testInstance.deviceTestManager.client);
+            this.testInstance.deviceTestManager.subscribe(true, false);
         }
         catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
-            fail(buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), this.testInstance.deviceTestManager.client));
+            fail(buildExceptionMessage("Unexpected exception occurred during subscribe: " + Tools.getStackTraceFromThrowable(e), this.testInstance.deviceTestManager.client));
         }
         catch (UnsupportedOperationException e)
         {
@@ -329,7 +309,6 @@ public class DeviceMethodCommon extends IntegrationTest
                 if (moduleId != null)
                 {
                     result = methodServiceClient.invoke(deviceId, moduleId, DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, testName);
-
                 }
                 else
                 {
@@ -390,11 +369,11 @@ public class DeviceMethodCommon extends IntegrationTest
         MethodResult result;
         if (testInstance.identity instanceof Module)
         {
-            result = methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module)testInstance.identity).getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module)testInstance.identity).getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
         }
         else
         {
-            result = methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
         }
 
         deviceTestManger.waitIotHub(1, 10);

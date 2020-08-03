@@ -77,7 +77,7 @@ public class JobClientTests extends IntegrationTest
         {
             testDevice = Tools.addDeviceWithRetry(registryManager, Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
             DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
-            testManager.setup(true, true);
+            testManager.subscribe(true, true);
             devices.add(testManager);
         }
     }
@@ -139,7 +139,7 @@ public class JobClientTests extends IntegrationTest
     {
         for (DeviceTestManager device:devices)
         {
-            device.clearDevice();
+            device.clearStatistics();
         }
 
         System.out.println("Waiting for all previously scheduled jobs to finish...");
