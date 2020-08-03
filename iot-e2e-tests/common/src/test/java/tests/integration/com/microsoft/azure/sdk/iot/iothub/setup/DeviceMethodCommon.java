@@ -9,10 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
@@ -24,6 +21,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -82,7 +80,7 @@ public class DeviceMethodCommon extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         Collection<Object[]> inputs = new ArrayList<>();
 
         for (ClientType clientType : ClientType.values())
@@ -243,7 +241,7 @@ public class DeviceMethodCommon extends IntegrationTest
     {
         try
         {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         }
         catch (IOException e)
         {

@@ -65,7 +65,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
 
         List inputs = Arrays.asList(

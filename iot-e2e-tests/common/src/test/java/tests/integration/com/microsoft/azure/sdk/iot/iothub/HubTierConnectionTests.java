@@ -74,7 +74,7 @@ public class HubTierConnectionTests extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-tier-connection-e2e-test".concat("-" + uuid);
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
@@ -116,7 +116,7 @@ public class HubTierConnectionTests extends IntegrationTest
     {
         try
         {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         }
         catch (IOException e)
         {

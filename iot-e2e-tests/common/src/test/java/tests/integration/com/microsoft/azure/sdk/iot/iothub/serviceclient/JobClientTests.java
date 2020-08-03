@@ -70,7 +70,7 @@ public class JobClientTests extends IntegrationTest
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
         jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
 
         String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICES; i++)

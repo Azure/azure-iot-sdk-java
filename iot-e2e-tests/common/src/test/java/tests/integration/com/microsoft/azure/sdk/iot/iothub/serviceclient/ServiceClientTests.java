@@ -131,7 +131,7 @@ public class ServiceClientTests extends IntegrationTest
         // Arrange
 
         // We remove and recreate the device for a clean start
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
 
         Device deviceAdded = Device.createFromId(testInstance.deviceId, null, null);
         Tools.addDeviceWithRetry(registryManager, deviceAdded);

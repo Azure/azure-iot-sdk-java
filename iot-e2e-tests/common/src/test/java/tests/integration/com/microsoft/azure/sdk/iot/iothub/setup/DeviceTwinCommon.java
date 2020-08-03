@@ -60,7 +60,7 @@ public class DeviceTwinCommon extends IntegrationTest
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
         sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
 
         List inputs = new ArrayList();
@@ -440,7 +440,7 @@ public class DeviceTwinCommon extends IntegrationTest
         try
         {
             sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
             scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
         }
         catch (IOException e)

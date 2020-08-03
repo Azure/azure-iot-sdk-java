@@ -387,7 +387,7 @@ public class ProvisioningTests extends ProvisioningCommon
         {
             //delete provisioned device
             RegistryManager registryManagerFarAway = RegistryManager.createFromConnectionString(farAwayIotHubConnectionString);
-            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
 
             if (deviceId != null && !deviceId.isEmpty())
             {

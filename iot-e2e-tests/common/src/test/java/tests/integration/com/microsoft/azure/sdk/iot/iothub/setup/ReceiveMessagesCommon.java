@@ -46,7 +46,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
 
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
@@ -126,7 +126,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
     {
         try
         {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
             serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
             serviceClient.open();
         }

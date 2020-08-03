@@ -52,7 +52,7 @@ public class SendMessagesCommon extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
 
         List inputs = new ArrayList();
@@ -171,7 +171,7 @@ public class SendMessagesCommon extends IntegrationTest
     {
         try
         {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         }
         catch (IOException e)
         {

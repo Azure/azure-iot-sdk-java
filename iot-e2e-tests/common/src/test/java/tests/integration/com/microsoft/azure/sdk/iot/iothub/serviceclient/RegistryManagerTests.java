@@ -231,7 +231,7 @@ public class RegistryManagerTests extends IntegrationTest
     public void getDeviceStatisticsTest() throws Exception
     {
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(0).build());
         Tools.getStatisticsWithRetry(registryManager);
     }
 
