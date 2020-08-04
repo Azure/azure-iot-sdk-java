@@ -220,8 +220,14 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void setup() throws Exception
         {
-            String TEST_UUID = UUID.randomUUID().toString();
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+            setup(sslContext);
+        }
+
+        public void setup(SSLContext customSSLContext) throws Exception
+        {
+            String TEST_UUID = UUID.randomUUID().toString();
+
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 if (authenticationType == SAS)
@@ -240,7 +246,7 @@ public class SendMessagesCommon extends IntegrationTest
                     Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
                     deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
                     deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, sslContext);
+                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, customSSLContext);
                     this.identity = deviceX509;
                 }
                 else
@@ -277,82 +283,6 @@ public class SendMessagesCommon extends IntegrationTest
                     Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
                     moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
                     moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
-                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, sslContext);
-                    this.identity = moduleX509;
-                }
-                else
-                {
-                    throw new Exception("Test code has not been written for this path yet");
-                }
-            }
-
-            if (this.useHttpProxy)
-            {
-                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
-                this.client.setProxySettings(proxySettings);
-            }
-
-            Thread.sleep(2000);
-
-            buildMessageLists();
-        }
-
-        public void setup(SSLContext customSSLContext) throws Exception
-        {
-            String TEST_UUID = UUID.randomUUID().toString();
-
-            /* Create unique device names */
-            String deviceId = "java-method-e2e-test-device".concat("-" + TEST_UUID);
-            String moduleId = "java-method-e2e-test-module".concat("-" + TEST_UUID);
-            String deviceX509Id = "java-method-e2e-test-device-x509".concat("-" + TEST_UUID);
-            String moduleX509Id = "java-method-e2e-test-module-x509".concat("-" + TEST_UUID);
-
-            /* Create device on the service */
-            Device device = Device.createFromId(deviceId, null, null);
-            Module module = Module.createFromId(deviceId, moduleId, null);
-
-            Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-            deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-            Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
-            moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-            device = Tools.addDeviceWithRetry(registryManager, device);
-            deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
-
-            if (clientType == ClientType.DEVICE_CLIENT)
-            {
-                if (authenticationType == SAS)
-                {
-                    //sas device client
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol, customSSLContext);
-                    this.identity = device;
-                }
-                else if (authenticationType == SELF_SIGNED)
-                {
-                    //x509 device client
-                    SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, customSSLContext);
-                    this.identity = deviceX509;
-                }
-                else
-                {
-                    throw new Exception("Test code has not been written for this path yet");
-                }
-            }
-            else if (clientType == ClientType.MODULE_CLIENT)
-            {
-                if (authenticationType == SAS)
-                {
-                    //sas module client
-                    module = Tools.addModuleWithRetry(registryManager, module);
-                    this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, customSSLContext);
-                    this.identity = module;
-                }
-                else if (authenticationType == SELF_SIGNED)
-                {
-                    //x509 module client
-                    moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
-                    SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, customSSLContext);
                     this.identity = moduleX509;
                 }
