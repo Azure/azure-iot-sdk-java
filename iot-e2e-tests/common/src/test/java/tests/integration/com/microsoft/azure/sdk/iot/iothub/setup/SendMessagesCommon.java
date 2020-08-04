@@ -22,8 +22,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -40,7 +38,7 @@ import static junit.framework.TestCase.fail;
  */
 public class SendMessagesCommon extends IntegrationTest
 {
-    @Parameterized.Parameters(name = "{0}_{1}_{2}_{6}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}")
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
@@ -60,23 +58,16 @@ public class SendMessagesCommon extends IntegrationTest
                 new Object[][]
                         {
                                 //sas token device client, no proxy
-                                {HTTPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                {AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
+                                {HTTPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {AMQPS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
 
                                 //x509 device client, no proxy
-                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-
-                                //sas token device client, with proxy
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
-                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
-
-                                //x509 device client, with proxy
-                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true}
+                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
                         }
         ));
 
@@ -86,18 +77,14 @@ public class SendMessagesCommon extends IntegrationTest
                     new Object[][]
                             {
                                     //sas token module client, no proxy
-                                    {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                    {AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
+                                    {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
 
                                     //x509 module client, no proxy
-                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, false},
-
-                                    //sas token module client, with proxy
-                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true},
-                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint, true}
+                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
                             }
             ));
         }
@@ -157,13 +144,14 @@ public class SendMessagesCommon extends IntegrationTest
     protected static RegistryManager registryManager;
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
-    protected static int testProxyPort = 8899;
+    protected static int testProxyPortWithAuth = 8899;
+    protected static int testProxyPortWithoutAuth = 8799;
     protected static final String testProxyUser = "proxyUsername";
     protected static final char[] testProxyPass = "1234".toCharArray();
 
-    public SendMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
+    public SendMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        this.testInstance = new SendMessagesTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, withProxy);
+        this.testInstance = new SendMessagesTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     @BeforeClass
@@ -184,8 +172,12 @@ public class SendMessagesCommon extends IntegrationTest
     public static void startProxy()
     {
         proxyServer = DefaultHttpProxyServer.bootstrap()
-                .withPort(testProxyPort)
+                .withPort(testProxyPortWithAuth)
                 .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
+                .start();
+
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+                .withPort(testProxyPortWithoutAuth)
                 .start();
     }
 
@@ -205,9 +197,8 @@ public class SendMessagesCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
-        public boolean useHttpProxy;
 
-        public SendMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy) throws Exception
+        public SendMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -215,7 +206,6 @@ public class SendMessagesCommon extends IntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
-            this.useHttpProxy = useHttpProxy;
         }
 
         public void setup() throws Exception
@@ -227,7 +217,6 @@ public class SendMessagesCommon extends IntegrationTest
         public void setup(SSLContext customSSLContext) throws Exception
         {
             String TEST_UUID = UUID.randomUUID().toString();
-
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 if (authenticationType == SAS)
@@ -290,13 +279,6 @@ public class SendMessagesCommon extends IntegrationTest
                 {
                     throw new Exception("Test code has not been written for this path yet");
                 }
-            }
-
-            if (this.useHttpProxy)
-            {
-                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
-                this.client.setProxySettings(proxySettings);
             }
 
             Thread.sleep(2000);

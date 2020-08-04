@@ -6,10 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 
 
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
-import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -23,6 +20,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.SendMessagesCommon;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,9 +42,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGene
 @RunWith(Parameterized.class)
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, withProxy);
+        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
     //TODO this test doesn't seem to check anything that the basic sendMessages test already checks. It just has a different payload. Needs
@@ -160,7 +159,7 @@ public class SendMessagesTests extends SendMessagesCommon
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
         final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
 
-        if (testInstance.protocol != HTTPS || testInstance.authenticationType != SAS || testInstance.useHttpProxy)
+        if (testInstance.protocol != HTTPS || testInstance.authenticationType != SAS)
         {
             //This scenario only applies to HTTP since MQTT and AMQP allow expired sas tokens for 30 minutes after open
             // as long as token did not expire before open. X509 doesn't apply either
@@ -183,12 +182,6 @@ public class SendMessagesTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void expiredMessagesAreNotSent() throws Exception
     {
-        if (testInstance.useHttpProxy)
-        {
-            //Not worth testing
-            return;
-        }
-
         this.testInstance.setup();
 
         IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
@@ -204,6 +197,42 @@ public class SendMessagesTests extends SendMessagesCommon
         }
 
         this.testInstance.setup(SSLContextBuilder.buildSSLContext());
+
+        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
+
+    @Test
+    public void sendMessagesWithProxyWithAuth() throws Exception
+    {
+        if (testInstance.protocol == MQTT || testInstance.protocol == AMQPS)
+        {
+            // clients only support proxies for HTTPS, AMQPS_WS and MQTT_WS
+            return;
+        }
+
+        this.testInstance.setup();
+
+        Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPortWithAuth));
+        ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
+        this.testInstance.client.setProxySettings(proxySettings);
+
+        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
+
+    @Test
+    public void sendMessagesWithProxyWithoutAuth() throws Exception
+    {
+        if (testInstance.protocol == MQTT || testInstance.protocol == AMQPS)
+        {
+            // clients only support proxies for HTTPS, AMQPS_WS and MQTT_WS
+            return;
+        }
+
+        this.testInstance.setup();
+
+        Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPortWithoutAuth));
+        ProxySettings proxySettings = new ProxySettings(testProxy);
+        this.testInstance.client.setProxySettings(proxySettings);
 
         IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
