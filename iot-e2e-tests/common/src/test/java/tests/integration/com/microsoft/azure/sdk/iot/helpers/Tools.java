@@ -92,7 +92,7 @@ public class Tools
         }
         catch (ClassNotFoundException e)
         {
-            log.debug("Likely running the JVM tests, ignoring ClassNotFoundException");
+            log.debug("Likely running the JVM tests, ignoring ClassNotFoundException\n");
         }
 
         return envVariables;
