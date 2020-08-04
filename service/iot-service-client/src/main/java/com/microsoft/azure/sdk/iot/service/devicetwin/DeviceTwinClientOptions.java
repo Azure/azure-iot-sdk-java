@@ -1,19 +1,20 @@
-package com.microsoft.azure.sdk.iot.service;
+package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Configurable options for all registry manager operations
+ * Configurable options for all twin client operations.
  */
 @Builder
-public class RegistryManagerOptions
+public class DeviceTwinClientOptions
 {
     protected static final Integer DEFAULT_HTTP_READ_TIMEOUT_MS = 24000; // 24 seconds
     protected static final Integer DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 24000; // 24 seconds
 
     /**
-     * The options that specify what proxy to tunnel through. If null, no proxy will be used
+     * The options that specify what proxy to tunnel through. If null, no proxy will be used.
      */
     @Getter
     private ProxyOptions proxyOptions;

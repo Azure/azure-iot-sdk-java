@@ -10,8 +10,10 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.Module;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
@@ -19,12 +21,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceMethodCommon;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -481,6 +487,41 @@ public class DeviceMethodTests extends DeviceMethodCommon
                 Assert.assertEquals(404001, actualException.getErrorCode());
                 Assert.assertEquals(ErrorCodeDescription.DeviceNotFound, actualException.getErrorCodeDescription());
             }
+        }
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodWithServiceSideProxy() throws Exception
+    {
+        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        {
+            // This test doesn't really care about the device side protocol or authentication, so just run it once
+            // when the device is using MQTT with SAS auth
+            return;
+        }
+
+        String testProxyHostname = "127.0.0.1";
+        int testProxyPort = 8894;
+        HttpProxyServer proxyServer = DefaultHttpProxyServer.bootstrap()
+                .withPort(testProxyPort)
+                .start();
+
+        try
+        {
+            Proxy serviceSideProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+
+            ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
+            DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().proxyOptions(proxyOptions).build();
+
+            this.testInstance.methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, options);
+
+            super.openDeviceClientAndSubscribeToMethods();
+            super.invokeMethodSucceed();
+        }
+        finally
+        {
+            proxyServer.stop();
         }
     }
 }
