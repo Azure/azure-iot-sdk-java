@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
@@ -16,6 +17,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.*;
 /**
  * Common rules and flags for all integration tests
  */
+@Slf4j
 public abstract class IntegrationTest
 {
     @Rule
@@ -23,12 +25,12 @@ public abstract class IntegrationTest
     {
         protected void starting(Description description)
         {
-            System.out.println("Starting test: " + description.getMethodName());
+            log.info("Starting test: {}", description.getMethodName());
         }
 
         protected void finished(Description description)
         {
-            System.out.println("Finished test: " + description.getMethodName());
+            log.info("Finished test: {}", description.getMethodName());
         }
     };
 
