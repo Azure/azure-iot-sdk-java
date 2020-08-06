@@ -5,6 +5,12 @@ trigger:
   branches:
     include:
       - preview
+  paths:
+    exclude:
+      - doc/*
+      - device/iot-device-samples/*
+      - service/iot-service-samples/*
+      - provisioning/provisioning-samples/*
 
 jobs:
   ### Windows ###
