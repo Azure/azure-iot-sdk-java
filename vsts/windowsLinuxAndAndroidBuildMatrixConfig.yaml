@@ -58,7 +58,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
-          testRunTitle: "Windows"
+          testRunTitle: "Windows (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
 
@@ -125,7 +125,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
-          testRunTitle: "Linux"
+          testRunTitle: "Linux (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
 
