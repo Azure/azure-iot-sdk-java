@@ -161,36 +161,25 @@ public class ReceiveMessagesCommon extends IntegrationTest
         public void setup() throws Exception
         {
             String TEST_UUID = UUID.randomUUID().toString();
-
-            /* Create unique device names */
-            String deviceId = "java-method-e2e-test-device".concat("-" + TEST_UUID);
-            String moduleId = "java-method-e2e-test-module".concat("-" + TEST_UUID);
-            String deviceX509Id = "java-method-e2e-test-device-x509".concat("-" + TEST_UUID);
-            String moduleX509Id = "java-method-e2e-test-module-x509".concat("-" + TEST_UUID);
-
-            /* Create device on the service */
-            Device device = Device.createFromId(deviceId, null, null);
-            Module module = Module.createFromId(deviceId, moduleId, null);
-
-            Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-            deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-            Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
-            moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-            device = Tools.addDeviceWithRetry(registryManager, device);
-            deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
-
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 if (authenticationType == SAS)
                 {
                     //sas device client
+                    String deviceId = "java-method-e2e-test-device".concat("-" + TEST_UUID);
+                    Device device = Device.createFromId(deviceId, null, null);
+                    device = Tools.addDeviceWithRetry(registryManager, device);
                     this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
                     this.identity = device;
                 }
                 else if (authenticationType == SELF_SIGNED)
                 {
                     //x509 device client
+                    String deviceX509Id = "java-method-e2e-test-device-x509".concat("-" + TEST_UUID);
+                    Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
+                    deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+                    deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
                     this.client = new DeviceClient(registryManager.getDeviceConnectionString(deviceX509), protocol, sslContext);
                     this.identity = deviceX509;
                 }
@@ -203,14 +192,30 @@ public class ReceiveMessagesCommon extends IntegrationTest
             {
                 if (authenticationType == SAS)
                 {
+                    //sas device client to house the module under test
+                    String deviceId = "java-receive-message-e2e-test-device".concat("-" + TEST_UUID);
+                    Device device = Device.createFromId(deviceId, null, null);
+                    device = Tools.addDeviceWithRetry(registryManager, device);
+
                     //sas module client
+                    String moduleId = "java-receive-message-e2e-test-module".concat("-" + TEST_UUID);
+                    Module module = Module.createFromId(deviceId, moduleId, null);
                     module = Tools.addModuleWithRetry(registryManager, module);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
                     this.identity = module;
                 }
                 else if (authenticationType == SELF_SIGNED)
                 {
+                    //x509 device client to house the module under test
+                    String deviceX509Id = "java-receive-message-e2e-test-device-x509".concat("-" + TEST_UUID);
+                    Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
+                    deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+                    deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
+
                     //x509 module client
+                    String moduleX509Id = "java-receive-message-e2e-test-module-x509".concat("-" + TEST_UUID);
+                    Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
+                    moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
                     moduleX509 = Tools.addModuleWithRetry(registryManager, moduleX509);
                     this.client = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509, moduleX509), protocol, sslContext);
                     this.identity = moduleX509;

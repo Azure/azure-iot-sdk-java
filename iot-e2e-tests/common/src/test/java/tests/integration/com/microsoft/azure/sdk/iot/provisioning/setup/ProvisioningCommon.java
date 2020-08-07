@@ -119,7 +119,6 @@ public class ProvisioningCommon extends IntegrationTest
 
     protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
 
-    public ProvisioningServiceClient provisioningServiceClient = null;
     public RegistryManager registryManager = null;
 
     //sending reported properties for twin operations takes some time to get the appropriate callback
@@ -235,6 +234,7 @@ public class ProvisioningCommon extends IntegrationTest
         public String provisionedDeviceId;
         public SecurityProvider securityProvider;
         public String provisionedIotHubUri;
+        public ProvisioningServiceClient provisioningServiceClient;
 
         public ProvisioningTestInstance(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
         {
@@ -242,15 +242,14 @@ public class ProvisioningCommon extends IntegrationTest
             this.attestationType = attestationType;
             this.groupId = "";// by default, assume enrollment has no group id
             this.registrationId = "java-provisioning-test-" + this.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
+            this.provisioningServiceClient =
+                    ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
         }
     }
 
     @Before
     public void setUp() throws Exception
     {
-        provisioningServiceClient =
-                ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
-
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
@@ -264,11 +263,11 @@ public class ProvisioningCommon extends IntegrationTest
             registryManager.close();
         }
 
-        provisioningServiceClient = null;
         registryManager = null;
 
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
+            testInstance.provisioningServiceClient = null;
             try
             {
                 //TPM security provider MUST be shutdown between tests
@@ -527,7 +526,7 @@ public class ProvisioningCommon extends IntegrationTest
                 testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
                 testInstance.enrollmentGroup.setIotHubs(iothubs);
                 testInstance.enrollmentGroup.setCapabilities(deviceCapabilities);
-                testInstance.enrollmentGroup = provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
+                testInstance.enrollmentGroup = testInstance.provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
                 Attestation attestation = testInstance.enrollmentGroup.getAttestation();
                 assertTrue(attestation instanceof SymmetricKeyAttestation);
 
@@ -588,7 +587,7 @@ public class ProvisioningCommon extends IntegrationTest
         testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);
         testInstance.individualEnrollment.setIotHubs(iothubs);
         testInstance.individualEnrollment.setInitialTwin(twinState);
-        testInstance.individualEnrollment = provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+        testInstance.individualEnrollment = testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
     }
 
     public static byte[] ComputeDerivedSymmetricKey(String masterKey, String registrationId) throws InvalidKeyException, NoSuchAlgorithmException

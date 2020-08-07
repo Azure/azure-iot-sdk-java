@@ -50,29 +50,27 @@ public class DeviceTestManager
         }
     }
 
-    public void clearDevice()
+    public void clearStatistics()
     {
         this.deviceEmulator.clearStatistics();
     }
 
-    public void setup(boolean enableMethod, boolean enableTwin) throws IOException, InterruptedException
+    public void subscribe(boolean enableMethod, boolean enableTwin) throws IOException, InterruptedException
     {
-        this.deviceEmulator.setup();
-
         if (enableMethod)
         {
             /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
-            deviceEmulator.enableDeviceMethod();
+            deviceEmulator.subscribeToDeviceMethod();
         }
 
         if (enableTwin)
         {
             /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
-            deviceEmulator.enableDeviceTwin();
+            deviceEmulator.subscribeToDeviceTwin();
         }
     }
 
-    public void tearDown() throws IOException, InterruptedException
+    public void tearDown() throws IOException
     {
         deviceEmulator.tearDown();
     }
@@ -108,13 +106,13 @@ public class DeviceTestManager
         /* Create a emulator for the device client, and connect it to the IoTHub */
         deviceEmulator = new DeviceEmulator(this.client);
 
-        deviceEmulator.setup();
+        deviceEmulator.open();
 
         /* Enable DeviceMethod on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceMethod();
+        deviceEmulator.subscribeToDeviceMethod();
 
         /* Enable DeviceTwin on the device client using the callbacks from the DeviceEmulator */
-        deviceEmulator.enableDeviceTwin();
+        deviceEmulator.subscribeToDeviceTwin();
     }
 
     public int getStatusOk()

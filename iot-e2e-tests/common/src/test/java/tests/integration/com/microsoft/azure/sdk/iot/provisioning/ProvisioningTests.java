@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
+import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.AllocationPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.CustomAllocationDefinition;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.ReprovisionPolicy;
@@ -413,11 +414,11 @@ public class ProvisioningTests extends ProvisioningCommon
             //delete enrollment
             if (enrollmentType == EnrollmentType.GROUP)
             {
-                provisioningServiceClient.deleteEnrollmentGroup(testInstance.groupId);
+                testInstance.provisioningServiceClient.deleteEnrollmentGroup(testInstance.groupId);
             }
             else
             {
-                provisioningServiceClient.deleteIndividualEnrollment(testInstance.individualEnrollment.getRegistrationId());
+                testInstance.provisioningServiceClient.deleteIndividualEnrollment(testInstance.individualEnrollment.getRegistrationId());
             }
         }
         catch (Exception e)
@@ -462,12 +463,12 @@ public class ProvisioningTests extends ProvisioningCommon
         if (enrollmentType == EnrollmentType.GROUP)
         {
             testInstance.enrollmentGroup.setIotHubs(iothubsToFinishAt);
-            provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
+            testInstance.provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
         }
         else
         {
             testInstance.individualEnrollment.setIotHubs(iothubsToFinishAt);
-            provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+            testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
         }
     }
 }
