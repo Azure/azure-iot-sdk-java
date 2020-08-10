@@ -1,5 +1,17 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - doc/*
+      - device/iot-device-samples/*
+      - service/iot-service-samples/*
+      - provisioning/provisioning-samples/*
+
 jobs:
   ### Windows ###
   - job: Windows
@@ -58,7 +70,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
-          testRunTitle: "Windows"
+          testRunTitle: "Windows (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
 
@@ -125,7 +137,7 @@ jobs:
         displayName: 'Publish Test Results'
         inputs:
           mergeTestResults: true
-          testRunTitle: "Linux"
+          testRunTitle: "Linux (Attempt $(System.JobAttempt))"
         continueOnError: true
         condition: always()
 

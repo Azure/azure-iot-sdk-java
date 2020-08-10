@@ -106,14 +106,14 @@ public class ServiceClientTests extends IntegrationTest
         proxyServer.stop();
     }
 
-    @Test (timeout=MAX_TEST_MILLISECONDS)
+    @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
         cloudToDeviceTelemetry(false);
     }
 
-    @Test (timeout=MAX_TEST_MILLISECONDS)
+    @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithProxy() throws Exception
     {
@@ -173,7 +173,7 @@ public class ServiceClientTests extends IntegrationTest
         registryManager.close();
     }
 
-    @Test (timeout=MAX_TEST_MILLISECONDS)
+    @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenSendingTelemetry() throws IOException
     {
@@ -198,7 +198,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
-    @Test (timeout=MAX_TEST_MILLISECONDS)
+    @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFeedbackReceiver() throws IOException
     {
@@ -225,7 +225,7 @@ public class ServiceClientTests extends IntegrationTest
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
     }
 
-    @Test (timeout=MAX_TEST_MILLISECONDS)
+    @Test
     @ContinuousIntegrationTest
     public void serviceClientValidatesRemoteCertificateWhenGettingFileUploadFeedbackReceiver() throws IOException
     {
