@@ -43,7 +43,7 @@ public class Message
     /**
      * List of nested messages.
      */
-    private Set<Message> nestedMessages;
+    private List<Message> nestedMessages;
 
     /**
      * Destination of the message
@@ -179,7 +179,7 @@ public class Message
      * Internal constructor to initialize a bulk message instance.
      * @param messages List of nested messages
      */
-    Message(Set<Message> messages)
+    Message(List<Message> messages)
     {
         if (messages == null)
         {
@@ -194,7 +194,7 @@ public class Message
      * Gets the list of nested messages.
      * @return All nested messages.
      */
-    public Set<Message> getNestedMessages()
+    public List<Message> getNestedMessages()
     {
         return this.nestedMessages;
     }

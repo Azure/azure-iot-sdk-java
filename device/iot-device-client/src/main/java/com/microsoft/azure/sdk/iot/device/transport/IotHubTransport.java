@@ -406,7 +406,8 @@ public class IotHubTransport implements IotHubListener
         {
             for (Message singleMessage : message.getNestedMessages())
             {
-                waitingPacketsQueue.add(new IotHubTransportPacket(message, callback, callbackContext,null, System.currentTimeMillis()));
+                this.addToWaitingQueue(new IotHubTransportPacket(singleMessage, callback, callbackContext,null, System.currentTimeMillis()));
+                log.info("Messages were queued to be sent later ({})", singleMessage);
             }
 
             return;

@@ -10,9 +10,11 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +75,20 @@ public class SendMessagesTests extends SendMessagesCommon
         this.testInstance.setup();
 
         IotHubServicesCommon.sendBulkMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
+
+    @Test
+    public void sendManySmallMessagesAsBatch() throws Exception
+    {
+        // Only send batch messages in large quantities when using HTTPS protocol.
+        if (this.testInstance.protocol != HTTPS)
+        {
+            return;
+        }
+
+        this.testInstance.setup();
+
+        IotHubServicesCommon.sendBulkMessages(testInstance.client, testInstance.protocol, MULTIPLE_SMALL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test

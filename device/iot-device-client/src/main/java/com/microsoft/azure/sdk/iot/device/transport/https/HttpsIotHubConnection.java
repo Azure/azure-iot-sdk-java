@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.https;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.net.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
@@ -92,9 +93,9 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                     {
                         batchMessage.addMessage(HttpsSingleMessage.parseHttpsMessage(singleMessage));
                     }
-                    catch (Exception e)
+                    catch (IotHubSizeExceededException e)
                     {
-                        throw new TransportException(e);
+                        throw new TransportException("Failed to create HTTPS batch message", e);
                     }
                 }
                 httpsMessage = batchMessage;

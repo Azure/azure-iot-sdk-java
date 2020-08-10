@@ -16,6 +16,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -199,7 +200,7 @@ public class InternalClient
      * @throws IllegalStateException if the client has not been opened yet or is
      * already closed.
      */
-    public void sendEventBatchAsync(Set<Message> messages, IotHubEventCallback callback, Object callbackContext)
+    public void sendEventBatchAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
     {
         for (Message message: messages)
         {

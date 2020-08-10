@@ -114,6 +114,8 @@ public class SendMessagesCommon extends IntegrationTest
     //How many keys each message will cary.
     protected static final Integer NUM_KEYS_PER_MESSAGE = 3;
 
+    protected static final Integer NUM_SMALL_MESSAGES = 50;
+
     // Max IoT Hub message size is 256 kb, but that includes headers, not just payload
     protected static final int MAX_MESSAGE_PAYLOAD_SIZE = 255*1024;
 
@@ -134,6 +136,7 @@ public class SendMessagesCommon extends IntegrationTest
     //The messages to be sent in these tests. Some contain error injection messages surrounded by normal messages
     protected List<MessageAndResult> NORMAL_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> LARGE_MESSAGES_TO_SEND = new ArrayList<>();
+    protected List<MessageAndResult> MULTIPLE_SMALL_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> LARGE_MESSAGES_TO_SEND_AMQPS_WS = new ArrayList<>();
     protected List<MessageAndResult> TCP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> AMQP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
@@ -444,6 +447,7 @@ public class SendMessagesCommon extends IntegrationTest
         MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND = new ArrayList<>();
         LARGE_MESSAGES_TO_SEND = new ArrayList<>();
         LARGE_MESSAGES_TO_SEND_AMQPS_WS = new ArrayList<>();
+        MULTIPLE_SMALL_MESSAGES_TO_SEND = new ArrayList<>();
 
         MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
         for (int i = 0; i < NUM_MESSAGES_PER_CONNECTION; i++)
@@ -511,6 +515,10 @@ public class SendMessagesCommon extends IntegrationTest
             NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK_EMPTY));
             LARGE_MESSAGES_TO_SEND.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]), IotHubStatusCode.OK_EMPTY));
             LARGE_MESSAGES_TO_SEND_AMQPS_WS.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE_AMQPS_WS]), IotHubStatusCode.OK_EMPTY));
+        }
+
+        for (int i = 0 ; i < NUM_SMALL_MESSAGES; i++){
+            MULTIPLE_SMALL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK_EMPTY));
         }
     }
 

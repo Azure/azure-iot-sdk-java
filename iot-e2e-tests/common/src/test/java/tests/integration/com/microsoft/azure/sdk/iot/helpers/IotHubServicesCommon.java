@@ -114,7 +114,7 @@ public class IotHubServicesCommon
                 return;
             }
 
-            Set<Message> bulkMessages = new HashSet<>();
+            List<Message> bulkMessages = new ArrayList<>();
             for (MessageAndResult mar : messagesToSend) {
                 bulkMessages.add(mar.message);
             }
@@ -127,7 +127,6 @@ public class IotHubServicesCommon
             client.closeNow();
         }
     }
-
 
     public static void sendSecurityMessages(InternalClient client,
                                             IotHubClientProtocol protocol,
