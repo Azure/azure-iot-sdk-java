@@ -80,7 +80,29 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
-            HttpsMessage httpsMessage = HttpsSingleMessage.parseHttpsMessage(message);
+            // Here we check if it's a bulk message and serialize it.
+            HttpsMessage httpsMessage = null;
+
+            if (message.isBulk())
+            {
+                HttpsBatchMessage batchMessage = new HttpsBatchMessage();
+                for (Message singleMessage : message.getNestedMessages())
+                {
+                    try
+                    {
+                        batchMessage.addMessage(HttpsSingleMessage.parseHttpsMessage(singleMessage));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new TransportException(e);
+                    }
+                }
+                httpsMessage = batchMessage;
+            }
+            else
+            {
+                httpsMessage = HttpsSingleMessage.parseHttpsMessage(message);
+            }
 
             String iotHubHostname = getHostName();
             String deviceId = this.config.getDeviceId();
@@ -145,7 +167,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             IotHubStatusCode status = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
             this.log.trace("Iot Hub responded to http message for iot hub message ({}) with status code {}", message, status);
 
-            IotHubTransportMessage transportMessage = new IotHubTransportMessage(message.getBytes(), message.getMessageType(), message.getMessageId(), message.getCorrelationId(), message.getProperties());
+            IotHubTransportMessage transportMessage = new IotHubTransportMessage(httpsMessage.getBody(), message.getMessageType(), message.getMessageId(), message.getCorrelationId(), message.getProperties());
             if (status == IotHubStatusCode.OK || status == IotHubStatusCode.OK_EMPTY)
             {
                 //Codes_SRS_HTTPSIOTHUBCONNECTION_34_067: [If the response from the service is OK or OK_EMPTY, this function shall notify its listener that a message was sent with no exception.]

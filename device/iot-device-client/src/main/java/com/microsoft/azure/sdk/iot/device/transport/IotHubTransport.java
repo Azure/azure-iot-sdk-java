@@ -401,6 +401,17 @@ public class IotHubTransport implements IotHubListener
 
         //Codes_SRS_IOTHUBTRANSPORT_34_042: [This function shall build a transport packet from the provided message,
         // callback, and context and then add that packet to the waiting queue.]
+
+        if (message.isBulk() && !(this.iotHubTransportConnection instanceof HttpsIotHubConnection))
+        {
+            for (Message singleMessage : message.getNestedMessages())
+            {
+                waitingPacketsQueue.add(new IotHubTransportPacket(message, callback, callbackContext,null, System.currentTimeMillis()));
+            }
+
+            return;
+        }
+
         IotHubTransportPacket packet = new IotHubTransportPacket(message, callback, callbackContext, null, System.currentTimeMillis());
         this.addToWaitingQueue(packet);
 
@@ -433,6 +444,7 @@ public class IotHubTransport implements IotHubListener
         while (this.connectionStatus == IotHubConnectionStatus.CONNECTED && timeSlice-- > 0)
         {
             IotHubTransportPacket packet = waitingPacketsQueue.poll();
+
             if (packet != null)
             {
                 Message message = packet.getMessage();

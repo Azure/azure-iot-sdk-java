@@ -68,6 +68,14 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    public void sendBulkMessages() throws Exception
+    {
+        this.testInstance.setup();
+
+        IotHubServicesCommon.sendBulkMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+    }
+
+    @Test
     @ContinuousIntegrationTest
     public void sendLargestMessages() throws Exception
     {

@@ -508,7 +508,7 @@ public class SendMessagesCommon extends IntegrationTest
                 MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND.add(normalMessageAndExpectedResult);
             }
 
-            NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY));
+            NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK_EMPTY));
             LARGE_MESSAGES_TO_SEND.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]), IotHubStatusCode.OK_EMPTY));
             LARGE_MESSAGES_TO_SEND_AMQPS_WS.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE_AMQPS_WS]), IotHubStatusCode.OK_EMPTY));
         }

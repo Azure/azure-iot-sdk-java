@@ -12,9 +12,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.Assert;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
@@ -94,6 +92,42 @@ public class IotHubServicesCommon
             client.closeNow();
         }
     }
+
+    /*
+     * method to send message over given DeviceClient
+     */
+    public static void sendBulkMessages(InternalClient client,
+                                    IotHubClientProtocol protocol,
+                                    List<MessageAndResult> messagesToSend,
+                                    final long RETRY_MILLISECONDS,
+                                    final long SEND_TIMEOUT_MILLISECONDS,
+                                    long interMessageDelay,
+                                    List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException
+    {
+        try
+        {
+            client.open();
+
+            if (protocol != IotHubClientProtocol.HTTPS)
+            {
+                sendMessages(client, protocol, messagesToSend,RETRY_MILLISECONDS ,SEND_TIMEOUT_MILLISECONDS,interMessageDelay, statusUpdates);
+                return;
+            }
+
+            Set<Message> bulkMessages = new HashSet<>();
+            for (MessageAndResult mar : messagesToSend) {
+                bulkMessages.add(mar.message);
+            }
+
+            BulkMessagesAndResult bulkMessagesAndResult = new BulkMessagesAndResult(bulkMessages, IotHubStatusCode.OK_EMPTY);
+            sendBulkMessagesAndWaitForResponse(client, bulkMessagesAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+        }
+        finally
+        {
+            client.closeNow();
+        }
+    }
+
 
     public static void sendSecurityMessages(InternalClient client,
                                             IotHubClientProtocol protocol,
@@ -356,6 +390,36 @@ public class IotHubServicesCommon
             if (messageAndResult.statusCode != null && messageSent.getCallbackStatusCode() != messageAndResult.statusCode)
             {
                 Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected " + messageAndResult.statusCode + " but received " + messageSent.getCallbackStatusCode(), client));
+            }
+        }
+        catch (Exception e)
+        {
+            Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: Exception encountered while sending and waiting on a message: " + e.getMessage(), client));
+        }
+    }
+
+    public static void sendBulkMessagesAndWaitForResponse(InternalClient client, BulkMessagesAndResult messagesAndResults, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    {
+        try
+        {
+            Success messageSent = new Success();
+            EventCallback callback = new EventCallback(messagesAndResults.statusCode);
+            client.sendEventBatchAsync(messagesAndResults.messages, callback, messageSent);
+
+            long startTime = System.currentTimeMillis();
+            while (!messageSent.wasCallbackFired())
+            {
+                Thread.sleep(RETRY_MILLISECONDS);
+                if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
+                {
+                    Assert.fail(buildExceptionMessage("Timed out waiting for a message callback", client));
+                    break;
+                }
+            }
+
+            if (messagesAndResults.statusCode != null && messageSent.getCallbackStatusCode() != messagesAndResults.statusCode)
+            {
+                Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected " + messagesAndResults.statusCode + " but received " + messageSent.getCallbackStatusCode(), client));
             }
         }
         catch (Exception e)

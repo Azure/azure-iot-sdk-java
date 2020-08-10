@@ -185,6 +185,35 @@ public class InternalClient
     }
 
     /**
+     * ASynchronously sends a batch of messages to the IoT Hub
+     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent one at a time.
+     * Maximum payload size for HTTPS is 255KB
+     *
+     * @param messages the list of message to be sent.
+     * @param callback the callback to be invoked when a response is received.
+     * Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     *
+     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @throws IllegalStateException if the client has not been opened yet or is
+     * already closed.
+     */
+    public void sendEventBatchAsync(Set<Message> messages, IotHubEventCallback callback, Object callbackContext)
+    {
+        //Codes_SRS_INTERNALCLIENT_34_045: [This function shall set the provided message's connection device id to the config's saved device id.]
+        for (Message message: messages)
+        {
+            message.setConnectionDeviceId(this.config.getDeviceId());
+        }
+
+        Message message = new Message(messages);
+
+        //Codes_SRS_INTERNALCLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.]
+        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
+    }
+
+    /**
      * Subscribes to desired properties.
      *
      * This client will receive a callback each time a desired property is updated. That callback will either contain
