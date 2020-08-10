@@ -186,7 +186,7 @@ public class InternalClient
 
     /**
      * ASynchronously sends a batch of messages to the IoT Hub
-     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent one at a time.
+     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
      * Maximum payload size for HTTPS is 255KB
      *
      * @param messages the list of message to be sent.
