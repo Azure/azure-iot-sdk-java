@@ -201,7 +201,6 @@ public class InternalClient
      */
     public void sendEventBatchAsync(Set<Message> messages, IotHubEventCallback callback, Object callbackContext)
     {
-        //Codes_SRS_INTERNALCLIENT_34_045: [This function shall set the provided message's connection device id to the config's saved device id.]
         for (Message message: messages)
         {
             message.setConnectionDeviceId(this.config.getDeviceId());
