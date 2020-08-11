@@ -36,16 +36,6 @@ public class Message
     private String messageId;
 
     /**
-     * Whether or not there is a list of nested messages included in this instance.
-     */
-    private boolean isBulk;
-
-    /**
-     * List of nested messages.
-     */
-    private List<Message> nestedMessages;
-
-    /**
      * Destination of the message
      */
     private String to;
@@ -176,30 +166,6 @@ public class Message
     }
 
     /**
-     * Internal constructor to initialize a bulk message instance.
-     * @param messages List of nested messages
-     */
-    Message(List<Message> messages)
-    {
-        if (messages == null)
-        {
-            throw new IllegalArgumentException("Messages list cannot be 'null'.");
-        }
-        this.nestedMessages = messages;
-        this.isBulk = true;
-        initialize();
-    }
-
-    /**
-     * Gets the list of nested messages.
-     * @return All nested messages.
-     */
-    public List<Message> getNestedMessages()
-    {
-        return this.nestedMessages;
-    }
-
-    /**
      * Constructor.
      * @param stream A stream to provide the body of the new Message instance.
      */
@@ -245,16 +211,6 @@ public class Message
 
     
     // ----- Public Methods -----
-
-    /**
-     * Indicates whether or not this instance is a bulk message instance.
-     * @return Boolean value to indicate whether or not this is a bulk message instance.
-     */
-    public boolean isBulk()
-    {
-        return this.isBulk;
-    }
-
     /**
      * The stream content of the body.
      * @return always returns null.

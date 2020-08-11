@@ -84,10 +84,10 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             // Here we check if it's a bulk message and serialize it.
             HttpsMessage httpsMessage = null;
 
-            if (message.isBulk())
+            if (message instanceof BatchMessages)
             {
                 HttpsBatchMessage batchMessage = new HttpsBatchMessage();
-                for (Message singleMessage : message.getNestedMessages())
+                for (Message singleMessage : ((BatchMessages)message).getNestedMessages())
                 {
                     try
                     {

@@ -207,7 +207,7 @@ public class InternalClient
             message.setConnectionDeviceId(this.config.getDeviceId());
         }
 
-        Message message = new Message(messages);
+        Message message = new BatchMessages(messages);
 
         deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
     }
