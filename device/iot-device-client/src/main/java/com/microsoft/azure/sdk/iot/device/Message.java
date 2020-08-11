@@ -211,6 +211,7 @@ public class Message
 
     
     // ----- Public Methods -----
+
     /**
      * The stream content of the body.
      * @return always returns null.
