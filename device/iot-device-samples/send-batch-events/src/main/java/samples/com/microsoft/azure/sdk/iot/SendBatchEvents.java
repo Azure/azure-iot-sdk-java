@@ -22,13 +22,13 @@ public class SendBatchEvents
     {
         public void execute(IotHubStatusCode status, Object context)
         {
-            Message msg = (Message) context;
+            List<Message> messages = (List<Message>) context;
 
-            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
+            System.out.println("IoT Hub responded to the batch message with status " + status.name());
 
             if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
-                failedMessageListOnClose.add(msg.getMessageId());
+                failedMessageListOnClose.addAll(messages);
             }
         }
     }
@@ -166,6 +166,7 @@ public class SendBatchEvents
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
+
         if (pathToCertificate != null )
         {
             client.setOption("SetCertificatePath", pathToCertificate );
@@ -183,11 +184,13 @@ public class SendBatchEvents
         client.open();
 
         System.out.println("Opened connection to IoT Hub.");
-        System.out.println("Sending the following event messages:");
+        System.out.println("Sending the following event messages in batch:");
 
         String deviceId = "MyJavaDevice";
         double temperature = 0.0;
         double humidity = 0.0;
+
+        List<Message> messageList = new ArrayList<Message>();
 
         for (int i = 0; i < numRequests; ++i)
         {
@@ -196,23 +199,25 @@ public class SendBatchEvents
 
             String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
 
-            try
-            {
                 Message msg = new Message(msgStr);
                 msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
+
                 System.out.println(msgStr);
 
-                EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, msg);
-            }
+                messageList.add(msg);
+        }
 
-            catch (Exception e)
-            {
-                e.printStackTrace(); // Trace the exception
-            }
+        try
+        {
+            EventCallback callback = new EventCallback();
+            client.sendEventBatchAsync(messageList, callback, messageList);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace(); // Trace the exception
         }
 
         System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
