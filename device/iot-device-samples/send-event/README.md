@@ -1,8 +1,8 @@
-# Send Events In Batch Sample
+# Send Event Sample
 
-Sample application that uses the Azure IoT Java SDK to send telemetry messages in batch to the
+Sample application that uses the Azure IoT Java SDK to send telemetry messages to the
 Azure IoT Hub cloud service or to an Azure IoT Edge device. The sample demonstrates how to connect
-and send messages using a protocol of your choices as a parameter. However, currently only HTTPS messages will be sent in a batch request and MQTT and AMQP protocols will queue the messages individually.
+and send messages using a protocol of your choices as a parameter.
 
 ## Build the sample
 
@@ -16,8 +16,8 @@ $> mvn install -DskipTests
 Listed below is the command to launch the sample along with a description of its arguments
 
 ```
-$> cd {sample root}/send-batch-events
-$> java -jar target/send-batch-events-{version}-with-deps.jar "{connection string}" {number of messages to send} {protocol}  {path to trusted root ca}
+$> cd {sample root}/send-event
+$> java -jar target/send-event-{version}-with-deps.jar "{connection string}" {number of messages to send} {protocol}  {path to trusted root ca}
 ```
 
 ### Arguments Description
@@ -42,7 +42,7 @@ $> java -jar target/send-batch-events-{version}-with-deps.jar "{connection strin
 Sample command invocation:
 
 ```
-$> java -jar target/send-batch-events-1.14.0-with-deps.jar "{connection string}" 20 mqtt /home/user/ca_cert.pem
+$> java -jar target/send-event-1.14.0-with-deps.jar "{connection string}" 20 mqtt /home/user/ca_cert.pem
 ```
 
 ## Verify output
@@ -51,12 +51,10 @@ If everything was correctly provided via the CLI arguments, the following should
 
 ```
 ...
-Sending the following event messages in batch:
-{"deviceId":"MyJavaDevice","messageId":0,"temperature":22.794061892854135,"humidity":37.62552699796588}
-{"deviceId":"MyJavaDevice","messageId":1,"temperature":21.53579682739172,"humidity":37.074460372012084}
-{"deviceId":"MyJavaDevice","messageId":2,"temperature":28.469394562293672,"humidity":48.85065152753948}
-{"deviceId":"MyJavaDevice","messageId":3,"temperature":27.59171413398098,"humidity":33.7627855634459}
-{"deviceId":"MyJavaDevice","messageId":4,"temperature":27.645685621530887,"humidity":49.181172831276676}
 IoT Hub responded to message d630cd17-4b84-49f1-878a-901f53ac4038 with status OK_EMPTY
+IoT Hub responded to message e45e5998-5ea1-49bd-978c-5a149e2012e8 with status OK_EMPTY
+IoT Hub responded to message f12eb242-b314-4ded-98a6-9f2229a9c2b7 with status OK_EMPTY
+IoT Hub responded to message 033cc1fd-b3fe-43a8-b05a-5e1e188d2b8c with status OK_EMPTY
+IoT Hub responded to message 1695f37f-455a-4386-a46b-57fe4e4fae44 with status OK_EMPTY
 ...
 ```

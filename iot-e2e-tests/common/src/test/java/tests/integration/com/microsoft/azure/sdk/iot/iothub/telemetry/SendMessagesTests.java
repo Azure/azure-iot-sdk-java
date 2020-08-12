@@ -78,6 +78,7 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    @ContinuousIntegrationTest
     public void sendManySmallMessagesAsBatch() throws Exception
     {
         // Only send batch messages in large quantities when using HTTPS protocol.

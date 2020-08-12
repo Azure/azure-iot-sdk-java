@@ -402,9 +402,11 @@ public class IotHubTransport implements IotHubListener
         //Codes_SRS_IOTHUBTRANSPORT_34_042: [This function shall build a transport packet from the provided message,
         // callback, and context and then add that packet to the waiting queue.]
 
-        if (message instanceof BatchMessages && !(this.iotHubTransportConnection instanceof HttpsIotHubConnection))
+        // We will get the nested messages and queue them normally if this is a batch message but the protocol is not HTTPS
+        // Currently only HTTPS is supports batch message events.
+        if (message instanceof BatchMessage && !(this.iotHubTransportConnection instanceof HttpsIotHubConnection))
         {
-            for (Message singleMessage : ((BatchMessages)message).getNestedMessages())
+            for (Message singleMessage : ((BatchMessage)message).getNestedMessages())
             {
                 this.addToWaitingQueue(new IotHubTransportPacket(singleMessage, callback, callbackContext,null, System.currentTimeMillis()));
                 log.info("Messages were queued to be sent later ({})", singleMessage);

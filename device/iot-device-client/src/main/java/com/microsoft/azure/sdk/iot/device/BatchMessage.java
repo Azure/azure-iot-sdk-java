@@ -2,7 +2,10 @@ package com.microsoft.azure.sdk.iot.device;
 
 import java.util.List;
 
-public class BatchMessages extends Message
+/**
+ * Used to construct batch messages to be sent to the IoT Hub {@link com.microsoft.azure.sdk.iot.device.InternalClient#sendEventBatchAsync(List, IotHubEventCallback, Object)}
+ */
+public class BatchMessage extends Message
 {
     /**
      * List of nested messages.
@@ -12,9 +15,9 @@ public class BatchMessages extends Message
     /**
      * Creates a batch message
      * This constructor is internal and can only be called within the com.microsoft.azure.sdk.iot.device package.
-     * @param messages
+     * @param messages The messages that will be sent as a batch
      */
-    BatchMessages(List<Message> messages)
+    BatchMessage(List<Message> messages)
     {
         this.nestedMessages = messages;
     }

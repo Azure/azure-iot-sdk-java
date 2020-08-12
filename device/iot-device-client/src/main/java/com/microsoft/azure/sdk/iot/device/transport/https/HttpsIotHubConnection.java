@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * An HTTPS connection between a device and an IoT Hub. Contains functionality
@@ -84,10 +83,10 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             // Here we check if it's a bulk message and serialize it.
             HttpsMessage httpsMessage = null;
 
-            if (message instanceof BatchMessages)
+            if (message instanceof BatchMessage)
             {
                 HttpsBatchMessage batchMessage = new HttpsBatchMessage();
-                for (Message singleMessage : ((BatchMessages)message).getNestedMessages())
+                for (Message singleMessage : ((BatchMessage)message).getNestedMessages())
                 {
                     try
                     {
