@@ -186,7 +186,7 @@ public class InternalClient
     }
 
     /**
-     * ASynchronously sends a batch of messages to the IoT Hub
+     * Asynchronously sends a batch of messages to the IoT Hub
      * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
      * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
      * Maximum payload size for HTTPS is 255KB
