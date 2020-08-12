@@ -77,7 +77,7 @@ public final class IotHubServiceSasToken
         try
         {
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
-            targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), String.valueOf(StandardCharsets.UTF_8));
+            targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), StandardCharsets.UTF_8.name());
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_003: [The constructor shall create a string to sign by concatenating the target uri and the expiry time string (one year)]
             String toSign = targetUri + "\n" + this.expiryTime;
 
