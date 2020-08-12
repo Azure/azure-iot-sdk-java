@@ -152,6 +152,9 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 this.listener.onMessageSent(transportMessage, null);
             }
 
+            // Status codes other than 200 and 204 have their errors handled in the IotHubTransport layer once this method returns,
+            // so there is no need to call "this.listener.onMessageSent(transportMessage, someException)" from this layer.
+
             return status;
         }
     }
