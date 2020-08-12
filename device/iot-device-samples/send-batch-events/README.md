@@ -57,6 +57,6 @@ Sending the following event messages in batch:
 {"deviceId":"MyJavaDevice","messageId":2,"temperature":28.469394562293672,"humidity":48.85065152753948}
 {"deviceId":"MyJavaDevice","messageId":3,"temperature":27.59171413398098,"humidity":33.7627855634459}
 {"deviceId":"MyJavaDevice","messageId":4,"temperature":27.645685621530887,"humidity":49.181172831276676}
-IoT Hub responded to message d630cd17-4b84-49f1-878a-901f53ac4038 with status OK_EMPTY
+IoT Hub responded to the batch message with status OK_EMPTY
 ...
 ```
