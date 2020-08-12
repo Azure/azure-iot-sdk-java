@@ -1,4 +1,4 @@
-# Send Event Sample
+# Send Events In Batch Sample
 
 Sample application that uses the Azure IoT Java SDK to send telemetry messages in batch to the
 Azure IoT Hub cloud service or to an Azure IoT Edge device. The sample demonstrates how to connect
