@@ -151,11 +151,6 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 //Codes_SRS_HTTPSIOTHUBCONNECTION_34_067: [If the response from the service is OK or OK_EMPTY, this function shall notify its listener that a message was sent with no exception.]
                 this.listener.onMessageSent(transportMessage, null);
             }
-            else
-            {
-                //Codes_SRS_HTTPSIOTHUBCONNECTION_34_068: [If the response from the service not OK or OK_EMPTY, this function shall notify its listener that a message was with the mapped IotHubServiceException.]
-                this.listener.onMessageSent(transportMessage, IotHubStatusCode.getConnectionStatusException(status, ""));
-            }
 
             return status;
         }
