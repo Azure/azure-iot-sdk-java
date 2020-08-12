@@ -950,7 +950,10 @@ public class IotHubTransport implements IotHubListener
             this.waitingPacketsQueue.add(this.transportPacket);
 
             // Wake up send messages thread so that it can send this message
-            this.sendThreadLock.notifyAll();
+            synchronized (this.sendThreadLock)
+            {
+                this.sendThreadLock.notifyAll();
+            }
         }
     }
 
