@@ -401,6 +401,20 @@ public class IotHubTransport implements IotHubListener
 
         //Codes_SRS_IOTHUBTRANSPORT_34_042: [This function shall build a transport packet from the provided message,
         // callback, and context and then add that packet to the waiting queue.]
+
+        // We will get the nested messages and queue them normally if this is a batch message but the protocol is not HTTPS
+        // Currently only HTTPS is supports batch message events.
+        if (message instanceof BatchMessage && !(this.iotHubTransportConnection instanceof HttpsIotHubConnection))
+        {
+            for (Message singleMessage : ((BatchMessage)message).getNestedMessages())
+            {
+                this.addToWaitingQueue(new IotHubTransportPacket(singleMessage, callback, callbackContext,null, System.currentTimeMillis()));
+                log.info("Messages were queued to be sent later ({})", singleMessage);
+            }
+
+            return;
+        }
+
         IotHubTransportPacket packet = new IotHubTransportPacket(message, callback, callbackContext, null, System.currentTimeMillis());
         this.addToWaitingQueue(packet);
 
@@ -433,6 +447,7 @@ public class IotHubTransport implements IotHubListener
         while (this.connectionStatus == IotHubConnectionStatus.CONNECTED && timeSlice-- > 0)
         {
             IotHubTransportPacket packet = waitingPacketsQueue.poll();
+
             if (packet != null)
             {
                 Message message = packet.getMessage();
@@ -935,7 +950,10 @@ public class IotHubTransport implements IotHubListener
             this.waitingPacketsQueue.add(this.transportPacket);
 
             // Wake up send messages thread so that it can send this message
-            this.sendThreadLock.notifyAll();
+            synchronized (this.sendThreadLock)
+            {
+                this.sendThreadLock.notifyAll();
+            }
         }
     }
 

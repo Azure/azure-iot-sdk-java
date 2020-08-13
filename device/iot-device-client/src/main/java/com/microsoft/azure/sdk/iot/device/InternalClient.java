@@ -16,6 +16,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOError;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -181,6 +182,34 @@ public class InternalClient
         message.setConnectionDeviceId(this.config.getDeviceId());
 
         //Codes_SRS_INTERNALCLIENT_21_010: [The sendEventAsync shall asynchronously send the message using the deviceIO connection.]
+        deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
+    }
+
+    /**
+     * Asynchronously sends a batch of messages to the IoT Hub
+     * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
+     * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
+     * Maximum payload size for HTTPS is 255KB
+     *
+     * @param messages the list of message to be sent.
+     * @param callback the callback to be invoked when a response is received.
+     * Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be
+     * {@code null} if no callback is provided.
+     *
+     * @throws IllegalArgumentException if the message provided is {@code null}.
+     * @throws IllegalStateException if the client has not been opened yet or is
+     * already closed.
+     */
+    public void sendEventBatchAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
+    {
+        for (Message message: messages)
+        {
+            message.setConnectionDeviceId(this.config.getDeviceId());
+        }
+
+        Message message = new BatchMessage(messages);
+
         deviceIO.sendEventAsync(message, callback, callbackContext, this.config.getDeviceId());
     }
 
