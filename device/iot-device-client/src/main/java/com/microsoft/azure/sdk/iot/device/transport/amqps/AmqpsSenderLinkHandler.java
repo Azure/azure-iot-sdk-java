@@ -81,7 +81,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         }
         else
         {
-            this.amqpsLinkStateCallback.onMessageAcknowledged(acknowledgedIotHubMessage, deliveryTag);
+            this.amqpsLinkStateCallback.onMessageAcknowledged(acknowledgedIotHubMessage, deliveryTag, delivery.getRemoteState());
         }
 
         delivery.free();

@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
@@ -185,7 +186,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.twinReceiverLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage);
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance());
                 this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
             }
         }
@@ -195,7 +196,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.twinSenderLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage);
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance());
                 this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
             }
         }
@@ -205,7 +206,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.methodsReceiverLinkOpened && this.explicitInProgressMethodsSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage);
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage, Accepted.getInstance());
                 this.explicitInProgressMethodsSubscriptionMessage = null; //By setting this to null, this session can handle another method subscription message
             }
         }
@@ -215,14 +216,14 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.methodsSenderLinkOpened && this.explicitInProgressMethodsSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage);
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage, Accepted.getInstance());
                 this.explicitInProgressMethodsSubscriptionMessage = null; //By setting this to null, this session can handle another method subscription message
             }
         }
     }
 
     @Override
-    public void onMessageAcknowledged(Message message, int deliveryTag)
+    public void onMessageAcknowledged(Message message, int deliveryTag, DeliveryState deliveryState)
     {
         if (this.implicitInProgressSubscriptionMessages.containsKey(deliveryTag))
         {
@@ -231,7 +232,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         }
         else
         {
-            this.amqpsSessionStateCallback.onMessageAcknowledged(message);
+            this.amqpsSessionStateCallback.onMessageAcknowledged(message, deliveryState);
         }
     }
 
@@ -304,7 +305,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
                     {
                         // No need to do anything. Method links are already opened
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message);
+                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance());
                         return true;
                     }
 
@@ -330,7 +331,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     {
                         // No need to do anything. Twin links are already opened and desired properties subscription is automatically
                         // sent once the twin links are opened.
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message);
+                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance());
                         return true;
                     }
 

@@ -3,6 +3,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 
 /**
@@ -28,8 +29,9 @@ interface AmqpsSessionStateCallback
      * Executed when a message sent in this connection was acknowledged by the service.
      *
      * @param message the message that was acknowledged.
+     * @param deliveryState state information that describes if the message was accepted by the receiver or not.
      */
-    void onMessageAcknowledged(Message message);
+    void onMessageAcknowledged(Message message, DeliveryState deliveryState);
 
     /**
      * Executed when a message was received by a session that this connection owns. This message should be acknowledged later.
