@@ -44,6 +44,7 @@ import java.util.*;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
+import static tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.QueryTwinTests.QUERY_TIMEOUT_MILLISECONDS;
 
 public class ProvisioningCommon extends IntegrationTest
 {
@@ -448,11 +449,25 @@ public class ProvisioningCommon extends IntegrationTest
         }
     }
 
-    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException
-    {
+    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
         DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString);
-        Query query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
-        assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device " + testInstance.provisionedDeviceId + "not found in expected hub", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), deviceTwin.hasNextDeviceTwin(query));
+
+        boolean deviceFoundInCorrectHub = false;
+        Query query = null;
+        long startTime = System.currentTimeMillis();
+        while (!deviceFoundInCorrectHub)
+        {
+            query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
+            deviceFoundInCorrectHub = deviceTwin.hasNextDeviceTwin(query);
+
+            Thread.sleep(3000);
+
+            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+            {
+                fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for provisioned device " + testInstance.provisionedDeviceId + " to be found in expected hub", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
+            }
+        }
+
         DeviceTwinDevice provisionedDevice = deviceTwin.getNextDeviceTwin(query);
         if (expectedDeviceCapabilities.isIotEdge())
         {
