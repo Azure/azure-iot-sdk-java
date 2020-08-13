@@ -2112,50 +2112,6 @@ public class HttpsIotHubConnectionTest
         };
     }
 
-    //Tests_SRS_HTTPSIOTHUBCONNECTION_34_068: [If the response from the service not OK or OK_EMPTY, this function shall notify its listener that a message was with the mapped IotHubServiceException.]
-    @Test
-    public void sendMessageNotifiesListenerOfIotHubServiceExceptionOnMessageSent(final @Mocked IotHubEventUri mockUri) throws TransportException
-    {
-        //arrange
-        final String iotHubHostname = "test.iothub";
-        final String deviceId = "test-device-id";
-        final String eventUri = "test-event-uri";
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = iotHubHostname;
-                mockConfig.getDeviceId();
-                result = deviceId;
-                new IotHubEventUri(iotHubHostname, deviceId, null);
-                result = mockUri;
-                mockUri.toString();
-                result = eventUri;
-
-                mockRequest.send();
-                result = mockResponse;
-
-                mockResponse.getStatus();
-                result = 404;
-            }
-        };
-
-        HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
-        conn.setListener(mockedListener);
-
-        //act
-        conn.sendMessage(mockedMessage);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedListener.onMessageSent((IotHubTransportMessage) any, (TransportException) any);
-                times = 1;
-            }
-        };
-    }
-
     //Tests_SRS_HTTPSIOTHUBCONNECTION_34_071: [This function shall return the empty string.]
     @Test
     public void getConnectionIdReturnsEmptyString()
