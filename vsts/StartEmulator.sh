@@ -20,7 +20,7 @@ $ANDROID_HOME/emulator/emulator -list-avds
 
 echo ''
 echo "Starting emulator in background thread"
-nohup $ANDROID_HOME/emulator/emulator -avd $avdName -no-snapshot > /dev/null 2>&1 &
+nohup $ANDROID_HOME/emulator/emulator -avd $avdName -gpu auto -no-snapshot > /dev/null 2>&1 &
 
 echo ''
 echo 'Waiting for emulator to boot up...'
