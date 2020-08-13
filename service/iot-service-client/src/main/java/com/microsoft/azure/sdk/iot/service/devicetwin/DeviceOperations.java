@@ -62,25 +62,26 @@ public class DeviceOperations
         /* Codes_SRS_DEVICE_OPERATIONS_21_001: [The request shall throw IllegalArgumentException if the provided `iotHubConnectionString` is null.] */
         if(iotHubConnectionString == null)
         {
-            throw new IllegalArgumentException("Null ConnectionString");
+            throw new IllegalArgumentException("Http requests must provide a non-null connection string");
         }
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_002: [The request shall throw IllegalArgumentException if the provided `url` is null.] */
         if(url == null)
         {
-            throw new IllegalArgumentException("Null URL");
+            throw new IllegalArgumentException("Http requests must provide a non-null URL");
         }
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_003: [The request shall throw IllegalArgumentException if the provided `method` is null.] */
         if(method == null)
         {
-            throw new IllegalArgumentException("Null method");
+            throw new IllegalArgumentException("Http requests must provide a non-null http method");
         }
 
         /* Codes_SRS_DEVICE_OPERATIONS_21_004: [The request shall throw IllegalArgumentException if the provided `payload` is null.] */
         if(payload == null)
         {
-            throw new IllegalArgumentException("Null payload");
+            // This is an odd requirement, but since we won't use this API since its deprecation, it will stay.
+            throw new IllegalArgumentException("Http requests must provide a non-null URL");
         }
 
         /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` exceed Integer.MAX_VALUE.] */
@@ -169,19 +170,19 @@ public class DeviceOperations
             Proxy proxy)
             throws IOException, IotHubException, IllegalArgumentException
     {
-        if (iotHubConnectionString == null)
+        if(iotHubConnectionString == null)
         {
-            throw new IllegalArgumentException("Null ConnectionString");
+            throw new IllegalArgumentException("Http requests must provide a non-null connection string");
         }
 
-        if (url == null)
+        if(url == null)
         {
-            throw new IllegalArgumentException("Null URL");
+            throw new IllegalArgumentException("Http requests must provide a non-null URL");
         }
 
-        if (method == null)
+        if(method == null)
         {
-            throw new IllegalArgumentException("Null method");
+            throw new IllegalArgumentException("Http requests must provide a non-null http method");
         }
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
