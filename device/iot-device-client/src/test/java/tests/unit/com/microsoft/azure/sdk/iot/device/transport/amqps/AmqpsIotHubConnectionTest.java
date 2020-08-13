@@ -1080,6 +1080,67 @@ public class AmqpsIotHubConnectionTest {
         Assert.assertEquals(expectedConnectionId, actualConnectionId);
     }
 
+    @Test
+    public void onMessageAcknowledgedAccepted()
+    {
+        // arrange
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+
+        new Expectations()
+        {
+            {
+                mockedIotHubListener.onMessageSent(mockIoTMessage, null);
+            }
+        };
+
+        // act
+        connection.onMessageAcknowledged(mockIoTMessage, Accepted.getInstance());
+    }
+
+    @Test
+    public void onMessageAcknowledgedReleased()
+    {
+        // arrange
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+
+        new Expectations()
+        {
+            {
+                new ProtocolException(anyString);
+                result = mockedProtocolException;
+
+                mockedProtocolException.setRetryable(true);
+
+                mockedIotHubListener.onMessageSent(mockIoTMessage, mockedProtocolException);
+            }
+        };
+
+        // act
+        connection.onMessageAcknowledged(mockIoTMessage, Released.getInstance());
+    }
+
+    @Test
+    public void onMessageAcknowledgedRejected(@Mocked final Rejected mockRejected)
+    {
+        // arrange
+        AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
+        Deencapsulation.setField(connection, "listener", mockedIotHubListener);
+
+        new Expectations()
+        {
+            {
+                mockRejected.getError();
+
+                mockedIotHubListener.onMessageSent(mockIoTMessage, (TransportException) any);
+            }
+        };
+
+        // act
+        connection.onMessageAcknowledged(mockIoTMessage, mockRejected);
+    }
+
     private void baseExpectations() throws TransportException
     {
         new NonStrictExpectations() {
