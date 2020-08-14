@@ -12,11 +12,13 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.Modified;
 import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -468,9 +470,29 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     }
 
     @Override
-    public void onMessageAcknowledged(Message message)
+    public void onMessageAcknowledged(Message message, DeliveryState deliveryState)
     {
-        this.listener.onMessageSent(message, null);
+        if (deliveryState == Accepted.getInstance())
+        {
+            this.listener.onMessageSent(message, null);
+        }
+        else if (deliveryState instanceof Rejected)
+        {
+            // The message was not accepted by the server, and the reason why is found within the nested error
+            TransportException ex = AmqpsExceptionTranslator.convertFromAmqpException(((Rejected) deliveryState).getError());
+            this.listener.onMessageSent(message, ex);
+        }
+        else if (deliveryState == Released.getInstance())
+        {
+            // As per AMQP spec, this state means the message should be re-delivered to the server at a later time
+            ProtocolException protocolException = new ProtocolException("Message was released by the amqp server");
+            protocolException.setRetryable(true);
+            this.listener.onMessageSent(message, protocolException);
+        }
+        else
+        {
+            log.warn("Unexpected delivery state for sent message ({})", message);
+        }
     }
 
     @Override

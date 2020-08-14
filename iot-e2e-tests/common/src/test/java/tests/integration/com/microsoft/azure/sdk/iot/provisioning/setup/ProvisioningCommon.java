@@ -44,6 +44,7 @@ import java.util.*;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
+import static tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.QueryTwinTests.QUERY_TIMEOUT_MILLISECONDS;
 
 public class ProvisioningCommon extends IntegrationTest
 {
@@ -119,7 +120,6 @@ public class ProvisioningCommon extends IntegrationTest
 
     protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
 
-    public ProvisioningServiceClient provisioningServiceClient = null;
     public RegistryManager registryManager = null;
 
     //sending reported properties for twin operations takes some time to get the appropriate callback
@@ -235,6 +235,7 @@ public class ProvisioningCommon extends IntegrationTest
         public String provisionedDeviceId;
         public SecurityProvider securityProvider;
         public String provisionedIotHubUri;
+        public ProvisioningServiceClient provisioningServiceClient;
 
         public ProvisioningTestInstance(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
         {
@@ -242,15 +243,14 @@ public class ProvisioningCommon extends IntegrationTest
             this.attestationType = attestationType;
             this.groupId = "";// by default, assume enrollment has no group id
             this.registrationId = "java-provisioning-test-" + this.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
+            this.provisioningServiceClient =
+                    ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
         }
     }
 
     @Before
     public void setUp() throws Exception
     {
-        provisioningServiceClient =
-                ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
-
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
@@ -264,11 +264,11 @@ public class ProvisioningCommon extends IntegrationTest
             registryManager.close();
         }
 
-        provisioningServiceClient = null;
         registryManager = null;
 
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
+            testInstance.provisioningServiceClient = null;
             try
             {
                 //TPM security provider MUST be shutdown between tests
@@ -449,11 +449,25 @@ public class ProvisioningCommon extends IntegrationTest
         }
     }
 
-    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException
-    {
+    protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
         DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString);
-        Query query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
-        assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Provisioned device " + testInstance.provisionedDeviceId + "not found in expected hub", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), deviceTwin.hasNextDeviceTwin(query));
+
+        boolean deviceFoundInCorrectHub = false;
+        Query query = null;
+        long startTime = System.currentTimeMillis();
+        while (!deviceFoundInCorrectHub)
+        {
+            query = deviceTwin.queryTwin("SELECT * FROM devices WHERE deviceId = '" + testInstance.provisionedDeviceId +"'");
+            deviceFoundInCorrectHub = deviceTwin.hasNextDeviceTwin(query);
+
+            Thread.sleep(3000);
+
+            if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+            {
+                fail(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Timed out waiting for provisioned device " + testInstance.provisionedDeviceId + " to be found in expected hub", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId));
+            }
+        }
+
         DeviceTwinDevice provisionedDevice = deviceTwin.getNextDeviceTwin(query);
         if (expectedDeviceCapabilities.isIotEdge())
         {
@@ -527,7 +541,7 @@ public class ProvisioningCommon extends IntegrationTest
                 testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
                 testInstance.enrollmentGroup.setIotHubs(iothubs);
                 testInstance.enrollmentGroup.setCapabilities(deviceCapabilities);
-                testInstance.enrollmentGroup = provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
+                testInstance.enrollmentGroup = testInstance.provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
                 Attestation attestation = testInstance.enrollmentGroup.getAttestation();
                 assertTrue(attestation instanceof SymmetricKeyAttestation);
 
@@ -588,7 +602,7 @@ public class ProvisioningCommon extends IntegrationTest
         testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);
         testInstance.individualEnrollment.setIotHubs(iothubs);
         testInstance.individualEnrollment.setInitialTwin(twinState);
-        testInstance.individualEnrollment = provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+        testInstance.individualEnrollment = testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
     }
 
     public static byte[] ComputeDerivedSymmetricKey(String masterKey, String registrationId) throws InvalidKeyException, NoSuchAlgorithmException

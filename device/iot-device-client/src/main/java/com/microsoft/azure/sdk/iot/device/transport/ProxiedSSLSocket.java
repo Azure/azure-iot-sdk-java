@@ -5,23 +5,23 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import lombok.AllArgsConstructor;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 
-import javax.net.ssl.*;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -92,17 +92,14 @@ public class ProxiedSSLSocket extends SSLSocket
         OutputStream out = tunnel.getOutputStream();
         String hostWithPort = host + ":" + port;
 
-        String proxyConnectMessage;
+        String proxyConnectMessage = String.format("CONNECT %s %s\r\nHost: %s\r\nUser-Agent: %s\r\n", hostWithPort, HTTP_VERSION_1_1, hostWithPort, TransportUtils.USER_AGENT_STRING);
         if (this.proxyUsername != null && this.proxyPassword != null)
         {
             String base64EncodedCredentials = new String(Base64.encodeBase64(String.format("%s:%s", this.proxyUsername, new String(this.proxyPassword)).getBytes(byteEncoding)));
-            proxyConnectMessage = String.format("CONNECT %s %s\r\nHost: %s\r\nProxy-Authorization: Basic %s\r\n\r\n", hostWithPort, HTTP_VERSION_1_1, hostWithPort, base64EncodedCredentials);
-        }
-        else
-        {
-            proxyConnectMessage = String.format("CONNECT %s %s\r\nHost: %s\r\n\r\n", hostWithPort, HTTP_VERSION_1_1, hostWithPort);
+            proxyConnectMessage += String.format("Proxy-Authorization: Basic %s\r\n", base64EncodedCredentials, TransportUtils.USER_AGENT_STRING);
         }
 
+        proxyConnectMessage += "\r\n";
 
         byte[] proxyConnectBytes = proxyConnectMessage.getBytes(byteEncoding);
 

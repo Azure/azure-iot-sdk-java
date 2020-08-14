@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
 
@@ -121,7 +122,7 @@ public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStat
     }
 
     @Override
-    public void onMessageAcknowledged(Message message, int deliveryTag)
+    public void onMessageAcknowledged(Message message, int deliveryTag, DeliveryState deliveryState)
     {
         // Do nothing. Users of this SDK don't care about this ack, and the SDK doesn't open any links or sessions
         // upon receiving this ack. The CBS receiver link receives a message with the actual status of the authentication.

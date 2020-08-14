@@ -2,6 +2,7 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.BaseHandler;
 
@@ -23,8 +24,9 @@ public interface AmqpsLinkStateCallback
      *
      * @param message     the message that was sent
      * @param deliveryTag the integer that identifies which delivery this acknowledgement was tied to
+     * @param deliveryState state information that describes if the message was accepted by the receiver or not.
      */
-    void onMessageAcknowledged(Message message, int deliveryTag);
+    void onMessageAcknowledged(Message message, int deliveryTag, DeliveryState deliveryState);
 
     /**
      * Executed when a message is received by a link in this session. This message should be acknowledged later.
