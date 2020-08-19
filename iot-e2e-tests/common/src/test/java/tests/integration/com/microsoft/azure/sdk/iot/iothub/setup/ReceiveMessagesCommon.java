@@ -214,7 +214,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
             try
             {
                 this.client.closeNow();
-                registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
+                this.registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
+                this.serviceClient.close();
             }
             catch (Exception e)
             {
