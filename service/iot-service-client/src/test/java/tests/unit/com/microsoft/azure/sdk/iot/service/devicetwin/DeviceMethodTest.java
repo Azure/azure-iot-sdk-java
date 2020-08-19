@@ -18,6 +18,7 @@ import mockit.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
@@ -427,7 +428,9 @@ public class DeviceMethodTest
                     HttpMethod method,
                     byte[] payload,
                     String requestId,
-                    long timeoutInMs)
+                    int httpConnectTimeout,
+                    int httpReadTimeout,
+                    Proxy proxy)
                     throws IOException, IotHubException, IllegalArgumentException
             {
                 throw new IotHubException();

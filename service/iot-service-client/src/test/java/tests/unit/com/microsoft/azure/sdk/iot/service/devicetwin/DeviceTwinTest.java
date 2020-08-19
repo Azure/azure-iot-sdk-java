@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.*;
 
@@ -765,7 +766,10 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        final int connectTimeout = 1234;
+        final int readTimeout = 5678;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
+
 
         new Expectations()
         {
@@ -782,7 +786,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, any, any, HttpMethod.POST, connectTimeout, readTimeout, any);
                 times = 1;
             }
         };
@@ -839,14 +843,17 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        final int connectTimeout = 1234;
+        final int readTimeout = 5678;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
+
 
         new NonStrictExpectations()
         {
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, any, any, HttpMethod.POST, connectTimeout, readTimeout, any);
                 result = new IotHubException();
             }
         };
@@ -862,7 +869,9 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        final int connectTimeout = 1234;
+        final int readTimeout = 5678;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
 
         new NonStrictExpectations()
         {
@@ -883,7 +892,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, any, any, HttpMethod.POST, connectTimeout, readTimeout, any);
                 times = 1;
             }
         };
@@ -944,7 +953,9 @@ public class DeviceTwinTest
         final Integer version = 15;
         final String etag = "validEtag";
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        final int connectTimeout = 1234;
+        final int readTimeout = 5678;
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
         final String expectedString = "testJsonAsNext";
         TwinCollection tags = new TwinCollection();
         tags.putFinal("tagsKey", "tagsValue");
@@ -990,7 +1001,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, any, any, HttpMethod.POST, connectTimeout, readTimeout, any);
                 times = 1;
             }
         };
@@ -1017,8 +1028,10 @@ public class DeviceTwinTest
         final String expectedModuleId = "someModuleId";
         final Integer version = 15;
         final String etag = "validEtag";
-        final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        final int connectTimeout = 1234;
+        final int readTimeout = 5678;
+        final String connectionString = "someConnectionString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
         final String expectedString = "testJsonAsNext";
         TwinCollection tags = new TwinCollection();
         tags.putFinal("tagsKey", "tagsValue");
@@ -1066,7 +1079,7 @@ public class DeviceTwinTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
+                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, any, any, HttpMethod.POST, connectTimeout, readTimeout, any);
                 times = 1;
             }
         };
@@ -1379,6 +1392,10 @@ public class DeviceTwinTest
         //arrange
         String expectedSqlQuery = "some query";
         int expectedPageSize = 23;
+        final int connectTimeout = 1234;
+        final int readTimeout = 5678;
+        final String connectionString = "someConnectionString";
+        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
 
         new StrictExpectations()
         {
@@ -1386,16 +1403,15 @@ public class DeviceTwinTest
                 //returning mock URL seems to break this test for some reason
                 mockedConnectionString.getUrlTwinQuery();
                 result = null;
-                Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, long.class}, expectedSqlQuery, expectedPageSize, QueryType.TWIN, mockedConnectionString, null, HttpMethod.POST, 0);
+                Deencapsulation.newInstance(QueryCollection.class, new Class[] {String.class, int.class, QueryType.class, IotHubConnectionString.class, URL.class, HttpMethod.class, int.class, int.class, Proxy.class}, expectedSqlQuery, expectedPageSize, QueryType.TWIN, mockedConnectionString, null, HttpMethod.POST, connectTimeout, readTimeout, null);
                 result = mockQueryCollection;
             }
         };
 
-        DeviceTwin deviceTwin = new DeviceTwin();
-        Deencapsulation.setField(deviceTwin, "iotHubConnectionString", mockedConnectionString);
+        Deencapsulation.setField(testTwin, "iotHubConnectionString", mockedConnectionString);
 
         //act
-        deviceTwin.queryTwinCollection(expectedSqlQuery, expectedPageSize);
+        testTwin.queryTwinCollection(expectedSqlQuery, expectedPageSize);
     }
 
     //Tests_SRS_DEVICETWIN_34_075: [This function shall call next(deviceTwinQueryCollection, queryOptions) where queryOptions has the deviceTwinQueryCollection's current page size.]
