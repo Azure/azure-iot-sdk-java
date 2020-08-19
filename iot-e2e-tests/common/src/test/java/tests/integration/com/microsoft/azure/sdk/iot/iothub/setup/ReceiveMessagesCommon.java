@@ -46,15 +46,10 @@ public class ReceiveMessagesCommon extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
         messageProperties.put("name2", "value2");
         messageProperties.put("name3", "value3");
-
-        serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
-        serviceClient.open();
 
         List inputs = new ArrayList();
         inputs.addAll(Arrays.asList(
@@ -103,9 +98,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
     protected static final int MAX_COMMANDS_TO_SEND = 5; // maximum commands to be sent in a loop
 
     protected static String iotHubConnectionString = "";
-    protected static RegistryManager registryManager;
-
-    protected static ServiceClient serviceClient;
 
     // How much to wait until receiving a message from the server, in milliseconds
     protected static final int RECEIVE_TIMEOUT_MILLISECONDS = 3 * 60 * 1000; // 3 minutes
@@ -121,22 +113,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
         this.testInstance = new ReceiveMessagesTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    @BeforeClass
-    public static void classSetup()
-    {
-        try
-        {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-            serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
-            serviceClient.open();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception occurred");
-        }
-    }
-
     public class ReceiveMessagesTestInstance
     {
         public InternalClient client;
@@ -147,6 +123,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
         public String publicKeyCert;
         public String privateKey;
         public String x509Thumbprint;
+        public RegistryManager registryManager;
+        public ServiceClient serviceClient;
 
         public ReceiveMessagesTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
         {
@@ -156,6 +134,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
+            this.registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         }
 
         public void setup() throws Exception
@@ -225,6 +205,8 @@ public class ReceiveMessagesCommon extends IntegrationTest
                     throw new Exception("Test code has not been written for this path yet");
                 }
             }
+
+            testInstance.serviceClient.open();
         }
 
         public void dispose()
@@ -340,7 +322,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         serviceMessage.setCorrelationId(expectedCorrelationId);
         serviceMessage.setMessageId(expectedMessageId);
         serviceMessage.setProperties(messageProperties);
-        serviceClient.send(deviceId, serviceMessage);
+        testInstance.serviceClient.send(deviceId, serviceMessage);
     }
 
     protected void sendMessageToModule(String deviceId, String moduleId, String protocolName) throws IotHubException, IOException
@@ -350,7 +332,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         serviceMessage.setCorrelationId(expectedCorrelationId);
         serviceMessage.setMessageId(expectedMessageId);
         serviceMessage.setProperties(messageProperties);
-        serviceClient.send(deviceId, moduleId, serviceMessage);
+        testInstance.serviceClient.send(deviceId, moduleId, serviceMessage);
     }
 
     protected void waitForMessageToBeReceived(Success messageReceived, String protocolName)

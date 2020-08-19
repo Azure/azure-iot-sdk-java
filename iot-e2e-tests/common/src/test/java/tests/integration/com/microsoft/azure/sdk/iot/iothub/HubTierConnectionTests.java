@@ -5,10 +5,8 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions.RegistryManagerOptionsBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -16,6 +14,7 @@ import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.BasicTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
@@ -74,7 +73,7 @@ public class HubTierConnectionTests extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-tier-connection-e2e-test".concat("-" + uuid);
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
@@ -116,7 +115,7 @@ public class HubTierConnectionTests extends IntegrationTest
     {
         try
         {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         }
         catch (IOException e)
         {

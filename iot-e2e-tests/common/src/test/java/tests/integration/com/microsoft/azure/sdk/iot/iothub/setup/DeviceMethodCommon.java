@@ -9,12 +9,10 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.BaseDevice;
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.Module;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.TestCase;
@@ -24,6 +22,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -59,8 +58,6 @@ public class DeviceMethodCommon extends IntegrationTest
 
     protected static String iotHubConnectionString = "";
 
-    protected static RegistryManager registryManager;
-
     protected static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     protected static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
     protected static final String PAYLOAD_STRING = "This is a valid payload";
@@ -82,7 +79,6 @@ public class DeviceMethodCommon extends IntegrationTest
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
         Collection<Object[]> inputs = new ArrayList<>();
 
         for (ClientType clientType : ClientType.values())
@@ -140,6 +136,7 @@ public class DeviceMethodCommon extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
         public DeviceMethod methodServiceClient;
+        public RegistryManager registryManager;
 
         protected DeviceMethodTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
         {
@@ -149,7 +146,8 @@ public class DeviceMethodCommon extends IntegrationTest
             this.publicKeyCert = publicKeyCert;
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
-            this.methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+            this.methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         }
 
         public void setup() throws Exception {
@@ -242,20 +240,6 @@ public class DeviceMethodCommon extends IntegrationTest
         }
     }
 
-    @BeforeClass
-    public static void classSetup()
-    {
-        try
-        {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            TestCase.fail("Unexpected exception encountered");
-        }
-    }
-
     public void openDeviceClientAndSubscribeToMethods() throws Exception
     {
         testInstance.setup();
@@ -343,12 +327,6 @@ public class DeviceMethodCommon extends IntegrationTest
         }
     }
 
-    @AfterClass
-    public static void tearDownClass()
-    {
-        registryManager.close();
-    }
-
     protected void setConnectionStatusCallBack(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
 
@@ -391,6 +369,6 @@ public class DeviceMethodCommon extends IntegrationTest
 
     protected String getModuleConnectionString(Module module) throws IotHubException, IOException
     {
-        return DeviceConnectionString.get(iotHubConnectionString, registryManager.getDevice(module.getDeviceId()), module);
+        return DeviceConnectionString.get(iotHubConnectionString, testInstance.registryManager.getDevice(module.getDeviceId()), module);
     }
 }

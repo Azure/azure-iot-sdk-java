@@ -36,8 +36,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
@@ -75,7 +74,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
             RunnableInvoke runnableInvoke;
             // Create one methodServiceClient per thread since each method service client only allows one method invoke
             // at a time. This limitation exists because the invokeMethod method is synchronized with itself
-            DeviceMethod methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+            DeviceMethod methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             if (testInstance.identity instanceof Module)
             {
                 runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(),"Thread" + i, cdl);
@@ -340,7 +339,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         Assert.assertEquals(buildExceptionMessage("Unexpected status errors occurred", testInstance.deviceTestManager.client), 0, deviceTestManger.getStatusError());
     }
 
-    @Test (expected = IotHubGatewayTimeoutException.class)
+    @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
     public void invokeMethodResponseTimeoutFailed() throws Exception
@@ -349,29 +348,50 @@ public class DeviceMethodTests extends DeviceMethodCommon
         this.openDeviceClientAndSubscribeToMethods();
 
         // Act
-        if (testInstance.identity instanceof Module)
+        boolean expectedExceptionCaught = false;
+        try
         {
-            testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+            if (testInstance.identity instanceof Module)
+            {
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+            }
+            else
+            {
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+            }
         }
-        else
+        catch (IotHubGatewayTimeoutException e)
         {
-            testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+            expectedExceptionCaught = true;
         }
+
+        assertTrue(buildExceptionMessage("Iot Hub did not throw the expected gateway timeout exception", testInstance.deviceTestManager.client), expectedExceptionCaught);
     }
 
-    @Test(expected = IotHubNotFoundException.class)
+    @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
     public void invokeMethodUnknownDeviceFailed() throws Exception
     {
-        if (testInstance.identity instanceof Module)
+        // Act
+        boolean expectedExceptionCaught = false;
+        try
         {
-            testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "someModuleThatDoesNotExistOnADeviceThatDoesExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            if (testInstance.identity instanceof Module)
+            {
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "someModuleThatDoesNotExistOnADeviceThatDoesExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            }
+            else
+            {
+                testInstance.methodServiceClient.invoke("someDeviceThatDoesNotExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            }
         }
-        else
+        catch (IotHubNotFoundException e)
         {
-            testInstance.methodServiceClient.invoke("someDeviceThatDoesNotExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            expectedExceptionCaught = true;
         }
+
+        assertTrue("Iot Hub did not throw the expected not found exception", expectedExceptionCaught);
     }
 
     @Test
@@ -394,7 +414,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
             else
             {
                 testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
-                deviceTestManger.restartDevice(registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
+                deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
             }
 
             Assert.fail(buildExceptionMessage("Reset identity do not affect the method invoke on the service", testInstance.deviceTestManager.client));
@@ -410,7 +430,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         }
         else
         {
-            deviceTestManger.restartDevice(registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
+            deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
         }
     }
 
@@ -512,7 +532,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
             Proxy serviceSideProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
 
             ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
-            DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().proxyOptions(proxyOptions).build();
+            DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().proxyOptions(proxyOptions).httpReadTimeout(HTTP_READ_TIMEOUT).build();
 
             this.testInstance.methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, options);
 

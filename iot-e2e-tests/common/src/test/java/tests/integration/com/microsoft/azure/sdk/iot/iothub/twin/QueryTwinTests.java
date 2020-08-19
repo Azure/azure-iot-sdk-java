@@ -416,7 +416,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     public void queryCollectionCanReturnEmptyQueryResults() throws IOException, IotHubException
     {
         String fullQuery = "select * from devices where deviceId='nonexistantdevice'";
-        DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         QueryCollection twinQuery = twinClient.queryTwinCollection(fullQuery);
         QueryOptions options = new QueryOptions();
         QueryCollectionResponse<DeviceTwinDevice> response = twinClient.next(twinQuery, options);

@@ -106,11 +106,11 @@ public class TransportClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
 
-        methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+        methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         return Arrays.asList(
                 new Object[][]
@@ -152,7 +152,7 @@ public class TransportClientTests extends IntegrationTest
             fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
             Assert.assertNotNull(fileUploadNotificationReceiver);
 
-            deviceTwinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+            deviceTwinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
             String uuid = UUID.randomUUID().toString();
 

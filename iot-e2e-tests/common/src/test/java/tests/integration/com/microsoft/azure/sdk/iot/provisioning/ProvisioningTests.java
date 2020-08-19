@@ -22,7 +22,9 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.ReprovisionPolic
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -349,11 +351,11 @@ public class ProvisioningTests extends ProvisioningCommon
             DeviceTwin twinClient;
             if (inFarAwayHub)
             {
-                twinClient = DeviceTwin.createFromConnectionString(farAwayIotHubConnectionString);
+                twinClient = DeviceTwin.createFromConnectionString(farAwayIotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
             else
             {
-                twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+                twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
 
             DeviceTwinDevice device = new DeviceTwinDevice(testInstance.provisionedDeviceId);
@@ -388,7 +390,7 @@ public class ProvisioningTests extends ProvisioningCommon
         {
             //delete provisioned device
             RegistryManager registryManagerFarAway = RegistryManager.createFromConnectionString(farAwayIotHubConnectionString);
-            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
             if (deviceId != null && !deviceId.isEmpty())
             {
