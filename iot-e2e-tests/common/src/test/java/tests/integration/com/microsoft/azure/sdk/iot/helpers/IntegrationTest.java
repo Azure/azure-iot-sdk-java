@@ -53,6 +53,9 @@ public abstract class IntegrationTest
     @Rule
     public FlakeyTestRule flakeyTestRule = new FlakeyTestRule();
 
+    @Rule
+    public ThrottleResistantTestRule throttleResistantTestRule = new ThrottleResistantTestRule();
+
     int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
 
     // Each test must finish in under 5 minutes. Only the token renewal test should last longer,
@@ -67,4 +70,6 @@ public abstract class IntegrationTest
     public static boolean runIotHubTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_IOTHUB_TESTS", "true"));
     public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
 
+    // Infinite read timeout for all http operations
+    public static int HTTP_READ_TIMEOUT = 0;
 }

@@ -14,11 +14,9 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQuery;
+import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -428,9 +426,9 @@ public class DeviceTwinCommon extends IntegrationTest
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
             this.clientType = clientType;
-            this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+            this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             rawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
         }
     }

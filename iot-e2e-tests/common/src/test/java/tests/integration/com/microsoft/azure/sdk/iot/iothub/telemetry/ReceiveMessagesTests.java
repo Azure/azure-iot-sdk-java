@@ -143,12 +143,12 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
             CompletableFuture<Void> future;
             if (testInstance.client instanceof DeviceClient)
             {
-                future = serviceClient.sendAsync(testInstance.identity.getDeviceId(), serviceMessage);
+                future = testInstance.serviceClient.sendAsync(testInstance.identity.getDeviceId(), serviceMessage);
                 futureList.add(future);
             }
             else if (testInstance.client instanceof ModuleClient)
             {
-                serviceClient.send(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), serviceMessage);
+                testInstance.serviceClient.send(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), serviceMessage);
             }
         }
 
