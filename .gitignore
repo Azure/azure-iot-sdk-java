@@ -192,6 +192,7 @@ java/**/target/
 java/**/*.iml
 java/**/*dependency-reduced-pom.xml
 java/**/*.crt
+.flattened-pom.xml
 
 # VS Code stuff
 **/typings/**
@@ -208,3 +209,28 @@ java/service/doc/api_reference
 *.class
 target
 *.iml
+*.project
+*.classpath
+*.prefs
+provisioning/provisioning-tools/tpm-simulator/NVChip
+
+# vertx log files (for Edge E2E wrapper)
+.vertx
+vertx.log.lck
+
+
+# =========================
+# Android environment variable config
+# =========================
+
+*.properties
+**/gradlew*
+**/.gradle
+**/build
+
+# =========================
+# Samples logging config
+# =========================
+
+#Whitelist, will allow changes to log4j.properties files to be tracked via source control
+!log4j.properties
