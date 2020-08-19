@@ -28,7 +28,7 @@ public class PnpHelper {
 
     /**
      * Create a plug and play compatible telemetry message.
-     * @param telemetryName The name of the telemetry, as defined in the DTDL interface. Must be 64 characters or less. For more details refer <see href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry"
+     * @param telemetryName The name of the telemetry, as defined in the DTDL interface. Must be 64 characters or less. For more details see <a href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry">this documentation</a>
      * @param telemetryValue The telemetry payload, in the format defined in the DTDL interface.
      * @return A plug and play compatible telemetry message, which can be sent to IoT Hub.
      */
@@ -38,7 +38,7 @@ public class PnpHelper {
 
     /**
      * Create a plug and play compatible telemetry message.
-     * @param telemetryName The name of the telemetry, as defined in the DTDL interface. Must be 64 characters or less. For more details refer <see href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry"
+     * @param telemetryName The name of the telemetry, as defined in the DTDL interface. Must be 64 characters or less. For more details see <a href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry">this documentation</a>
      * @param telemetryValue The telemetry payload, in the format defined in the DTDL interface.
      * @param componentName (optional) The name of the component in which the telemetry is defined. Can be null for telemetry defined under the root interface.
      * @return A plug and play compatible telemetry message, which can be sent to IoT Hub.
