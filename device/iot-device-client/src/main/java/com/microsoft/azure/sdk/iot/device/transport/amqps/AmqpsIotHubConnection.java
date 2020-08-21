@@ -702,7 +702,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             executorService = Executors.newFixedThreadPool(1);
         }
 
-        ReactorRunner reactorRunner = new ReactorRunner(new IotHubReactor(createReactor()), this.listener, this.connectionId);
+        this.reactor = createReactor();
+        ReactorRunner reactorRunner = new ReactorRunner(new IotHubReactor(this.reactor), this.listener, this.connectionId);
         executorService.submit(reactorRunner);
     }
 
