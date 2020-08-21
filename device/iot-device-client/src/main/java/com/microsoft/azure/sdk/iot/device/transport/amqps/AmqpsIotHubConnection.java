@@ -83,6 +83,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     // Proton-j primitives and wrappers for the device and authentication sessions
     private Connection connection;
+    private Reactor reactor;
     private ArrayList<AmqpsSessionHandler> sessionHandlerList = new ArrayList<>();
     private ArrayList<AmqpsSasTokenRenewalHandler> sasTokenRenwalHandlerList = new ArrayList<>();
     private AmqpsCbsSessionHandler amqpsCbsSessionHandler;
@@ -193,7 +194,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onReactorInit(Event event)
     {
-        Reactor reactor = event.getReactor();
+        this.reactor = event.getReactor();
 
         String hostName = this.hostName;
         int port = AMQP_PORT;
@@ -212,8 +213,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
         }
 
-        reactor.connectionToHost(hostName, port, this);
-        reactor.schedule(SEND_MESSAGES_PERIOD_MILLIS, this);
+        this.reactor.connectionToHost(hostName, port, this);
+        this.reactor.schedule(SEND_MESSAGES_PERIOD_MILLIS, this);
     }
 
     @Override
@@ -709,13 +710,32 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         log.trace("OpenAsync called for amqp connection");
 
-        if (this.connection.getLocalState() == EndpointState.CLOSED && this.connection.getRemoteState() == EndpointState.CLOSED)
+        // This may be called before a connection or reactor have been established, so need to check the state
+        if (this.connection == null && this.reactor == null) {
+            // If both the connection and reactor were never initialized, then just release the latches to signal the end of the connection closing
+            releaseLatch(authenticationSessionOpenedLatch);
+            releaseLatch(deviceSessionsOpenedLatch);
+            releaseLatch(closeReactorLatch);
+        }
+        else if (this.connection == null)
+        {
+            // If only the reactor was initialized, then just stop the reactor. OnReactorFinal will release the latches to signal the end of the connection closing
+            this.reactor.stop();
+        }
+        else if (this.reactor == null)
+        {
+            // This should never happen as this block is only hit when the connection was initialized but its reactor was not
+            log.warn("Connection was initialized without a reactor, connection is in an unknown state; closing connection anyways.");
+            this.connection.close();
+        }
+        else if (this.connection.getLocalState() == EndpointState.CLOSED && this.connection.getRemoteState() == EndpointState.CLOSED)
         {
             log.trace("Closing amqp reactor since the connection was already closed");
             this.connection.getReactor().stop();
         }
         else
         {
+            //client is initializing this close, so don't shut down the reactor yet
             log.trace("Closing amqp connection");
             this.connection.close();
         }
