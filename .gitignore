@@ -234,3 +234,5 @@ vertx.log.lck
 
 #Whitelist, will allow changes to log4j.properties files to be tracked via source control
 !log4j.properties
+
+apidocs
