@@ -234,3 +234,7 @@ vertx.log.lck
 
 #Whitelist, will allow changes to log4j.properties files to be tracked via source control
 !log4j.properties
+
+javadoc-options-javadoc-resources.xml
+iot-e2e-tests
+.flattened-pom.xml
