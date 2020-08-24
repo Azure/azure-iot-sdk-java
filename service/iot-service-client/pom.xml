@@ -128,6 +128,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <!--This configures the "mvn javadoc:javadoc" created artifacts are outputted to <reportOutputDirectory>/<destDir>-->
+                    <reportOutputDirectory>${session.executionRootDirectory}/apidocs</reportOutputDirectory>
+                    <destDir>service</destDir>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
