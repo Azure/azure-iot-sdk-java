@@ -5,9 +5,11 @@ package com.microsoft.azure.sdk.iot.provisioning.service;
 
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
-import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
-import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientServiceException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ public class IndividualEnrollmentManager
     private static final String PATH_SEPARATOR = "/";
     private static final String PATH_ENROLLMENTS = "enrollments";
     private static final String CONDITION_KEY = "If-Match";
+    private static final String ATTESTATION_MECHANISM = "attestationmechanism";
 
     /**
      * PRIVATE CONSTRUCTOR
@@ -206,6 +209,26 @@ public class IndividualEnrollmentManager
         return new IndividualEnrollment(new String(body));
     }
 
+    AttestationMechanism getAttestationMechanism(String registrationId) throws ProvisioningServiceClientException
+    {
+        if(Tools.isNullOrEmpty(registrationId))
+        {
+            throw new IllegalArgumentException("registrationId cannot be null or empty.");
+        }
+
+        String enrollmentAttestationMechanismPath = IndividualEnrollmentManager.getEnrollmentAttestationMechanismPath(registrationId);
+        String payload = "{}";
+        HttpResponse httpResponse = contractApiHttp.request(HttpMethod.POST, enrollmentAttestationMechanismPath, null, payload);
+
+        byte[] body = httpResponse.getBody();
+        if (body == null)
+        {
+            throw new ProvisioningServiceClientServiceException("Unexpected empty body received from service");
+        }
+
+        return new AttestationMechanism(new String(body));
+    }
+
     /**
      * Delete individualEnrollment.
      *
@@ -319,6 +342,11 @@ public class IndividualEnrollmentManager
     private static String getEnrollmentPath(String registrationId)
     {
         return PATH_ENROLLMENTS + PATH_SEPARATOR + registrationId;
+    }
+
+    private static String getEnrollmentAttestationMechanismPath(String registrationId)
+    {
+        return PATH_ENROLLMENTS + PATH_SEPARATOR + registrationId + PATH_SEPARATOR + ATTESTATION_MECHANISM;
     }
 
     private static String getEnrollmentsPath()
