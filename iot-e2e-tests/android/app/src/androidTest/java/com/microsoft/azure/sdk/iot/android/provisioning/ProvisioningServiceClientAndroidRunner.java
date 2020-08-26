@@ -15,5 +15,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.provisioning.ProvisioningSe
 @TestGroup1
 public class ProvisioningServiceClientAndroidRunner extends ProvisioningServiceClientTests
 {
-
+    // Intentionally empty class. The important part of this file is that the class inherits tests
+    // from ProvisioningServiceClientTests and is assigned to a test group.
 }
