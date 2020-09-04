@@ -108,7 +108,7 @@ public class FileUploadSimpleSample
                 FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false);
                 client.completeFileUploadAsync(completionNotification);
 
-                System.out.println("Successfully notified IoT Hub that the SAS URI can be freed, and that the file upload was a failure.");
+                System.out.println("Notified IoT Hub that the SAS URI can be freed and that the file upload was a failure.");
 
                 client.closeNow();
                 return;
