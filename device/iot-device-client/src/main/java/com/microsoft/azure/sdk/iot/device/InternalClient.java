@@ -33,6 +33,8 @@ public class InternalClient
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
+    static final String SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = "SetAmqpOpenAuthenticationSessionTimeout";
+    static final String SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = "SetAmqpOpenDeviceSessionsTimeout";
 
     static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
     static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
@@ -870,6 +872,51 @@ public class InternalClient
                         throw new IOError(e);
                     }
                 }
+            }
+        }
+    }
+
+    void setOption_SetAmqpOpenAuthenticationSessionTimeout(Object value)
+    {
+        if (value != null)
+        {
+            if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
+            {
+                throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using protocol " + this.config.getProtocol());
+            }
+
+            if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+            {
+                throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
+            }
+
+            if (value instanceof Integer)
+            {
+                this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
+            }
+            else
+            {
+                throw new IllegalArgumentException("value is not int = " + value);
+            }
+        }
+    }
+
+    void setOption_SetAmqpOpenDeviceSessionsTimeout(Object value)
+    {
+        if (value != null)
+        {
+            if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
+            {
+                throw new UnsupportedOperationException("Cannot set the open device session timeout when using protocol " + this.config.getProtocol());
+            }
+
+            if (value instanceof Integer)
+            {
+                this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
+            }
+            else
+            {
+                throw new IllegalArgumentException("value is not int = " + value);
             }
         }
     }
