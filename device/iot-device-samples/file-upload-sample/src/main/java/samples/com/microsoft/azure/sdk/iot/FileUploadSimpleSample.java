@@ -3,10 +3,14 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,8 +62,6 @@ public class FileUploadSimpleSample
         IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
         System.out.println("Successfully read input parameters.");
-        System.out.format("Using communication protocol %s.\n",
-                protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
 
@@ -67,20 +69,57 @@ public class FileUploadSimpleSample
 
         try
         {
-
             File file = new File(fullFileName);
-            if(file.isDirectory())
+            if (file.isDirectory())
             {
                 throw new IllegalArgumentException(fullFileName + " is a directory, please provide a single file name, or use the FileUploadSample to upload directories.");
             }
-            else
+
+            System.out.println("Retrieving SAS URI from IoT Hub...");
+            FileUploadSasUriResponse sasUriResponse = client.getFileUploadSasUri(new FileUploadSasUriRequest(file.getName()));
+
+            System.out.println("Successfully got SAS URI from IoT Hub");
+            System.out.println("Correlation Id: " + sasUriResponse.getCorrelationId());
+            System.out.println("Container name: " + sasUriResponse.getContainerName());
+            System.out.println("Blob name: " + sasUriResponse.getBlobName());
+            System.out.println("Blob Uri: " + sasUriResponse.getBlobUri());
+
+            System.out.println("Using the Azure Storage SDK to upload file to Azure Storage...");
+
+            try (FileInputStream fileInputStream = new FileInputStream(file))
             {
-                client.uploadToBlobAsync(file.getName(), new FileInputStream(file), file.length(), new FileUploadStatusCallBack(), null);
+                // Note that other versions of the Azure Storage SDK can be used here instead. The latest can be found here:
+                // https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/storage#azure-storage-sdk-client-library-for-java
+                CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
+                blob.upload(fileInputStream, file.length());
+            }
+            catch (Exception e)
+            {
+                System.out.println("Exception encountered while uploading file to blob: " + e.getMessage());
+
+                System.out.println("Failed to upload file to Azure Storage.");
+
+                System.out.println("Notifying IoT Hub that the SAS URI can be freed and that the file upload failed.");
+
+                // Note that this is done even when the file upload fails. IoT Hub has a fixed number of SAS URIs allowed active
+                // at any given time. Once you are done with the file upload, you should free your SAS URI so that other
+                // SAS URIs can be generated. If a SAS URI is not freed through this API, then it will free itself eventually
+                // based on how long SAS URIs are configured to live on your IoT Hub.
+                FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false);
+                client.completeFileUploadAsync(completionNotification);
+
+                System.out.println("Successfully notified IoT Hub that the SAS URI can be freed, and that the file upload was a failure.");
+
+                client.closeNow();
+                return;
             }
 
-            System.out.println("File upload started with success");
+            System.out.println("Successfully uploaded file to Azure Storage.");
 
-            System.out.println("Waiting for file upload callback with the status...");
+            System.out.println("Notifying IoT Hub that the SAS URI can be freed and that the file upload was a success.");
+            FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true);
+            client.completeFileUploadAsync(completionNotification);
+            System.out.println("Successfully notified IoT Hub that the SAS URI can be freed, and that the file upload was a success");
         }
         catch (Exception e)
         {
@@ -95,13 +134,5 @@ public class FileUploadSimpleSample
         scanner.nextLine();
         System.out.println("Shutting down...");
         client.closeNow();
-    }
-
-    protected static class FileUploadStatusCallBack implements IotHubEventCallback
-    {
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            System.out.println("IoT Hub responded to file upload operation with status " + status.name());
-        }
     }
 }
