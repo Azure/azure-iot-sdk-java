@@ -106,7 +106,7 @@ public class FileUploadSimpleSample
                 // SAS URIs can be generated. If a SAS URI is not freed through this API, then it will free itself eventually
                 // based on how long SAS URIs are configured to live on your IoT Hub.
                 FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false);
-                client.completeFileUploadAsync(completionNotification);
+                client.completeFileUpload(completionNotification);
 
                 System.out.println("Notified IoT Hub that the SAS URI can be freed and that the file upload was a failure.");
 
@@ -118,7 +118,7 @@ public class FileUploadSimpleSample
 
             System.out.println("Notifying IoT Hub that the SAS URI can be freed and that the file upload was a success.");
             FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true);
-            client.completeFileUploadAsync(completionNotification);
+            client.completeFileUpload(completionNotification);
             System.out.println("Successfully notified IoT Hub that the SAS URI can be freed, and that the file upload was a success");
         }
         catch (Exception e)

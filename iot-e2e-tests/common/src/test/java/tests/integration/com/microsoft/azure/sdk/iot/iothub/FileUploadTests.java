@@ -343,7 +343,7 @@ public class FileUploadTests extends IntegrationTest
         fileUploadCompletionNotification.setSuccess(true);
         fileUploadCompletionNotification.setStatusDescription("Succeed to upload to storage.");
 
-        deviceClient.completeFileUploadAsync(fileUploadCompletionNotification);
+        deviceClient.completeFileUpload(fileUploadCompletionNotification);
 
         // assert
         assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
