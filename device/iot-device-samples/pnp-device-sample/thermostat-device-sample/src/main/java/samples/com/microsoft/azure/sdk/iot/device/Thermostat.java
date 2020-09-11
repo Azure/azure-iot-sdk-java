@@ -7,6 +7,10 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.provisioning.device.*;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -17,9 +21,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Slf4j
@@ -40,6 +41,17 @@ public class Thermostat {
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
     private static final String MODEL_ID = "dtmi:com:example:Thermostat;1";
 
+    // Environmental variables for Dps
+    
+    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
+    private static final String scopeId = System.getenv("IOTHUB_DEVICE_DPS_ID_SCOPE");
+    private static final String globalEndpoint = System.getenv("IOTHUB_DEVICE_DPS_ENDPOINT");
+    private static final String deviceSymmetricKey = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_KEY");
+    private static final String registrationId = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_ID");
+
+    private static final ProvisioningDeviceClientTransportProtocol provisioningProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
+    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
+
     // Plug and play features are available over either MQTT or MQTT_WS.
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
@@ -56,7 +68,31 @@ public class Thermostat {
     private static double maxTemperature = 0.0d;
     private static boolean temperatureReset = true;
 
-    public static void main(String[] args) throws URISyntaxException, IOException {
+    static class ProvisioningStatus
+    {
+        ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationResult();
+        Exception exception;
+    }
+
+    static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
+    {
+        @Override
+        public void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception exception, Object context)
+        {
+            if (context instanceof ProvisioningStatus)
+            {
+                ProvisioningStatus status = (ProvisioningStatus) context;
+                status.provisioningDeviceClientRegistrationInfoClient = provisioningDeviceClientRegistrationResult;
+                status.exception = exception;
+            }
+            else
+            {
+                System.out.println("Received unknown context");
+            }
+        }
+    }
+
+    public static void main(String[] args) throws URISyntaxException, IOException, ProvisioningDeviceClientException, InterruptedException {
 
         // This sample follows the following workflow:
         // -> Initialize device client instance.
@@ -65,8 +101,44 @@ public class Thermostat {
         // -> Periodically send "temperature" over telemetry.
         // -> Send "maxTempSinceLastReboot" over property update, when a new max temperature is set.
 
+        // This environment variable indicates if DPS or IoT Hub connection string will be used to provision the device.
+        // Expected values: (case-insensitive)
+        // "DPS" - The sample will use DPS to provision the device.
+        // "connectionString" - The sample will use IoT Hub connection string to provision the device.
+
+        if ((deviceSecurityType == null) || deviceSecurityType.isEmpty())
+        {
+            throw new IllegalArgumentException("Device security type needs to be specified, please set the environment variable \"IOTHUB_DEVICE_SECURITY_TYPE\"");
+        }
+
         log.debug("Initialize the device client.");
-        initializeDeviceClient();
+
+        switch (deviceSecurityType.toLowerCase())
+        {
+            case "dps":
+            {
+                if (validateArgsForDpsFlow())
+                {
+                    initializeAndProvisionDevice();
+                    break;
+                }
+                throw new IllegalArgumentException("Required environment variables are not set for DPS flow, please recheck your environment.");
+            }
+            case "connectionstring":
+            {
+                if (validateArgsForIotHubFlow())
+                {
+                    initializeDeviceClient();
+                    break;
+                }
+                throw new IllegalArgumentException("Required environment variables are not set for IoT Hub flow, please recheck your environment.");
+            }
+            default:
+            {
+                throw new IllegalArgumentException("Unrecognized value for IOTHUB_DEVICE_SECURITY_TYPE received: {s_deviceSecurityType}." +
+                        " It should be either \"DPS\" or \"connectionString\" (case-insensitive).");
+            }
+        }
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
         deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
@@ -96,6 +168,86 @@ public class Thermostat {
                 }
             }
         }).start();
+    }
+
+    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
+        SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
+        ProvisioningDeviceClient provisioningDeviceClient = null;
+        ProvisioningStatus provisioningStatus = new ProvisioningStatus();
+
+        provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, provisioningProtocol, securityClientSymmetricKey);
+
+        AdditionalData additionalData = new AdditionalData();
+        additionalData.setProvisioningPayload(String.format("{\"modelId\": \"%s\"}", MODEL_ID));
+
+        provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus, additionalData);
+
+        while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
+        {
+            if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR ||
+                    provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_DISABLED ||
+                    provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_FAILED)
+            {
+                provisioningStatus.exception.printStackTrace();
+                System.out.println("Registration error, bailing out");
+                break;
+            }
+            System.out.println("Waiting for Provisioning Service to register");
+            Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
+        }
+
+        ClientOptions options = new ClientOptions();
+        options.setModelId(MODEL_ID);
+
+        if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
+            System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
+            System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+
+            String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+            String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+
+            deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
+            deviceClient.open();
+        }
+    }
+
+    private static boolean validateArgsForIotHubFlow()
+    {
+        return !(deviceConnectionString == null || deviceConnectionString.isEmpty());
+    }
+
+    private static boolean validateArgsForDpsFlow()
+    {
+        return !((globalEndpoint == null || globalEndpoint.isEmpty())
+                && (scopeId == null || scopeId.isEmpty())
+                && (registrationId == null || registrationId.isEmpty())
+                && (deviceSymmetricKey == null || deviceSymmetricKey.isEmpty()));
+    }
+
+    private static void initializeDeviceClient(String hostname, SecurityProvider securityProvider, ProvisioningStatus provisioningStatus) throws URISyntaxException {
+        ClientOptions options = new ClientOptions();
+        options.setModelId(MODEL_ID);
+
+        if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
+            System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
+            System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+
+            String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
+            String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+            try {
+                deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityProvider, IotHubClientProtocol.MQTT);
+                deviceClient.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
+                    log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
+
+                    if (throwable != null) {
+                        log.debug("The connection status change was caused by the following Throwable: {}", throwable.getMessage());
+                        throwable.printStackTrace();
+                    }
+                }, deviceClient);
+            } catch (IOException e) {
+                System.out.println("Device Client threw an exception" + e.getMessage());
+            }
+        }
     }
 
     /**
