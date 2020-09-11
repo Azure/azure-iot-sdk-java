@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -42,7 +41,6 @@ public class Thermostat {
     private static final String MODEL_ID = "dtmi:com:example:Thermostat;1";
 
     // Environmental variables for Dps
-    
     private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String scopeId = System.getenv("IOTHUB_DEVICE_DPS_ID_SCOPE");
     private static final String globalEndpoint = System.getenv("IOTHUB_DEVICE_DPS_ENDPOINT");
@@ -206,7 +204,7 @@ public class Thermostat {
             String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
             String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
 
-            deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
+            deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
             deviceClient.open();
         }
     }
@@ -222,32 +220,6 @@ public class Thermostat {
                 && (scopeId == null || scopeId.isEmpty())
                 && (registrationId == null || registrationId.isEmpty())
                 && (deviceSymmetricKey == null || deviceSymmetricKey.isEmpty()));
-    }
-
-    private static void initializeDeviceClient(String hostname, SecurityProvider securityProvider, ProvisioningStatus provisioningStatus) throws URISyntaxException {
-        ClientOptions options = new ClientOptions();
-        options.setModelId(MODEL_ID);
-
-        if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
-            System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
-            System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
-
-            String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
-            String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
-            try {
-                deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityProvider, IotHubClientProtocol.MQTT);
-                deviceClient.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> {
-                    log.debug("Connection status change registered: status={}, reason={}", status, statusChangeReason);
-
-                    if (throwable != null) {
-                        log.debug("The connection status change was caused by the following Throwable: {}", throwable.getMessage());
-                        throwable.printStackTrace();
-                    }
-                }, deviceClient);
-            } catch (IOException e) {
-                System.out.println("Device Client threw an exception" + e.getMessage());
-            }
-        }
     }
 
     /**
