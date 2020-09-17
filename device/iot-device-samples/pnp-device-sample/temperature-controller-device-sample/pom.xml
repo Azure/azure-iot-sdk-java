@@ -10,6 +10,14 @@
             <name>Microsoft</name>
         </developer>
     </developers>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>provisioning-device-client</artifactId>
+            <version>1.8.3</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
     <parent>
         <artifactId>pnp-device-sample</artifactId>
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>

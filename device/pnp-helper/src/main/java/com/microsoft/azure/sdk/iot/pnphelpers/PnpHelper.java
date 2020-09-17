@@ -23,6 +23,7 @@ public class PnpHelper {
     private static final String CONTENT_APPLICATION_JSON = "application/json";
     private static final String PROPERTY_COMPONENT_IDENTIFIER_KEY = "__t";
     private static final String PROPERTY_COMPONENT_IDENTIFIER_VALUE = "c";
+    private static final String MODEL_ID = "modelId";
 
     private static final Gson gson = new Gson();
 
@@ -55,6 +56,16 @@ public class PnpHelper {
         }
 
         return message;
+    }
+
+    /**
+     * Create the DPS payload to provision a device as plug and play.
+     * @param modelId The Id of the model the device adheres to for properties, telemetry, and commands.
+     * @return The DPS payload to provision a device as plug and play.
+     */
+    public static String createDpsPayload(@NonNull String modelId) {
+        Map<String, String> payload = singletonMap(MODEL_ID, modelId);
+        return gson.toJson(payload);
     }
 
     /**
