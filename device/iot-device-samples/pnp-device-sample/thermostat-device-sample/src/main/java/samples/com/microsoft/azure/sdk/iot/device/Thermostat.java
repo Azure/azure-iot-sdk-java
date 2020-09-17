@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Slf4j
@@ -48,7 +49,7 @@ public class Thermostat {
     private static final String registrationId = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_ID");
 
     private static final ProvisioningDeviceClientTransportProtocol provisioningProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
-    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
+    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000; // in milli seconds
 
     // Plug and play features are available over either MQTT or MQTT_WS.
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
@@ -204,6 +205,7 @@ public class Thermostat {
             String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
             String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
 
+            log.debug("Opening the device client.");
             deviceClient = DeviceClient.createFromSecurityProvider(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
             deviceClient.open();
         }
@@ -306,6 +308,7 @@ public class Thermostat {
     private static class GetMaxMinReportMethodCallback implements DeviceMethodCallback {
         String commandName = "getMaxMinReport";
 
+        @SneakyThrows
         @Override
         public DeviceMethodData call(String methodName, Object methodData, Object context) {
             if (methodName.equalsIgnoreCase(commandName)) {
@@ -324,13 +327,15 @@ public class Thermostat {
                 }
 
                 if (filteredReadings.size() > 1) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
                     double maxTemp = Collections.max(filteredReadings.values());
                     double minTemp = Collections.min(filteredReadings.values());
                     double avgTemp = runningTotal / filteredReadings.size();
-                    Date startTime = Collections.min(filteredReadings.keySet());
-                    Date endTime = Collections.max(filteredReadings.keySet());
+                    String startTime = sdf.format(Collections.min(filteredReadings.keySet()));
+                    String endTime = sdf.format(Collections.max(filteredReadings.keySet()));
+
                     String responsePayload = String.format(
-                            "{\"maxTemp\": %f, \"minTemp\": %f, \"avgTemp\": %f, \"startTime\": %tc, \"endTime\": %tc",
+                            "{\"maxTemp\": %.1f, \"minTemp\": %.1f, \"avgTemp\": %.1f, \"startTime\": \"%s\", \"endTime\": \"%s\"}",
                             maxTemp,
                             minTemp,
                             avgTemp,
