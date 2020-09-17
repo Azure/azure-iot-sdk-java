@@ -957,6 +957,7 @@ public class DeviceTwinTest
         final int readTimeout = 5678;
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
         final String expectedString = "testJsonAsNext";
+        final String modelId = "testModelId";
         TwinCollection tags = new TwinCollection();
         tags.putFinal("tagsKey", "tagsValue");
         TwinCollection rp = new TwinCollection();
@@ -964,13 +965,11 @@ public class DeviceTwinTest
         TwinCollection dp = new TwinCollection();
         dp.putFinal("dpKey", "dpValue");
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = true;
                 Deencapsulation.invoke(mockedQuery, "next");
                 result = expectedString;
                 mockedTwinState.getDeviceId();
@@ -981,6 +980,8 @@ public class DeviceTwinTest
                 result = version;
                 mockedTwinState.getETag();
                 result = etag;
+                mockedTwinState.getModelId();
+                result = modelId;
                 mockedTwinState.getTags();
                 result = tags;
                 mockedTwinState.getDesiredProperty();
@@ -1017,15 +1018,13 @@ public class DeviceTwinTest
         assertEqualSetAndMap(result.getReportedProperties(), (Map)rp);
         assertTrue(result.getCapabilities().isIotEdge());
         assertNull(result.getModuleId());
+        assertEquals(result.getModelId(), result.getModelId());
     }
 
-    //Tests_SRS_DEVICETWIN_25_059: [ The method shall parse the next element from the query response as Twin Document using TwinState and provide the response on DeviceTwinDevice.]
     @Test
-    public void nextRetrievesCorrectlyWithModuleId() throws IotHubException, IOException
+    public void nextRetrievesCorrectlyWithoutModelId() throws IotHubException, IOException
     {
         //arrange
-        final String connectionState = "Connected";
-        final String expectedModuleId = "someModuleId";
         final Integer version = 15;
         final String etag = "validEtag";
         final int connectTimeout = 1234;
@@ -1033,6 +1032,7 @@ public class DeviceTwinTest
         final String connectionString = "someConnectionString";
         DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
         final String expectedString = "testJsonAsNext";
+        final String moduleId = "testModuleId";
         TwinCollection tags = new TwinCollection();
         tags.putFinal("tagsKey", "tagsValue");
         TwinCollection rp = new TwinCollection();
@@ -1040,33 +1040,31 @@ public class DeviceTwinTest
         TwinCollection dp = new TwinCollection();
         dp.putFinal("dpKey", "dpValue");
 
-        new NonStrictExpectations()
+        new Expectations()
         {
             {
                 Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.TWIN);
                 result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "hasNext");
-                result = true;
                 Deencapsulation.invoke(mockedQuery, "next");
                 result = expectedString;
                 mockedTwinState.getDeviceId();
                 result = "testDeviceID";
                 mockedTwinState.getModuleId();
-                result = expectedModuleId;
+                result = moduleId;
                 mockedTwinState.getVersion();
                 result = version;
                 mockedTwinState.getETag();
                 result = etag;
+                mockedTwinState.getModelId();
+                result = null;
                 mockedTwinState.getTags();
                 result = tags;
                 mockedTwinState.getDesiredProperty();
                 result = dp;
                 mockedTwinState.getReportedProperty();
                 result = rp;
-                mockedTwinState.getConnectionState();
-                result = connectionState;
-                mockedTwinState.getConfigurations();
-                result = mockConfigurations;
+                mockCapabilities.isIotEdge();
+                result = Boolean.TRUE;
             }
         };
 
@@ -1093,9 +1091,9 @@ public class DeviceTwinTest
         assertEqualSetAndMap(result.getTags(), (Map)tags);
         assertEqualSetAndMap(result.getDesiredProperties(), (Map)dp);
         assertEqualSetAndMap(result.getReportedProperties(), (Map)rp);
-        assertEquals(expectedModuleId, result.getModuleId());
-        assertEquals(connectionState, result.getConnectionState());
-        assertTrue(mockConfigurations == result.getConfigurations());
+        assertTrue(result.getCapabilities().isIotEdge());
+        assertNull(result.getModelId());
+        assertEquals(result.getModuleId(), result.getModuleId());
     }
 
     @Test (expected = IllegalArgumentException.class)

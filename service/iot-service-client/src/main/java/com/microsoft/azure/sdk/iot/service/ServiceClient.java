@@ -89,6 +89,7 @@ public class ServiceClient
      *
      * @param iotHubConnectionString The ConnectionString object for the IotHub
      * @param iotHubServiceClientProtocol protocol to use
+     * @param options options for proxy
      */
     protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
     {
