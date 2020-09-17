@@ -39,10 +39,10 @@ public class Thermostat {
 
     // DTDL interface used: https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
+    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String MODEL_ID = "dtmi:com:example:Thermostat;1";
 
     // Environmental variables for Dps
-    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String scopeId = System.getenv("IOTHUB_DEVICE_DPS_ID_SCOPE");
     private static final String globalEndpoint = System.getenv("IOTHUB_DEVICE_DPS_ENDPOINT");
     private static final String deviceSymmetricKey = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_KEY");

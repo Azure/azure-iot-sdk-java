@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 
 /** Manages device on IotHub - CRUD operations */
@@ -57,7 +58,12 @@ public class DeviceManagerSample
         }
         catch (IotHubException iote)
         {
-            iote.printStackTrace();
+            if (iote.getErrorCode() == HttpURLConnection.HTTP_CONFLICT) {
+                System.out.println("Device " + device.getDeviceId() + " already exists");
+            }
+            else {
+                iote.printStackTrace();
+            }
         }
         catch (IOException e)
         {

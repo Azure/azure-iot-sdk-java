@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.DeviceCapabilitiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Twin management representation
@@ -123,6 +125,17 @@ public class RegisterManager
     @SerializedName(CAPABILITIES_TAG)
     protected DeviceCapabilities capabilities = null;
 
+    /**
+     * The Digital Twin model id of the device and module
+     * The value will be null for a non-pnp device.
+     * The value will be null for a pnp device until the device connects and registers with the model id.
+     */
+    private static final String MODEL_ID = "modelId";
+    @Expose(serialize = true, deserialize = true)
+    @SerializedName(MODEL_ID)
+    @Setter
+    @Getter
+    protected String modelId = null;
 
     /**
      * Setter for the DeviceId

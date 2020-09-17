@@ -20,6 +20,9 @@
     <modules>
         <module>iot-service-client</module>
         <module>iot-service-samples</module>
+        <module>iot-service-samples/digitaltwin-service-samples</module>
+        <module>iot-service-samples/digitaltwin-service-samples/temperature-controller-service-sample</module>
+        <module>iot-service-samples/digitaltwin-service-samples/thermostat-service-sample</module>
     </modules>
     <build>
         <plugins>

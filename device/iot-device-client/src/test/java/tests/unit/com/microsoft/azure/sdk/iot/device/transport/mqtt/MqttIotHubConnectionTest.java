@@ -43,14 +43,8 @@ public class MqttIotHubConnectionTest
     final String hubName = "test.iothub";
     final String deviceId = "test-deviceId";
     final String modelId = "dtmi:my:company:namespace;1";
-    final String deviceKey = "test-devicekey?&test";
     final String apiVersionPrefix = "?api-version=";
     final String API_VERSION = apiVersionPrefix + TransportUtils.IOTHUB_API_VERSION;
-    final String PNP_API_VERSION = apiVersionPrefix + TransportUtils.IOTHUB_API_VERSION_PREVIEW + "&model-id=" + modelId;
-    final String resourceUri = "test-resource-uri";
-    final int qos = 1;
-    final String publishTopic = "devices/test-deviceId/messages/events/";
-    final String subscribeTopic = "devices/test-deviceId/messages/devicebound/#";
     final String expectedToken = "someToken";
     final byte[] expectedMessageBody = { 0x61, 0x62, 0x63 };
     final String userAgentString = "some user agent string";
@@ -312,7 +306,7 @@ public class MqttIotHubConnectionTest
     }
 
     @Test
-    public void openEstablishesConnectionUsingModelIdSetsCorrectPreviewApiVersion() throws IOException, TransportException
+    public void openEstablishesConnectionUsingModelId() throws IOException, TransportException
     {
         final String expectedSasToken = "someToken";
         final String serverUri = SSL_PREFIX + iotHubHostName + SSL_PORT_SUFFIX;
@@ -339,7 +333,7 @@ public class MqttIotHubConnectionTest
         final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
 
         String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + PNP_API_VERSION));
+        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&model-id=" + modelId));
 
         final String actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
 
