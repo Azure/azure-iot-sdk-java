@@ -32,9 +32,8 @@
         <dice-provider-emulator-artifact-id>dice-provider-emulator</dice-provider-emulator-artifact-id>
         <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
         <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
-
-        <iot-device-client-version>1.25.0</iot-device-client-version>
-        <iot-service-client-version>1.25.0</iot-service-client-version>
+        <iot-device-client-version>1.25.0-digitaltwin-preview</iot-device-client-version>
+        <iot-service-client-version>1.25.0-digitaltwin-preview</iot-service-client-version>
         <iot-deps-version>0.10.0</iot-deps-version>
         <provisioning-device-client-version>1.8.3</provisioning-device-client-version>
         <provisioning-service-client-version>1.6.2</provisioning-service-client-version>
