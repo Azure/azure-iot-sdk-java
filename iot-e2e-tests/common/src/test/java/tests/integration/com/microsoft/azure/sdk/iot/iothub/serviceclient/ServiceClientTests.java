@@ -110,7 +110,7 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
-        cloudToDeviceTelemetry(false);
+        cloudToDeviceTelemetry(false, true);
     }
 
     @Test
@@ -123,10 +123,18 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true);
+        cloudToDeviceTelemetry(true, true);
     }
 
-    public void cloudToDeviceTelemetry(boolean withProxy) throws Exception
+    @Test
+    @StandardTierHubOnlyTest
+    @ContinuousIntegrationTest
+    public void cloudToDeviceTelemetryWithNoPayload() throws Exception
+    {
+        cloudToDeviceTelemetry(false, false);
+    }
+
+    public void cloudToDeviceTelemetry(boolean withProxy, boolean withPayload) throws Exception
     {
         // Arrange
 
@@ -154,7 +162,16 @@ public class ServiceClientTests extends IntegrationTest
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
 
-        Message message = new Message(content.getBytes());
+
+        Message message;
+        if (withPayload)
+        {
+            message = new Message(content.getBytes());
+        }
+        else
+        {
+            message = new Message();
+        }
 
         CompletableFuture<Void> completableFuture = serviceClient.sendAsync(testInstance.deviceId, message);
         completableFuture.get();
