@@ -115,6 +115,7 @@ public class HttpsRequest
     /**
      * Executes the HTTPS request.
      *
+     * @param isHttps if true, the request will be sent as an HTTPS request. Otherwise it will be sent as an Http request
      * @return an HTTPS response.
      *
      * @throws TransportException if the connection could not be established, or the
