@@ -43,7 +43,7 @@ public class HttpsConnectionTest
 
     // Tests_SRS_HTTPSCONNECTION_11_001: [The constructor shall open a connection to the given URL.]
     @Test
-    public void constructorOpensConnection() throws IOException, TransportException
+    public void constructorOpensHttpsConnection() throws IOException, TransportException
     {
         final HttpsMethod httpsMethod = HttpsMethod.PUT;
         new NonStrictExpectations()
@@ -64,6 +64,64 @@ public class HttpsConnectionTest
                 mockUrl.openConnection();
             }
         };
+    }
+
+    @Test
+    public void constructorOpensHttpConnection() throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "http";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+            }
+        };
+
+        new HttpsConnection(mockUrl, httpsMethod, null, false);
+
+        new Verifications()
+        {
+            {
+                mockUrl.openConnection();
+            }
+        };
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsIfHttpsProtocolIsNotExpected() throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "https";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+            }
+        };
+
+        new HttpsConnection(mockUrl, httpsMethod, null, false);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorThrowsIfHttpProtocolIsNotExpected() throws IOException, TransportException
+    {
+        final HttpsMethod httpsMethod = HttpsMethod.PUT;
+        new NonStrictExpectations()
+        {
+            {
+                mockUrl.getProtocol();
+                result = "http";
+                mockUrl.openConnection();
+                result = mockUrlConn;
+            }
+        };
+
+        new HttpsConnection(mockUrl, httpsMethod, null, true);
     }
 
     // Tests_SRS_HTTPSCONNECTION_11_002: [The constructor shall throw a TransportException if the connection was unable to be opened.]

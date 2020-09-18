@@ -68,12 +68,34 @@ public class HttpsConnection
      */
     public HttpsConnection(URL url, HttpsMethod method, final ProxySettings proxySettings) throws TransportException
     {
-        // Codes_SRS_HTTPSCONNECTION_11_022: [If the URI given does not use the HTTPS or HTTP protocol, the constructor shall throw an IllegalArgumentException.]
+        this(url, method, proxySettings, true);
+    }
+    /**
+     * Constructor. Opens a connection to the given URL. Can be HTTPS or HTTP
+     *
+     * @param url the URL for the HTTP/HTTPS connection.
+     * @param method the HTTP method (i.e. GET).
+     * @param proxySettings The proxy settings to use when connecting. If null, then no proxy will be used
+     * @param isHttps if true, then this request is an https request as opposed to an http request
+     * @throws TransportException if the connection could not be opened.
+     */
+    public HttpsConnection(URL url, HttpsMethod method, final ProxySettings proxySettings, boolean isHttps) throws TransportException
+    {
         final String protocol = url.getProtocol();
-        if (!protocol.equalsIgnoreCase("HTTPS"))
+        if (isHttps && !protocol.equalsIgnoreCase("HTTPS"))
         {
             String errMsg = String.format("Expected URL that uses protocol "
                             + "HTTPS but received one that uses "
+                            + "protocol '%s'.%n",
+                    protocol);
+            throw new IllegalArgumentException(errMsg);
+        }
+
+
+        if (!isHttps && !protocol.equalsIgnoreCase("HTTP"))
+        {
+            String errMsg = String.format("Expected URL that uses protocol "
+                            + "HTTP but received one that uses "
                             + "protocol '%s'.%n",
                     protocol);
             throw new IllegalArgumentException(errMsg);
