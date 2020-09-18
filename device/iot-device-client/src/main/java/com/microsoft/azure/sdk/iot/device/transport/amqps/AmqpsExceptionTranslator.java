@@ -14,6 +14,13 @@ public class AmqpsExceptionTranslator
 {
     static TransportException convertFromAmqpException(ErrorCondition error)
     {
+        if (error == null)
+        {
+            TransportException t = new TransportException("An unknown transport exception occurred");
+            t.setRetryable(true);
+            return t;
+        }
+
         String exceptionCode = error.getCondition() != null ? error.getCondition().toString() : "unknown";
         String description = error.getDescription();
 
