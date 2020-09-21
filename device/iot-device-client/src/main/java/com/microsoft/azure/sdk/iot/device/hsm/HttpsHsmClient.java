@@ -199,9 +199,13 @@ public class HttpsHsmClient
         }
 
         HttpsResponse response;
-        if (this.scheme.equalsIgnoreCase(HTTPS_SCHEME) || this.scheme.equalsIgnoreCase(HTTP_SCHEME))
+        if (this.scheme.equalsIgnoreCase(HTTPS_SCHEME))
         {
             response = httpsRequest.send();
+        }
+        else if (this.scheme.equalsIgnoreCase(HTTP_SCHEME))
+        {
+            response = httpsRequest.sendAsHttpRequest();
         }
         else if (this.scheme.equalsIgnoreCase(UNIX_SCHEME))
         {
