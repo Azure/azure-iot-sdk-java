@@ -86,7 +86,6 @@ public class FeedbackReceiver extends Receiver
      * @param sasToken The iot hub SAS token for the given device
      * @param iotHubServiceClientProtocol protocol to be used
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     * 
      */
     public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
     {
@@ -157,6 +156,9 @@ public class FeedbackReceiver extends Receiver
     /**
      * Receive FeedbackBatch with default timeout
      *
+     * This function is synchronized internally so that only one receive operation is allowed at a time.
+     * In order to do more receive operations at a time, you will need to instantiate another FeedbackReceiver instance.
+     *
      * @return The received FeedbackBatch object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
@@ -169,6 +171,10 @@ public class FeedbackReceiver extends Receiver
 
     /**
      * Receive FeedbackBatch with specific timeout
+     *
+     * This function is synchronized internally so that only one receive operation is allowed at a time.
+     * In order to do more receive operations at a time, you will need to instantiate another FeedbackReceiver instance.
+     *
      * @param timeoutMs The timeout in milliseconds
      * @return The received FeedbackBatch object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
