@@ -100,6 +100,9 @@ public class FileUploadNotificationReceiver extends Receiver
      *
      * QoS for receiving file upload notifications is at least once
      *
+     * This function is synchronized internally so that only one receive operation is allowed at a time.
+     * In order to do more receive operations at a time, you will need to instantiate another FileUploadNotificationReceiver instance.
+     *
      * @return The received FileUploadNotification object
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
      * @throws InterruptedException This exception is thrown if the receive process has been interrupted
@@ -114,6 +117,9 @@ public class FileUploadNotificationReceiver extends Receiver
      * Receive FileUploadNotification with specific timeout
      *
      * QoS for receiving file upload notifications is at least once
+     *
+     * This function is synchronized internally so that only one receive operation is allowed at a time.
+     * In order to do more receive operations at a time, you will need to instantiate another FileUploadNotificationReceiver instance.
      *
      * @param timeoutMs The timeout in milliseconds
      * @return The received FileUploadNotification object
