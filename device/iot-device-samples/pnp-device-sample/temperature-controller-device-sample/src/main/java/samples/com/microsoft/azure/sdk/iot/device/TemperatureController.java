@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.pnphelpers.PnpHelper;
+import com.microsoft.azure.sdk.iot.device.plugandplay.PnpHelper;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
@@ -44,13 +44,14 @@ public class TemperatureController {
 
     // DTDL interface used: https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
+    // Defaulting to DPS flow for bug bash
+    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE") == null ? "dps" : System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String MODEL_ID = "dtmi:com:example:TemperatureController;1";
     private static final String THERMOSTAT_1 = "thermostat1";
     private static final String THERMOSTAT_2 = "thermostat2";
     private static final String SERIAL_NO = "SR-123456";
 
     // Environmental variables for Dps
-    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String scopeId = System.getenv("IOTHUB_DEVICE_DPS_ID_SCOPE");
     private static final String globalEndpoint = System.getenv("IOTHUB_DEVICE_DPS_ENDPOINT");
     private static final String deviceSymmetricKey = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_KEY");
@@ -216,7 +217,7 @@ public class TemperatureController {
         provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, provisioningProtocol, securityClientSymmetricKey);
 
         AdditionalData additionalData = new AdditionalData();
-        additionalData.setProvisioningPayload(PnpHelper.createDpsPayload(MODEL_ID));
+        additionalData.setProvisioningPayload(com.microsoft.azure.sdk.iot.provisioning.device.plugandplay.PnpHelper.createDpsPayload(MODEL_ID));
 
         provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus, additionalData);
 
