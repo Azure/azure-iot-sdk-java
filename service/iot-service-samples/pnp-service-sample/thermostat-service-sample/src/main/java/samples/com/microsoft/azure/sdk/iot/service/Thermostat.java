@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class Thermostat {
     // Get connection string and device id inputs.
     private static final String iotHubConnectionString  = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String deviceId = System.getenv("DEVICE_ID");
+    private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
 
     private static DeviceTwin twinClient;
     private static DeviceMethod methodClient;
