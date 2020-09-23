@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.pnphelpers;
+package com.microsoft.azure.sdk.iot.device.plugandplay;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -15,7 +15,9 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
-
+/*
+ A helper class for formatting command requests and properties as per plug and play convention.
+*/
 public class PnpHelper {
 
     private static final String TELEMETRY_COMPONENT_NAME = "$.sub";
@@ -23,7 +25,6 @@ public class PnpHelper {
     private static final String CONTENT_APPLICATION_JSON = "application/json";
     private static final String PROPERTY_COMPONENT_IDENTIFIER_KEY = "__t";
     private static final String PROPERTY_COMPONENT_IDENTIFIER_VALUE = "c";
-    private static final String MODEL_ID = "modelId";
 
     private static final Gson gson = new Gson();
 
@@ -56,16 +57,6 @@ public class PnpHelper {
         }
 
         return message;
-    }
-
-    /**
-     * Create the DPS payload to provision a device as plug and play.
-     * @param modelId The Id of the model the device adheres to for properties, telemetry, and commands.
-     * @return The DPS payload to provision a device as plug and play.
-     */
-    public static String createDpsPayload(@NonNull String modelId) {
-        Map<String, String> payload = singletonMap(MODEL_ID, modelId);
-        return gson.toJson(payload);
     }
 
     /**
