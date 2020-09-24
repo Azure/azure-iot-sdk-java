@@ -112,7 +112,15 @@ This sample uses the following simple model which has no components - [Thermosta
       * IOTHUB_CONNECTION_STRING
       * DEVICE_ID
 
-2. Building the digitaltwin service sampl application:
+2. Install dependencies:
+
+    To install required dependencies, at a command prompt navigate to the root **azure-iot-sdk-java** folder. Then execute the following command:
+    
+    ```
+    mvn install -T 2C -DskipTests
+    ```
+
+3. Building the digitaltwin service sampl application:
 
     To build the digitaltwin service sampl application using Maven, at a command prompt navigate to the **\service\iot-service-samples\digitaltwin-service-samples\thermostat-service-sample** folder. Then execute the following command and check for build errors:
     
@@ -120,7 +128,7 @@ This sample uses the following simple model which has no components - [Thermosta
     mvn clean package
     ```
 
-3. Running the digitaltwin service sampl application:
+4. Running the digitaltwin service sampl application:
 
 	To run the digitaltwin service sampl application using Maven, execute the following command.
     
