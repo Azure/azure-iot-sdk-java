@@ -77,7 +77,7 @@ public class Thermostat {
         System.out.println("Update Digital Twin");
 
         getResponse = client.getDigitalTwin(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after removing an existing property: " + getResponse);
+        System.out.println("Updated Digital Twin after removing the new property: " + getResponse);
     }
 
     private static void InvokeMethodOnRootLevel()

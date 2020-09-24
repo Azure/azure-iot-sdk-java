@@ -113,7 +113,7 @@ public class TemperatureController {
         System.out.println("Update Digital Twin response status: " + updateResponse.response().message());
 
         getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after removing an existing component: " + getResponse.body());
+        System.out.println("Updated Digital Twin after removing the new component: " + getResponse.body());
     }
 
     private static void InvokeMethodOnComponent()
