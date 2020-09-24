@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
@@ -46,7 +48,7 @@ public class Thermostat {
     {
         // Get the digital twin.
         String getResponse = client.getDigitalTwin(digitalTwinid, String.class);
-        System.out.println("Digital Twin is: " + getResponse);
+        System.out.println("Digital Twin: " + prettyString(getResponse));
     }
 
     private static void UpdateDigitalTwin()
@@ -88,5 +90,12 @@ public class Thermostat {
         // Invoke a method on root level.
         DigitalTwinCommandResponse response = client.invokeCommand(digitalTwinid, commandName, commandInput);
         System.out.println("Invoked Command " + commandName + " response: " + response.getPayload());
+    }
+
+    private static String prettyString(String str)
+    {
+        Gson gson = new Gson();
+        Gson gsonBuilder = new GsonBuilder().setPrettyPrinting().create();
+        return gsonBuilder.toJson(gson.fromJson(str, Object.class));
     }
 }

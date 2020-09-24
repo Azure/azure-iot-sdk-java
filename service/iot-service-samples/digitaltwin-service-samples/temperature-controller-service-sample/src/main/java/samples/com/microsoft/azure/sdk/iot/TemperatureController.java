@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
@@ -58,7 +60,7 @@ public class TemperatureController {
     private static void GetDigitalTwin()
     {
         ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
-        System.out.println("Digital Twin: " + getResponse.body());
+        System.out.println("Digital Twin: " + prettyString(getResponse.body()));
         System.out.println("Digital Twin eTag: " + getResponse.headers().eTag());
         System.out.println("Digital Twin get response message: " + getResponse.response().message());
     }
@@ -141,5 +143,12 @@ public class TemperatureController {
         System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload());
         System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
         System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
+    }
+
+    private static String prettyString(String str)
+    {
+        Gson gson = new Gson();
+        Gson gsonBuilder = new GsonBuilder().setPrettyPrinting().create();
+        return gsonBuilder.toJson(gson.fromJson(str, Object.class));
     }
 }
