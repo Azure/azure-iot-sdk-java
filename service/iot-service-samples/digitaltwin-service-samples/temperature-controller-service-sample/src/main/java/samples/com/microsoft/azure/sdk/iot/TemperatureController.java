@@ -39,16 +39,24 @@ public class TemperatureController {
         System.out.println("Initialize the service client.");
         InitializeServiceClient();
 
+        System.out.println("--------------------------------------------------------------------------------------------");
         System.out.println("Get digital twin");
+        System.out.println("--------------------------------------------------------------------------------------------");
         GetDigitalTwin();
 
+        System.out.println("--------------------------------------------------------------------------------------------");
         System.out.println("Update digital twin");
+        System.out.println("--------------------------------------------------------------------------------------------");
         UpdateDigitalTwinComponentProperty();
 
-        System.out.println("Invoke a method on component");
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Invoke a method on component - getMaxMinReport");
+        System.out.println("--------------------------------------------------------------------------------------------");
         InvokeMethodOnComponent();
 
-        System.out.println("Invoke a method on root level");
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Invoke a method on root level - reboot");
+        System.out.println("--------------------------------------------------------------------------------------------");
         InvokeMethodOnRootLevel();
     }
 
@@ -78,8 +86,12 @@ public class TemperatureController {
 
         // The json patch format can be found here - https://docs.microsoft.com/en-us/azure/iot-pnp/howto-manage-digital-twin#update-a-digital-twin.
         // Add a new component.
+        String newComponentName = "newThermostat";
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Add a new component " + newComponentName);
+        System.out.println("--------------------------------------------------------------------------------------------");
         options.setIfMatch(getResponse.headers().eTag());
-        String path = "/newThermostat";
+        String path = "/" + newComponentName;
         Map<String, Object> properties = new HashMap<>();
         properties.put(propertyName, 50);
         updateOperationUtility.appendAddComponentOperation(path, properties);
@@ -90,12 +102,17 @@ public class TemperatureController {
         getResponse = GetDigitalTwin();
 
         // Replace an existing component.
+        String component1 = "thermostat1";
+        String component2 = "thermostat2";
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Replace existing components " + component1 + " and " + component2);
+        System.out.println("--------------------------------------------------------------------------------------------");
         options.setIfMatch(getResponse.headers().eTag());
-        path = "/thermostat1";
+        path = "/" + component1;
         Map<String, Object> t1properties = new HashMap<>();
         t1properties.put(propertyName, 50);
         updateOperationUtility.appendReplaceComponentOperation(path, t1properties);
-        path = "/thermostat2";
+        path = "/" + component2;
         Map<String, Object> t2properties = new HashMap<>();
         t2properties.put(propertyName, 40);
         updateOperationUtility.appendReplaceComponentOperation(path, t2properties);
@@ -105,7 +122,10 @@ public class TemperatureController {
 
         getResponse = GetDigitalTwin();
 
-        // Remove an existing component.
+        // Remove the new component.
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Remove the new component " + newComponentName);
+        System.out.println("--------------------------------------------------------------------------------------------");
         options.setIfMatch(getResponse.headers().eTag());
         path = "/newThermostat";
         updateOperationUtility.appendRemoveComponentOperation(path);

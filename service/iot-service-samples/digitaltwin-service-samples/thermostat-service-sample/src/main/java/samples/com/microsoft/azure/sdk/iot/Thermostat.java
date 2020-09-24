@@ -29,13 +29,19 @@ public class Thermostat {
         System.out.println("Initialize the service client.");
         InitializeServiceClient();
 
+        System.out.println("--------------------------------------------------------------------------------------------");
         System.out.println("Get original digital twin");
+        System.out.println("--------------------------------------------------------------------------------------------");
         GetDigitalTwin();
 
+        System.out.println("--------------------------------------------------------------------------------------------");
         System.out.println("Update digital twin");
+        System.out.println("--------------------------------------------------------------------------------------------");
         UpdateDigitalTwin();
 
-        System.out.println("Invoke a method on root level");
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Invoke a method on root level - getMaxMinReport");
+        System.out.println("--------------------------------------------------------------------------------------------");
         InvokeMethodOnRootLevel();
     }
 
@@ -57,24 +63,35 @@ public class Thermostat {
         UpdateOperationUtility updateOperationUtility = new UpdateOperationUtility();
 
         // Add a new property at root level.
-        updateOperationUtility.appendAddPropertyOperation("/currentTemperature", 35);
-        updateOperationUtility.appendAddPropertyOperation("/targetTemperature", 35);
+        String newProperty = "currentTemperature";
+        String existingProperty = "targetTemperature";
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Add properties at root level " + newProperty + " and " + existingProperty);
+        System.out.println("--------------------------------------------------------------------------------------------");
+        updateOperationUtility.appendAddPropertyOperation("/" + newProperty, 35);
+        updateOperationUtility.appendAddPropertyOperation("/" + existingProperty, 35);
         client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin");
+        System.out.println("Updated Digital Twin");
 
         GetDigitalTwin();
 
         // Replace an existing property at root level.
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Replace an existing property at root level " + existingProperty);
+        System.out.println("--------------------------------------------------------------------------------------------");
         updateOperationUtility.appendReplacePropertyOperation("/targetTemperature", 50);
         client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin");
+        System.out.println("Updated Digital Twin");
 
         GetDigitalTwin();
 
-        // Remove a property at root level.
+        // Remove the new property at root level.
+        System.out.println("--------------------------------------------------------------------------------------------");
+        System.out.println("Remove the new property at root level " + newProperty);
+        System.out.println("--------------------------------------------------------------------------------------------");
         updateOperationUtility.appendRemovePropertyOperation("/currentTemperature");
         client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin");
+        System.out.println("Updated Digital Twin");
 
         GetDigitalTwin();
     }
