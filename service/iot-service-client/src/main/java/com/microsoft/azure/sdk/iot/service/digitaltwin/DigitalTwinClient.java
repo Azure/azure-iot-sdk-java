@@ -100,10 +100,21 @@ public class DigitalTwinClient {
      * Invoke a command on a digital twin.
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
-     * @param payload The command payload.
-     * @return The application/json command invocation response.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public String invokeCommand(@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload) {
+    public DigitalTwinCommandResponse invokeCommand(@NonNull String digitalTwinId, @NonNull String commandName) {
+        return digitalTwinAsyncClient.invokeCommand(digitalTwinId, commandName)
+                .toBlocking().single();
+    }
+
+    /**
+     * Invoke a command on a digital twin.
+     * @param digitalTwinId The Id of the digital twin.
+     * @param commandName The command to be invoked.
+     * @param payload The command payload.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     */
+    public DigitalTwinCommandResponse invokeCommand(@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload) {
         return digitalTwinAsyncClient.invokeCommand(digitalTwinId, commandName, payload)
                 .toBlocking().single();
     }
@@ -113,38 +124,49 @@ public class DigitalTwinClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
      * @param payload The command payload.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and the application/json command invocation response.
+     * @param options The optional settings for this request.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload) {
-        return digitalTwinAsyncClient.invokeCommandWithResponse(digitalTwinId, commandName, payload)
+    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload, @NonNull DigitalTwinInvokeCommandRequestOptions options) {
+        return digitalTwinAsyncClient.invokeCommandWithResponse(digitalTwinId, commandName, payload, options)
                 .toBlocking().single();
     }
 
     /**
-     * Invoke a command on a digital twin.
+     * Invoke a command on a digital twin component.
      * @param digitalTwinId The Id of the digital twin.
+     * @param componentName The component name under which the command is defined.
+     * @param commandName The command to be invoked.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     */
+    public DigitalTwinCommandResponse invokeComponentCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName) {
+        return digitalTwinAsyncClient.invokeComponentCommand(digitalTwinId, componentName, commandName)
+                .toBlocking().single();
+    }
+
+    /**
+     * Invoke a command on a digital twin component.
+     * @param digitalTwinId The Id of the digital twin.
+     * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
      * @param payload The command payload.
-     * @param options The optional settings for this request.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and the application/json command invocation response.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(@NonNull String digitalTwinId, @NonNull String commandName, @NonNull DigitalTwinInvokeCommandRequestOptions options, @NonNull String payload) {
-        return digitalTwinAsyncClient.invokeCommandWithResponse(digitalTwinId, commandName, options, payload)
+    public DigitalTwinCommandResponse invokeComponentCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload) {
+        return digitalTwinAsyncClient.invokeComponentCommand(digitalTwinId, componentName, commandName, payload)
                 .toBlocking().single();
     }
 
-    public String invokeComponentCommand(@NonNull String id, @NonNull String componentName, @NonNull String commandName, @NonNull String payload) {
-        return digitalTwinAsyncClient.invokeComponentCommand(id, componentName, commandName, payload)
-                .toBlocking().single();
-    }
-
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(@NonNull String id, @NonNull String componentName, @NonNull String commandName, @NonNull String payload) {
-        return digitalTwinAsyncClient.invokeComponentCommandWithResponse(id, componentName, commandName, payload)
-                .toBlocking().single();
-    }
-
-    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(@NonNull String id, @NonNull String componentName, @NonNull String commandName, @NonNull DigitalTwinInvokeCommandRequestOptions options, @NonNull String payload) {
-        return digitalTwinAsyncClient.invokeComponentCommandWithResponse(id, componentName, commandName, options, payload)
+    /**
+     * Invoke a command on a digital twin component.
+     * @param digitalTwinId The Id of the digital twin.
+     * @param componentName The component name under which the command is defined.
+     * @param commandName The command to be invoked.
+     * @param payload The command payload.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     */
+    public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload, @NonNull DigitalTwinInvokeCommandRequestOptions options) {
+        return digitalTwinAsyncClient.invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, options)
                 .toBlocking().single();
     }
 }

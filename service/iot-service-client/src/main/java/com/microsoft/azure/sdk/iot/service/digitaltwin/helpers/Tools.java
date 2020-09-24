@@ -35,7 +35,20 @@ public final class Tools {
         }
     };
 
-    public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>, Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>>> FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE = object -> {
+    public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>, Observable<DigitalTwinCommandResponse>> FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE = object -> {
+        try {
+            DigitalTwinCommandResponse digitalTwinCommandResponse = new DigitalTwinCommandResponse();
+            digitalTwinCommandResponse.setPayload(objectMapper.writeValueAsString(object.body()));
+            digitalTwinCommandResponse.setStatus(object.headers().xMsCommandStatuscode());
+            return Observable.just(digitalTwinCommandResponse);
+        }
+        catch (JsonProcessingException e) {
+            return Observable.error(e);
+        }
+
+    };
+
+    public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>, Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>>> FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE_WITH_HEADERS = object -> {
         try {
             DigitalTwinCommandResponse digitalTwinCommandResponse = new DigitalTwinCommandResponse();
             digitalTwinCommandResponse.setPayload(objectMapper.writeValueAsString(object.body()));
@@ -51,7 +64,20 @@ public final class Tools {
 
     };
 
-    public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>, Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>>> FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE = object -> {
+    public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>, Observable<DigitalTwinCommandResponse>> FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE = object -> {
+        try {
+            DigitalTwinCommandResponse digitalTwinCommandResponse = new DigitalTwinCommandResponse();
+            digitalTwinCommandResponse.setPayload(objectMapper.writeValueAsString(object.body()));
+            digitalTwinCommandResponse.setStatus(object.headers().xMsCommandStatuscode());
+            return Observable.just(digitalTwinCommandResponse);
+        }
+        catch (JsonProcessingException e) {
+            return Observable.error(e);
+        }
+
+    };
+
+    public static final Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>, Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>>> FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE_WITH_HEADERS = object -> {
         try {
             DigitalTwinCommandResponse digitalTwinCommandResponse = new DigitalTwinCommandResponse();
             digitalTwinCommandResponse.setPayload(objectMapper.writeValueAsString(object.body()));

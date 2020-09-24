@@ -4,6 +4,7 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 
 import java.time.ZoneOffset;
@@ -85,7 +86,7 @@ public class Thermostat {
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
 
         // Invoke a method on root level.
-        String response = client.invokeCommand(digitalTwinid, commandName, commandInput);
-        System.out.println("Invoked Command " + commandName + " response: " + response);
+        DigitalTwinCommandResponse response = client.invokeCommand(digitalTwinid, commandName, commandInput);
+        System.out.println("Invoked Command " + commandName + " response: " + response.getPayload());
     }
 }

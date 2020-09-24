@@ -127,8 +127,7 @@ public class DigitalTwinAsyncClient {
      */
     public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (@NonNull String digitalTwinId, @NonNull List<Object> digitalTwinUpdateOperations)
     {
-        return digitalTwin.updateDigitalTwinWithServiceResponseAsync(digitalTwinId, digitalTwinUpdateOperations)
-                .subscribeOn(Schedulers.io());
+        return updateDigitalTwinWithResponse(digitalTwinId, digitalTwinUpdateOperations, null);
     }
 
     /**
@@ -149,13 +148,12 @@ public class DigitalTwinAsyncClient {
      * Invoke a command on a digital twin.
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
-     * @param payload The command payload.
-     * @return The application/json command invocation response.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public Observable<String> invokeCommand (@NonNull String digitalTwinId, @NonNull String commandName, String payload)
+    public Observable<DigitalTwinCommandResponse> invokeCommand (@NonNull String digitalTwinId, @NonNull String commandName)
     {
-        return digitalTwin.invokeRootLevelCommandAsync(digitalTwinId, commandName, payload, null, null)
-                .flatMap(FUNC_MAP_TO_JSON_STRING);
+        return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName)
+                .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
     }
 
     /**
@@ -163,9 +161,9 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
      * @param payload The command payload.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and the application/json command invocation response.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeCommandWithResponse (@NonNull String digitalTwinId, @NonNull String commandName, String payload)
+    public Observable<DigitalTwinCommandResponse> invokeCommand (@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload)
     {
         return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payload, null, null)
                 .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
@@ -177,12 +175,12 @@ public class DigitalTwinAsyncClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @param options The optional settings for this request.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and the application/json command invocation response.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeCommandWithResponse (@NonNull String digitalTwinId, @NonNull String commandName, @NonNull DigitalTwinInvokeCommandRequestOptions options, @NonNull String payload)
+    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeCommandWithResponse (@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload, @NonNull DigitalTwinInvokeCommandRequestOptions options)
     {
         return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payload, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
+                .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE_WITH_HEADERS);
     }
 
     /**
@@ -190,13 +188,12 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
-     * @param payload The command payload.
-     * @return The application/json command invocation response.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public Observable<String> invokeComponentCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload)
+    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName)
     {
-        return digitalTwin.invokeComponentCommandAsync(digitalTwinId, componentName, commandName, payload, null, null)
-                .flatMap(FUNC_MAP_TO_JSON_STRING);
+        return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName)
+                .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
     }
 
     /**
@@ -205,9 +202,9 @@ public class DigitalTwinAsyncClient {
      * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
      * @param payload The command payload.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and the application/json command invocation response.
+     * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeComponentCommandWithResponse (@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload)
+    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload)
     {
         return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payload, null, null)
                 .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
@@ -220,11 +217,11 @@ public class DigitalTwinAsyncClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @param options The optional settings for this request.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and the application/json command invocation response.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeComponentCommandWithResponse (@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull DigitalTwinInvokeCommandRequestOptions options, @NonNull String payload)
+    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeComponentCommandWithResponse (@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload, @NonNull DigitalTwinInvokeCommandRequestOptions options)
     {
         return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payload, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
+                .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE_WITH_HEADERS);
     }
 }
