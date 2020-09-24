@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 import lombok.Getter;
 import lombok.Setter;
 
-public class DigitalTwinInvokeCommandRequestOptions {
+public final class DigitalTwinInvokeCommandRequestOptions {
 
     @Getter
     @Setter

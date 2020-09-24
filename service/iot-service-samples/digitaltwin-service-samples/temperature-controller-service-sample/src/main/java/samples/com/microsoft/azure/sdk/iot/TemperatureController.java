@@ -143,7 +143,7 @@ public class TemperatureController {
 
         DigitalTwinInvokeCommandRequestOptions options = new DigitalTwinInvokeCommandRequestOptions();
         ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeComponentCommandWithResponse(digitalTwinid, componentName, commandName, commandInput, options);
-        System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload());
+        System.out.println("Command " + commandName + ", payload: " + prettyString(commandResponse.body().getPayload()));
         System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
         System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
     }
