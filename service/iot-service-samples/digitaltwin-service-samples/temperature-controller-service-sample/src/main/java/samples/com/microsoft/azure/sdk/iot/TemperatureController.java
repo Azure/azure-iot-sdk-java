@@ -80,7 +80,7 @@ public class TemperatureController {
         options.setIfMatch(getResponse.headers().eTag());
         String path = "/newThermostat";
         Map<String, Object> properties = new HashMap<>();
-        properties.put("targetTemperature", 50);
+        properties.put(propertyName, 50);
         updateOperationUtility.appendAddComponentOperation(path, properties);
         List<Object> digitalTwinUpdateOperations = updateOperationUtility.getUpdateOperations();
         ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateResponse = client.updateDigitalTwinWithResponse(digitalTwinid, digitalTwinUpdateOperations, options);
@@ -93,11 +93,11 @@ public class TemperatureController {
         options.setIfMatch(getResponse.headers().eTag());
         path = "/thermostat1";
         Map<String, Object> t1properties = new HashMap<>();
-        t1properties.put("targetTemperature", 50);
+        t1properties.put(propertyName, 50);
         updateOperationUtility.appendReplaceComponentOperation(path, t1properties);
         path = "/thermostat2";
         Map<String, Object> t2properties = new HashMap<>();
-        t2properties.put("targetTemperature", 40);
+        t2properties.put(propertyName, 40);
         updateOperationUtility.appendReplaceComponentOperation(path, t2properties);
         digitalTwinUpdateOperations = updateOperationUtility.getUpdateOperations();
         updateResponse = client.updateDigitalTwinWithResponse(digitalTwinid, digitalTwinUpdateOperations, options);
