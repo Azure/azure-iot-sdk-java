@@ -21,12 +21,12 @@ public class PnpHelper {
     /**
      * Create the DPS payload to provision a device as plug and play.
      * For more information on device provisioning service and plug and play compatibility,
-     * and PnP device certification, see {@linktourl https://docs.microsoft.com/en-us/azure/iot-pnp/howto-certify-device}
+     * and PnP device certification, see https://docs.microsoft.com/en-us/azure/iot-pnp/howto-certify-device
      * The DPS payload should be in the format:
      * {
      *     "modelId": "dtmi:com:example:modelName;1"
      * }
-     * For information on DTDL, see {@linktourl https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md}
+     * For information on DTDL, see https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md
      * @param modelId The Id of the model the device adheres to for properties, telemetry, and commands.
      * @return The DPS payload to provision a device as plug and play.
      */
