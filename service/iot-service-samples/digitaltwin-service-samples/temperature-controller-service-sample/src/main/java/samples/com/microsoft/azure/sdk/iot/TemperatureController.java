@@ -57,17 +57,18 @@ public class TemperatureController {
         client = new DigitalTwinClient(asyncClient);
     }
 
-    private static void GetDigitalTwin()
+    private static ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> GetDigitalTwin()
     {
         ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
         System.out.println("Digital Twin: " + prettyString(getResponse.body()));
         System.out.println("Digital Twin eTag: " + getResponse.headers().eTag());
         System.out.println("Digital Twin get response message: " + getResponse.response().message());
+        return getResponse;
     }
 
     private static void UpdateDigitalTwinComponentProperty() {
         // Get digital twin.
-        ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
+        ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> getResponse = GetDigitalTwin();
 
         // Construct the options for conditional update.
         DigitalTwinUpdateRequestOptions options = new DigitalTwinUpdateRequestOptions();
@@ -86,8 +87,7 @@ public class TemperatureController {
         ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateResponse = client.updateDigitalTwinWithResponse(digitalTwinid, digitalTwinUpdateOperations, options);
         System.out.println("Update Digital Twin response status: " + updateResponse.response().message());
 
-        getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after adding a new component: " + getResponse.body());
+        getResponse = GetDigitalTwin();
 
         // Replace an existing component.
         options.setIfMatch(getResponse.headers().eTag());
@@ -103,8 +103,7 @@ public class TemperatureController {
         updateResponse = client.updateDigitalTwinWithResponse(digitalTwinid, digitalTwinUpdateOperations, options);
         System.out.println("Update Digital Twin response status: " + updateResponse.response().message());
 
-        getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after replacing an existing component: " + getResponse.body());
+        getResponse = GetDigitalTwin();
 
         // Remove an existing component.
         options.setIfMatch(getResponse.headers().eTag());
@@ -114,8 +113,7 @@ public class TemperatureController {
         updateResponse = client.updateDigitalTwinWithResponse(digitalTwinid, digitalTwinUpdateOperations, options);
         System.out.println("Update Digital Twin response status: " + updateResponse.response().message());
 
-        getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after removing the new component: " + getResponse.body());
+        GetDigitalTwin();
     }
 
     private static void InvokeMethodOnComponent()

@@ -62,24 +62,21 @@ public class Thermostat {
         client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
         System.out.println("Update Digital Twin");
 
-        String getResponse = client.getDigitalTwin(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after adding a new property: " + getResponse);
+        GetDigitalTwin();
 
         // Replace an existing property at root level.
         updateOperationUtility.appendReplacePropertyOperation("/targetTemperature", 50);
         client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
         System.out.println("Update Digital Twin");
 
-        getResponse = client.getDigitalTwin(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after replacing an existing property: " + getResponse);
+        GetDigitalTwin();
 
         // Remove a property at root level.
         updateOperationUtility.appendRemovePropertyOperation("/currentTemperature");
         client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
         System.out.println("Update Digital Twin");
 
-        getResponse = client.getDigitalTwin(digitalTwinid, String.class);
-        System.out.println("Updated Digital Twin after removing the new property: " + getResponse);
+        GetDigitalTwin();
     }
 
     private static void InvokeMethodOnRootLevel()
