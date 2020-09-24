@@ -56,24 +56,24 @@ public class Thermostat {
         // Add a new property at root level.
         updateOperationUtility.appendAddPropertyOperation("/currentTemperature", 35);
         updateOperationUtility.appendAddPropertyOperation("/targetTemperature", 35);
-        ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateresponse = client.updateDigitalTwinWithResponse(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin response status : " + updateresponse.response().message());
+        client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
+        System.out.println("Update Digital Twin");
 
         String getResponse = client.getDigitalTwin(digitalTwinid, String.class);
         System.out.println("Updated Digital Twin after adding a new property: " + getResponse);
 
         // Replace an existing property at root level.
         updateOperationUtility.appendReplacePropertyOperation("/targetTemperature", 50);
-        updateresponse = client.updateDigitalTwinWithResponse(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin response status : " + updateresponse.response().message());
+        client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
+        System.out.println("Update Digital Twin");
 
         getResponse = client.getDigitalTwin(digitalTwinid, String.class);
         System.out.println("Updated Digital Twin after replacing an existing property: " + getResponse);
 
         // Remove a property at root level.
         updateOperationUtility.appendRemovePropertyOperation("/currentTemperature");
-        updateresponse = client.updateDigitalTwinWithResponse(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin response status : " + updateresponse.response().message());
+        client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
+        System.out.println("Update Digital Twin");
 
         getResponse = client.getDigitalTwin(digitalTwinid, String.class);
         System.out.println("Updated Digital Twin after removing an existing property: " + getResponse);

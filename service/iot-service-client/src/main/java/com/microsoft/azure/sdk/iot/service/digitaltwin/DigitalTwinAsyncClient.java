@@ -111,6 +111,18 @@ public class DigitalTwinAsyncClient {
      * Updates a digital twin.
      * @param digitalTwinId The Id of the digital twin.
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
+     * @return void.
+     */
+    public Observable<Void> updateDigitalTwin (@NonNull String digitalTwinId, @NonNull List<Object> digitalTwinUpdateOperations)
+    {
+        return digitalTwin.updateDigitalTwinAsync(digitalTwinId, digitalTwinUpdateOperations)
+                .subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * Updates a digital twin.
+     * @param digitalTwinId The Id of the digital twin.
+     * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
      */
     public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (@NonNull String digitalTwinId, @NonNull List<Object> digitalTwinUpdateOperations)

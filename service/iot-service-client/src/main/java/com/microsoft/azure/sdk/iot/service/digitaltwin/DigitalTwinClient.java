@@ -13,6 +13,8 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateR
 import com.microsoft.rest.*;
 import lombok.NonNull;
 import lombok.Setter;
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.util.List;
 
@@ -55,6 +57,18 @@ public class DigitalTwinClient {
     {
         return digitalTwinAsyncClient.getDigitalTwinWithResponse(digitalTwinId, clazz)
                 .toBlocking().single();
+    }
+
+    /**
+     * Updates a digital twin.
+     * @param digitalTwinId The Id of the digital twin.
+     * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
+     * @return void.
+     */
+    public Void updateDigitalTwin (@NonNull String digitalTwinId, @NonNull List<Object> digitalTwinUpdateOperations)
+    {
+        return digitalTwinAsyncClient.updateDigitalTwin(digitalTwinId, digitalTwinUpdateOperations)
+            .toBlocking().single();
     }
 
     /**
