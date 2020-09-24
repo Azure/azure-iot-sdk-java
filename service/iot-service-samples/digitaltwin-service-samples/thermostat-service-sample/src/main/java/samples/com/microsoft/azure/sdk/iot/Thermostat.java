@@ -1,11 +1,11 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
-import com.microsoft.rest.ServiceResponseWithHeaders;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;

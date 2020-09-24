@@ -1,7 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package com.microsoft.azure.sdk.iot.service.digitaltwin.helpers;
-
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
