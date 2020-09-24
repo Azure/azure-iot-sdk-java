@@ -15,8 +15,6 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateR
 import com.microsoft.rest.*;
 import lombok.NonNull;
 import lombok.Setter;
-import rx.Observable;
-import rx.schedulers.Schedulers;
 
 import java.util.List;
 

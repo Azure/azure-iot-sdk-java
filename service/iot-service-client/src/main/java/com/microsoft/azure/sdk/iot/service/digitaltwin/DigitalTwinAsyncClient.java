@@ -4,10 +4,10 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.SasTokenProvider;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientCredentialsProvider;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionString;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionStringParser;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.IotHubGatewayServiceAPIsImpl;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
@@ -28,6 +28,7 @@ import lombok.Setter;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,18 +45,18 @@ public class DigitalTwinAsyncClient {
      * @param connectionString The IoTHub connection string
      */
     @Builder(builderMethodName = "buildFromConnectionString", builderClassName = "FromConnectionStringBuilder")
-    public DigitalTwinAsyncClient(@NonNull String connectionString) {
-        ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
-        SasTokenProvider sasTokenProvider = serviceConnectionString.createSasTokenProvider();
-        String httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
+    public DigitalTwinAsyncClient(@NonNull String connectionString) throws IOException {
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
+        String httpsEndpoint = "https://" + iotHubConnectionString.getHostName();
 
-        init(sasTokenProvider, httpsEndpoint);
+        init(iotHubServiceSasToken.toString(), httpsEndpoint);
     }
 
-    private void init(SasTokenProvider sasTokenProvider, String httpsEndpoint) {
+    private void init(String sasToken, String httpsEndpoint) {
         RestClient simpleRestClient = new RestClient.Builder()
                 .withBaseUrl(httpsEndpoint)
-                .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
+                .withCredentials(new ServiceClientCredentialsProvider(sasToken))
                 .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
                 .withSerializerAdapter(new JacksonAdapter())
                 .build();

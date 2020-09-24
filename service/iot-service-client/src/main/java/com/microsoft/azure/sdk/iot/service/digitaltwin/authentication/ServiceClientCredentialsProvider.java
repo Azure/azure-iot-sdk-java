@@ -15,14 +15,14 @@ public class ServiceClientCredentialsProvider implements ServiceClientCredential
 
     private static final String AUTHORIZATION = "Authorization";
     @NonNull
-    private final SasTokenProvider sasTokenProvider;
+    private final String sasToken;
 
     @Override
     public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
         Interceptor authenticationInterceptor = chain -> {
             Request authenticatedRequest = chain.request()
                                                 .newBuilder()
-                                                .header(AUTHORIZATION, sasTokenProvider.getSasToken())
+                                                .header(AUTHORIZATION, sasToken)
                                                 .build();
             return chain.proceed(authenticatedRequest);
         };

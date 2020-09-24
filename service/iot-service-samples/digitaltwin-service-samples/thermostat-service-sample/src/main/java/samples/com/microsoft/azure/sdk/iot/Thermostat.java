@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUt
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
 
+import java.io.IOException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,11 +23,11 @@ public class Thermostat {
 
     private static DigitalTwinClient client;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         RunSample();
     }
 
-    private static void RunSample() {
+    private static void RunSample() throws IOException {
         System.out.println("Initialize the service client.");
         InitializeServiceClient();
 
@@ -46,7 +47,7 @@ public class Thermostat {
         InvokeMethodOnRootLevel();
     }
 
-    private static void InitializeServiceClient() {
+    private static void InitializeServiceClient() throws IOException {
         DigitalTwinAsyncClient asyncClient = new DigitalTwinAsyncClient(iotHubConnectionString);
         client = new DigitalTwinClient(asyncClient);
     }
