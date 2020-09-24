@@ -119,7 +119,8 @@ public class TemperatureController {
         String commandName = "getMaxMinReport";
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
 
-        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeComponentCommandWithResponse(digitalTwinid, componentName, commandName, commandInput);
+        DigitalTwinInvokeCommandRequestOptions options = new DigitalTwinInvokeCommandRequestOptions();
+        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeComponentCommandWithResponse(digitalTwinid, componentName, commandName, commandInput, options);
         System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload());
         System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
         System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
@@ -134,7 +135,7 @@ public class TemperatureController {
         options.setConnectTimeoutInSeconds(5);
         options.setResponseTimeoutInSeconds(10);
 
-        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeCommandWithResponse(digitalTwinid, commandName, options, commandInput);
+        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeCommandWithResponse(digitalTwinid, commandName, commandInput, options);
         System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload());
         System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
         System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());

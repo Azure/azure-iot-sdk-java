@@ -4,6 +4,7 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 
 import java.time.ZoneOffset;
@@ -56,24 +57,24 @@ public class Thermostat {
         // Add a new property at root level.
         updateOperationUtility.appendAddPropertyOperation("/currentTemperature", 35);
         updateOperationUtility.appendAddPropertyOperation("/targetTemperature", 35);
-        ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateresponse = client.updateDigitalTwinWithResponse(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin response status : " + updateresponse.response().message());
+        client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
+        System.out.println("Update Digital Twin");
 
         String getResponse = client.getDigitalTwin(digitalTwinid, String.class);
         System.out.println("Updated Digital Twin after adding a new property: " + getResponse);
 
         // Replace an existing property at root level.
         updateOperationUtility.appendReplacePropertyOperation("/targetTemperature", 50);
-        updateresponse = client.updateDigitalTwinWithResponse(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin response status : " + updateresponse.response().message());
+        client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
+        System.out.println("Update Digital Twin");
 
         getResponse = client.getDigitalTwin(digitalTwinid, String.class);
         System.out.println("Updated Digital Twin after replacing an existing property: " + getResponse);
 
         // Remove a property at root level.
         updateOperationUtility.appendRemovePropertyOperation("/currentTemperature");
-        updateresponse = client.updateDigitalTwinWithResponse(digitalTwinid, updateOperationUtility.getUpdateOperations());
-        System.out.println("Update Digital Twin response status : " + updateresponse.response().message());
+        client.updateDigitalTwin(digitalTwinid, updateOperationUtility.getUpdateOperations());
+        System.out.println("Update Digital Twin");
 
         getResponse = client.getDigitalTwin(digitalTwinid, String.class);
         System.out.println("Updated Digital Twin after removing an existing property: " + getResponse);
@@ -85,7 +86,7 @@ public class Thermostat {
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
 
         // Invoke a method on root level.
-        String response = client.invokeCommand(digitalTwinid, commandName, commandInput);
-        System.out.println("Invoked Command " + commandName + " response: " + response);
+        DigitalTwinCommandResponse response = client.invokeCommand(digitalTwinid, commandName, commandInput);
+        System.out.println("Invoked Command " + commandName + " response: " + response.getPayload());
     }
 }
