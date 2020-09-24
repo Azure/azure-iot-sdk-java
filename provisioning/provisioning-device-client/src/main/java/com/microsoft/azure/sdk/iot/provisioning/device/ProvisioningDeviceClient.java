@@ -110,6 +110,7 @@ public class ProvisioningDeviceClient
      * @param provisioningDeviceClientRegistrationCallback Callback where you can retrieve the status of registration like iothub uri and the registered device or
      *                                                     any exception that was caused during registration process. Cannot be {@code null}.
      * @param context Context for the callback. Can be {@code null}.
+     * @param additionalData Additional data to register device.
      * @throws ProvisioningDeviceClientException if any of the underlying API calls fail to process.
      */
     public void registerDevice(ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback, Object context, AdditionalData additionalData) throws ProvisioningDeviceClientException

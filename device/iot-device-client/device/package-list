@@ -1,0 +1,16 @@
+com.microsoft.azure.sdk.iot.device
+com.microsoft.azure.sdk.iot.device.DeviceTwin
+com.microsoft.azure.sdk.iot.device.auth
+com.microsoft.azure.sdk.iot.device.edge
+com.microsoft.azure.sdk.iot.device.exceptions
+com.microsoft.azure.sdk.iot.device.fileupload
+com.microsoft.azure.sdk.iot.device.hsm
+com.microsoft.azure.sdk.iot.device.hsm.parser
+com.microsoft.azure.sdk.iot.device.net
+com.microsoft.azure.sdk.iot.device.plugandplay
+com.microsoft.azure.sdk.iot.device.transport
+com.microsoft.azure.sdk.iot.device.transport.amqps
+com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions
+com.microsoft.azure.sdk.iot.device.transport.https
+com.microsoft.azure.sdk.iot.device.transport.mqtt
+com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions

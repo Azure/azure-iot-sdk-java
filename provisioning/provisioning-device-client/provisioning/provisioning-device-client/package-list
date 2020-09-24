@@ -1,0 +1,10 @@
+com.microsoft.azure.sdk.iot.provisioning.device
+com.microsoft.azure.sdk.iot.provisioning.device.internal
+com.microsoft.azure.sdk.iot.provisioning.device.internal.contract
+com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.amqp
+com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http
+com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.mqtt
+com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions
+com.microsoft.azure.sdk.iot.provisioning.device.internal.parser
+com.microsoft.azure.sdk.iot.provisioning.device.internal.task
+com.microsoft.azure.sdk.iot.provisioning.device.plugandplay

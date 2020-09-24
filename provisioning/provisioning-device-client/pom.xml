@@ -37,6 +37,24 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <repositories>
+        <repository>
+            <id>AzureIotSdks</id>
+            <url>https://azure-iot-sdks.pkgs.visualstudio.com/azure-iot-sdks/_packaging/AzureIotSdks/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <repository>
+            <id>AzureIotSdks</id>
+            <url>https://azure-iot-sdks.pkgs.visualstudio.com/azure-iot-sdks/_packaging/AzureIotSdks/maven/v1</url>
+        </repository>
+    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
