@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
 
 import java.time.ZoneOffset;
@@ -53,8 +54,8 @@ public class Thermostat {
     private static void GetDigitalTwin()
     {
         // Get the digital twin.
-        String getResponse = client.getDigitalTwin(digitalTwinid, String.class);
-        System.out.println("Digital Twin: " + prettyString(getResponse));
+        BasicDigitalTwin getResponse = client.getDigitalTwin(digitalTwinid, BasicDigitalTwin.class);
+        System.out.println("Digital Twin: " + prettyBasicDigitalTwin(getResponse));
     }
 
     private static void UpdateDigitalTwin()
@@ -66,7 +67,7 @@ public class Thermostat {
         String newProperty = "currentTemperature";
         String existingProperty = "targetTemperature";
         System.out.println("--------------------------------------------------------------------------------------------");
-        System.out.println("Add properties at root level " + newProperty + " and " + existingProperty);
+        System.out.println("Add properties at root level - " + newProperty + " and " + existingProperty);
         System.out.println("--------------------------------------------------------------------------------------------");
         updateOperationUtility.appendAddPropertyOperation("/" + newProperty, 35);
         updateOperationUtility.appendAddPropertyOperation("/" + existingProperty, 35);
@@ -103,7 +104,13 @@ public class Thermostat {
 
         // Invoke a method on root level.
         DigitalTwinCommandResponse response = client.invokeCommand(digitalTwinid, commandName, commandInput);
-        System.out.println("Invoked Command " + commandName + " response: " + response.getPayload());
+        System.out.println("Invoked Command " + commandName + " response: " + prettyString(response.getPayload()));
+    }
+
+    private static String prettyBasicDigitalTwin(BasicDigitalTwin basicDigitalTwin)
+    {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(basicDigitalTwin);
     }
 
     private static String prettyString(String str)
