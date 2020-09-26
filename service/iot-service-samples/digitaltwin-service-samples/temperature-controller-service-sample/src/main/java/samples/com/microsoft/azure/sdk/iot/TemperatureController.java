@@ -4,15 +4,14 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 
 import java.time.ZoneOffset;
@@ -68,9 +67,13 @@ public class TemperatureController {
     private static ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> GetDigitalTwin()
     {
         ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> getResponse = client.getDigitalTwinWithResponse(digitalTwinid, String.class);
+        JsonObject jsonObject = new JsonParser().parse(getResponse.body()).getAsJsonObject();
+        String modelId = jsonObject.getAsJsonObject("$metadata").get("$model").getAsString();
+        System.out.println("Digital Twin Model Id:" + modelId);
         System.out.println("Digital Twin: " + prettyString(getResponse.body()));
         System.out.println("Digital Twin eTag: " + getResponse.headers().eTag());
         System.out.println("Digital Twin get response message: " + getResponse.response().message());
+
         return getResponse;
     }
 
@@ -162,7 +165,7 @@ public class TemperatureController {
         System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
         System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
     }
-
+    
     private static String prettyString(String str)
     {
         Gson gson = new Gson();
