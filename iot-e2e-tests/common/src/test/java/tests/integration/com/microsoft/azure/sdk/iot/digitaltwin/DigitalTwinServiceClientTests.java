@@ -1,24 +1,25 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.simulator.TestDigitalTwinDevice;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
+import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.TwinPnPTests;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -36,10 +37,13 @@ import static org.junit.Assert.assertEquals;
 public class DigitalTwinServiceClientTests extends IntegrationTest
 {
 
-    protected static String iotHubConnectionString = "";
-    private TestDigitalTwinDevice testDevice;
+    private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
+    private static RegistryManager registryManager;
+    private String deviceId;
+    private DeviceClient deviceClient;
     private DigitalTwinClient digitalTwinClient = null;
-    private static final String DEVICE_ID_PREFIX = "DigitalTwinE2ETests_";
+    private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientTests_";
+    public TwinPnPTests.TwinPnPTestInstance testInstance;
 
     @Rule
     public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
@@ -55,24 +59,52 @@ public class DigitalTwinServiceClientTests extends IntegrationTest
         });
     }
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws IOException {
+        registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+    }
+
     @Before
     public void setUp() throws URISyntaxException, IOException, IotHubException {
-        testDevice = new TestDigitalTwinDevice(DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString()), protocol);
-        testDevice.getDeviceClient().open();
-        iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        DigitalTwinAsyncClient asyncClient = new DigitalTwinAsyncClient(iotHubConnectionString);
+
+        this.deviceClient = createDeviceClient(protocol);
+        deviceClient.open();
+        DigitalTwinAsyncClient asyncClient = new DigitalTwinAsyncClient(IOTHUB_CONNECTION_STRING);
         digitalTwinClient = new DigitalTwinClient(asyncClient);
     }
 
     @After
-    public void cleanUp(){
-        testDevice.closeAndDeleteDevice();
+    public void cleanUp() {
+        try {
+            deviceClient.closeNow();
+            registryManager.removeDevice(deviceId);
+            registryManager.close();
+        } catch (Exception ex) {
+            log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);
+        }
+    }
+
+    private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
+        ClientOptions options = new ClientOptions();
+        options.setModelId(E2ETestConstants.MODEL_ID);
+
+        this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
+        Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
+        Device registeredDevice = registryManager.addDevice(device);
+        String deviceConnectionString = registryManager.getDeviceConnectionString(registeredDevice);
+        return new DeviceClient(deviceConnectionString, protocol, options);
+    }
+
+    @AfterClass
+    public static void cleanUpAfterClass()
+    {
+        registryManager.close();
     }
 
     @Test
     @DigitalTwinTest
     public void getDigitalTwin() {
-        BasicDigitalTwin getResponse = this.digitalTwinClient.getDigitalTwin(testDevice.getDeviceId(), BasicDigitalTwin.class);
+        BasicDigitalTwin getResponse = this.digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
         assertEquals(getResponse.getMetadata().getModelId(), E2ETestConstants.MODEL_ID);
     }
 
