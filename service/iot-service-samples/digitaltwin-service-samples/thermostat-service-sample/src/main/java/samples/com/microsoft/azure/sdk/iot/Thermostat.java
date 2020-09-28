@@ -55,6 +55,7 @@ public class Thermostat {
     {
         // Get the digital twin.
         BasicDigitalTwin getResponse = client.getDigitalTwin(digitalTwinid, BasicDigitalTwin.class);
+        System.out.println("Digital Twin Model Id: " + getResponse.getMetadata().getModelId());
         System.out.println("Digital Twin: " + prettyBasicDigitalTwin(getResponse));
     }
 
