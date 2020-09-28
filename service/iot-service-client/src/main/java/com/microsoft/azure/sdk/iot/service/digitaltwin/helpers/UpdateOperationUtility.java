@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.service.digitaltwin.helpers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,7 +38,6 @@ public final class UpdateOperationUtility {
      * @return The UpdateOperationUtility object itself.
      */
     public UpdateOperationUtility appendAddPropertyOperation(String path, Object value) {
-
         operations.add(
                 new UpdateOperation()
                         .setOperation(ADD)

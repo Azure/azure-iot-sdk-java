@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,8 +16,6 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateR
 import com.microsoft.rest.*;
 import lombok.NonNull;
 import lombok.Setter;
-import rx.Observable;
-import rx.schedulers.Schedulers;
 
 import java.util.List;
 
@@ -25,7 +24,6 @@ import static lombok.AccessLevel.PACKAGE;
 public class DigitalTwinClient {
     @Setter(PACKAGE)
     private final DigitalTwinAsyncClient digitalTwinAsyncClient;
-    private static ObjectMapper objectMapper = new ObjectMapper();
 
     /***
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
@@ -165,6 +163,7 @@ public class DigitalTwinClient {
      * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
      * @param payload The command payload.
+     * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
      */
     public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload, @NonNull DigitalTwinInvokeCommandRequestOptions options) {
