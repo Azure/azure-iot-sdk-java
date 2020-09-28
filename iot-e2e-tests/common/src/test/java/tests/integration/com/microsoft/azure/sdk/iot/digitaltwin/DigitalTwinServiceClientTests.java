@@ -43,7 +43,6 @@ public class DigitalTwinServiceClientTests extends IntegrationTest
     private DeviceClient deviceClient;
     private DigitalTwinClient digitalTwinClient = null;
     private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientTests_";
-    public TwinPnPTests.TwinPnPTestInstance testInstance;
 
     @Rule
     public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
