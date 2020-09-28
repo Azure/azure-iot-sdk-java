@@ -15,8 +15,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.simulator.TestDigitalTwinDevice;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -31,7 +33,8 @@ import static org.junit.Assert.assertEquals;
 @DigitalTwinTest
 @Slf4j
 @RunWith(Parameterized.class)
-public class DigitalTwinServiceClientTests {
+public class DigitalTwinServiceClientTests extends IntegrationTest
+{
 
     protected static String iotHubConnectionString = "";
     private TestDigitalTwinDevice testDevice;
@@ -67,6 +70,7 @@ public class DigitalTwinServiceClientTests {
     }
 
     @Test
+    @DigitalTwinTest
     public void getDigitalTwin() {
         BasicDigitalTwin getResponse = this.digitalTwinClient.getDigitalTwin(testDevice.getDeviceId(), BasicDigitalTwin.class);
         assertEquals(getResponse.getMetadata().getModelId(), E2ETestConstants.MODEL_ID);
