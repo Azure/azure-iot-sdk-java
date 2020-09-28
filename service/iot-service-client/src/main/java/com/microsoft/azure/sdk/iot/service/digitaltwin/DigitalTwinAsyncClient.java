@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -52,18 +53,6 @@ public class DigitalTwinAsyncClient {
         init(sasTokenProvider, httpsEndpoint);
     }
 
-    private void init(SasTokenProvider sasTokenProvider, String httpsEndpoint) {
-        RestClient simpleRestClient = new RestClient.Builder()
-                .withBaseUrl(httpsEndpoint)
-                .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
-                .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
-                .withSerializerAdapter(new JacksonAdapter())
-                .build();
-
-        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
-        digitalTwin = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
-    }
-
     /**
      * Gets a digital twin.
      * @param digitalTwinId The Id of the digital twin.
@@ -75,14 +64,12 @@ public class DigitalTwinAsyncClient {
     {
         return digitalTwin.getDigitalTwinAsync(digitalTwinId)
                 .filter(Objects::nonNull)
-                .map(response -> {
-                    T genericResponse = null;
+                .flatMap(response -> {
                     try {
-                        genericResponse = DeserializationHelpers.castObject(objectMapper, response, clazz);
+                        return Observable.just(DeserializationHelpers.castObject(objectMapper, response, clazz));
                     } catch (JsonProcessingException e) {
-                        Observable.error(e);
+                        return Observable.error(e);
                     }
-                    return genericResponse;
                 })
                 .subscribeOn(Schedulers.io());
     }
@@ -97,14 +84,14 @@ public class DigitalTwinAsyncClient {
     public <T> Observable<ServiceResponseWithHeaders<T, DigitalTwinGetHeaders>> getDigitalTwinWithResponse (@NonNull String digitalTwinId, Class<T> clazz)
     {
         return digitalTwin.getDigitalTwinWithServiceResponseAsync(digitalTwinId)
-                .map(response -> {
-                    T genericResponse = null;
+                .flatMap(response -> {
                     try {
-                        genericResponse = DeserializationHelpers.castObject(objectMapper, response.body(), clazz);
+                        T genericResponse = DeserializationHelpers.castObject(objectMapper, response.body(), clazz);
+                        return Observable.just(new ServiceResponseWithHeaders<>(genericResponse, response.headers(), response.response()));
                     } catch (JsonProcessingException e) {
-                        Observable.error(e);
+                        return Observable.error(e);
                     }
-                    return new ServiceResponseWithHeaders<>(genericResponse, response.headers(), response.response());
+
                 })
                 .subscribeOn(Schedulers.io());
     }
@@ -225,5 +212,17 @@ public class DigitalTwinAsyncClient {
     {
         return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payload, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
                 .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE_WITH_HEADERS);
+    }
+
+    private void init(SasTokenProvider sasTokenProvider, String httpsEndpoint) {
+        RestClient simpleRestClient = new RestClient.Builder()
+                .withBaseUrl(httpsEndpoint)
+                .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
+                .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
+                .withSerializerAdapter(new JacksonAdapter())
+                .build();
+
+        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
+        digitalTwin = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
     }
 }

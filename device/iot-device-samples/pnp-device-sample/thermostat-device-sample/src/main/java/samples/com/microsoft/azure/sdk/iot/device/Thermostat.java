@@ -39,8 +39,7 @@ public class Thermostat {
 
     // DTDL interface used: https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
-    // Defaulting to DPS flow for bug bash
-    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE") == null ? "dps" : System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
+    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String MODEL_ID = "dtmi:com:example:Thermostat;1";
 
     // Environmental variables for Dps

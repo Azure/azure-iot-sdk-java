@@ -44,8 +44,7 @@ public class TemperatureController {
 
     // DTDL interface used: https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
-    // Defaulting to DPS flow for bug bash
-    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE") == null ? "dps" : System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
+    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String MODEL_ID = "dtmi:com:example:TemperatureController;1";
     private static final String THERMOSTAT_1 = "thermostat1";
     private static final String THERMOSTAT_2 = "thermostat2";
