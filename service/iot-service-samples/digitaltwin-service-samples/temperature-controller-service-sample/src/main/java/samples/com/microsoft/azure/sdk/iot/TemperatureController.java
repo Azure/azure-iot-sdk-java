@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUt
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 
+import java.io.IOException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,11 +32,11 @@ public class TemperatureController {
 
     private static DigitalTwinClient client;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         RunSample();
     }
 
-    private static void RunSample() {
+    private static void RunSample() throws IOException {
         System.out.println("Initialize the service client.");
         InitializeServiceClient();
 
@@ -61,8 +62,7 @@ public class TemperatureController {
     }
 
     private static void InitializeServiceClient() {
-        DigitalTwinAsyncClient asyncClient = new DigitalTwinAsyncClient(iotHubConnectionString);
-        client = new DigitalTwinClient(asyncClient);
+        client = DigitalTwinClient.createFromConnectionString(iotHubConnectionString);
     }
 
     private static ServiceResponseWithHeaders<String, DigitalTwinGetHeaders> GetDigitalTwin()
@@ -140,8 +140,7 @@ public class TemperatureController {
         GetDigitalTwin();
     }
 
-    private static void InvokeMethodOnComponent()
-    {
+    private static void InvokeMethodOnComponent() throws IOException {
         String commandName = "getMaxMinReport";
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
 
@@ -152,8 +151,7 @@ public class TemperatureController {
         System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
     }
 
-    private static void InvokeMethodOnRootLevel()
-    {
+    private static void InvokeMethodOnRootLevel() throws IOException {
         String commandName = "reboot";
         String commandInput = "5";
 

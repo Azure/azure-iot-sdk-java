@@ -116,10 +116,7 @@ public final class UpdateOperationUtility {
      * @return The UpdateOperationUtility object itself.
      */
     public UpdateOperationUtility appendRemoveComponentOperation(String path) {
-        operations.add(
-                new UpdateOperation()
-                        .setOperation(REMOVE)
-                        .setPath(path));
+        appendRemovePropertyOperation(path);
 
         return this;
     }

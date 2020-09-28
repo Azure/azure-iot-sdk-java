@@ -23,34 +23,41 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeC
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
 import com.microsoft.rest.*;
 import com.microsoft.rest.serializer.JacksonAdapter;
-import lombok.Builder;
-import lombok.NonNull;
-import lombok.Setter;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
-import static lombok.AccessLevel.PACKAGE;
 
 public class DigitalTwinAsyncClient {
-    @Setter(PACKAGE)
     private DigitalTwinsImpl digitalTwin;
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    /***
-     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
-     * @param connectionString The IoTHub connection string
-     */
-    @Builder(builderMethodName = "buildFromConnectionString", builderClassName = "FromConnectionStringBuilder")
-    public DigitalTwinAsyncClient(@NonNull String connectionString) {
+     DigitalTwinAsyncClient(String connectionString) {
         ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
         SasTokenProvider sasTokenProvider = serviceConnectionString.createSasTokenProvider();
         String httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
 
-        init(sasTokenProvider, httpsEndpoint);
+        RestClient simpleRestClient = new RestClient.Builder()
+                .withBaseUrl(httpsEndpoint)
+                .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
+                .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
+                .withSerializerAdapter(new JacksonAdapter())
+                .build();
+
+        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
+        digitalTwin = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param connectionString The IoTHub connection string
+     */
+    public static DigitalTwinAsyncClient createFromConnectionString(String connectionString)
+    {
+        return new DigitalTwinAsyncClient(connectionString);
     }
 
     /**
@@ -60,18 +67,10 @@ public class DigitalTwinAsyncClient {
      * @param <T> The generic type to deserialize the application/json into.
      * @return The application/json of the digital twin.
      */
-    public <T> Observable<T> getDigitalTwin (@NonNull String digitalTwinId, Class<T> clazz)
+    public <T> Observable<T> getDigitalTwin (String digitalTwinId, Class<T> clazz)
     {
-        return digitalTwin.getDigitalTwinAsync(digitalTwinId)
-                .filter(Objects::nonNull)
-                .flatMap(response -> {
-                    try {
-                        return Observable.just(DeserializationHelpers.castObject(objectMapper, response, clazz));
-                    } catch (JsonProcessingException e) {
-                        return Observable.error(e);
-                    }
-                })
-                .subscribeOn(Schedulers.io());
+        return getDigitalTwinWithResponse(digitalTwinId, clazz)
+                .map(response -> response.body());
     }
 
     /**
@@ -81,7 +80,7 @@ public class DigitalTwinAsyncClient {
      * @param <T> The generic type to deserialize the application/json into.
      * @return A {@link ServiceResponseWithHeaders} representing deserialized application/json of the digital twin with {@link DigitalTwinGetHeaders}.
      */
-    public <T> Observable<ServiceResponseWithHeaders<T, DigitalTwinGetHeaders>> getDigitalTwinWithResponse (@NonNull String digitalTwinId, Class<T> clazz)
+    public <T> Observable<ServiceResponseWithHeaders<T, DigitalTwinGetHeaders>> getDigitalTwinWithResponse (String digitalTwinId, Class<T> clazz)
     {
         return digitalTwin.getDigitalTwinWithServiceResponseAsync(digitalTwinId)
                 .flatMap(response -> {
@@ -102,10 +101,10 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
      * @return void.
      */
-    public Observable<Void> updateDigitalTwin (@NonNull String digitalTwinId, @NonNull List<Object> digitalTwinUpdateOperations)
+    public Observable<Void> updateDigitalTwin (String digitalTwinId, List<Object> digitalTwinUpdateOperations)
     {
-        return digitalTwin.updateDigitalTwinAsync(digitalTwinId, digitalTwinUpdateOperations)
-                .subscribeOn(Schedulers.io());
+        return updateDigitalTwinWithResponse(digitalTwinId, digitalTwinUpdateOperations, null)
+                .map(response -> response.body());
     }
 
     /**
@@ -114,7 +113,7 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
      */
-    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (@NonNull String digitalTwinId, @NonNull List<Object> digitalTwinUpdateOperations)
+    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations)
     {
         return updateDigitalTwinWithResponse(digitalTwinId, digitalTwinUpdateOperations, null);
     }
@@ -126,7 +125,7 @@ public class DigitalTwinAsyncClient {
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
      */
-    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (@NonNull String digitalTwinId, @NonNull List<Object> digitalTwinUpdateOperations, @NonNull DigitalTwinUpdateRequestOptions options)
+    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations, DigitalTwinUpdateRequestOptions options)
     {
         String ifMatch = options != null ? options.getIfMatch() : null;
         return digitalTwin.updateDigitalTwinWithServiceResponseAsync(digitalTwinId, digitalTwinUpdateOperations, ifMatch)
@@ -138,11 +137,11 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     * @throws {@link IOException} can be thrown if the provided payload cannot be deserialized to an Object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeCommand (@NonNull String digitalTwinId, @NonNull String commandName)
-    {
-        return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName)
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
+    public Observable<DigitalTwinCommandResponse> invokeCommand (String digitalTwinId, String commandName) throws IOException {
+        return invokeCommandWithResponse(digitalTwinId, commandName, null, null)
+                .map(response -> response.body());
     }
 
     /**
@@ -151,11 +150,11 @@ public class DigitalTwinAsyncClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     * @throws {@link IOException} can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeCommand (@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload)
-    {
-        return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payload, null, null)
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
+    public Observable<DigitalTwinCommandResponse> invokeCommand (String digitalTwinId, String commandName, String payload) throws IOException {
+        return invokeCommandWithResponse(digitalTwinId, commandName, payload, null)
+                .map(response -> response.body());
     }
 
     /**
@@ -165,11 +164,18 @@ public class DigitalTwinAsyncClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     * @throws {@link IOException} can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeCommandWithResponse (@NonNull String digitalTwinId, @NonNull String commandName, @NonNull String payload, @NonNull DigitalTwinInvokeCommandRequestOptions options)
-    {
-        return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payload, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE_WITH_HEADERS);
+    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeCommandWithResponse (String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+        if(options == null)
+        {
+            options = new DigitalTwinInvokeCommandRequestOptions();
+        }
+
+        Object payloadAsObject = DeserializationHelpers.castObject(objectMapper, payload, Object.class);
+
+        return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payloadAsObject, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
+                .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
     }
 
     /**
@@ -178,11 +184,11 @@ public class DigitalTwinAsyncClient {
      * @param componentName The component name under which the command is defined.
      * @param commandName The command to be invoked.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     * @throws {@link IOException} can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName)
-    {
-        return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName)
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
+    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName) throws IOException {
+        return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, null, null)
+                .map(response -> response.body());
     }
 
     /**
@@ -192,11 +198,11 @@ public class DigitalTwinAsyncClient {
      * @param commandName The command to be invoked.
      * @param payload The command payload.
      * @return A {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     * @throws {@link IOException} can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload)
-    {
-        return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payload, null, null)
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
+    public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
+        return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null)
+                .map(response -> response.body());
     }
 
     /**
@@ -207,22 +213,17 @@ public class DigitalTwinAsyncClient {
      * @param payload The command payload.
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinInvokeRootLevelCommandHeaders} and {@link DigitalTwinCommandResponse} which contains the application/json command invocation response.
+     * @throws {@link IOException} can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
-    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeComponentCommandWithResponse (@NonNull String digitalTwinId, @NonNull String componentName, @NonNull String commandName, @NonNull String payload, @NonNull DigitalTwinInvokeCommandRequestOptions options)
-    {
-        return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payload, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
-                .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE_WITH_HEADERS);
-    }
+    public Observable<ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders>> invokeComponentCommandWithResponse (String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
+        if(options == null)
+        {
+            options = new DigitalTwinInvokeCommandRequestOptions();
+        }
 
-    private void init(SasTokenProvider sasTokenProvider, String httpsEndpoint) {
-        RestClient simpleRestClient = new RestClient.Builder()
-                .withBaseUrl(httpsEndpoint)
-                .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
-                .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
-                .withSerializerAdapter(new JacksonAdapter())
-                .build();
+        Object payloadAsObject = DeserializationHelpers.castObject(objectMapper, payload, Object.class);
 
-        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
-        digitalTwin = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+        return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payloadAsObject, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
+                .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
     }
 }
