@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalT
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import rx.Observable;
 import rx.functions.Func1;
@@ -28,7 +29,7 @@ public final class Tools {
             return Observable.just(result);
         }
         catch (JsonProcessingException e) {
-            return Observable.error(e);
+            return Observable.error(new IotHubException("Failed to parse the resonse"));
         }
 
     };
@@ -44,7 +45,7 @@ public final class Tools {
             return Observable.just(result);
         }
         catch (JsonProcessingException e) {
-            return Observable.error(e);
+            return Observable.error(new IotHubException("Failed to parse the resonse"));
         }
 
     };

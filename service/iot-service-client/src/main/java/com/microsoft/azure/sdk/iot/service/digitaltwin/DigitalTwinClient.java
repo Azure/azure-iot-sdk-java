@@ -42,6 +42,11 @@ public class DigitalTwinClient {
      */
     public <T> T getDigitalTwin (String digitalTwinId, Class<T> clazz)
     {
+        if(clazz == null)
+        {
+            throw new IllegalArgumentException("Parameter clazz is required and cannot be null.");
+        }
+
         return getDigitalTwinWithResponse(digitalTwinId, clazz).body();
     }
 
@@ -54,6 +59,11 @@ public class DigitalTwinClient {
      */
     public <T> ServiceResponseWithHeaders<T, DigitalTwinGetHeaders> getDigitalTwinWithResponse (String digitalTwinId, Class<T> clazz)
     {
+        if(clazz == null)
+        {
+            throw new IllegalArgumentException("Parameter clazz is required and cannot be null.");
+        }
+
         return digitalTwinAsyncClient.getDigitalTwinWithResponse(digitalTwinId, clazz)
                 .toBlocking().single();
     }
