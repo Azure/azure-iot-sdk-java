@@ -1,16 +1,39 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
-import lombok.Getter;
-import lombok.Setter;
-
+/**
+ * Represents the device command invocation results.
+ */
 public final class DigitalTwinCommandResponse {
-    @Getter
-    @Setter
+    /**
+     * Command invocation result status, as supplied by the device.
+     */
     Integer status;
 
-    @Getter
-    @Setter
+    /**
+     *  Command invocation result payload, as supplied by the device.
+     */
     String payload;
+
+    public Integer getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(Integer status)
+    {
+        this.status = status;
+    }
+
+    public String getPayload()
+    {
+        return payload;
+    }
+
+    public void setPayload(String payload)
+    {
+        this.payload = payload;
+    }
 }

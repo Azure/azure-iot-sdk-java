@@ -106,7 +106,7 @@ You need to first clone the repository or download the sample project folder on 
 <br/>
 This sample uses the following simple model which has no components - [Thermostat](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/Thermostat.json)
 
-1. Preparing the digitaltwin service sampl application:
+1. Preparing the digitaltwin service sample application:
    1. Set the following environment variables on the terminal from which you want to run the application.
 
       * IOTHUB_CONNECTION_STRING
@@ -120,17 +120,17 @@ This sample uses the following simple model which has no components - [Thermosta
     mvn install -T 2C -DskipTests
     ```
 
-3. Building the digitaltwin service sampl application:
+3. Building the digitaltwin service sample application:
 
-    To build the digitaltwin service sampl application using Maven, at a command prompt navigate to the **\service\iot-service-samples\digitaltwin-service-samples\thermostat-service-sample** folder. Then execute the following command and check for build errors:
+    To build the digitaltwin service sample application using Maven, at a command prompt navigate to the **\service\iot-service-samples\digitaltwin-service-samples\thermostat-service-sample** folder. Then execute the following command and check for build errors:
     
     ```
     mvn clean package
     ```
 
-4. Running the digitaltwin service sampl application:
+4. Running the digitaltwin service sample application:
 
-	To run the digitaltwin service sampl application using Maven, execute the following command.
+	To run the digitaltwin service sample application using Maven, execute the following command.
     
     ```
     mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.service.Thermostat"
@@ -143,7 +143,7 @@ This sample uses the following simple model which has no components - [Thermosta
 <br/>
 This sample uses the following model which has components - [TemperatureController](https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json)
 
-1. Preparing the digitaltwin service sampl application:
+1. Preparing the digitaltwin service sample application:
    1. Set the following environment variables on the terminal from which you want to run the application.
 
       * IOTHUB_CONNECTION_STRING
@@ -165,9 +165,9 @@ This sample uses the following model which has components - [TemperatureControll
     mvn clean package
     ```
 
-4. Running the digitaltwin service sampl application:
+4. Running the digitaltwin service sample application:
 
-	To run the digitaltwin service sampl application using Maven, execute the following command.
+	To run the digitaltwin service sample application using Maven, execute the following command.
     
     ```
     mvn exec:java -Dexec.mainClass="samples.com.microsoft.azure.sdk.iot.service.TemperatureController"

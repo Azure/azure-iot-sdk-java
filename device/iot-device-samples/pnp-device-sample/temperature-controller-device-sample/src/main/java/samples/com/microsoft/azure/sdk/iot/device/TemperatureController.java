@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.plugandplay.PnpHelper;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
@@ -44,8 +43,7 @@ public class TemperatureController {
 
     // DTDL interface used: https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
-    // Defaulting to DPS flow for bug bash
-    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE") == null ? "dps" : System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
+    private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
     private static final String MODEL_ID = "dtmi:com:example:TemperatureController;1";
     private static final String THERMOSTAT_1 = "thermostat1";
     private static final String THERMOSTAT_2 = "thermostat2";
@@ -168,6 +166,7 @@ public class TemperatureController {
 
         deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
 
+        updateDeviceInformation();
         sendDeviceMemory();
         sendDeviceSerialNumber();
 
@@ -372,7 +371,7 @@ public class TemperatureController {
                 double targetTemperature = (double) ((TwinCollection) property.getValue()).get(propertyName);
                 log.debug("Property: Received - component=\"{}\", {\"{}\": {}°C}.", componentName, propertyName, targetTemperature);
 
-                Set<Property> pendingPropertyPatch = PnpHelper.createPropertyEmbeddedValuePatch(
+                Set<Property> pendingPropertyPatch = PnpConvention.createPropertyEmbeddedValuePatch(
                         propertyName,
                         targetTemperature,
                         componentName,
@@ -389,7 +388,7 @@ public class TemperatureController {
                     Thread.sleep(5 * 1000);
                 }
 
-                Set<Property> completedPropertyPatch = PnpHelper.createPropertyEmbeddedValuePatch(
+                Set<Property> completedPropertyPatch = PnpConvention.createPropertyEmbeddedValuePatch(
                         propertyName,
                         temperature.get(componentName),
                         componentName,
@@ -404,20 +403,73 @@ public class TemperatureController {
         }
     }
 
+    // Report the property updates on "deviceInformation" component.
+    private static void updateDeviceInformation() throws IOException {
+        String componentName = "deviceInformation";
+
+        String manufacturer = "manufacturer";
+        String manufacturerValue = "element15";
+        Set<Property> manufacturerPatch = PnpConvention.createPropertyPatch(manufacturer, manufacturerValue, componentName);
+        deviceClient.sendReportedProperties(manufacturerPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, manufacturer, manufacturerValue, StatusCode.COMPLETED);
+
+        String model = "model";
+        String modelValue = "ModelIDxcdvmk";
+        Set<Property> modelPatch = PnpConvention.createPropertyPatch(model, modelValue, componentName);
+        deviceClient.sendReportedProperties(modelPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, model, modelValue, StatusCode.COMPLETED);
+
+        String swVersion = "swVersion";
+        String swVersionValue = "1.0.0";
+        Set<Property> swVersionPatch = PnpConvention.createPropertyPatch(swVersion, swVersionValue, componentName);
+        deviceClient.sendReportedProperties(swVersionPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, swVersion, swVersionValue, StatusCode.COMPLETED);
+
+        String osName = "osName";
+        String osNameValue = "Windows 10";
+        Set<Property> osNamePatch = PnpConvention.createPropertyPatch(osName, osNameValue, componentName);
+        deviceClient.sendReportedProperties(osNamePatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, osName, osNameValue, StatusCode.COMPLETED);
+
+        String processorArchitecture = "processorArchitecture";
+        String processorArchitectureValue = "64-bit";
+        Set<Property> processorArchitecturePatch = PnpConvention.createPropertyPatch(processorArchitecture, processorArchitectureValue, componentName);
+        deviceClient.sendReportedProperties(processorArchitecturePatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, processorArchitecture, processorArchitectureValue, StatusCode.COMPLETED);
+
+        String processorManufacturer = "processorManufacturer";
+        String processorManufacturerValue = "Intel";
+        Set<Property> processorManufacturerPatch = PnpConvention.createPropertyPatch(processorManufacturer, processorManufacturerValue, componentName);
+        deviceClient.sendReportedProperties(processorManufacturerPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, processorManufacturer, processorManufacturerValue, StatusCode.COMPLETED);
+
+        String totalStorage = "totalStorage";
+        double totalStorageValue = 256;
+        Set<Property> totalStoragePatch = PnpConvention.createPropertyPatch(totalStorage, totalStorageValue, componentName);
+        deviceClient.sendReportedProperties(totalStoragePatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": {}MB }} is {}.", componentName, totalStorage, totalStorageValue, StatusCode.COMPLETED);
+
+        String totalMemory = "totalMemory";
+        double totalMemoryValue = 1024;
+        Set<Property> totalMemoryPatch = PnpConvention.createPropertyPatch(totalMemory, totalMemoryValue, componentName);
+        deviceClient.sendReportedProperties(totalMemoryPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": {}MB }} is {}.", componentName, totalMemory, totalMemoryValue, StatusCode.COMPLETED);
+    }
+    
     private static void sendDeviceMemory() {
         String telemetryName = "workingSet";
 
         // TODO: Environment.WorkingSet equivalent in Java
         double workingSet = 1024;
 
-        Message message = PnpHelper.createIotHubMessageUtf8(telemetryName, workingSet);
+        Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, workingSet);
         deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}KiB }", telemetryName, workingSet);
     }
 
     private static void sendDeviceSerialNumber() throws IOException {
         String propertyName = "serialNumber";
-        Set<Property> propertyPatch = PnpHelper.createPropertyPatch(propertyName, SERIAL_NO);
+        Set<Property> propertyPatch = PnpConvention.createPropertyPatch(propertyName, SERIAL_NO);
 
         deviceClient.sendReportedProperties(propertyPatch);
         log.debug("Property: Update - {\"{}\": {}} is {}", propertyName, SERIAL_NO, StatusCode.COMPLETED);
@@ -437,7 +489,7 @@ public class TemperatureController {
         String telemetryName = "temperature";
         double currentTemperature = temperature.get(componentName);
 
-        Message message = PnpHelper.createIotHubMessageUtf8(telemetryName, currentTemperature, componentName);
+        Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, currentTemperature, componentName);
         deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, currentTemperature, message.getMessageId());
 
@@ -456,7 +508,7 @@ public class TemperatureController {
         String propertyName = "maxTempSinceLastReboot";
         double maxTemp = maxTemperature.get(componentName);
 
-        Set<Property> reportedProperty = PnpHelper.createPropertyPatch(propertyName, maxTemp, componentName);
+        Set<Property> reportedProperty = PnpConvention.createPropertyPatch(propertyName, maxTemp, componentName);
         deviceClient.sendReportedProperties(reportedProperty);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemp, StatusCode.COMPLETED);
     }

@@ -6,10 +6,10 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin.generated;
 
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeComponentCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateDigitalTwinHeaders;
 import com.microsoft.rest.RestException;
 import com.microsoft.rest.ServiceCallback;
 import com.microsoft.rest.ServiceFuture;
@@ -60,7 +60,7 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the observable to the Object object
      */
-    Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders>> getDigitalTwinWithServiceResponseAsync(String id);
+    Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>> getDigitalTwinWithServiceResponseAsync(String id);
 
     /**
      * Updates a digital twin.
@@ -102,7 +102,7 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
-    Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch);
+    Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch);
     /**
      * Updates a digital twin.
      *
@@ -147,7 +147,7 @@ public interface DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
-    Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch, String ifMatch);
+    Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch, String ifMatch);
 
     /**
      * Invoke a digital twin root level command.

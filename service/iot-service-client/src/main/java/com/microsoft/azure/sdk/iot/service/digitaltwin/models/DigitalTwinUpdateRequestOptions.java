@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
 public final class DigitalTwinUpdateRequestOptions {
@@ -21,7 +22,7 @@ public final class DigitalTwinUpdateRequestOptions {
      * To force the operation to execute only if the entity exists, set the ETag to the wildcard character '*'.
      * To force the operation to execute unconditionally, leave this value null.
      * If this value is not set, it defaults to null, and the ifMatch header will not be sent with the request.
-     * This means that update and delete will be unconditional and the operation will execute regardless of the existence of the resource. </p>
+     * This means that update will be unconditional and the operation will execute regardless of the existence of the resource. </p>
      *
      * @param ifMatch A string representing a weak ETag for the entity that this request performs an operation against, as per RFC7232.
      * @return The UpdateDigitalTwinRequestOptions object itself.

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines headers for UpdateDigitalTwin operation.
  */
-public class DigitalTwinUpdateHeaders {
+public class DigitalTwinUpdateDigitalTwinHeaders {
     /**
      * Weak Etag of the modified resource.
      */
@@ -37,9 +37,9 @@ public class DigitalTwinUpdateHeaders {
      * Set weak Etag of the modified resource.
      *
      * @param eTag the eTag value to set
-     * @return the DigitalTwinUpdateHeaders object itself.
+     * @return the DigitalTwinUpdateDigitalTwinHeaders object itself.
      */
-    public DigitalTwinUpdateHeaders withETag(String eTag) {
+    public DigitalTwinUpdateDigitalTwinHeaders withETag(String eTag) {
         this.eTag = eTag;
         return this;
     }
@@ -57,9 +57,9 @@ public class DigitalTwinUpdateHeaders {
      * Set uRI of the digital twin.
      *
      * @param location the location value to set
-     * @return the DigitalTwinUpdateHeaders object itself.
+     * @return the DigitalTwinUpdateDigitalTwinHeaders object itself.
      */
-    public DigitalTwinUpdateHeaders withLocation(String location) {
+    public DigitalTwinUpdateDigitalTwinHeaders withLocation(String location) {
         this.location = location;
         return this;
     }

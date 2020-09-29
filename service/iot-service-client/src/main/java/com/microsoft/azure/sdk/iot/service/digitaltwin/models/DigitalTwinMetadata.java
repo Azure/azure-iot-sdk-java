@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -9,11 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class DigitalTwinMetadata {
+    /* The Id of the model that the digital twin or component is modeled by. This is present on a digital twin's root level metadata */
     @JsonProperty(value = "$model", required = true)
     private String modelId;
 
+    /* Model-defined writable properties' request state. */
     @JsonIgnore
-    private final Map<String, Object> writeableProperties = new HashMap<>();
+    private final Map<String, WritableProperty> writeableProperties = new HashMap<>();
 
     /**
      * Creates an instance of digital twin metadata.
@@ -34,7 +39,7 @@ public final class DigitalTwinMetadata {
      * @param modelId The Id of the model that the digital twin or component is modeled by.
      * @return The DigitalTwinMetadata object itself.
      */
-    private DigitalTwinMetadata setModelId(String modelId) {
+    public DigitalTwinMetadata setModelId(String modelId) {
         this.modelId = modelId;
         return this;
     }
@@ -45,7 +50,7 @@ public final class DigitalTwinMetadata {
      * @return The model-defined writable properties' request state.
      */
     @JsonAnyGetter
-    public Map<String, Object> getWriteableProperties() {
+    public Map<String, WritableProperty> getWriteableProperties() {
         return writeableProperties;
     }
 
@@ -54,7 +59,7 @@ public final class DigitalTwinMetadata {
      * @return The DigitalTwinMetadata object itself.
      */
     @JsonAnySetter
-    DigitalTwinMetadata setWritableProperties(String key, Object value) {
+    DigitalTwinMetadata setWritableProperties(String key, WritableProperty value) {
         this.writeableProperties.put(key, value);
         return this;
     }
