@@ -9,7 +9,11 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.BasicDigitalTwin;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.rest.ServiceResponseWithHeaders;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.rules.Timeout;
@@ -23,6 +27,9 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.TwinPnPTests;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -34,7 +41,7 @@ import static org.junit.Assert.assertEquals;
 @DigitalTwinTest
 @Slf4j
 @RunWith(Parameterized.class)
-public class DigitalTwinServiceClientTests extends IntegrationTest
+public class DigitalTwinClientTests extends IntegrationTest
 {
 
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
@@ -99,7 +106,6 @@ public class DigitalTwinServiceClientTests extends IntegrationTest
     }
 
     @Test
-    @DigitalTwinTest
     public void getDigitalTwin() {
         BasicDigitalTwin getResponse = this.digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
         assertEquals(getResponse.getMetadata().getModelId(), E2ETestConstants.MODEL_ID);
@@ -118,6 +124,26 @@ public class DigitalTwinServiceClientTests extends IntegrationTest
     @Test
     public void updateDigitalTwinWithResponse() {
         String digitalTwinId = "";
+    }
+
+    @Test
+    public void invokeRootLevelCommand() throws IOException {
+        String commandName = "getMaxMinReport";
+        String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
+        DigitalTwinCommandResponse response = this.digitalTwinClient.invokeCommand(deviceId, commandName, commandInput);
+        assertEquals(response.getStatus(), new Integer(200));
+    }
+
+    @Test
+    public void invokeRootLevelCommandWithhResponse() throws IOException {
+        DigitalTwinInvokeCommandRequestOptions options = new DigitalTwinInvokeCommandRequestOptions();
+        options.setConnectTimeoutInSeconds(15);
+        options.setResponseTimeoutInSeconds(15);
+        String commandName = "getMaxMinReport";
+        String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
+        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> response = this.digitalTwinClient.invokeCommandWithResponse(deviceId, commandName, commandInput, options);
+        assertEquals(response.body().getStatus(), new Integer(200));
+        assertEquals(response.body().getPayload(), commandName);
     }
 
 }

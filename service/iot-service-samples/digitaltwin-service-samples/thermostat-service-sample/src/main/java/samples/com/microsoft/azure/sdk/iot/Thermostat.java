@@ -6,10 +6,8 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.BasicDigitalTwin;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
 
 import java.io.IOException;
 import java.time.ZoneOffset;

@@ -183,7 +183,11 @@ public class DigitalTwinAsyncClient {
             options = new DigitalTwinInvokeCommandRequestOptions();
         }
 
-        Object payloadAsObject = DeserializationHelpers.castObject(objectMapper, payload, Object.class);
+        Object payloadAsObject = null;
+        if(payload != null)
+        {
+            payloadAsObject = objectMapper.readValue(payload, Object.class);
+        }
 
         return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payloadAsObject, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
                 .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
@@ -232,7 +236,11 @@ public class DigitalTwinAsyncClient {
             options = new DigitalTwinInvokeCommandRequestOptions();
         }
 
-        Object payloadAsObject = DeserializationHelpers.castObject(objectMapper, payload, Object.class);
+        Object payloadAsObject = null;
+        if(payload != null)
+        {
+            payloadAsObject = objectMapper.readValue(payload, Object.class);
+        }
 
         return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payloadAsObject, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
                 .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
