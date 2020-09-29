@@ -82,7 +82,7 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param clazz The class to deserialize the application/json into.
      * @param <T> The generic type to deserialize the application/json into.
-     * @return A {@link ServiceResponseWithHeaders} representing deserialized application/json of the digital twin with {@link DigitalTwinGetDigitalTwinHeaders}.
+     * @return A {@link ServiceResponseWithHeaders} representing deserialized application/json of the digital twin with {@link DigitalTwinGetHeaders}.
      */
     public <T> Observable<ServiceResponseWithHeaders<T, DigitalTwinGetHeaders>> getDigitalTwinWithResponse (String digitalTwinId, Class<T> clazz)
     {
@@ -121,7 +121,7 @@ public class DigitalTwinAsyncClient {
      * Updates a digital twin.
      * @param digitalTwinId The Id of the digital twin.
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateDigitalTwinHeaders}.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
      */
     public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations)
     {
@@ -133,7 +133,7 @@ public class DigitalTwinAsyncClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
      * @param options The optional settings for this request.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateDigitalTwinHeaders}.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
      */
     public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations, DigitalTwinUpdateRequestOptions options)
     {
