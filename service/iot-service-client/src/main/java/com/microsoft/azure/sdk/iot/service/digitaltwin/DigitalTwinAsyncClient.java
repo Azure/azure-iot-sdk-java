@@ -164,6 +164,11 @@ public class DigitalTwinAsyncClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public Observable<DigitalTwinCommandResponse> invokeCommand (String digitalTwinId, String commandName, String payload) throws IOException {
+        // Retrofit does not work well with null in body
+        if(payload == null)
+        {
+            payload = "";
+        }
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null)
                 .map(response -> response.body());
     }
@@ -183,13 +188,13 @@ public class DigitalTwinAsyncClient {
             options = new DigitalTwinInvokeCommandRequestOptions();
         }
 
-        Object payloadAsObject = null;
-        if(payload != null)
+        // Retrofit does not work well with null in body
+        if(payload == null)
         {
-            payloadAsObject = objectMapper.readValue(payload, Object.class);
+            payload = "";
         }
 
-        return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payloadAsObject, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
+        return digitalTwin.invokeRootLevelCommandWithServiceResponseAsync(digitalTwinId, commandName, payload, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
                 .flatMap(FUNC_TO_DIGITAL_TWIN_COMMAND_RESPONSE);
     }
 
@@ -216,6 +221,12 @@ public class DigitalTwinAsyncClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
+        // Retrofit does not work well with null in body
+        if(payload == null)
+        {
+            payload = "";
+        }
+
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null)
                 .map(response -> response.body());
     }
@@ -236,13 +247,13 @@ public class DigitalTwinAsyncClient {
             options = new DigitalTwinInvokeCommandRequestOptions();
         }
 
-        Object payloadAsObject = null;
-        if(payload != null)
+        // Retrofit does not work well with null in body
+        if(payload == null)
         {
-            payloadAsObject = objectMapper.readValue(payload, Object.class);
+            payload = "";
         }
 
-        return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payloadAsObject, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
+        return digitalTwin.invokeComponentCommandWithServiceResponseAsync(digitalTwinId, componentName, commandName, payload, options.getConnectTimeoutInSeconds(), options.getResponseTimeoutInSeconds())
                 .flatMap(FUNC_TO_DIGITAL_TWIN_COMPONENT_COMMAND_RESPONSE);
     }
 }

@@ -129,6 +129,12 @@ public class DigitalTwinClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName, String payload) throws IOException {
+        // Retrofit does not work well with null in body
+        if(payload == null)
+        {
+            payload = "";
+        }
+
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null).body();
     }
 
@@ -145,6 +151,12 @@ public class DigitalTwinClient {
         if(options == null)
         {
             options = new DigitalTwinInvokeCommandRequestOptions();
+        }
+
+        // Retrofit does not work well with null in body
+        if(payload == null)
+        {
+            payload = "";
         }
 
         return digitalTwinAsyncClient.invokeCommandWithResponse(digitalTwinId, commandName, payload, options)
@@ -173,6 +185,12 @@ public class DigitalTwinClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
+        // Retrofit does not work well with null in body
+        if(payload == null)
+        {
+            payload = "";
+        }
+
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null).body();
     }
 
@@ -190,6 +208,12 @@ public class DigitalTwinClient {
         if(options == null)
         {
             options = new DigitalTwinInvokeCommandRequestOptions();
+        }
+
+        // Retrofit does not work well with null in body
+        if(payload == null)
+        {
+            payload = "";
         }
 
         return digitalTwinAsyncClient.invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, options)
