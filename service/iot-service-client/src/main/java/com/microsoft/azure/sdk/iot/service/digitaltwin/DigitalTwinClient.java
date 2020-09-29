@@ -4,10 +4,7 @@
 package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateDigitalTwinHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.rest.*;
 
