@@ -166,6 +166,7 @@ public class TemperatureController {
 
         deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
 
+        updateDeviceInformation();
         sendDeviceMemory();
         sendDeviceSerialNumber();
 
@@ -402,6 +403,59 @@ public class TemperatureController {
         }
     }
 
+    // Report the property updates on "deviceInformation" component.
+    private static void updateDeviceInformation() throws IOException {
+        String componentName = "deviceInformation";
+
+        String manufacturer = "manufacturer";
+        String manufacturerValue = "element15";
+        Set<Property> manufacturerPatch = PnpConvention.createPropertyPatch(manufacturer, manufacturerValue, componentName);
+        deviceClient.sendReportedProperties(manufacturerPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, manufacturer, manufacturerValue, StatusCode.COMPLETED);
+
+        String model = "model";
+        String modelValue = "ModelIDxcdvmk";
+        Set<Property> modelPatch = PnpConvention.createPropertyPatch(model, modelValue, componentName);
+        deviceClient.sendReportedProperties(modelPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, model, modelValue, StatusCode.COMPLETED);
+
+        String swVersion = "swVersion";
+        String swVersionValue = "1.0.0";
+        Set<Property> swVersionPatch = PnpConvention.createPropertyPatch(swVersion, swVersionValue, componentName);
+        deviceClient.sendReportedProperties(swVersionPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, swVersion, swVersionValue, StatusCode.COMPLETED);
+
+        String osName = "osName";
+        String osNameValue = "Windows 10";
+        Set<Property> osNamePatch = PnpConvention.createPropertyPatch(osName, osNameValue, componentName);
+        deviceClient.sendReportedProperties(osNamePatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, osName, osNameValue, StatusCode.COMPLETED);
+
+        String processorArchitecture = "processorArchitecture";
+        String processorArchitectureValue = "64-bit";
+        Set<Property> processorArchitecturePatch = PnpConvention.createPropertyPatch(processorArchitecture, processorArchitectureValue, componentName);
+        deviceClient.sendReportedProperties(processorArchitecturePatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, processorArchitecture, processorArchitectureValue, StatusCode.COMPLETED);
+
+        String processorManufacturer = "processorManufacturer";
+        String processorManufacturerValue = "Intel";
+        Set<Property> processorManufacturerPatch = PnpConvention.createPropertyPatch(processorManufacturer, processorManufacturerValue, componentName);
+        deviceClient.sendReportedProperties(processorManufacturerPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": \"{}\" }} is {}.", componentName, processorManufacturer, processorManufacturerValue, StatusCode.COMPLETED);
+
+        String totalStorage = "totalStorage";
+        double totalStorageValue = 256;
+        Set<Property> totalStoragePatch = PnpConvention.createPropertyPatch(totalStorage, totalStorageValue, componentName);
+        deviceClient.sendReportedProperties(totalStoragePatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": {}MB }} is {}.", componentName, totalStorage, totalStorageValue, StatusCode.COMPLETED);
+
+        String totalMemory = "totalMemory";
+        double totalMemoryValue = 1024;
+        Set<Property> totalMemoryPatch = PnpConvention.createPropertyPatch(totalMemory, totalMemoryValue, componentName);
+        deviceClient.sendReportedProperties(totalMemoryPatch);
+        log.debug("Property: Update - component = \"{}\", property {{ \"{}\": {}MB }} is {}.", componentName, totalMemory, totalMemoryValue, StatusCode.COMPLETED);
+    }
+    
     private static void sendDeviceMemory() {
         String telemetryName = "workingSet";
 
