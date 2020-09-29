@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.plugandplay;
+package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
@@ -15,10 +15,11 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
+
 /*
  A helper class for formatting command requests and properties as per plug and play convention.
 */
-public class PnpHelper {
+public class PnpHelpers {
 
     private static final String TELEMETRY_COMPONENT_NAME = "$.sub";
     private static final String ENCODING_UTF_8 = StandardCharsets.UTF_8.name();
