@@ -1,37 +1,39 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
-import com.microsoft.azure.sdk.iot.device.ClientOptions;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.BasicDigitalTwin;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.rest.RestException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.omg.PortableServer.POA;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.TwinPnPTests;
 
+import javax.xml.ws.Service;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
@@ -90,7 +92,7 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     private DeviceClient createDeviceClient(IotHubClientProtocol protocol) throws IOException, IotHubException, URISyntaxException {
         ClientOptions options = new ClientOptions();
-        options.setModelId(E2ETestConstants.MODEL_ID);
+        options.setModelId(E2ETestConstants.THERMOSTAT_MODEL_ID);
 
         this.deviceId = DEVICE_ID_PREFIX.concat(UUID.randomUUID().toString());
         Device device = Device.createDevice(deviceId, AuthenticationType.SAS);
@@ -107,43 +109,61 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Test
     public void getDigitalTwin() {
-        BasicDigitalTwin getResponse = this.digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
-        assertEquals(getResponse.getMetadata().getModelId(), E2ETestConstants.MODEL_ID);
+        // act
+        BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
+
+        // assert
+        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
     }
 
     @Test
-    public void getDigitalTwinWithResponse() {
-        String digitalTwinId = "";
-    }
-
-    @Test
-    public void updateDigitalTwin() {
-        String digitalTwinId = "";
-    }
-
-    @Test
-    public void updateDigitalTwinWithResponse() {
-        String digitalTwinId = "";
+    public void updateDigitalTwin() throws IOException {
     }
 
     @Test
     public void invokeRootLevelCommand() throws IOException {
+        // arrange
         String commandName = "getMaxMinReport";
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
-        DigitalTwinCommandResponse response = this.digitalTwinClient.invokeCommand(deviceId, commandName, commandInput);
-        assertEquals(response.getStatus(), new Integer(200));
-    }
-
-    @Test
-    public void invokeRootLevelCommandWithhResponse() throws IOException {
         DigitalTwinInvokeCommandRequestOptions options = new DigitalTwinInvokeCommandRequestOptions();
         options.setConnectTimeoutInSeconds(15);
         options.setResponseTimeoutInSeconds(15);
-        String commandName = "getMaxMinReport";
-        String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
-        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> response = this.digitalTwinClient.invokeCommandWithResponse(deviceId, commandName, commandInput, options);
-        assertEquals(response.body().getStatus(), new Integer(200));
-        assertEquals(response.body().getPayload(), commandName);
-    }
 
+        // setup device callback
+        Integer deviceSuccessResponseStatus = 200;
+        String deviceSuccessResponseMessage = "Success";
+        Integer deviceFailureResponseStatus = 500;
+        String deviceFailureResponseMessage = "Failed";
+
+        // Device method callback
+        DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
+            if(methodName.equalsIgnoreCase(commandName)) {
+                return new DeviceMethodData(deviceSuccessResponseStatus, deviceSuccessResponseMessage);
+            }
+            else {
+                return new DeviceMethodData(deviceFailureResponseStatus, deviceFailureResponseMessage);
+            }
+        };
+
+        // IotHub event callback
+        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
+
+        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
+
+        // act
+        DigitalTwinCommandResponse responseWithNoPaylod = digitalTwinClient.invokeCommand(deviceId, commandName, null);
+        DigitalTwinCommandResponse response = digitalTwinClient.invokeCommand(deviceId, commandName, commandInput);
+        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> responseWithHeaders = digitalTwinClient.invokeCommandWithResponse(deviceId, commandName, commandInput, options);
+
+        // assert
+        String receivedDeviceResponseStatus = "\"" + deviceSuccessResponseMessage + "\"";
+        assertEquals(deviceSuccessResponseStatus, responseWithNoPaylod.getStatus());
+        assertEquals(receivedDeviceResponseStatus, responseWithNoPaylod.getPayload());
+        assertEquals(deviceSuccessResponseStatus, response.getStatus());
+        assertEquals(receivedDeviceResponseStatus, response.getPayload());
+        assertEquals(deviceSuccessResponseStatus, responseWithHeaders.body().getStatus());
+        assertEquals(receivedDeviceResponseStatus, responseWithHeaders.body().getPayload());
+    }
 }
