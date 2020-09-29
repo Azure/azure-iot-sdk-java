@@ -19,7 +19,7 @@ import static java.util.Collections.singletonMap;
 /*
  A helper class for formatting command requests and properties as per plug and play convention.
 */
-public class PnpHelpers {
+public class PnpConvention {
 
     private static final String TELEMETRY_COMPONENT_NAME = "$.sub";
     private static final String ENCODING_UTF_8 = StandardCharsets.UTF_8.name();

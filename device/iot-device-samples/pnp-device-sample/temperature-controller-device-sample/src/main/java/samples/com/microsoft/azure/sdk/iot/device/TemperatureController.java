@@ -370,7 +370,7 @@ public class TemperatureController {
                 double targetTemperature = (double) ((TwinCollection) property.getValue()).get(propertyName);
                 log.debug("Property: Received - component=\"{}\", {\"{}\": {}°C}.", componentName, propertyName, targetTemperature);
 
-                Set<Property> pendingPropertyPatch = PnpHelpers.createPropertyEmbeddedValuePatch(
+                Set<Property> pendingPropertyPatch = PnpConvention.createPropertyEmbeddedValuePatch(
                         propertyName,
                         targetTemperature,
                         componentName,
@@ -387,7 +387,7 @@ public class TemperatureController {
                     Thread.sleep(5 * 1000);
                 }
 
-                Set<Property> completedPropertyPatch = PnpHelpers.createPropertyEmbeddedValuePatch(
+                Set<Property> completedPropertyPatch = PnpConvention.createPropertyEmbeddedValuePatch(
                         propertyName,
                         temperature.get(componentName),
                         componentName,
@@ -408,14 +408,14 @@ public class TemperatureController {
         // TODO: Environment.WorkingSet equivalent in Java
         double workingSet = 1024;
 
-        Message message = PnpHelpers.createIotHubMessageUtf8(telemetryName, workingSet);
+        Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, workingSet);
         deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}KiB }", telemetryName, workingSet);
     }
 
     private static void sendDeviceSerialNumber() throws IOException {
         String propertyName = "serialNumber";
-        Set<Property> propertyPatch = PnpHelpers.createPropertyPatch(propertyName, SERIAL_NO);
+        Set<Property> propertyPatch = PnpConvention.createPropertyPatch(propertyName, SERIAL_NO);
 
         deviceClient.sendReportedProperties(propertyPatch);
         log.debug("Property: Update - {\"{}\": {}} is {}", propertyName, SERIAL_NO, StatusCode.COMPLETED);
@@ -435,7 +435,7 @@ public class TemperatureController {
         String telemetryName = "temperature";
         double currentTemperature = temperature.get(componentName);
 
-        Message message = PnpHelpers.createIotHubMessageUtf8(telemetryName, currentTemperature, componentName);
+        Message message = PnpConvention.createIotHubMessageUtf8(telemetryName, currentTemperature, componentName);
         deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, currentTemperature, message.getMessageId());
 
@@ -454,7 +454,7 @@ public class TemperatureController {
         String propertyName = "maxTempSinceLastReboot";
         double maxTemp = maxTemperature.get(componentName);
 
-        Set<Property> reportedProperty = PnpHelpers.createPropertyPatch(propertyName, maxTemp, componentName);
+        Set<Property> reportedProperty = PnpConvention.createPropertyPatch(propertyName, maxTemp, componentName);
         deviceClient.sendReportedProperties(reportedProperty);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemp, StatusCode.COMPLETED);
     }
