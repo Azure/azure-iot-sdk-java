@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.SasTokenProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientCredentialsProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionString;
@@ -16,6 +17,7 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalT
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.DeserializationHelpers;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.DigitalTwinStringSerializer;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
@@ -40,12 +42,16 @@ public class DigitalTwinAsyncClient {
         ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
         SasTokenProvider sasTokenProvider = serviceConnectionString.createSasTokenProvider();
         String httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
+        final SimpleModule stringModule = new SimpleModule("String Serializer");
+        stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
 
+        JacksonAdapter adapter = new JacksonAdapter();
+        adapter.serializer().registerModule(stringModule);
         RestClient simpleRestClient = new RestClient.Builder()
                 .withBaseUrl(httpsEndpoint)
                 .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
                 .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
-                .withSerializerAdapter(new JacksonAdapter())
+                .withSerializerAdapter(adapter)
                 .build();
 
         IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
@@ -70,11 +76,6 @@ public class DigitalTwinAsyncClient {
      */
     public <T> Observable<T> getDigitalTwin (String digitalTwinId, Class<T> clazz)
     {
-        if(clazz == null)
-        {
-            throw new IllegalArgumentException("Parameter clazz is required and cannot be null.");
-        }
-
         return getDigitalTwinWithResponse(digitalTwinId, clazz)
                 .map(response -> response.body());
     }
@@ -165,10 +166,6 @@ public class DigitalTwinAsyncClient {
      */
     public Observable<DigitalTwinCommandResponse> invokeCommand (String digitalTwinId, String commandName, String payload) throws IOException {
         // Retrofit does not work well with null in body
-        if(payload == null)
-        {
-            payload = "";
-        }
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null)
                 .map(response -> response.body());
     }
@@ -221,12 +218,6 @@ public class DigitalTwinAsyncClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
-        // Retrofit does not work well with null in body
-        if(payload == null)
-        {
-            payload = "";
-        }
-
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null)
                 .map(response -> response.body());
     }
