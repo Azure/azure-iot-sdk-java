@@ -4,14 +4,11 @@
 package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.rest.*;
 
 import java.io.IOException;
@@ -50,7 +47,7 @@ public class DigitalTwinClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param clazz The class to deserialize the application/json into.
      * @param <T> The generic type to deserialize the application/json into.
-     * @return A {@link ServiceResponseWithHeaders} representing deserialized application/json of the digital twin with {@link DigitalTwinGetHeaders}.
+     * @return A {@link ServiceResponseWithHeaders} representing deserialized application/json of the digital twin with {@link DigitalTwinGetDigitalTwinHeaders}.
      */
     public <T> ServiceResponseWithHeaders<T, DigitalTwinGetHeaders> getDigitalTwinWithResponse (String digitalTwinId, Class<T> clazz)
     {
@@ -74,7 +71,7 @@ public class DigitalTwinClient {
      * Updates a digital twin.
      * @param digitalTwinId The Id of the digital twin.
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateDigitalTwinHeaders}.
      */
     public ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations)
     {
@@ -86,7 +83,7 @@ public class DigitalTwinClient {
      * @param digitalTwinId The Id of the digital twin.
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
      * @param options The optional settings for this request.
-     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
+     * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateDigitalTwinHeaders}.
      */
     public ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations, DigitalTwinUpdateRequestOptions options)
     {

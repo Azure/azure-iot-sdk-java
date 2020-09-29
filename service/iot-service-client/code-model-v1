@@ -24,11 +24,11 @@
         "2020-09-30"
        ],
        "filename": [
-        "mem:///103?oai3.shaken.json"
+        "mem:///102?oai3.shaken.json"
        ],
        "name": "paths·1xm88z2·digitaltwins-id·get·responses·200·headers·etag",
        "originalLocations": [
-        "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1xm88z2·digitaltwins-id·get·responses·200·headers·etag"
+        "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1xm88z2·digitaltwins-id·get·responses·200·headers·etag"
        ]
       }
      },
@@ -82,11 +82,11 @@
         "2020-09-30"
        ],
        "filename": [
-        "mem:///103?oai3.shaken.json"
+        "mem:///102?oai3.shaken.json"
        ],
        "name": "paths·pkf6q4·digitaltwins-id·patch·responses·202·headers·etag",
        "originalLocations": [
-        "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·pkf6q4·digitaltwins-id·patch·responses·202·headers·etag"
+        "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·pkf6q4·digitaltwins-id·patch·responses·202·headers·etag"
        ]
       }
      },
@@ -127,11 +127,11 @@
         "2020-09-30"
        ],
        "filename": [
-        "mem:///103?oai3.shaken.json"
+        "mem:///102?oai3.shaken.json"
        ],
        "name": "paths·m9lek·digitaltwins-id·patch·responses·202·headers·location",
        "originalLocations": [
-        "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·m9lek·digitaltwins-id·patch·responses·202·headers·location"
+        "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·m9lek·digitaltwins-id·patch·responses·202·headers·location"
        ]
       }
      },
@@ -185,11 +185,11 @@
         "2020-09-30"
        ],
        "filename": [
-        "mem:///103?oai3.shaken.json"
+        "mem:///102?oai3.shaken.json"
        ],
        "name": "paths·1cl9x8t·digitaltwins-id-commands-commandname·post·responses·200·headers·x_ms_command_statuscode",
        "originalLocations": [
-        "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1cl9x8t·digitaltwins-id-commands-commandname·post·responses·200·headers·x_ms_command_statuscode"
+        "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1cl9x8t·digitaltwins-id-commands-commandname·post·responses·200·headers·x_ms_command_statuscode"
        ]
       }
      },
@@ -231,11 +231,11 @@
         "2020-09-30"
        ],
        "filename": [
-        "mem:///103?oai3.shaken.json"
+        "mem:///102?oai3.shaken.json"
        ],
        "name": "paths·1d8rdg·digitaltwins-id-commands-commandname·post·responses·200·headers·x_ms_request_id",
        "originalLocations": [
-        "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1d8rdg·digitaltwins-id-commands-commandname·post·responses·200·headers·x_ms_request_id"
+        "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1d8rdg·digitaltwins-id-commands-commandname·post·responses·200·headers·x_ms_request_id"
        ]
       }
      },
@@ -289,11 +289,11 @@
         "2020-09-30"
        ],
        "filename": [
-        "mem:///103?oai3.shaken.json"
+        "mem:///102?oai3.shaken.json"
        ],
        "name": "paths·1r51bn8·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200·headers·x_ms_command_statuscode",
        "originalLocations": [
-        "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1r51bn8·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200·headers·x_ms_command_statuscode"
+        "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1r51bn8·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200·headers·x_ms_command_statuscode"
        ]
       }
      },
@@ -335,11 +335,11 @@
         "2020-09-30"
        ],
        "filename": [
-        "mem:///103?oai3.shaken.json"
+        "mem:///102?oai3.shaken.json"
        ],
        "name": "paths·1sdcdpi·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200·headers·x_ms_request_id",
        "originalLocations": [
-        "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1sdcdpi·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200·headers·x_ms_request_id"
+        "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/headers/paths·1sdcdpi·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200·headers·x_ms_request_id"
        ]
       }
      },
@@ -396,11 +396,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·1tkjuz5·digitaltwins-id·get·parameters·0",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1tkjuz5·digitaltwins-id·get·parameters·0"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1tkjuz5·digitaltwins-id·get·parameters·0"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -442,11 +442,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·f78rs6·digitaltwins-id·patch·parameters·0",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·f78rs6·digitaltwins-id·patch·parameters·0"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·f78rs6·digitaltwins-id·patch·parameters·0"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -487,11 +487,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·1miyl44·digitaltwins-id·patch·parameters·1",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1miyl44·digitaltwins-id·patch·parameters·1"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1miyl44·digitaltwins-id·patch·parameters·1"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -532,11 +532,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·1gucrlh·digitaltwins-id-commands-commandname·post·parameters·0",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1gucrlh·digitaltwins-id-commands-commandname·post·parameters·0"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1gucrlh·digitaltwins-id-commands-commandname·post·parameters·0"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -577,11 +577,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·cuyncu·digitaltwins-id-commands-commandname·post·parameters·1",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·cuyncu·digitaltwins-id-commands-commandname·post·parameters·1"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·cuyncu·digitaltwins-id-commands-commandname·post·parameters·1"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -623,11 +623,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·e18es3·digitaltwins-id-commands-commandname·post·parameters·3",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·e18es3·digitaltwins-id-commands-commandname·post·parameters·3"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·e18es3·digitaltwins-id-commands-commandname·post·parameters·3"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -670,11 +670,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·1o105wg·digitaltwins-id-commands-commandname·post·parameters·4",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1o105wg·digitaltwins-id-commands-commandname·post·parameters·4"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1o105wg·digitaltwins-id-commands-commandname·post·parameters·4"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -716,11 +716,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·1vj9ah2·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·0",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1vj9ah2·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·0"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1vj9ah2·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·0"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -761,11 +761,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·sv78xn·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·1",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·sv78xn·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·1"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·sv78xn·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·1"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -806,11 +806,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·3haext·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·2",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·3haext·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·2"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·3haext·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·2"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -852,11 +852,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·ncf3ff·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·4",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·ncf3ff·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·4"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·ncf3ff·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·4"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -899,11 +899,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "paths·1lu4jxs·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·5",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1lu4jxs·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·5"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1lu4jxs·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·5"
      ]
     },
     "x-ms-parameter-location": "method"
@@ -947,11 +947,11 @@
       "2020-09-30"
      ],
      "filename": [
-      "mem:///103?oai3.shaken.json"
+      "mem:///102?oai3.shaken.json"
      ],
      "name": "api-version",
      "originalLocations": [
-      "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/api-version"
+      "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/api-version"
      ]
     }
    },
@@ -998,11 +998,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·1tkjuz5·digitaltwins-id·get·parameters·0",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1tkjuz5·digitaltwins-id·get·parameters·0"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1tkjuz5·digitaltwins-id·get·parameters·0"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1086,11 +1086,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·d0hqrw·digitaltwins-id·get·responses·200",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·d0hqrw·digitaltwins-id·get·responses·200"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·d0hqrw·digitaltwins-id·get·responses·200"
          ]
         }
        },
@@ -1146,11 +1146,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·f78rs6·digitaltwins-id·patch·parameters·0",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·f78rs6·digitaltwins-id·patch·parameters·0"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·f78rs6·digitaltwins-id·patch·parameters·0"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1189,11 +1189,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·11buglb·digitaltwins-id·patch·requestbody",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/requestBodies/paths·11buglb·digitaltwins-id·patch·requestbody"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/requestBodies/paths·11buglb·digitaltwins-id·patch·requestbody"
          ]
         },
         "x-ms-requestBody-name": "digitalTwinPatch"
@@ -1241,11 +1241,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·1miyl44·digitaltwins-id·patch·parameters·1",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1miyl44·digitaltwins-id·patch·parameters·1"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1miyl44·digitaltwins-id·patch·parameters·1"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1320,11 +1320,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·121lnpx·digitaltwins-id·patch·responses·202",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·121lnpx·digitaltwins-id·patch·responses·202"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·121lnpx·digitaltwins-id·patch·responses·202"
          ]
         }
        },
@@ -1377,11 +1377,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·1gucrlh·digitaltwins-id-commands-commandname·post·parameters·0",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1gucrlh·digitaltwins-id-commands-commandname·post·parameters·0"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1gucrlh·digitaltwins-id-commands-commandname·post·parameters·0"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1422,11 +1422,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·cuyncu·digitaltwins-id-commands-commandname·post·parameters·1",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·cuyncu·digitaltwins-id-commands-commandname·post·parameters·1"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·cuyncu·digitaltwins-id-commands-commandname·post·parameters·1"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1464,11 +1464,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·tkf3p1·digitaltwins-id-commands-commandname·post·requestbody",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/requestBodies/paths·tkf3p1·digitaltwins-id-commands-commandname·post·requestbody"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/requestBodies/paths·tkf3p1·digitaltwins-id-commands-commandname·post·requestbody"
          ]
         },
         "x-ms-requestBody-name": "payload"
@@ -1539,11 +1539,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·e18es3·digitaltwins-id-commands-commandname·post·parameters·3",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·e18es3·digitaltwins-id-commands-commandname·post·parameters·3"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·e18es3·digitaltwins-id-commands-commandname·post·parameters·3"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1586,11 +1586,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·1o105wg·digitaltwins-id-commands-commandname·post·parameters·4",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1o105wg·digitaltwins-id-commands-commandname·post·parameters·4"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1o105wg·digitaltwins-id-commands-commandname·post·parameters·4"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1646,11 +1646,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·3c3d3f·digitaltwins-id-commands-commandname·post·responses·200",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·3c3d3f·digitaltwins-id-commands-commandname·post·responses·200"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·3c3d3f·digitaltwins-id-commands-commandname·post·responses·200"
          ]
         }
        },
@@ -1707,11 +1707,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·1vj9ah2·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·0",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1vj9ah2·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·0"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1vj9ah2·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·0"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1752,11 +1752,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·sv78xn·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·1",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·sv78xn·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·1"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·sv78xn·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·1"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1797,11 +1797,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·3haext·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·2",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·3haext·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·2"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·3haext·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·2"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1839,11 +1839,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·vpkxzw·digitaltwins-id-components-componentpath-commands-commandname·post·requestbody",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/requestBodies/paths·vpkxzw·digitaltwins-id-components-componentpath-commands-commandname·post·requestbody"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/requestBodies/paths·vpkxzw·digitaltwins-id-components-componentpath-commands-commandname·post·requestbody"
          ]
         },
         "x-ms-requestBody-name": "payload"
@@ -1914,11 +1914,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·ncf3ff·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·4",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·ncf3ff·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·4"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·ncf3ff·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·4"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -1961,11 +1961,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·1lu4jxs·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·5",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1lu4jxs·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·5"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/parameters/paths·1lu4jxs·digitaltwins-id-components-componentpath-commands-commandname·post·parameters·5"
          ]
         },
         "x-ms-parameter-location": "method"
@@ -2021,11 +2021,11 @@
           "2020-09-30"
          ],
          "filename": [
-          "mem:///103?oai3.shaken.json"
+          "mem:///102?oai3.shaken.json"
          ],
          "name": "paths·n9llrq·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200",
          "originalLocations": [
-          "file:///D:/iot/azure-iot-sdk-java-track1/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·n9llrq·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200"
+          "file:///D:/iot/java%20clone/azure-iot-sdk-java/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/digitalTwin.json#/components/responses/paths·n9llrq·digitaltwins-id-components-componentpath-commands-commandname·post·responses·200"
          ]
         }
        },

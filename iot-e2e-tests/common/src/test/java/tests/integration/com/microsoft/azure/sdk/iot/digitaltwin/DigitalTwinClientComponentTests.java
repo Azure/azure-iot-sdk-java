@@ -5,10 +5,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinAsyncClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
@@ -21,7 +18,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETest
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.TwinPnPTests;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

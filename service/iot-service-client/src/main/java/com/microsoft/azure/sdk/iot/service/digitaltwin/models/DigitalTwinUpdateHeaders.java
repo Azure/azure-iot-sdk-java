@@ -4,7 +4,7 @@
  * regenerated.
  */
 
-package com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models;
+package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
