@@ -68,8 +68,7 @@ public class DigitalTwinServiceClientTests extends IntegrationTest
 
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open();
-        DigitalTwinAsyncClient asyncClient = new DigitalTwinAsyncClient(IOTHUB_CONNECTION_STRING);
-        digitalTwinClient = new DigitalTwinClient(asyncClient);
+        digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);
     }
 
     @After
