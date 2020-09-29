@@ -30,6 +30,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Digital
 import javax.xml.ws.Service;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -74,7 +75,6 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Before
     public void setUp() throws URISyntaxException, IOException, IotHubException {
-
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open();
         digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);
@@ -126,24 +126,24 @@ public class DigitalTwinClientTests extends IntegrationTest
     public void invokeRootLevelCommand() throws IOException {
         // arrange
         String commandName = "getMaxMinReport";
-        String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
+        String commandInput = "\"" +ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME) + "\"";
+        String jsonStringInput = "{\"prop\":\"value\"}";
         DigitalTwinInvokeCommandRequestOptions options = new DigitalTwinInvokeCommandRequestOptions();
         options.setConnectTimeoutInSeconds(15);
         options.setResponseTimeoutInSeconds(15);
 
         // setup device callback
         Integer deviceSuccessResponseStatus = 200;
-        String deviceSuccessResponseMessage = "Success";
         Integer deviceFailureResponseStatus = 500;
-        String deviceFailureResponseMessage = "Failed";
 
         // Device method callback
         DeviceMethodCallback deviceMethodCallback = (methodName, methodData, context) -> {
+            String jsonRequest = new String((byte[]) methodData, StandardCharsets.UTF_8);
             if(methodName.equalsIgnoreCase(commandName)) {
-                return new DeviceMethodData(deviceSuccessResponseStatus, deviceSuccessResponseMessage);
+                return new DeviceMethodData(deviceSuccessResponseStatus, jsonRequest);
             }
             else {
-                return new DeviceMethodData(deviceFailureResponseStatus, deviceFailureResponseMessage);
+                return new DeviceMethodData(deviceFailureResponseStatus, jsonRequest);
             }
         };
 
@@ -153,17 +153,19 @@ public class DigitalTwinClientTests extends IntegrationTest
         deviceClient.subscribeToDeviceMethod(deviceMethodCallback, commandName, iotHubEventCallback, commandName);
 
         // act
-        DigitalTwinCommandResponse responseWithNoPaylod = digitalTwinClient.invokeCommand(deviceId, commandName, null);
-        DigitalTwinCommandResponse response = digitalTwinClient.invokeCommand(deviceId, commandName, commandInput);
-        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> responseWithHeaders = digitalTwinClient.invokeCommandWithResponse(deviceId, commandName, commandInput, options);
+        DigitalTwinCommandResponse responseWithNoPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, null);
+        DigitalTwinCommandResponse responseWithJsonStringPayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, jsonStringInput);
+        DigitalTwinCommandResponse responseWithDatePayload = this.digitalTwinClient.invokeCommand(deviceId, commandName, commandInput);
+        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> datePayloadResponseWithHeaders = this.digitalTwinClient.invokeCommandWithResponse(deviceId, commandName, commandInput, options);
 
         // assert
-        String receivedDeviceResponseStatus = "\"" + deviceSuccessResponseMessage + "\"";
-        assertEquals(deviceSuccessResponseStatus, responseWithNoPaylod.getStatus());
-        assertEquals(receivedDeviceResponseStatus, responseWithNoPaylod.getPayload());
-        assertEquals(deviceSuccessResponseStatus, response.getStatus());
-        assertEquals(receivedDeviceResponseStatus, response.getPayload());
-        assertEquals(deviceSuccessResponseStatus, responseWithHeaders.body().getStatus());
-        assertEquals(receivedDeviceResponseStatus, responseWithHeaders.body().getPayload());
+        assertEquals(deviceSuccessResponseStatus, responseWithNoPayload.getStatus());
+        assertEquals("\"\"", responseWithNoPayload.getPayload());
+        assertEquals(deviceSuccessResponseStatus, responseWithJsonStringPayload.getStatus());
+        assertEquals(jsonStringInput, responseWithJsonStringPayload.getPayload());
+        assertEquals(deviceSuccessResponseStatus, responseWithDatePayload.getStatus());
+        assertEquals(commandInput, responseWithDatePayload.getPayload());
+        assertEquals(deviceSuccessResponseStatus, datePayloadResponseWithHeaders.body().getStatus());
+        assertEquals(commandInput, datePayloadResponseWithHeaders.body().getPayload());
     }
 }

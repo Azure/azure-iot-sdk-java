@@ -42,11 +42,6 @@ public class DigitalTwinClient {
      */
     public <T> T getDigitalTwin (String digitalTwinId, Class<T> clazz)
     {
-        if(clazz == null)
-        {
-            throw new IllegalArgumentException("Parameter clazz is required and cannot be null.");
-        }
-
         return getDigitalTwinWithResponse(digitalTwinId, clazz).body();
     }
 
@@ -59,11 +54,6 @@ public class DigitalTwinClient {
      */
     public <T> ServiceResponseWithHeaders<T, DigitalTwinGetHeaders> getDigitalTwinWithResponse (String digitalTwinId, Class<T> clazz)
     {
-        if(clazz == null)
-        {
-            throw new IllegalArgumentException("Parameter clazz is required and cannot be null.");
-        }
-
         return digitalTwinAsyncClient.getDigitalTwinWithResponse(digitalTwinId, clazz)
                 .toBlocking().single();
     }
@@ -100,11 +90,6 @@ public class DigitalTwinClient {
      */
     public ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations, DigitalTwinUpdateRequestOptions options)
     {
-        if(options == null)
-        {
-            options = new DigitalTwinUpdateRequestOptions();
-        }
-
         return digitalTwinAsyncClient.updateDigitalTwinWithResponse(digitalTwinId, digitalTwinUpdateOperations, options)
                 .toBlocking().single();
     }
@@ -130,11 +115,6 @@ public class DigitalTwinClient {
      */
     public DigitalTwinCommandResponse invokeCommand(String digitalTwinId, String commandName, String payload) throws IOException {
         // Retrofit does not work well with null in body
-        if(payload == null)
-        {
-            payload = "";
-        }
-
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null).body();
     }
 
@@ -148,17 +128,6 @@ public class DigitalTwinClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
-        if(options == null)
-        {
-            options = new DigitalTwinInvokeCommandRequestOptions();
-        }
-
-        // Retrofit does not work well with null in body
-        if(payload == null)
-        {
-            payload = "";
-        }
-
         return digitalTwinAsyncClient.invokeCommandWithResponse(digitalTwinId, commandName, payload, options)
                 .toBlocking().single();
     }
@@ -186,11 +155,6 @@ public class DigitalTwinClient {
      */
     public DigitalTwinCommandResponse invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
         // Retrofit does not work well with null in body
-        if(payload == null)
-        {
-            payload = "";
-        }
-
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null).body();
     }
 
@@ -205,17 +169,6 @@ public class DigitalTwinClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeComponentCommandWithResponse(String digitalTwinId, String componentName, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
-        if(options == null)
-        {
-            options = new DigitalTwinInvokeCommandRequestOptions();
-        }
-
-        // Retrofit does not work well with null in body
-        if(payload == null)
-        {
-            payload = "";
-        }
-
         return digitalTwinAsyncClient.invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, options)
                 .toBlocking().single();
     }
