@@ -38,7 +38,7 @@ public final class BasicDigitalTwin {
      * @param id The unique Id of the digital twin in a digital twins instance. This field is present on every digital twin.
      * @return The BasicDigitalTwin object itself.
      */
-    private BasicDigitalTwin setId(String id) {
+    public BasicDigitalTwin setId(String id) {
         this.id =id;
         return this;
     }
