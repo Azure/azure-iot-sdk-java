@@ -36,6 +36,20 @@ public final class UpdateOperationUtility {
      * @param path The path to the property to be added.
      * @param value The value to update to.
      * @return The UpdateOperationUtility object itself.
+     *  <pre>
+     *     The root-level property patch should be in the following format:
+     *     {
+     *          "op": "add",
+     *          "path": "/samplePropertyName",
+     *          "value": 20
+     *     }
+     *     The component-level property patch should be in the following format:
+     *     {
+     *          "op": "add",
+     *          "path": "/sampleComponentName/samplePropertyName",
+     *          "value": 20
+     *     }
+     *  </pre>
      */
     public UpdateOperationUtility appendAddPropertyOperation(String path, Object value) {
         operations.add(
@@ -52,6 +66,17 @@ public final class UpdateOperationUtility {
      * @param path The path to the component to be added.
      * @param properties A collection of properties and their values in the component.
      * @return The UpdateOperationUtility object itself.
+     *  <pre>
+     *     The component patch should be in the following format:
+     *     {
+     *          "op": "add",
+     *          "path": "/sampleComponentName",
+     *          "value": {
+     *             "samplePropertyName": 20,
+     *             "$metadata": {}
+     *             }
+     *     }
+     *  </pre>
      */
     public UpdateOperationUtility appendAddComponentOperation(String path, Map<String, Object> properties) {
         properties.put("$metadata", Collections.emptyMap());
@@ -68,6 +93,20 @@ public final class UpdateOperationUtility {
      * @param path The path to the property to be updated.
      * @param value The value to update to.
      * @return The UpdateOperationUtility object itself.
+     *  <pre>
+     *     The root-level property patch should be in the following format:
+     *     {
+     *          "op": "replace",
+     *          "path": "/samplePropertyName",
+     *          "value": 20
+     *     }
+     *     The root-level property patch should be in the following format:
+     *     {
+     *          "op": "replace",
+     *          "path": "/sampleComponentName/samplePropertyName",
+     *          "value": 20
+     *     }
+     *  </pre>
      */
     public UpdateOperationUtility appendReplacePropertyOperation(String path, Object value) {
         operations.add(
@@ -84,6 +123,17 @@ public final class UpdateOperationUtility {
      * @param path The path to the component to be updated.
      * @param properties A collection of properties and their values in the component.
      * @return The UpdateOperationUtility object itself.
+     *  <pre>
+     *     The component patch should be in the following format:
+     *     {
+     *          "op": "replace",
+     *          "path": "/sampleComponentName",
+     *          "value": {
+     *             "samplePropertyName": 20,
+     *             "$metadata": {}
+     *             }
+     *     }
+     *  </pre>
      */
     public UpdateOperationUtility appendReplaceComponentOperation(String path, Map<String, Object> properties) {
         properties.put("$metadata", Collections.emptyMap());
@@ -100,6 +150,18 @@ public final class UpdateOperationUtility {
      * Include a remove operation for a property.
      * @param path The path to the property to be added.
      * @return The UpdateOperationUtility object itself.
+     *  <pre>
+     *     The patch for removing a root-level property should be in the following format:
+     *     {
+     *          "op": "remove",
+     *          "path": "/samplePropertyName",
+     *     }
+     *     The patch for removing a component-level property should be in the following format:
+     *     {
+     *          "op": "remove",
+     *          "path": "/sampleComponentName/samplePropertyName",
+     *     }
+     *  </pre>
      */
     public UpdateOperationUtility appendRemovePropertyOperation(String path) {
         operations.add(
@@ -114,6 +176,13 @@ public final class UpdateOperationUtility {
      * Include a remove operation for a component.
      * @param path The path to the component to be removed.
      * @return The UpdateOperationUtility object itself.
+     *  <pre>
+     *     The patch for removing a component should be in the following format:
+     *     {
+     *          "op": "remove",
+     *          "path": "/sampleComponentName",
+     *     }
+     *  </pre>
      */
     public UpdateOperationUtility appendRemoveComponentOperation(String path) {
         operations.add(
