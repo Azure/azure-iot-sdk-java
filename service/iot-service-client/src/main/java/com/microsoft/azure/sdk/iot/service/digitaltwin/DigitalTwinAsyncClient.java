@@ -13,16 +13,13 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceCon
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.IotHubGatewayServiceAPIsImpl;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.DeserializationHelpers;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.DigitalTwinStringSerializer;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.UpdateOperationUtility;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.*;
 import com.microsoft.rest.serializer.JacksonAdapter;
@@ -95,6 +92,7 @@ public class DigitalTwinAsyncClient {
         }
 
         return digitalTwin.getDigitalTwinWithServiceResponseAsync(digitalTwinId)
+                .flatMap(FUNC_TO_DIGITAL_TWIN_GET_RESPONSE)
                 .flatMap(response -> {
                     try {
                         T genericResponse = DeserializationHelpers.castObject(objectMapper, response.body(), clazz);
@@ -141,6 +139,7 @@ public class DigitalTwinAsyncClient {
     {
         String ifMatch = options != null ? options.getIfMatch() : null;
         return digitalTwin.updateDigitalTwinWithServiceResponseAsync(digitalTwinId, digitalTwinUpdateOperations, ifMatch)
+                .flatMap(FUNC_TO_DIGITAL_TWIN_UPDATE_RESPONSE)
                 .subscribeOn(Schedulers.io());
     }
 

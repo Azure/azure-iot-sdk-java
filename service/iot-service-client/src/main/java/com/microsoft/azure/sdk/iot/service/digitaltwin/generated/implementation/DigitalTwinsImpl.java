@@ -9,10 +9,10 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation
 import retrofit2.Retrofit;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
 import com.google.common.reflect.TypeToken;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeComponentCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateDigitalTwinHeaders;
 import com.microsoft.rest.RestException;
 import com.microsoft.rest.ServiceCallback;
 import com.microsoft.rest.ServiceFuture;
@@ -110,9 +110,9 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the observable to the Object object
      */
     public Observable<Object> getDigitalTwinAsync(String id) {
-        return getDigitalTwinWithServiceResponseAsync(id).map(new Func1<ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders>, Object>() {
+        return getDigitalTwinWithServiceResponseAsync(id).map(new Func1<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>, Object>() {
             @Override
-            public Object call(ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders> response) {
+            public Object call(ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders> response) {
                 return response.body();
             }
         });
@@ -125,17 +125,17 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the observable to the Object object
      */
-    public Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders>> getDigitalTwinWithServiceResponseAsync(String id) {
+    public Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>> getDigitalTwinWithServiceResponseAsync(String id) {
         if (id == null) {
             throw new IllegalArgumentException("Parameter id is required and cannot be null.");
         }
         final String apiVersion = "2020-09-30";
         return service.getDigitalTwin(id, apiVersion)
-            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders>>>() {
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>>>() {
                 @Override
-                public Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders>> call(Response<ResponseBody> response) {
+                public Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>> call(Response<ResponseBody> response) {
                     try {
-                        ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders> clientResponse = getDigitalTwinDelegate(response);
+                        ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders> clientResponse = getDigitalTwinDelegate(response);
                         return Observable.just(clientResponse);
                     } catch (Throwable t) {
                         return Observable.error(t);
@@ -144,10 +144,10 @@ public class DigitalTwinsImpl implements DigitalTwins {
             });
     }
 
-    private ServiceResponseWithHeaders<Object, DigitalTwinGetHeaders> getDigitalTwinDelegate(Response<ResponseBody> response) throws RestException, IOException, IllegalArgumentException {
+    private ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders> getDigitalTwinDelegate(Response<ResponseBody> response) throws RestException, IOException, IllegalArgumentException {
         return this.client.restClient().responseBuilderFactory().<Object, RestException>newInstance(this.client.serializerAdapter())
                 .register(200, new TypeToken<Object>() { }.getType())
-                .buildWithHeaders(response, DigitalTwinGetHeaders.class);
+                .buildWithHeaders(response, DigitalTwinGetDigitalTwinHeaders.class);
     }
 
     /**
@@ -185,9 +185,9 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
     public Observable<Void> updateDigitalTwinAsync(String id, List<Object> digitalTwinPatch) {
-        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch).map(new Func1<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>, Void>() {
+        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch).map(new Func1<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>, Void>() {
             @Override
-            public Void call(ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> response) {
+            public Void call(ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> response) {
                 return response.body();
             }
         });
@@ -201,7 +201,7 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
-    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch) {
+    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch) {
         if (id == null) {
             throw new IllegalArgumentException("Parameter id is required and cannot be null.");
         }
@@ -212,11 +212,11 @@ public class DigitalTwinsImpl implements DigitalTwins {
         final String apiVersion = "2020-09-30";
         final String ifMatch = null;
         return service.updateDigitalTwin(id, digitalTwinPatch, ifMatch, apiVersion)
-            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>>>() {
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>>>() {
                 @Override
-                public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> call(Response<ResponseBody> response) {
+                public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> call(Response<ResponseBody> response) {
                     try {
-                        ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> clientResponse = updateDigitalTwinDelegate(response);
+                        ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> clientResponse = updateDigitalTwinDelegate(response);
                         return Observable.just(clientResponse);
                     } catch (Throwable t) {
                         return Observable.error(t);
@@ -263,9 +263,9 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
     public Observable<Void> updateDigitalTwinAsync(String id, List<Object> digitalTwinPatch, String ifMatch) {
-        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch, ifMatch).map(new Func1<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>, Void>() {
+        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch, ifMatch).map(new Func1<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>, Void>() {
             @Override
-            public Void call(ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> response) {
+            public Void call(ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> response) {
                 return response.body();
             }
         });
@@ -280,7 +280,7 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @throws IllegalArgumentException thrown if parameters fail the validation
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
-    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch, String ifMatch) {
+    public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> updateDigitalTwinWithServiceResponseAsync(String id, List<Object> digitalTwinPatch, String ifMatch) {
         if (id == null) {
             throw new IllegalArgumentException("Parameter id is required and cannot be null.");
         }
@@ -290,11 +290,11 @@ public class DigitalTwinsImpl implements DigitalTwins {
         Validator.validate(digitalTwinPatch);
         final String apiVersion = "2020-09-30";
         return service.updateDigitalTwin(id, digitalTwinPatch, ifMatch, apiVersion)
-            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>>>() {
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>>>() {
                 @Override
-                public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders>> call(Response<ResponseBody> response) {
+                public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> call(Response<ResponseBody> response) {
                     try {
-                        ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> clientResponse = updateDigitalTwinDelegate(response);
+                        ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> clientResponse = updateDigitalTwinDelegate(response);
                         return Observable.just(clientResponse);
                     } catch (Throwable t) {
                         return Observable.error(t);
@@ -303,10 +303,10 @@ public class DigitalTwinsImpl implements DigitalTwins {
             });
     }
 
-    private ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinDelegate(Response<ResponseBody> response) throws RestException, IOException, IllegalArgumentException {
+    private ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> updateDigitalTwinDelegate(Response<ResponseBody> response) throws RestException, IOException, IllegalArgumentException {
         return this.client.restClient().responseBuilderFactory().<Void, RestException>newInstance(this.client.serializerAdapter())
                 .register(202, new TypeToken<Void>() { }.getType())
-                .buildWithHeaders(response, DigitalTwinUpdateHeaders.class);
+                .buildWithHeaders(response, DigitalTwinUpdateDigitalTwinHeaders.class);
     }
 
     /**
