@@ -39,7 +39,7 @@ public final class DigitalTwinMetadata {
      * @param modelId The Id of the model that the digital twin or component is modeled by.
      * @return The DigitalTwinMetadata object itself.
      */
-    private DigitalTwinMetadata setModelId(String modelId) {
+    public DigitalTwinMetadata setModelId(String modelId) {
         this.modelId = modelId;
         return this;
     }

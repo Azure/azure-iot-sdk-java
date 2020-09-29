@@ -3,16 +3,40 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
 
-import lombok.Getter;
-import lombok.Setter;
-
+/**
+ * General request options that are applicable, but optional, for invoke command APIs.
+ */
 public final class DigitalTwinInvokeCommandRequestOptions {
 
-    @Getter
-    @Setter
-    Integer connectTimeoutInSeconds;
+    /**
+     * The time (in seconds) that the service waits for the device to come online.
+     * The default is 0 seconds (which means the device must already be online) and the maximum is 300 seconds.
+     */
+    private Integer connectTimeoutInSeconds;
 
-    @Getter
-    @Setter
-    Integer responseTimeoutInSeconds;
+    /**
+     * The time (in seconds) that the service waits for the method invocation to return a response.
+     * The default is 30 seconds, minimum is 5 seconds, and maximum is 300 seconds.
+     */
+    private Integer responseTimeoutInSeconds;
+
+    public Integer getConnectTimeoutInSeconds()
+    {
+        return connectTimeoutInSeconds;
+    }
+
+    public void setConnectTimeoutInSeconds(Integer connectTimeoutInSeconds)
+    {
+        this.connectTimeoutInSeconds = connectTimeoutInSeconds;
+    }
+
+    public Integer getResponseTimeoutInSeconds()
+    {
+        return responseTimeoutInSeconds;
+    }
+
+    public void setResponseTimeoutInSeconds(Integer responseTimeoutInSeconds)
+    {
+        this.responseTimeoutInSeconds = responseTimeoutInSeconds;
+    }
 }
