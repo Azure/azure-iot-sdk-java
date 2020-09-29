@@ -21,6 +21,7 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommand
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.*;
 import com.microsoft.rest.serializer.JacksonAdapter;
 import rx.Observable;
@@ -69,6 +70,11 @@ public class DigitalTwinAsyncClient {
      */
     public <T> Observable<T> getDigitalTwin (String digitalTwinId, Class<T> clazz)
     {
+        if(clazz == null)
+        {
+            throw new IllegalArgumentException("Parameter clazz is required and cannot be null.");
+        }
+
         return getDigitalTwinWithResponse(digitalTwinId, clazz)
                 .map(response -> response.body());
     }
@@ -82,13 +88,18 @@ public class DigitalTwinAsyncClient {
      */
     public <T> Observable<ServiceResponseWithHeaders<T, DigitalTwinGetHeaders>> getDigitalTwinWithResponse (String digitalTwinId, Class<T> clazz)
     {
+        if(clazz == null)
+        {
+            throw new IllegalArgumentException("Parameter clazz is required and cannot be null.");
+        }
+
         return digitalTwin.getDigitalTwinWithServiceResponseAsync(digitalTwinId)
                 .flatMap(response -> {
                     try {
                         T genericResponse = DeserializationHelpers.castObject(objectMapper, response.body(), clazz);
                         return Observable.just(new ServiceResponseWithHeaders<>(genericResponse, response.headers(), response.response()));
                     } catch (JsonProcessingException e) {
-                        return Observable.error(e);
+                        return Observable.error(new IotHubException("Failed to parse the resonse"));
                     }
 
                 })
