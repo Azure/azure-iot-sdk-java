@@ -12,9 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class DigitalTwinMetadata {
+    /* The Id of the model that the digital twin or component is modeled by. This is present on a digital twin's root level metadata */
     @JsonProperty(value = "$model", required = true)
     private String modelId;
 
+    /* Model-defined writable properties' request state. */
     @JsonIgnore
     private final Map<String, Object> writeableProperties = new HashMap<>();
 
