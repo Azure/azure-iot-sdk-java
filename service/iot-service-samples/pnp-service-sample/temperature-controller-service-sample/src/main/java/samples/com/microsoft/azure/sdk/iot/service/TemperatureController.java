@@ -4,7 +4,6 @@ package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.plugandplay.PnpHelper;
 
 import java.io.IOException;
 import java.time.ZoneOffset;

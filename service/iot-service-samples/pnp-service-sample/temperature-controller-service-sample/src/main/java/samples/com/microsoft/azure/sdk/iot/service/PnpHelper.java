@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.service.plugandplay;
+package samples.com.microsoft.azure.sdk.iot.service;
 
-import lombok.NonNull;
 import com.google.gson.JsonObject;
 import java.util.Set;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import static java.util.Collections.singleton;
 
 /*

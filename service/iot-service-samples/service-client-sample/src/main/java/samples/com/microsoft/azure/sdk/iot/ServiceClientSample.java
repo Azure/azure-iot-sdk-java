@@ -85,13 +85,16 @@ public class ServiceClientSample
         else
         {
             System.out.println("No file upload notification received !");
+            closeFileUploadNotificationReceiver();
+            closeServiceClient();
+            System.out.println("********* Shutting down ServiceClient sample...");
         }
 
         closeFileUploadNotificationReceiver();
         closeFeedbackReceiver();
+        closeServiceClient();
 
         System.out.println("********* Shutting down ServiceClient sample...");
-        closeServiceClient();
     }
 
     protected static void openServiceClient() throws Exception

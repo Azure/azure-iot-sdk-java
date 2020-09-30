@@ -5,14 +5,11 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +25,6 @@ public class ModuleManagerSample
     public static void main(String[] args) throws Exception
     {
         System.out.println("Starting sample...");
-
-        System.out.println("Add Device started");
-        AddDevice();
-        System.out.println("Add Device finished");
 
         System.out.println("Add Module started");
         AddModule(0);
@@ -52,33 +45,6 @@ public class ModuleManagerSample
 
         System.out.println("Shutting down sample...");
     }
-
-    private static void AddDevice() throws Exception
-    {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
-
-        Device device = Device.createFromId(SampleUtils.deviceId, DeviceStatus.Enabled, null);
-
-        try
-        {
-            device = registryManager.addDevice(device);
-
-            System.out.println("Device created: " + device.getDeviceId());
-        }
-        catch (IotHubException iote)
-        {
-            if (iote.getErrorCode() == HttpURLConnection.HTTP_CONFLICT) {
-                System.out.println("Device " + device.getDeviceId() + " already exists");
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        registryManager.close();
-    }
-
 
     private static void AddModule(int n) throws Exception
     {
