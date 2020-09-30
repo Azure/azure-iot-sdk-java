@@ -55,6 +55,7 @@ public class DigitalTwinAsyncClient {
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoTHub connection string
+     * @return DigitalTwinAsyncClient
      */
     public static DigitalTwinAsyncClient createFromConnectionString(String connectionString)
     {

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 
 /**
- * Configures the {@link StdSerializer<String>} with custom behavior needed to work with Digital Twins REST API.
+ * Configures the {@link StdSerializer} with custom behavior needed to work with Digital Twins REST API.
  */
 public final class DigitalTwinStringSerializer extends StdSerializer<String> {
     private static final long serialVersionUID = 1L;

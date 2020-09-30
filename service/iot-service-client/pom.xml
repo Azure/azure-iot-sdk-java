@@ -135,11 +135,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <excludePackageNames>
-                        com.microsoft.azure.sdk.iot.service.digitaltwin.generated:
-                        com.microsoft.azure.sdk.iot.service.digitaltwin.helpers:
-                        com.microsoft.azure.sdk.iot.service.digitaltwin.authentication
-                    </excludePackageNames>
+                    <excludePackageNames>com.microsoft.azure.sdk.iot.service.digitaltwin.generated*:com.microsoft.azure.sdk.iot.service.digitaltwin.helpers*:com.microsoft.azure.sdk.iot.service.digitaltwin.authentication*</excludePackageNames>
                     <!--This configures the "mvn javadoc:javadoc" created artifacts are outputted to <reportOutputDirectory>/<destDir>-->
                     <reportOutputDirectory>${session.executionRootDirectory}/apidocs</reportOutputDirectory>
                     <destDir>service</destDir>
