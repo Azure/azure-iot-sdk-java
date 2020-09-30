@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package com.microsoft.azure.sdk.iot.service.digitaltwin.models;
+package com.microsoft.azure.sdk.iot.service.digitaltwin.serialization;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;

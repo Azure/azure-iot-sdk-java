@@ -10,9 +10,9 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalT
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import rx.Observable;
