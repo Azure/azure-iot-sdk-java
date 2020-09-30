@@ -10,12 +10,14 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.SasTokenPr
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientCredentialsProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionString;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionStringParser;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.IotHubGatewayServiceAPIsImpl;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.DeserializationHelpers;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.DigitalTwinStringSerializer;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.DeserializationHelpers;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.DigitalTwinStringSerializer;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.*;
