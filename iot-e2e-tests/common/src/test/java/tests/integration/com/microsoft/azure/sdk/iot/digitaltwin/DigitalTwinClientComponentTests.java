@@ -6,6 +6,7 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
@@ -113,6 +114,31 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @Test
     public void updateDigitalTwin() throws IOException {
+        // arrange
+        String newProperty = "currentTemperature";
+        Integer newPropertyValue = 35;
+        String newComponent = "newThermostat";
+        String newComponentPath = "/newThermostat";
+        Map<String, Object> componentProperties = new HashMap<>();
+        componentProperties.put(newProperty, newPropertyValue);
+
+        DigitalTwinUpdateRequestOptions optionsWithoutEtag = new DigitalTwinUpdateRequestOptions();
+        optionsWithoutEtag.setIfMatch("*");
+
+        // get digital twin and Etag before update
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
+        DigitalTwinUpdateRequestOptions optionsWithEtag = new DigitalTwinUpdateRequestOptions();
+        optionsWithEtag.setIfMatch(responseWithHeaders.headers().eTag());
+
+        // act
+        // Add component at root level - conditional update with max overload
+        UpdateOperationUtility updateOperationUtility = new UpdateOperationUtility().appendAddComponentOperation(newComponentPath, componentProperties);
+        digitalTwinClient.updateDigitalTwinWithResponse(deviceId, updateOperationUtility.getUpdateOperations(), optionsWithEtag);
+        BasicDigitalTwin digitalTwin = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class).body();
+
+        // assert
+        assertEquals(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID, digitalTwin.getMetadata().getModelId());
+        assertEquals(true, digitalTwin.getCustomProperties().containsKey(newComponent));
     }
 
     @Test

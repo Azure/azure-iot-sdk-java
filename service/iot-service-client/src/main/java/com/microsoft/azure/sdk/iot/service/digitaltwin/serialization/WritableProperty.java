@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin.serialization;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.OffsetDateTime;
+import java.util.Date;
 
 /*
 An optional, helper class for deserializing a digital twin. A writable property is one that the service may request a change for from the device.
@@ -45,8 +46,8 @@ public final class WritableProperty
     /**
      * The time when this property was last updated.
      */
-    @JsonProperty("ackDescription")
-    public OffsetDateTime LastUpdateTime;
+    @JsonProperty("lastUpdateTime")
+    public Date LastUpdateTime;
 
     public Object getDesiredValue() {
         return this.DesiredValue;
@@ -68,7 +69,7 @@ public final class WritableProperty
         return this.AckDescription;
     }
 
-    public OffsetDateTime getLastUpdateTime() {
+    public Date getLastUpdateTime() {
         return this.LastUpdateTime;
     }
 
@@ -92,7 +93,7 @@ public final class WritableProperty
         this.AckDescription = AckDescription;
     }
 
-    public void setLastUpdateTime(OffsetDateTime LastUpdateTime) {
+    public void setLastUpdateTime(Date LastUpdateTime) {
         this.LastUpdateTime = LastUpdateTime;
     }
 }

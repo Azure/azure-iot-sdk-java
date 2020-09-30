@@ -76,7 +76,7 @@ public class Thermostat {
     }
 
     private static void UpdateDigitalTwin() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(3);
+        CountDownLatch latch1 = new CountDownLatch(1);
 
         // Update the digital twin.
         UpdateOperationUtility updateOperationUtility = new UpdateOperationUtility();
@@ -94,17 +94,18 @@ public class Thermostat {
                         getResponse ->
                         {
                             System.out.println("Updated Digital Twin");
-                            latch.countDown();
+                            latch1.countDown();
                         },
                         error ->
                         {
                             System.out.println("Update Digital Twin failed: " + error);
-                            latch.countDown();
+                            latch1.countDown();
                         });
-
+        latch1.await(MAX_WAIT_TIME_ASYNC_OPERATIONS_IN_SECONDS, TimeUnit.SECONDS);
         GetDigitalTwin();
 
         // Replace an existing property at root level.
+        CountDownLatch latch2 = new CountDownLatch(1);
         System.out.println("--------------------------------------------------------------------------------------------");
         System.out.println("Replace an existing property at root level " + existingProperty);
         System.out.println("--------------------------------------------------------------------------------------------");
@@ -114,17 +115,19 @@ public class Thermostat {
                         getResponse ->
                         {
                             System.out.println("Updated Digital Twin");
-                            latch.countDown();
+                            latch2.countDown();
                         },
                         error ->
                         {
                             System.out.println("Update Digital Twin failed: " + error);
-                            latch.countDown();
+                            latch2.countDown();
                         });
 
+        latch2.await(MAX_WAIT_TIME_ASYNC_OPERATIONS_IN_SECONDS, TimeUnit.SECONDS);
         GetDigitalTwin();
 
         // Remove the new property at root level.
+        CountDownLatch latch3 = new CountDownLatch(1);
         System.out.println("--------------------------------------------------------------------------------------------");
         System.out.println("Remove the new property at root level " + newProperty);
         System.out.println("--------------------------------------------------------------------------------------------");
@@ -134,17 +137,16 @@ public class Thermostat {
                         getResponse ->
                         {
                             System.out.println("Updated Digital Twin");
-                            latch.countDown();
+                            latch3.countDown();
                         },
                         error ->
                         {
                             System.out.println("Update Digital Twin failed: " + error);
-                            latch.countDown();
+                            latch3.countDown();
                         });
 
+        latch3.await(MAX_WAIT_TIME_ASYNC_OPERATIONS_IN_SECONDS, TimeUnit.SECONDS);
         GetDigitalTwin();
-
-        latch.await(MAX_WAIT_TIME_ASYNC_OPERATIONS_IN_SECONDS, TimeUnit.SECONDS);
     }
 
     private static void InvokeMethodOnRootLevel() throws IOException, InterruptedException {
