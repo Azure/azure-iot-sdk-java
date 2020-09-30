@@ -110,7 +110,7 @@ This sample uses the following simple model which has no components - [Thermosta
    1. Set the following environment variables on the terminal from which you want to run the application.
 
       * IOTHUB_CONNECTION_STRING
-      * DEVICE_ID
+      * IOTHUB_DEVICE_ID
 
 2. Install dependencies:
 
@@ -147,7 +147,7 @@ This sample uses the following model which has components - [TemperatureControll
    1. Set the following environment variables on the terminal from which you want to run the application.
 
       * IOTHUB_CONNECTION_STRING
-      * DEVICE_ID
+      * IOTHUB_DEVICE_ID
 
 2. Install dependencies:
 

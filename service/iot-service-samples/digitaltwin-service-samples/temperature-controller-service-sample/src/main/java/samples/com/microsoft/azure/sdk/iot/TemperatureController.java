@@ -9,7 +9,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
+import com.microsoft.rest.RestException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 
 import java.io.IOException;
@@ -142,10 +145,23 @@ public class TemperatureController {
         String commandInput = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5).format(DateTimeFormatter.ISO_DATE_TIME);
 
         DigitalTwinInvokeCommandRequestOptions options = new DigitalTwinInvokeCommandRequestOptions();
-        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeComponentCommandWithResponse(digitalTwinid, componentName, commandName, commandInput, options);
-        System.out.println("Command " + commandName + ", payload: " + prettyString(commandResponse.body().getPayload()));
-        System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
-        System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
+        try {
+            ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeComponentCommandWithResponse(digitalTwinid, componentName, commandName, commandInput, options);
+            System.out.println("Command " + commandName + ", payload: " + prettyString(commandResponse.body().getPayload()));
+            System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
+            System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
+        } catch (RestException ex)
+        {
+            if(ex.response().code() == 404)
+            {
+                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample.");
+            }
+            else
+            {
+                throw ex;
+            }
+        }
+
     }
 
     private static void InvokeMethodOnRootLevel() throws IOException {
@@ -156,10 +172,23 @@ public class TemperatureController {
         options.setConnectTimeoutInSeconds(5);
         options.setResponseTimeoutInSeconds(10);
 
-        ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeCommandWithResponse(digitalTwinid, commandName, commandInput, options);
-        System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload());
-        System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
-        System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
+        try
+        {
+            ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> commandResponse = client.invokeCommandWithResponse(digitalTwinid, commandName, commandInput, options);
+            System.out.println("Command " + commandName + ", payload: " + commandResponse.body().getPayload());
+            System.out.println("Command " + commandName + ", status: " + commandResponse.body().getStatus());
+            System.out.println("Command " + commandName + ", requestId: " + commandResponse.headers().getRequestId());
+        } catch (RestException ex)
+        {
+            if(ex.response().code() == 404)
+            {
+                System.out.println("Ensure the device sample is running for this sample to succeed - https://github.com/Azure/azure-iot-sdk-java/tree/master/device/iot-device-samples/pnp-device-sample/temperature-controller-device-sample.");
+            }
+            else
+            {
+                throw ex;
+            }
+        }
     }
     
     private static String prettyString(String str)
