@@ -3,17 +3,22 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
+import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.rest.RestException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.rules.Timeout;
@@ -116,6 +121,52 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Test
     public void updateDigitalTwin() throws IOException {
+        // arrange
+        String newProperty = "currentTemperature";
+        String newPropertyPath = "/currentTemperature";
+        Integer newPropertyValue = 35;
+
+        // Property update callback
+        TwinPropertyCallBack twinPropertyCallBack = (property, context) -> {
+            Set<Property> properties = new HashSet<>();
+            properties.add(property);
+            try {
+                //EmbeddedPropertyUpdate completedUpdate = new EmbeddedPropertyUpdate(property.getValue(), 200, property.getVersion(), "Successfully updated target temperature");
+                //Property reportedPropertyCompleted = new Property(property.getKey(), completedUpdate);
+                deviceClient.sendReportedProperties(properties);
+            } catch (IOException e) {
+            }
+        };
+
+        // IotHub event callback
+        IotHubEventCallback iotHubEventCallback = (responseStatus, callbackContext) -> {};
+
+        // start device twin and setup handler for property updates in device
+        deviceClient.startDeviceTwin(iotHubEventCallback, null, twinPropertyCallBack, null);
+        Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
+                Collections.singletonMap(
+                        new Property(newProperty, null),
+                        new Pair<>(twinPropertyCallBack, null));
+        deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
+
+        DigitalTwinUpdateRequestOptions optionsWithoutEtag = new DigitalTwinUpdateRequestOptions();
+        optionsWithoutEtag.setIfMatch("*");
+
+        // get digital twin and Etag before update
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
+        DigitalTwinUpdateRequestOptions optionsWithEtag = new DigitalTwinUpdateRequestOptions();
+        optionsWithEtag.setIfMatch(responseWithHeaders.headers().eTag());
+
+        // act
+        // Add properties at root level - conditional update with max overload
+        UpdateOperationUtility updateOperationUtility = new UpdateOperationUtility().appendAddPropertyOperation(newPropertyPath, newPropertyValue);
+        digitalTwinClient.updateDigitalTwinWithResponse(deviceId, updateOperationUtility.getUpdateOperations(), optionsWithEtag);
+        BasicDigitalTwin digitalTwin = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class).body();
+
+        // assert
+        assertEquals(E2ETestConstants.THERMOSTAT_MODEL_ID, digitalTwin.getMetadata().getModelId());
+        assertEquals(true, digitalTwin.getMetadata().getWriteableProperties().containsKey(newProperty));
+        assertEquals(newPropertyValue, digitalTwin.getMetadata().getWriteableProperties().get(newProperty).getDesiredValue());
     }
 
     @Test
