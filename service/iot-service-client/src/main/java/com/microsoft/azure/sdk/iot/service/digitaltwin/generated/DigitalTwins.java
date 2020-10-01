@@ -151,7 +151,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin root level command.
-     * Invoke a digital twin root level command.
      *
      * @param id the String value
      * @param commandName the String value
@@ -164,7 +163,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin root level command.
-     * Invoke a digital twin root level command.
      *
      * @param id the String value
      * @param commandName the String value
@@ -176,7 +174,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin root level command.
-     * Invoke a digital twin root level command.
      *
      * @param id the String value
      * @param commandName the String value
@@ -187,7 +184,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin root level command.
-     * Invoke a digital twin root level command.
      *
      * @param id the String value
      * @param commandName the String value
@@ -196,7 +192,6 @@ public interface DigitalTwins {
      */
     Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>> invokeRootLevelCommandWithServiceResponseAsync(String id, String commandName);
     /**
-     * Invoke a digital twin root level command.
      * Invoke a digital twin root level command.
      *
      * @param id the String value
@@ -213,7 +208,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin root level command.
-     * Invoke a digital twin root level command.
      *
      * @param id the String value
      * @param commandName the String value
@@ -228,7 +222,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin root level command.
-     * Invoke a digital twin root level command.
      *
      * @param id the String value
      * @param commandName the String value
@@ -241,7 +234,6 @@ public interface DigitalTwins {
     Observable<Object> invokeRootLevelCommandAsync(String id, String commandName, Object payload, Integer connectTimeoutInSeconds, Integer responseTimeoutInSeconds);
 
     /**
-     * Invoke a digital twin root level command.
      * Invoke a digital twin root level command.
      *
      * @param id the String value
@@ -256,7 +248,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin command.
-     * Invoke a digital twin command.
      *
      * @param id the String value
      * @param componentPath the String value
@@ -270,7 +261,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin command.
-     * Invoke a digital twin command.
      *
      * @param id the String value
      * @param componentPath the String value
@@ -283,7 +273,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin command.
-     * Invoke a digital twin command.
      *
      * @param id the String value
      * @param componentPath the String value
@@ -295,7 +284,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin command.
-     * Invoke a digital twin command.
      *
      * @param id the String value
      * @param componentPath the String value
@@ -305,7 +293,6 @@ public interface DigitalTwins {
      */
     Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>> invokeComponentCommandWithServiceResponseAsync(String id, String componentPath, String commandName);
     /**
-     * Invoke a digital twin command.
      * Invoke a digital twin command.
      *
      * @param id the String value
@@ -323,7 +310,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin command.
-     * Invoke a digital twin command.
      *
      * @param id the String value
      * @param componentPath the String value
@@ -339,7 +325,6 @@ public interface DigitalTwins {
 
     /**
      * Invoke a digital twin command.
-     * Invoke a digital twin command.
      *
      * @param id the String value
      * @param componentPath the String value
@@ -353,7 +338,6 @@ public interface DigitalTwins {
     Observable<Object> invokeComponentCommandAsync(String id, String componentPath, String commandName, Object payload, Integer connectTimeoutInSeconds, Integer responseTimeoutInSeconds);
 
     /**
-     * Invoke a digital twin command.
      * Invoke a digital twin command.
      *
      * @param id the String value

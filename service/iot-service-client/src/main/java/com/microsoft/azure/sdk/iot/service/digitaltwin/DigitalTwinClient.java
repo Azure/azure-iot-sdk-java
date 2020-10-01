@@ -37,7 +37,7 @@ public class DigitalTwinClient {
      * @param <T> The generic type to deserialize the application/json into.
      * @return The application/json of the digital twin.
      */
-    public <T> T getDigitalTwin (String digitalTwinId, Class<T> clazz)
+    public <T> T getDigitalTwin(String digitalTwinId, Class<T> clazz)
     {
         return getDigitalTwinWithResponse(digitalTwinId, clazz).body();
     }
@@ -49,7 +49,7 @@ public class DigitalTwinClient {
      * @param <T> The generic type to deserialize the application/json into.
      * @return A {@link ServiceResponseWithHeaders} representing deserialized application/json of the digital twin with {@link DigitalTwinGetHeaders}.
      */
-    public <T> ServiceResponseWithHeaders<T, DigitalTwinGetHeaders> getDigitalTwinWithResponse (String digitalTwinId, Class<T> clazz)
+    public <T> ServiceResponseWithHeaders<T, DigitalTwinGetHeaders> getDigitalTwinWithResponse(String digitalTwinId, Class<T> clazz)
     {
         return digitalTwinAsyncClient.getDigitalTwinWithResponse(digitalTwinId, clazz)
                 .toBlocking().single();
@@ -61,7 +61,7 @@ public class DigitalTwinClient {
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
      * @return void.
      */
-    public Void updateDigitalTwin (String digitalTwinId, List<Object> digitalTwinUpdateOperations)
+    public Void updateDigitalTwin(String digitalTwinId, List<Object> digitalTwinUpdateOperations)
     {
         return digitalTwinAsyncClient.updateDigitalTwin(digitalTwinId, digitalTwinUpdateOperations)
             .toBlocking().single();
@@ -73,7 +73,7 @@ public class DigitalTwinClient {
      * @param digitalTwinUpdateOperations The JSON patch to apply to the specified digital twin. This argument can be created using {@link UpdateOperationUtility}.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
      */
-    public ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations)
+    public ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinWithResponse(String digitalTwinId, List<Object> digitalTwinUpdateOperations)
     {
         return updateDigitalTwinWithResponse(digitalTwinId, digitalTwinUpdateOperations, null);
     }
@@ -85,7 +85,7 @@ public class DigitalTwinClient {
      * @param options The optional settings for this request.
      * @return A {@link ServiceResponseWithHeaders} with {@link DigitalTwinUpdateHeaders}.
      */
-    public ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinWithResponse (String digitalTwinId, List<Object> digitalTwinUpdateOperations, DigitalTwinUpdateRequestOptions options)
+    public ServiceResponseWithHeaders<Void, DigitalTwinUpdateHeaders> updateDigitalTwinWithResponse(String digitalTwinId, List<Object> digitalTwinUpdateOperations, DigitalTwinUpdateRequestOptions options)
     {
         return digitalTwinAsyncClient.updateDigitalTwinWithResponse(digitalTwinId, digitalTwinUpdateOperations, options)
                 .toBlocking().single();
@@ -125,7 +125,8 @@ public class DigitalTwinClient {
      * @throws IOException can be thrown if the provided payload cannot be deserialized into a valid Json object.
      */
     public ServiceResponseWithHeaders<DigitalTwinCommandResponse, DigitalTwinInvokeCommandHeaders> invokeCommandWithResponse(String digitalTwinId, String commandName, String payload, DigitalTwinInvokeCommandRequestOptions options) throws IOException {
-        return digitalTwinAsyncClient.invokeCommandWithResponse(digitalTwinId, commandName, payload, options)
+        return digitalTwinAsyncClient
+                .invokeCommandWithResponse(digitalTwinId, commandName, payload, options)
                 .toBlocking().single();
     }
 

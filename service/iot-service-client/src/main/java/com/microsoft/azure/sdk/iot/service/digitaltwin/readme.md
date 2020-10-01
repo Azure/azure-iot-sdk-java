@@ -40,7 +40,7 @@ try
 }
 catch (RestException ex)
 {
-    if(ex.response().code() == 404)
+    if (ex.response().code() == 404)
     {
         System.out.println("404");
     }

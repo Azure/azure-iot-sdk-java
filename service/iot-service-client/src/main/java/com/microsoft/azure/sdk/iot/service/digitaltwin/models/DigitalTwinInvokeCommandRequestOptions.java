@@ -20,21 +20,35 @@ public final class DigitalTwinInvokeCommandRequestOptions {
      */
     private Integer responseTimeoutInSeconds;
 
+    /**
+     * Sets the time (in seconds) that the service waits for the device to come online.
+     */
     public Integer getConnectTimeoutInSeconds()
     {
         return connectTimeoutInSeconds;
     }
 
+    /**
+     * Sets the time (in seconds) that the service waits for the device to come online.
+     * The default is 0 seconds (which means the device must already be online) and the maximum is 300 seconds.
+     */
     public void setConnectTimeoutInSeconds(Integer connectTimeoutInSeconds)
     {
         this.connectTimeoutInSeconds = connectTimeoutInSeconds;
     }
 
+    /**
+     * Gets the time (in seconds) that the service waits for the method invocation to return a response.
+     */
     public Integer getResponseTimeoutInSeconds()
     {
         return responseTimeoutInSeconds;
     }
 
+    /**
+     * Sets the time (in seconds) that the service waits for the method invocation to return a response.
+     * The default is 30 seconds, minimum is 5 seconds, and maximum is 300 seconds.
+     */
     public void setResponseTimeoutInSeconds(Integer responseTimeoutInSeconds)
     {
         this.responseTimeoutInSeconds = responseTimeoutInSeconds;

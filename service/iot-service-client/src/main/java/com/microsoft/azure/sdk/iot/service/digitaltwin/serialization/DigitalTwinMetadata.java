@@ -55,11 +55,11 @@ public final class DigitalTwinMetadata {
     }
 
     /**
-     * Sets the model-defined writable properties' request state.
+     * Adds the model-defined writable properties' request state.
      * @return The DigitalTwinMetadata object itself.
      */
     @JsonAnySetter
-    DigitalTwinMetadata setWritableProperties(String key, WritableProperty value) {
+    DigitalTwinMetadata addWritableProperties(String key, WritableProperty value) {
         this.writeableProperties.put(key, value);
         return this;
     }

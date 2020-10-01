@@ -37,10 +37,10 @@ public final class Base64 {
 
     private static final int[] BASE64D16_CONVERSION_TABLE =
             {
-                    ((int) 'A' + ((int) 'E' << ONE_BYTE) + ((int) 'I' << TWO_BYTES) + ((int) 'M' << THREE_BYTES)),
-                    ((int) 'Q' + ((int) 'U' << ONE_BYTE) + ((int) 'Y' << TWO_BYTES) + ((int) 'c' << THREE_BYTES)),
-                    ((int) 'g' + ((int) 'k' << ONE_BYTE) + ((int) 'o' << TWO_BYTES) + ((int) 's' << THREE_BYTES)),
-                    ((int) 'w' + ((int) '0' << ONE_BYTE) + ((int) '4' << TWO_BYTES) + ((int) '8' << THREE_BYTES)),
+                ((int) 'A' + ((int) 'E' << ONE_BYTE) + ((int) 'I' << TWO_BYTES) + ((int) 'M' << THREE_BYTES)),
+                ((int) 'Q' + ((int) 'U' << ONE_BYTE) + ((int) 'Y' << TWO_BYTES) + ((int) 'c' << THREE_BYTES)),
+                ((int) 'g' + ((int) 'k' << ONE_BYTE) + ((int) 'o' << TWO_BYTES) + ((int) 's' << THREE_BYTES)),
+                ((int) 'w' + ((int) '0' << ONE_BYTE) + ((int) '4' << TWO_BYTES) + ((int) '8' << THREE_BYTES)),
             };
 
     private static final int BASE64D8_CONVERSION_TABLE = ((int) 'A' + ((int) 'Q' << ONE_BYTE) + ((int) 'g' << TWO_BYTES) + ((int) 'w' << THREE_BYTES));

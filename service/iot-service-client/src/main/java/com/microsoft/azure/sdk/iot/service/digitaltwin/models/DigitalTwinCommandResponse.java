@@ -10,12 +10,12 @@ public final class DigitalTwinCommandResponse {
     /**
      * Command invocation result status, as supplied by the device.
      */
-    Integer status;
+    private Integer status;
 
     /**
      *  Command invocation result payload, as supplied by the device.
      */
-    String payload;
+    private String payload;
 
     public Integer getStatus()
     {
