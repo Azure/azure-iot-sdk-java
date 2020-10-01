@@ -237,3 +237,7 @@ vertx.log.lck
 !log4j.properties
 
 apidocs
+*.html
+*.js
+*.css
+package-list
