@@ -6,11 +6,8 @@
 package com.microsoft.azure.sdk.iot.android.digitaltwin;
 
 import com.microsoft.azure.sdk.iot.android.helper.TestGroup1;
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Rule;
 
-import tests.integration.com.microsoft.azure.sdk.iot.provisioning.ProvisioningServiceClientTests;
+import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.DigitalTwinClientComponentTests;
 
 @TestGroup1
 public class DigitalTwinClientComponentTestsAndroidRunner extends DigitalTwinClientComponentTests
