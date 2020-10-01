@@ -26,8 +26,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -47,7 +49,6 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class DigitalTwinClientTests extends IntegrationTest
 {
-
     private static final String IOTHUB_CONNECTION_STRING = Tools.retrieveEnvironmentVariableValue(E2ETestConstants.IOTHUB_CONNECTION_STRING_ENV_VAR_NAME);
     private static RegistryManager registryManager;
     private String deviceId;
@@ -63,10 +64,12 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Parameterized.Parameters(name = "{index}: Digital Twin Test: protocol={0}")
     public static Collection<Object[]> data() {
-        return asList(new Object[][] {
-                {MQTT},
-                {MQTT_WS},
-        });
+        List inputs = new ArrayList();
+            inputs.addAll(Arrays.asList(new Object[][]{
+                    {MQTT},
+                    {MQTT_WS},
+            }));
+        return inputs;
     }
 
     @BeforeClass
@@ -109,6 +112,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void getDigitalTwin() {
         // act
         BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
@@ -120,6 +124,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void updateDigitalTwin() throws IOException {
         // arrange
         String newProperty = "currentTemperature";
@@ -170,6 +175,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void invokeRootLevelCommand() throws IOException {
         // arrange
         String commandName = "getMaxMinReport";

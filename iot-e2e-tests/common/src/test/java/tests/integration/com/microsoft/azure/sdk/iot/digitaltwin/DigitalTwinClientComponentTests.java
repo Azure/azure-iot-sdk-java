@@ -24,6 +24,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETest
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -105,6 +106,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void getDigitalTwin() {
         // act
         BasicDigitalTwin response = this.digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
@@ -116,6 +118,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void updateDigitalTwin() throws IOException {
         // arrange
         String newProperty = "currentTemperature";
@@ -145,6 +148,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void invokeComponentLevelCommand() throws IOException {
         // arrange
         String componentName = "thermostat1";
@@ -194,6 +198,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     @Test
+    @StandardTierHubOnlyTest
     public void invokeRootLevelCommand() throws IOException {
         // arrange
         String commandName = "reboot";
