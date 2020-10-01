@@ -15,6 +15,7 @@ if (($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
 
     $Env:runIotHubTests = "true"
     $Env:runProvisioningTests = "true"
+	$Env:runDigitalTwinTests = "true"
 
     exit 0
 }
@@ -37,6 +38,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
 	    # If code changes were made to provisioning sdk code or to provisioning e2e tests
@@ -50,6 +52,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
 		# If code changes were made to device client
@@ -57,6 +60,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
 		    $Env:runIotHubTests = "true"
 		    $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
         # If code changes were made to service client
@@ -64,6 +68,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
         {
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
         }
 
         # Both provisioning and iot hub depend on deps package
@@ -71,6 +76,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
 			$Env:runIotHubTests = "true"
 			$Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
         # E2E common code can be used in any test, so we must run every test
@@ -78,6 +84,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
         }
 
         # Android helpers can be used in any test, so we must run every test
@@ -85,7 +92,13 @@ ForEach ($line in $($GitDiff -split "`r`n"))
         {
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
         }
+
+		if ($line.toLower().Contains("digitaltwin"))
+		{
+			$Env:runDigitalTwinTests = "true"
+		}
 	}
 }
 
@@ -105,5 +118,14 @@ if ($Env:runProvisioningTests -eq "true")
 else
 {
     Write-Host "Will not run provisioning tests"
+}
+
+if ($Env:runDigitalTwinTests -eq "true")
+{
+	Write-Host "Will run digital twin tests"
+}
+else
+{
+	Write-Host "Will not run digital twin tests"
 }
 
