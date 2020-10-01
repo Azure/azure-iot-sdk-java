@@ -200,6 +200,7 @@ java/**/*.crt
 # C/C++ extension for VS Code
 .browse.VC.db*
 
+code-model-v1
 service/java/.idea
 service/java/target
 service/java/iot.service.sdk.java.iml
@@ -236,3 +237,7 @@ vertx.log.lck
 !log4j.properties
 
 apidocs
+*.html
+*.js
+*.css
+package-list

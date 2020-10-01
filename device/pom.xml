@@ -20,7 +20,6 @@
     <modules>
         <module>iot-device-client</module>
         <module>iot-device-samples</module>
-        <module>pnp-helper</module>
     </modules>
     <build>
         <plugins>

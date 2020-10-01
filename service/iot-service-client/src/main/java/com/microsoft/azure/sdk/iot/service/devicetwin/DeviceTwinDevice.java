@@ -6,8 +6,8 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
 import java.util.HashSet;
@@ -34,6 +34,7 @@ public class DeviceTwinDevice
     private Map<String, ConfigurationInfo> configurations = null;
     private DeviceCapabilities capabilities = null;
     private String connectionState;
+    private String modelId;
 
     /**
      * Constructor to create instance for a device
@@ -47,6 +48,7 @@ public class DeviceTwinDevice
         this.moduleId = null;
         this.eTag = null;
         this.version = null;
+        this.modelId = null;
     }
 
     /**
@@ -536,6 +538,8 @@ public class DeviceTwinDevice
         {
             thisDevice.append("Version: " + this.getVersion() + "\n");
         }
+
+        thisDevice.append("Model ID: " + this.getModelId() + "\n");
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());
         thisDevice.append(desiredPropertiesToString());
@@ -638,5 +642,13 @@ public class DeviceTwinDevice
         }
 
         return map;
+    }
+
+    public String getModelId() {
+        return this.modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 }

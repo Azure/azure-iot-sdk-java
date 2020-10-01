@@ -138,6 +138,7 @@ public class QueryCollection
      * @param httpMethod the http method to call with the query.
      * @param httpConnectTimeout the http connect timeout to use.
      * @param httpReadTimeout the http read timeout to use.
+     * @param proxy proxy type
      * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown, of if the query string is null or empty,
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
@@ -174,6 +175,7 @@ public class QueryCollection
      * @param httpMethod the http method to call with the query.
      * @param httpConnectTimeout the http connect timeout to use.
      * @param httpReadTimeout the http read timeout to use.
+     * @param proxy the proxy type
      * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown,
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
