@@ -7,8 +7,8 @@ import com.google.gson.JsonObject;
 import java.util.Set;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
+import lombok.NonNull;
 import static java.util.Collections.singleton;
 
 /*
