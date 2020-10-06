@@ -9,9 +9,7 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.NonNull;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
@@ -36,7 +34,10 @@ public class PnpConvention {
      * @return A plug and play compatible telemetry message, which can be sent to IoT Hub.
      */
     public static Message createIotHubMessageUtf8(@NonNull String telemetryName, @NonNull Object telemetryValue) {
-        return createIotHubMessageUtf8(telemetryName, telemetryValue, null);
+        return createIotHubMessageUtf8(new HashMap<String, Object>()
+        {{
+            put(telemetryName, telemetryValue);
+        }}, null);
     }
 
     /**
@@ -49,7 +50,21 @@ public class PnpConvention {
     public static Message createIotHubMessageUtf8(@NonNull String telemetryName, @NonNull Object telemetryValue, String componentName) {
         Map<String, Object> payload = singletonMap(telemetryName, telemetryValue);
 
-        Message message = new Message(gson.toJson(payload));
+        return createIotHubMessageUtf8(new HashMap<String, Object>()
+        {{
+            put(telemetryName, telemetryValue);
+        }}, componentName);
+    }
+
+    /**
+     * Create a plug and play compatible telemetry message.
+     * @param telemetryPairs he unserialized name and value telemetry pairs, as defined in the DTDL interface. Names must be 64 characters or less. For more details see
+     *                       <a href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry">this documentation</a>
+     * @param componentName (optional) The name of the component in which the telemetry is defined. Can be null for telemetry defined under the root interface.
+     * @return A plug and play compatible telemetry message, which can be sent to IoT Hub.
+     */
+    public static Message createIotHubMessageUtf8(@NonNull HashMap<String, Object> telemetryPairs, String componentName) {
+        Message message = new Message(gson.toJson(telemetryPairs));
         message.setContentEncoding(ENCODING_UTF_8);
         message.setContentTypeFinal(CONTENT_APPLICATION_JSON);
 
@@ -75,8 +90,6 @@ public class PnpConvention {
         return singleton(new Property(propertyName, propertyValue));
     }
 
-
-
     /**
      * Create a key-value property patch for both read-only and read-write properties.
      * @param propertyName The property name, as defined in the DTDL interface.
@@ -92,18 +105,39 @@ public class PnpConvention {
      *     }
      * }
      */
-    public static Set<Property> createPropertyPatch(@NonNull final String propertyName, @NonNull final Object propertyValue, String componentName) {
+    public static Set<Property> createComponentPropertyPatch(@NonNull final String propertyName, @NonNull final Object propertyValue, @NonNull String componentName) {
+
+        return createComponentPropertyPatch(componentName, new HashMap<String, Object>()
+        {{
+            put(propertyName, propertyValue);
+        }});
+    }
+
+    /**
+     * Create a key-value property patch for both read-only and read-write properties.
+     * @param propertyKeyValuePairs The property name and an unserialized value, as defined in the DTDL interface.
+     * @param componentName (optional) The name of the component in which the property is defined. Can be null for property defined under the root interface.
+     * @return The property patch for read-only and read-write property updates
+     *
+     * The property patch is created in the below format:
+     * {
+     *     "sampleComponentName": {
+     *         "__t": "c",
+     *         "samplePropertyName"": 20
+     *     }
+     * }
+     */
+    public static Set<Property> createComponentPropertyPatch(@NonNull String componentName, @NonNull HashMap<String, Object> propertyKeyValuePairs) {
         Map<String, Object> componentProperty = new HashMap<String, Object>() {{
             put(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
-            put(propertyName, propertyValue);
+            putAll(propertyKeyValuePairs);
         }};
 
         return singleton(new Property(componentName, componentProperty));
     }
 
     /**
-     * Create a key-embedded value property patch for read-write properties.
-     * Embedded value property updates are sent from a device in response to a service-initiated read-write property update.
+     * Creates a response to a write request on a device property.
      * @param propertyName The property name, as defined in the DTDL interface.
      * @param propertyValue The property value, in the format defined in the DTDL interface.
      * @param ackCode The acknowledgment code from the device, for the embedded value property update.
@@ -121,29 +155,66 @@ public class PnpConvention {
      *     }
      * }
      */
-    public static Set<Property> createPropertyEmbeddedValuePatch(
+    public static Set<Property> createWritablePropertyResponse(
             @NonNull String propertyName,
             @NonNull final Object propertyValue,
             @NonNull final Integer ackCode,
             @NonNull final Long ackVersion,
             String ackDescription) {
 
-        Map<String, Object> embeddedProperty = new HashMap<String, Object>() {{
-            put("value", propertyValue);
-            put("ac", ackCode);
-            put("av", ackVersion);
-        }};
-
-        if (ackDescription != null && !ackDescription.isEmpty()) {
-            embeddedProperty.put("ad", ackDescription);
-        }
-
-        return singleton(new Property(propertyName, embeddedProperty));
+        return createWritablePropertyResponse(new HashMap<String, Object>()
+        {{
+            put(propertyName, propertyValue);
+        }}, ackCode, ackVersion, ackDescription);
     }
 
     /**
-     * Create a key-embedded value property patch for read-write properties.
-     * Embedded value property updates are sent from a device in response to a service-initiated read-write property update.
+     * Creates a response to a write request on a device property.
+     * @param propertyPairs The name and unserialized value of the property to report.
+     * @param ackCode The acknowledgment code from the device, for the embedded value property update.
+     * @param ackVersion The version no. of the service-initiated read-write property update.
+     * @param ackDescription (optional) The description from the device, accompanying the embedded value property update.
+     * @return The property patch for embedded value property updates for read-write properties.
+     *
+     * The property patch is created in the below format:
+     * {
+     *     "samplePropertyName": {
+     *         "value": 20,
+     *         "ac": 200,
+     *         "av": 5,
+     *         "ad": "The update was successful."
+     *     }
+     * }
+     */
+    public static Set<Property> createWritablePropertyResponse(
+            @NonNull HashMap<String, Object> propertyPairs,
+            @NonNull final Integer ackCode,
+            @NonNull final Long ackVersion,
+            String ackDescription) {
+
+        Set<Property> response = new HashSet<>();
+
+        propertyPairs.forEach((k,v) ->
+            {
+                if(k == null || k.isEmpty())
+                {
+                    throw new IllegalArgumentException("One of the propertyPairs keys was null, empty, or white space.");
+                }
+
+                if (ackDescription != null && !ackDescription.isEmpty()) {
+                    response.add(new Property(k, new WritablePropertyResponse(v, ackCode, ackVersion)));
+                }
+                else
+                {
+                    response.add(new Property(k, new WritablePropertyResponse(v, ackCode, ackVersion, ackDescription)));
+                }
+            });
+
+        return response;
+    }
+
+    /**
+     * Creates a response to a write request on a device property.
      * @param propertyName The property name, as defined in the DTDL interface.
      * @param propertyValue The property value, in the format defined in the DTDL interface.
      * @param componentName (optional) The name of the component in which the property is defined. Can be null for property defined under the root interface.
@@ -165,30 +236,72 @@ public class PnpConvention {
      *     }
      * }
      */
-    public static Set<Property> createPropertyEmbeddedValuePatch(
+    public static Set<Property> createComponentWritablePropertyResponse(
             @NonNull final String propertyName,
             @NonNull final Object propertyValue,
-            String componentName,
+            @NonNull String componentName,
             @NonNull final Integer ackCode,
             @NonNull final Long ackVersion,
             String ackDescription) {
 
-        final Map<String, Object> embeddedProperty = new HashMap<String, Object>() {{
-            put("value", propertyValue);
-            put("ac", ackCode);
-            put("av", ackVersion);
-        }};
+        return createComponentWritablePropertyResponse(new HashMap<String, Object>()
+        {{
+            put(propertyName, propertyValue);
+        }}, componentName, ackCode, ackVersion, ackDescription);
+    }
 
-        if (ackDescription != null && !ackDescription.isEmpty()) {
-            embeddedProperty.put("ad", ackDescription);
-        }
+    /**
+     * Creates a response to a write request on a device property.
+     * @param propertyPairs The name and unserialized value of the property to report.
+     * @param componentName (optional) The name of the component in which the property is defined. Can be null for property defined under the root interface.
+     * @param ackCode The acknowledgment code from the device, for the embedded value property update.
+     * @param ackVersion The version no. of the service-initiated read-write property update.
+     * @param ackDescription (optional) The description from the device, accompanying the embedded value property update.
+     * @return The property patch for embedded value property updates for read-write properties.
+     *
+     * The property patch is created in the below format:
+     * {
+     *     "sampleComponentName": {
+     *         "__t": "c",
+     *         "samplePropertyName": {
+     *             "value": 20,
+     *             "ac": 200,
+     *             "av": 5,
+     *             "ad": "The update was successful."
+     *         }
+     *     }
+     * }
+     */
+    public static Set<Property> createComponentWritablePropertyResponse(
+            @NonNull HashMap<String, Object> propertyPairs,
+            @NonNull String componentName,
+            @NonNull final Integer ackCode,
+            @NonNull final Long ackVersion,
+            String ackDescription) {
+
+        HashMap<String, Object> propertyMap = new HashMap<>();
+
+        propertyPairs.forEach((k,v) ->
+        {
+            if(k == null || k.isEmpty())
+            {
+                throw new IllegalArgumentException("One of the propertyPairs keys was null, empty, or white space.");
+            }
+
+            if (ackDescription != null && !ackDescription.isEmpty()) {
+                propertyMap.put(k, new WritablePropertyResponse(v, ackCode, ackVersion, ackDescription));
+            }
+            else
+            {
+                propertyMap.put(k, new WritablePropertyResponse(v, ackCode, ackVersion));
+            }
+        });
 
         Map<String, Object> componentProperty = new HashMap<String, Object>() {{
             put(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
-            put(propertyName, embeddedProperty);
+            putAll(propertyMap);
         }};
 
         return singleton(new Property(componentName, componentProperty));
     }
-
 }
