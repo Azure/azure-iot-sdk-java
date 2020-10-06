@@ -58,7 +58,7 @@ public class PnpConvention {
 
     /**
      * Create a plug and play compatible telemetry message.
-     * @param telemetryPairs he unserialized name and value telemetry pairs, as defined in the DTDL interface. Names must be 64 characters or less. For more details see
+     * @param telemetryPairs The unserialized name and value telemetry pairs, as defined in the DTDL interface. Names must be 64 characters or less. For more details see
      *                       <a href="https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/dtdlv2.md#telemetry">this documentation</a>
      * @param componentName (optional) The name of the component in which the telemetry is defined. Can be null for telemetry defined under the root interface.
      * @return A plug and play compatible telemetry message, which can be sent to IoT Hub.
@@ -116,7 +116,7 @@ public class PnpConvention {
     /**
      * Create a key-value property patch for both read-only and read-write properties.
      * @param propertyKeyValuePairs The property name and an unserialized value, as defined in the DTDL interface.
-     * @param componentName (optional) The name of the component in which the property is defined. Can be null for property defined under the root interface.
+     * @param componentName The name of the component in which the property is defined. Can be null for property defined under the root interface.
      * @return The property patch for read-only and read-write property updates
      *
      * The property patch is created in the below format:
@@ -202,11 +202,11 @@ public class PnpConvention {
                 }
 
                 if (ackDescription != null && !ackDescription.isEmpty()) {
-                    response.add(new Property(k, new WritablePropertyResponse(v, ackCode, ackVersion)));
+                    response.add(new Property(k, new WritablePropertyResponse(v, ackCode, ackVersion, ackDescription)));
                 }
                 else
                 {
-                    response.add(new Property(k, new WritablePropertyResponse(v, ackCode, ackVersion, ackDescription)));
+                    response.add(new Property(k, new WritablePropertyResponse(v, ackCode, ackVersion)));
                 }
             });
 
@@ -217,7 +217,7 @@ public class PnpConvention {
      * Creates a response to a write request on a device property.
      * @param propertyName The property name, as defined in the DTDL interface.
      * @param propertyValue The property value, in the format defined in the DTDL interface.
-     * @param componentName (optional) The name of the component in which the property is defined. Can be null for property defined under the root interface.
+     * @param componentName The name of the component in which the property is defined. Can be null for property defined under the root interface.
      * @param ackCode The acknowledgment code from the device, for the embedded value property update.
      * @param ackVersion The version no. of the service-initiated read-write property update.
      * @param ackDescription (optional) The description from the device, accompanying the embedded value property update.
