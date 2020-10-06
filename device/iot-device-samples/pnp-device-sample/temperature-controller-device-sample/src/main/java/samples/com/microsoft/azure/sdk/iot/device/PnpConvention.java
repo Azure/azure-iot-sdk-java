@@ -94,7 +94,7 @@ public class PnpConvention {
      * Create a key-value property patch for both read-only and read-write properties.
      * @param propertyName The property name, as defined in the DTDL interface.
      * @param propertyValue The property value, in the format defined in the DTDL interface.
-     * @param componentName (optional) The name of the component in which the property is defined. Can be null for property defined under the root interface.
+     * @param componentName The name of the component in which the property is defined. Can be null for property defined under the root interface.
      * @return The property path for read-only and read-write property updates.
      *
      * The property patch is created in the below format:
@@ -253,7 +253,7 @@ public class PnpConvention {
     /**
      * Creates a response to a write request on a device property.
      * @param propertyPairs The name and unserialized value of the property to report.
-     * @param componentName (optional) The name of the component in which the property is defined. Can be null for property defined under the root interface.
+     * @param componentName The name of the component in which the property is defined. Can be null for property defined under the root interface.
      * @param ackCode The acknowledgment code from the device, for the embedded value property update.
      * @param ackVersion The version no. of the service-initiated read-write property update.
      * @param ackDescription (optional) The description from the device, accompanying the embedded value property update.
