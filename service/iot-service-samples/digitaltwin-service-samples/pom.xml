@@ -6,10 +6,8 @@
         <artifactId>iot-service-client-parent</artifactId>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <version>1.18.0</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>digitaltwin-service-samples</artifactId>
 
     <properties>
