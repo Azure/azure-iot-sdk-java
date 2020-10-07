@@ -45,8 +45,8 @@ public class PnpConventionTests
     public void createRootLevelPropertyPatch()
     {
         // arrange
-        String propertyName = "prop1";
-        String propertyValue = "val1";
+        String propertyName = "testProperty";
+        String propertyValue = "testValue";
         Gson gson = new Gson();
         Property testProperty = new Property(propertyName, propertyValue);
         String actualString = gson.toJson(testProperty);
@@ -64,9 +64,9 @@ public class PnpConventionTests
     public void createComponentPropertyPatch()
     {
         // arrange
-        String propertyName = "prop1";
-        String propertyValue = "val1";
-        String componentName = "component1";
+        String propertyName = "testProperty";
+        String propertyValue = "testValue";
+        String componentName = "testComponent";
         Gson gson = new Gson();
         Property testProperty = new Property(componentName, new HashMap<String, Object>()
         {{
