@@ -2062,7 +2062,7 @@ public class DeviceClientTest
             client.setOption("setAmqpOpenAuthenticationSessionTimeout", null);
         } catch (IllegalArgumentException expected) {
             //assert
-            assertEquals("optionValue is null", expected.getMessage());
+            assertEquals("value is null", expected.getMessage());
         }
     }
 
@@ -2242,7 +2242,7 @@ public class DeviceClientTest
             client.setOption("SetAmqpOpenDeviceSessionsTimeout", null);
         } catch (IllegalArgumentException expected) {
             //assert
-            assertEquals("optionValue is null", expected.getMessage());
+            assertEquals("value is null", expected.getMessage());
         }
     }
 

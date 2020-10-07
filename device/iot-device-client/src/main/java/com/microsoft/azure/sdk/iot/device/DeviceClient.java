@@ -735,7 +735,7 @@ public final class DeviceClient extends InternalClient implements Closeable
         else if (value == null)
         {
             // Codes_SRS_DEVICECLIENT_12_026: [The function shall trow IllegalArgumentException if the value is null.]
-            throw new IllegalArgumentException("optionValue is null");
+            throw new IllegalArgumentException("value is null");
         }
 
         switch (optionName)
@@ -817,7 +817,6 @@ public final class DeviceClient extends InternalClient implements Closeable
             {
                 setOption_SetAmqpOpenAuthenticationSessionTimeout(value);
                 return;
-
             }
             case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
             {

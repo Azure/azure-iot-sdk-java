@@ -31,8 +31,8 @@ public final class DeviceClientConfig
     private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
 
-    private static final int DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = 20 * 1000; // 20 second timeout
-    private static final int DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = 60 * 1000; // 60 second timeout
+    private static final int DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS = 20;
+    private static final int DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS = 60;
 
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
@@ -278,8 +278,8 @@ public final class DeviceClientConfig
         this.useWebsocket = false;
         this.httpsReadTimeout = DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
         this.httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
-        this.amqpOpenAuthenticationSessionTimeout = DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT;
-        this.amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT;
+        this.amqpOpenAuthenticationSessionTimeout = DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
+        this.amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
     }
 
     private void assertConnectionStringIsX509(IotHubConnectionString iotHubConnectionString)

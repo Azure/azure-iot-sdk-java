@@ -381,7 +381,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = authLatch;
 
-                authLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                authLatch.await(anyLong, TimeUnit.SECONDS);
                 result = true;
             }
         };
@@ -408,7 +408,7 @@ public class AmqpsIotHubConnectionTest {
                 new CountDownLatch(anyInt);
                 result = workerLinkLatch;
 
-                workerLinkLatch.await(anyLong, TimeUnit.MILLISECONDS);
+                workerLinkLatch.await(anyLong, TimeUnit.SECONDS);
                 result = true;
             }
         };
