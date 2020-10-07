@@ -24,6 +24,7 @@
         <module>device-method-sample</module>
         <module>job-client-sample</module>
         <module>pnp-service-sample</module>
+        <module>digitaltwin-service-samples</module>
     </modules>
     <dependencies>
         <dependency>
