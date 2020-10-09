@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package samples.com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
@@ -14,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class Thermostat {
     // Get connection string and device id inputs.
     private static final String iotHubConnectionString  = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String deviceId = System.getenv("DEVICE_ID");
+    private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
 
     private static DeviceTwin twinClient;
     private static DeviceMethod methodClient;

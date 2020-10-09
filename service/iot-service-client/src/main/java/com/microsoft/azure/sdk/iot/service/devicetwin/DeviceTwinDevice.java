@@ -6,8 +6,8 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.deps.twin.ConfigurationInfo;
-import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,8 +36,6 @@ public class DeviceTwinDevice
     private Map<String, ConfigurationInfo> configurations = null;
     private DeviceCapabilities capabilities = null;
     private String connectionState;
-    @Getter
-    @Setter
     private String modelId;
 
     /**
@@ -646,5 +644,13 @@ public class DeviceTwinDevice
         }
 
         return map;
+    }
+
+    public String getModelId() {
+        return this.modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 }

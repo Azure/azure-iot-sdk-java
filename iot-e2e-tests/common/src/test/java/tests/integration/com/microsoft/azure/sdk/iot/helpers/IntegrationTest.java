@@ -48,10 +48,16 @@ public abstract class IntegrationTest
     public DeviceProvisioningServiceTestRule deviceProvisioningServiceTestRule = new DeviceProvisioningServiceTestRule();
 
     @Rule
+    public DigitalTwinTestRule digitalTwinTestRule = new DigitalTwinTestRule();
+
+    @Rule
     public ContinuousIntegrationTestRule continuousIntegrationTestRule = new ContinuousIntegrationTestRule();
 
     @Rule
     public FlakeyTestRule flakeyTestRule = new FlakeyTestRule();
+
+    @Rule
+    public ThrottleResistantTestRule throttleResistantTestRule = new ThrottleResistantTestRule();
 
     int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
 
@@ -66,5 +72,8 @@ public abstract class IntegrationTest
     //By default, run all tests. Even if env vars aren't set
     public static boolean runIotHubTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_IOTHUB_TESTS", "true"));
     public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
+    public static boolean runDigitalTwinTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_DIGITAL_TESTS", "true"));
 
+    // Infinite read timeout for all http operations
+    public static int HTTP_READ_TIMEOUT = 0;
 }

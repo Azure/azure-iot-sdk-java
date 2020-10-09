@@ -90,6 +90,15 @@ ForEach ($line in $($paths -split "`r`n"))
                     # No more need to process results, the test runner definitely needs to run
                     exit 0
 				}
+
+				if ($line.toLower().Contains("digitaltwin") -and ($Env:runDigitalTwinTests -eq "true"))
+                {
+                    Write-Host "This test group includes digital twin tests, and digital twin tests have to be run, so this test group will run"
+                    Write-Host "##vso[task.setvariable variable=task.android.needToRunTestGroup]yes"
+
+                    # No more need to process results, the test runner definitely needs to run
+                    exit 0
+                }
 			}
 		}
 	}

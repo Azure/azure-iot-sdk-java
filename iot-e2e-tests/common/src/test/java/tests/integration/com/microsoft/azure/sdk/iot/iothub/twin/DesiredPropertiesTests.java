@@ -44,7 +44,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 {
     private JsonParser jsonParser = new JsonParser();
 
-    public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
         jsonParser = new JsonParser();
@@ -126,7 +126,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, updatePropertyValue));
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+        testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -189,7 +189,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
                             Set currentDesiredProperties = deviceUnderTest.sCDeviceForTwin.getDesiredProperties();
                             desiredProperties.addAll(currentDesiredProperties);
                             deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-                            sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+                            testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
                         }
                     }
                     catch (IotHubException | IOException e)
@@ -256,7 +256,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
             desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, updatePropertyValue));
             deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-            sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+            testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
 
@@ -279,28 +279,28 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
             Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
             desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + i, PROPERTY_VALUE + i));
             devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
-            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
             devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
         // Update desired properties on multiple devices
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.getTwin(devicesUnderTest[i].sCDeviceForTwin);
             Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties();
             for (com.microsoft.azure.sdk.iot.service.devicetwin.Pair dp : desiredProperties)
             {
                 dp.setValue(PROPERTY_VALUE_UPDATE + i);
             }
             devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
-            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
             devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
         // Read updates on multiple devices
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.getTwin(devicesUnderTest[i].sCDeviceForTwin);
 
             for (com.microsoft.azure.sdk.iot.service.devicetwin.Pair dp : devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties())
             {
@@ -314,21 +314,21 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         // Remove desired properties
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.getTwin(devicesUnderTest[i].sCDeviceForTwin);
             Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties();
             for (com.microsoft.azure.sdk.iot.service.devicetwin.Pair dp : desiredProperties)
             {
                 dp.setValue(null);
             }
             devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
-            sCDeviceTwin.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
             devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
         // Read updates
         for (int i = 0; i < MAX_DEVICES; i++)
         {
-            sCDeviceTwin.getTwin(devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.twinServiceClient.getTwin(devicesUnderTest[i].sCDeviceForTwin);
 
             Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Desired properties were not deleted by setting to null", internalClient), 0, devicesUnderTest[i].sCDeviceForTwin.getDesiredProperties().size());
         }

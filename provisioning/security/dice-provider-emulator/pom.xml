@@ -104,6 +104,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <!--This configures the "mvn javadoc:javadoc" created artifacts are outputted to <reportOutputDirectory>/<destDir>-->
+                    <reportOutputDirectory>${session.executionRootDirectory}/apidocs</reportOutputDirectory>
+                    <destDir>provisioning/security/dice-provider-emulator</destDir>
+                </configuration>
             </plugin>
         </plugins>
     </build>

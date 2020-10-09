@@ -5,8 +5,6 @@ package com.microsoft.azure.sdk.iot.deps.twin;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.DeviceCapabilitiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import lombok.Getter;
 import lombok.Setter;
@@ -133,8 +131,6 @@ public class RegisterManager
     private static final String MODEL_ID = "modelId";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(MODEL_ID)
-    @Setter
-    @Getter
     protected String modelId = null;
 
     /**
@@ -251,5 +247,13 @@ public class RegisterManager
     RegisterManager()
     {
         /* Codes_SRS_REGISTER_MANAGER_21_007: [The RegisterManager shall provide an empty constructor to make GSON happy.] */
+    }
+
+    public String getModelId() {
+        return this.modelId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
     }
 }

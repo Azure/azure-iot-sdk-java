@@ -53,8 +53,6 @@ public class RegistryManagerTests extends IntegrationTest
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8879;
-    
-    private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
 
     @BeforeClass
     public static void setUp() throws IOException
@@ -103,7 +101,7 @@ public class RegistryManagerTests extends IntegrationTest
     {
         proxyServer.stop();
     }
-    
+
     @Test
     public void deviceLifecycle() throws Exception
     {
@@ -230,8 +228,7 @@ public class RegistryManagerTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void getDeviceStatisticsTest() throws Exception
     {
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         Tools.getStatisticsWithRetry(registryManager);
     }
 
@@ -417,7 +414,7 @@ public class RegistryManagerTests extends IntegrationTest
         assertTrue(buildExceptionMessage("", hostName), configWasDeletedSuccessfully(testInstance.registryManager, testInstance.configId));
     }
 
-    @Test (expected = IotHubBadFormatException.class)
+    @Test
     @StandardTierHubOnlyTest
     public void apply_configuration_e2e() throws Exception
     {
@@ -441,8 +438,19 @@ public class RegistryManagerTests extends IntegrationTest
         ConfigurationContent content = new ConfigurationContent();
         content.setDeviceContent(testDeviceContent);
 
+        boolean expectedExceptionThrown = false;
+
         // Act
-        testInstance.registryManager.applyConfigurationContentOnDevice(testInstance.deviceId, content);
+        try
+        {
+            testInstance.registryManager.applyConfigurationContentOnDevice(testInstance.deviceId, content);
+        }
+        catch (IotHubBadFormatException e)
+        {
+            expectedExceptionThrown = true;
+        }
+
+        assertTrue("Bad format exception wasn't thrown but was expected", expectedExceptionThrown);
     }
 
     @StandardTierHubOnlyTest

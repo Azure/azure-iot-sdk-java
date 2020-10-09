@@ -89,6 +89,7 @@ public class ServiceClient
      *
      * @param iotHubConnectionString The ConnectionString object for the IotHub
      * @param iotHubServiceClientProtocol protocol to use
+     * @param options options for proxy
      */
     protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
     {
@@ -156,7 +157,8 @@ public class ServiceClient
     }
 
     /**
-     * Send a one-way message to the specified device
+     * Send a one-way message to the specified device. This function is synchronized internally so that only one send operation
+     * is allowed at a time. In order to do more send operations at a time, you will need to instantiate another service client instance.
      *
      * @param deviceId The device identifier for the target device
      * @param message The message for the device
@@ -170,7 +172,8 @@ public class ServiceClient
     }
 
     /**
-     * Send a one-way message to the specified module
+     * Send a one-way message to the specified module. This function is synchronized internally so that only one send operation
+     * is allowed at a time. In order to do more send operations at a time, you will need to instantiate another service client instance.
      *
      * @param deviceId The device identifier for the target device
      * @param moduleId The module identifier for the target device
@@ -276,20 +279,18 @@ public class ServiceClient
         return feedbackReceiver;
     }
     
-     /**
-     * Get FeedbackReceiver object.  
-     *
+    /**
+     * Instantiate a new FeedbackReceiver object.
      *
      * @return The instance of the FeedbackReceiver
      */
-    
      public FeedbackReceiver getFeedbackReceiver()
-    {
+     {
         return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options.getProxyOptions());
-    }
+     }
 
     /**
-     * Get FileUploadNotificationReceiver object.
+     * Instantiate a new FileUploadNotificationReceiver object.
      *
      * @return The instance of the FileUploadNotificationReceiver
      */

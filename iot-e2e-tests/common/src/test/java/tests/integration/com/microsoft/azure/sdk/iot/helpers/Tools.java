@@ -1,7 +1,7 @@
 /*
-*  Copyright (c) Microsoft. All rights reserved.
-*  Licensed under the MIT license. See LICENSE file in the project root for full license information.
-*/
+ *  Copyright (c) Microsoft. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+ */
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
@@ -14,6 +14,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -109,7 +110,7 @@ public class Tools
         return possibleExceptionCause.isInstance(exceptionToSearch) || (exceptionToSearch != null && isCause(possibleExceptionCause, exceptionToSearch.getCause()));
     }
 
-    public synchronized static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
+    public static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Device ret = null;
@@ -117,12 +118,14 @@ public class Tools
         {
             try
             {
+                log.debug("Attempting to add device {} to registry", device.getDeviceId());
                 ret = registryManager.addDevice(device);
+                log.debug("Successfully added device {} to registry", device.getDeviceId());
                 break;
             }
-            catch (UnknownHostException | SocketException e)
+            catch (UnknownHostException | SocketException | SocketTimeoutException e)
             {
-                System.out.println("Failed to add device " + device.getDeviceId());
+                log.warn("Failed to add device " + device.getDeviceId());
                 e.printStackTrace();
                 Thread.sleep(WAIT_FOR_RETRY);
                 if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
@@ -136,7 +139,7 @@ public class Tools
         return ret;
     }
 
-    public synchronized static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException
+    public static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
         Module ret = null;
@@ -144,12 +147,14 @@ public class Tools
         {
             try
             {
+                log.debug("Attempting to add module {} to registry", module.getId());
                 ret = registryManager.addModule(module);
+                log.debug("Successfully added module {} to registry", module.getId());
                 break;
             }
-            catch (UnknownHostException | SocketException e)
+            catch (UnknownHostException | SocketException | SocketTimeoutException e)
             {
-                System.out.println("Failed to add module " + module.getId());
+                log.warn("Failed to add module " + module.getId());
                 e.printStackTrace();
                 Thread.sleep(WAIT_FOR_RETRY);
                 if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)

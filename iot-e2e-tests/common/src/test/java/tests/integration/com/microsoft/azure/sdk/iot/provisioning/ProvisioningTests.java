@@ -14,15 +14,17 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
-import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.AllocationPolicy;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.CustomAllocationDefinition;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.ReprovisionPolicy;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -32,7 +34,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DeviceProvisioningServiceTest;
@@ -42,11 +43,15 @@ import tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.Provisio
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
+import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -183,6 +188,34 @@ public class ProvisioningTests extends ProvisioningCommon
     public void individualEnrollmentWithCustomAllocationPolicy() throws Exception
     {
         customAllocationFlow(EnrollmentType.INDIVIDUAL);
+    }
+
+    @Test
+    public void individualEnrollmentGetAttestationMechanismTPM() throws ProvisioningServiceClientException, SecurityProviderException
+    {
+        //This test fits in better with the other provisioning service client tests, but it needs to be run sequentially
+        // with the other TPM tests, so it lives here with them
+        if (testInstance.attestationType != AttestationType.TPM)
+        {
+            return;
+        }
+
+        if (testInstance.protocol != HTTPS)
+        {
+            //The test protocol has no bearing on this test since it only uses the provisioning service client, so the test should only run once.
+            return;
+        }
+
+        SecurityProvider securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
+        Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
+        testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
+
+        AttestationMechanism retrievedAttestationMechanism = testInstance.provisioningServiceClient.getIndividualEnrollmentAttestationMechanism(testInstance.registrationId);
+        assertEquals(retrievedAttestationMechanism.getType(), AttestationMechanismType.TPM);
+        assertTrue(retrievedAttestationMechanism.getAttestation() instanceof TpmAttestation);
+        TpmAttestation retrievedTpmAttestation = (TpmAttestation) retrievedAttestationMechanism.getAttestation();
+        assertNotNull(retrievedTpmAttestation.getEndorsementKey());
     }
 
     /***
@@ -349,11 +382,11 @@ public class ProvisioningTests extends ProvisioningCommon
             DeviceTwin twinClient;
             if (inFarAwayHub)
             {
-                twinClient = DeviceTwin.createFromConnectionString(farAwayIotHubConnectionString);
+                twinClient = DeviceTwin.createFromConnectionString(farAwayIotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
             else
             {
-                twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+                twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
 
             DeviceTwinDevice device = new DeviceTwinDevice(testInstance.provisionedDeviceId);
@@ -388,7 +421,7 @@ public class ProvisioningTests extends ProvisioningCommon
         {
             //delete provisioned device
             RegistryManager registryManagerFarAway = RegistryManager.createFromConnectionString(farAwayIotHubConnectionString);
-            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
             if (deviceId != null && !deviceId.isEmpty())
             {

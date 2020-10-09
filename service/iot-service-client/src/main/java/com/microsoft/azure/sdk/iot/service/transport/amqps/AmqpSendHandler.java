@@ -126,7 +126,17 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_007: [The function shall create a Binary (Proton) object from the content string]
-        Binary binary = new Binary(message.getBytes());
+        Binary binary;
+        //Messages may have no payload, so check that the message has a payload before giving message.getBytes() as the payload
+        if (message.getBytes() != null)
+        {
+            binary = new Binary(message.getBytes());
+        }
+        else
+        {
+            binary = new Binary(new byte[0]);
+        }
+
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_008: [The function shall create a data Section (Proton) object from the Binary]
         Section section = new Data(binary);
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_009: [The function shall set the Message body to the created data section]

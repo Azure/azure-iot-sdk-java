@@ -16,7 +16,7 @@ if (($env:TARGET_BRANCH).toLower().Contains("system.pullrequest.targetbranch"))
 
     $Env:runIotHubTests = "true"
     $Env:runProvisioningTests = "true"
-    $Env:runDigitalTwinTests = "true"
+	$Env:runDigitalTwinTests = "true"
 
     exit 0
 }
@@ -39,6 +39,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
 	    # If code changes were made to provisioning sdk code or to provisioning e2e tests
@@ -52,14 +53,15 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
 		# If code changes were made to device client
 		if ($line.toLower().Contains("iot-device-client/src/main") -or $line.toLower().Contains("iot-device-client/pom.xml"))
 		{
 		    $Env:runIotHubTests = "true"
-            $Env:runProvisioningTests = "true"
-            $Env:runDigitalTwinTests = "true"
+		    $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
         # If code changes were made to service client
@@ -67,6 +69,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
         {
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
         }
 
         # Both provisioning and iot hub depend on deps package
@@ -74,6 +77,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
 			$Env:runIotHubTests = "true"
 			$Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
 		}
 
         # E2E common code can be used in any test, so we must run every test
@@ -81,6 +85,7 @@ ForEach ($line in $($GitDiff -split "`r`n"))
 		{
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
         }
 
         # Android helpers can be used in any test, so we must run every test
@@ -88,25 +93,13 @@ ForEach ($line in $($GitDiff -split "`r`n"))
         {
             $Env:runIotHubTests = "true"
             $Env:runProvisioningTests = "true"
+			$Env:runDigitalTwinTests = "true"
         }
 
-        # If code changes were made to digital twin device client
-        if ($line.toLower().Contains("digitaltwin/device/src/main"))
-        {
-            $Env:runDigitalTwinTests = "true"
-        }
-
-        # If code changes were made to digital twin service client
-        if ($line.toLower().Contains("digitaltwin/service/src/main"))
-        {
-            $Env:runDigitalTwinTests = "true"
-        }
-
-        # If code changes were made to digital twin E2E tests
-        if ($line.toLower().Contains("digitaltwin/device/e2e-tests"))
-        {
-            $Env:runDigitalTwinTests = "true"
-        }
+		if ($line.toLower().Contains("digitaltwin"))
+		{
+			$Env:runDigitalTwinTests = "true"
+		}
 	}
 }
 
@@ -130,10 +123,10 @@ else
 
 if ($Env:runDigitalTwinTests -eq "true")
 {
-    Write-Host "Will run digital twin tests"
+	Write-Host "Will run digital twin tests"
 }
 else
 {
-    Write-Host "Will not run digital twin tests"
+	Write-Host "Will not run digital twin tests"
 }
 

@@ -5,10 +5,13 @@ package com.microsoft.azure.sdk.iot.provisioning.service;
 
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
+import com.microsoft.azure.sdk.iot.provisioning.service.configs.AttestationMechanism;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
 import com.microsoft.azure.sdk.iot.provisioning.service.contract.ContractApiHttp;
-import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.*;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientServiceException;
+import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientTransportException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +31,7 @@ public class EnrollmentGroupManager
     private static final String CONDITION_KEY = "If-Match";
     private static final String PATH_SEPARATOR = "/";
     private static final String PATH_ENROLLMENT_GROUPS = "enrollmentGroups";
+    private static final String ATTESTATION_MECHANISM = "attestationmechanism";
 
     /**
      * PRIVATE CONSTRUCTOR
@@ -152,6 +156,27 @@ public class EnrollmentGroupManager
         return new EnrollmentGroup(new String(body));
     }
 
+    AttestationMechanism getAttestationMechanism(String enrollmentGroupId) throws ProvisioningServiceClientException
+    {
+        if(Tools.isNullOrEmpty(enrollmentGroupId))
+        {
+            throw new IllegalArgumentException("enrollmentGroupId cannot be null or empty.");
+        }
+
+        String enrollmentAttestationMechanismPath = getEnrollmentGroupAttestationMechanismPath(enrollmentGroupId);
+
+        String payload = "{}";
+        HttpResponse httpResponse = contractApiHttp.request(HttpMethod.POST, enrollmentAttestationMechanismPath, null, payload);
+
+        byte[] body = httpResponse.getBody();
+        if (body == null)
+        {
+            throw new ProvisioningServiceClientServiceException("Unexpected empty body received from service");
+        }
+
+        return new AttestationMechanism(new String(body));
+    }
+
     /**
      * Delete enrollmentGroup.
      *
@@ -265,6 +290,11 @@ public class EnrollmentGroupManager
     private static String getEnrollmentGroupPath(String enrollmentGroupId)
     {
         return PATH_ENROLLMENT_GROUPS + PATH_SEPARATOR + enrollmentGroupId;
+    }
+
+    private static String getEnrollmentGroupAttestationMechanismPath(String enrollmentGroupId)
+    {
+        return PATH_ENROLLMENT_GROUPS + PATH_SEPARATOR + enrollmentGroupId + PATH_SEPARATOR + ATTESTATION_MECHANISM;
     }
 
     private static String getEnrollmentGroupsPath()

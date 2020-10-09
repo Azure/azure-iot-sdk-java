@@ -94,6 +94,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <!--This configures the "mvn javadoc:javadoc" created artifacts are outputted to <reportOutputDirectory>/<destDir>-->
+                    <reportOutputDirectory>${session.executionRootDirectory}/apidocs</reportOutputDirectory>
+                    <destDir>provisioning/security/security-provider</destDir>
+                </configuration>
             </plugin>
         </plugins>
     </build>

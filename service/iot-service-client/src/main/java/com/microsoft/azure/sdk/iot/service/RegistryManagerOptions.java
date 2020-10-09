@@ -22,7 +22,7 @@ public class RegistryManagerOptions
      * The http read timeout to a specified timeout, in milliseconds. A non-zero value specifies the timeout when reading from
      * Input stream after a connection is established to a resource. If the timeout expires before there is data available
      * for read, a java.net.SocketTimeoutException is raised. A timeout of zero is interpreted as an infinite timeout.
-     * By default, this value is {@link #DEFAULT_HTTP_READ_TIMEOUT_MS}
+     * By default, this value is {@link #DEFAULT_HTTP_READ_TIMEOUT_MS}. Must be a non-negative value.
      */
     @Getter
     private int httpReadTimeout;
@@ -31,7 +31,7 @@ public class RegistryManagerOptions
      * The http connect timeout value, in milliseconds, to be used when connecting to the service. If the timeout expires
      * before the connection can be established, a java.net.SocketTimeoutException is thrown.
      * A timeout of zero is interpreted as an infinite timeout.
-     * By default, this value is {@link #DEFAULT_HTTP_CONNECT_TIMEOUT_MS}
+     * By default, this value is {@link #DEFAULT_HTTP_CONNECT_TIMEOUT_MS}. Must be a non-negative value.
      */
     @Getter
     private int httpConnectTimeout;

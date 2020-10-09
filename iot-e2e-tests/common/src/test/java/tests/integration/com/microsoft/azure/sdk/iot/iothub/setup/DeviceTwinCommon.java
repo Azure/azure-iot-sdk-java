@@ -14,11 +14,9 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
-import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
-import com.microsoft.azure.sdk.iot.service.devicetwin.RawTwinQuery;
+import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -58,10 +56,6 @@ public class DeviceTwinCommon extends IntegrationTest
         String publicKeyCert = certificateGenerator.getPublicCertificate();
         String privateKey = certificateGenerator.getPrivateKey();
         String x509Thumbprint = certificateGenerator.getX509Thumbprint();
-
-        sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-        scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
 
         List inputs = new ArrayList();
         for (ClientType clientType : ClientType.values())
@@ -143,10 +137,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static String moduleIdPrefix = "java-twin-e2e-test-module";
 
     // States of SDK
-    protected static RegistryManager registryManager;
     protected InternalClient internalClient;
-    protected static RawTwinQuery scRawTwinQueryClient;
-    protected static DeviceTwin sCDeviceTwin;
     protected DeviceState deviceUnderTest = null;
 
     protected DeviceState[] devicesUnderTest;
@@ -296,8 +287,8 @@ public class DeviceTwinCommon extends IntegrationTest
             String id = "java-device-twin-e2e-test-" + this.testInstance.protocol.toString() + UUID.randomUUID().toString();
             devicesUnderTest[i].sCDeviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(id, null, null);
             devicesUnderTest[i].sCModuleForRegistryManager = com.microsoft.azure.sdk.iot.service.Module.createFromId(id, "module", null);
-            devicesUnderTest[i].sCDeviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, devicesUnderTest[i].sCDeviceForRegistryManager);
-            devicesUnderTest[i].sCModuleForRegistryManager = Tools.addModuleWithRetry(registryManager, devicesUnderTest[i].sCModuleForRegistryManager);
+            devicesUnderTest[i].sCDeviceForRegistryManager = Tools.addDeviceWithRetry(testInstance.registryManager, devicesUnderTest[i].sCDeviceForRegistryManager);
+            devicesUnderTest[i].sCModuleForRegistryManager = Tools.addModuleWithRetry(testInstance.registryManager, devicesUnderTest[i].sCModuleForRegistryManager);
             setUpTwin(devicesUnderTest[i], openDeviceClients);
         }
 
@@ -309,7 +300,7 @@ public class DeviceTwinCommon extends IntegrationTest
         for (int i = 0; i < numberOfDevices; i++)
         {
             tearDownTwin(devicesUnderTest[i]);
-            registryManager.removeDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
+            testInstance.registryManager.removeDevice(devicesUnderTest[i].sCDeviceForRegistryManager.getDeviceId());
         }
     }
 
@@ -366,7 +357,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
         // set up twin on ServiceClient
-        if (sCDeviceTwin != null)
+        if (testInstance.twinServiceClient != null)
         {
             if (testInstance.clientType == ClientType.DEVICE_CLIENT)
             {
@@ -377,7 +368,7 @@ public class DeviceTwinCommon extends IntegrationTest
                 deviceState.sCDeviceForTwin = new DeviceTwinDevice(deviceState.sCDeviceForRegistryManager.getDeviceId(), deviceState.sCModuleForRegistryManager.getId());
             }
 
-            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
+            testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin);
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);
         }
     }
@@ -408,7 +399,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    public DeviceTwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+    public DeviceTwinCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
     {
         this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
@@ -422,8 +413,12 @@ public class DeviceTwinCommon extends IntegrationTest
         public String x509Thumbprint;
         public String uuid;
         public ClientType clientType;
+        public DeviceTwin twinServiceClient;
+        public RegistryManager registryManager;
+        public RawTwinQuery rawTwinQueryClient;
 
-        public DeviceTwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint)
+
+        public DeviceTwinTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -431,31 +426,10 @@ public class DeviceTwinCommon extends IntegrationTest
             this.privateKey = privateKey;
             this.x509Thumbprint = x509Thumbprint;
             this.clientType = clientType;
-        }
-    }
+            this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
-    @BeforeClass
-    public static void classSetup()
-    {
-        try
-        {
-            sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-            scRawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
-    }
-
-    @AfterClass
-    public static void classTearDown()
-    {
-        if (registryManager != null)
-        {
-            registryManager.close();
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            rawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
         }
     }
 
@@ -485,11 +459,11 @@ public class DeviceTwinCommon extends IntegrationTest
         }
 
 
-        deviceUnderTest.sCDeviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, deviceUnderTest.sCDeviceForRegistryManager);
+        deviceUnderTest.sCDeviceForRegistryManager = Tools.addDeviceWithRetry(testInstance.registryManager, deviceUnderTest.sCDeviceForRegistryManager);
 
         if (deviceUnderTest.sCModuleForRegistryManager != null)
         {
-            Tools.addModuleWithRetry(registryManager, deviceUnderTest.sCModuleForRegistryManager);
+            Tools.addModuleWithRetry(testInstance.registryManager, deviceUnderTest.sCModuleForRegistryManager);
         }
 
         Thread.sleep(2000);
@@ -503,7 +477,7 @@ public class DeviceTwinCommon extends IntegrationTest
         try
         {
             tearDownTwin(deviceUnderTest);
-            registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
+            testInstance.registryManager.removeDevice(deviceUnderTest.sCDeviceForRegistryManager.getDeviceId());
         }
         catch (Exception e)
         {
@@ -528,7 +502,7 @@ public class DeviceTwinCommon extends IntegrationTest
             }
 
             actualCount = 0;
-            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
+            testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin);
             Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
 
             for (Pair p : repProperties)
@@ -561,7 +535,7 @@ public class DeviceTwinCommon extends IntegrationTest
             }
 
             actualCount = 0;
-            sCDeviceTwin.getTwin(deviceState.sCDeviceForTwin);
+            testInstance.twinServiceClient.getTwin(deviceState.sCDeviceForTwin);
             Set<Pair> repProperties = deviceState.sCDeviceForTwin.getReportedProperties();
 
             for (Pair p : repProperties)
@@ -695,7 +669,7 @@ public class DeviceTwinCommon extends IntegrationTest
             desiredProperties.add(new Pair(PROPERTY_KEY + i, propertyUpdateValue));
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+        testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
 
         // assert
         waitAndVerifyTwinStatusBecomesSuccess();
@@ -716,7 +690,7 @@ public class DeviceTwinCommon extends IntegrationTest
         this.internalClient.registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }
 
-    protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
+    protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         // arrange
         Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
@@ -736,7 +710,7 @@ public class DeviceTwinCommon extends IntegrationTest
             desiredProperties.add(new Pair(PROPERTY_KEY + i, PROPERTY_VALUE_UPDATE + UUID.randomUUID()));
         }
         deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-        sCDeviceTwin.updateTwin(deviceUnderTest.sCDeviceForTwin);
+        testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);
 
         for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
