@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>provisioning-device-client</artifactId>
+            <artifactId>provisioning-device-client-preview</artifactId>
             <version>${provisioning-device-client-version}</version>
             <scope>compile</scope>
         </dependency>
