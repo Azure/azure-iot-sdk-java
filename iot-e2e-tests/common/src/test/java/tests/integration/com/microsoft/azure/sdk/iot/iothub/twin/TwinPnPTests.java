@@ -57,7 +57,6 @@ public class TwinPnPTests extends IntegrationTest
 
         List inputs = new ArrayList();
         inputs.addAll(Arrays.asList(
-<<<<<<< HEAD
                 new Object[][]
                         {
                                 //sas token device client, no proxy
@@ -70,26 +69,11 @@ public class TwinPnPTests extends IntegrationTest
                                 //sas token device client, with proxy
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
                         }
-=======
-            new Object[][]
-                {
-                        //sas token device client, no proxy
-                        {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                        {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-
-                        //x509 device client, no proxy
-                        {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-
-                        //sas token device client, with proxy
-                        {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                }
->>>>>>> master
         ));
 
         if (!isBasicTierHub)
         {
             inputs.addAll(Arrays.asList(
-<<<<<<< HEAD
                     new Object[][]
                             {
                                     //sas token module client, no proxy
@@ -102,20 +86,6 @@ public class TwinPnPTests extends IntegrationTest
                                     //sas token module client, with proxy
                                     {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
                             }
-=======
-                new Object[][]
-                    {
-                            //sas token module client, no proxy
-                            {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-
-                            //x509 module client, no proxy
-                            {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-
-                            //sas token module client, with proxy
-                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                    }
->>>>>>> master
             ));
         }
 

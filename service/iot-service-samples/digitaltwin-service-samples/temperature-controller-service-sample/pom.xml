@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
-            <artifactId>iot-service-client</artifactId>
+            <artifactId>iot-service-client-preview</artifactId>
             <version>${iot-service-client-version}</version>
             <scope>compile</scope>
         </dependency>
