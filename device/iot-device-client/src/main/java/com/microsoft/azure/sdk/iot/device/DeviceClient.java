@@ -486,7 +486,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      *          empty or not valid, or if the callback is {@code null}.
      * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
      * @deprecated Use {@link #getFileUploadSasUri(FileUploadSasUriRequest)} to get the SAS URI, use the azure storage SDK to upload a file
-     * to that SAS URI, and then use {@link #completeFileUploadAsync(FileUploadCompletionNotification)} to notify Iot Hub that
+     * to that SAS URI, and then use {@link #completeFileUpload(FileUploadCompletionNotification)} to notify Iot Hub that
      * your file upload has completed, successfully or otherwise. This method does all three of these tasks for you, but has limited configuration options.
      */
     @Deprecated
@@ -537,8 +537,20 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Notify IoT Hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
      * @param notification The notification details, including if the file upload succeeded.
      * @throws IOException If this HTTPS request fails to send.
+     * @deprecated This function is not actually async, so use {@link #completeFileUpload(FileUploadCompletionNotification)} to avoid confusion
      */
+    @Deprecated
     public void completeFileUploadAsync(FileUploadCompletionNotification notification) throws IOException
+    {
+        this.completeFileUpload(notification);
+    }
+
+    /**
+     * Notify IoT Hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
+     * @param notification The notification details, including if the file upload succeeded.
+     * @throws IOException If this HTTPS request fails to send.
+     */
+    public void completeFileUpload(FileUploadCompletionNotification notification) throws IOException
     {
         if (this.fileUploadTask == null)
         {

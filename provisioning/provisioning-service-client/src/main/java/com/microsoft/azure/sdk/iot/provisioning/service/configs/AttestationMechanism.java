@@ -3,8 +3,11 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.provisioning.service.Tools;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
 /**
@@ -49,7 +52,7 @@ public final class AttestationMechanism
      * @param attestation the {@code Attestation} with the TPM keys, X509 certificates or Symmetric Keys. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided tpm is {@code null}.
      */
-    AttestationMechanism(Attestation attestation)
+    public AttestationMechanism(Attestation attestation)
     {
         /* SRS_ATTESTATION_MECHANISM_21_001: [The constructor shall throw IllegalArgumentException if the provided attestation is null or invalid.] */
         if(attestation == null)
@@ -97,12 +100,28 @@ public final class AttestationMechanism
         }
     }
 
+    public AttestationMechanism(String json)
+    {
+        if (Tools.isNullOrEmpty(json))
+        {
+            throw new IllegalArgumentException("JSON with result is null or empty");
+        }
+
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
+        AttestationMechanism result = gson.fromJson(json, AttestationMechanism.class);
+
+        this.symmetricKey = result.symmetricKey;
+        this.tpm = result.tpm;
+        this.type = result.type;
+        this.x509 = result.x509;
+    }
+
     /**
      * Getter for the type.
      *
      * @return the {@link AttestationMechanismType} that contains the stored type. It cannot be {@code null}.
      */
-    AttestationMechanismType getType()
+    public AttestationMechanismType getType()
     {
         /* SRS_ATTESTATION_MECHANISM_21_009: [The getType shall return a AttestationMechanismType with the stored mechanism type.] */
         return this.type;
@@ -114,7 +133,7 @@ public final class AttestationMechanism
      * @return the {@link Attestation} that contains one of the stored Attestation. It cannot be {@code null}.
      * @throws ProvisioningServiceClientException If the type of the attestation mechanism is unknown.
      */
-    Attestation getAttestation() throws ProvisioningServiceClientException
+    public Attestation getAttestation() throws ProvisioningServiceClientException
     {
         switch (this.type)
         {

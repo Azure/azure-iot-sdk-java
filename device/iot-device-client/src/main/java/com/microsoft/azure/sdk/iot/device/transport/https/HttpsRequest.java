@@ -94,12 +94,41 @@ public class HttpsRequest
      */
     public HttpsResponse send() throws TransportException
     {
+        return send(true);
+    }
+
+    /**
+     * Executes the HTTPS request as an HTTP request. This method should only be called when a user supplied
+     * url contains HTTP rather than HTTPS. Currently, this only happens from the {@link com.microsoft.azure.sdk.iot.device.hsm.HttpsHsmClient}
+     * for some edge workload urls.
+     *
+     * @return an HTTPS response.
+     *
+     * @throws TransportException if the connection could not be established, or the
+     * input/output streams could not be accessed.
+     */
+    public HttpsResponse sendAsHttpRequest() throws TransportException
+    {
+        return send(false);
+    }
+
+    /**
+     * Executes the HTTPS request.
+     *
+     * @param isHttps if true, the request will be sent as an HTTPS request. Otherwise it will be sent as an Http request
+     * @return an HTTPS response.
+     *
+     * @throws TransportException if the connection could not be established, or the
+     * input/output streams could not be accessed.
+     */
+    private HttpsResponse send(boolean isHttps) throws TransportException
+    {
         if (this.url == null)
         {
             throw new IllegalArgumentException("url cannot be null");
         }
 
-        HttpsConnection connection = new HttpsConnection(url, method, this.proxySettings);
+        HttpsConnection connection = new HttpsConnection(url, method, this.proxySettings, isHttps);
 
         for (String headerKey : headers.keySet())
         {
@@ -111,7 +140,7 @@ public class HttpsRequest
 
         connection.writeOutput(this.body);
 
-        if (this.sslContext != null)
+        if (this.sslContext != null && isHttps)
         {
             connection.setSSLContext(this.sslContext);
         }

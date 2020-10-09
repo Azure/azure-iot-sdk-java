@@ -20,7 +20,9 @@ import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClien
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -251,7 +253,7 @@ public class ProvisioningCommon extends IntegrationTest
     @Before
     public void setUp() throws Exception
     {
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
     }
@@ -450,7 +452,7 @@ public class ProvisioningCommon extends IntegrationTest
     }
 
     protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
-        DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString);
+        DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         boolean deviceFoundInCorrectHub = false;
         Query query = null;

@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 
@@ -207,7 +208,6 @@ public class QueryCollectionTest
         IotHubConnectionString actualConnectionString = Deencapsulation.getField(queryCollection, "iotHubConnectionString");
         HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
         URL actualUrl = Deencapsulation.getField(queryCollection, "url");
-        long actualTimeout = Deencapsulation.getField(queryCollection, "timeout");
 
         assertEquals(expectedQuery, actualQuery);
         assertEquals(expectedPageSize, actualPageSize);
@@ -215,7 +215,6 @@ public class QueryCollectionTest
         assertTrue(actualIsSqlQuery);
         assertEquals(actualConnectionString, mockConnectionString);
         assertEquals(actualHttpMethod, mockHttpMethod);
-        assertEquals(actualTimeout, expectedTimeout);
         assertEquals(actualUrl, mockUrl);
     }
 
@@ -243,14 +242,12 @@ public class QueryCollectionTest
         IotHubConnectionString actualConnectionString = Deencapsulation.getField(queryCollection, "iotHubConnectionString");
         HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
         URL actualUrl = Deencapsulation.getField(queryCollection, "url");
-        long actualTimeout = Deencapsulation.getField(queryCollection, "timeout");
 
         assertEquals(expectedPageSize, actualPageSize);
         assertEquals(expectedQueryType, actualQueryType);
         assertFalse(actualIsSqlQuery);
         assertEquals(actualConnectionString, mockConnectionString);
         assertEquals(actualHttpMethod, mockHttpMethod);
-        assertEquals(actualTimeout, expectedTimeout);
         assertEquals(actualUrl, mockUrl);
     }
 
@@ -325,7 +322,7 @@ public class QueryCollectionTest
                 DeviceOperations.setHeaders(expectedValidRequestHeaders);
                 times = 1;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, anyInt, anyInt, (Proxy) any);
                 times = 1;
             }
         };
@@ -373,7 +370,7 @@ public class QueryCollectionTest
         new NonStrictExpectations()
         {
             {
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, anyInt, anyInt, (Proxy) any);
                 result = mockHttpResponse;
 
                 mockHttpResponse.getHeaderFields();
@@ -393,7 +390,7 @@ public class QueryCollectionTest
                 DeviceOperations.setHeaders(expectedValidRequestHeaders);
                 times = 1;
 
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, expectedTimeout);
+                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, anyInt, anyInt, (Proxy) any);
                 times = 1;
             }
         };
@@ -439,7 +436,7 @@ public class QueryCollectionTest
         new Verifications()
         {
             {
-                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyLong);
+                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyInt, anyInt, (Proxy) any);
                 times = 1;
             }
         };

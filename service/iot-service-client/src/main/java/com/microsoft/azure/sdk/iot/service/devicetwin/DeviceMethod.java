@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -22,28 +23,49 @@ public class DeviceMethod
 {
     private IotHubConnectionString iotHubConnectionString = null;
     private Integer requestId = 0;
-    private static final int DEFAULT_RESPONSE_TIMEOUT = 30; // default response timeout is 30 seconds
-    private static final int DEFAULT_CONNECT_TIMEOUT = 0;
-    private static final int THOUSAND_MS = 1000;
+
+    private DeviceMethodClientOptions options;
+
     /**
      * Create a DeviceMethod instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
      * @return an instance of the DeviceMethod.
-     * @throws IOException This exception is thrown if the object creation failed
+     * @throws IOException This exception is thrown if the object creation failed.
      */
     public static DeviceMethod createFromConnectionString(String connectionString) throws IOException
     {
+        return createFromConnectionString(
+                connectionString,
+                DeviceMethodClientOptions.builder()
+                    .httpConnectTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                    .httpReadTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                    .build());
+    }
+
+    /**
+     * Create a DeviceMethod instance from the information in the connection string.
+     *
+     * @param connectionString is the IoTHub connection string.
+     * @param options the configurable options for each operation on this client. May not be null.
+     * @return an instance of the DeviceMethod.
+     * @throws IOException This exception is thrown if the object creation failed.
+     */
+    public static DeviceMethod createFromConnectionString(String connectionString, DeviceMethodClientOptions options) throws IOException
+    {
         if (connectionString == null || connectionString.length() == 0)
         {
-            /* Codes_SRS_DEVICEMETHOD_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
             throw new IllegalArgumentException("Connection string cannot be null or empty");
         }
 
-        /* Codes_SRS_DEVICEMETHOD_21_003: [The constructor shall create a new DeviceMethod instance and return it.] */
-        DeviceMethod deviceMethod = new DeviceMethod();
+        if (options == null)
+        {
+            throw new IllegalArgumentException("options may not be null");
+        }
 
-        /* Codes_SRS_DEVICEMETHOD_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
+        DeviceMethod deviceMethod = new DeviceMethod();
+        deviceMethod.options = options;
+
         deviceMethod.iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
         return deviceMethod;
@@ -56,10 +78,10 @@ public class DeviceMethod
      * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
      * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
-     * @param payload is the the method parameter
-     * @return the status and payload resulted from the method invoke
-     * @throws IotHubException This exception is thrown if the response verification failed
-     * @throws IOException This exception is thrown if the IO operation failed
+     * @param payload is the the method parameter.
+     * @return the status and payload resulted from the method invoke.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
      */
     public synchronized MethodResult invoke(String deviceId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
@@ -89,10 +111,10 @@ public class DeviceMethod
      * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
      * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
-     * @param payload is the the method parameter
-     * @return the status and payload resulted from the method invoke
-     * @throws IotHubException This exception is thrown if the response verification failed
-     * @throws IOException This exception is thrown if the IO operation failed
+     * @param payload is the the method parameter.
+     * @return the status and payload resulted from the method invoke.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
      */
     public synchronized MethodResult invoke(String deviceId, String moduleId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
@@ -127,74 +149,43 @@ public class DeviceMethod
      * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
      * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
-     * @param payload is the the method parameter
-     * @return the status and payload resulted from the method invoke
-     * @throws IotHubException This exception is thrown if the response verification failed
-     * @throws IOException This exception is thrown if the IO operation failed
+     * @param payload is the the method parameter.
+     * @return the status and payload resulted from the method invoke.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
      */
     private synchronized MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
     {
-        /* Codes_SRS_DEVICEMETHOD_21_006: [The invoke shall throw IllegalArgumentException if the provided responseTimeoutInSeconds is negative.] */
-        /* Codes_SRS_DEVICEMETHOD_21_007: [The invoke shall throw IllegalArgumentException if the provided connectTimeoutInSeconds is negative.] */
-        /* Codes_SRS_DEVICEMETHOD_21_014: [The invoke shall bypass the Exception if one of the functions called by invoke failed.] */
         MethodParser methodParser = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
 
-        /* Codes_SRS_DEVICEMETHOD_21_011: [The invoke shall add a HTTP body with Json created by the `serializer.MethodParser`.] */
         String json = methodParser.toJson();
         if(json == null)
         {
-            /* Codes_SRS_DEVICEMETHOD_21_012: [If `MethodParser` return a null Json, the invoke shall throw IllegalArgumentException.] */
             throw new IllegalArgumentException("MethodParser return null Json");
         }
 
-        long  responseTimeout, connectTimeout;
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
 
-        if (responseTimeoutInSeconds == null)
-        {
-            responseTimeout  = DEFAULT_RESPONSE_TIMEOUT; // If timeout is not set, it defaults to 30 seconds
-        }
-        else
-        {
-            responseTimeout  = responseTimeoutInSeconds;
-        }
-        
-        if (connectTimeoutInSeconds == null)
-        {
-            connectTimeout  = DEFAULT_CONNECT_TIMEOUT;
-        }
-        else
-        {
-            connectTimeout  = connectTimeoutInSeconds;
-        }
-        
-        // Calculate total timeout in milliseconds
-        long timeoutInMs = (responseTimeout + connectTimeout) * THOUSAND_MS; 
-               
-        /* Codes_SRS_DEVICEMETHOD_21_009: [The invoke shall send the created request and get the response using the HttpRequester.] */
-        /* Codes_SRS_DEVICEMETHOD_21_010: [The invoke shall create a new HttpRequest with http method as `POST`.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), timeoutInMs);
-
-        /* Codes_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.MethodParser`.] */
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
 
-        /* Codes_SRS_DEVICEMETHOD_21_015: [If the HttpStatus represents success, the invoke shall return the status and payload using the `MethodResult` class.] */
         return new MethodResult(methodParserResponse.getStatus(), methodParserResponse.getPayload());
     }
 
     /**
-     * Creates a new Job to invoke method on one or multiple devices
+     * Creates a new Job to invoke method on one or multiple devices.
      *
-     * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty
-     * @param methodName Method name to be invoked
+     * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty.
+     * @param methodName Method name to be invoked.
      * @param responseTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for answer. It can be {@code null}.
      * @param connectTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for the connection. It can be {@code null}.
      * @param payload Object that contains the payload defined by the user. It can be {@code null}.
-     * @param startTimeUtc Date time in Utc to start the job
-     * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run
-     * @return a Job class that represent this job on IotHub
-     * @throws IOException if the function contains invalid parameters
-     * @throws IotHubException if the http request failed
+     * @param startTimeUtc Date time in Utc to start the job.
+     * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run.
+     * @return a Job class that represent this job on IotHub.
+     * @throws IOException if the function contains invalid parameters.
+     * @throws IotHubException if the http request failed.
      */
     public Job scheduleDeviceMethod(String queryCondition,
                                     String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload,

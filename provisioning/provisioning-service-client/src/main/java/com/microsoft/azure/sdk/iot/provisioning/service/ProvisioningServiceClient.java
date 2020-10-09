@@ -357,6 +357,17 @@ public final class ProvisioningServiceClient
     }
 
     /**
+     * Get the attestation mechanism details for a given individual enrollment
+     * @param registrationId the registration id of the individual enrollment to look up the attestation mechanism for
+     * @return the attestation mechanism of the given individual enrollment
+     * @throws ProvisioningServiceClientException if any exception is thrown while getting the attestation mechanism
+     */
+    public AttestationMechanism getIndividualEnrollmentAttestationMechanism(String registrationId) throws ProvisioningServiceClientException
+    {
+        return individualEnrollmentManager.getAttestationMechanism(registrationId);
+    }
+
+    /**
      * Delete the individualEnrollment information.
      *
      * <p> This method will remove the individualEnrollment from the Device Provisioning Service using the
@@ -668,6 +679,17 @@ public final class ProvisioningServiceClient
     {
         /* SRS_PROVISIONING_SERVICE_CLIENT_21_017: [The getEnrollmentGroup shall retrieve the enrollmentGroup information for the provided enrollmentGroupId by calling the get in the enrollmentGroupManager.] */
         return enrollmentGroupManager.get(enrollmentGroupId);
+    }
+
+    /**
+     * Get the attestation mechanism details for a given enrollment group
+     * @param enrollmentGroupId the group id of the enrollment group to look up the attestation mechanism for
+     * @return the attestation mechanism of the given enrollment group
+     * @throws ProvisioningServiceClientException if any exception is thrown while getting the attestation mechanism
+     */
+    public AttestationMechanism getEnrollmentGroupAttestationMechanism(String enrollmentGroupId) throws ProvisioningServiceClientException
+    {
+        return enrollmentGroupManager.getAttestationMechanism(enrollmentGroupId);
     }
 
     /**

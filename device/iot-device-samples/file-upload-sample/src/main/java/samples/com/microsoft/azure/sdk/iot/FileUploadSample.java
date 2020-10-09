@@ -3,10 +3,14 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
+import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -22,14 +26,6 @@ import java.util.Scanner;
 public class FileUploadSample
 {
     private static List<String> fileNameList = new ArrayList<>();
-
-    protected static class FileUploadStatusCallBack implements IotHubEventCallback
-    {
-        public void execute(IotHubStatusCode status, Object context)
-        {
-            System.out.println("IoT Hub responded to file upload for " + fileNameList.get((int)context) + " operation with status " + status.name());
-        }
-    }
 
     /**
      * Upload file or directories to blobs using IoT Hub.
@@ -78,12 +74,7 @@ public class FileUploadSample
         
         try
         {
-
             uploadFileOrDirectory(client, fullFileName);
-
-            System.out.println("File upload started with success");
-
-            System.out.println("Waiting for file upload callback with the status...");
         }
         catch (Exception e)
         {
@@ -100,8 +91,7 @@ public class FileUploadSample
         client.closeNow();
     }
 
-    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws FileNotFoundException, IOException
-    {
+    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws FileNotFoundException, IOException, URISyntaxException {
         File file = new File(fullFileName);
         if(file.isDirectory())
         {
@@ -113,8 +103,7 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws FileNotFoundException, IOException
-    {
+    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws FileNotFoundException, IOException, URISyntaxException {
         String[] fileNameList = null;
 
         File file = new File(baseDirectory, relativePath);
@@ -136,19 +125,52 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws FileNotFoundException, IOException
-    {
+    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws FileNotFoundException, IOException, URISyntaxException {
         File file = new File(baseDirectory, relativeFileName);
-        InputStream inputStream = new FileInputStream(file);
-        long streamLength = file.length();
-
-        if(relativeFileName.startsWith("\\"))
+        try (InputStream inputStream = new FileInputStream(file))
         {
-            relativeFileName = relativeFileName.substring(1);
-        }
+            long streamLength = file.length();
 
-        int index = fileNameList.size();
-        fileNameList.add(relativeFileName);
-        client.uploadToBlobAsync(relativeFileName, inputStream, streamLength, new FileUploadStatusCallBack(), index);
+            if(relativeFileName.startsWith("\\"))
+            {
+                relativeFileName = relativeFileName.substring(1);
+            }
+
+            int index = fileNameList.size();
+            fileNameList.add(relativeFileName);
+
+            System.out.println("Getting SAS URI for upload file " + fileNameList.get(index));
+            FileUploadSasUriResponse sasUriResponse = client.getFileUploadSasUri(new FileUploadSasUriRequest(file.getName()));
+
+            try
+            {
+                // Note that other versions of the Azure Storage SDK can be used here instead. The latest can be found here:
+                // https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/storage#azure-storage-sdk-client-library-for-java
+                System.out.println("Uploading file " + fileNameList.get(index) + " with the retrieved SAS URI...");
+                CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
+                blob.upload(inputStream, streamLength);
+            }
+            catch (Exception e)
+            {
+                // Note that this is done even when the file upload fails. IoT Hub has a fixed number of SAS URIs allowed active
+                // at any given time. Once you are done with the file upload, you should free your SAS URI so that other
+                // SAS URIs can be generated. If a SAS URI is not freed through this API, then it will free itself eventually
+                // based on how long SAS URIs are configured to live on your IoT Hub.
+                FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false);
+                client.completeFileUpload(completionNotification);
+                System.out.println("Failed to upload file " + fileNameList.get(index));
+                e.printStackTrace();
+                return;
+            }
+            finally
+            {
+                inputStream.close();
+            }
+
+            FileUploadCompletionNotification completionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true);
+            client.completeFileUpload(completionNotification);
+
+            System.out.println("Finished file upload for file " + fileNameList.get(index));
+        }
     }
 }

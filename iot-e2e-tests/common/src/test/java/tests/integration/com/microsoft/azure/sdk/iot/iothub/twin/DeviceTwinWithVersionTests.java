@@ -13,7 +13,9 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -55,8 +57,6 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-
         List inputs =  Arrays.asList(
                 new Object[][]
                         {
@@ -87,8 +87,6 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
             add(new Property(PROPERTY_KEY_2, PROPERTY_VALUE_2));
         }
     };
-
-    private static RegistryManager registryManager;
 
     private enum STATUS
     {
@@ -194,25 +192,17 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         public IotHubClientProtocol protocol;
         private com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;
 
-        private DeviceTwin sCDeviceTwin;
+        private DeviceTwin twinServiceClient;
         private TestDevice testDevice;
+        public RegistryManager registryManager;
 
         public DeviceTwinWithVersionTestInstance(IotHubClientProtocol protocol) throws IOException
         {
             this.protocol = protocol;
 
-            this.sCDeviceTwin = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+            this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             this.testDevice = new TestDevice();
-        }
-    }
-
-    @AfterClass
-    public static void tearDown() throws Exception
-    {
-        if (registryManager != null)
-        {
-            registryManager.close();
-            registryManager = null;
         }
     }
 
@@ -231,7 +221,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         testInstance.testDevice.receivedProperties = new HashSet<>();
 
         testInstance.deviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(testInstance.testDevice.deviceId, null, null);
-        testInstance.deviceForRegistryManager = Tools.addDeviceWithRetry(registryManager, testInstance.deviceForRegistryManager);
+        testInstance.deviceForRegistryManager = Tools.addDeviceWithRetry(testInstance.registryManager, testInstance.deviceForRegistryManager);
 
     }
 
@@ -251,9 +241,9 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
             testInstance.testDevice.receivedProperties = null;
             testInstance.testDevice.deviceTwinStatus = STATUS.UNKNOWN;
 
-            if (registryManager != null && testInstance.testDevice.deviceId != null)
+            if (testInstance.registryManager != null && testInstance.testDevice.deviceId != null)
             {
-                registryManager.removeDevice(testInstance.testDevice.deviceId);
+                testInstance.registryManager.removeDevice(testInstance.testDevice.deviceId);
             }
         }
     }
@@ -297,7 +287,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
-        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        testInstance.twinServiceClient.getTwin(deviceOnServiceClient);
         assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
@@ -386,7 +376,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
-        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        testInstance.twinServiceClient.getTwin(deviceOnServiceClient);
         assertEquals(buildExceptionMessage("Expected reported properties version 3 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 3, (int)deviceOnServiceClient.getReportedPropertiesVersion());        Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(newValues, reported);
     }
@@ -472,7 +462,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
-        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        testInstance.twinServiceClient.getTwin(deviceOnServiceClient);
         assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);
@@ -559,7 +549,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         // test service client
         DeviceTwinDevice deviceOnServiceClient = new DeviceTwinDevice(testInstance.testDevice.deviceId);
-        testInstance.sCDeviceTwin.getTwin(deviceOnServiceClient);
+        testInstance.twinServiceClient.getTwin(deviceOnServiceClient);
         assertEquals(buildExceptionMessage("Expected reported properties version 2 but was " + deviceOnServiceClient.getReportedPropertiesVersion(), testInstance.testDevice.deviceClient), 2, (int)deviceOnServiceClient.getReportedPropertiesVersion());
         Set<Pair> reported = deviceOnServiceClient.getReportedProperties();
         assertSetEquals(PROPERTIES, reported);

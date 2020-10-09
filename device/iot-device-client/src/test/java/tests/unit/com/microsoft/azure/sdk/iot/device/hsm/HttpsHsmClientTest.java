@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignResponse;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.TrustBundleResponse;
-import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsRequest;
@@ -110,7 +109,7 @@ public class HttpsHsmClientTest
     // Tests_SRS_HSMHTTPCLIENT_34_003: [This function shall build an http request with headers ContentType and Accept with value application/json.]
     // Tests_SRS_HSMHTTPCLIENT_34_004: [If the response from the http call is 200, this function shall return the SignResponse built from the response body json.]
     @Test
-    public void signSuccess(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
+    public void signSuccessHttps(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
     {
         //arrange
         final String expectedUrl = expectedBaseUrl + "/modules/" + URLEncoder.encode(expectedName, "UTF-8") + "/genid/" + URLEncoder.encode(expectedGenId, "UTF-8") + "/sign?api-version=" + URLEncoder.encode(expectedApiVersion, "UTF-8");
@@ -132,6 +131,63 @@ public class HttpsHsmClientTest
                 result = mockedHttpsRequest;
 
                 mockedHttpsRequest.send();
+                result = mockedHttpsResponse;
+
+                mockedHttpsResponse.getStatus();
+                result = 200;
+
+                mockedHttpsResponse.getBody();
+                result = expectedResponseBody.getBytes();
+            }
+        };
+
+        HttpsHsmClient client = new HttpsHsmClient(expectedBaseUrl);
+
+        //act
+        client.sign(expectedApiVersion, expectedName, mockedSignRequest, expectedGenId);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedHttpsRequest.setHeaderField("Content-Type", "application/json");
+                times = 1;
+
+                mockedHttpsRequest.setHeaderField("Accept", "application/json");
+                times = 1;
+
+                new URL(expectedUrl);
+                times = 1;
+
+                SignResponse.fromJson(expectedResponseBody);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void signSuccessHttp(final @Mocked URI mockedURI) throws IOException, TransportException, URISyntaxException, HsmException
+    {
+        //arrange
+        final String expectedUrl = expectedBaseUrl + "/modules/" + URLEncoder.encode(expectedName, "UTF-8") + "/genid/" + URLEncoder.encode(expectedGenId, "UTF-8") + "/sign?api-version=" + URLEncoder.encode(expectedApiVersion, "UTF-8");
+        final String expectedJson = "some json";
+        final String expectedResponseBody = "some json response";
+        new Expectations()
+        {
+            {
+                new URI(expectedBaseUrl);
+                result = mockedURI;
+
+                mockedURI.getScheme();
+                result = expectedSchemeHttp;
+
+                mockedSignRequest.toJson();
+                result = expectedJson;
+
+                new HttpsRequest((URL) any, HttpsMethod.POST, expectedJson.getBytes(), anyString);
+                result = mockedHttpsRequest;
+
+                mockedHttpsRequest.sendAsHttpRequest();
                 result = mockedHttpsResponse;
 
                 mockedHttpsResponse.getStatus();

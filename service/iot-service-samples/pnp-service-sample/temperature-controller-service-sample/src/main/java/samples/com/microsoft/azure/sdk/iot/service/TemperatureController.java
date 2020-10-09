@@ -1,6 +1,7 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 package samples.com.microsoft.azure.sdk.iot.service;
 
-import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
@@ -10,15 +11,12 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.Collections.singleton;
-
 // This sample uses the model - https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json.
 public class TemperatureController {
     // Get connection string and device id inputs.
     private static final String iotHubConnectionString  = System.getenv("IOTHUB_CONNECTION_STRING");
-    private static final String deviceId = System.getenv("DEVICE_ID");
-    private static final String PROPERTY_COMPONENT_IDENTIFIER_KEY = "__t";
-    private static final String PROPERTY_COMPONENT_IDENTIFIER_VALUE = "c";
+    private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
+
     private static DeviceTwin twinClient;
     private static DeviceMethod methodClient;
 
@@ -64,17 +62,7 @@ public class TemperatureController {
         String propertyName = "targetTemperature";
         double propertyValue = 60.2;
         String componentName = "thermostat1";
-        /* The property patch should be in the below format:
-         *   "componentName": {
-         *      "__t": "c",
-         *      "propertyName": {
-         *        "value": "hello"
-         *      }
-         */
-        JsonObject patchJson = new JsonObject();
-        patchJson.addProperty(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
-        patchJson.addProperty(propertyName, propertyValue);
-        twin.setDesiredProperties(singleton(new Pair(componentName, patchJson)));
+        twin.setDesiredProperties(PnpHelper.CreateComponentPropertyPatch(propertyName, propertyValue, componentName));
         twinClient.updateTwin(twin);
 
         // Get the updated twin properties.
@@ -102,8 +90,7 @@ public class TemperatureController {
     }
 
     private static void InvokeMethodOnComponent() throws IOException, IotHubException {
-        /* The command to invoke for components should be in the format: "componentName*commandName" */
-        String methodToInvoke = "thermostat1" + "*" +  "getMaxMinReport";
+        String methodToInvoke = PnpHelper.CreateComponentCommandName("thermostat1", "getMaxMinReport");
         System.out.println("Invoking method: " + methodToInvoke);
 
         Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);

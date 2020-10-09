@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
-enum AttestationMechanismType
+public enum AttestationMechanismType
 {
     @SerializedName("none") // There is no valid scenario for `NONE` Attestation Mechanism Type.
     NONE,

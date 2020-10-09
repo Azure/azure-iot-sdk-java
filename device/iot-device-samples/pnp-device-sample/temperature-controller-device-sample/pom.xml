@@ -10,6 +10,26 @@
             <name>Microsoft</name>
         </developer>
     </developers>
+    <dependencies>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
+            <artifactId>provisioning-device-client-preview</artifactId>
+            <version>${provisioning-device-client-version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.11.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <parent>
         <artifactId>pnp-device-sample</artifactId>
         <groupId>com.microsoft.azure.sdk.iot.samples</groupId>

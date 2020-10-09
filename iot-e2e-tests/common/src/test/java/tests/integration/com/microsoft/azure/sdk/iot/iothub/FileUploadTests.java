@@ -49,7 +49,6 @@ import static tests.integration.com.microsoft.azure.sdk.iot.iothub.FileUploadTes
 /**
  * Test class containing all tests to be run on JVM and android pertaining to FileUpload.
  */
-@FlakeyTest
 @IotHubTest
 @RunWith(Parameterized.class)
 public class FileUploadTests extends IntegrationTest
@@ -91,7 +90,7 @@ public class FileUploadTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
@@ -344,7 +343,7 @@ public class FileUploadTests extends IntegrationTest
         fileUploadCompletionNotification.setSuccess(true);
         fileUploadCompletionNotification.setStatusDescription("Succeed to upload to storage.");
 
-        deviceClient.completeFileUploadAsync(fileUploadCompletionNotification);
+        deviceClient.completeFileUpload(fileUploadCompletionNotification);
 
         // assert
         assertEquals(buildExceptionMessage("File upload status should be SUCCESS but was " + testInstance.fileUploadState[0].fileUploadStatus, deviceClient), SUCCESS, testInstance.fileUploadState[0].fileUploadStatus);
