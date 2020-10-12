@@ -24,9 +24,9 @@ public class ModuleTwinSample
             + "2. (mqtt | amqps | amqps_ws | mqtt_ws)\n";
 
     private static String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
-    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
+    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
-    private enum LIGHTS{ ON, OFF, DISABLED }
+    private enum LIGHTS{ ON, OFF }
     private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
     private static final int MAX_EVENTS_TO_REPORT = 5;
 

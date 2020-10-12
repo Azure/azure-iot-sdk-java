@@ -23,12 +23,8 @@ public class ModuleMethodSample
             + "2. (mqtt | amqps | amqps_ws | mqtt_ws)\n";
 
     private static String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
-    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
-
-    private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
     private static final int METHOD_SUCCESS = 200;
-    private static final int METHOD_HUNG = 300;
-    private static final int METHOD_NOT_FOUND = 404;
     private static final int METHOD_NOT_DEFINED = 404;
 
     private static int method_command(Object command)

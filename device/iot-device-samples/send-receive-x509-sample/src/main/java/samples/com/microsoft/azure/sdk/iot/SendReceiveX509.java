@@ -279,8 +279,8 @@ public class SendReceiveX509
         {
           e.printStackTrace();
         }
-        
-        System.out.println("In receive mode. Waiting for receiving C2D messages. Press ENTER to close");
+
+        System.out.println("In receive mode. Waiting for receiving C2D messages (only for MQTT and AMQP). Press ENTER to close. To receive in Https, send message and then start the sample.");
     
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
