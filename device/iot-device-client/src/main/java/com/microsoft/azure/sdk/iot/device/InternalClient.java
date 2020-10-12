@@ -440,6 +440,16 @@ public class InternalClient
      *         made by this client. By default, this value is 0 (no connect timeout).
      *         The value is expected to be of type {@code int}.
      *
+     *      - <b>SetAmqpOpenAuthenticationSessionTimeout</b> - this option is applicable for AMQP with SAS token authentication.
+     *         This option specifies the timeout in seconds to wait to open the authentication session.
+     *         By default, this value is 20 seconds.
+     *         The value is expected to be of type {@code int}.
+     *
+     *      - <b>SetAmqpOpenDeviceSessionsTimeout</b> - this option is applicable for AMQP.
+     *         This option specifies the timeout in seconds to open the device sessions.
+     *         By default, this value is 60 seconds.
+     *         The value is expected to be of type {@code int}.
+     *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
      * @throws IllegalArgumentException if the provided optionName is null

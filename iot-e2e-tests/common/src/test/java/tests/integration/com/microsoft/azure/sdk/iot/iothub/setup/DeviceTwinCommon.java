@@ -340,6 +340,9 @@ public class DeviceTwinCommon extends IntegrationTest
                 }
             }
 
+            internalClient.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
+            internalClient.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
+
             if (openDeviceClient)
             {
                 internalClient.open();

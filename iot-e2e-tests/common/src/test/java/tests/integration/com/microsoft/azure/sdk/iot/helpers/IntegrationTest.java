@@ -76,4 +76,8 @@ public abstract class IntegrationTest
 
     // Infinite read timeout for all http operations
     public static int HTTP_READ_TIMEOUT = 0;
+
+    // Amqp specific timeout values for waiting on authentication/device sessions to open
+    public static int AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS = 4 * 60;
+    public static int AMQP_DEVICE_SESSION_TIMEOUT_SECONDS = 4 * 60;
 }
