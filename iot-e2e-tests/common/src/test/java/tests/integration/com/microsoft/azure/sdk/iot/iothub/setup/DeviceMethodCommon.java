@@ -222,6 +222,12 @@ public class DeviceMethodCommon extends IntegrationTest
                 }
             }
 
+            if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
+            {
+                this.deviceTestManager.client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
+                this.deviceTestManager.client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
+            }
+
             Thread.sleep(2000);
         }
 
