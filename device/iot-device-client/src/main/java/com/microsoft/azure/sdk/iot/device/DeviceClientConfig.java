@@ -46,21 +46,22 @@ public final class DeviceClientConfig
     @Setter(AccessLevel.PROTECTED)
     String modelId;
 
+    // Initialize all the timeout values here instead of the constructor as the constructor is not always called.
     @Getter
     @Setter
-    private int httpsReadTimeout;
+    private int httpsReadTimeout = DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
 
     @Getter
     @Setter
-    private int httpsConnectTimeout;
+    private int httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
 
     @Getter
     @Setter
-    private int amqpOpenAuthenticationSessionTimeout;
+    private int amqpOpenAuthenticationSessionTimeout = DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
 
     @Getter
     @Setter
-    private int amqpOpenDeviceSessionsTimeout;
+    private int amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -276,10 +277,6 @@ public final class DeviceClientConfig
 
         this.productInfo = new ProductInfo();
         this.useWebsocket = false;
-        this.httpsReadTimeout = DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
-        this.httpsConnectTimeout = DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
-        this.amqpOpenAuthenticationSessionTimeout = DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
-        this.amqpOpenDeviceSessionsTimeout = DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
     }
 
     private void assertConnectionStringIsX509(IotHubConnectionString iotHubConnectionString)
