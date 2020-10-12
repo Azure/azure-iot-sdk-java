@@ -745,6 +745,8 @@ public final class DeviceClient extends InternalClient implements Closeable
             case SET_RECEIVE_INTERVAL:
             case SET_HTTPS_CONNECT_TIMEOUT:
             case SET_HTTPS_READ_TIMEOUT:
+            case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
+            case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
             {
                 break;
             }
@@ -812,16 +814,6 @@ public final class DeviceClient extends InternalClient implements Closeable
                     setOption_SetSASTokenExpiryTime(value);
                     return;
                 }
-            }
-            case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
-            {
-                setOption_SetAmqpOpenAuthenticationSessionTimeout(value);
-                return;
-            }
-            case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
-            {
-                setOption_SetAmqpOpenDeviceSessionsTimeout(value);
-                return;
             }
             default:
             {

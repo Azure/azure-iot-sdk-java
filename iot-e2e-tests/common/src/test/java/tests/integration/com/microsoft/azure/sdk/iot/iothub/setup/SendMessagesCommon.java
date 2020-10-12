@@ -295,6 +295,12 @@ public class SendMessagesCommon extends IntegrationTest
                 }
             }
 
+            if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
+            {
+                this.client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
+                this.client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
+            }
+
             if (this.useHttpProxy)
             {
                 Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
@@ -378,10 +384,6 @@ public class SendMessagesCommon extends IntegrationTest
         public void openConnection() throws IOException, URISyntaxException, InterruptedException
         {
             client = new DeviceClient(connString, protocol);
-
-            this.client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-            this.client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
-
             client.open();
         }
 

@@ -543,6 +543,16 @@ public class InternalClient
                     setOption_SetHttpsReadTimeout(value);
                     break;
                 }
+                case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
+                {
+                    setOption_SetAmqpOpenAuthenticationSessionTimeout(value);
+                    return;
+                }
+                case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
+                {
+                    setOption_SetAmqpOpenDeviceSessionsTimeout(value);
+                    return;
+                }
                 default:
                 {
                     throw new IllegalArgumentException("optionName is unknown = " + optionName);
