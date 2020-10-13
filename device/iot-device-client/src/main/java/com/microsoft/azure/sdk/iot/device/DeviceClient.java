@@ -710,6 +710,16 @@ public final class DeviceClient extends InternalClient implements Closeable
      *         made by this client. By default, this value is 0 (no connect timeout).
      *         The value is expected to be of type {@code int}.
      *
+     *      - <b>SetAmqpOpenAuthenticationSessionTimeout</b> - this option is applicable for AMQP with SAS token authentication.
+     *         This option specifies the timeout in seconds to wait to open the authentication session.
+     *         By default, this value is 20 seconds.
+     *         The value is expected to be of type {@code int}.
+     *
+     *      - <b>SetAmqpOpenDeviceSessionsTimeout</b> - this option is applicable for AMQP.
+     *         This option specifies the timeout in seconds to open the device sessions.
+     *         By default, this value is 60 seconds.
+     *         The value is expected to be of type {@code int}.
+     *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
      * @throws IllegalArgumentException if the provided optionName is null
@@ -725,7 +735,7 @@ public final class DeviceClient extends InternalClient implements Closeable
         else if (value == null)
         {
             // Codes_SRS_DEVICECLIENT_12_026: [The function shall trow IllegalArgumentException if the value is null.]
-            throw new IllegalArgumentException("optionName is null");
+            throw new IllegalArgumentException("value is null");
         }
 
         switch (optionName)
@@ -735,6 +745,8 @@ public final class DeviceClient extends InternalClient implements Closeable
             case SET_RECEIVE_INTERVAL:
             case SET_HTTPS_CONNECT_TIMEOUT:
             case SET_HTTPS_READ_TIMEOUT:
+            case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
+            case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
             {
                 break;
             }
