@@ -204,6 +204,12 @@ public class ReceiveMessagesCommon extends IntegrationTest
                 {
                     throw new Exception("Test code has not been written for this path yet");
                 }
+
+                if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
+                {
+                    this.client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
+                    this.client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
+                }
             }
 
             testInstance.serviceClient.open();
