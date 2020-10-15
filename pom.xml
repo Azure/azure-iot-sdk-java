@@ -36,11 +36,11 @@
         <digital-twin-device-client-artifact-id>digital-twin-device-client-preview</digital-twin-device-client-artifact-id>
         <digital-twin-service-client-artifact-id>digital-twin-service-client-preview</digital-twin-service-client-artifact-id>
         
-        <iot-device-client-version>1.1.0</iot-device-client-version>
-        <iot-service-client-version>1.1.0</iot-service-client-version>
+        <iot-device-client-version>1.2.0</iot-device-client-version>
+        <iot-service-client-version>1.2.0</iot-service-client-version>
         <iot-deps-version>1.1.0</iot-deps-version>
         <provisioning-device-client-version>1.0.1</provisioning-device-client-version>
-        <provisioning-service-client-version>1.0.1</provisioning-service-client-version>
+        <provisioning-service-client-version>1.1.0</provisioning-service-client-version>
         <security-provider-version>1.0.1</security-provider-version>
         <tpm-provider-emulator-version>1.0.1</tpm-provider-emulator-version>
         <tpm-provider-version>1.0.1</tpm-provider-version>
