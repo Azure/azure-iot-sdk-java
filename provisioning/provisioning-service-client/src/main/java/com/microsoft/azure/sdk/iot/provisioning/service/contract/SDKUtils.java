@@ -10,7 +10,7 @@ public class SDKUtils
 {
     private static final String SERVICE_API_VERSION = "2019-03-31";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client-preview/";
-    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.0.1";
+    private static final String PROVISIONING_SERVICE_CLIENT_VERSION = "1.8.0-preview-001";
 
     private static String JAVA_RUNTIME = System.getProperty("java.version");
     private static String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");
