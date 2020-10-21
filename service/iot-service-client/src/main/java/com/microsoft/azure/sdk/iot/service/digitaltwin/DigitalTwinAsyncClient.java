@@ -30,6 +30,11 @@ import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
 
+/**
+ * <p>
+ * The Digital Twins Service Client contains asynchronous methods to retrieve and update digital twin information, and invoke commands on a digital twin device.
+ * </p>
+ * */
 public class DigitalTwinAsyncClient {
     private DigitalTwinsImpl _protocolLayer;
     private static ObjectMapper objectMapper = new ObjectMapper();
