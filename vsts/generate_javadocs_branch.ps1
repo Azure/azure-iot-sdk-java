@@ -8,6 +8,11 @@
 # This script is designed to be used only by an Azure Devops release pipeline. Running it locally will not work
 # due to some assumptions this script makes about working directory.
 
+# Folder to place the generated content. 
+# Note: This is an input to the script and will be different for master and preview branches.
+[Parameter(Mandatory=$true)]
+[string] $folderName
+
 function TestLastExitCode {
 
     if ($LASTEXITCODE -ne 0) {
@@ -48,53 +53,53 @@ function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources) {
 
     Write-Host "Copying generated javadocs to replace current javadocs"
     Set-Location apidocs
-    Remove-Item ..\deps -Force -Recurse
-    Copy-Item -Force -Path .\deps\* -Destination ..\deps
-    Copy-Item -Recurse -Force -Path .\deps\com -Destination ..\deps
+    Remove-Item ..\$folderName\deps -Force -Recurse
+    Copy-Item -Force -Path .\deps\* -Destination ..\$folderName\deps
+    Copy-Item -Recurse -Force -Path .\deps\com -Destination ..\$folderName\deps
 
-    Remove-Item ..\device -Force -Recurse
-    Copy-Item -Force -Path .\device\* -Destination ..\device
-    Copy-Item -Recurse -Force -Path .\device\com -Destination ..\device
+    Remove-Item ..\$folderName\device -Force -Recurse
+    Copy-Item -Force -Path .\device\* -Destination ..\$folderName\device
+    Copy-Item -Recurse -Force -Path .\device\com -Destination ..\$folderName\device
 
-    Remove-Item ..\service -Force -Recurse
-    Copy-Item -Force -Path .\service\* -Destination ..\service
-    Copy-Item -Recurse -Force -Path .\service\com -Destination ..\service
+    Remove-Item ..\$folderName\service -Force -Recurse
+    Copy-Item -Force -Path .\service\* -Destination ..\$folderName\service
+    Copy-Item -Recurse -Force -Path .\service\com -Destination ..\$folderName\service
 
-    Remove-Item ..\provisioning -Force -Recurse
-    New-Item -Path '../provisioning' -ItemType Directory
-    New-Item -Path '../provisioning/provisioning-device-client' -ItemType Directory
-    New-Item -Path '../provisioning/provisioning-service-client' -ItemType Directory
-    New-Item -Path '../provisioning/security' -ItemType Directory
-    New-Item -Path '../provisioning/security/dice-provider' -ItemType Directory
-    New-Item -Path '../provisioning/security/dice-provider-emulator' -ItemType Directory
-    New-Item -Path '../provisioning/security/security-provider' -ItemType Directory
-    New-Item -Path '../provisioning/security/tpm-provider' -ItemType Directory
-    New-Item -Path '../provisioning/security/tpm-provider-emulator' -ItemType Directory
-    New-Item -Path '../provisioning/security/x509-provider' -ItemType Directory
+    Remove-Item ..\$folderName\provisioning -Force -Recurse
+    New-Item -Path '../$folderName/provisioning' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/provisioning-device-client' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/provisioning-service-client' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/security' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/security/dice-provider' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/security/dice-provider-emulator' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/security/security-provider' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/security/tpm-provider' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/security/tpm-provider-emulator' -ItemType Directory
+    New-Item -Path '../$folderName/provisioning/security/x509-provider' -ItemType Directory
 
-    Copy-Item -Force -Path .\provisioning\provisioning-device-client\* -Destination ..\provisioning\provisioning-device-client
-    Copy-Item -Recurse -Force -Path .\provisioning\provisioning-device-client\com -Destination ..\provisioning\provisioning-device-client
+    Copy-Item -Force -Path .\provisioning\provisioning-device-client\* -Destination ..\$folderName\provisioning\provisioning-device-client
+    Copy-Item -Recurse -Force -Path .\provisioning\provisioning-device-client\com -Destination ..\$folderName\provisioning\provisioning-device-client
 
-    Copy-Item -Force -Path .\provisioning\provisioning-service-client\* -Destination ..\provisioning\provisioning-service-client
-    Copy-Item -Recurse -Force -Path .\provisioning\provisioning-service-client\com -Destination ..\provisioning\provisioning-service-client
+    Copy-Item -Force -Path .\provisioning\provisioning-service-client\* -Destination ..\$folderName\provisioning\provisioning-service-client
+    Copy-Item -Recurse -Force -Path .\provisioning\provisioning-service-client\com -Destination ..\$folderName\provisioning\provisioning-service-client
 
-    Copy-Item -Force -Path .\provisioning\security\tpm-provider-emulator\* -Destination ..\provisioning\security\tpm-provider-emulator
-    Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider-emulator\com -Destination ..\provisioning\security\tpm-provider-emulator
+    Copy-Item -Force -Path .\provisioning\security\tpm-provider-emulator\* -Destination ..\$folderName\provisioning\security\tpm-provider-emulator
+    Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider-emulator\com -Destination ..\$folderName\provisioning\security\tpm-provider-emulator
 
-    Copy-Item -Force -Path .\provisioning\security\tpm-provider\* -Destination ..\provisioning\security\tpm-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider\com -Destination ..\provisioning\security\tpm-provider
+    Copy-Item -Force -Path .\provisioning\security\tpm-provider\* -Destination ..\$folderName\provisioning\security\tpm-provider
+    Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider\com -Destination ..\$folderName\provisioning\security\tpm-provider
 
-    Copy-Item -Force -Path .\provisioning\security\dice-provider-emulator\* -Destination ..\provisioning\security\dice-provider-emulator
-    Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider-emulator\com -Destination ..\provisioning\security\dice-provider-emulator
+    Copy-Item -Force -Path .\provisioning\security\dice-provider-emulator\* -Destination ..\$folderName\provisioning\security\dice-provider-emulator
+    Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider-emulator\com -Destination ..\$folderName\provisioning\security\dice-provider-emulator
 
-    Copy-Item -Force -Path .\provisioning\security\dice-provider\* -Destination ..\provisioning\security\dice-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider\com -Destination ..\provisioning\security\dice-provider
+    Copy-Item -Force -Path .\provisioning\security\dice-provider\* -Destination ..\$folderName\provisioning\security\dice-provider
+    Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider\com -Destination ..\$folderName\provisioning\security\dice-provider
 
-    Copy-Item -Force -Path .\provisioning\security\security-provider\* -Destination ..\provisioning\security\security-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\security-provider\com -Destination ..\provisioning\security\security-provider
+    Copy-Item -Force -Path .\provisioning\security\security-provider\* -Destination ..\$folderName\provisioning\security\security-provider
+    Copy-Item -Recurse -Force -Path .\provisioning\security\security-provider\com -Destination ..\$folderName\provisioning\security\security-provider
 
-    Copy-Item -Force -Path .\provisioning\security\x509-provider\* -Destination ..\provisioning\security\x509-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\x509-provider\com -Destination ..\provisioning\security\x509-provider
+    Copy-Item -Force -Path .\provisioning\security\x509-provider\* -Destination ..\$folderName\provisioning\security\x509-provider
+    Copy-Item -Recurse -Force -Path .\provisioning\security\x509-provider\com -Destination ..\$folderName\provisioning\security\x509-provider
 
     Set-Location ..
 
