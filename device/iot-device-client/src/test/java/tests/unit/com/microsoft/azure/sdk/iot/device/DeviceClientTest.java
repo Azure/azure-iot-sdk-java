@@ -1988,6 +1988,364 @@ public class DeviceClientTest
 
     }
 
+    @Test
+    public void setAmqpOpenAuthenticationSessionTimeout()
+    {
+        //arrange
+        final int timeoutInSeconds = 10;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.AMQPS;
+
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
+        //act
+        client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+
+        //assert
+        new Verifications() {
+            {
+                Deencapsulation.invoke(mockConfig, "setAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void setAmqpWsOpenAuthenticationSessionTimeout()
+    {
+        //arrange
+        final int timeoutInSeconds = 10;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.AMQPS_WS;
+
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
+        //act
+        client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+
+        //assert
+        new Verifications() {
+            {
+                Deencapsulation.invoke(mockConfig, "setAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void setNullAmqpWsOpenAuthenticationSessionTimeoutThrows()
+    {
+        //arrange
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        try {
+            //act
+            client.setOption("setAmqpOpenAuthenticationSessionTimeout", null);
+        } catch (IllegalArgumentException expected) {
+            //assert
+            assertEquals("value is null", expected.getMessage());
+        }
+    }
+
+    @Test
+    public void setIncorrectAmqpOpenAuthenticationSessionTimeoutThrows()
+    {
+        //arrange
+        String timeoutInSeconds = "ten";
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.AMQPS;
+
+                mockConfig.getAuthenticationType();
+                result = DeviceClientConfig.AuthType.SAS_TOKEN;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+        } catch (IllegalArgumentException expected) {
+            //assert
+            assertEquals("value is not int = " + timeoutInSeconds, expected.getMessage());
+        }
+    }
+
+    @Test
+    public void setAmqpOpenAuthenticationSessionTimeoutForHttpThrows()
+    {
+        //arrange
+        int timeoutInSeconds = 10;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+        } catch (UnsupportedOperationException expected) {
+            //assert
+            assertEquals("Cannot set the open authentication session timeout when using protocol " + protocol, expected.getMessage());
+        }
+    }
+
+    @Test
+    public void setAmqpOpenAuthenticationSessionTimeoutForMqttThrows()
+    {
+        //arrange
+        int timeoutInSeconds = 10;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+        } catch (UnsupportedOperationException expected) {
+            //assert
+            assertEquals("Cannot set the open authentication session timeout when using protocol " + protocol, expected.getMessage());
+        }
+    }
+
+    @Test
+    public void setAmqpOpenAuthenticationSessionTimeoutForMqttWsThrows()
+    {
+        //arrange
+        int timeoutInSeconds = 10;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT_WS;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+        } catch (UnsupportedOperationException expected) {
+            //assert
+            assertEquals("Cannot set the open authentication session timeout when using protocol " + protocol, expected.getMessage());
+        }
+    }
+
+    @Test
+    public void setAmqpOpenAuthenticationSessionTimeoutForX509Throws()
+    {
+        //arrange
+        int timeoutInSeconds = 10;
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+        final DeviceClientConfig.AuthType authType = DeviceClientConfig.AuthType.X509_CERTIFICATE;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+
+                mockConfig.getAuthenticationType();
+                result = authType;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenAuthenticationSessionTimeout", timeoutInSeconds);
+        } catch (UnsupportedOperationException expected) {
+            //assert
+            assertEquals("Cannot set the open authentication session timeout when using authentication type " + authType, expected.getMessage());
+        }
+    }
+
+    @Test
+    public void setOpenDeviceSessionsTimeout()
+    {
+        //arrange
+        final int timeoutInSeconds = 10;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.AMQPS;
+            }
+        };
+
+        //act
+        client.setOption("SetAmqpOpenDeviceSessionsTimeout", timeoutInSeconds);
+
+        //assert
+        new Verifications() {
+            {
+                Deencapsulation.invoke(mockConfig, "setAmqpOpenDeviceSessionsTimeout", timeoutInSeconds);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void setNullOpenDeviceSessionsTimeoutThrows()
+    {
+        //arrange
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenDeviceSessionsTimeout", null);
+        } catch (IllegalArgumentException expected) {
+            //assert
+            assertEquals("value is null", expected.getMessage());
+        }
+    }
+
+    @Test
+    public void setIncorrectOpenDeviceSessionsTimeoutThrows()
+    {
+        //arrange
+        String timeoutInSeconds = "ten";
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = IotHubClientProtocol.AMQPS;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenDeviceSessionsTimeout", timeoutInSeconds);
+        } catch (IllegalArgumentException expected) {
+            //assert
+            assertEquals("value is not int = " + timeoutInSeconds, expected.getMessage());
+        }
+    }
+
+    public void setOpenDeviceSessionsTimeoutForHttpThrows()
+    {
+        //arrange
+        String timeoutInSeconds = "ten";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenDeviceSessionsTimeout", timeoutInSeconds);
+        } catch (IllegalArgumentException expected) {
+            //assert
+            assertEquals("Cannot set the open device session timeout when using protocol " + protocol, expected.getMessage());
+        }
+    }
+
+    public void setOpenDeviceSessionsTimeoutForMqttThrows()
+    {
+        //arrange
+        String timeoutInSeconds = "ten";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenDeviceSessionsTimeout", timeoutInSeconds);
+        } catch (IllegalArgumentException expected) {
+            //assert
+            assertEquals("Cannot set the open device session timeout when using protocol " + protocol, expected.getMessage());
+        }
+    }
+
+    public void setOpenDeviceSessionsTimeoutForMqttWsThrows()
+    {
+        //arrange
+        String timeoutInSeconds = "ten";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT_WS;
+        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
+        Deencapsulation.setField(client, "config", mockConfig);
+
+        new NonStrictExpectations()
+        {
+            {
+                mockConfig.getProtocol();
+                result = protocol;
+            }
+        };
+
+        try {
+            //act
+            client.setOption("SetAmqpOpenDeviceSessionsTimeout", timeoutInSeconds);
+        } catch (IllegalArgumentException expected) {
+            //assert
+            assertEquals("Cannot set the open device session timeout when using protocol " + protocol, expected.getMessage());
+        }
+    }
+
     // Tests_SRS_DEVICECLIENT_34_043: ["SetCertificateAuthority" - set the certificate to verify peer.]
     @Test
     public void setCertificateAuthoritySucceeds()

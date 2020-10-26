@@ -13,6 +13,11 @@ import com.microsoft.rest.*;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * <p>
+ * The Digital Twins Service Client contains methods to retrieve and update digital twin information, and invoke commands on a digital twin device.
+ * </p>
+ * */
 public class DigitalTwinClient {
     private DigitalTwinAsyncClient digitalTwinAsyncClient;
 

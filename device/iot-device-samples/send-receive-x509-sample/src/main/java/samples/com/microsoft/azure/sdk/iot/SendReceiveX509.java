@@ -253,7 +253,7 @@ public class SendReceiveX509
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentType("application/json");
+                msg.setContentTypeFinal("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
@@ -279,8 +279,8 @@ public class SendReceiveX509
         {
           e.printStackTrace();
         }
-        
-        System.out.println("In receive mode. Waiting for receiving C2D messages. Press ENTER to close");
+
+        System.out.println("In receive mode. Waiting for receiving C2D messages (only for MQTT and AMQP). Press ENTER to close. To receive in Https, send message and then start the sample.");
     
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
