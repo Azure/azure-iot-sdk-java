@@ -15,7 +15,7 @@ function TestLastExitCode {
     }
 }
 
-function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources) {
+function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources, $FolderName) {
     if ($([string]::IsNullOrWhiteSpace($GitHubName) -eq $true)) {
         throw "GitHubName is null or empty"
     }
@@ -95,6 +95,19 @@ function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources) {
 
     Copy-Item -Force -Path .\provisioning\security\x509-provider\* -Destination ..\provisioning\security\x509-provider
     Copy-Item -Recurse -Force -Path .\provisioning\security\x509-provider\com -Destination ..\provisioning\security\x509-provider
+
+    # Create the folder to place content in if it does not exist.
+    if (Test-Path ..\$FolderName)
+    {
+        Remove-Item ../$FolderName -Recurse
+    }
+
+    # Move the generated content to the correct folder. The folder will be different for master and preview branches.
+    New-Item -Path ../$FolderName -ItemType Directory
+    Move-Item -Force -Path ..\deps -Destination ..\$FolderName\deps
+    Move-Item -Force -Path ..\device -Destination ..\$FolderName\device
+    Move-Item -Force -Path ..\service -Destination ..\$FolderName\provisioning
+    Move-Item -Force -Path ..\provisioning -Destination ..\$FolderName\service
 
     Set-Location ..
 
