@@ -1,0 +1,9 @@
+com.microsoft.azure.sdk.iot.deps.auth
+com.microsoft.azure.sdk.iot.deps.serializer
+com.microsoft.azure.sdk.iot.deps.transport.amqp
+com.microsoft.azure.sdk.iot.deps.transport.http
+com.microsoft.azure.sdk.iot.deps.transport.mqtt
+com.microsoft.azure.sdk.iot.deps.twin
+com.microsoft.azure.sdk.iot.deps.util
+com.microsoft.azure.sdk.iot.deps.ws
+com.microsoft.azure.sdk.iot.deps.ws.impl
