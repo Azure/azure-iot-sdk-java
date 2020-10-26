@@ -106,8 +106,8 @@ function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources, $Folder
     New-Item -Path ../$FolderName -ItemType Directory
     Move-Item -Force -Path ..\deps -Destination ..\$FolderName\deps
     Move-Item -Force -Path ..\device -Destination ..\$FolderName\device
-    Move-Item -Force -Path ..\service -Destination ..\$FolderName\provisioning
-    Move-Item -Force -Path ..\provisioning -Destination ..\$FolderName\service
+    Move-Item -Force -Path ..\service -Destination ..\$FolderName\service
+    Move-Item -Force -Path ..\provisioning -Destination ..\$FolderName\provisioning
 
     Set-Location ..
 
