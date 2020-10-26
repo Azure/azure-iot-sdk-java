@@ -34,8 +34,8 @@ public class FileUploadSimpleSample
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
-        String connString = null;
-        String fullFileName = null;
+        String connString;
+        String fullFileName;
 
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

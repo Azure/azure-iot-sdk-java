@@ -46,8 +46,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 {
     // Timeouts
     private static final int MAX_WAIT_TO_CLOSE_CONNECTION = 20 * 1000; // 20 second timeout
-    private static final int MAX_WAIT_TO_OPEN_AUTHENTICATION_SESSION = 20 * 1000; // 20 second timeout
-    private static final int MAX_WAIT_TO_OPEN_WORKER_SESSIONS = 60 * 1000; // 60 second timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 10;
 
     // Web socket constants
@@ -132,7 +130,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 this.openAsync();
 
                 log.trace("Waiting for authentication links to open...");
-                boolean authenticationSessionOpenTimedOut = !this.authenticationSessionOpenedLatch.await(MAX_WAIT_TO_OPEN_AUTHENTICATION_SESSION, TimeUnit.MILLISECONDS);
+                boolean authenticationSessionOpenTimedOut = !this.authenticationSessionOpenedLatch.await(this.deviceClientConfig.getAmqpOpenAuthenticationSessionTimeout(), TimeUnit.SECONDS);
 
                 if (this.savedException != null)
                 {
@@ -145,7 +143,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 }
 
                 log.trace("Waiting for device sessions to open...");
-                boolean deviceSessionsOpenTimedOut = !this.deviceSessionsOpenedLatch.await(MAX_WAIT_TO_OPEN_WORKER_SESSIONS, TimeUnit.MILLISECONDS);
+                boolean deviceSessionsOpenTimedOut = !this.deviceSessionsOpenedLatch.await(this.deviceClientConfig.getAmqpOpenDeviceSessionsTimeout(), TimeUnit.SECONDS);
 
                 if (this.savedException != null)
                 {

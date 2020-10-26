@@ -66,7 +66,7 @@ public class TransportClientSample
         {
             Counter counter = (Counter) context;
             System.out.println(
-                    "Device Client " + msg.getIotHubConnectionString().getDeviceId() + " received message " + counter.toString()
+                    " received message " + counter.toString()
                             + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
             for (MessageProperty messageProperty : msg.getProperties())
             {

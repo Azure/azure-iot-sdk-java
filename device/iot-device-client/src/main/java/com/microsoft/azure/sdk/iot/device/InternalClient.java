@@ -33,6 +33,8 @@ public class InternalClient
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
+    static final String SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = "SetAmqpOpenAuthenticationSessionTimeout";
+    static final String SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = "SetAmqpOpenDeviceSessionsTimeout";
 
     static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
     static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
@@ -438,6 +440,16 @@ public class InternalClient
      *         made by this client. By default, this value is 0 (no connect timeout).
      *         The value is expected to be of type {@code int}.
      *
+     *      - <b>SetAmqpOpenAuthenticationSessionTimeout</b> - this option is applicable for AMQP with SAS token authentication.
+     *         This option specifies the timeout in seconds to wait to open the authentication session.
+     *         By default, this value is 20 seconds.
+     *         The value is expected to be of type {@code int}.
+     *
+     *      - <b>SetAmqpOpenDeviceSessionsTimeout</b> - this option is applicable for AMQP.
+     *         This option specifies the timeout in seconds to open the device sessions.
+     *         By default, this value is 60 seconds.
+     *         The value is expected to be of type {@code int}.
+     *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
      * @throws IllegalArgumentException if the provided optionName is null
@@ -530,6 +542,16 @@ public class InternalClient
                 {
                     setOption_SetHttpsReadTimeout(value);
                     break;
+                }
+                case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
+                {
+                    setOption_SetAmqpOpenAuthenticationSessionTimeout(value);
+                    return;
+                }
+                case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
+                {
+                    setOption_SetAmqpOpenDeviceSessionsTimeout(value);
+                    return;
                 }
                 default:
                 {
@@ -870,6 +892,51 @@ public class InternalClient
                         throw new IOError(e);
                     }
                 }
+            }
+        }
+    }
+
+    void setOption_SetAmqpOpenAuthenticationSessionTimeout(Object value)
+    {
+        if (value != null)
+        {
+            if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
+            {
+                throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using protocol " + this.config.getProtocol());
+            }
+
+            if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
+            {
+                throw new UnsupportedOperationException("Cannot set the open authentication session timeout when using authentication type " + this.config.getAuthenticationType());
+            }
+
+            if (value instanceof Integer)
+            {
+                this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
+            }
+            else
+            {
+                throw new IllegalArgumentException("value is not int = " + value);
+            }
+        }
+    }
+
+    void setOption_SetAmqpOpenDeviceSessionsTimeout(Object value)
+    {
+        if (value != null)
+        {
+            if (this.config.getProtocol() != AMQPS && this.config.getProtocol() != AMQPS_WS)
+            {
+                throw new UnsupportedOperationException("Cannot set the open device session timeout when using protocol " + this.config.getProtocol());
+            }
+
+            if (value instanceof Integer)
+            {
+                this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
+            }
+            else
+            {
+                throw new IllegalArgumentException("value is not int = " + value);
             }
         }
     }

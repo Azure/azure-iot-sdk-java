@@ -16,8 +16,8 @@ import java.util.*;
 /** Manages device twin operations on IotHub */
 public class DeviceTwinSample
 {
-    public static final String iotHubConnectionString = "[IOT HUB Connection String]";
-    public static final String deviceId = "[Device ID]";
+    private static final String iotHubConnectionString  = System.getenv("IOTHUB_CONNECTION_STRING");
+    private static final String deviceId = System.getenv("IOTHUB_DEVICE_ID");
 
     private static final int TEMPERATURE_RANGE = 100;
     private static final int HUMIDITY_RANGE = 100;
@@ -121,6 +121,8 @@ public class DeviceTwinSample
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
         desiredProperties.add(new Pair("hum", new Random().nextInt(HUMIDITY_RANGE)));
         device.setDesiredProperties(desiredProperties);
+        // ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag
+        device.setETag("*");
 
         // date when the update shall be executed
         Date updateDateInFuture = new Date(new Date().getTime() + ADD_10_SECONDS_IN_MILLISECONDS); // 10 seconds in the future.
@@ -152,6 +154,8 @@ public class DeviceTwinSample
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
         desiredProperties.add(new Pair("hum", new Random().nextInt(HUMIDITY_RANGE)));
         device.setDesiredProperties(desiredProperties);
+        // ScheduleUpdateTwin job type is a force update, which only accepts '*' as the Etag
+        device.setETag("*");
 
         // date when the update shall be executed
         Date updateDateInFuture = new Date(new Date().getTime() + ADD_10_MINUTES_IN_MILLISECONDS); // 10 minutes in the future.
@@ -159,7 +163,7 @@ public class DeviceTwinSample
         // query condition that defines the list of device to be updated
         String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
-        System.out.println("Schedule updating Device twin (new temp, hum) in 10 minutes");
+        System.out.println("Cancel updating Device twin (new temp, hum) in 10 minutes");
         Job job = twinClient.scheduleUpdateTwin(queryCondition, device, updateDateInFuture, MAX_EXECUTION_TIME_IN_SECONDS);
 
         Thread.sleep(WAIT_1_SECOND_TO_CANCEL_IN_MILLISECONDS);

@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DeviceTwinSample
 {
-    private enum LIGHTS{ ON, OFF, DISABLED }
+    private enum LIGHTS{ ON, OFF }
     private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
     private static final int MAX_EVENTS_TO_REPORT = 5;
 
