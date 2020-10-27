@@ -645,17 +645,17 @@ public class DeviceTwinDevice
     }
 
     /**
-     * Getter to get model Id
+     * Getter for a model Id
      * @return The DTDL model Id of the device
      * The value will be null for a non-pnp device.
-     * The value will be null for a pnp device until the device connects and registers with the model Id.
+     * The value will be null for a pnp device until the device connects and registers with a model Id.
      */
     public String getModelId() {
         return this.modelId;
     }
 
     /**
-     * Setter to set model Id
+     * Setter for a model Id
      *
      * @param modelId is the DTDL model Id of the device
      */
