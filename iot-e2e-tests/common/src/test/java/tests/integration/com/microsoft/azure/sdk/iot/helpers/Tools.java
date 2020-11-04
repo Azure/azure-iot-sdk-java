@@ -197,6 +197,7 @@ public class Tools
 
     // This call mimics what should be a registry manager API for adding devices in bulk. Can be removed once we add support in our
     // registry manager for this
+    private static final String IMPORT_MODE = "create";
     public static void addDevices(Iterable<Device> devices, String connectionString) throws IOException, IotHubException {
         if (devices == null)
         {
@@ -214,7 +215,7 @@ public class Tools
             AuthenticationParser authenticationParser = new AuthenticationParser();
             authenticationParser.setSymmetricKey(new SymmetricKeyParser(device.getSymmetricKey().getPrimaryKey(), device.getSymmetricKey().getSecondaryKey()));
             exportImportDevice.setAuthentication(authenticationParser);
-            exportImportDevice.setImportMode("create");
+            exportImportDevice.setImportMode(IMPORT_MODE);
             parsers.add(exportImportDevice);
         }
 
