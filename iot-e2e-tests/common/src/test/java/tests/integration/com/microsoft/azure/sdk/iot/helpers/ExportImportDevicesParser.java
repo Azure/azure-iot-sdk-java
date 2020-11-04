@@ -22,8 +22,7 @@ public class ExportImportDevicesParser {
      */
     public String toJson()
     {
-        String json = gson.toJson(exportImportDevices);
-        return json;
+        return gson.toJson(exportImportDevices);
     }
 
     /**
@@ -36,7 +35,7 @@ public class ExportImportDevicesParser {
 
     /**
      * Constructor for an ExportImportDevicesParser that is built using the provided json
-     * @param json the json string to build the ExportImportDevicesParser out of
+     * @param json the json string used to build the ExportImportDevicesParser
      */
     public ExportImportDevicesParser(String json)
     {
@@ -45,17 +44,16 @@ public class ExportImportDevicesParser {
             throw new IllegalArgumentException("The provided json cannot be null or empty");
         }
 
-        ExportImportDevicesParser exportImportDevicesParser = null;
+        ExportImportDevicesParser exportImportDevicesParser;
         try
         {
             exportImportDevicesParser = gson.fromJson(json, ExportImportDevicesParser.class);
+            this.exportImportDevices = exportImportDevicesParser.getExportImportDevices();
         }
         catch (JsonSyntaxException e)
         {
             throw new IllegalArgumentException("The provided json could not be parsed");
         }
-
-        this.exportImportDevices = exportImportDevicesParser.getExportImportDevices();
     }
 
     public final Iterable<ExportImportDeviceParser> getExportImportDevices() {
