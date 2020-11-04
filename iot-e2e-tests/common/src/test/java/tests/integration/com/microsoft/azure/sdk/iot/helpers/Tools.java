@@ -5,19 +5,33 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.SymmetricKeyParser;
 import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -137,6 +151,98 @@ public class Tools
         }
 
         return ret;
+    }
+
+    public static void addDevicesWithRetry(List<Device> devices, String connectionString) throws IotHubException, IOException, InterruptedException
+    {
+        // IoT hub only allows for bulk adding of devices at up to 100 per request, so take the provided devices iterable
+        // and break it into 100 devices or smaller chunks
+        List<Device> subIterable = new ArrayList<>();
+        List<Device> devicesClone = new ArrayList<>(); //create a clone of the source list so elements can be removed from it instead
+        devicesClone.addAll(devices);
+        while (devicesClone.size() > 0)
+        {
+            Device device = devicesClone.remove(0);
+            subIterable.add(device);
+
+            // wait until sub list has the Iot Hub limit of 100 devices to add, or until there will be no more devices to add
+            if (subIterable.size() > 99 || devicesClone.size() <= 0)
+            {
+                long startTime = System.currentTimeMillis();
+                while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
+                {
+                    try
+                    {
+                        addDevices(subIterable, connectionString);
+                        break;
+                    }
+                    catch (UnknownHostException | SocketException | SocketTimeoutException e)
+                    {
+                        log.warn("Failed to add devices");
+                        e.printStackTrace();
+                        Thread.sleep(WAIT_FOR_RETRY);
+                        if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
+                        {
+                            throw e;
+                        }
+                    }
+
+                }
+
+                // clear the sub list so it can be filled back up again with the next devices to add
+                subIterable.clear();
+            }
+        }
+    }
+
+    // This call mimics what should be a registry manager API for adding devices in bulk. Can be removed once we add support in our
+    // registry manager for this
+    public static void addDevices(Iterable<Device> devices, String connectionString) throws IOException, IotHubException {
+        if (devices == null)
+        {
+            throw new IllegalArgumentException("devices cannot be null");
+        }
+
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        URL url = getBulkDeviceAddUrl(iotHubConnectionString);
+
+        List<ExportImportDeviceParser> parsers = new ArrayList<>();
+        for (Device device : devices)
+        {
+            ExportImportDeviceParser exportImportDevice = new ExportImportDeviceParser();
+            exportImportDevice.setId(device.getDeviceId());
+            AuthenticationParser authenticationParser = new AuthenticationParser();
+            authenticationParser.setSymmetricKey(new SymmetricKeyParser(device.getSymmetricKey().getPrimaryKey(), device.getSymmetricKey().getSecondaryKey()));
+            exportImportDevice.setAuthentication(authenticationParser);
+            exportImportDevice.setImportMode("create");
+            parsers.add(exportImportDevice);
+        }
+
+        ExportImportDevicesParser body = new ExportImportDevicesParser();
+        body.setExportImportDevices(parsers);
+
+        String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
+
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
+        request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
+        request.setHeaderField("authorization", sasTokenString);
+        request.setHeaderField("Accept", "application/json");
+        request.setHeaderField("Content-Type", "application/json");
+        request.setHeaderField("charset", "utf-8");
+
+        HttpResponse response = request.send();
+
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
+    public static URL getBulkDeviceAddUrl(IotHubConnectionString iotHubConnectionString) throws MalformedURLException
+    {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("https://");
+        stringBuilder.append(iotHubConnectionString.getHostName());
+        stringBuilder.append("/devices/?api-version=");
+        stringBuilder.append(TransportUtils.IOTHUB_API_VERSION);
+        return new URL(stringBuilder.toString());
     }
 
     public static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException

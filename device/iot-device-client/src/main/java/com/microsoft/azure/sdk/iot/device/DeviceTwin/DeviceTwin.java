@@ -69,7 +69,7 @@ public class DeviceTwin
                 IotHubStatusCode iotHubStatus = IotHubStatusCode.ERROR;
                 if (message.getMessageType() != MessageType.DEVICE_TWIN)
                 {
-                    System.out.print("Unexpected message type received");
+                    log.warn("Unexpected message type received; abandoning it");
                     deviceTwinStatusCallback.execute(iotHubStatus, deviceTwinStatusCallbackContext);
                     return ABANDON;
                 }
