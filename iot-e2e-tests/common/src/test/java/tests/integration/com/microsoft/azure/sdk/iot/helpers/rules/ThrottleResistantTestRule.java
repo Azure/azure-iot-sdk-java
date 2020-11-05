@@ -17,6 +17,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Standar
 @Slf4j
 public class ThrottleResistantTestRule implements TestRule
 {
+    final static String CONNECTION_REFUSED = "connection refused";
     final static int THROTTLING_RETRY_DELAY_MILLISECONDS = 10 * 1000;
 
     @Override
@@ -48,6 +49,19 @@ public class ThrottleResistantTestRule implements TestRule
                 {
                     log.warn("Thottling detected in test {}, waiting for {} milliseconds and then re-running the test", description.getMethodName(), THROTTLING_RETRY_DELAY_MILLISECONDS, e);
                     Thread.sleep(THROTTLING_RETRY_DELAY_MILLISECONDS);
+                }
+                catch (Exception e)
+                {
+                    if (e.getMessage() != null && e.getMessage().toLowerCase().contains(CONNECTION_REFUSED))
+                    {
+                        log.warn("Thottling detected in test {}, waiting for {} milliseconds and then re-running the test", description.getMethodName(), THROTTLING_RETRY_DELAY_MILLISECONDS, e);
+                        Thread.sleep(THROTTLING_RETRY_DELAY_MILLISECONDS);
+                    }
+                    else
+                    {
+                        // If throw exception wasn't about throttling, then re-throw it
+                        throw e;
+                    }
                 }
             }
         }
