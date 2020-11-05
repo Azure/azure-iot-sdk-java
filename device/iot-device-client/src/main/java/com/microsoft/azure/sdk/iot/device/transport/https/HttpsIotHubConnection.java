@@ -36,7 +36,6 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     private static final String HTTPS_PROPERTY_IF_MATCH_TAG = "if-match";
     private static final String HTTPS_PROPERTY_ETAG_TAG = "etag";
 
-
     private IotHubListener listener;
 
     /** The HTTPS connection lock. */
@@ -312,7 +311,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     }
 
     @Override
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs)
+    public void open()
     {
 
     }

@@ -11,6 +11,8 @@ import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.impl.EndpointImpl;
+import org.apache.qpid.proton.engine.impl.SessionImpl;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +64,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         //All events that happen to this session will be handled in this class (onSessionRemoteOpen, for instance)
         BaseHandler.setHandler(this.session, this);
 
+        log.trace("Opening device session for device {}", getDeviceId());
         this.session.open();
 
         //erase all state from previous connection state other than subscribeToMethodsOnReconnection/subscribeToTwinOnReconnection
@@ -81,7 +84,10 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
     public void closeSession()
     {
-        this.session.close();
+        if (this.session != null)
+        {
+            this.session.close();
+        }
     }
 
     public String getDeviceId()
@@ -90,17 +96,19 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     }
 
     @Override
+    public void onSessionFinal(Event e)
+    {
+        this.session.free();
+    }
+
+    @Override
     public void onSessionRemoteOpen(Event e)
     {
         log.trace("Device session opened remotely for device {}", this.getDeviceId());
         if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
         {
+            log.trace("Opening worker links for device {}", this.getDeviceId());
             openLinks();
-        }
-        else
-        {
-            // do nothing but log the event. SAS token based connections can't open links until cbs links are open, and authentication messages have been sent
-            log.trace("Device session for device {} opened locally", this.getDeviceId());
         }
     }
 
@@ -117,14 +125,15 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         if (session.getLocalState() == EndpointState.ACTIVE)
         {
             //Service initiated this session close
-            log.debug("Amqp device session closed remotely unexpectedly for device {}", getDeviceId());
-            this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(session.getRemoteCondition());
-
             this.session.close();
+
+            log.debug("Amqp device session closed remotely unexpectedly for device {}", getDeviceId());
+            this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(session.getRemoteCondition(), this.getDeviceId());
         }
         else
         {
             log.trace("Amqp device session closed remotely as expected for device {}", getDeviceId());
+            this.amqpsSessionStateCallback.onSessionClosedAsExpected(this.getDeviceId());
         }
     }
 
@@ -153,6 +162,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
         if (allLinksOpen)
         {
+            log.trace("Device session for device {} has finished opening its worker links. Notifying the connection layer.", this.getDeviceId());
             this.amqpsSessionStateCallback.onDeviceSessionOpened(this.getDeviceId());
         }
 
@@ -247,7 +257,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     {
         log.trace("Link closed unexpectedly for the amqp session of device {}", this.getDeviceId());
         this.session.close();
-        this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(errorCondition);
+        this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(errorCondition, this.getDeviceId());
     }
 
     public boolean acknowledgeReceivedMessage(IotHubTransportMessage message, DeliveryState ackType)
@@ -313,7 +323,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     {
                         createMethodLinks();
                         this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
-                        return true; //connection layer doesn't care about this delivery ta
+                        return true; //connection layer doesn't care about this delivery tag
                     }
                     else
                     {

@@ -80,6 +80,12 @@ public abstract class IotHubAuthenticationProvider
         }
     }
 
+    public void setSSLContext(SSLContext sslContext)
+    {
+        this.iotHubSSLContext = new IotHubSSLContext(sslContext);
+        this.sslContextNeedsUpdate = false;
+    }
+
     /**
      * Setter for the providing trusted certificate.
      * @param pathToCertificate path to the certificate for one way authentication.

@@ -1457,7 +1457,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, context);
+                mockDeviceIO.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, context, anyString);
                 times = 1;
             }
         };

@@ -154,7 +154,7 @@ public class TransportClientTest
         // arrange
         IotHubClientProtocol iotHubClientProtocol = IotHubClientProtocol.AMQPS;
         final TransportClient transportClient = new TransportClient(iotHubClientProtocol);
-        Deencapsulation.invoke(transportClient, "registerDeviceClient", mockDeviceClient);
+        Deencapsulation.invoke(transportClient, "registerDeviceClients", mockDeviceClient);
 
         new NonStrictExpectations()
         {
@@ -227,7 +227,7 @@ public class TransportClientTest
         IotHubClientProtocol iotHubClientProtocol = IotHubClientProtocol.AMQPS;
         final TransportClient transportClient = new TransportClient(iotHubClientProtocol);
         Deencapsulation.setField(transportClient, "deviceIO", mockDeviceIO);
-        Deencapsulation.invoke(transportClient, "registerDeviceClient", mockDeviceClient);
+        Deencapsulation.invoke(transportClient, "registerDeviceClients", mockDeviceClient);
 
         // act
         transportClient.closeNow();
@@ -320,7 +320,7 @@ public class TransportClientTest
         TransportClient transportClient = new TransportClient(iotHubClientProtocol);
 
         // act
-        Deencapsulation.invoke(transportClient, "registerDeviceClient", (DeviceClient)null);
+        Deencapsulation.invoke(transportClient, "registerDeviceClients", (DeviceClient)null);
     }
 
     // Tests_SRS_TRANSPORTCLIENT_12_006: [The function shall throw  IllegalStateException if the connection is already open.]
@@ -341,7 +341,7 @@ public class TransportClientTest
         };
 
         // act
-        Deencapsulation.invoke(transportClient, "registerDeviceClient", mockDeviceClient);
+        Deencapsulation.invoke(transportClient, "registerDeviceClients", mockDeviceClient);
     }
 
     // Tests_SRS_TRANSPORTCLIENT_12_007: [The function shall add the given device client to the deviceClientList.]
@@ -353,7 +353,7 @@ public class TransportClientTest
         TransportClient transportClient = new TransportClient(iotHubClientProtocol);
 
         // act
-        Deencapsulation.invoke(transportClient, "registerDeviceClient", mockDeviceClient);
+        Deencapsulation.invoke(transportClient, "registerDeviceClients", mockDeviceClient);
 
         // assert
         ArrayList<DeviceClient> actualDeviceClientList = Deencapsulation.getField(transportClient, "deviceClientList");

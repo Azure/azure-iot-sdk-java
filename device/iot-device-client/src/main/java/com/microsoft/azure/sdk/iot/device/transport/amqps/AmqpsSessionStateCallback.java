@@ -7,8 +7,8 @@ import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 
 /**
- * Status callbacks to be executed to notify the connection level when something happened to one of its sessions. Should
- * only be implemented by connection handler objects.
+ * Status callbacks to be executed by an AMQP session handler to notify its connection handler when something happened
+ * to one of its sessions. Should only be implemented by connection handler objects.
  */
 interface AmqpsSessionStateCallback
 {
@@ -52,7 +52,25 @@ interface AmqpsSessionStateCallback
      * closed unexpectedly.
      *
      * @param errorCondition the condition of the session that caused the close if the session closed remotely, or the condition
-     *                       of the link that closed unexpectedly
+     *                       of the link that closed unexpectedly.
+     * @param deviceId the device that the session belonged to.
      */
-    void onSessionClosedUnexpectedly(ErrorCondition errorCondition);
+    void onSessionClosedUnexpectedly(ErrorCondition errorCondition, String deviceId);
+
+    /**
+     * Executed if a session closes, but it was expected. Likely due to user calling close on the connection, or
+     * unregistering a device from an active multiplexed connection
+     *
+     * @param deviceId the device whose connection closed.
+     */
+    void onSessionClosedAsExpected(String deviceId);
+
+    /**
+     * Executed if the CBS session closes unexpectedly. May be because one of its links closed unexpectedly, or if the
+     * session closed unexpectedly.
+     *
+     * @param errorCondition the condition of the session that caused the close if the session closed remotely, or the condition
+     *                       of the link that closed unexpectedly.
+     */
+    void onCBSSessionClosedUnexpectedly(ErrorCondition errorCondition);
 }

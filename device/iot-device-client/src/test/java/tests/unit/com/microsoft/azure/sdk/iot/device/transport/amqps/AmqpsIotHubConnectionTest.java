@@ -37,10 +37,7 @@ import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 
 import static junit.framework.TestCase.assertEquals;
@@ -242,7 +239,8 @@ public class AmqpsIotHubConnectionTest {
 
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
-        DeviceClientConfig actualConfig = Deencapsulation.getField(connection, "deviceClientConfig");
+        Queue<DeviceClientConfig> deviceClientConfigs = Deencapsulation.getField(connection, "deviceClientConfigs");
+        DeviceClientConfig actualConfig = deviceClientConfigs.poll();
         String actualHostName = Deencapsulation.getField(connection, "hostName");
 
         assertEquals(mockConfig, actualConfig);
@@ -277,7 +275,7 @@ public class AmqpsIotHubConnectionTest {
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
         //act
-        connection.open(mockedQueue);
+        connection.open();
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_12_001: [The constructor shall initialize the AmqpsIotHubConnection member variable with the given config.]
@@ -349,7 +347,7 @@ public class AmqpsIotHubConnectionTest {
 
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
 
-        connection.open(mockedQueue);
+        connection.open();
 
         new Verifications()
         {
@@ -375,9 +373,6 @@ public class AmqpsIotHubConnectionTest {
         new Expectations()
         {
             {
-                mockConfig.getAuthenticationProvider();
-                result = mockIotHubSasTokenAuthenticationProvider;
-
                 new CountDownLatch(anyInt);
                 result = authLatch;
 
@@ -387,7 +382,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue);
+        connection.open();
     }
 
     @Test
@@ -414,7 +409,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue);
+        connection.open();
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_011: [If any exception is thrown while attempting to trigger the reactor, the function shall closeNow the connection and throw an IOException.]
@@ -435,7 +430,7 @@ public class AmqpsIotHubConnectionTest {
         };
 
         // act
-        connection.open(mockedQueue);
+        connection.open();
     }
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
@@ -464,7 +459,7 @@ public class AmqpsIotHubConnectionTest {
         //act
         try
         {
-            connection.open(mockedQueue);
+            connection.open();
         }
         catch (TransportException e)
         {
@@ -507,7 +502,7 @@ public class AmqpsIotHubConnectionTest {
         //act
         try
         {
-            connection.open(mockedQueue);
+            connection.open();
         }
         catch (TransportException e)
         {
@@ -567,7 +562,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                mockExecutorService.shutdown();
+                mockExecutorService.shutdownNow();
                 times = 1;
             }
         };
@@ -643,9 +638,9 @@ public class AmqpsIotHubConnectionTest {
         };
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
-        List<AmqpsSessionHandler> amqpsSessionHandlerList = new ArrayList<>();
+        Queue<AmqpsSessionHandler> amqpsSessionHandlerList = new ConcurrentLinkedQueue<>();
         amqpsSessionHandlerList.add(mockAmqpsSessionHandler);
-        Deencapsulation.setField(connection, "sessionHandlerList", amqpsSessionHandlerList);
+        Deencapsulation.setField(connection, "sessionHandlers", amqpsSessionHandlerList);
 
         connection.onReactorInit(mockEvent);
 
@@ -1162,7 +1157,9 @@ public class AmqpsIotHubConnectionTest {
     private void setLatches(AmqpsIotHubConnection connection)
     {
         Deencapsulation.setField(connection, "authenticationSessionOpenedLatch", mockAuthLatch);
-        Deencapsulation.setField(connection, "deviceSessionsOpenedLatch", mockWorkerLinkLatch);
+        Map<String, CountDownLatch> deviceSessionCountDownLatches = new HashMap<>();
+        deviceSessionCountDownLatches.put("someDevice", mockWorkerLinkLatch);
+        Deencapsulation.setField(connection, "deviceSessionsOpenedLatches", deviceSessionCountDownLatches);
         Deencapsulation.setField(connection, "closeReactorLatch", mockCloseLatch);
     }
 }

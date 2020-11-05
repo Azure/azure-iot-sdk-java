@@ -101,14 +101,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      *
      * @throws TransportException if a connection could not to be established.
      */
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs) throws TransportException
+    public void open() throws TransportException
     {
         connectionId = UUID.randomUUID().toString();
-        if (deviceClientConfigs.size() > 1)
-        {
-            //Codes_SRS_MQTTIOTHUBCONNECTION_34_022: [If the list of device client configuration objects is larger than 1, this function shall throw an UnsupportedOperationException.]
-            throw new UnsupportedOperationException("Mqtt does not support Multiplexing");
-        }
 
         synchronized (MQTT_CONNECTION_LOCK)
         {

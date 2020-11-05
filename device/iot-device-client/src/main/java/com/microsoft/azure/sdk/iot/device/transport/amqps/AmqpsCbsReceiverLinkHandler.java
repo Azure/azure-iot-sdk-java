@@ -94,7 +94,7 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
                             statusDescription = (String) applicationProperties.get(APPLICATION_PROPERTY_STATUS_DESCRIPTION);
                         }
 
-                        DeliveryState ackType = authenticationMessageCallback.handleAuthenticationResponseMessage(authenticationResponseCode, statusDescription);
+                        DeliveryState ackType = authenticationMessageCallback.handleAuthenticationResponseMessage(authenticationResponseCode, statusDescription, receiver.getSession().getConnection().getReactor());
                         amqpsMessage.acknowledge(ackType);
                         return;
                     }
