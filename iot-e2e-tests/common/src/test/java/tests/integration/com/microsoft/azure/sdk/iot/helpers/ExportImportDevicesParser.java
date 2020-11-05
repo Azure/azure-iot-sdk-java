@@ -44,11 +44,9 @@ public class ExportImportDevicesParser {
             throw new IllegalArgumentException("The provided json cannot be null or empty");
         }
 
-        ExportImportDevicesParser exportImportDevicesParser;
         try
         {
-            exportImportDevicesParser = gson.fromJson(json, ExportImportDevicesParser.class);
-            this.exportImportDevices = exportImportDevicesParser.getExportImportDevices();
+            this.exportImportDevices = gson.fromJson(json, ExportImportDevicesParser.class).getExportImportDevices();
         }
         catch (JsonSyntaxException e)
         {
