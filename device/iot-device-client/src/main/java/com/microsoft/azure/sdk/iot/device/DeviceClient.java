@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
-import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
@@ -111,6 +110,9 @@ public final class DeviceClient extends InternalClient implements Closeable
     private FileUpload fileUpload;
     private FileUploadTask fileUploadTask;
 
+    private static String MULTIPLEXING_CLOSE_ERROR_MESSAGE = "Cannot close a multiplexed client through this method. Must use multiplexingClient.unregisterDeviceClient(deviceClient)";
+    private static String MULTIPLEXING_OPEN_ERROR_MESSAGE = "Cannot open a multiplexed client through this method. Must use multiplexingClient.registerDeviceClient(deviceClient)";
+
     /**
      * Constructor that takes a connection string and a transport client as an argument.
      *
@@ -128,18 +130,19 @@ public final class DeviceClient extends InternalClient implements Closeable
      * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      * @throws UnsupportedOperationException if the connection string belongs to a module rather than a device
+     * @deprecated {@link MultiplexingClient} should be used instead of {@link TransportClient} for creating all multiplexed connections.
      */
+    @Deprecated
     public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException, IllegalArgumentException, UnsupportedOperationException
     {
-        // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
-        this.config = new DeviceClientConfig(new IotHubConnectionString(connString));
-        this.deviceIO = null;
-
         // Codes_SRS_DEVICECLIENT_12_018: [If the transportClient is null, the function shall throw an IllegalArgumentException.]
         if (transportClient == null)
         {
             throw new IllegalArgumentException("Transport client cannot be null.");
         }
+        
+        this.config = new DeviceClientConfig(new IotHubConnectionString(connString));
+        this.deviceIO = null;
 
         // Codes_SRS_DEVICECLIENT_12_010: [The constructor shall set the connection type to USE_TRANSPORTCLIENT.]
         this.ioTHubConnectionType = IoTHubConnectionType.USE_TRANSPORTCLIENT;
@@ -376,6 +379,11 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void open() throws IOException
     {
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
+        {
+            throw new UnsupportedOperationException(MULTIPLEXING_OPEN_ERROR_MESSAGE);
+        }
+
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.CLOSED)
@@ -410,6 +418,11 @@ public final class DeviceClient extends InternalClient implements Closeable
     @Deprecated
     public void close() throws IOException
     {
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
+        {
+            throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
+        }
+
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
@@ -446,6 +459,11 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void closeNow() throws IOException
     {
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
+        {
+            throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
+        }
+
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
@@ -668,6 +686,12 @@ public final class DeviceClient extends InternalClient implements Closeable
         this.subscribeToMethodsInternal(deviceMethodCallback, deviceMethodCallbackContext, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
     }
 
+    // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
+    void setConnectionType(IoTHubConnectionType connectionType)
+    {
+        this.ioTHubConnectionType = connectionType;
+    }
+
     /**
      * Sets a runtime option identified by parameter {@code optionName}
      * to {@code value}.
@@ -736,6 +760,12 @@ public final class DeviceClient extends InternalClient implements Closeable
         {
             // Codes_SRS_DEVICECLIENT_12_026: [The function shall trow IllegalArgumentException if the value is null.]
             throw new IllegalArgumentException("value is null");
+        }
+
+        // deviceIO is only ever null when a client was registered to a multiplexing client, became unregistered, and hasn't be re-registered yet.
+        if (this.deviceIO == null)
+        {
+            throw new UnsupportedOperationException("Must re-register this client to a multiplexing client before using it");
         }
 
         switch (optionName)

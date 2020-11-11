@@ -2106,7 +2106,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockedListener.onMessageSent((IotHubTransportMessage) any, null);
+                mockedListener.onMessageSent((IotHubTransportMessage) any, null, null);
                 times = 1;
             }
         };
@@ -2131,7 +2131,7 @@ public class HttpsIotHubConnectionTest
     public void openAndCloseDoNothing() throws IOException, TransportException
     {
         HttpsIotHubConnection connection = new HttpsIotHubConnection(mockConfig);
-        connection.open(null);
+        connection.open();
         connection.close();
     }
 }
