@@ -15,8 +15,7 @@ echo 'Running android tests with annotation'
 echo $annotationString
 
 echo 'Enabling verbose logging of packages under test'
-adb logcat com.microsoft.azure.sdk.iot.*:V
-adb logcat tests.integration.com.microsoft.azure.sdk.*:V
+adb logcat com.microsoft.azure.sdk.iot.device:V
 
 #Return code from adb shell isn't returned as one would expect. Need to capture output logs and analyze them to determine if this test run was a success or not
 TestLogs=$(adb -e shell am instrument -w -e annotation $annotationString com.iothub.azure.microsoft.com.androide2e.test/android.support.test.runner.AndroidJUnitRunner)
