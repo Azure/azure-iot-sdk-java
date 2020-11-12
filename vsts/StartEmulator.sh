@@ -3,7 +3,7 @@
 echo 'Listing available android sdks for installation'
 $ANDROID_HOME/tools/bin/sdkmanager --list | grep system-images
 
-emulatorImage='system-images;android-28;default;x86'
+emulatorImage='system-images;android-28;google_apis;x86_64'
 avdName='Pixel_9.0'
 
 echo ''
