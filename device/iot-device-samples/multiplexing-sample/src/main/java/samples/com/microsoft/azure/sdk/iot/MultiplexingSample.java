@@ -8,10 +8,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Sample that demonstrates creating a multiplexed connection to IoT Hub using AMQPS / AMQPS_WS. It also demonstrates
@@ -105,6 +102,7 @@ public class MultiplexingSample
      * args[1] = host name to connect to (for instance, "my-iot-hub.azure-devices.net")
      * args[2] = IoT Hub connection string - Device Client 1
      * args[3] = IoT Hub connection string - Device Client 2
+     * Add up to 998 device connection strings from args[4] and so on.
      *
      * Any additional arguments will be interpreted as additional connections strings. This allows this sample to be
      * run with more than 2 devices. At
@@ -122,7 +120,10 @@ public class MultiplexingSample
                             + "1. [Protocol]                   - amqps | amqps_ws\n"
                             + "2. [HostName]                   - my-iot-hub.azure-devices.net\n"
                             + "3. [Device 1 connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
-                            + "4. [Device 2 connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n",
+                            + "4. [Device 2 connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
+                            + ".\n"
+                            + ".\n"
+                            + ".\n",
                     args.length);
             return;
         }
@@ -135,25 +136,26 @@ public class MultiplexingSample
 
         String hostName = args[1];
 
-        // This sample allows for users to pass in 2 to many device connection strings, so this sample may multiplex
-        // 2 to many devices
-        int multiplexedDeviceCount = args.length - 2;
+        // This sample requires users for pass in at least 2 device connection strings, so this sample may multiplex
+        final int multiplexedDeviceCount = args.length - 2;
 
         // Options include setting a custom SSLContext to use for the SSL handshake, configuring proxy support, and setting threading strategies
         MultiplexingClientOptions options = MultiplexingClientOptions.builder().build();
-        MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, protocol, options);
+        final MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, protocol, options);
         MultiplexedDeviceConnectionStatusChangeTracker multiplexedConnectionStatusTracker = new MultiplexedDeviceConnectionStatusChangeTracker();
         multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusTracker, null);
 
         System.out.println("Creating device clients that will be multiplexed");
-        List<String> deviceIds = new ArrayList<>();
-        Map<String, DeviceClient> multiplexedDeviceClients = new HashMap<>(multiplexedDeviceCount);
+        final List<String> deviceIds = new ArrayList<>();
+        final Map<String, DeviceClient> multiplexedDeviceClients = new HashMap<>(multiplexedDeviceCount);
         List<MultiplexedDeviceConnectionStatusChangeTracker> deviceConnectionStatusTrackers = new ArrayList<>(multiplexedDeviceCount);
+
         for (int i = 0; i < multiplexedDeviceCount; i++)
         {
             DeviceClient clientToMultiplex = new DeviceClient(args[i+2], protocol);
             String deviceId = clientToMultiplex.getConfig().getDeviceId();
             deviceIds.add(deviceId);
+
             multiplexedDeviceClients.put(deviceId, clientToMultiplex);
             deviceConnectionStatusTrackers.add(new MultiplexedDeviceConnectionStatusChangeTracker());
             multiplexedDeviceClients.get(deviceId).registerConnectionStatusChangeCallback(deviceConnectionStatusTrackers.get(i), deviceId);
@@ -172,24 +174,27 @@ public class MultiplexingSample
         multiplexingClient.registerDeviceClients(multiplexedDeviceClients.values());
         System.out.println("Successfully registered " + multiplexedDeviceCount + " clients to the multiplexing client");
 
-        for (String deviceId : deviceIds)
-        {
-            System.out.printf("Sending message from device %s%n", deviceId);
-            Message message = new Message("some payload");
-            multiplexedDeviceClients.get(deviceId).sendEventAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
-        }
+        // Spin off a new thread to keep sending messages to all devices
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final long startTime = System.currentTimeMillis();
 
-        System.out.println("Waiting while messages get sent asynchronously...");
-        while (acknowledgedSentMessages < multiplexedDeviceCount)
-        {
-            System.out.printf(
-                    "Waiting on %d messages to be acknowledged out of %d%n",
-                    multiplexedDeviceCount - acknowledgedSentMessages,
-                    multiplexedDeviceCount);
-            Thread.sleep(200);
-        }
-
-        System.out.println("All messages sent successfully");
+                    while (true && System.currentTimeMillis() - startTime < 10000){
+                        for (String deviceId : deviceIds) {
+                            Thread.sleep(1000);
+                            System.out.printf("Sending message from device %s%n", deviceId);
+                            Message message = new Message("some payload");
+                            multiplexedDeviceClients.get(deviceId).sendEventAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
+                        }
+                    }
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
         // This code demonstrates how to remove a device from an active multiplexed connection without shutting down
         // the whole multiplexed connection or any of the other devices.
@@ -209,9 +214,16 @@ public class MultiplexingSample
         // If they are not unregistered, then you can re-open the multiplexing client later and it will still
         // have all of your registered devices
 
+        System.out.println("Press any key to exit...");
+
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
+
         System.out.println("Closing entire multiplexed connection...");
         // This call will close all multiplexed device client instances as well
         multiplexingClient.close();
         System.out.println("Successfully closed the multiplexed connection");
+
+        System.out.println("Shutting down...");
     }
 }
