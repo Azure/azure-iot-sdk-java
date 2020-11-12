@@ -71,7 +71,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private SSLContext sslContext;
     private final boolean isWebsocketConnection;
     private final DeviceClientConfig.AuthType authenticationType;
-    private final Queue<DeviceClientConfig> deviceClientConfigs = new ConcurrentLinkedQueue<>();
+    private final Set<DeviceClientConfig> deviceClientConfigs;
     private IotHubListener listener;
     private TransportException savedException;
     private boolean reconnectionScheduled = false;
@@ -93,11 +93,16 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     // Multiplexed device registrations and un-registrations come from a non-reactor thread, so they get queued into these
     // queues and are executed when onTimerTask checks them.
-    private final Queue<DeviceClientConfig> multiplexingClientsToRegister = new ConcurrentLinkedQueue<>();
-    private final Queue<DeviceClientConfig> multiplexingClientsToUnregister = new ConcurrentLinkedQueue<>();
+    private final Set<DeviceClientConfig> multiplexingClientsToRegister;
+    private final Set<DeviceClientConfig> multiplexingClientsToUnregister;
 
     public AmqpsIotHubConnection(DeviceClientConfig config)
     {
+        // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
+        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.multiplexingClientsToUnregister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+
         this.deviceClientConfigs.add(config);
 
         this.isWebsocketConnection = config.isUseWebsocket();
@@ -124,6 +129,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     public AmqpsIotHubConnection(String hostName, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings)
     {
+        // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
+        this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.multiplexingClientsToRegister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+        this.multiplexingClientsToUnregister = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
+
         this.isWebsocketConnection = isWebsocketConnection;
 
         // This constructor is only called when multiplexing, and multiplexing only supports SAS auth
@@ -150,10 +160,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             this.multiplexingClientsToRegister.add(config);
         }
 
-        if (!deviceClientConfigs.contains(config))
-        {
-            deviceClientConfigs.add(config);
-        }
+        deviceClientConfigs.add(config);
     }
 
     public void unregisterMultiplexedDevice(DeviceClientConfig config)
@@ -191,7 +198,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 this.openAsync();
 
                 log.trace("Waiting for authentication links to open...");
-                DeviceClientConfig defaultConfig = this.deviceClientConfigs.peek();
+                Iterator<DeviceClientConfig> configsIterator = this.deviceClientConfigs.iterator();
+                DeviceClientConfig defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
                 int timeoutSeconds = DeviceClientConfig.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
                 if (defaultConfig != null)
                 {
@@ -214,8 +222,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 for (DeviceClientConfig config : this.deviceClientConfigs)
                 {
                     //Each device has its own worker session timeout according to its config settings
-                    long workerSessionTimeoutTimeRemaining = config.getAmqpOpenDeviceSessionsTimeout();
-                    deviceSessionsOpenTimedOut = !this.deviceSessionsOpenedLatches.get(config.getDeviceId()).await(workerSessionTimeoutTimeRemaining, TimeUnit.SECONDS);
+                    deviceSessionsOpenTimedOut = !this.deviceSessionsOpenedLatches.get(config.getDeviceId()).await(config.getAmqpOpenDeviceSessionsTimeout(), TimeUnit.SECONDS);
 
                     if (deviceSessionsOpenTimedOut)
                     {
@@ -327,7 +334,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         try
         {
-            DeviceClientConfig defaultConfig = this.deviceClientConfigs.peek();
+            Iterator<DeviceClientConfig> configsIterator = this.deviceClientConfigs.iterator();
+            DeviceClientConfig defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
             SSLContext sslContext;
             if (defaultConfig != null)
             {
@@ -617,24 +625,24 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     }
 
     @Override
-    public void onMessageAcknowledged(Message message, DeliveryState deliveryState)
+    public void onMessageAcknowledged(Message message, DeliveryState deliveryState, String deviceId)
     {
         if (deliveryState == Accepted.getInstance())
         {
-            this.listener.onMessageSent(message, null);
+            this.listener.onMessageSent(message, deviceId, null);
         }
         else if (deliveryState instanceof Rejected)
         {
             // The message was not accepted by the server, and the reason why is found within the nested error
             TransportException ex = AmqpsExceptionTranslator.convertFromAmqpException(((Rejected) deliveryState).getError());
-            this.listener.onMessageSent(message, ex);
+            this.listener.onMessageSent(message, deviceId, ex);
         }
         else if (deliveryState == Released.getInstance())
         {
             // As per AMQP spec, this state means the message should be re-delivered to the server at a later time
             ProtocolException protocolException = new ProtocolException("Message was released by the amqp server");
             protocolException.setRetryable(true);
-            this.listener.onMessageSent(message, protocolException);
+            this.listener.onMessageSent(message, deviceId, protocolException);
         }
         else
         {
@@ -856,7 +864,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // can be opened on a reactor thread instead of from one of our threads.
     private void checkForNewlyRegisteredMultiplexedClientsToStart()
     {
-        DeviceClientConfig configToRegister = this.multiplexingClientsToRegister.poll();
+        Iterator<DeviceClientConfig> configsToRegisterIterator = this.multiplexingClientsToRegister.iterator();
+        DeviceClientConfig configToRegister = configsToRegisterIterator.hasNext() ? configsToRegisterIterator.next() : null;
+        Set<DeviceClientConfig> configsRegisteredSuccessfully = new HashSet<>();
         while (configToRegister != null)
         {
             AmqpsSessionHandler amqpsSessionHandler = createSessionHandler(configToRegister);
@@ -868,6 +878,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             try
             {
                 amqpsSasTokenRenewalHandler.sendAuthenticationMessage(this.reactor);
+
+                //Only add to this set if it was added successfully. Otherwise let it stay in the set to allow for retry
+                configsRegisteredSuccessfully.add(configToRegister);
             }
             catch (TransportException e)
             {
@@ -876,21 +889,22 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 //sas token renewal handler will be recreated when this function gets called again.
                 amqpsSasTokenRenewalHandler.close();
                 sasTokenRenewalHandlers.remove(amqpsSasTokenRenewalHandler);
-
-                //requeue the device that should re-attempt registration so that this function gets called again later
-                this.multiplexingClientsToRegister.add(configToRegister);
                 return;
             }
 
-            configToRegister = this.multiplexingClientsToRegister.poll();
+            configToRegister = configsToRegisterIterator.hasNext() ? configsToRegisterIterator.next() : null;
         }
+
+        this.multiplexingClientsToRegister.removeAll(configsRegisteredSuccessfully);
     }
 
     // This function is called periodically from the onTimerTask reactor callback so that any newly registered device sessions
     // can be opened on a reactor thread instead of from one of our threads.
     private void checkForNewlyUnregisteredMultiplexedClientsToStop()
     {
-        DeviceClientConfig configToUnregister = this.multiplexingClientsToUnregister.poll();
+        Iterator<DeviceClientConfig> configsToUnregisterIterator = this.multiplexingClientsToUnregister.iterator();
+        DeviceClientConfig configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
+        Set<DeviceClientConfig> configsUnregisteredSuccessfully = new HashSet<>();
         while (configToUnregister != null)
         {
             // Check if the device session still exists from a previous connection
@@ -941,8 +955,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
             amqpsSessionHandler.closeSession();
 
-            configToUnregister = this.multiplexingClientsToUnregister.poll();
+            configsUnregisteredSuccessfully.add(configToUnregister);
+
+            configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         }
+
+        this.multiplexingClientsToUnregister.removeAll(configsUnregisteredSuccessfully);
     }
 
     private void initializeStateLatches()

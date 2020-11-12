@@ -346,7 +346,7 @@ public class DeviceIOTest
             {
                 mockMsg.setConnectionDeviceId("someDeviceId");
                 times = 1;
-                mockedTransport.addMessage(mockMsg, mockCallback, context);
+                mockedTransport.addMessage(mockMsg, mockCallback, context, anyString);
                 times = 1;
             }
         };

@@ -18,10 +18,11 @@ public interface IotHubListener
     /**
      * Callback to be fired when a message that the transport client sent has been acknowledged by Iot Hub
      * @param message The message that was acknowledged
+     * @param deviceId The device that the message was sent from
      * @param e Null if the message was successfully acknowledged. Otherwise, this exception communicates if the message
      *          should be resent at all
      */
-    void onMessageSent(Message message, Throwable e);
+    void onMessageSent(Message message, String deviceId, Throwable e);
 
     /**
      * Callback to be fired when a transport message has been received.

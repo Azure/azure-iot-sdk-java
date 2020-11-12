@@ -30,8 +30,9 @@ interface AmqpsSessionStateCallback
      *
      * @param message the message that was acknowledged.
      * @param deliveryState state information that describes if the message was accepted by the receiver or not.
+     * @param deviceId the Id of the device whose message was acknowledged.
      */
-    void onMessageAcknowledged(Message message, DeliveryState deliveryState);
+    void onMessageAcknowledged(Message message, DeliveryState deliveryState, String deviceId);
 
     /**
      * Executed when a message was received by a session that this connection owns. This message should be acknowledged later.

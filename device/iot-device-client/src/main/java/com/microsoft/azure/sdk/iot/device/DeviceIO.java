@@ -134,15 +134,8 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     {
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
         this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
-
         this.state = IotHubConnectionStatus.DISCONNECTED;
-
         this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this);
-
-        this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
-        this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
-
-        this.state = IotHubConnectionStatus.DISCONNECTED;
     }
 
     /**
@@ -311,7 +304,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
 
         /* Codes_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
-        transport.addMessage(message, callback, callbackContext);
+        transport.addMessage(message, callback, callbackContext, deviceId);
     }
 
     /**
@@ -442,17 +435,15 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
     {
-        /* Codes_SRS_DEVICE_IO_99_001: [The registerConnectionStateCallback shall register the callback with the transport.]*/
         this.transport.registerConnectionStateCallback(callback, callbackContext);
     }
 
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)
+    void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)
     {
-        //Codes_SRS_DEVICE_IO_34_020: [This function shall register the callback with the transport.]
         this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext, deviceId);
     }
 
-    public void registerMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
+    void registerMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
         this.transport.registerMultiplexingConnectionStateCallback(callback, callbackContext);
     }

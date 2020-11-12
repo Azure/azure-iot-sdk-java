@@ -20,6 +20,7 @@ public final class IotHubTransportPacket
     private IotHubStatusCode status;
     private final long startTimeMillis;
     private int currentRetryAttempt;
+    private final String deviceId;
 
     /**
      * Constructor.
@@ -36,7 +37,8 @@ public final class IotHubTransportPacket
                                  IotHubEventCallback eventCallback,
                                  Object callbackContext,
                                  IotHubStatusCode status,
-                                 long startTimeMillis) throws IllegalArgumentException
+                                 long startTimeMillis,
+                                 String deviceId) throws IllegalArgumentException
     {
         if (startTimeMillis < 1)
         {
@@ -56,6 +58,7 @@ public final class IotHubTransportPacket
         this.callbackContext = callbackContext;
         this.status = status;
         this.startTimeMillis = startTimeMillis;
+        this.deviceId = deviceId;
     }
 
     /**
@@ -138,5 +141,13 @@ public final class IotHubTransportPacket
     {
         // Codes_SRS_IOTHUBTRANSPORTPACKET_34_009: [This function shall increment the saved retry attempt count by 1.]
         this.currentRetryAttempt++;
+    }
+
+    /**
+     * Get the Id of the device that this packet is being sent from.
+     * @return The Id of the device that this packet is being sent from.
+     */
+    public String getDeviceId() {
+        return deviceId;
     }
 }

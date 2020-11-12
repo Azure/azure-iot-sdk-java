@@ -111,6 +111,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     private FileUploadTask fileUploadTask;
 
     private static String MULTIPLEXING_CLOSE_ERROR_MESSAGE = "Cannot close a multiplexed client through this method. Must use multiplexingClient.unregisterDeviceClient(deviceClient)";
+    private static String MULTIPLEXING_OPEN_ERROR_MESSAGE = "Cannot open a multiplexed client through this method. Must use multiplexingClient.registerDeviceClient(deviceClient)";
 
     /**
      * Constructor that takes a connection string and a transport client as an argument.
@@ -380,7 +381,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     {
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
         {
-            throw new UnsupportedOperationException("Cannot open a multiplexed client through this method. Must use multiplexingClient.registerDeviceClients(deviceClient)");
+            throw new UnsupportedOperationException(MULTIPLEXING_OPEN_ERROR_MESSAGE);
         }
 
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)

@@ -23,7 +23,6 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static junit.framework.TestCase.assertNotNull;
@@ -480,9 +479,9 @@ public class MqttIotHubConnectionTest
                     times = 0;
                     Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
                     times = 0;
-                    new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any);
+                    new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any, anyString);
                     times = 0;
-                    new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
+                    new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any, anyString);
                     times = 0;
                     mockDeviceMessaging.start();
                     times = 0;
@@ -525,7 +524,7 @@ public class MqttIotHubConnectionTest
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
                 result = null;
-                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
+                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any, anyString);
                 result = new IOException(anyString);
             }
         };
@@ -580,9 +579,9 @@ public class MqttIotHubConnectionTest
                 new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean, (Map) any);
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
-                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
+                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any, anyString);
                 result = mockDeviceMethod;
-                new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any);
+                new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any, anyString);
                 result = new IOException(anyString);
             }
         };
@@ -1664,9 +1663,9 @@ public class MqttIotHubConnectionTest
                 new MqttMessaging(mockedMqttConnection, anyString, (IotHubListener) any, null, null, anyString, anyBoolean, (Map) any);
                 result = mockDeviceMessaging;
                 Deencapsulation.invoke(mockedMqttConnection, "setMqttCallback", mockDeviceMessaging);
-                new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any);
+                new MqttDeviceTwin(mockedMqttConnection, anyString, (Map) any, anyString);
                 result = mockDeviceTwin;
-                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any);
+                new MqttDeviceMethod(mockedMqttConnection, anyString, (Map) any, anyString);
                 result = mockDeviceMethod;
                 mockDeviceMessaging.start();
                 result = null;

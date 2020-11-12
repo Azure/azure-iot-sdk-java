@@ -183,6 +183,7 @@
                                     <exclude>com.microsoft.azure:azure-storage</exclude>
                                     <exclude>org.apache.commons:commons-lang3</exclude>
                                     <exclude>org.slf4j:slf4j-log4j12</exclude>
+                                    <exclude>org.slf4j:slf4j-api</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>

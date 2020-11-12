@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,8 +33,9 @@ public class MultiplexingClient
     public static final long DEFAULT_SEND_PERIOD_MILLIS = 10L;
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
 
+    // keys are deviceIds. Helps to optimize look ups later on which device Ids are already registered.
+    private final Map<String, DeviceClient> multiplexedDeviceClients;
     private final DeviceIO deviceIO;
-    private final ArrayList<DeviceClient> deviceClientList;
     private final String hostName;
     private final IotHubClientProtocol protocol;
 
@@ -85,7 +88,9 @@ public class MultiplexingClient
                 throw new IllegalArgumentException("Multiplexing is only supported for AMQPS and AMQPS_WS");
         }
 
-        this.deviceClientList = new ArrayList<>();
+        // Deliberately using HashMap instead of ConcurrentHashMap here. HashMap is faster for several operations such
+        // .size() and we can control the adding/removing of elements to it with synchronization within this client.
+        this.multiplexedDeviceClients = new HashMap<>();
         this.hostName = hostName;
         this.protocol = protocol;
         this.proxySettings = options != null ? options.getProxySettings() : null;
@@ -148,15 +153,12 @@ public class MultiplexingClient
         synchronized (this.operationLock)
         {
             log.info("Closing multiplexing client");
-            for (DeviceClient deviceClient : this.deviceClientList)
+            for (DeviceClient deviceClient : this.multiplexedDeviceClients.values())
             {
                 deviceClient.closeFileUpload();
             }
 
-            if (this.deviceIO != null)
-            {
-                this.deviceIO.multiplexClose();
-            }
+            this.deviceIO.multiplexClose();
 
             // Note that this method does not close each of the registered device client instances. This is intentional
             // as the calls to deviceClient.close() do nothing besides close the deviceIO layer, which is already closed
@@ -258,23 +260,6 @@ public class MultiplexingClient
                 // Overwrite the proxy settings of the new client to match the multiplexing client settings
                 configToAdd.setProxy(this.proxySettings);
 
-                boolean deviceAlreadyRegistered = false;
-                for (DeviceClient currentClient : deviceClientList)
-                {
-                    String currentDeviceId = currentClient.getConfig().getDeviceId();
-                    if (currentDeviceId.equalsIgnoreCase(configToAdd.getDeviceId()))
-                    {
-                        deviceAlreadyRegistered = true;
-                        break;
-                    }
-                }
-
-                if (deviceAlreadyRegistered)
-                {
-                    log.debug("Device {} wasn't registered to the multiplexed connection because it is already registered.", configToAdd.getDeviceId());
-                    continue;
-                }
-
                 if (configToAdd.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
                     throw new UnsupportedOperationException("Can only register to multiplex a device client that uses SAS token based authentication");
@@ -285,14 +270,14 @@ public class MultiplexingClient
                     throw new UnsupportedOperationException("A device client cannot be registered to a multiplexing client that specifies a different transport protocol.");
                 }
 
-                if (this.protocol == IotHubClientProtocol.AMQPS && this.deviceClientList.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS)
+                if (this.protocol == IotHubClientProtocol.AMQPS && this.multiplexedDeviceClients.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS)
                 {
                     throw new UnsupportedOperationException(String.format("Multiplexed connections over AMQPS only support up to %d devices", MAX_MULTIPLEX_DEVICE_COUNT_AMQPS));
                 }
 
                 // Typically client side validation is duplicate work, but IoT Hub doesn't give a good error message when closing the
                 // AMQPS_WS connection so this is the only way that users will know about this limit
-                if (this.protocol == IotHubClientProtocol.AMQPS_WS && this.deviceClientList.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS)
+                if (this.protocol == IotHubClientProtocol.AMQPS_WS && this.multiplexedDeviceClients.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS)
                 {
                     throw new UnsupportedOperationException(String.format("Multiplexed connections over AMQPS_WS only support up to %d devices", MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS));
                 }
@@ -302,16 +287,27 @@ public class MultiplexingClient
                     throw new UnsupportedOperationException("A device client cannot be registered to a multiplexing client that specifies a different host name.");
                 }
 
-                if (deviceClientToRegister.getDeviceIO() != null && deviceClientToRegister.getDeviceIO().isOpen())
+                if (deviceClientToRegister.getDeviceIO() != null && deviceClientToRegister.getDeviceIO().isOpen() && !deviceClientToRegister.isMultiplexed)
                 {
-                    throw new IllegalStateException("Cannot register a device client to a multiplexed connection when it the device client was already opened.");
+                    throw new IllegalStateException("Cannot register a device client to a multiplexed connection when the device client was already opened.");
                 }
 
                 deviceClientToRegister.setAsMultiplexed();
                 deviceClientToRegister.setDeviceIO(this.deviceIO);
                 deviceClientToRegister.setConnectionType(IoTHubConnectionType.USE_MULTIPLEXING_CLIENT);
-                this.deviceClientList.add(deviceClientToRegister);
-                deviceClientConfigsToRegister.add(configToAdd);
+
+                // Set notifies us if the device client is already in the set
+                boolean deviceAlreadyRegistered = this.multiplexedDeviceClients.containsKey(deviceClientToRegister.getConfig().getDeviceId());
+                if (deviceAlreadyRegistered)
+                {
+                    log.debug("Device {} wasn't registered to the multiplexed connection because it is already registered.", configToAdd.getDeviceId());
+                    continue;
+                }
+                else
+                {
+                    this.multiplexedDeviceClients.put(deviceClientToRegister.getConfig().getDeviceId(), deviceClientToRegister);
+                    deviceClientConfigsToRegister.add(configToAdd);
+                }
             }
 
             // if the device IO hasn't been created yet, then this client will be registered once it is created.
@@ -319,6 +315,7 @@ public class MultiplexingClient
             {
                 log.info("Registering device {} to multiplexing client", configBeingRegistered.getDeviceId());
             }
+
             this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister);
         }
     }
@@ -379,7 +376,7 @@ public class MultiplexingClient
                 DeviceClientConfig configToUnregister = deviceClientToUnregister.getConfig();
                 deviceClientConfigsToRegister.add(configToUnregister);
                 log.info("Unregistering device {} from multiplexing client", deviceClientToUnregister.getConfig().getDeviceId());
-                this.deviceClientList.remove(deviceClientToUnregister);
+                this.multiplexedDeviceClients.remove(deviceClientToUnregister.getConfig().getDeviceId());
                 deviceClientToUnregister.setDeviceIO(null);
             }
 
@@ -417,15 +414,7 @@ public class MultiplexingClient
     {
         synchronized (this.operationLock)
         {
-            for (DeviceClient client : this.deviceClientList)
-            {
-                if (client.getConfig().getDeviceId().equalsIgnoreCase(deviceId))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return this.multiplexedDeviceClients.containsKey(deviceId);
         }
     }
 
@@ -437,9 +426,12 @@ public class MultiplexingClient
     {
         synchronized (this.operationLock)
         {
-            // O(1) operation since ArrayList saves this value as an integer rather than iterating over each element.
+            // O(1) operation since HashMap saves this value as an integer rather than iterating over each element.
             // So there is no need to be more clever about this.
-            return this.deviceClientList.size();
+
+            // Note that ConcurrentHashMap's version of this method has O(n) time complexity, so we avoid using that type here.
+            // Instead we just make every method synchronous to protect against race conditions.
+            return this.multiplexedDeviceClients.size();
         }
     }
 

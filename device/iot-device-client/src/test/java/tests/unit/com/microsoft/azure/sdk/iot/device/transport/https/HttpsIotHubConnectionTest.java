@@ -2106,7 +2106,7 @@ public class HttpsIotHubConnectionTest
         new Verifications()
         {
             {
-                mockedListener.onMessageSent((IotHubTransportMessage) any, null);
+                mockedListener.onMessageSent((IotHubTransportMessage) any, null, null);
                 times = 1;
             }
         };

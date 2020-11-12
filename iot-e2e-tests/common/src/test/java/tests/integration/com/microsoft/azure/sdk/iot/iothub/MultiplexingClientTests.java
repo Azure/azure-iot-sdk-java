@@ -21,6 +21,8 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import junit.framework.AssertionFailedError;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
@@ -39,12 +41,14 @@ import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static junit.framework.TestCase.*;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to multiplexing with the MultiplexingClient class
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class MultiplexingClientTests extends IntegrationTest
@@ -217,7 +221,7 @@ public class MultiplexingClientTests extends IntegrationTest
     }
 
     @Test
-    public void unregisterAllClientsThenReregisterAllClients() throws Exception
+    public void canUnregisterAllClientsThenReregisterAllClientsOnOpenConnection() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         testInstance.multiplexingClient.open();
@@ -292,17 +296,18 @@ public class MultiplexingClientTests extends IntegrationTest
 
         long startOpenTime = System.currentTimeMillis();
         Thread[] openThreads = new Thread[multiplexingClientCount];
+        AtomicReference<IOException>[] openExceptions = new AtomicReference[multiplexingClientCount];
         for (int i = 0; i < multiplexingClientCount; i++)
         {
             int finalI = i;
-            openThreads[i] = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        testInstances[finalI].multiplexingClient.open();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            openThreads[i] = new Thread(() -> {
+                try
+                {
+                    testInstances[finalI].multiplexingClient.open();
+                }
+                catch (IOException e)
+                {
+                    openExceptions[finalI].set(e);
                 }
             });
 
@@ -312,6 +317,14 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < multiplexingClientCount; i++)
         {
             openThreads[i].join();
+        }
+
+        for (int i = 0; i < multiplexingClientCount; i++)
+        {
+            if (openExceptions[i] != null && openExceptions[i].get() != null)
+            {
+                throw openExceptions[i].get();
+            }
         }
 
         long finishOpenTime = System.currentTimeMillis();
@@ -330,10 +343,12 @@ public class MultiplexingClientTests extends IntegrationTest
         }
         long finishCloseTime = System.currentTimeMillis();
 
-        System.out.println("Setup time: " + (finishSetupTime - startSetupTime) / 1000.0);
-        System.out.println("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
-        System.out.println("Send time: " + (finishSendTime - startSendTime) / 1000.0);
-        System.out.println("Close time: " + (finishCloseTime - startCloseTime) / 1000.0);
+        // Mostly for looking at perf manually. No requirements are set on how low these values should be, so we
+        // don't have any assertions tied to them.
+        log.debug("Setup time: " + (finishSetupTime - startSetupTime) / 1000.0);
+        log.debug("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
+        log.debug("Send time: " + (finishSendTime - startSendTime) / 1000.0);
+        log.debug("Close time: " + (finishCloseTime - startCloseTime) / 1000.0);
     }
 
     @ContinuousIntegrationTest
@@ -380,10 +395,12 @@ public class MultiplexingClientTests extends IntegrationTest
         }
         long finishCloseTime = System.currentTimeMillis();
 
-        System.out.println("Setup time: " + (finishSetupTime - startSetupTime) / 1000.0);
-        System.out.println("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
-        System.out.println("Send time: " + (finishSendTime - startSendTime) / 1000.0);
-        System.out.println("Close time: " + (finishCloseTime - startCloseTime) / 1000.0);
+        // Mostly for looking at perf manually. No requirements are set on how low these values should be, so we
+        // don't have any assertions tied to them.
+        log.debug("Setup time: " + (finishSetupTime - startSetupTime) / 1000.0);
+        log.debug("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
+        log.debug("Send time: " + (finishSendTime - startSendTime) / 1000.0);
+        log.debug("Close time: " + (finishCloseTime - startCloseTime) / 1000.0);
     }
 
     @ContinuousIntegrationTest
@@ -828,8 +845,10 @@ public class MultiplexingClientTests extends IntegrationTest
         assertTrue("Expected exception to be thrown when sending a message from an unregistered client", exceptionThrown);
     }
 
+    // Fault every device session, wait for it to recover, test sending from it, and verify that no other device sessions were dropped
+    // other than the deliberately dropped session.
     @Test
-    public void multiplexedConnectionRecoversFromDeviceSessionDrops() throws Exception
+    public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
@@ -865,6 +884,54 @@ public class MultiplexingClientTests extends IntegrationTest
                 // devices above index i have not been deliberately faulted yet, so make sure they haven't seen a DISCONNECTED_RETRYING event yet.
                 assertFalse("Multiplexed device that hasn't been deliberately faulted yet saw an unexpected DISCONNECTED_RETRYING connection status callback", connectionStatusChangeTrackers[j].wentDisconnectedRetrying);
             }
+
+            // Try to send a message over the now-recovered device session
+            testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i));
+        }
+
+        // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
+        testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
+
+        testInstance.multiplexingClient.close();
+
+        assertMultiplexedDevicesClosedGracefully(connectionStatusChangeTrackers);
+    }
+
+    // Fault every device session basically at once, make sure that the clients all recover
+    @Test
+    public void multiplexedConnectionRecoversFromDeviceSessionDropsParallel() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            connectionStatusChangeTrackers[i] = new ConnectionStatusChangeTracker();
+            testInstance.deviceClientArray.get(i).registerConnectionStatusChangeCallback(connectionStatusChangeTrackers[i], null);
+        }
+
+        testInstance.multiplexingClient.open();
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            assertTrue("Multiplexing client opened successfully, but connection status change callback didn't execute.", connectionStatusChangeTrackers[i].isOpen);
+        }
+
+        // For each multiplexed device, use fault injection to drop the session and see if it can recover, one device at a time
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            Message errorIjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
+            Success messageSendSuccess = testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
+            waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
+        }
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // Now that error injection message has been sent, need to wait for the device session to drop
+            assertConnectionStateCallbackFiredDisconnectedRetrying(connectionStatusChangeTrackers[i]);
+
+            // Next, the faulted device should eventually recover
+            assertConnectionStateCallbackFiredConnected(connectionStatusChangeTrackers[i], FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS);
 
             // Try to send a message over the now-recovered device session
             testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i));

@@ -9,23 +9,57 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.WebSocketHandler;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.net.IotHubUri;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.*;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.*;
-import mockit.*;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsCbsSessionHandler;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsReceiverLinkHandler;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSendResult;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSessionHandler;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsTelemetryReceiverLinkHandler;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.IotHubReactor;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
+import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpSessionWindowViolationException;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
-import org.apache.qpid.proton.amqp.messaging.*;
+import org.apache.qpid.proton.amqp.messaging.Accepted;
+import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
+import org.apache.qpid.proton.amqp.messaging.Modified;
+import org.apache.qpid.proton.amqp.messaging.Received;
+import org.apache.qpid.proton.amqp.messaging.Rejected;
+import org.apache.qpid.proton.amqp.messaging.Released;
+import org.apache.qpid.proton.amqp.messaging.Source;
+import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Handler;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Receiver;
+import org.apache.qpid.proton.engine.Sasl;
+import org.apache.qpid.proton.engine.Sender;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.message.impl.MessageImpl;
@@ -37,8 +71,16 @@ import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -239,8 +281,8 @@ public class AmqpsIotHubConnectionTest {
 
         AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
-        Queue<DeviceClientConfig> deviceClientConfigs = Deencapsulation.getField(connection, "deviceClientConfigs");
-        DeviceClientConfig actualConfig = deviceClientConfigs.poll();
+        Set<DeviceClientConfig> deviceClientConfigs = Deencapsulation.getField(connection, "deviceClientConfigs");
+        DeviceClientConfig actualConfig = deviceClientConfigs.iterator().next();
         String actualHostName = Deencapsulation.getField(connection, "hostName");
 
         assertEquals(mockConfig, actualConfig);
@@ -1085,12 +1127,12 @@ public class AmqpsIotHubConnectionTest {
         new Expectations()
         {
             {
-                mockedIotHubListener.onMessageSent(mockIoTMessage, null);
+                mockedIotHubListener.onMessageSent(mockIoTMessage, null, null);
             }
         };
 
         // act
-        connection.onMessageAcknowledged(mockIoTMessage, Accepted.getInstance());
+        connection.onMessageAcknowledged(mockIoTMessage, Accepted.getInstance(), null);
     }
 
     @Test
@@ -1108,12 +1150,12 @@ public class AmqpsIotHubConnectionTest {
 
                 mockedProtocolException.setRetryable(true);
 
-                mockedIotHubListener.onMessageSent(mockIoTMessage, mockedProtocolException);
+                mockedIotHubListener.onMessageSent(mockIoTMessage, null, mockedProtocolException);
             }
         };
 
         // act
-        connection.onMessageAcknowledged(mockIoTMessage, Released.getInstance());
+        connection.onMessageAcknowledged(mockIoTMessage, Released.getInstance(), null);
     }
 
     @Test
@@ -1128,12 +1170,12 @@ public class AmqpsIotHubConnectionTest {
             {
                 mockRejected.getError();
 
-                mockedIotHubListener.onMessageSent(mockIoTMessage, (TransportException) any);
+                mockedIotHubListener.onMessageSent(mockIoTMessage, null, (TransportException) any);
             }
         };
 
         // act
-        connection.onMessageAcknowledged(mockIoTMessage, mockRejected);
+        connection.onMessageAcknowledged(mockIoTMessage, mockRejected, null);
     }
 
     private void baseExpectations() throws TransportException
