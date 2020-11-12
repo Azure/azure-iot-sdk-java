@@ -105,7 +105,7 @@ public class DeviceClientTest
                 TransportClient actualTransportClient = Deencapsulation.getField(client, "transportClient");
                 assertEquals(mockTransportClient, actualTransportClient);
 
-                Deencapsulation.invoke(mockTransportClient, "registerDeviceClient", client);
+                Deencapsulation.invoke(mockTransportClient, "registerDeviceClients", client);
                 times = 1;
             }
         };
