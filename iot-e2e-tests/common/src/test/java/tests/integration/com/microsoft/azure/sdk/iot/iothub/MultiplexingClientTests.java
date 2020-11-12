@@ -272,6 +272,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
+    @Ignore  // This is more of a performance test than a typical test. It should only be run locally, not at the gate
     @ContinuousIntegrationTest
     @Test
     public void sendMessagesMaxDevicesAllowedTimes10MultiplexingClientsParallelOpen() throws Exception
@@ -351,6 +352,7 @@ public class MultiplexingClientTests extends IntegrationTest
         log.debug("Close time: " + (finishCloseTime - startCloseTime) / 1000.0);
     }
 
+    @Ignore  // This is more of a performance test than a typical test. It should only be run locally, not at the gate
     @ContinuousIntegrationTest
     @Test
     public void sendMessagesMaxDevicesAllowedTimes10MultiplexingClientsSerialOpen() throws Exception
