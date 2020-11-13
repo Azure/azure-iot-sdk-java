@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
-
 /**
  * Sample that demonstrates creating a multiplexed connection to IoT Hub using AMQPS / AMQPS_WS. It also demonstrates
  * removing and adding device clients from the multiplexed connection while it is open.
@@ -142,13 +141,14 @@ public class MultiplexingSample
         // Options include setting a custom SSLContext to use for the SSL handshake, configuring proxy support, and setting threading strategies
         MultiplexingClientOptions options = MultiplexingClientOptions.builder().build();
         final MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, protocol, options);
+
         MultiplexedDeviceConnectionStatusChangeTracker multiplexedConnectionStatusTracker = new MultiplexedDeviceConnectionStatusChangeTracker();
         multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusTracker, null);
 
         System.out.println("Creating device clients that will be multiplexed");
         final List<String> deviceIds = new ArrayList<>();
         final Map<String, DeviceClient> multiplexedDeviceClients = new HashMap<>(multiplexedDeviceCount);
-        List<MultiplexedDeviceConnectionStatusChangeTracker> deviceConnectionStatusTrackers = new ArrayList<>(multiplexedDeviceCount);
+        final Map<String, DeviceClientManager> deviceManagers = new HashMap<>(multiplexedDeviceCount);
 
         for (int i = 0; i < multiplexedDeviceCount; i++)
         {
@@ -157,8 +157,8 @@ public class MultiplexingSample
             deviceIds.add(deviceId);
 
             multiplexedDeviceClients.put(deviceId, clientToMultiplex);
-            deviceConnectionStatusTrackers.add(new MultiplexedDeviceConnectionStatusChangeTracker());
-            multiplexedDeviceClients.get(deviceId).registerConnectionStatusChangeCallback(deviceConnectionStatusTrackers.get(i), deviceId);
+
+            deviceManagers.put(deviceId, new DeviceClientManager(clientToMultiplex));
         }
 
         System.out.println("Opening multiplexed connection");
@@ -186,7 +186,7 @@ public class MultiplexingSample
                             Thread.sleep(1000);
                             System.out.printf("Sending message from device %s%n", deviceId);
                             Message message = new Message("some payload");
-                            multiplexedDeviceClients.get(deviceId).sendEventAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
+                            deviceManagers.get(deviceId).sendEventAsync(message, new TelemetryAcknowledgedEventCallback(), message.getMessageId());
                         }
                     }
                 }
