@@ -72,7 +72,7 @@ public class MultiplexingSample
         MultiplexingClientOptions options = MultiplexingClientOptions.builder().build();
         final MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, protocol, options);
 
-        MultiplexClientManager multiplexClientManager = new MultiplexClientManager(multiplexingClient);
+        MultiplexClientManager multiplexClientManager = new MultiplexClientManager(multiplexingClient, "MultiplexingClient");
 
         System.out.println("Creating device clients that will be multiplexed");
         final List<String> deviceIds = new ArrayList<>();

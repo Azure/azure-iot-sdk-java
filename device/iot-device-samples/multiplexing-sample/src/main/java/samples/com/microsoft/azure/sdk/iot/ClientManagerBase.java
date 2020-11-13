@@ -23,7 +23,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     }
 
     protected static final Object lock = new Object();
-    protected static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 10;
+    protected static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 2;
     protected ConnectionStatus connectionStatus;
     protected Pair<IotHubConnectionStatusChangeCallback, Object> suppliedConnectionStatusChangeCallback;
 
@@ -67,7 +67,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                 Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
             }
             catch (InterruptedException ex) {
-                throw new RuntimeException("InterruptedException in thread sleep: ", ex);
+                throw new RuntimeException("Interrupted while waiting between attempting to open the client: ", ex);
             }
         }
     }
@@ -107,6 +107,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
         else
         {
             System.out.println("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason + ", " + throwable.getMessage());
+            throwable.printStackTrace();
         }
 
         if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
