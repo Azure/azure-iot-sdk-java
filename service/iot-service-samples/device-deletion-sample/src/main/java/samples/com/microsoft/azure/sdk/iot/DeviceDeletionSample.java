@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.IndividualEnrollment;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QueryResult;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
+import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
@@ -88,40 +89,39 @@ public class DeviceDeletionSample
             }
 
             System.out.println("Querying ");
-            DeviceTwin deviceTwin = null;
-            try
-            {
-                deviceTwin = DeviceTwin.createFromConnectionString(this.iotConnString);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                System.out.println("Could not create device twin client from the provided connection string, exiting iot hub cleanup thread");
-                return;
-            }
-
-            Query query = null;
-            try
-            {
-                query = deviceTwin.queryTwin("SELECT * FROM Devices", 100);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                System.out.println("Could not execute the query on your iot hub to retrieve the device list, exiting iot hub cleanup thread");
-                return;
-            }
 
             List<String> deviceIdsToRemove = new ArrayList<>();
             try
             {
-                while (deviceTwin.hasNextDeviceTwin(query))
+                while (true)
                 {
-                    DeviceTwinDevice device = deviceTwin.getNextDeviceTwin(query);
-                    if (!device.getDeviceId().toLowerCase().contains("longhaul"))
+                    List<Device> devices = registryManager.getDevices(100);
+
+                    for (Device d: devices)
                     {
-                        deviceIdsToRemove.add(device.getDeviceId());
+                        if (!d.getDeviceId().toLowerCase().contains("longhaul"))
+                        {
+                            deviceIdsToRemove.add(d.getDeviceId());
+                        }
                     }
+
+                    for (String deviceIdToRemove : deviceIdsToRemove)
+                    {
+                        try
+                        {
+                            registryManager.removeDevice(deviceIdToRemove);
+                            System.out.println("Removed device " + deviceIdToRemove);
+                        }
+                        catch (Exception e)
+                        {
+                            System.out.println("Could not remove device with id " +deviceIdToRemove);
+                            e.printStackTrace();
+
+                            System.out.println("Moving onto deleting the remaining devices anyways...");
+                        }
+                    }
+
+                    deviceIdsToRemove.clear();
                 }
             }
             catch (Exception e)
@@ -130,28 +130,6 @@ public class DeviceDeletionSample
                 System.out.println("Could not collect the full list of device ids to delete, exiting iot hub cleanup thread");
                 return;
             }
-
-            int deletedDeviceCount = 0;
-            for (String deviceIdToRemove : deviceIdsToRemove)
-            {
-                try
-                {
-                    registryManager.removeDevice(deviceIdToRemove);
-                    System.out.println("Removed device " + deviceIdToRemove);
-                    deletedDeviceCount++;
-                }
-                catch (Exception e)
-                {
-                    System.out.println("Could not remove device with id " +deviceIdToRemove);
-                    e.printStackTrace();
-
-                    System.out.println("Moving onto deleting the remaining devices anyways...");
-                }
-            }
-
-            System.out.println("Deleted " + deletedDeviceCount + " out of the total " + deviceIdsToRemove.size() + " devices");
-
-            registryManager.close();
         }
     }
 
