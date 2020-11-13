@@ -27,8 +27,17 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     protected ConnectionStatus connectionStatus;
     protected Pair<IotHubConnectionStatusChangeCallback, Object> suppliedConnectionStatusChangeCallback;
 
-    public void openClient() throws IOException{};
-    public void closeClient() throws IOException{};
+    public abstract void openClient() throws IOException;
+    public abstract void closeClient() throws IOException;
+    public abstract String getClientId();
+
+    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) {
+        if (callback != null) {
+            this.suppliedConnectionStatusChangeCallback = new Pair<>(callback, callbackContext);
+        } else {
+            this.suppliedConnectionStatusChangeCallback = null;
+        }
+    }
 
     public void doConnect() throws IOException {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
@@ -36,16 +45,16 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
             synchronized (lock) {
                 if(connectionStatus == ConnectionStatus.CONNECTING) {
                     try {
-                        log.debug("Opening the device client instance...");
+                        log.debug("Opening the device client instance " + getClientId() + " ...");
                         openClient();
                         connectionStatus = ConnectionStatus.CONNECTED;
                         break;
                     }
                     catch (Exception ex) {
                         if (ex.getCause() instanceof TransportException && ((TransportException) ex.getCause()).isRetryable()) {
-                            log.warn("Transport exception thrown while opening DeviceClient instance, retrying: ", ex);
+                            log.warn("Transport exception thrown while opening DeviceClient instance " + getClientId() + ", retrying: ", ex);
                         } else {
-                            log.error("Non-retryable exception thrown while opening DeviceClient instance: ", ex);
+                            log.error("Non-retryable exception thrown while opening DeviceClient instance " + getClientId() + ": ", ex);
                             connectionStatus = ConnectionStatus.DISCONNECTED;
                             throw ex;
                         }
@@ -66,11 +75,11 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     public void closeNow() {
         synchronized (lock) {
             try {
-                log.debug("Closing the device client instance...");
+                log.debug("Closing the client instance " + getClientId() + " ...");
                 closeClient();
             }
             catch (IOException e) {
-                log.error("Exception thrown while closing DeviceClient instance: ", e);
+                log.error("Exception thrown while closing client instance " + getClientId() + " : ", e);
             } finally {
                 connectionStatus = ConnectionStatus.DISCONNECTED;
             }
@@ -93,11 +102,11 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
         Pair<IotHubConnectionStatusChangeCallback, Object> suppliedCallbackPair = this.suppliedConnectionStatusChangeCallback;
         if (throwable == null)
         {
-            System.out.println("CONNECTION STATUS UPDATE FOR MULTIPLEXING CLIENT " + " - " + status + ", " + statusChangeReason);
+            System.out.println("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason);
         }
         else
         {
-            System.out.println("CONNECTION STATUS UPDATE FOR DEVICE " + " - " + status + ", " + statusChangeReason + ", " + throwable.getMessage());
+            System.out.println("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason + ", " + throwable.getMessage());
         }
 
         if (shouldDeviceReconnect(status, statusChangeReason, throwable)) {
@@ -122,25 +131,25 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        log.debug("Attempting reconnect for device client...");
+                        log.debug("Attempting reconnect for client: " + getClientId() + " ...");
                         synchronized (lock) {
                             if (connectionStatus == ConnectionStatus.CONNECTED) {
                                 try {
                                     closeClient();
                                 } catch (Exception e) {
-                                    log.warn("DeviceClient closeNow failed.", e);
+                                    log.warn("Client " + getClientId() + " closeNow failed.", e);
                                 } finally {
                                     connectionStatus = ConnectionStatus.CONNECTING;
                                 }
                             } else {
-                                log.debug("DeviceClient is currently connecting, or already connected; skipping...");
+                                log.debug("Client `" + getClientId() + "` is currently connecting, or already connected; skipping...");
                                 return;
                             }
                         }
                         try {
                             doConnect();
                         } catch (IOException e) {
-                            log.error("Exception thrown while opening DeviceClient instance: ", e);
+                            log.error("Exception thrown while opening client instance: " + getClientId(), e);
                         }
                     }
                 }).start();
