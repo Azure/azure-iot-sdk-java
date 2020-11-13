@@ -346,6 +346,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         // Mostly for looking at perf manually. No requirements are set on how low these values should be, so we
         // don't have any assertions tied to them.
+        log.debug("Multiplexed client count : " + multiplexingClientCount);
         log.debug("Setup time: " + (finishSetupTime - startSetupTime) / 1000.0);
         log.debug("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
         log.debug("Send time: " + (finishSendTime - startSendTime) / 1000.0);
@@ -399,6 +400,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         // Mostly for looking at perf manually. No requirements are set on how low these values should be, so we
         // don't have any assertions tied to them.
+        log.debug("Multiplexed client count : " + multiplexingClientCount);
         log.debug("Setup time: " + (finishSetupTime - startSetupTime) / 1000.0);
         log.debug("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
         log.debug("Send time: " + (finishSendTime - startSendTime) / 1000.0);
