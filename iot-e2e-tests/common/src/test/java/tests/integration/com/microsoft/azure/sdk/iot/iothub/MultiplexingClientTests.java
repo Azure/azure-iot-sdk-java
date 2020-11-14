@@ -304,6 +304,7 @@ public class MultiplexingClientTests extends IntegrationTest
             openThreads[i] = new Thread(() -> {
                 try
                 {
+                    openExceptions[finalI] = new AtomicReference<>();
                     testInstances[finalI].multiplexingClient.open();
                 }
                 catch (IOException e)
