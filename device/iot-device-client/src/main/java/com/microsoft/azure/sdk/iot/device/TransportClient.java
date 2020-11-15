@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -15,8 +16,13 @@ import java.util.ArrayList;
  * the connection. 
  * </p>
  * The multiplexed connection is supported with AMQPS / AMQPS_WS protocols.
+ *
+ * @deprecated This client has been replaced with {@link MultiplexingClient} since this client does not support adding
+ * or removing devices once the connection has been established. {@link MultiplexingClient} allows for adding and removing
+ * of devices from multiplexed connections before or after opening the connection.
  */
 @Slf4j
+@Deprecated
 public class TransportClient
 {
     public enum TransportClientState
@@ -94,11 +100,21 @@ public class TransportClient
             deviceClientList.get(0).setDeviceIO(this.deviceIO);
 
             // Codes_SRS_TRANSPORTCLIENT_12_012: [The function shall set the created DeviceIO to all registered device client.]
+            List<DeviceClientConfig> configList = new ArrayList<>();
             for (int i = 1; i < this.deviceClientList.size(); i++)
             {
                 deviceClientList.get(i).setDeviceIO(this.deviceIO);
                 //propagate this client config to amqp connection
-                this.deviceIO.addClient(deviceClientList.get(i).getConfig());
+                configList.add(deviceClientList.get(i).getConfig());
+            }
+
+            try
+            {
+                this.deviceIO.registerMultiplexedDeviceClient(configList);
+            }
+            catch (InterruptedException e)
+            {
+                throw new IOException("Interrupted while registering device clients to the multiplexed connection", e);
             }
 
             // Codes_SRS_TRANSPORTCLIENT_12_013: [The function shall open the transport in multiplexing mode.]

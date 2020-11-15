@@ -17,7 +17,9 @@ import java.util.Scanner;
 
 /**
  * Multiplex devices an IoT Hub using AMQPS / AMQPS_WS
+ * @deprecated use {@link MultiplexingClient} instead of {@link TransportClient}.
  */
+@Deprecated
 public class TransportClientSample
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds

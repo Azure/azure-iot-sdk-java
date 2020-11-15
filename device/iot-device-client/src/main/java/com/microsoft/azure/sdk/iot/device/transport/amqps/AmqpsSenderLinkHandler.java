@@ -112,8 +112,8 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         if (link.getLocalState() == EndpointState.ACTIVE)
         {
             log.debug("{} sender link with link correlation id {} was closed remotely unexpectedly", getLinkInstanceType(), this.linkCorrelationId);
-            this.amqpsLinkStateCallback.onLinkClosedUnexpectedly(link.getRemoteCondition());
             link.close();
+            this.amqpsLinkStateCallback.onLinkClosedUnexpectedly(link.getRemoteCondition());
         }
         else
         {

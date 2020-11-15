@@ -17,9 +17,10 @@ import org.apache.qpid.proton.engine.*;
 import java.util.UUID;
 
 /**
- * This class defines the special CBS session that owns a CBS sender and receiver link. This session is responsible for
+ * This class defines the special CBS ("Claims-Based-Security") session that owns a CBS sender and receiver link. This session is responsible for
  * sending authentication messages on behalf of all device sessions in this connection. Even when multiplexing, there
- * is only one CBS session.
+ * is only one CBS session. When connecting as a single device, and using x509 based authentication, this session
+ * should not be created.
  */
 @Slf4j
 public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStateCallback
@@ -81,9 +82,9 @@ public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStat
         {
             //Service initiated this session close
             log.debug("Amqp CBS session closed remotely unexpectedly");
-            this.connectionStateCallback.onSessionClosedUnexpectedly(session.getRemoteCondition());
+            this.connectionStateCallback.onCBSSessionClosedUnexpectedly(session.getRemoteCondition());
 
-            this.session.close();
+            this.close();
         }
         else
         {
@@ -139,7 +140,7 @@ public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStat
     {
         log.trace("CBS link closed unexpectedly, closing the CBS session");
         this.session.close();
-        this.connectionStateCallback.onSessionClosedUnexpectedly(errorCondition);
+        this.connectionStateCallback.onCBSSessionClosedUnexpectedly(errorCondition);
     }
 
     public void onAuthenticationFailed(TransportException transportException)
