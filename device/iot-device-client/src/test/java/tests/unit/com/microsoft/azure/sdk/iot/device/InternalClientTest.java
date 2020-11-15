@@ -1457,7 +1457,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.registerConnectionStatusChangeCallback(mockedIotHubConnectionStatusChangeCallback, context);
+                Deencapsulation.invoke(mockDeviceIO, "registerConnectionStatusChangeCallback", new Class[] {IotHubConnectionStatusChangeCallback.class, Object.class, String.class}, mockedIotHubConnectionStatusChangeCallback, context, null);
                 times = 1;
             }
         };

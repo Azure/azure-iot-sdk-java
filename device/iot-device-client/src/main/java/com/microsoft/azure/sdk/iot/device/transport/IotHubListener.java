@@ -11,17 +11,18 @@ import com.microsoft.azure.sdk.iot.device.Message;
 
 /**
  * Callback interface for communicating connection and message status updates from individual protocol clients
- * (mqtt, https, amqps) to the Tranpsort layer that handles queueing of messages and connecting/reconnecting/disconnecting
+ * (mqtt, https, amqps) to the transport layer that handles queueing of messages and connecting/reconnecting/disconnecting
  */
 public interface IotHubListener
 {
     /**
      * Callback to be fired when a message that the transport client sent has been acknowledged by Iot Hub
      * @param message The message that was acknowledged
+     * @param deviceId The device that the message was sent from
      * @param e Null if the message was successfully acknowledged. Otherwise, this exception communicates if the message
      *          should be resent at all
      */
-    void onMessageSent(Message message, Throwable e);
+    void onMessageSent(Message message, String deviceId, Throwable e);
 
     /**
      * Callback to be fired when a transport message has been received.
@@ -43,4 +44,16 @@ public interface IotHubListener
      * @param connectionId the id of the connection this update is relevant to
      */
     void onConnectionEstablished(String connectionId);
+
+    /**
+     * Callback to be fired when the multiplexed connection establishes a new device session.
+     * @param deviceId the Id of the device that the session belongs to
+     */
+    void onMultiplexedDeviceSessionEstablished(String connectionId, String deviceId);
+
+    /**
+     * Callback to be fired when the multiplexed connection loses a device session.
+     * @param deviceId the Id of the device that the session belongs to
+     */
+    void onMultiplexedDeviceSessionLost(Throwable e, String connectionId, String deviceId);
 }
