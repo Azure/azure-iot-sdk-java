@@ -36,10 +36,10 @@ public class MqttDeviceMethod extends Mqtt
     private final int METHOD_TOKEN = 3;
     private final int REQID_TOKEN = 4;
 
-    public MqttDeviceMethod(MqttConnection mqttConnection, String connectionId, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
+    public MqttDeviceMethod(MqttConnection mqttConnection, String connectionId, Map<Integer, Message> unacknowledgedSentMessages, String deviceId) throws TransportException
     {
         //Codes_SRS_MqttDeviceMethod_25_001: [The constructor shall instantiate super class without any parameters.]
-        super(mqttConnection, null, null, connectionId, unacknowledgedSentMessages);
+        super(mqttConnection, null, null, connectionId, unacknowledgedSentMessages, deviceId);
 
         //Codes_SRS_MqttDeviceMethod_25_002: [The constructor shall create subscribe and response topics strings for device methods as per the spec.]
         this.subscribeTopic = POST + BACKSLASH + POUND;

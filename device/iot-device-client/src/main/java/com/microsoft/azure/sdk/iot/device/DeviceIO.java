@@ -8,14 +8,19 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 
 /*
  *     +-------------------------------------+                  +-----------------------------------+
@@ -75,16 +80,13 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     private long receivePeriodInMilliseconds;
 
     private IotHubTransport transport;
-    private DeviceClientConfig config;
     private IotHubSendTask sendTask = null;
     private IotHubReceiveTask receiveTask = null;
-    private IotHubClientProtocol protocol = null;
 
     private ScheduledExecutorService receiveTaskScheduler;
     private ScheduledExecutorService sendTaskScheduler;
     private IotHubConnectionStatus state;
 
-    private List<DeviceClientConfig> deviceClientConfigs = new LinkedList<>();
 
     // This lock is used to keep calls to open/close/connection status changes synchronous.
     private Object stateLock = new Object();
@@ -101,16 +103,13 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
     {
-        /* Codes_SRS_DEVICE_IO_21_002: [If the `config` is null, the constructor shall throw an IllegalArgumentException.] */
-        if(config == null)
+        if (config == null)
         {
             throw new IllegalArgumentException("Config cannot be null.");
         }
 
-        /* Codes_SRS_DEVICE_IO_21_001: [The constructor shall store the provided protocol and config information.] */
-        deviceClientConfigs.add(config);
-        this.config = config;
-        this.protocol = this.config.getProtocol();
+        IotHubClientProtocol protocol = config.getProtocol();
+        config.setUseWebsocket(protocol == IotHubClientProtocol.AMQPS_WS || protocol == MQTT_WS);
 
         /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
@@ -119,11 +118,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubConnectionStatus.DISCONNECTED;
-
-        if (protocol == IotHubClientProtocol.AMQPS_WS || protocol == IotHubClientProtocol.MQTT_WS)
-        {
-            this.config.setUseWebsocket(true);
-        }
 
         this.transport = new IotHubTransport(config, this);
 
@@ -134,6 +128,14 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubConnectionStatus.DISCONNECTED;
+    }
+
+    DeviceIO(String hostName, IotHubClientProtocol protocol, SSLContext sslContext, ProxySettings proxySettings, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
+    {
+        this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;
+        this.receivePeriodInMilliseconds = receivePeriodInMilliseconds;
+        this.state = IotHubConnectionStatus.DISCONNECTED;
+        this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this);
     }
 
     /**
@@ -153,7 +155,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
             try
             {
-                this.transport.open(deviceClientConfigs);
+                this.transport.open();
             }
             catch (DeviceClientException e)
             {
@@ -162,19 +164,19 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    /**
-     * Adds a device client config to the saved list. Each device client config will be used in multiplexing
-     * @param config the config tied to the device client to multiplex with
-     */
-    void addClient(DeviceClientConfig config)
+    void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs) throws InterruptedException
     {
-        if (config == null)
-        {
-            throw new IllegalArgumentException("Config cannot be null");
-        }
+        this.transport.registerMultiplexedDeviceClient(configs);
+    }
 
-        // add client to transport
-        deviceClientConfigs.add(config);
+    void unregisterMultiplexedDeviceClient(List<DeviceClientConfig> configs) throws InterruptedException
+    {
+        this.transport.unregisterMultiplexedDeviceClient(configs);
+    }
+
+    void setMultiplexingRetryPolicy(RetryPolicy retryPolicy)
+    {
+        this.transport.setMultiplexingRetryPolicy(retryPolicy);
     }
 
     /**
@@ -218,6 +220,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     {
         synchronized (this.stateLock)
         {
+            if (state == IotHubConnectionStatus.DISCONNECTED)
+            {
+                return;
+            }
+
             if (this.sendTaskScheduler != null)
             {
                 this.sendTaskScheduler.shutdown();
@@ -297,7 +304,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
 
         /* Codes_SRS_DEVICE_IO_21_022: [The sendEventAsync shall add the message, with its associated callback and callback context, to the transport.] */
-        transport.addMessage(message, callback, callbackContext);
+        transport.addMessage(message, callback, callbackContext, deviceId);
     }
 
     /**
@@ -394,7 +401,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     public IotHubClientProtocol getProtocol()
     {
         /* Codes_SRS_DEVICE_IO_21_025: [The getProtocol shall return the protocol for transport.] */
-        return this.protocol;
+        return this.transport.getProtocol();
     }
 
     /**
@@ -428,14 +435,17 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
     {
-        /* Codes_SRS_DEVICE_IO_99_001: [The registerConnectionStateCallback shall register the callback with the transport.]*/
         this.transport.registerConnectionStateCallback(callback, callbackContext);
     }
 
-    public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext)
+    void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)
     {
-        //Codes_SRS_DEVICE_IO_34_020: [This function shall register the callback with the transport.]
-        this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext);
+        this.transport.registerConnectionStatusChangeCallback(statusChangeCallback, callbackContext, deviceId);
+    }
+
+    void registerMultiplexingConnectionStateCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
+    {
+        this.transport.registerMultiplexingConnectionStateCallback(callback, callbackContext);
     }
 
     /*

@@ -173,6 +173,7 @@ public class Tools
                 {
                     try
                     {
+                        log.debug("Registering a batch of {} devices from total of {} remaining devices", subIterable.size(), devicesClone.size() + subIterable.size());
                         addDevices(subIterable, connectionString);
                         break;
                     }
