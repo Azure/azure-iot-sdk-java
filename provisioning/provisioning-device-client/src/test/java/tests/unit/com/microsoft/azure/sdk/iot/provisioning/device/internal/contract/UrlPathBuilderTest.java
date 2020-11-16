@@ -212,8 +212,8 @@ public class UrlPathBuilderTest
     public void generateSasTokenUrlSucceeds() throws IOException
     {
         //arrange
-        //testScope%2Fregistrations%2FtestRegistrationId
-        final String expectedSasTokenUrl = TEST_SCOPE + "%2Fregistrations%2F" + TEST_REGISTRATION_ID;
+        //testScope/registrations/testRegistrationId
+        final String expectedSasTokenUrl = TEST_SCOPE + "/registrations/" + TEST_REGISTRATION_ID;
         UrlPathBuilder urlPathBuilder = new UrlPathBuilder(TEST_HOST_NAME, TEST_SCOPE, ProvisioningDeviceClientTransportProtocol.HTTPS);
         //act
         String sastokenUrl = urlPathBuilder.generateSasTokenUrl(TEST_REGISTRATION_ID);
