@@ -15,6 +15,10 @@ import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeRea
 import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.DISCONNECTED;
 import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.DISCONNECTED_RETRYING;
 
+/**
+ * This is the base class for DeviceClientManager and MultiplexingClientManager
+ * The shared logic for reconnection and handling status change call back exists here.
+ */
 @Slf4j
 public abstract class ClientManagerBase implements IotHubConnectionStatusChangeCallback {
 

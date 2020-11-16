@@ -7,9 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+/**
+ * This class is in charge of handling reconnection logic and registering callbacks for connection status changes.
+ * It will delegate all other calls other than `Open`, `Close` and registerConnectionStatusChangeCallbaack to the inner client (DeviceClient)
+ */
 @Slf4j
 public class DeviceClientManager extends ClientManagerBase {
 
+    // Define method calls that will not be delegated to the inner client.
     private interface DeviceClientNonDelegatedFunction {
         void open();
         void closeNow();

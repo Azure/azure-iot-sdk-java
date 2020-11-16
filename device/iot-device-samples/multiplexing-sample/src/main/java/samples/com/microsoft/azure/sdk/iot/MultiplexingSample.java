@@ -14,14 +14,8 @@ import java.util.*;
  */
 public class MultiplexingSample
 {
-    // Every multiplexed device will maintain its own connection status callback. Because of that, you can monitor
-    // if a particular device session goes offline unexpectedly. This connection status callback is also how you
-    // confirm when a device client is connected after registering it to an active multiplexed connection since the .registerDeviceClients(...)
-    // call behaves asynchronously when the multiplexing client is already open. Similarly, this callback is used to track
-    // when a device client is closed when unregistering it from an active connection.
     // In this sample we are using MultiplexClientManager to implement the reconnection
     // logic for the MultiplexingClient and DeviceClientManager to implement and track DeviceClient
-
 
     /**
      * Multiplex devices an IoT Hub using AMQPS / AMQPS_WS
