@@ -11,9 +11,6 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientT
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 public class UrlPathBuilder
 {
@@ -125,9 +122,8 @@ public class UrlPathBuilder
      * Generates URL Encoded SAS Token
      * @param registrationId Id for the registration. Cannot be {@code null} or empty
      * @return A string of format
-     * @throws UnsupportedEncodingException if the string could not be encoded.
      */
-    public String generateSasTokenUrl(String registrationId) throws UnsupportedEncodingException
+    public String generateSasTokenUrl(String registrationId)
     {
         //SRS_UrlPathBuilder_25_005: [ This method shall throw IllegalArgumentException if the registration id is null or empty. ]
         if (registrationId == null || registrationId.isEmpty())
@@ -141,7 +137,7 @@ public class UrlPathBuilder
         sasTokenUrl.append(REGISTRATIONS);
         sasTokenUrl.append(SLASH);
         sasTokenUrl.append(registrationId);
-        return URLEncoder.encode(sasTokenUrl.toString(), StandardCharsets.UTF_8.displayName());
+        return sasTokenUrl.toString();
     }
 
     /**
