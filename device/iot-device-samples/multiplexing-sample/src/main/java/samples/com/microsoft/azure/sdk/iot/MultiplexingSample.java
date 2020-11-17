@@ -20,10 +20,7 @@ import java.util.Map;
 public class MultiplexingSample
 {
     // Every multiplexed device will maintain its own connection status callback. Because of that, you can monitor
-    // if a particular device session goes offline unexpectedly. This connection status callback is also how you
-    // confirm when a device client is connected after registering it to an active multiplexed connection since the .registerDeviceClients(...)
-    // call behaves asynchronously when the multiplexing client is already open. Similarly, this callback is used to track
-    // when a device client is closed when unregistering it from an active connection.
+    // if a particular device session goes offline unexpectedly.
     public static class MultiplexedDeviceConnectionStatusChangeTracker implements IotHubConnectionStatusChangeCallback
     {
         private boolean isOpen = false;
