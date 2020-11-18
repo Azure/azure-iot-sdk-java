@@ -45,7 +45,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>provisioning-symmetrickey-sample</module>
+        <module>provisioning-symmetrickey-group-sample</module>
+        <module>provisioning-symmetrickey-individual-sample</module>
         <module>provisioning-tpm-sample</module>
         <module>provisioning-X509-sample</module>
         <module>service-enrollment-sample</module>

@@ -11,7 +11,7 @@
         <version>1.8.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>provisioning-symmetrickey-sample</artifactId>
+    <artifactId>provisioning-symmetrickey-group-sample</artifactId>
     <version>1.8.1</version>
     <name>Provisioning Symmetric Key Sample for Device Client</name>
     <developers>
@@ -50,7 +50,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.ProvisioningSymmetricKeySample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.ProvisioningSymmetricKeyIndividualEnrollmentSample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -16,20 +16,32 @@ import java.io.IOException;
 import java.util.Scanner;
 
 /**
- * Symmetric Key sample
+ * Symmetric Key authenticated enrollment group sample
  */
-public class ProvisioningSymmetricKeySample
+public class ProvisioningSymmetricKeyEnrollmentGroupSample
 {
+    // The scope Id of your DPS instance. This value can be retrieved from the Azure Portal
     private static final String SCOPE_ID = "[Your scope ID here]";
+
+    // Typically "global.azure-devices-provisioning.net"
     private static final String GLOBAL_ENDPOINT = "[Your Provisioning Service Global Endpoint here]";
+
+    // The symmetric key of the enrollment group. Unlike with individual enrollments, this key cannot be used directly when provisioning a device.
+    // Instead, this sample will demonstrate how to derive the symmetric key for your particular device within the enrollment group.
     private static final String SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
-    private static final String REGISTRATION_ID = "[Enter your Registration ID here]";
+
+    // The Id to assign to this device when it is provisioned to an IoT Hub. This value is arbitrary outside of some
+    // character limitations. For sample purposes, this value is filled in for you, but it may be changed.
+    private static final String PROVISIONED_DEVICE_ID = "myProvisionedDevice";
+
+    // Uncomment one line to choose which protocol you'd like to use
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS_WS;
-    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
+
+    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milliseconds
 
     static class ProvisioningStatus
     {
@@ -72,7 +84,16 @@ public class ProvisioningSymmetricKeySample
         Scanner scanner = new Scanner(System.in);
         DeviceClient deviceClient = null;
 
-        securityClientSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(), REGISTRATION_ID);
+        // Since enrollment groups can be used to provision more than one device, the service requires you to derive the
+        // symmetric key for your device to provision based on the master key of the enrollment group, and the desired
+        // device Id of the device you are provisioning
+
+        // For the sake of security, ComputeDerivedSymmetricKey also has an overload that takes the key as a byte[] to avoid writing it to heap memory as a string.
+        // For the sake of simplifying this sample though, the symmetric key is saved as a string despite this. It is recommended
+        // that users don't save their keys as strings in production code though.
+        byte[] derivedSymmetricKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(SYMMETRIC_KEY.getBytes(), PROVISIONED_DEVICE_ID);
+
+        securityClientSymmetricKey = new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
 
         ProvisioningDeviceClient provisioningDeviceClient = null;
         try
