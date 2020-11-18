@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -91,7 +92,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
         // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
         // it can be removed from stack memory.
-        byte[] derivedSymmetricKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(SYMMETRIC_KEY.getBytes(), PROVISIONED_DEVICE_ID);
+        byte[] derivedSymmetricKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), PROVISIONED_DEVICE_ID);
 
         securityClientSymmetricKey = new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
 
