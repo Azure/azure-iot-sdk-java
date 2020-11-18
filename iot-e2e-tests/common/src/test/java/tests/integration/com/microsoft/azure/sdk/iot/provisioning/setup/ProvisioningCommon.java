@@ -550,7 +550,7 @@ public class ProvisioningCommon extends IntegrationTest
                 assertEquals(TEST_VALUE_DP, testInstance.enrollmentGroup.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
 
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) attestation;
-                byte[] derivedPrimaryKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(symmetricKeyAttestation.getPrimaryKey(), testInstance.registrationId);
+                byte[] derivedPrimaryKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(StandardCharsets.UTF_8), testInstance.registrationId);
                 securityProvider = new SecurityProviderSymmetricKey(derivedPrimaryKey, testInstance.registrationId);
             }
         }
