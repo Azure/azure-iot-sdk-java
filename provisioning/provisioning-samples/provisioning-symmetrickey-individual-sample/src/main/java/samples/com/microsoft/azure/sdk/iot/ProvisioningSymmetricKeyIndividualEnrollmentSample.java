@@ -27,6 +27,10 @@ public class ProvisioningSymmetricKeyIndividualEnrollmentSample
     private static final String GLOBAL_ENDPOINT = "[Your Provisioning Service Global Endpoint here]";
 
     // The symmetric key of the individual enrollment. Unlike with enrollment groups, this key can be used directly.
+
+    // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
+    // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
+    // it can be removed from stack memory.
     private static final String SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
 
     // The registration Id to provision the device to. When creating an individual enrollment prior to running this sample, you choose this value.

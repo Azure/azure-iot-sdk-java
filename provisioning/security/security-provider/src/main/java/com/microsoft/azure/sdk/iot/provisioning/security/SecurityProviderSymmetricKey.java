@@ -166,33 +166,6 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
      * Compute the derived symmetric key for authenticating your device based on it's group enrollment's symmetric key and
      * from the device's registrationId. This step is only necessary for devices in group enrollments. Devices that
      * are registered via an individual enrollment can use the individual enrollment's symmetric key directly.
-     *
-     * Note that it isn't recommended to save keys such as the enrollmentGroupSymmetricKey as strings as that puts the key
-     * in heap memory which is a security concern. Users are advised to use the overload of this method that takes the key
-     * as an array of utf-8 bytes instead for production code. This function is only exposed for simplifying test/sample
-     * code.
-     *
-     * @param enrollmentGroupSymmetricKey The primary or secondary key of the group enrollment for which a device is computing it's derived symmetric key.
-     * @param deviceId The Id of the particular device to compute the derived key for. The user is expected to decide what the
-     *                 deviceId should be prior to attempting to provision the device.
-     * @return The derived key, in base64 encoded bytes.
-     * @throws InvalidKeyException If any exception occurs while initializing the HMAC with the provided key
-     * @throws NoSuchAlgorithmException If your device does not support HMAC_SHA256
-     */
-    public static byte[] ComputeDerivedSymmetricKey(String enrollmentGroupSymmetricKey, String deviceId) throws InvalidKeyException, NoSuchAlgorithmException
-    {
-        // The symmetric key, as provided by the Azure Portal, is a base64 encoded string, so first we need to decode it
-        byte[] masterKeyBytes = Base64.getDecoder().decode(enrollmentGroupSymmetricKey.getBytes(StandardCharsets.UTF_8));
-        SecretKeySpec secretKey = new SecretKeySpec(masterKeyBytes, HMAC_SHA256);
-        Mac hMacSha256 = Mac.getInstance(HMAC_SHA256);
-        hMacSha256.init(secretKey);
-        return Base64.getEncoder().encode(hMacSha256.doFinal(deviceId.getBytes()));
-    }
-
-    /**
-     * Compute the derived symmetric key for authenticating your device based on it's group enrollment's symmetric key and
-     * from the device's registrationId. This step is only necessary for devices in group enrollments. Devices that
-     * are registered via an individual enrollment can use the individual enrollment's symmetric key directly.
      * @param enrollmentGroupSymmetricKey The primary or secondary key of the group enrollment for which a device is computing it's derived symmetric key. Must be a UTF-8 byte array.
      * @param deviceId The Id of the particular device to compute the derived key for. The user is expected to decide what the
      *                 deviceId should be prior to attempting to provision the device.

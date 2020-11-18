@@ -88,9 +88,9 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         // symmetric key for your device to provision based on the symmetric key of the enrollment group, and the desired
         // device Id of the device you are provisioning
 
-        // For the sake of security, ComputeDerivedSymmetricKey also has an overload that takes the key as a byte[] to avoid writing it to heap memory as a string.
-        // For the sake of simplifying this sample though, the symmetric key is saved as a string despite this. It is recommended
-        // that users don't save their keys as strings in production code though.
+        // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
+        // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
+        // it can be removed from stack memory.
         byte[] derivedSymmetricKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(SYMMETRIC_KEY.getBytes(), PROVISIONED_DEVICE_ID);
 
         securityClientSymmetricKey = new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
