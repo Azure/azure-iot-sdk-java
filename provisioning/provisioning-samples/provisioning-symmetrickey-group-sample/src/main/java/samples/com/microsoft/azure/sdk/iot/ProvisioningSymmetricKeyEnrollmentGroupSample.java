@@ -29,7 +29,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
 
     // The symmetric key of the enrollment group. Unlike with individual enrollments, this key cannot be used directly when provisioning a device.
     // Instead, this sample will demonstrate how to derive the symmetric key for your particular device within the enrollment group.
-    private static final String SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
+    private static final String ENROLLMENT_GROUP_SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
 
     // The Id to assign to this device when it is provisioned to an IoT Hub. This value is arbitrary outside of some
     // character limitations. For sample purposes, this value is filled in for you, but it may be changed.
@@ -92,7 +92,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
         // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
         // it can be removed from stack memory.
-        byte[] derivedSymmetricKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), PROVISIONED_DEVICE_ID);
+        byte[] derivedSymmetricKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(ENROLLMENT_GROUP_SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), PROVISIONED_DEVICE_ID);
 
         securityClientSymmetricKey = new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
 
