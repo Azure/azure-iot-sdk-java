@@ -85,7 +85,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
         DeviceClient deviceClient = null;
 
         // Since enrollment groups can be used to provision more than one device, the service requires you to derive the
-        // symmetric key for your device to provision based on the master key of the enrollment group, and the desired
+        // symmetric key for your device to provision based on the symmetric key of the enrollment group, and the desired
         // device Id of the device you are provisioning
 
         // For the sake of security, ComputeDerivedSymmetricKey also has an overload that takes the key as a byte[] to avoid writing it to heap memory as a string.
