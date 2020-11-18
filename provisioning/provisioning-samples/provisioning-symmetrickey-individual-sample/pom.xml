@@ -11,7 +11,7 @@
         <version>1.8.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>provisioning-symmetrickey-group-sample</artifactId>
+    <artifactId>provisioning-symmetrickey-individual-sample</artifactId>
     <version>1.8.1</version>
     <name>Provisioning Symmetric Key Sample for Device Client</name>
     <developers>
