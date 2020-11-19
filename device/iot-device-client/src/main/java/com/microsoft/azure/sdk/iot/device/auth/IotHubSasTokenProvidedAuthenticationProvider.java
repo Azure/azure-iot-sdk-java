@@ -5,10 +5,16 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.SasTokenProvider;
 
 import javax.net.ssl.SSLContext;
 
+/**
+ * {@link IotHubSasTokenAuthenticationProvider} implementation where the tokens are provided by an instance of {@link SasTokenProvider}.
+ * This is used in cases like when the user creates a device client with {@link com.microsoft.azure.sdk.iot.device.DeviceClient#DeviceClient(String, String, SasTokenProvider, IotHubClientProtocol, ClientOptions)}
+ */
 public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
     SasTokenProvider sasTokenProvider;
@@ -19,7 +25,7 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
 
         if (sasTokenProvider == null)
         {
-            throw new IllegalArgumentException("sas token provider cannot be null");
+            throw new IllegalArgumentException("SAS token provider cannot be null");
         }
 
         this.sasTokenProvider = sasTokenProvider;
@@ -34,7 +40,7 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
     @Override
     public void setTokenValidSecs(long tokenValidSecs)
     {
-        throw new UnsupportedOperationException("Cannot configure sas token time to live when custom sas token provider is in use");
+        throw new UnsupportedOperationException("Cannot configure SAS token time to live when custom sas token provider is in use");
     }
 
     @Override
