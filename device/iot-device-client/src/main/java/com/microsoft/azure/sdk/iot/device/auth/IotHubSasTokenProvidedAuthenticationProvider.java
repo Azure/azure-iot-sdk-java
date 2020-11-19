@@ -34,13 +34,15 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
     @Override
     public boolean isRenewalNecessary()
     {
+        // Renewal of the authentication provider itself is never needed since the SAS token provider is responsible
+        // for providing SAS tokens indefinitely.
         return false;
     }
 
     @Override
     public void setTokenValidSecs(long tokenValidSecs)
     {
-        throw new UnsupportedOperationException("Cannot configure SAS token time to live when custom sas token provider is in use");
+        throw new UnsupportedOperationException("Cannot configure SAS token time to live when custom SAS token provider is in use");
     }
 
     @Override
