@@ -126,10 +126,10 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
 
         //act
-        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(true, false);
+        char[] actual = moduleAuthenticationWithTokenRefresh.getSasToken();
 
         //assert
-        assertEquals(newSasToken.toString(), actual);
+        assertEquals(newSasToken.toString(), String.valueOf(actual));
     }
 
     @Test
@@ -144,29 +144,9 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
 
         //act
-        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(true, true);
+        char[] actual = moduleAuthenticationWithTokenRefresh.getSasToken();
 
         //assert
-        assertEquals(newSasToken.toString(), actual);
-    }
-
-    // Tests_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_004: [This function shall invoke shouldRefreshSasToken, and if it should refresh, this function shall refresh the sas token.]
-    // Tests_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_005: [This function shall return the saved sas token's string representation.]
-    @Test
-    public void getRenewedSasTokenDoesNotRefreshIfNotNeeded() throws IOException, TransportException
-    {
-        //arrange
-        final IotHubSasToken oldSasToken = Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, "", "", "", "", "", 1);
-        final IotHubSasToken newSasToken = mockedIotHubSasToken;
-        IotHubImplSasTokenWithRefreshAuthenticationProvider moduleAuthenticationWithTokenRefresh = new IotHubImplSasTokenWithRefreshAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedSharedAccessToken, expectedTimeToLive, expectedTimeBufferPercentage);
-        Deencapsulation.setField(moduleAuthenticationWithTokenRefresh, "sasToken", oldSasToken);
-        moduleAuthenticationWithTokenRefresh.shouldRefresh = false;
-        moduleAuthenticationWithTokenRefresh.nextToken = newSasToken;
-
-        //act
-        String actual = moduleAuthenticationWithTokenRefresh.getRenewedSasToken(false, false);
-
-        //assert
-        assertEquals(oldSasToken.toString(), actual);
+        assertEquals(newSasToken.toString(), String.valueOf(actual));
     }
 }

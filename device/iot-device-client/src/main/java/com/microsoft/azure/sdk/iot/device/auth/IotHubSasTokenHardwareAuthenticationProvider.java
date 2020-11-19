@@ -65,25 +65,14 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
     /**
      * Getter for SasToken. If the saved token has expired, this method shall renew it if possible
      *
-     * @param proactivelyRenew if true, this method will generate a fresh sas token even if the previously saved token
-     *                                 has not expired yet as long as the current token has lived beyond its buffer.
-     *                                 Use this for pre-emptively renewing sas tokens.
-
      * @throws IOException if generating the sas token from the TPM fails
      * @return The value of SasToken
      */
-    public String getRenewedSasToken(boolean proactivelyRenew, boolean forceRenewal) throws IOException
+    public char[] getSasToken() throws IOException
     {
-        if (this.shouldRefreshToken(proactivelyRenew) || forceRenewal)
-        {
-            //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_035: [If the saved sas token has expired and there is a security provider, the saved sas token shall be refreshed with a new token from the security provider.]
-            //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_036: [If the saved sas token has not expired and there is a security provider, but the sas token should be proactively renewed, the saved sas token shall be refreshed with a new token from the security provider.]
-            String sasTokenString = this.generateSasTokenSignatureFromSecurityProvider(this.tokenValidSecs);
-            this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, null, sasTokenString, this.moduleId, 0);
-        }
-
-        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]
-        return this.sasToken.toString();
+        String sasTokenString = this.generateSasTokenSignatureFromSecurityProvider(this.tokenValidSecs);
+        this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, null, sasTokenString, this.moduleId, 0);
+        return this.sasToken.toString().toCharArray();
     }
 
     @Override

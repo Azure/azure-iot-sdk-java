@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
@@ -30,7 +29,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private IotHubConnectionStatus state = IotHubConnectionStatus.DISCONNECTED;
 
     private String iotHubUserName;
-    private String iotHubUserPassword;
+    private char[] iotHubUserPassword;
     private MqttConnection mqttConnection;
 
     //string constants
@@ -129,7 +128,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
                     this.log.trace("MQTT connection will use sas token based auth");
-                    this.iotHubUserPassword = this.config.getSasTokenAuthentication().getRenewedSasToken(false, false);
+                    this.iotHubUserPassword = this.config.getSasTokenAuthentication().getSasToken();
                     this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)

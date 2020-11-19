@@ -227,7 +227,16 @@ public class SendMessagesCommon extends IntegrationTest
             setup(sslContext);
         }
 
-        public void setup(SSLContext customSSLContext) throws Exception
+        public void setup(SSLContext customSSLContext) throws Exception {
+            setup(customSSLContext, false);
+        }
+
+        public void setup(boolean useCustomSasTokenProvider) throws Exception {
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+            setup(sslContext, useCustomSasTokenProvider);
+        }
+
+        public void setup(SSLContext customSSLContext, boolean useCustomSasTokenProvider) throws Exception
         {
             String TEST_UUID = UUID.randomUUID().toString();
 
@@ -239,8 +248,17 @@ public class SendMessagesCommon extends IntegrationTest
                     String deviceId = "java-send-message-e2e-test-device".concat("-" + TEST_UUID);
                     Device device = Device.createFromId(deviceId, null, null);
                     device = Tools.addDeviceWithRetry(registryManager, device);
-                    this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
                     this.identity = device;
+
+                    if (useCustomSasTokenProvider)
+                    {
+                        SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(device));
+                        this.client = new DeviceClient(hostName, deviceId, sasTokenProvider, protocol, null);
+                    }
+                    else
+                    {
+                        this.client = new DeviceClient(registryManager.getDeviceConnectionString(device), protocol);
+                    }
                 }
                 else if (authenticationType == SELF_SIGNED)
                 {

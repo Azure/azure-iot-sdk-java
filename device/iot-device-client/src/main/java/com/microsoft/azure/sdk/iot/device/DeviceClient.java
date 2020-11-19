@@ -208,6 +208,37 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
+     * Constructor that allows for the client's SAS token generation to be controlled by the user. Note that options in
+     * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
+     * the SDK no longer controls that when this constructor is used.
+     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param deviceId The Id of the device that the connection will identify as.
+     * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
+     * @param protocol The protocol that the client will connect over.
+     */
+    public DeviceClient(String hostName, String deviceId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol)
+    {
+        this(hostName, deviceId, sasTokenProvider, protocol, null);
+    }
+
+    /**
+     * Constructor that allows for the client's SAS token generation to be controlled by the user. Note that options in
+     * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
+     * the SDK no longer controls that when this constructor is used.
+     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param deviceId The Id of the device that the connection will identify as.
+     * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
+     * @param protocol The protocol that the client will connect over.
+     * @param clientOptions The options that allow configuration of the device client instance during initialization.
+     */
+    public DeviceClient(String hostName, String deviceId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
+    {
+        super(hostName, deviceId, null, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        commonConstructorVerifications();
+        commonConstructorSetup();
+    }
+
+    /**
      * Constructor that uses x509 authentication for communicating with IotHub
      *
      * @param connString the connection string for the x509 device to connect as (format: "HostName=...;DeviceId=...;x509=true")
@@ -685,7 +716,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      *
      *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
      *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
-     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
+     *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
      *	    - <b>SetCertificatePath</b> - this option is applicable only

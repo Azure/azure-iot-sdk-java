@@ -78,7 +78,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         }
 
         @Override
-        public String getRenewedSasToken(boolean proactivelyRenew, boolean forceRenewal) throws IOException
+        public char[] getSasToken() throws IOException
         {
             return null;
         }

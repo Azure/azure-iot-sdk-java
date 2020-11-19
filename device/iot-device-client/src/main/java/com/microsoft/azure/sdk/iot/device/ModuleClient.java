@@ -176,6 +176,40 @@ public class ModuleClient extends InternalClient
     }
 
     /**
+     * Constructor that allows for the client's SAS token generation to be controlled by the user. Note that options in
+     * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
+     * the SDK no longer controls that when this constructor is used.
+     *
+     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param deviceId The Id of the device containing the module that the connection will identify as.
+     * @param moduleId The Id of the module that the connection will identify as.
+     * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
+     * @param protocol The protocol that the client will connect over.
+     */
+    public ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol)
+    {
+        this(hostName, deviceId, moduleId, sasTokenProvider, protocol, null);
+    }
+
+    /**
+     * Constructor that allows for the client's SAS token generation to be controlled by the user. Note that options in
+     * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
+     * the SDK no longer controls that when this constructor is used.
+     *
+     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param deviceId The Id of the device containing the module that the connection will identify as.
+     * @param moduleId The Id of the module that the connection will identify as.
+     * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
+     * @param protocol The protocol that the client will connect over.
+     * @param clientOptions The options that allow configuration of the module client instance during initialization.
+     */
+    public ModuleClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions)
+    {
+        super(hostName, deviceId, moduleId, sasTokenProvider, protocol, clientOptions, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
+        commonConstructorVerifications(protocol, this.getConfig());
+    }
+
+    /**
      * Create a module client instance from your environment variables
      * @return the created module client instance
      * @throws ModuleClientException if the module client cannot be created

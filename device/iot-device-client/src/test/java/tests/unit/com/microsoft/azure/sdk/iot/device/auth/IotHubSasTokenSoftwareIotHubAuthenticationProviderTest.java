@@ -155,8 +155,6 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
             {
                 System.currentTimeMillis();
                 result = 0;
-                Deencapsulation.invoke(mockSasToken, "isExpired");
-                result = true;
                 System.currentTimeMillis();
                 result = 0;
                 Deencapsulation.newInstance(IotHubSasToken.class, new Class[] {String.class, String.class, String.class, String.class, String.class, long.class}, expectedHostname, expectedDeviceId, expectedDeviceKey, null, expectedModuleId, expectedExpiryTime);
@@ -168,7 +166,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        sasAuth.getRenewedSasToken(false, false);
+        sasAuth.getSasToken();
 
     }
 
@@ -201,7 +199,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        sasAuth.getRenewedSasToken(true, false);
+        sasAuth.getSasToken();
     }
 
     @Test
@@ -232,7 +230,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        sasAuth.getRenewedSasToken(true, true);
+        sasAuth.getSasToken();
     }
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_006: [If the saved sas token has not expired and there is a device key present, but this method is called to proactively renew and the token should renew, the saved sas token shall be renewed.]
@@ -262,13 +260,12 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        sasAuth.getRenewedSasToken(true, false);
+        sasAuth.getSasToken();
     }
 
     //Tests_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]
     @Test
-    public void getSasTokenReturnsSavedValue() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
-    {
+    public void getSasTokenReturnsSavedValue() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, TransportException {
         //arrange
         new Expectations()
         {
@@ -277,18 +274,16 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
                 result = mockSasToken;
                 mockSasToken.toString();
                 result = "some token";
-                Deencapsulation.invoke(mockSasToken, "isExpired");
-                result = false;
             }
         };
 
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        String actualSasToken = Deencapsulation.invoke(sasAuth, "getRenewedSasToken", false, false);
+        char[] actualSasToken = sasAuth.getSasToken();
 
         //assert
-        assertEquals(mockSasToken.toString(), actualSasToken);
+        assertEquals(mockSasToken.toString(), String.valueOf(actualSasToken));
     }
 
     //Tests_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired and cannot be renewed, this function shall return true.]

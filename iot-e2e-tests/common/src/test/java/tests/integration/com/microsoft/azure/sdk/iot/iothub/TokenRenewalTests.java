@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,12 +37,14 @@ import java.util.UUID;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static junit.framework.TestCase.assertTrue;
 
+@Slf4j
 @IotHubTest
 public class TokenRenewalTests extends IntegrationTest
 {
     protected static String iotHubConnectionString;
     private static RegistryManager registryManager;
     protected static HttpProxyServer proxyServer;
+    private static String iotHubHostName;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8898;
     protected static final String testProxyUser = "proxyUsername";
@@ -51,6 +54,10 @@ public class TokenRenewalTests extends IntegrationTest
     private static final Integer RETRY_MILLISECONDS = 100;
 
     private static final int TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS = 17 * 60 * 1000;
+
+    private static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
+    private static final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
+    private static final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 120; //wait time beyond the expected grace period, just in case
 
     public TokenRenewalTests()
     {
@@ -63,7 +70,7 @@ public class TokenRenewalTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-
+        iotHubHostName = com.microsoft.azure.sdk.iot.service.IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
@@ -94,10 +101,6 @@ public class TokenRenewalTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
-        final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
-        final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
-        final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 120; //wait time beyond the expected grace period, just in case
-
         List<InternalClient> clients = createClientsToTest();
 
         //service grants a 10 minute grace period beyond when sas token expires, this test attempts to send a message after that grace period
@@ -106,8 +109,17 @@ public class TokenRenewalTests extends IntegrationTest
 
         for (InternalClient client : clients)
         {
-            //set it so a newly generated sas token only lasts for a small amount of time
-            client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
+            try
+            {
+                //set it so a newly generated sas token only lasts for a small amount of time
+                client.setOption("SetSASTokenExpiryTime", SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
+            }
+            catch (UnsupportedOperationException e)
+            {
+                // This will throw for clients with custom sas token providers since you cannot configure this value at the SDK
+                // level when the user controls all aspects of SAS token generation.
+                log.debug("Ignoring UnsupportedOperationException because it was expected");
+            }
         }
 
         Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
@@ -198,6 +210,16 @@ public class TokenRenewalTests extends IntegrationTest
             {
                 clients.add(createModuleClient(protocol));
             }
+
+            // Add another client with a custom sas token provider. This is important to test
+            // because we want to make sure that the sas token provider is called to get the new sas token and that it mqtt/amqp connections
+            // with it behave the same way as mqtt/amqp connections without it.
+            UUID uuid = UUID.randomUUID();
+            String deviceId = "token-renewal-test-device-with-custom-sas-token-provider-" + protocol + "-" + uuid.toString();
+            com.microsoft.azure.sdk.iot.service.Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, DeviceStatus.Enabled, null);
+            device = registryManager.addDevice(device);
+            SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(device), (int) (SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL));
+            clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
         }
 
         return clients;
