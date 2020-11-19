@@ -76,10 +76,13 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
     }
 
     /**
-     * Returns true if the saved sas token needs to be manually renewed by the user
-     * @return true if the saved sas token needs to be manually renewed by the user
+     * Returns true if the this authentication provider is no longer valid. If true, users will need to create a new
+     * DeviceClient instance to get a new authentication provider. The most common case for this is if the user
+     * provides a SAS token, but no symmetric key, and that SAS token has expired. At that point, the user's client
+     * won't be able to authenticate anymore.
+     * @return true if the this authentication provider is no longer valid. False otherwise
      */
-    public boolean isRenewalNecessary()
+    public boolean isAuthenticationProviderRenewalNecessary()
     {
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_017: [If the saved sas token has expired, this function shall return true.]
         return (this.sasToken != null && this.sasToken.isExpired());

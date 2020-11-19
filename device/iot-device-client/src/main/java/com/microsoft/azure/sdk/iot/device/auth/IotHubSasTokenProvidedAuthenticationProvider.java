@@ -32,7 +32,7 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
     }
 
     @Override
-    public boolean isRenewalNecessary()
+    public boolean isAuthenticationProviderRenewalNecessary()
     {
         // Renewal of the authentication provider itself is never needed since the SAS token provider is responsible
         // for providing SAS tokens indefinitely.

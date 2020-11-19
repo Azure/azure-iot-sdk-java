@@ -139,7 +139,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
-        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
+        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
 
         //assert
         assertTrue(isRenewalNecessary);
@@ -162,7 +162,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
-        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
+        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
 
         //assert
         assertFalse(isRenewalNecessary);

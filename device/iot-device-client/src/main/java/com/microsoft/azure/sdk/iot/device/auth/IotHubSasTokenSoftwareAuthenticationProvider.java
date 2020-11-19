@@ -5,15 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
@@ -91,10 +86,10 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @return if the sas token needs manual renewal
      */
     @Override
-    public boolean isRenewalNecessary()
+    public boolean isAuthenticationProviderRenewalNecessary()
     {
-        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isRenewalNecessary returns true.]
-        return (super.isRenewalNecessary() && this.deviceKey == null);
+        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isAuthenticationProviderRenewalNecessary returns true.]
+        return (super.isAuthenticationProviderRenewalNecessary() && this.deviceKey == null);
     }
 
     @Override

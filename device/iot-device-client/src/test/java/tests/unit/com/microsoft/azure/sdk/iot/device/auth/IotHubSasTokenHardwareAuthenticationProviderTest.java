@@ -502,7 +502,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
-        boolean result = sasTokenAuthentication.isRenewalNecessary();
+        boolean result = sasTokenAuthentication.isAuthenticationProviderRenewalNecessary();
 
         //assert
         assertFalse(result);

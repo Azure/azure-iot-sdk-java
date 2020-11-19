@@ -61,7 +61,7 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
      * @return false
      */
     @Override
-    public boolean isRenewalNecessary()
+    public boolean isAuthenticationProviderRenewalNecessary()
     {
         // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_003: [This function shall always return false.]
         return false;

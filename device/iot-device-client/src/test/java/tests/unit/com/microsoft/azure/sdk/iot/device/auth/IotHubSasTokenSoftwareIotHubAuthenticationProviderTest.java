@@ -302,7 +302,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, null, expectedSasToken);
 
         //act
-        boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
+        boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
 
         //assert
         assertTrue(needsToRenew);
@@ -326,7 +326,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
+        boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
 
         //assert
         assertFalse(needsToRenew);
@@ -348,13 +348,13 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
+        boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
 
         //assert
         assertFalse(needsToRenew);
     }
 
-    // Tests_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isRenewalNecessary returns true.]
+    // Tests_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isAuthenticationProviderRenewalNecessary returns true.]
     @Test
     public void isRenewalNecessaryReturnsTrueIfDeviceKeyPresent()
     {
@@ -362,7 +362,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
-        boolean result = sasAuth.isRenewalNecessary();
+        boolean result = sasAuth.isAuthenticationProviderRenewalNecessary();
 
         //assert
         assertFalse(result);

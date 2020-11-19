@@ -120,7 +120,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
      * @return always returns false as the hardware authentication mechanism will never need to be updated with a new key or token
      */
     @Override
-    public boolean isRenewalNecessary()
+    public boolean isAuthenticationProviderRenewalNecessary()
     {
         //Hardware will always be able to generate new sas tokens
         //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_012: [This function shall return false.]

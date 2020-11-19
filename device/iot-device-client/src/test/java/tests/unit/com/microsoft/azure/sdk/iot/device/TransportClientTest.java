@@ -165,7 +165,7 @@ public class TransportClientTest
                 result = mockDeviceClientConfig;
                 mockDeviceClientConfig.getSasTokenAuthentication();
                 result = mockIotHubSasTokenAuthenticationProvider;
-                mockIotHubSasTokenAuthenticationProvider.isRenewalNecessary();
+                mockIotHubSasTokenAuthenticationProvider.isAuthenticationProviderRenewalNecessary();
                 result = true;
             }
         };

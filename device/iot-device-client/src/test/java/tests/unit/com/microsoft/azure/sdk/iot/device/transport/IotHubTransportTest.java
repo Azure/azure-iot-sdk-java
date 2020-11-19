@@ -2310,7 +2310,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockedConfig.getSasTokenAuthentication().isRenewalNecessary();
+                mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
             }
         };
@@ -2333,7 +2333,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                mockedConfig.getSasTokenAuthentication().isRenewalNecessary();
+                mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = false;
             }
         };
@@ -2356,7 +2356,7 @@ public class IotHubTransportTest
             {
                 mockedConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
-                mockedConfig.getSasTokenAuthentication().isRenewalNecessary();
+                mockedConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
             }
         };

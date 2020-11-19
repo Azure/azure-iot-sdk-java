@@ -109,7 +109,7 @@ public class IotHubSasTokenWithRefreshAuthenticationProviderTest
         IotHubSasTokenWithRefreshAuthenticationProvider moduleAuthenticationWithTokenRefresh = new IotHubImplSasTokenWithRefreshAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedSharedAccessToken, expectedTimeToLive, expectedTimeBufferPercentage);
 
         //act, assert
-        assertFalse(moduleAuthenticationWithTokenRefresh.isRenewalNecessary());
+        assertFalse(moduleAuthenticationWithTokenRefresh.isAuthenticationProviderRenewalNecessary());
     }
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_004: [This function shall invoke shouldRefreshSasToken, and if it should refresh, this function shall refresh the sas token.]
