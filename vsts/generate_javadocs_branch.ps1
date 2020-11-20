@@ -15,7 +15,16 @@ function TestLastExitCode {
     }
 }
 
-function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources, $FolderName) {
+function CreateJavadocReleaseBranch(
+    $GitHubName,
+    $GitHubEmail,
+    $Sources,
+    $FolderName,
+    $UpdateServiceClientDocs,
+    $UpdateDeviceClientDocs,
+    $UpdateProvisioningClientDocs,
+    $UpdateDepsDocs) {
+
     if ($([string]::IsNullOrWhiteSpace($GitHubName) -eq $true)) {
         throw "GitHubName is null or empty"
     }
@@ -48,6 +57,7 @@ function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources, $Folder
 
     Write-Host "Copying generated javadocs to replace current javadocs"
     Set-Location apidocs
+
     Remove-Item ..\deps -Force -Recurse
     Copy-Item -Force -Path .\deps\* -Destination ..\deps
     Copy-Item -Recurse -Force -Path .\deps\com -Destination ..\deps
@@ -104,10 +114,26 @@ function CreateJavadocReleaseBranch($GitHubName, $GitHubEmail, $Sources, $Folder
 
     # Move the generated content to the correct folder. The folder will be different for master and preview branches.
     New-Item -Path ../$FolderName -ItemType Directory
-    Move-Item -Force -Path ..\deps -Destination ..\$FolderName\deps
-    Move-Item -Force -Path ..\device -Destination ..\$FolderName\device
-    Move-Item -Force -Path ..\service -Destination ..\$FolderName\service
-    Move-Item -Force -Path ..\provisioning -Destination ..\$FolderName\provisioning
+
+    if($UpdateDepsDocs)
+    {
+        Move-Item -Force -Path ..\deps -Destination ..\$FolderName\deps
+    }
+
+    if($UpdateDeviceClientDocs)
+    {
+        Move-Item -Force -Path ..\device -Destination ..\$FolderName\device
+    }
+
+    if($UpdateServiceClientDocs)
+    {
+        Move-Item -Force -Path ..\service -Destination ..\$FolderName\service
+    }
+
+    if($UpdateProvisioningClientDocs)
+    {
+        Move-Item -Force -Path ..\provisioning -Destination ..\$FolderName\provisioning
+    }
 
     Set-Location ..
 
