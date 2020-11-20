@@ -37,10 +37,12 @@ public class CustomSasTokenProviderSample
     {
         private static final String RAW_SIGNATURE_FORMAT = "%s\n%s";
         private static final String SHARED_ACCESS_SIGNATURE_FORMAT = "SharedAccessSignature %s=%s&%s=%s&%s=%d";
+        private static final String SCOPE_FORMAT = "%s/devices/%s";
         private static final Charset SIGNATURE_CHARSET = StandardCharsets.UTF_8;
-        private static final String ExpiryTimeFieldKey = "se";
-        private static final String SignatureFieldKey = "sig";
-        private static final String ResourceURIFieldKey = "sr";
+        private static final String EXPIRY_TIME_FIELD_KEY = "se";
+        private static final String SIGNATURE_FIELD_KEY = "sig";
+        private static final String RESOURCE_URI_FIELD_KEY = "sr";
+        private static final String HMAC_SHA_256 = "HmacSHA256";
 
         // When deciding whether to renew SAS tokens or not, it is wise to renew proactively to avoid clock skew issues
         // between client and server.
@@ -82,13 +84,14 @@ public class CustomSasTokenProviderSample
                 // URL encode the string
                 String urlEncodedSignature = URLEncoder.encode(utf8Sig, SIGNATURE_CHARSET.name());
 
-                this.sasToken = String.format(SHARED_ACCESS_SIGNATURE_FORMAT,
-                        ResourceURIFieldKey,
-                        scope,
-                        SignatureFieldKey,
-                        urlEncodedSignature,
-                        ExpiryTimeFieldKey,
-                        this.expiryTimeSeconds).toCharArray();
+                this.sasToken = String.format(
+                    SHARED_ACCESS_SIGNATURE_FORMAT,
+                        RESOURCE_URI_FIELD_KEY,
+                    scope,
+                        SIGNATURE_FIELD_KEY,
+                    urlEncodedSignature,
+                        EXPIRY_TIME_FIELD_KEY,
+                    this.expiryTimeSeconds).toCharArray();
             }
             catch (UnsupportedEncodingException | InvalidKeyException | NoSuchAlgorithmException e)
             {
@@ -120,12 +123,10 @@ public class CustomSasTokenProviderSample
 
         private byte[] encryptSignatureHmacSha256(byte[] signature, byte[] deviceKey) throws NoSuchAlgorithmException, InvalidKeyException
         {
-            String hmacSha256 = "HmacSHA256";
-
-            SecretKeySpec secretKey = new SecretKeySpec(deviceKey, hmacSha256);
+            SecretKeySpec secretKey = new SecretKeySpec(deviceKey, HMAC_SHA_256);
 
             byte[] encryptedSig = null;
-            Mac hMacSha256 = Mac.getInstance(hmacSha256);
+            Mac hMacSha256 = Mac.getInstance(HMAC_SHA_256);
             hMacSha256.init(secretKey);
             encryptedSig = hMacSha256.doFinal(signature);
 
@@ -134,7 +135,7 @@ public class CustomSasTokenProviderSample
 
         private String buildScope(String hostName, String deviceId)
         {
-            return String.format("%s/devices/%s", hostName, deviceId);
+            return String.format(SCOPE_FORMAT, hostName, deviceId);
         }
     }
 
@@ -195,7 +196,7 @@ public class CustomSasTokenProviderSample
 
             System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
 
-            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
+            if (status == IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
             {
                 failedMessageListOnClose.add(msg.getMessageId());
             }
