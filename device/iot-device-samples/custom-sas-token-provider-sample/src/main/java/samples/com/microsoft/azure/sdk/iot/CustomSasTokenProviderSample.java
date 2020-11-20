@@ -174,6 +174,12 @@ public class CustomSasTokenProviderSample
                 this.cachedSasToken = new SasToken(this.hostName, this.deviceId, this.deviceKey, this.secondsToLivePerToken, this.renewalBufferSeconds);
                 return this.cachedSasToken.getValue();
             }
+            //else if (...)
+            //{
+                // It is recommended to have some logic in here that checks to make sure that the device key in use itself
+                // is still valid. A given device may have it's keys cycled by its owner, and this would be an appropriate
+                // time to update the device key if a new one was cycled in.
+            //}
             else
             {
                 return this.cachedSasToken.getValue();
