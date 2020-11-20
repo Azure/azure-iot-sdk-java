@@ -33,7 +33,7 @@ public class CustomSasTokenProviderSample
      * Helper class for turning symmetric keys into SAS tokens. It also provides some helpful functions around
      * if this token should be renewed.
      */
-    protected static class SasToken
+    protected static class SasTokenHelper
     {
         private static final String RAW_SIGNATURE_FORMAT = "%s\n%s";
         private static final String SHARED_ACCESS_SIGNATURE_FORMAT = "SharedAccessSignature %s=%s&%s=%s&%s=%d";
@@ -58,7 +58,7 @@ public class CustomSasTokenProviderSample
          * @param secondsToLive the number of seconds that the token will live for.
          * @param renewalBufferSeconds the number of seconds before the token expires when this instance will recommend renewal via {{@link #shouldRenewSasToken()}}
          */
-        public SasToken(String hostName, String deviceId, String deviceKey, int secondsToLive, int renewalBufferSeconds)
+        public SasTokenHelper(String hostName, String deviceId, String deviceKey, int secondsToLive, int renewalBufferSeconds)
         {
             this.renewalBufferSeconds = renewalBufferSeconds;
 
@@ -155,7 +155,7 @@ public class CustomSasTokenProviderSample
         private int secondsToLivePerToken;
         private int renewalBufferSeconds;
 
-        private SasToken cachedSasToken;
+        private SasTokenHelper cachedSasToken;
 
         public SasTokenProviderImpl(String hostName, String deviceId, String deviceKey, int secondsToLivePerToken, int renewalBufferSeconds)
         {
@@ -172,7 +172,7 @@ public class CustomSasTokenProviderSample
             if (this.cachedSasToken == null || this.cachedSasToken.shouldRenewSasToken())
             {
                 // if no SAS token is cached, or if the cached token is expired/about to expire, create a new one
-                this.cachedSasToken = new SasToken(this.hostName, this.deviceId, this.deviceKey, this.secondsToLivePerToken, this.renewalBufferSeconds);
+                this.cachedSasToken = new SasTokenHelper(this.hostName, this.deviceId, this.deviceKey, this.secondsToLivePerToken, this.renewalBufferSeconds);
                 return this.cachedSasToken.getValue();
             }
             //else if (...)
