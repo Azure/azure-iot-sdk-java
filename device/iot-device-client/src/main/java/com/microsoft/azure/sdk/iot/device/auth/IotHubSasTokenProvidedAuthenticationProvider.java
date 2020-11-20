@@ -66,7 +66,7 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
 
         // Assuming that the token's life "starts" now for the sake of figuring out when it needs to be renewed. Users
         // could theoretically give us a SAS token that started a while ago, but since we have no way of figuring that out,
-        // we will conservatively just renew at 85% of the remaining time on the token, rather than 85% of the time the token
+        // we will conservatively just renew at timeBufferPercentage% of the remaining time on the token, rather than timeBufferPercentage% of the time the token
         // has existed for.
         long tokenValidSeconds = expiryTimeSeconds - (System.currentTimeMillis() / 1000);
 
