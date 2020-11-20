@@ -115,22 +115,22 @@ function CreateJavadocReleaseBranch(
     # Move the generated content to the correct folder. The folder will be different for master and preview branches.
     New-Item -Path ../$FolderName -ItemType Directory
 
-    if($UpdateDepsDocs)
+    if ($UpdateDepsDocs -eq "True")
     {
         Move-Item -Force -Path ..\deps -Destination ..\$FolderName\deps
     }
 
-    if($UpdateDeviceClientDocs)
+    if ($UpdateDeviceClientDocs -eq "True")
     {
         Move-Item -Force -Path ..\device -Destination ..\$FolderName\device
     }
 
-    if($UpdateServiceClientDocs)
+    if ($UpdateServiceClientDocs -eq "True")
     {
         Move-Item -Force -Path ..\service -Destination ..\$FolderName\service
     }
 
-    if($UpdateProvisioningClientDocs)
+    if ($UpdateProvisioningClientDocs -eq "True")
     {
         Move-Item -Force -Path ..\provisioning -Destination ..\$FolderName\provisioning
     }
