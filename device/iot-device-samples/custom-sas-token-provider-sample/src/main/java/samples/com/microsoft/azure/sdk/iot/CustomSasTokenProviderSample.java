@@ -27,7 +27,7 @@ import java.util.List;
 public class CustomSasTokenProviderSample
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private static List<String> failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
     /**
      * Helper class for turning symmetric keys into SAS tokens. It also provides some helpful functions around
