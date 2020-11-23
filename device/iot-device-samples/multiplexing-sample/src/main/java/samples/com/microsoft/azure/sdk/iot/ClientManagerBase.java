@@ -25,7 +25,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     protected enum ConnectionStatus {
         DISCONNECTED, CONNECTING, CONNECTED
     }
-
+    
     protected static final Object lock = new Object();
     protected static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 2;
     protected ConnectionStatus connectionStatus;
@@ -67,7 +67,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
             }
 
             try {
-                log.debug("Sleeping for 10 secs before attempting another open()");
+                log.debug("Sleeping for " + SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS + " secs before attempting another open()");
                 Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
             }
             catch (InterruptedException ex) {
@@ -106,11 +106,11 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
         Pair<IotHubConnectionStatusChangeCallback, Object> suppliedCallbackPair = this.suppliedConnectionStatusChangeCallback;
         if (throwable == null)
         {
-            System.out.println("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason);
+            log.info("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason);
         }
         else
         {
-            System.out.println("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason + ", " + throwable.getMessage());
+            log.info("CONNECTION STATUS UPDATE FOR CLIENT: " + getClientId() + " - " + status + ", " + statusChangeReason + ", " + throwable.getMessage());
             throwable.printStackTrace();
         }
 

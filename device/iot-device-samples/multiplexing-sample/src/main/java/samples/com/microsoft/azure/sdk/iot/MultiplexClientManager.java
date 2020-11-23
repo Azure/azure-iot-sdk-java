@@ -26,6 +26,12 @@ public class MultiplexClientManager extends ClientManagerBase {
     private final MultiplexingClient client;
     private final String multiplexClientId;
 
+    /**
+     * Creates an instance of the MultiplexClientManager
+     *
+     * @param multiplexingClient the multiplexing client
+     * @param multiplexClientId user defined Id for the multiplexing client.
+     */
     MultiplexClientManager(MultiplexingClient multiplexingClient, String multiplexClientId) {
         this.connectionStatus = ConnectionStatus.DISCONNECTED;
         this.client = multiplexingClient;
