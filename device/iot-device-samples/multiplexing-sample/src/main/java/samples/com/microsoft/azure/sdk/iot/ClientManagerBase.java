@@ -113,7 +113,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     // We only expect the connection status to be CONNECTED by the time we enter this state.
     public void handleRecoverableDisconnection() {
         // If the lastKnownConnectionStatus is not in a CONNECTED state it can mean two things:
-        // 1: the status is CONNECTING, in which case there is nothing to be done.
+        // 1: the status is CONNECTING, in which case there is nothing to be done at this time.
         // 2: the status is DISCONNECTED, in which case connection cannot be re-established.
         if (lastKnownConnectionStatus == ConnectionStatus.CONNECTED)
         {
@@ -169,12 +169,13 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
             {
                 // If the client has dependencies to another client (in this case it could be the multiplexing client) we have to wait to make sure the
                 // dependent connection is established first.
-                if (dependencyConnectionStatusTracker != null && dependencyConnectionStatusTracker.getConnectionStatus() != ConnectionStatus.CONNECTED)
+                if (dependencyConnectionStatusTracker != null && dependencyConnectionStatusTracker.getConnectionStatus() == ConnectionStatus.CONNECTING)
                 {
                     try
                     {
                         log.info("Waiting for the dependent connection to be established before attempting to open the connection");
                         Thread.sleep(SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS * 1000);
+                        continue;
                     }
                     catch (InterruptedException ex)
                     {
