@@ -34,7 +34,6 @@ public class DeviceClientManager extends ClientManagerBase
     DeviceClientManager(DeviceClient deviceClient, ConnectionStatusTracker dependencyConnectionStatusTracker)
     {
         this.dependencyConnectionStatusTracker = dependencyConnectionStatusTracker;
-        lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
         client = deviceClient;
         client.registerConnectionStatusChangeCallback(this, this);
     }
