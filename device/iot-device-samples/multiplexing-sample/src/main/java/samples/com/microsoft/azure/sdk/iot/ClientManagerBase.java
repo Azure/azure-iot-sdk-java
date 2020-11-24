@@ -24,6 +24,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     // Initialize the connection status as DISCONNECTED
     protected ConnectionStatus lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
 
+    // Tracks connection status of the dependency connection (multiplexing client connection status for example in this case for DeviceClientManager)
     protected ConnectionStatusTracker dependencyConnectionStatusTracker;
 
     public abstract void openClient() throws IOException;
