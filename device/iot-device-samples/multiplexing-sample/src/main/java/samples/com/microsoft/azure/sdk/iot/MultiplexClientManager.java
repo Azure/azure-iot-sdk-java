@@ -12,10 +12,11 @@ import java.io.IOException;
  * It will delegate all other calls other than `Open`, `Close` and registerConnectionStatusChangeCallbaack to the inner client (MultiplexingClient)
  */
 @Slf4j
-public class MultiplexClientManager extends ClientManagerBase {
-
+public class MultiplexClientManager extends ClientManagerBase
+{
     // Define method calls that will not be delegated to the inner client.
-    private interface DeviceClientNonDelegatedFunction {
+    private interface DeviceClientNonDelegatedFunction
+    {
         void open();
         void close();
         void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
@@ -32,29 +33,28 @@ public class MultiplexClientManager extends ClientManagerBase {
      * @param multiplexingClient the multiplexing client
      * @param multiplexClientId user defined Id for the multiplexing client.
      */
-    MultiplexClientManager(MultiplexingClient multiplexingClient, String multiplexClientId) {
-        this.connectionStatus = ConnectionStatus.DISCONNECTED;
+    MultiplexClientManager(MultiplexingClient multiplexingClient, String multiplexClientId)
+    {
         this.client = multiplexingClient;
         this.multiplexClientId = multiplexClientId;
         this.client.registerConnectionStatusChangeCallback(this, this);
     }
 
     @Override
-    public void openClient() throws IOException {
+    public void openClient() throws IOException
+    {
         this.client.open();
     }
 
     @Override
-    public void closeClient() throws IOException {
+    public void closeClient() throws IOException
+    {
         this.client.close();
     }
 
     @Override
-    public String getClientId() {
-        return  multiplexClientId;
-    }
-
-    public MultiplexingClient getMultiplexClient(){
-        return client;
+    public String getClientId()
+    {
+        return multiplexClientId;
     }
 }

@@ -81,7 +81,7 @@ public class MultiplexingSample
 
             multiplexedDeviceClients.put(deviceId, clientToMultiplex);
 
-            deviceManagers.put(deviceId, new DeviceClientManager(clientToMultiplex));
+            deviceManagers.put(deviceId, new DeviceClientManager(clientToMultiplex, multiplexClientManager));
         }
 
         System.out.println("Opening multiplexed connection");
@@ -97,6 +97,7 @@ public class MultiplexingSample
         multiplexClientManager.registerDeviceClients(multiplexedDeviceClients.values());
 
         System.out.println("Successfully registered " + multiplexedDeviceCount + " clients to the multiplexing client");
+
 
         for (String deviceId : deviceIds)
         {
