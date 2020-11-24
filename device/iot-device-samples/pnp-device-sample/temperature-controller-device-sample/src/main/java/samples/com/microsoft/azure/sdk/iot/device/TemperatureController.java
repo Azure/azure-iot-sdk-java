@@ -41,10 +41,14 @@ public class TemperatureController {
         }
     }
 
-    // DTDL interface used: https://github.com/Azure/opendigitaltwins-dtdl/blob/master/DTDL/v2/samples/TemperatureController.json
+    // DTDL interface used: https://github.com/Azure/iot-plugandplay-models/blob/main/dtmi/com/example/temperaturecontroller-2.json
+    // The TemperatureController model contains 2 Thermostat components that implement different versions of Thermostat models.
+    // Both Thermostat models are identical in definition but this is done to allow IoT Central to handle
+    // TemperatureController model correctly.
+
     private static final String deviceConnectionString = System.getenv("IOTHUB_DEVICE_CONNECTION_STRING");
     private static final String deviceSecurityType = System.getenv("IOTHUB_DEVICE_SECURITY_TYPE");
-    private static final String MODEL_ID = "dtmi:com:example:TemperatureController;1";
+    private static final String MODEL_ID = "dtmi:com:example:TemperatureController;2";
     private static final String THERMOSTAT_1 = "thermostat1";
     private static final String THERMOSTAT_2 = "thermostat2";
     private static final String SERIAL_NO = "SR-123456";
