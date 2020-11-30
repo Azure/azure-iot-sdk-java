@@ -49,7 +49,6 @@ public class DeviceClientManager extends ClientManagerBase
 
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be opened.
-     * @throws IOException
      */
     @Override
     protected void openClient() throws IOException
@@ -59,7 +58,6 @@ public class DeviceClientManager extends ClientManagerBase
 
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be closed.
-     * @throws IOException
      */
     @Override
     protected void closeClient() throws IOException
@@ -69,7 +67,6 @@ public class DeviceClientManager extends ClientManagerBase
 
     /**
      * All classes that extend ClientManagerBase should implement how their inner client can be identified for logging purposes.
-     * @throws IOException
      */
     @Override
     public String getClientId()

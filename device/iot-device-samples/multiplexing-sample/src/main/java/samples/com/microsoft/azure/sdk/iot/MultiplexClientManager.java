@@ -14,16 +14,19 @@ import java.io.IOException;
 @Slf4j
 public class MultiplexClientManager extends ClientManagerBase
 {
-    // Define method calls that will not be delegated to the inner client.
+    /**
+     * Define method calls that will not be delegated to the inner client.
+     */
     private interface DeviceClientNonDelegatedFunction
     {
         void open();
         void close();
-        void closeNow();
         void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
-    // The methods defined in the interface DeviceClientNonDelegatedFunction will be called on MultiplexingClientManager, and not on MultiplexingClient.
+    /**
+     * The methods defined in the interface DeviceClientNonDelegatedFunction will be called on MultiplexingClientManager, and not on MultiplexingClient.
+     */
     @Delegate(excludes = DeviceClientNonDelegatedFunction.class)
     private final MultiplexingClient multiplexingClient;
     private final String multiplexClientId;
@@ -41,18 +44,27 @@ public class MultiplexClientManager extends ClientManagerBase
         this.multiplexingClient.registerConnectionStatusChangeCallback(this, this);
     }
 
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be opened.
+     */
     @Override
     protected void openClient() throws IOException
     {
         this.multiplexingClient.open();
     }
 
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be closed.
+     */
     @Override
     protected void closeClient() throws IOException
     {
         this.multiplexingClient.close();
     }
 
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be identified for logging purposes.
+     */
     @Override
     public String getClientId()
     {
