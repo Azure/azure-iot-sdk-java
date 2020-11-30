@@ -135,8 +135,8 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     protected boolean shouldClientReconnect(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable)
     {
         return status == DISCONNECTED
-                && statusChangeReason == RETRY_EXPIRED
-                && throwable instanceof DeviceOperationTimeoutException;
+            && statusChangeReason == RETRY_EXPIRED
+            && throwable instanceof DeviceOperationTimeoutException;
     }
 
     /**
