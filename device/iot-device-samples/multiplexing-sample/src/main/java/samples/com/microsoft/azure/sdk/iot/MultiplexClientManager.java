@@ -19,12 +19,13 @@ public class MultiplexClientManager extends ClientManagerBase
     {
         void open();
         void close();
+        void closeNow();
         void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
     // The methods defined in the interface DeviceClientNonDelegatedFunction will be called on MultiplexingClientManager, and not on MultiplexingClient.
     @Delegate(excludes = DeviceClientNonDelegatedFunction.class)
-    private final MultiplexingClient client;
+    private final MultiplexingClient multiplexingClient;
     private final String multiplexClientId;
 
     /**
@@ -35,21 +36,21 @@ public class MultiplexClientManager extends ClientManagerBase
      */
     MultiplexClientManager(MultiplexingClient multiplexingClient, String multiplexClientId)
     {
-        this.client = multiplexingClient;
+        this.multiplexingClient = multiplexingClient;
         this.multiplexClientId = multiplexClientId;
-        this.client.registerConnectionStatusChangeCallback(this, this);
+        this.multiplexingClient.registerConnectionStatusChangeCallback(this, this);
     }
 
     @Override
-    public void openClient() throws IOException
+    protected void openClient() throws IOException
     {
-        this.client.open();
+        this.multiplexingClient.open();
     }
 
     @Override
-    public void closeClient() throws IOException
+    protected void closeClient() throws IOException
     {
-        this.client.close();
+        this.multiplexingClient.close();
     }
 
     @Override

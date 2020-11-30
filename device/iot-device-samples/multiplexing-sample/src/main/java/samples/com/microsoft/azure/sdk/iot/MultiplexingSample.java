@@ -8,15 +8,31 @@ import com.microsoft.azure.sdk.iot.device.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
+
 /**
  * Sample that demonstrates creating a multiplexed connection to IoT Hub using AMQPS / AMQPS_WS. It also demonstrates
  * removing and adding device clients from the multiplexed connection while it is open.
+ *
+ * This sample also demonstrates how reconnection can be handled by introducing {@link MultiplexClientManager} and {@link DeviceClientManager}
+ * both of which extend {@link ClientManagerBase}.
+ *
+ * ClientManagerBase class implements two separate interfaces
+ *
+ * 1. {@link IotHubConnectionStatusChangeCallback} which is an SDK type for handling a connection status change callback
+ * 2. {@link ConnectionStatusTracker} which allows for a dependent connection check the underlying connection status before attempting a reconnection.
+ *
+ * Both {@link DeviceClientManager} and {@link MultiplexClientManager} classes delegate all but 3 API calls to their underlying SDK client (MultiplexingClient or DeviceClient) they are wrapping around.
+ * open(), close(), registerConnectionStatusChangeCallback() are the 3 APIs that are handled by the ClientManager instance to allow for dynamic reconnection logic.
+ *
+ * These client managers are in charge of handling the reconnection logic since they are the connection status callback handler.
+ *
+ * DeviceClientManager also takes an instance of {@link ConnectionStatusTracker} to identify whether or not the underlying
+ * Multiplexing connection is established or not before they attempt a re-connection in an event of a disconnection.
+ * This will avoid unnecessary reconnection attempts by DeviceClient since it cannot be connected unless the Multiplexing connection is established.
+ *
  */
 public class MultiplexingSample
 {
-    // In this sample we are using MultiplexClientManager to implement the reconnection
-    // logic for the MultiplexingClient and DeviceClientManager to implement and track DeviceClient
-
     /**
      * Multiplex devices an IoT Hub using AMQPS / AMQPS_WS
      *

@@ -9,22 +9,31 @@ import java.io.IOException;
 
 /**
  * This class is in charge of handling reconnection logic and registering callbacks for connection status changes.
- * It will delegate all other calls other than `Open`, `Close` and registerConnectionStatusChangeCallbaack to the inner client (DeviceClient)
+ * It will delegate all other calls other than `Open`, `Close` and registerConnectionStatusChangeCallback to the inner client (DeviceClient)
  */
 @Slf4j
 public class DeviceClientManager extends ClientManagerBase
 {
-    // Define method calls that will not be delegated to the inner client.
+    /**
+     * Define method calls that will not be delegated to the inner client.
+     * Device client has 2 method signatures for closing the client.
+     * 1. close  -> This method is deprecated.
+     * 2. closeNow -> Currently the preferred method signature.
+     * For the purpose of this sample, we will make sure both of these methods perform the same operation.
+     */
     private interface DeviceClientNonDelegatedFunction
     {
         void open();
+        void close();
         void closeNow();
         void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
-    // The methods defined in the interface DeviceClientNonDelegatedFunction will be called on DeviceClientManager, and not on DeviceClient.
+    /**
+     * The methods defined in the interface DeviceClientNonDelegatedFunction will be called on DeviceClientManager, and not on DeviceClient.
+     */
     @Delegate(excludes = DeviceClientNonDelegatedFunction.class)
-    private final DeviceClient client;
+    private final DeviceClient deviceClient;
 
     /**
      * Creates an instance of DeviceClientManager
@@ -34,25 +43,37 @@ public class DeviceClientManager extends ClientManagerBase
     DeviceClientManager(DeviceClient deviceClient, ConnectionStatusTracker dependencyConnectionStatusTracker)
     {
         this.dependencyConnectionStatusTracker = dependencyConnectionStatusTracker;
-        client = deviceClient;
-        client.registerConnectionStatusChangeCallback(this, this);
+        this.deviceClient = deviceClient;
+        this.deviceClient.registerConnectionStatusChangeCallback(this, this);
     }
 
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be opened.
+     * @throws IOException
+     */
     @Override
-    public void openClient() throws IOException
+    protected void openClient() throws IOException
     {
-        client.open();
+        deviceClient.open();
     }
 
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be closed.
+     * @throws IOException
+     */
     @Override
-    public void closeClient() throws IOException
+    protected void closeClient() throws IOException
     {
-        client.closeNow();
+        deviceClient.closeNow();
     }
 
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be identified for logging purposes.
+     * @throws IOException
+     */
     @Override
     public String getClientId()
     {
-        return  client.getConfig().getDeviceId();
+        return  deviceClient.getConfig().getDeviceId();
     }
 }

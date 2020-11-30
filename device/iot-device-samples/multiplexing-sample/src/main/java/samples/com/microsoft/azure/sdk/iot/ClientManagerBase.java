@@ -21,20 +21,43 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
 {
     protected static final int SLEEP_TIME_BEFORE_RECONNECTING_IN_SECONDS = 2;
 
-    // Initialize the connection status as DISCONNECTED
+    /**
+     * Initialize the connection status as DISCONNECTED
+     */
     protected ConnectionStatus lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
 
     // Tracks connection status of the dependency connection (multiplexing client connection status for example in this case for DeviceClientManager)
     protected ConnectionStatusTracker dependencyConnectionStatusTracker;
 
-    public abstract void openClient() throws IOException;
-    public abstract void closeClient() throws IOException;
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be opened.
+     */
+    protected abstract void openClient() throws IOException;
+
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be closed.
+     */
+    protected abstract void closeClient() throws IOException;
+
+    /**
+     * All classes that extend ClientManagerBase should implement how their inner client can be identified for logging purposes.
+     */
     public abstract String getClientId();
 
-    // Since the client manager is in charge of handling the connection status callback, this method is a no-op
+    /**
+     * Since the client manager is in charge of handling the connection status callback, this method is a no-op.
+     * This method is not an abstract method since in this sample there is no need for the user to register a connection status callback
+     * @param callback The callback function.
+     * @param callbackContext The callback context
+     */
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
         return;
+    }
+
+    public void close()
+    {
+        closeNow();
     }
 
     public void closeNow()
@@ -58,8 +81,11 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
         }
     }
 
-    // When client manager is being opened it first makes sure the client is in a DISCONNECTED state
-    // If the client is in CONNECTING or CONNECTED state, Open will be no-op.
+    /**
+     * When client manager is being opened it first makes sure the client is in a DISCONNECTED state
+     * If the client is in CONNECTING or CONNECTED state, Open will be no-op.
+     * @throws IOException
+     */
     public void open() throws IOException
     {
         synchronized (lastKnownConnectionStatus)
@@ -69,14 +95,12 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
             {
                 return;
             }
-            else
-            {
-                // Set the connection status to CONNECTING
-                lastKnownConnectionStatus = ConnectionStatus.CONNECTING;
-            }
+
+            // Set the connection status to CONNECTING
+            lastKnownConnectionStatus = ConnectionStatus.CONNECTING;
         }
 
-        establishConnection();
+        connect();
     }
 
     @Override
@@ -97,21 +121,28 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
             throwable.printStackTrace();
         }
 
-        if (shouldDeviceReconnect(status, statusChangeReason, throwable))
+        if (shouldClientReconnect(status, statusChangeReason, throwable))
         {
             handleRecoverableDisconnection();
         }
     }
 
-    // This detects the state where the DeviceClient reports that OperationTimeout has expired, and stops retrying; even though the applied RetryPolicy is still valid.
-    // The logic to identify whether or not the connection should be established lives in this method.
-    // The client will automatically retry to establish the connection if the error is retryable
-    protected boolean shouldDeviceReconnect(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable)
+    /**
+     * This detects the state where the DeviceClient reports that OperationTimeout has expired, and sto
+     * The logic to identify whether or not the connection should be established lives in this method.
+     * The client will automatically retry to establish the connection if the error is retryable
+     */
+    protected boolean shouldClientReconnect(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable)
     {
-        return (status == DISCONNECTED && statusChangeReason == RETRY_EXPIRED && throwable instanceof DeviceOperationTimeoutException);
+        return status == DISCONNECTED
+                && statusChangeReason == RETRY_EXPIRED
+                && throwable instanceof DeviceOperationTimeoutException;
     }
 
-    // We only expect the connection status to be CONNECTED by the time we enter this state.
+    /**
+     * Handles a recoverable disconnection
+     * We only expect the connection status to be CONNECTED by the time we enter this state.
+     */
     public void handleRecoverableDisconnection() {
         // If the lastKnownConnectionStatus is not in a CONNECTED state it can mean two things:
         // 1: the status is CONNECTING, in which case there is nothing to be done at this time.
@@ -149,7 +180,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                     // The client is now closed and the connection status is CONNECTING. Connection can be established now.
                     try
                     {
-                        establishConnection();
+                        connect();
                     }
                     catch (IOException ex)
                     {
@@ -160,7 +191,10 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
         }
     }
 
-    public void establishConnection() throws IOException
+    /**
+     * Attempts to open the client and establish the connection.
+     */
+    public void connect() throws IOException
     {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         // Lock the lastKnownConnectionStus so no other process will be able to change it while the client manager is attempting to open the connection.
@@ -170,7 +204,8 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
             {
                 // If the client has dependencies to another client (in this case it could be the multiplexing client) we have to wait to make sure the
                 // dependent connection is established first.
-                if (dependencyConnectionStatusTracker != null && dependencyConnectionStatusTracker.getConnectionStatus() == ConnectionStatus.CONNECTING)
+                if (dependencyConnectionStatusTracker != null
+                    && dependencyConnectionStatusTracker.getConnectionStatus() == ConnectionStatus.CONNECTING)
                 {
                     try
                     {
