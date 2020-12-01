@@ -165,7 +165,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     }
 
     // Functionally the same as "open()", but without wrapping any thrown TransportException into an IOException
-    void multiplexingClientOpen() throws TransportException
+    void openWithoutWrappingException() throws TransportException
     {
         try
         {
@@ -173,16 +173,18 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
         catch (IOException e)
         {
+            // We did this silly thing in the DeviceClient to work around the fact that we can't throw TransportExceptions
+            // directly in methods like deviceClient.open() because the open API existed before the TransportException did.
+            // To get around it, we just nested the meaningful exception into an IOException. The multiplexing client doesn't
+            // have to do the same thing though, so this code un-nests the exception when possible.
             Throwable cause = e.getCause();
             if (cause != null && cause instanceof TransportException)
             {
                 throw (TransportException) cause;
             }
-            else
-            {
-                // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
-                throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
-            }
+
+            // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
+            throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
         }
     }
 
@@ -274,7 +276,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     }
 
     // Functionally the same as "close()", but without wrapping any thrown TransportException into an IOException
-    public void multiplexClose() throws TransportException
+    public void closeWithoutWrappingException() throws TransportException
     {
         try
         {
@@ -282,15 +284,17 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
         catch (IOException e)
         {
+            // We did this silly thing in the DeviceClient to work around the fact that we can't throw TransportExceptions
+            // directly in methods like deviceClient.close() because the close API existed before the TransportException did.
+            // To get around it, we just nested the meaningful exception into an IOException. The multiplexing client doesn't
+            // have to do the same thing though, so this code un-nests the exception when possible.
             if (e.getCause() != null && e.getCause() instanceof TransportException)
             {
                 throw (TransportException) e.getCause();
             }
-            else
-            {
-                // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
-                throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
-            }
+
+            // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
+            throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
         }
     }
 

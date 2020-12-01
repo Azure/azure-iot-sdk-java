@@ -152,7 +152,7 @@ public class TransportClient
             deviceClientList.get(i).closeFileUpload();
         }
 
-        // Codes_SRS_TRANSPORTCLIENT_12_014: [If the deviceIO not null the function shall call multiplexClose on the deviceIO and set the deviceIO to null.]
+        // Codes_SRS_TRANSPORTCLIENT_12_014: [If the deviceIO not null the function shall call closeWithoutWrappingException on the deviceIO and set the deviceIO to null.]
         if (this.deviceIO != null)
         {
             this.deviceIO.close();

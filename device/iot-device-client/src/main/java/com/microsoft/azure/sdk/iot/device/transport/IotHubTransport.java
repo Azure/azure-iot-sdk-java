@@ -749,7 +749,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new MultiplexingClientDeviceRegistrationFailedException("Timed out waiting for all device registrations to finish");
+                        throw new MultiplexingClientDeviceRegistrationFailedException("Timed out waiting for all device registrations to finish.");
                     }
                 }
 
@@ -757,7 +757,7 @@ public class IotHubTransport implements IotHubListener
                 {
                     if (registrationException == null)
                     {
-                        registrationException = new MultiplexingClientDeviceRegistrationFailedException("Failed to register one or more devices to the multiplexed connection");
+                        registrationException = new MultiplexingClientDeviceRegistrationFailedException("Failed to register one or more devices to the multiplexed connection.");
                     }
 
                     registrationException.addRegistrationException(deviceId, deviceRegistrationException);
@@ -775,7 +775,7 @@ public class IotHubTransport implements IotHubListener
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
-            throw new UnsupportedOperationException("Cannot add a multiplexed device unless connection is over AMQPS or AMQPS_WS");
+            throw new UnsupportedOperationException("Cannot add a multiplexed device unless connection is over AMQPS or AMQPS_WS.");
         }
 
         for (DeviceClientConfig configToRegister : configs)
@@ -806,7 +806,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new MultiplexingClientDeviceRegistrationFailedException("Timed out waiting for all device unregistrations to finish");
+                        throw new MultiplexingClientDeviceRegistrationFailedException("Timed out waiting for all device unregistrations to finish.");
                     }
                 }
             }

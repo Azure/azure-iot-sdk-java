@@ -145,7 +145,8 @@ public class MultiplexingSample
             // and why each device failed to register.
             System.out.println("Encountered an exception while registering devices to the active multiplexed connection: " + e.getMessage());
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
-            for (String deviceId : registrationExceptions.keySet()) {
+            for (String deviceId : registrationExceptions.keySet())
+            {
                 System.out.println( "Device " + deviceId + " failed to register because of " + registrationExceptions.get(deviceId).getMessage());
             }
             System.out.println("Closing client...");
@@ -167,7 +168,6 @@ public class MultiplexingSample
             System.exit(-1);
         }
         System.out.println("Successfully registered " + multiplexedDeviceCount + " clients to the multiplexing client");
-
 
         for (String deviceId : deviceIds)
         {

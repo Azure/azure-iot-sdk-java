@@ -37,6 +37,7 @@ public class MultiplexingClient
     public static final long DEFAULT_RECEIVE_PERIOD_MILLIS = 10L;
     static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final String OPEN_ERROR_MESSAGE = "Failed to open the multiplexing connection";
 
     // keys are deviceIds. Helps to optimize look ups later on which device Ids are already registered.
     private final Map<String, DeviceClient> multiplexedDeviceClients;
@@ -124,8 +125,6 @@ public class MultiplexingClient
         this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, sendPeriod, receivePeriod);
     }
 
-    private static final String OPEN_ERROR_MESSAGE = "Failed to open the multiplexed connection";
-
     /**
      * Opens this multiplexing client. This may be done before or after registering any number of device clients.
      * <p>
@@ -146,7 +145,7 @@ public class MultiplexingClient
             log.info("Opening multiplexing client");
             try
             {
-                this.deviceIO.multiplexingClientOpen();
+                this.deviceIO.openWithoutWrappingException();
             }
             catch (TransportException e)
             {
@@ -198,7 +197,7 @@ public class MultiplexingClient
                     deviceClient.closeFileUpload();
                 }
 
-                this.deviceIO.multiplexClose();
+                this.deviceIO.closeWithoutWrappingException();
             }
             catch (TransportException | IOException e)
             {
