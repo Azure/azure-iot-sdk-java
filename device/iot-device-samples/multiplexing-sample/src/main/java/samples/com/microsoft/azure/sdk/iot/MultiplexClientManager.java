@@ -2,6 +2,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +49,7 @@ public class MultiplexClientManager extends ClientManagerBase
      * All classes that extend ClientManagerBase should implement how their inner client can be opened.
      */
     @Override
-    protected void openClient() throws IOException
+    protected void openClient() throws MultiplexingClientException
     {
         this.multiplexingClient.open();
     }
@@ -57,7 +58,7 @@ public class MultiplexClientManager extends ClientManagerBase
      * All classes that extend ClientManagerBase should implement how their inner client can be closed.
      */
     @Override
-    protected void closeClient() throws IOException
+    protected void closeClient() throws MultiplexingClientException
     {
         this.multiplexingClient.close();
     }

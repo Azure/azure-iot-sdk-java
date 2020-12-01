@@ -1,11 +1,15 @@
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationFailedException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.microsoft.azure.sdk.iot.device.MultiplexingClient.DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS;
 
 /**
  * <p>
@@ -110,11 +114,15 @@ public class TransportClient
 
             try
             {
-                this.deviceIO.registerMultiplexedDeviceClient(configList);
+                this.deviceIO.registerMultiplexedDeviceClient(configList, DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS);
             }
             catch (InterruptedException e)
             {
                 throw new IOException("Interrupted while registering device clients to the multiplexed connection", e);
+            }
+            catch (MultiplexingClientException e)
+            {
+                throw new IOException("Failed to register one or more device clients to the multiplexed connection", e);
             }
 
             // Codes_SRS_TRANSPORTCLIENT_12_013: [The function shall open the transport in multiplexing mode.]
@@ -147,7 +155,7 @@ public class TransportClient
         // Codes_SRS_TRANSPORTCLIENT_12_014: [If the deviceIO not null the function shall call multiplexClose on the deviceIO and set the deviceIO to null.]
         if (this.deviceIO != null)
         {
-            this.deviceIO.multiplexClose();
+            this.deviceIO.close();
             this.deviceIO = null;
         }
 

@@ -4,6 +4,8 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubReceiveTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubSendTask;
@@ -13,9 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -164,14 +164,36 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs) throws InterruptedException
+    // Functionally the same as "open()", but without wrapping any thrown TransportException into an IOException
+    void multiplexingClientOpen() throws TransportException
     {
-        this.transport.registerMultiplexedDeviceClient(configs);
+        try
+        {
+            open();
+        }
+        catch (IOException e)
+        {
+            Throwable cause = e.getCause();
+            if (cause != null && cause instanceof TransportException)
+            {
+                throw (TransportException) cause;
+            }
+            else
+            {
+                // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
+                throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
+            }
+        }
     }
 
-    void unregisterMultiplexedDeviceClient(List<DeviceClientConfig> configs) throws InterruptedException
+    void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
-        this.transport.unregisterMultiplexedDeviceClient(configs);
+        this.transport.registerMultiplexedDeviceClient(configs, timeoutMilliseconds);
+    }
+
+    void unregisterMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    {
+        this.transport.unregisterMultiplexedDeviceClient(configs, timeoutMilliseconds);
     }
 
     void setMultiplexingRetryPolicy(RetryPolicy retryPolicy)
@@ -251,18 +273,25 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    /**
-     * Completes all current outstanding requests and closes the IoT Hub client.
-     * Must be called to terminate the background thread that is sending data to
-     * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
-     *  usable. If the client is already closed, the function shall do nothing.
-     *
-     * @throws IOException if the connection to an IoT Hub cannot be closed.
-     */
-    public void multiplexClose() throws IOException
+    // Functionally the same as "close()", but without wrapping any thrown TransportException into an IOException
+    public void multiplexClose() throws TransportException
     {
-        // Codes_SRS_DEVICE_IO_12_009: [THe function shall call close().]
-        close();
+        try
+        {
+            close();
+        }
+        catch (IOException e)
+        {
+            if (e.getCause() != null && e.getCause() instanceof TransportException)
+            {
+                throw (TransportException) e.getCause();
+            }
+            else
+            {
+                // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
+                throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
+            }
+        }
     }
 
     /**

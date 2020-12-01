@@ -12,6 +12,9 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationFailedException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -21,10 +24,8 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
-import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
@@ -40,7 +41,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static junit.framework.TestCase.*;
@@ -115,12 +115,12 @@ public class MultiplexingClientTests extends IntegrationTest
             this.protocol = protocol;
         }
 
-        public void setup(int multiplexingDeviceSessionCount) throws InterruptedException, IotHubException, IOException, URISyntaxException
+        public void setup(int multiplexingDeviceSessionCount) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException
         {
             setup(multiplexingDeviceSessionCount, null);
         }
 
-        public void setup(int multiplexingDeviceSessionCount, ProxySettings proxySettings) throws InterruptedException, IotHubException, IOException, URISyntaxException
+        public void setup(int multiplexingDeviceSessionCount, ProxySettings proxySettings) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException
         {
             deviceIdentityArray = new ArrayList<>(multiplexingDeviceSessionCount);
             deviceClientArray = new ArrayList<>(multiplexingDeviceSessionCount);
@@ -206,6 +206,8 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
+    // MultiplexingClient should be able to open an AMQP connection to IoTHub with no device sessions, and should
+    // allow for device sessions to be added and used later.
     @Test
     public void openMultiplexingClientWithoutAnyRegisteredDevices() throws Exception
     {
@@ -297,7 +299,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         long startOpenTime = System.currentTimeMillis();
         Thread[] openThreads = new Thread[multiplexingClientCount];
-        AtomicReference<IOException>[] openExceptions = new AtomicReference[multiplexingClientCount];
+        AtomicReference<MultiplexingClientException>[] openExceptions = new AtomicReference[multiplexingClientCount];
         for (int i = 0; i < multiplexingClientCount; i++)
         {
             int finalI = i;
@@ -307,7 +309,7 @@ public class MultiplexingClientTests extends IntegrationTest
                     openExceptions[finalI] = new AtomicReference<>();
                     testInstances[finalI].multiplexingClient.open();
                 }
-                catch (IOException e)
+                catch (MultiplexingClientException e)
                 {
                     openExceptions[finalI].set(e);
                 }
@@ -461,7 +463,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Success[] messageSendResults = new Success[multiplexedClients.size()];
         for (int i = 0; i < multiplexedClients.size(); i++)
         {
-            messageSendResults[i] = testSendingMessageFromMultiplexedClient(multiplexedClients.get(i));
+            messageSendResults[i] = testSendingMessageFromDeviceClient(multiplexedClients.get(i));
         }
 
         for (int i = 0; i < multiplexedClients.size(); i++)
@@ -470,12 +472,12 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    private static Success testSendingMessageFromMultiplexedClient(DeviceClient multiplexedClient)
+    private static Success testSendingMessageFromDeviceClient(DeviceClient multiplexedClient)
     {
-        return testSendingMessageFromMultiplexedClient(multiplexedClient, new Message("some payload"));
+        return testSendingMessageFromDeviceClient(multiplexedClient, new Message("some payload"));
     }
 
-    private static Success testSendingMessageFromMultiplexedClient(DeviceClient multiplexedClient, Message message)
+    private static Success testSendingMessageFromDeviceClient(DeviceClient multiplexedClient, Message message)
     {
         Success messageSendSuccess = new Success();
         EventCallback messageSentCallback = new EventCallback(IotHubStatusCode.OK_EMPTY);
@@ -787,6 +789,8 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
+    // Unregister a single device from an active multiplexed connection, test that other devices on that connection
+    // can still be used to send telemetry.
     @Test
     @StandardTierHubOnlyTest
     public void registerClientAfterOpen() throws Exception
@@ -806,9 +810,11 @@ public class MultiplexingClientTests extends IntegrationTest
 
         assertConnectionStateCallbackFiredConnected(connectionStatusChangeTracker, DEVICE_SESSION_OPEN_TIMEOUT);
 
-        testSendingMessageFromMultiplexedClient(clientToRegisterAfterOpen);
+        testSendingMessageFromDeviceClient(clientToRegisterAfterOpen);
     }
 
+    // Unregister a single device from an active multiplexed connection, test that other devices on that connection
+    // can still be used to send telemetry.
     @Test
     @StandardTierHubOnlyTest
     public void unregisterClientAfterOpen() throws Exception
@@ -832,7 +838,7 @@ public class MultiplexingClientTests extends IntegrationTest
         // start index from 1 since the 0th client was deliberately unregistered
         for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i));
+            testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i));
         }
 
         // verify that unregistered clients don't attempt to send messages on the active multiplexed connection after unregistration
@@ -875,7 +881,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             Message errorIjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
-            Success messageSendSuccess = testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
+            Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
             waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
 
             // Now that error injection message has been sent, need to wait for the device session to drop
@@ -891,7 +897,7 @@ public class MultiplexingClientTests extends IntegrationTest
             }
 
             // Try to send a message over the now-recovered device session
-            testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i));
+            testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i));
         }
 
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
@@ -926,7 +932,7 @@ public class MultiplexingClientTests extends IntegrationTest
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
             Message errorIjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
-            Success messageSendSuccess = testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
+            Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
             waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
         }
 
@@ -939,7 +945,7 @@ public class MultiplexingClientTests extends IntegrationTest
             assertConnectionStateCallbackFiredConnected(connectionStatusChangeTrackers[i], FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS);
 
             // Try to send a message over the now-recovered device session
-            testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i));
+            testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i));
         }
 
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
@@ -950,6 +956,8 @@ public class MultiplexingClientTests extends IntegrationTest
         assertMultiplexedDevicesClosedGracefully(connectionStatusChangeTrackers);
     }
 
+    // Open a multiplexed connection, send a fault injection message to drop the TCP connection, and ensure that the multiplexed
+    // connection recovers
     @Test
     public void multiplexedConnectionRecoversFromTcpConnectionDrop() throws Exception
     {
@@ -977,7 +985,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
 
         Message errorInjectionMessage = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 10);
-        Success messageSendSuccess = testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(0), errorInjectionMessage);
+        Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(0), errorInjectionMessage);
         waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
 
         // Now that error injection message has been sent, need to wait for the device session to drop
@@ -998,7 +1006,7 @@ public class MultiplexingClientTests extends IntegrationTest
             assertConnectionStateCallbackFiredConnected(connectionStatusChangeTrackers[i], FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS);
 
             // Try to send a message over the now-recovered device session
-            testSendingMessageFromMultiplexedClient(testInstance.deviceClientArray.get(i));
+            testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i));
         }
 
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
@@ -1011,6 +1019,170 @@ public class MultiplexingClientTests extends IntegrationTest
                 multiplexedConnectionStatusChangeTracker.clientClosedGracefully);
 
         assertMultiplexedDevicesClosedGracefully(connectionStatusChangeTrackers);
+    }
+
+    // Attempt to register a single device with the wrong connection string. The thrown exception
+    // should contain all the exceptions thrown by the service.
+    @Test
+    public void registerDeviceWithIncorrectCredentialsAfterOpenThrows() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+
+        testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(0));
+
+        testInstance.multiplexingClient.open();
+
+        // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
+        String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0)).toLowerCase();
+
+        DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
+
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            testInstance.multiplexingClient.registerDeviceClient(clientWithIncorrectCredentials);
+        }
+        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        {
+            Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
+            assertEquals(1, registrationExceptions.size());
+            String deviceId = testInstance.deviceIdentityArray.get(0).getDeviceId();
+            assertTrue(registrationExceptions.containsKey(deviceId));
+            assertTrue(registrationExceptions.get(deviceId) instanceof UnauthorizedException);
+            expectedExceptionThrown = true;
+        }
+
+        testInstance.multiplexingClient.close();
+
+        assertTrue("Expected exception was not thrown", expectedExceptionThrown);
+    }
+
+    // Before opening the multiplexed connection, register a single device with incorrect credentials. Opening the client
+    // should throw and the thrown exception should have details on why the open failed
+    @Test
+    public void registerDeviceWithIncorrectCredentialsBeforeOpenThrowsOnOpen() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+
+        testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(0));
+
+
+        // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
+        String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0)).toLowerCase();
+
+        DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
+        testInstance.multiplexingClient.registerDeviceClient(clientWithIncorrectCredentials);
+
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            testInstance.multiplexingClient.open();
+        }
+        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        {
+            Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
+            assertEquals(1, registrationExceptions.size());
+            String deviceId = testInstance.deviceIdentityArray.get(0).getDeviceId();
+            assertTrue(registrationExceptions.containsKey(deviceId));
+            assertTrue(registrationExceptions.get(deviceId) instanceof UnauthorizedException);
+            expectedExceptionThrown = true;
+        }
+
+        testInstance.multiplexingClient.close();
+
+        assertTrue("Expected exception was not thrown", expectedExceptionThrown);
+    }
+
+    // Attempt to register a batch of devices, all with the wrong connection string. The thrown exception
+    // should contain all the exceptions thrown by the service.
+    @Test
+    public void registerDevicesWithIncorrectCredentialsAfterOpenThrows() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(i));
+        }
+
+        testInstance.multiplexingClient.open();
+
+        List<DeviceClient> clientsWithIncorrectCredentials = new ArrayList<>();
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
+            String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i)).toLowerCase();
+            DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
+            clientsWithIncorrectCredentials.add(clientWithIncorrectCredentials);
+        }
+
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            testInstance.multiplexingClient.registerDeviceClients(clientsWithIncorrectCredentials);
+        }
+        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        {
+            Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
+            assertEquals(DEVICE_MULTIPLEX_COUNT, registrationExceptions.size());
+            for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                String deviceId = testInstance.deviceIdentityArray.get(i).getDeviceId();
+                assertTrue(registrationExceptions.containsKey(deviceId));
+                assertTrue(registrationExceptions.get(deviceId) instanceof UnauthorizedException);
+            }
+
+            expectedExceptionThrown = true;
+        }
+
+        testInstance.multiplexingClient.close();
+
+        assertTrue("Expected exception was not thrown", expectedExceptionThrown);
+    }
+
+    @Test
+    public void registerDevicesWithIncorrectCredentialsBeforeOpenThrowsOnOpen() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(i));
+        }
+
+
+        List<DeviceClient> clientsWithIncorrectCredentials = new ArrayList<>();
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
+            String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i)).toLowerCase();
+            DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
+            clientsWithIncorrectCredentials.add(clientWithIncorrectCredentials);
+        }
+        testInstance.multiplexingClient.registerDeviceClients(clientsWithIncorrectCredentials);
+
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            testInstance.multiplexingClient.open();
+        }
+        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        {
+            Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
+            assertEquals(DEVICE_MULTIPLEX_COUNT, registrationExceptions.size());
+            for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                String deviceId = testInstance.deviceIdentityArray.get(i).getDeviceId();
+                assertTrue(registrationExceptions.containsKey(deviceId));
+                assertTrue(registrationExceptions.get(deviceId) instanceof UnauthorizedException);
+            }
+
+            expectedExceptionThrown = true;
+        }
+
+        testInstance.multiplexingClient.close();
+
+        assertTrue("Expected exception was not thrown", expectedExceptionThrown);
     }
 
     private static void assertMultiplexedDevicesClosedGracefully(ConnectionStatusChangeTracker[] connectionStatusChangeTrackers)

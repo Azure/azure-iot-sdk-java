@@ -12,6 +12,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationFailedException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
@@ -74,6 +75,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final Set<DeviceClientConfig> deviceClientConfigs;
     private IotHubListener listener;
     private TransportException savedException;
+    private MultiplexingClientDeviceRegistrationFailedException savedMultiplexingRegistrationException;
+    private final Object savedMultiplexingRegistrationExceptionLock = new Object();
     private boolean reconnectionScheduled = false;
     private final Map<String, Boolean> reconnectionsScheduled = new ConcurrentHashMap<>();
     private ExecutorService executorService;
@@ -234,6 +237,14 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 if (this.savedException != null)
                 {
                     throw this.savedException;
+                }
+
+                if (this.savedMultiplexingRegistrationException != null)
+                {
+                    // AMQP layer will throw a TransportException with a nested MultiplexingClientException here to avoid adding MultiplexingClientException
+                    // to the list of thrown exceptions here. Once this exception reaches the MultiplexingClient level, this transport exception is removed and the nested
+                    // MultiplexingClientException will be thrown instead. This helps to cut down on the number of nested exceptions that the user sees.
+                    throw new TransportException("One or more multiplexed devices failed to authenticate", savedMultiplexingRegistrationException);
                 }
 
                 if (deviceSessionsOpenTimedOut)
@@ -657,11 +668,35 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     }
 
     @Override
-    public void onAuthenticationFailed(TransportException transportException)
+    public void onAuthenticationFailed(String deviceId, TransportException transportException)
     {
-        this.savedException = transportException;
-        releaseLatch(authenticationSessionOpenedLatch);
-        releaseDeviceSessionLatches();
+        if (this.deviceClientConfigs.size() > 1)
+        {
+            synchronized (this.savedMultiplexingRegistrationExceptionLock)
+            {
+                if (this.savedMultiplexingRegistrationException == null)
+                {
+                    this.savedMultiplexingRegistrationException = new MultiplexingClientDeviceRegistrationFailedException("One or more multiplexed devices failed to authenticate");
+                }
+
+                this.savedMultiplexingRegistrationException.addRegistrationException(deviceId, transportException);
+            }
+        }
+        else
+        {
+            this.savedException = transportException;
+        }
+
+        this.listener.onMultiplexedDeviceSessionRegistrationFailed(this.connectionId, deviceId, transportException);
+
+        if (this.deviceSessionsOpenedLatches.containsKey(deviceId))
+        {
+            this.deviceSessionsOpenedLatches.get(deviceId).countDown();
+        }
+        else
+        {
+            log.warn("Unrecognized device Id reported authentication failure, could not map it to a device session latch", transportException);
+        }
     }
 
     @Override

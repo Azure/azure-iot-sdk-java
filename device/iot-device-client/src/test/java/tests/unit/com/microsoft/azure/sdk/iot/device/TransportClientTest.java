@@ -239,7 +239,7 @@ public class TransportClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.multiplexClose();
+                mockDeviceIO.close();
                 times = 1;
                 Deencapsulation.invoke(mockDeviceClient, "closeFileUpload");
                 times = 1;
