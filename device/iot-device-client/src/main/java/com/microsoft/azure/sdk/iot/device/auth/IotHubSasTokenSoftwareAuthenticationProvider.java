@@ -5,15 +5,10 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
@@ -91,10 +86,10 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @return if the sas token needs manual renewal
      */
     @Override
-    public boolean isRenewalNecessary()
+    public boolean isAuthenticationProviderRenewalNecessary()
     {
-        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isRenewalNecessary returns true.]
-        return (super.isRenewalNecessary() && this.deviceKey == null);
+        // Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_018: [This function shall return true if a deviceKey is present and if super.isAuthenticationProviderRenewalNecessary returns true.]
+        return (super.isAuthenticationProviderRenewalNecessary() && this.deviceKey == null);
     }
 
     @Override
@@ -118,26 +113,19 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
     /**
      * Getter for SasToken. If the saved token has expired, this method shall renew it if possible
      *
-     * @param proactivelyRenew if true, this method will generate a fresh sas token even if the previously saved token
-     *                                 has not expired yet as long as the current token has lived beyond its buffer.
-     *                                 Use this for pre-emptively renewing sas tokens.
-     *
      * @return The value of SasToken
      */
     @Override
-    public String getRenewedSasToken(boolean proactivelyRenew, boolean forceRenewal) throws IOException, TransportException
+    public char[] getSasToken() throws IOException, TransportException
     {
-        if (this.shouldRefreshToken(proactivelyRenew) || forceRenewal)
+        if (this.deviceKey != null)
         {
-            if (this.deviceKey != null)
-            {
-                //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_004: [If the saved sas token has expired and there is a device key present, the saved sas token shall be renewed.]
-                //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_006: [If the saved sas token has not expired and there is a device key present, but this method is called to proactively renew and the token should renew, the saved sas token shall be renewed.]
-                this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, this.deviceKey, null, this.moduleId, getExpiryTimeInSeconds());
-            }
+            //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_004: [If the saved sas token has expired and there is a device key present, the saved sas token shall be renewed.]
+            //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_006: [If the saved sas token has not expired and there is a device key present, but this method is called to proactively renew and the token should renew, the saved sas token shall be renewed.]
+            this.sasToken = new IotHubSasToken(this.hostname, this.deviceId, this.deviceKey, null, this.moduleId, getExpiryTimeInSeconds());
         }
 
         //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_005: [This function shall return the saved sas token.]
-        return this.sasToken.toString();
+        return this.sasToken.toString().toCharArray();
     }
 }

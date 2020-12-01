@@ -128,6 +128,28 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
+    InternalClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions, long sendPeriodMillis, long receivePeriodMillis)
+    {
+        if (hostName == null)
+        {
+            throw new IllegalArgumentException("Host name cannot be null");
+        }
+
+        if (protocol == null)
+        {
+            throw new IllegalArgumentException("Protocol cannot be null.");
+        }
+
+        this.config = new DeviceClientConfig(hostName, sasTokenProvider, clientOptions, deviceId, moduleId);
+        this.config.setProtocol(protocol);
+        if (clientOptions != null)
+        {
+            this.config.modelId = clientOptions.getModelId();
+        }
+
+        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+    }
+
     //unused
     InternalClient()
     {
@@ -138,7 +160,7 @@ public class InternalClient
 
     public void open() throws IOException
     {
-        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isRenewalNecessary())
+        if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
             //Codes_SRS_INTERNALCLIENT_34_044: [If the SAS token has expired before this call, throw a Security Exception]
             throw new SecurityException("Your SasToken is expired");
@@ -415,7 +437,7 @@ public class InternalClient
      *
      *	    - <b>SetReceiveInterval</b> - this option is applicable to all protocols
      *	      in case of HTTPS protocol, this option acts the same as {@code SetMinimumPollingInterval}
-     *	      in case of MQTT and AMQP protocols, this option specifies the interval in millisecods
+     *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
