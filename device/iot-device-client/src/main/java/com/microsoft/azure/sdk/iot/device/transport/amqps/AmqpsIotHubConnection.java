@@ -12,7 +12,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationFailedException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
@@ -75,7 +75,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final Set<DeviceClientConfig> deviceClientConfigs;
     private IotHubListener listener;
     private TransportException savedException;
-    private MultiplexingClientDeviceRegistrationFailedException savedMultiplexingRegistrationException;
+    private MultiplexingClientDeviceRegistrationAuthenticationException savedMultiplexingRegistrationException;
     private final Object savedMultiplexingRegistrationExceptionLock = new Object();
     private boolean reconnectionScheduled = false;
     private final Map<String, Boolean> reconnectionsScheduled = new ConcurrentHashMap<>();
@@ -676,7 +676,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 if (this.savedMultiplexingRegistrationException == null)
                 {
-                    this.savedMultiplexingRegistrationException = new MultiplexingClientDeviceRegistrationFailedException("One or more multiplexed devices failed to authenticate");
+                    this.savedMultiplexingRegistrationException = new MultiplexingClientDeviceRegistrationAuthenticationException("One or more multiplexed devices failed to authenticate");
                 }
 
                 this.savedMultiplexingRegistrationException.addRegistrationException(deviceId, transportException);

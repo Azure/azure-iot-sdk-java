@@ -11,7 +11,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClientOptions;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationFailedException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 
@@ -137,7 +137,7 @@ public class MultiplexingSample
         {
             multiplexClientManager.registerDeviceClients(multiplexedDeviceClients.values());
         }
-        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
         {
             // When registering device clients to an active multiplexed connection, one to all of the devices may fail
             // to register if they have out-of-date or otherwise incorrect connection strings, for instance. The thrown exception

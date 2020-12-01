@@ -12,7 +12,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationFailedException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -1042,7 +1042,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.registerDeviceClient(clientWithIncorrectCredentials);
         }
-        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(1, registrationExceptions.size());
@@ -1078,7 +1078,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.open();
         }
-        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(1, registrationExceptions.size());
@@ -1121,7 +1121,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.registerDeviceClients(clientsWithIncorrectCredentials);
         }
-        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(DEVICE_MULTIPLEX_COUNT, registrationExceptions.size());
@@ -1150,7 +1150,6 @@ public class MultiplexingClientTests extends IntegrationTest
             testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(i));
         }
 
-
         List<DeviceClient> clientsWithIncorrectCredentials = new ArrayList<>();
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -1166,7 +1165,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             testInstance.multiplexingClient.open();
         }
-        catch (MultiplexingClientDeviceRegistrationFailedException e)
+        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
         {
             Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
             assertEquals(DEVICE_MULTIPLEX_COUNT, registrationExceptions.size());

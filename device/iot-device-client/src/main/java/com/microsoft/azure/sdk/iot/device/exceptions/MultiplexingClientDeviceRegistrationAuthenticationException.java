@@ -10,42 +10,42 @@ import java.util.Objects;
 /**
  * Exception that is thrown when one or more devices fail to register to an active multiplexed connection.
  */
-public class MultiplexingClientDeviceRegistrationFailedException extends MultiplexingClientException
+public class MultiplexingClientDeviceRegistrationAuthenticationException extends MultiplexingClientException
 {
     private Map<String, Exception> registrationExceptions = new HashMap<>();
 
     /**
-     * Construct a new MultiplexingClientDeviceRegistrationFailedException with no nested exception and no error message.
+     * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with no nested exception and no error message.
      */
-    public MultiplexingClientDeviceRegistrationFailedException()
+    public MultiplexingClientDeviceRegistrationAuthenticationException()
     {
         super();
     }
 
     /**
-     * Construct a new MultiplexingClientDeviceRegistrationFailedException with no nested exception but with an error message.
+     * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with no nested exception but with an error message.
      * @param message The top level message for this exception.
      */
-    public MultiplexingClientDeviceRegistrationFailedException(String message)
+    public MultiplexingClientDeviceRegistrationAuthenticationException(String message)
     {
         super(message);
     }
 
     /**
-     * Construct a new MultiplexingClientDeviceRegistrationFailedException with a nested exception and an error message.
+     * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with a nested exception and an error message.
      * @param message The top level message for this exception.
      * @param cause The nested exception.
      */
-    public MultiplexingClientDeviceRegistrationFailedException(String message, Throwable cause)
+    public MultiplexingClientDeviceRegistrationAuthenticationException(String message, Throwable cause)
     {
         super(message, cause);
     }
 
     /**
-     * Construct a new MultiplexingClientDeviceRegistrationFailedException with a nested exception but no error message.
+     * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with a nested exception but no error message.
      * @param cause The nested exception.
      */
-    public MultiplexingClientDeviceRegistrationFailedException(Throwable cause)
+    public MultiplexingClientDeviceRegistrationAuthenticationException(Throwable cause)
     {
         super(cause);
     }

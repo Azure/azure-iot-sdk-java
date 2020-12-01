@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationFailedException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -134,7 +134,7 @@ public class MultiplexingClient
      * If this client is already open, then this method will do nothing.
      * <p>
      * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
-     * @throws MultiplexingClientDeviceRegistrationFailedException If one or many of the registered devices failed to authenticate.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
      * Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
      * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
      */
@@ -154,22 +154,19 @@ public class MultiplexingClient
                 // no extra context is added into the TransportException layer. Because of that, this layer will strip out the TransportException
                 // if the TransportException's cause was a MultiplexingClientException.
                 Throwable cause = e.getCause();
-                if (cause != null && cause instanceof MultiplexingClientDeviceRegistrationFailedException)
+                if (cause != null && cause instanceof MultiplexingClientDeviceRegistrationAuthenticationException)
                 {
-                    MultiplexingClientDeviceRegistrationFailedException newException =
-                            new MultiplexingClientDeviceRegistrationFailedException(OPEN_ERROR_MESSAGE, cause);
+                    MultiplexingClientDeviceRegistrationAuthenticationException newException =
+                            new MultiplexingClientDeviceRegistrationAuthenticationException(OPEN_ERROR_MESSAGE, cause);
 
                     // Bring the exceptions map from the cause to the root level exception, so that users don't have to use
                     // fields from inner exceptions.
-                    newException.setRegistrationExceptionsMap(((MultiplexingClientDeviceRegistrationFailedException) cause).getRegistrationExceptions());
+                    newException.setRegistrationExceptionsMap(((MultiplexingClientDeviceRegistrationAuthenticationException) cause).getRegistrationExceptions());
 
                     throw newException;
                 }
-                else
-                {
-                    throw new MultiplexingClientException(OPEN_ERROR_MESSAGE, e);
-                }
 
+                throw new MultiplexingClientException(OPEN_ERROR_MESSAGE, e);
             }
             log.info("Successfully opened multiplexing client");
         }
@@ -217,7 +214,7 @@ public class MultiplexingClient
      * multiplexed connection.
      * <p>
      * Users should use {@link #registerDeviceClients(Iterable)} for registering multiple devices as it has some
-     * performance improvements over repeatedly calling this method. This method blocks on each registration, whereas
+     * performance improvements over repeatedly calling this method for individual device registrations. This method blocks on each registration, whereas
      * {@link #registerDeviceClients(Iterable)} blocks on all of the registrations after starting them all asynchronously.
      * <p>
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
@@ -244,7 +241,7 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationFailedException If one or more devices failed to register. Details for each failure can be found
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
      * in this exception.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
@@ -259,7 +256,7 @@ public class MultiplexingClient
      * multiplexed connection.
      * <p>
      * Users should use {@link #registerDeviceClients(Iterable)} for registering multiple devices as it has some
-     * performance improvements over repeatedly calling this method. This method blocks on each registration, whereas
+     * performance improvements over repeatedly calling this method for individual device registrations. This method blocks on each registration, whereas
      * {@link #registerDeviceClients(Iterable)} blocks on all of the registrations after starting them all asynchronously.
      * <p>
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
@@ -286,7 +283,7 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationFailedException If one or more devices failed to register. Details for each failure can be found
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
      * in this exception.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
@@ -301,7 +298,7 @@ public class MultiplexingClient
     }
 
     /**
-     * Register device clients to this multiplexing client. This method may be called before or after opening the multiplexed
+     * Register multiple device clients to this multiplexing client. This method may be called before or after opening the multiplexed
      * connection.
      * <p>
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
@@ -329,7 +326,7 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationFailedException If one or more devices failed to register. Details for each failure can be found
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
      * in this exception. Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
@@ -341,7 +338,7 @@ public class MultiplexingClient
     }
 
     /**
-     * Register device clients to this multiplexing client. This method may be called before or after opening the multiplexed
+     * Register multiple device clients to this multiplexing client. This method may be called before or after opening the multiplexed
      * connection.
      * <p>
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
@@ -369,7 +366,7 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationFailedException If one or more devices failed to register. Details for each failure can be found
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
      * in this exception. Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
@@ -467,7 +464,7 @@ public class MultiplexingClient
      * multiplexed connection.
      * <p>
      * Users should use {@link #unregisterDeviceClients(Iterable)} for unregistering multiple devices as it has some
-     * performance improvements over repeatedly calling this method. This method blocks on each unregistration, whereas
+     * performance improvements over repeatedly calling this method for individual device unregistrations. This method blocks on each unregistration, whereas
      * {@link #registerDeviceClients(Iterable)} blocks on all of the unregistrations after starting them all asynchronously.
      * <p>
      * If the multiplexed connection is already open, then this call will close the AMQP device session associated with
@@ -495,7 +492,7 @@ public class MultiplexingClient
      * multiplexed connection.
      * <p>
      * Users should use {@link #unregisterDeviceClients(Iterable)} for unregistering multiple devices as it has some
-     * performance improvements over repeatedly calling this method. This method blocks on each unregistration, whereas
+     * performance improvements over repeatedly calling this method for individual device unregistrations. This method blocks on each unregistration, whereas
      * {@link #registerDeviceClients(Iterable)} blocks on all of the unregistrations after starting them all asynchronously.
      * <p>
      * If the multiplexed connection is already open, then this call will close the AMQP device session associated with
@@ -523,7 +520,7 @@ public class MultiplexingClient
     }
 
     /**
-     * Unregister device clients from this multiplexing client. This method may be called before or after opening the
+     * Unregister multiple device clients from this multiplexing client. This method may be called before or after opening the
      * multiplexed connection.
      * <p>
      * If the multiplexed connection is already open, then this call will close the AMQP device session associated with
@@ -547,7 +544,7 @@ public class MultiplexingClient
     }
 
     /**
-     * Unregister device clients from this multiplexing client. This method may be called before or after opening the
+     * Unregister multiple device clients from this multiplexing client. This method may be called before or after opening the
      * multiplexed connection.
      * <p>
      * If the multiplexed connection is already open, then this call will close the AMQP device session associated with

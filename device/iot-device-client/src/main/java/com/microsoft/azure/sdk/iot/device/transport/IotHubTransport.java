@@ -710,7 +710,7 @@ public class IotHubTransport implements IotHubListener
         this.multiplexingStateCallbackContext = callbackContext;
     }
 
-    public void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientDeviceRegistrationFailedException {
+    public void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientDeviceRegistrationAuthenticationException {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
             throw new UnsupportedOperationException("Cannot add a multiplexed device unless connection is over AMQPS or AMQPS_WS");
@@ -732,7 +732,7 @@ public class IotHubTransport implements IotHubListener
 
         // If the multiplexed connection is active, block until all the registered devices have been connected.
         long timeoutTime = System.currentTimeMillis() + timeoutMilliseconds;
-        MultiplexingClientDeviceRegistrationFailedException registrationException = null;
+        MultiplexingClientDeviceRegistrationAuthenticationException registrationException = null;
         if (this.connectionStatus != IotHubConnectionStatus.DISCONNECTED)
         {
             for (DeviceClientConfig newlyRegisteredConfig : configs)
@@ -749,7 +749,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new MultiplexingClientDeviceRegistrationFailedException("Timed out waiting for all device registrations to finish.");
+                        throw new MultiplexingClientDeviceRegistrationAuthenticationException("Timed out waiting for all device registrations to finish.");
                     }
                 }
 
@@ -757,7 +757,7 @@ public class IotHubTransport implements IotHubListener
                 {
                     if (registrationException == null)
                     {
-                        registrationException = new MultiplexingClientDeviceRegistrationFailedException("Failed to register one or more devices to the multiplexed connection.");
+                        registrationException = new MultiplexingClientDeviceRegistrationAuthenticationException("Failed to register one or more devices to the multiplexed connection.");
                     }
 
                     registrationException.addRegistrationException(deviceId, deviceRegistrationException);
@@ -806,7 +806,7 @@ public class IotHubTransport implements IotHubListener
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
                     if (operationHasTimedOut)
                     {
-                        throw new MultiplexingClientDeviceRegistrationFailedException("Timed out waiting for all device unregistrations to finish.");
+                        throw new MultiplexingClientDeviceRegistrationAuthenticationException("Timed out waiting for all device unregistrations to finish.");
                     }
                 }
             }
