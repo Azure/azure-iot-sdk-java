@@ -2,6 +2,7 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceRegistrationAuthenticationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
@@ -149,19 +150,17 @@ public class MultiplexingClient
             }
             catch (TransportException e)
             {
-                // AMQP layer will throw a TransportException with a nested MultiplexingClientException in some cases. In these
-                // cases, the wrapping of the MultiplexingClientException is strictly to avoid adding more thrown exception types, and
-                // no extra context is added into the TransportException layer. Because of that, this layer will strip out the TransportException
-                // if the TransportException's cause was a MultiplexingClientException.
-                Throwable cause = e.getCause();
-                if (cause != null && cause instanceof MultiplexingClientDeviceRegistrationAuthenticationException)
+                // AMQP layer may throw a MultiplexingDeviceRegistrationAuthenticationException in some cases. In these
+                // cases, we want to copy the registration exceptions map from this TransportException into this thrown exception
+                // so that users don't need to look at the cause of the thrown exception to get this important information.
+                if (e instanceof MultiplexingDeviceRegistrationAuthenticationException)
                 {
                     MultiplexingClientDeviceRegistrationAuthenticationException newException =
-                            new MultiplexingClientDeviceRegistrationAuthenticationException(OPEN_ERROR_MESSAGE, cause);
+                            new MultiplexingClientDeviceRegistrationAuthenticationException(OPEN_ERROR_MESSAGE, e);
 
                     // Bring the exceptions map from the cause to the root level exception, so that users don't have to use
                     // fields from inner exceptions.
-                    newException.setRegistrationExceptionsMap(((MultiplexingClientDeviceRegistrationAuthenticationException) cause).getRegistrationExceptions());
+                    newException.setRegistrationExceptionsMap(((MultiplexingDeviceRegistrationAuthenticationException) e).getRegistrationExceptions());
 
                     throw newException;
                 }
