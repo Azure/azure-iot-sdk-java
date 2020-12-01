@@ -11,8 +11,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
 import com.microsoft.azure.sdk.iot.device.MultiplexingClientOptions;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 
 import java.io.IOException;
@@ -26,7 +24,7 @@ import java.util.Map;
  * Sample that demonstrates creating a multiplexed connection to IoT Hub using AMQPS / AMQPS_WS. It also demonstrates
  * removing and adding device clients from the multiplexed connection while it is open.
  *
- * This sample also demonstrates how reconnection can be handled by introducing {@link MultiplexClientManager} and {@link DeviceClientManager}
+ * This sample also demonstrates how reconnection can be handled by introducing {@link MultiplexingClientManager} and {@link DeviceClientManager}
  * both of which extend {@link ClientManagerBase}.
  *
  * ClientManagerBase class implements two separate interfaces
@@ -34,7 +32,7 @@ import java.util.Map;
  * 1. {@link IotHubConnectionStatusChangeCallback} which is an SDK type for handling a connection status change callback
  * 2. {@link ConnectionStatusTracker} which allows for a dependent connection check the underlying connection status before attempting a reconnection.
  *
- * Both {@link DeviceClientManager} and {@link MultiplexClientManager} classes delegate all but 3 API calls to their underlying SDK client (MultiplexingClient or DeviceClient) they are wrapping around.
+ * Both {@link DeviceClientManager} and {@link MultiplexingClientManager} classes delegate all but 3 API calls to their underlying SDK client (MultiplexingClient or DeviceClient) they are wrapping around.
  * open(), close(), registerConnectionStatusChangeCallback() are the 3 APIs that are handled by the ClientManager instance to allow for dynamic reconnection logic.
  *
  * These client managers are in charge of handling the reconnection logic since they are the connection status callback handler.
@@ -95,7 +93,7 @@ public class MultiplexingSample
         MultiplexingClientOptions options = MultiplexingClientOptions.builder().build();
         final MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, protocol, options);
 
-        MultiplexClientManager multiplexClientManager = new MultiplexClientManager(multiplexingClient, "MultiplexingClient");
+        MultiplexingClientManager multiplexingClientManager = new MultiplexingClientManager(multiplexingClient, "MultiplexingClient");
 
         System.out.println("Creating device clients that will be multiplexed");
         final List<String> deviceIds = new ArrayList<>();
@@ -110,20 +108,19 @@ public class MultiplexingSample
 
             multiplexedDeviceClients.put(deviceId, clientToMultiplex);
 
-            deviceManagers.put(deviceId, new DeviceClientManager(clientToMultiplex, multiplexClientManager));
+            deviceManagers.put(deviceId, new DeviceClientManager(clientToMultiplex, multiplexingClientManager));
         }
 
         System.out.println("Opening multiplexed connection");
         // All previously registered device clients will be opened alongside this multiplexing client
         try
         {
-            multiplexClientManager.open();
+            multiplexingClientManager.open();
         }
         catch (MultiplexingClientException | IOException e)
         {
-            System.out.println("Unexpected exception thrown while opening multiplexed connection, closing client...");
-            e.printStackTrace();
-            multiplexingClient.close();
+            // error is logged by the MultiplexingClientManager, no need to log it here, too
+            System.out.println("Exiting sample...");
             System.exit(-1);
         }
         System.out.println("Multiplexed connection opened successfully");
@@ -135,36 +132,12 @@ public class MultiplexingSample
         System.out.println("Registering " + multiplexedDeviceCount + " clients to the multiplexing client...");
         try
         {
-            multiplexClientManager.registerDeviceClients(multiplexedDeviceClients.values());
-        }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
-        {
-            // When registering device clients to an active multiplexed connection, one to all of the devices may fail
-            // to register if they have out-of-date or otherwise incorrect connection strings, for instance. The thrown exception
-            // here contains a map of deviceId -> registration failure so that you can tell which devices failed to register,
-            // and why each device failed to register.
-            System.out.println("Encountered an exception while registering devices to the active multiplexed connection: " + e.getMessage());
-            Map<String, Exception> registrationExceptions = e.getRegistrationExceptions();
-            for (String deviceId : registrationExceptions.keySet())
-            {
-                System.out.println( "Device " + deviceId + " failed to register because of " + registrationExceptions.get(deviceId).getMessage());
-            }
-            System.out.println("Closing client...");
-            multiplexingClient.close();
-            System.exit(-1);
-        }
-        catch (MultiplexingClientDeviceRegistrationTimeoutException e)
-        {
-            System.out.println("Timed out waiting for device registration to finish, closing client...");
-            e.printStackTrace();
-            multiplexingClient.close();
-            System.exit(-1);
+            multiplexingClientManager.registerDeviceClients(multiplexedDeviceClients.values());
         }
         catch (MultiplexingClientException e)
         {
-            System.out.println("Unexpected exception thrown during device registration, closing client...");
-            e.printStackTrace();
-            multiplexingClient.close();
+            // error is logged by the MultiplexingClientManager, no need to log it here, too
+            System.out.println("Exiting sample...");
             System.exit(-1);
         }
         System.out.println("Successfully registered " + multiplexedDeviceCount + " clients to the multiplexing client");
@@ -195,13 +168,12 @@ public class MultiplexingSample
         System.out.println("Unregistering device " + deviceIdToUnregister + " from multiplexed connection...");
         try
         {
-            multiplexClientManager.unregisterDeviceClient(multiplexedDeviceClients.get(deviceIdToUnregister));
+            multiplexingClientManager.unregisterDeviceClient(multiplexedDeviceClients.get(deviceIdToUnregister));
         }
         catch (MultiplexingClientException e)
         {
-            System.out.println("Encountered an exception while unregistering device from active multiplexed connection, closing client...");
-            e.printStackTrace();
-            multiplexingClient.close();
+            // error is logged by the MultiplexingClientManager, no need to log it here, too
+            System.out.println("Exiting sample...");
             System.exit(-1);
         }
         System.out.println("Successfully unregistered device " + deviceIdToUnregister + " from an active multiplexed connection.");
@@ -211,13 +183,12 @@ public class MultiplexingSample
         System.out.println("Re-registering device " + deviceIdToUnregister + " to an active multiplexed connection...");
         try
         {
-            multiplexClientManager.registerDeviceClient(multiplexedDeviceClients.get(deviceIdToUnregister));
+            multiplexingClientManager.registerDeviceClient(multiplexedDeviceClients.get(deviceIdToUnregister));
         }
         catch (MultiplexingClientException e)
         {
-            System.out.println("Encountered an exception while re-registering device to the active multiplexed connection, closing client...");
-            e.printStackTrace();
-            multiplexingClient.close();
+            // error is logged by the MultiplexingClientManager, no need to log it here, too
+            System.out.println("Exiting sample...");
             System.exit(-1);
         }
         System.out.println("Successfully registered " + deviceIdToUnregister + " to an active multiplexed connection");
@@ -227,7 +198,7 @@ public class MultiplexingSample
         // have all of your registered devices
         System.out.println("Closing entire multiplexed connection...");
         // This call will close all multiplexed device client instances as well
-        multiplexClientManager.closeClient();
+        multiplexingClientManager.closeClient();
         System.out.println("Successfully closed the multiplexed connection");
 
         System.out.println("Shutting down...");

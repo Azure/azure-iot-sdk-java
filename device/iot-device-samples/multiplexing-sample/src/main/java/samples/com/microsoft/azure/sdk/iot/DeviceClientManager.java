@@ -38,7 +38,7 @@ public class DeviceClientManager extends ClientManagerBase
     /**
      * Creates an instance of DeviceClientManager
      * @param deviceClient the DeviceClient to manage
-     * @param dependencyConnectionStatusTracker the dependency connection status tracker (it may be the MultiplexClientManager object)
+     * @param dependencyConnectionStatusTracker the dependency connection status tracker (it may be the MultiplexingClientManager object)
      */
     DeviceClientManager(DeviceClient deviceClient, ConnectionStatusTracker dependencyConnectionStatusTracker)
     {
