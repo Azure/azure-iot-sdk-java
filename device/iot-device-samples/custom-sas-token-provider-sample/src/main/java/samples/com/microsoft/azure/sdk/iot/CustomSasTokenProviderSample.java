@@ -86,11 +86,11 @@ public class CustomSasTokenProviderSample
 
                 this.sasToken = String.format(
                     SHARED_ACCESS_SIGNATURE_FORMAT,
-                        RESOURCE_URI_FIELD_KEY,
+                    RESOURCE_URI_FIELD_KEY,
                     scope,
-                        SIGNATURE_FIELD_KEY,
+                    SIGNATURE_FIELD_KEY,
                     urlEncodedSignature,
-                        EXPIRY_TIME_FIELD_KEY,
+                    EXPIRY_TIME_FIELD_KEY,
                     this.expiryTimeSeconds).toCharArray();
             }
             catch (UnsupportedEncodingException | InvalidKeyException | NoSuchAlgorithmException e)

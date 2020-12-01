@@ -150,7 +150,6 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-
     //unused
     InternalClient()
     {

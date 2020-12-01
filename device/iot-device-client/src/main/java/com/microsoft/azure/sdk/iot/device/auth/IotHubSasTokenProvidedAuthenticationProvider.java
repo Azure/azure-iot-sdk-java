@@ -48,6 +48,7 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
     @Override
     public boolean canRefreshToken()
     {
+        // User is always capable of providing a new SAS token when using this authentication provider.
         return true;
     }
 

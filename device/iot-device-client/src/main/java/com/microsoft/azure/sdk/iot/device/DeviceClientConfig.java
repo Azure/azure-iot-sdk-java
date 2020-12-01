@@ -147,12 +147,9 @@ public final class DeviceClientConfig
 
     public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
     {
-        this.authenticationProvider = new IotHubSasTokenProvidedAuthenticationProvider(
-                hostName,
-                deviceId,
-                moduleId,
-                sasTokenProvider,
-                clientOptions != null ? clientOptions.sslContext : null);
+        SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
+        this.authenticationProvider =
+                new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
 
         this.useWebsocket = false;
         this.productInfo = new ProductInfo();
