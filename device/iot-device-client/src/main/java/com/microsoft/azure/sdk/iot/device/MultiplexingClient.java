@@ -135,6 +135,9 @@ public class MultiplexingClient
      * If this client is already open, then this method will do nothing.
      * <p>
      * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
+     * @throws MultiplexingClientDeviceRegistrationFailedException If one or many of the registered devices failed to authenticate.
+     * Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
+     * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
      */
     public void open() throws MultiplexingClientException
     {
