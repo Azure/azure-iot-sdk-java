@@ -9,16 +9,16 @@ import java.util.Objects;
 
 /**
  * Exception that is thrown when one or more devices fail to register to an active multiplexed connection.
- * Only thrown by AMQP layer, not by MultiplexingClient layer. Not to be confused with
+ * Only thrown by AMQP layer, not by MultiplexingClient layer.
  */
-public class MultiplexingDeviceRegistrationAuthenticationException extends TransportException
+public class MultiplexingDeviceUnauthorizedException extends UnauthorizedException
 {
     private Map<String, Exception> registrationExceptions = new HashMap<>();
 
     /**
      * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with no nested exception and no error message.
      */
-    public MultiplexingDeviceRegistrationAuthenticationException()
+    public MultiplexingDeviceUnauthorizedException()
     {
         super();
         this.isRetryable = false;
@@ -28,7 +28,7 @@ public class MultiplexingDeviceRegistrationAuthenticationException extends Trans
      * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with no nested exception but with an error message.
      * @param message The top level message for this exception.
      */
-    public MultiplexingDeviceRegistrationAuthenticationException(String message)
+    public MultiplexingDeviceUnauthorizedException(String message)
     {
         super(message);
         this.isRetryable = false;
@@ -39,7 +39,7 @@ public class MultiplexingDeviceRegistrationAuthenticationException extends Trans
      * @param message The top level message for this exception.
      * @param cause The nested exception.
      */
-    public MultiplexingDeviceRegistrationAuthenticationException(String message, Throwable cause)
+    public MultiplexingDeviceUnauthorizedException(String message, Throwable cause)
     {
         super(message, cause);
         this.isRetryable = false;
@@ -49,7 +49,7 @@ public class MultiplexingDeviceRegistrationAuthenticationException extends Trans
      * Construct a new MultiplexingClientDeviceRegistrationAuthenticationException with a nested exception but no error message.
      * @param cause The nested exception.
      */
-    public MultiplexingDeviceRegistrationAuthenticationException(Throwable cause)
+    public MultiplexingDeviceUnauthorizedException(Throwable cause)
     {
         super(cause);
         this.isRetryable = false;

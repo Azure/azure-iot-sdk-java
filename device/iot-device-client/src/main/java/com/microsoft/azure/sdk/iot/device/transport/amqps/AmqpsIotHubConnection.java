@@ -12,8 +12,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
-import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceRegistrationAuthenticationException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceUnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
@@ -665,12 +664,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         {
             if (this.savedException == null)
             {
-                this.savedException = new MultiplexingDeviceRegistrationAuthenticationException("One or more multiplexed devices failed to authenticate");
+                this.savedException = new MultiplexingDeviceUnauthorizedException("One or more multiplexed devices failed to authenticate");
             }
 
-            if (this.savedException instanceof MultiplexingDeviceRegistrationAuthenticationException)
+            if (this.savedException instanceof MultiplexingDeviceUnauthorizedException)
             {
-                ((MultiplexingDeviceRegistrationAuthenticationException)this.savedException).addRegistrationException(deviceId, transportException);
+                ((MultiplexingDeviceUnauthorizedException)this.savedException).addRegistrationException(deviceId, transportException);
             }
         }
         else
