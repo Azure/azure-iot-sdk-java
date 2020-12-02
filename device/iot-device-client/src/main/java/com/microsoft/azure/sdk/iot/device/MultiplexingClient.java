@@ -216,6 +216,11 @@ public class MultiplexingClient
      * performance improvements over repeatedly calling this method for individual device registrations. This method blocks on each registration, whereas
      * {@link #registerDeviceClients(Iterable)} blocks on all of the registrations after starting them all asynchronously.
      * <p>
+     * A device client can be unregistered using {@link #unregisterDeviceClient(DeviceClient)}, {@link #unregisterDeviceClient(DeviceClient, long)},
+     * {@link #unregisterDeviceClients(Iterable)}, or {@link #unregisterDeviceClients(Iterable, long)}. A device client will not be unregistered
+     * automatically if it encounters a non-retryable exception, so users are responsible for unregistering a device client
+     * when they no longer want it in this multiplexing client.
+     * <p>
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
      * and up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS} devices can be registered on a multiplexed AMQPS_WS connection.
      * <p>
@@ -257,6 +262,11 @@ public class MultiplexingClient
      * Users should use {@link #registerDeviceClients(Iterable)} for registering multiple devices as it has some
      * performance improvements over repeatedly calling this method for individual device registrations. This method blocks on each registration, whereas
      * {@link #registerDeviceClients(Iterable)} blocks on all of the registrations after starting them all asynchronously.
+     * <p>
+     * A device client can be unregistered using {@link #unregisterDeviceClient(DeviceClient)}, {@link #unregisterDeviceClient(DeviceClient, long)},
+     * {@link #unregisterDeviceClients(Iterable)}, or {@link #unregisterDeviceClients(Iterable, long)}. A device client will not be unregistered
+     * automatically if it encounters a non-retryable exception, so users are responsible for unregistering a device client
+     * when they no longer want it in this multiplexing client.
      * <p>
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
      * and up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS} devices can be registered on a multiplexed AMQPS_WS connection.
@@ -303,6 +313,11 @@ public class MultiplexingClient
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
      * and up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS} devices can be registered on a multiplexed AMQPS_WS connection.
      * <p>
+     * A device client can be unregistered using {@link #unregisterDeviceClient(DeviceClient)}, {@link #unregisterDeviceClient(DeviceClient, long)},
+     * {@link #unregisterDeviceClients(Iterable)}, or {@link #unregisterDeviceClients(Iterable, long)}. A device client will not be unregistered
+     * automatically if it encounters a non-retryable exception, so users are responsible for unregistering a device client
+     * when they no longer want it in this multiplexing client.
+     * <p>
      * If the multiplexing client is already open, then these device clients will automatically
      * be opened, too. If the multiplexing client is not open yet, then these device clients will not be opened until
      * {@link MultiplexingClient#open()} is called.
@@ -342,6 +357,11 @@ public class MultiplexingClient
      * <p>
      * Up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS} devices can be registered on a multiplexed AMQPS connection,
      * and up to {@link #MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS} devices can be registered on a multiplexed AMQPS_WS connection.
+     * <p>
+     * A device client can be unregistered using {@link #unregisterDeviceClient(DeviceClient)}, {@link #unregisterDeviceClient(DeviceClient, long)},
+     * {@link #unregisterDeviceClients(Iterable)}, or {@link #unregisterDeviceClients(Iterable, long)}. A device client will not be unregistered
+     * automatically if it encounters a non-retryable exception, so users are responsible for unregistering a device client
+     * when they no longer want it in this multiplexing client.
      * <p>
      * If the multiplexing client is already open, then these device clients will automatically
      * be opened, too. If the multiplexing client is not open yet, then these device clients will not be opened until
