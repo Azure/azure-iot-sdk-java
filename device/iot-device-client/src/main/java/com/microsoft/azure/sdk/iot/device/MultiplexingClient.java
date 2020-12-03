@@ -398,7 +398,7 @@ public class MultiplexingClient
 
         if (timeoutMilliseconds <= 0)
         {
-            throw new IllegalArgumentException("Cannot set a device registration timeout of less than 0 milliseconds");
+            throw new IllegalArgumentException("Cannot set a device registration timeout of less than or equal to 0 milliseconds");
         }
 
         synchronized (this.operationLock)
