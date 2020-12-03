@@ -740,35 +740,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private void executorServicesCleanup() throws TransportException
+    private void executorServicesCleanup()
     {
         if (this.executorService != null)
         {
             log.trace("Shutdown of executor service has started");
-            this.executorService.shutdown();
-            try
-            {
-                // Wait a while for existing tasks to terminate
-                if (!this.executorService.awaitTermination(MAX_WAIT_TO_TERMINATE_EXECUTOR, TimeUnit.SECONDS))
-                {
-                    this.executorService.shutdownNow(); // Cancel currently executing tasks
-                    // Wait a while for tasks to respond to being cancelled
-                    if (!this.executorService.awaitTermination(MAX_WAIT_TO_TERMINATE_EXECUTOR, TimeUnit.SECONDS))
-                    {
-                        log.trace("Pool did not terminate");
-                    }
-                }
-
-                this.executorService = null;
-            }
-            catch (InterruptedException e)
-            {
-                log.warn("Interrupted while cleaning up executor services", e);
-                // (Re-)Cancel if current thread also interrupted
-                this.executorService.shutdownNow();
-                this.executorService = null;
-                throw new TransportException("Waited too long for the connection to close.", e);
-            }
+            this.executorService.shutdownNow();
+            this.executorService = null;
             log.trace("Shutdown of executor service completed");
         }
     }
