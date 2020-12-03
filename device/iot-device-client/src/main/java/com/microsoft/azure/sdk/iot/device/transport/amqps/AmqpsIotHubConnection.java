@@ -72,6 +72,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private IotHubListener listener;
     private TransportException savedException;
     private boolean reconnectionScheduled = false;
+    private final Object executorServiceLock = new Object();
     private ExecutorService executorService;
 
     // State latches are used for asynchronous open and close operations
@@ -694,10 +695,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         log.trace("OpenAsnyc called for amqp connection");
 
-        if (executorService == null)
+        synchronized (this.executorServiceLock)
         {
-            log.trace("Creating new executor service");
-            executorService = Executors.newFixedThreadPool(1);
+            if (executorService == null)
+            {
+                log.trace("Creating new executor service");
+                executorService = Executors.newFixedThreadPool(1);
+            }
         }
 
         this.reactor = createReactor();
@@ -742,12 +746,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private void executorServicesCleanup()
     {
-        if (this.executorService != null)
+        synchronized (this.executorServiceLock)
         {
-            log.trace("Shutdown of executor service has started");
-            this.executorService.shutdownNow();
-            this.executorService = null;
-            log.trace("Shutdown of executor service completed");
+            if (this.executorService != null)
+            {
+                log.trace("Shutdown of executor service has started");
+                this.executorService.shutdownNow();
+                this.executorService = null;
+                log.trace("Shutdown of executor service completed");
+            }
         }
     }
 
