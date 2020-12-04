@@ -1023,6 +1023,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     // Attempt to register a single device with the wrong connection string. The thrown exception
     // should contain all the exceptions thrown by the service.
+    @ContinuousIntegrationTest
     @Test
     public void registerDeviceWithIncorrectCredentialsAfterOpenThrows() throws Exception
     {
@@ -1059,6 +1060,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     // Before opening the multiplexed connection, register a single device with incorrect credentials. Opening the client
     // should throw and the thrown exception should have details on why the open failed
+    @ContinuousIntegrationTest
     @Test
     public void registerDeviceWithIncorrectCredentialsBeforeOpenThrowsOnOpen() throws Exception
     {
@@ -1095,6 +1097,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     // Attempt to register a batch of devices, all with the wrong connection string. The thrown exception
     // should contain all the exceptions thrown by the service.
+    @ContinuousIntegrationTest
     @Test
     public void registerDevicesWithIncorrectCredentialsAfterOpenThrows() throws Exception
     {
@@ -1140,6 +1143,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assertTrue("Expected exception was not thrown", expectedExceptionThrown);
     }
 
+    @ContinuousIntegrationTest
     @Test
     public void registerDevicesWithIncorrectCredentialsBeforeOpenThrowsOnOpen() throws Exception
     {
