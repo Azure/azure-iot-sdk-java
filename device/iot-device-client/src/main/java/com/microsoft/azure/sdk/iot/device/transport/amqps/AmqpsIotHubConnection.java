@@ -72,6 +72,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private IotHubListener listener;
     private TransportException savedException;
     private boolean reconnectionScheduled = false;
+    private final Object executorServiceLock = new Object();
     private ExecutorService executorService;
 
     // State latches are used for asynchronous open and close operations
@@ -694,10 +695,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         log.trace("OpenAsnyc called for amqp connection");
 
-        if (executorService == null)
+        synchronized (this.executorServiceLock)
         {
-            log.trace("Creating new executor service");
-            executorService = Executors.newFixedThreadPool(1);
+            if (executorService == null)
+            {
+                log.trace("Creating new executor service");
+                executorService = Executors.newFixedThreadPool(1);
+            }
         }
 
         this.reactor = createReactor();
@@ -740,36 +744,17 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private void executorServicesCleanup() throws TransportException
+    private void executorServicesCleanup()
     {
-        if (this.executorService != null)
+        synchronized (this.executorServiceLock)
         {
-            log.trace("Shutdown of executor service has started");
-            this.executorService.shutdown();
-            try
+            if (this.executorService != null)
             {
-                // Wait a while for existing tasks to terminate
-                if (!this.executorService.awaitTermination(MAX_WAIT_TO_TERMINATE_EXECUTOR, TimeUnit.SECONDS))
-                {
-                    this.executorService.shutdownNow(); // Cancel currently executing tasks
-                    // Wait a while for tasks to respond to being cancelled
-                    if (!this.executorService.awaitTermination(MAX_WAIT_TO_TERMINATE_EXECUTOR, TimeUnit.SECONDS))
-                    {
-                        log.trace("Pool did not terminate");
-                    }
-                }
-
-                this.executorService = null;
-            }
-            catch (InterruptedException e)
-            {
-                log.warn("Interrupted while cleaning up executor services", e);
-                // (Re-)Cancel if current thread also interrupted
+                log.trace("Shutdown of executor service has started");
                 this.executorService.shutdownNow();
                 this.executorService = null;
-                throw new TransportException("Waited too long for the connection to close.", e);
+                log.trace("Shutdown of executor service completed");
             }
-            log.trace("Shutdown of executor service completed");
         }
     }
 
