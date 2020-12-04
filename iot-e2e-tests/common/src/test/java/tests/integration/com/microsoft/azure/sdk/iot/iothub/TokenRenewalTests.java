@@ -9,6 +9,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.Module;
@@ -263,7 +264,7 @@ public class TokenRenewalTests extends IntegrationTest
         return clients;
     }
 
-    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> createdClients) throws IotHubException, IOException, URISyntaxException, ModuleClientException, DeviceClientException, InterruptedException {
+    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> createdClients) throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException {
         String hostName = createdClients.get(0).getConfig().getIotHubHostname();
         MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, protocol);
 

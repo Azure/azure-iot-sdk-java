@@ -56,4 +56,13 @@ public interface IotHubListener
      * @param deviceId the Id of the device that the session belongs to
      */
     void onMultiplexedDeviceSessionLost(Throwable e, String connectionId, String deviceId);
+
+    /**
+     * Callback to be fired when the multiplexed connection fails to register a device session.
+     * @param connectionId the Id of the connection, used to identify which of possible many reconnection attempts
+     *                     this event belongs to.
+     * @param deviceId the Id of the device that the session belongs to
+     * @param e the throwable that explains why the registration failed.
+     */
+    void onMultiplexedDeviceSessionRegistrationFailed(String connectionId, String deviceId, Exception e);
 }

@@ -217,7 +217,7 @@ public class TransportClientTest
         };
     }
 
-    // Tests_SRS_TRANSPORTCLIENT_12_014: [If the deviceIO not null the function shall call multiplexClose on the deviceIO and set the deviceIO to null.]
+    // Tests_SRS_TRANSPORTCLIENT_12_014: [If the deviceIO not null the function shall call closeWithoutWrappingException on the deviceIO and set the deviceIO to null.]
     // Tests_SRS_TRANSPORTCLIENT_12_015: [If the registered device list is not empty the function shall call closeFileUpload on all devices.]
     // Tests_SRS_TRANSPORTCLIENT_12_016: [The function shall clear the registered device list.]
     @Test
@@ -239,7 +239,7 @@ public class TransportClientTest
         new Verifications()
         {
             {
-                mockDeviceIO.multiplexClose();
+                mockDeviceIO.close();
                 times = 1;
                 Deencapsulation.invoke(mockDeviceClient, "closeFileUpload");
                 times = 1;

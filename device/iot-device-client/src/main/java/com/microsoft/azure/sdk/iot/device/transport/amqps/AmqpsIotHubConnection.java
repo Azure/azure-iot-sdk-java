@@ -12,6 +12,7 @@ import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceUnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
@@ -77,6 +78,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private boolean reconnectionScheduled = false;
     private final Object executorServiceLock = new Object();
     private final Map<String, Boolean> reconnectionsScheduled = new ConcurrentHashMap<>();
+    private final Object executorServiceLock = new Object();
     private ExecutorService executorService;
     private final ProxySettings proxySettings;
 
@@ -661,11 +663,35 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     }
 
     @Override
-    public void onAuthenticationFailed(TransportException transportException)
+    public void onAuthenticationFailed(String deviceId, TransportException transportException)
     {
-        this.savedException = transportException;
-        releaseLatch(authenticationSessionOpenedLatch);
-        releaseDeviceSessionLatches();
+        if (this.deviceClientConfigs.size() > 1)
+        {
+            if (this.savedException == null)
+            {
+                this.savedException = new MultiplexingDeviceUnauthorizedException("One or more multiplexed devices failed to authenticate");
+            }
+
+            if (this.savedException instanceof MultiplexingDeviceUnauthorizedException)
+            {
+                ((MultiplexingDeviceUnauthorizedException)this.savedException).addRegistrationException(deviceId, transportException);
+            }
+        }
+        else
+        {
+            this.savedException = transportException;
+        }
+
+        this.listener.onMultiplexedDeviceSessionRegistrationFailed(this.connectionId, deviceId, transportException);
+
+        if (this.deviceSessionsOpenedLatches.containsKey(deviceId))
+        {
+            this.deviceSessionsOpenedLatches.get(deviceId).countDown();
+        }
+        else
+        {
+            log.warn("Unrecognized device Id reported authentication failure, could not map it to a device session latch", transportException);
+        }
     }
 
     @Override

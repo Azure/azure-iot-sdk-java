@@ -67,31 +67,31 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
     @Override
     public DeliveryState handleAuthenticationResponseMessage(int status, String description, Reactor reactor)
     {
+        try
+        {
+            if (nextToAuthenticate != null)
+            {
+                nextToAuthenticate.sendAuthenticationMessage(reactor);
+                nextToAuthenticate = null; //only need to chain the next authentication once, so remove this connection
+            }
+        }
+        catch (TransportException e)
+        {
+            log.error("Failed to send authentication message for device {}", nextToAuthenticate.amqpsSessionHandler.getDeviceId(), e);
+        }
+
         if (status == 200)
         {
             log.debug("CBS message authentication succeeded for device {}", this.amqpsSessionHandler.getDeviceId());
             amqpsSessionHandler.openLinks();
-
-            try
-            {
-                if (nextToAuthenticate != null)
-                {
-                    nextToAuthenticate.sendAuthenticationMessage(reactor);
-                    nextToAuthenticate = null; //only need to chain the next authentication once, so remove this connection
-                }
-            }
-            catch (TransportException e)
-            {
-                log.error("Failed to send authentication message for device {}", nextToAuthenticate.amqpsSessionHandler.getDeviceId(), e);
-            }
-
-            return Accepted.getInstance();
         }
         else
         {
-            this.amqpsCbsSessionHandler.onAuthenticationFailed(IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(status), description));
-            return Accepted.getInstance();
+            TransportException exception = IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(status), description);
+            this.amqpsCbsSessionHandler.onAuthenticationFailed(this.amqpsSessionHandler.getDeviceId(), exception);
         }
+
+        return Accepted.getInstance();
     }
 
     // Once closed, this handler will stop sending authentication messages for its device. This object may not be re-opened.
