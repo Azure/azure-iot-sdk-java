@@ -384,7 +384,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                             }
                         }
                     }
-                    
+
                     AmqpsSendResult amqpsSendResult = senderLinkHandler.sendMessageAndGetDeliveryTag(message);
 
                     if (amqpsSendResult.isDeliverySuccessful())
