@@ -365,6 +365,26 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                         || senderLinkHandler instanceof AmqpsTwinSenderLinkHandler && messageType == DEVICE_TWIN
                         || senderLinkHandler instanceof AmqpsMethodsSenderLinkHandler && messageType == DEVICE_METHODS)
                 {
+                    if (messageType == DEVICE_TWIN)
+                    {
+                        if (explicitInProgressTwinSubscriptionMessage != null)
+                        {
+                            // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
+                            // has been acknowledged by the service before sending it.
+                            return false;
+                        }
+
+                        for (SubscriptionType subscriptionType : this.implicitInProgressSubscriptionMessages.values())
+                        {
+                            if (subscriptionType == SubscriptionType.DESIRED_PROPERTIES_SUBSCRIPTION)
+                            {
+                                // Don't send any twin messages while a twin subscription is in progress. Wait until the subscription
+                                // has been acknowledged by the service before sending it.
+                                return false;
+                            }
+                        }
+                    }
+
                     AmqpsSendResult amqpsSendResult = senderLinkHandler.sendMessageAndGetDeliveryTag(message);
 
                     if (amqpsSendResult.isDeliverySuccessful())

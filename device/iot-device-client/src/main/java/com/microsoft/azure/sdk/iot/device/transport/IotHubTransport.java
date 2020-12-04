@@ -41,6 +41,8 @@ public class IotHubTransport implements IotHubListener
     // device sessions are open.
     private Map<String, IotHubConnectionStatus> deviceConnectionStates = new HashMap<>();
 
+    private final Map<String, Exception> multiplexingDeviceRegistrationFailures = new ConcurrentHashMap<>();
+
     private IotHubTransportConnection iotHubTransportConnection;
 
     // Messages waiting to be sent to the IoT Hub.
@@ -337,6 +339,15 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
+    @Override
+    public void onMultiplexedDeviceSessionRegistrationFailed(String connectionId, String deviceId, Exception e)
+    {
+        if (connectionId != null && connectionId.equals(this.iotHubTransportConnection.getConnectionId()))
+        {
+            this.multiplexingDeviceRegistrationFailures.put(deviceId, e);
+        }
+    }
+
     public void setMultiplexingRetryPolicy(RetryPolicy retryPolicy)
     {
         this.multiplexingRetryPolicy = retryPolicy;
@@ -349,10 +360,9 @@ public class IotHubTransport implements IotHubListener
      * If reconnection is occurring when this is called, this function shall block and wait for the reconnection
      * to finish before trying to open the connection
      *
-     * @throws DeviceClientException if a communication channel cannot be
-     * established.
+     * @throws TransportException if a communication channel cannot be established.
      */
-    public void open() throws DeviceClientException
+    public void open() throws TransportException
     {
         if (this.connectionStatus == IotHubConnectionStatus.CONNECTED)
         {
@@ -700,11 +710,14 @@ public class IotHubTransport implements IotHubListener
         this.multiplexingStateCallbackContext = callbackContext;
     }
 
-    public void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs) throws InterruptedException {
+    public void registerMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
+    {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
             throw new UnsupportedOperationException("Cannot add a multiplexed device unless connection is over AMQPS or AMQPS_WS");
         }
+
+        multiplexingDeviceRegistrationFailures.clear();
 
         for (DeviceClientConfig configToRegister : configs)
         {
@@ -719,23 +732,51 @@ public class IotHubTransport implements IotHubListener
         }
 
         // If the multiplexed connection is active, block until all the registered devices have been connected.
+        long timeoutTime = System.currentTimeMillis() + timeoutMilliseconds;
+        MultiplexingClientDeviceRegistrationAuthenticationException registrationException = null;
         if (this.connectionStatus != IotHubConnectionStatus.DISCONNECTED)
         {
             for (DeviceClientConfig newlyRegisteredConfig : configs)
             {
-                while (deviceConnectionStates.get(newlyRegisteredConfig.getDeviceId()) != IotHubConnectionStatus.CONNECTED)
+                String deviceId = newlyRegisteredConfig.getDeviceId();
+                boolean deviceIsNotConnected = deviceConnectionStates.get(deviceId) != IotHubConnectionStatus.CONNECTED;
+                Exception deviceRegistrationException = multiplexingDeviceRegistrationFailures.remove(deviceId);
+                while (deviceIsNotConnected && deviceRegistrationException == null)
                 {
                     Thread.sleep(100);
+
+                    deviceIsNotConnected = deviceConnectionStates.get(deviceId) != IotHubConnectionStatus.CONNECTED;
+                    deviceRegistrationException = multiplexingDeviceRegistrationFailures.remove(deviceId);
+                    boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
+                    if (operationHasTimedOut)
+                    {
+                        throw new MultiplexingClientDeviceRegistrationTimeoutException("Timed out waiting for all device registrations to finish.");
+                    }
                 }
+
+                if (deviceRegistrationException != null)
+                {
+                    if (registrationException == null)
+                    {
+                        registrationException = new MultiplexingClientDeviceRegistrationAuthenticationException("Failed to register one or more devices to the multiplexed connection.");
+                    }
+
+                    registrationException.addRegistrationException(deviceId, deviceRegistrationException);
+                }
+            }
+
+            if (registrationException != null)
+            {
+                throw registrationException;
             }
         }
     }
 
-    public void unregisterMultiplexedDeviceClient(List<DeviceClientConfig> configs) throws InterruptedException
+    public void unregisterMultiplexedDeviceClient(List<DeviceClientConfig> configs, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         if (getProtocol() != IotHubClientProtocol.AMQPS && getProtocol() != IotHubClientProtocol.AMQPS_WS)
         {
-            throw new UnsupportedOperationException("Cannot add a multiplexed device unless connection is over AMQPS or AMQPS_WS");
+            throw new UnsupportedOperationException("Cannot add a multiplexed device unless connection is over AMQPS or AMQPS_WS.");
         }
 
         for (DeviceClientConfig configToRegister : configs)
@@ -754,6 +795,7 @@ public class IotHubTransport implements IotHubListener
         }
 
         // If the multiplexed connection is active, block until all the unregistered devices have been disconnected.
+        long timeoutTime = System.currentTimeMillis() + timeoutMilliseconds;
         if (this.connectionStatus != IotHubConnectionStatus.DISCONNECTED)
         {
             for (DeviceClientConfig newlyUnregisteredConfig : configs)
@@ -761,6 +803,12 @@ public class IotHubTransport implements IotHubListener
                 while (deviceConnectionStates.get(newlyUnregisteredConfig.getDeviceId()) != IotHubConnectionStatus.DISCONNECTED)
                 {
                     Thread.sleep(100);
+
+                    boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
+                    if (operationHasTimedOut)
+                    {
+                        throw new MultiplexingClientDeviceRegistrationTimeoutException("Timed out waiting for all device unregistrations to finish.");
+                    }
                 }
             }
         }

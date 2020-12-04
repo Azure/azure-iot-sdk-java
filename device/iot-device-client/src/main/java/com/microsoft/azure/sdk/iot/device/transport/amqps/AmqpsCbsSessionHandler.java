@@ -143,9 +143,9 @@ public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStat
         this.connectionStateCallback.onCBSSessionClosedUnexpectedly(errorCondition);
     }
 
-    public void onAuthenticationFailed(TransportException transportException)
+    public void onAuthenticationFailed(String deviceId, TransportException transportException)
     {
-        this.connectionStateCallback.onAuthenticationFailed(transportException);
+        this.connectionStateCallback.onAuthenticationFailed(deviceId, transportException);
     }
 
     public void close()

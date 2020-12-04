@@ -44,9 +44,10 @@ interface AmqpsSessionStateCallback
     /**
      * Executed when SAS based authentication fails for a device in this connection
      *
+     * @param deviceId the Id of the device for which the authentication failed.
      * @param transportException the cause of that failure.
      */
-    void onAuthenticationFailed(TransportException transportException);
+    void onAuthenticationFailed(String deviceId, TransportException transportException);
 
     /**
      * Executed if a session closes unexpectedly. May be because one of its links closed unexpectedly, or if the session
