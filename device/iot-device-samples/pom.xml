@@ -37,6 +37,7 @@
         <module>send-event-with-proxy</module>
         <module>device-reconnection-sample</module>
         <module>pnp-device-sample</module>
+        <module>custom-sas-token-provider-sample</module>
     </modules>
     <dependencies>
         <dependency>

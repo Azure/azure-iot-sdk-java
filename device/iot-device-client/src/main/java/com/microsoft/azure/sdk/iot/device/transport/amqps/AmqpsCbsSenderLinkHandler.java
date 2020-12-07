@@ -107,7 +107,7 @@ public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
         Section section;
         try
         {
-            section = new AmqpValue(deviceClientConfig.getSasTokenAuthentication().getRenewedSasToken(true, true));
+            section = new AmqpValue(String.valueOf(deviceClientConfig.getSasTokenAuthentication().getSasToken()));
             outgoingMessage.setBody(section);
         }
         catch (IOException e)

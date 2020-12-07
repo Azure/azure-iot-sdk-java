@@ -78,7 +78,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         }
 
         @Override
-        public String getRenewedSasToken(boolean proactivelyRenew, boolean forceRenewal) throws IOException
+        public char[] getSasToken() throws IOException
         {
             return null;
         }
@@ -139,7 +139,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
-        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
+        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
 
         //assert
         assertTrue(isRenewalNecessary);
@@ -162,7 +162,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         Deencapsulation.setField(sasAuth, "sasToken", mockSasToken);
 
         //act
-        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isRenewalNecessary");
+        boolean isRenewalNecessary = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
 
         //assert
         assertFalse(isRenewalNecessary);

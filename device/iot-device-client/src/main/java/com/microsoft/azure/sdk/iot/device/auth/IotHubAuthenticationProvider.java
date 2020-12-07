@@ -56,7 +56,11 @@ public abstract class IotHubAuthenticationProvider
         this(hostname, gatewayHostname, deviceId, moduleId);
 
         this.sslContextNeedsUpdate = false;
-        this.iotHubSSLContext = new IotHubSSLContext(sslContext);
+
+        if (sslContext != null)
+        {
+            this.iotHubSSLContext = new IotHubSSLContext(sslContext);
+        }
     }
 
     public SSLContext getSSLContext() throws IOException

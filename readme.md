@@ -154,6 +154,10 @@ This folder contains scripts to build and run Java SDK provided proper environme
 
 Contains libraries that enable interactions with the IoT Hub service to perform operations such as sending messages to devices and managing the device identity registry. Refer to API documentation and samples for more details.
 
+## Certificates -  Important to know
+
+For guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team. 
+
 # Long Term Support
 
 The project offers a Long Term Support (LTS) version to allow users that do not need the latest features to be shielded from unwanted changes.

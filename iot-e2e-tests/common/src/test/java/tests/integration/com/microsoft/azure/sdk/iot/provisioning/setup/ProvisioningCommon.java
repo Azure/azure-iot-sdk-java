@@ -116,8 +116,6 @@ public class ProvisioningCommon extends IntegrationTest
 
     public static final long MAX_TIME_TO_WAIT_FOR_REGISTRATION_MILLISECONDS = 60 * 1000;
 
-    public static final String HMAC_SHA256 = "HmacSHA256";
-
     public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
 
     protected static final String CUSTOM_ALLOCATION_WEBHOOK_API_VERSION = "2019-03-31";
@@ -552,7 +550,7 @@ public class ProvisioningCommon extends IntegrationTest
                 assertEquals(TEST_VALUE_DP, testInstance.enrollmentGroup.getInitialTwin().getDesiredProperty().get(TEST_KEY_DP));
 
                 SymmetricKeyAttestation symmetricKeyAttestation = (SymmetricKeyAttestation) attestation;
-                byte[] derivedPrimaryKey = ComputeDerivedSymmetricKey(symmetricKeyAttestation.getPrimaryKey(), testInstance.registrationId);
+                byte[] derivedPrimaryKey = SecurityProviderSymmetricKey.ComputeDerivedSymmetricKey(symmetricKeyAttestation.getPrimaryKey().getBytes(StandardCharsets.UTF_8), testInstance.registrationId);
                 securityProvider = new SecurityProviderSymmetricKey(derivedPrimaryKey, testInstance.registrationId);
             }
         }
@@ -605,14 +603,5 @@ public class ProvisioningCommon extends IntegrationTest
         testInstance.individualEnrollment.setIotHubs(iothubs);
         testInstance.individualEnrollment.setInitialTwin(twinState);
         testInstance.individualEnrollment = testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
-    }
-
-    public static byte[] ComputeDerivedSymmetricKey(String masterKey, String registrationId) throws InvalidKeyException, NoSuchAlgorithmException
-    {
-        byte[] masterKeyBytes = com.microsoft.azure.sdk.iot.deps.util.Base64.decodeBase64Local(masterKey.getBytes(StandardCharsets.UTF_8));
-        SecretKeySpec secretKey = new SecretKeySpec(masterKeyBytes, HMAC_SHA256);
-        Mac hMacSha256 = Mac.getInstance(HMAC_SHA256);
-        hMacSha256.init(secretKey);
-        return com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(hMacSha256.doFinal(registrationId.getBytes()));
     }
 }
