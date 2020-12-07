@@ -28,7 +28,7 @@ public class MqttConnectionTest
     private static final String SERVER_URI = "test.host.name";
     private static final String CLIENT_ID = "test.iothub";
     private static final String USER_NAME = "test-deviceId";
-    private static final String PWORD = "this is not a secret";
+    private static final char[] PWORD = "this is not a secret".toCharArray();
 
     @Mocked
     SSLContext mockSSLContext;
@@ -76,7 +76,7 @@ public class MqttConnectionTest
                 times = 1;
                 mockMqttConnectionOptions.setUserName(USER_NAME);
                 times = 1;
-                mockMqttConnectionOptions.setPassword(PWORD.toCharArray());
+                mockMqttConnectionOptions.setPassword(PWORD);
                 times = 1;
                 mockMqttConnectionOptions.setSocketFactory(mockSSLContext.getSocketFactory());
                 times = 1;
@@ -96,7 +96,7 @@ public class MqttConnectionTest
         //arrange
         baseConstructorExpectations();
         //act
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, (ProxySettings) null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, (ProxySettings) null);
 
         //assert
         baseConstructorVerifications();
@@ -251,7 +251,7 @@ public class MqttConnectionTest
     public void getAsyncClientSucceeds() throws Exception
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
 
         //act
         MqttAsyncClient mqttAsyncClient = Deencapsulation.invoke(mqttConnection, "getMqttAsyncClient");
@@ -265,7 +265,7 @@ public class MqttConnectionTest
     public void getAllReceivedMessagesSucceeds() throws Exception
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
 
         //act
         ConcurrentLinkedQueue concurrentLinkedQueue = Deencapsulation.invoke(mqttConnection, "getAllReceivedMessages");
@@ -279,7 +279,7 @@ public class MqttConnectionTest
     public void getMqttLockSucceeds() throws Exception
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
 
         //act
         Object mqttLock = Deencapsulation.invoke(mqttConnection, "getMqttLock");
@@ -293,7 +293,7 @@ public class MqttConnectionTest
     public void getConnectionOptionsSucceeds() throws Exception
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
 
         //act
         MqttConnectOptions mqttConnectOptions = Deencapsulation.invoke(mqttConnection, "getConnectionOptions");
@@ -307,7 +307,7 @@ public class MqttConnectionTest
     public void setMqttAsyncClientSucceeds() throws Exception
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         MqttAsyncClient testMqttAsyncClient = null;
 
         //act
@@ -323,7 +323,7 @@ public class MqttConnectionTest
     public void setMqttCallbackSucceeds(@Mocked MqttCallback mockedMqttCallback) throws Exception
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         final MqttCallback testMqttCallback = mockedMqttCallback;
 
         //act
@@ -344,7 +344,7 @@ public class MqttConnectionTest
     public void setMqttCallbackThrowsOnNull(@Mocked MqttCallback mockedMqttCallback) throws Exception
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         MqttCallback testMqttCallback = null;
 
         //act
@@ -362,7 +362,7 @@ public class MqttConnectionTest
     {
         //arrange
         final int expectedMessageId = 13;
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
 
         //act
         boolean returnedValue = Deencapsulation.invoke(mqttConnection, "sendMessageAcknowledgement", expectedMessageId);
@@ -386,7 +386,7 @@ public class MqttConnectionTest
     {
         //arrange
         final int expectedMessageId = 13;
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         final MqttException mqttException = new MqttException(new Throwable());
         new NonStrictExpectations()
         {
@@ -407,7 +407,7 @@ public class MqttConnectionTest
     public void isConnectedChecksMqttAsyncClientFalse()
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
 
         new NonStrictExpectations()
@@ -438,7 +438,7 @@ public class MqttConnectionTest
     public void isConnectedChecksMqttAsyncClientTrue()
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
 
         new NonStrictExpectations()
@@ -468,7 +468,7 @@ public class MqttConnectionTest
     public void isConnectedReturnsFalseIfMqttAsyncClientIsNull()
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         Deencapsulation.setField(mqttConnection, "mqttAsyncClient", null);
 
         //act
@@ -484,7 +484,7 @@ public class MqttConnectionTest
     public void disconnectInvokesDisconnectOnAsyncClient() throws MqttException
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
         new NonStrictExpectations()
         {
@@ -513,7 +513,7 @@ public class MqttConnectionTest
     public void disconnectReturnsNullIfNullAsyncClient() throws MqttException
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         Deencapsulation.setField(mqttConnection, "mqttAsyncClient", null);
 
         //act
@@ -529,7 +529,7 @@ public class MqttConnectionTest
     public void closeInvokesCloseOnAsyncClient() throws MqttException
     {
         //arrange
-        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, String.class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
+        final MqttConnection mqttConnection = Deencapsulation.newInstance(MqttConnection.class, new Class[] {String.class, String.class, String.class, char[].class, SSLContext.class, ProxySettings.class}, SERVER_URI, CLIENT_ID, USER_NAME, PWORD, mockSSLContext, null);
         Deencapsulation.setField(mqttConnection, "mqttAsyncClient", mockMqttAsyncClient);
 
         //act

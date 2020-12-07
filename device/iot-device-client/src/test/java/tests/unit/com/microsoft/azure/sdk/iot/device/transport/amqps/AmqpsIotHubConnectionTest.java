@@ -585,7 +585,7 @@ public class AmqpsIotHubConnectionTest {
         {
             {
                 mockReactorFuture.cancel(true);
-                mockExecutorService.shutdown();
+                mockExecutorService.shutdownNow();
             }
         };
 

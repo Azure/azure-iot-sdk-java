@@ -147,6 +147,19 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
     }
 
+
+    public DeviceClientConfig(String hostName, SasTokenProvider sasTokenProvider, ClientOptions clientOptions, String deviceId, String moduleId)
+    {
+        SSLContext sslContext = clientOptions != null ? clientOptions.sslContext : null;
+        this.authenticationProvider =
+                new IotHubSasTokenProvidedAuthenticationProvider(hostName, deviceId, moduleId, sasTokenProvider, sslContext);
+
+        this.useWebsocket = false;
+        this.productInfo = new ProductInfo();
+
+        log.debug("Device configured to use SAS token provided authentication provider");
+    }
+
     /**
      * Constructor for device configs that use x509 authentication
      *

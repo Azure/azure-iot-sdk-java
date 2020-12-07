@@ -1536,7 +1536,7 @@ public class IotHubTransport implements IotHubListener
     {
         //Codes_SRS_IOTHUBTRANSPORT_28_003: [This function shall indicate if the device's sas token is expired.]
         return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
-                && this.getDefaultConfig().getSasTokenAuthentication().isRenewalNecessary();
+                && this.getDefaultConfig().getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
     }
 
     /**

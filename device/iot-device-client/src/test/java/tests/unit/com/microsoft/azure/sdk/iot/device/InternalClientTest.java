@@ -1405,7 +1405,7 @@ public class InternalClientTest
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
 
-                mockConfig.getSasTokenAuthentication().isRenewalNecessary();
+                mockConfig.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
                 result = true;
             }
         };

@@ -45,7 +45,7 @@ public class MqttConnection
      * @throws IllegalArgumentException is thrown if any of the parameters are null or empty
      * @throws TransportException when Mqtt async client cannot be instantiated
      */
-    MqttConnection(String serverURI, String clientId, String userName, String password, SSLContext sslContext, ProxySettings proxySettings) throws TransportException, IllegalArgumentException, UnknownHostException
+    MqttConnection(String serverURI, String clientId, String userName, char[] password, SSLContext sslContext, ProxySettings proxySettings) throws TransportException, IllegalArgumentException, UnknownHostException
     {
         if (serverURI == null || clientId == null || userName == null || sslContext == null)
         {
@@ -86,7 +86,7 @@ public class MqttConnection
      * @param userName the user name for the mqtt broker connection.
      * @param userPassword the user password for the mqtt broker connection.
      */
-    private void updateConnectionOptions(String userName, String userPassword, SSLContext iotHubSSLContext, ProxySettings proxySettings) throws UnknownHostException
+    private void updateConnectionOptions(String userName, char[] userPassword, SSLContext iotHubSSLContext, ProxySettings proxySettings) throws UnknownHostException
     {
         this.connectionOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
         this.connectionOptions.setCleanSession(SET_CLEAN_SESSION);
@@ -112,9 +112,9 @@ public class MqttConnection
             this.connectionOptions.setSocketFactory(iotHubSSLContext.getSocketFactory());
         }
 
-        if (userPassword != null && !userPassword.isEmpty())
+        if (userPassword != null && userPassword.length > 0)
         {
-            this.connectionOptions.setPassword(userPassword.toCharArray());
+            this.connectionOptions.setPassword(userPassword);
         }
     }
 
