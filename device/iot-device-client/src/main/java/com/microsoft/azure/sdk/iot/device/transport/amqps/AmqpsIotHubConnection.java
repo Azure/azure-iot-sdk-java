@@ -158,8 +158,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (InterruptedException e)
             {
-                executorServicesCleanup();
-                throw new TransportException("Interrupted while waiting for links to open for AMQP connection", e);
+                this.close();
+                TransportException interruptedTransportException = new TransportException("Interrupted while waiting for links to open for AMQP connection", e);
+                interruptedTransportException.setRetryable(true);
+                throw interruptedTransportException;
             }
         }
 
@@ -181,6 +183,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
         catch (InterruptedException e)
         {
+            this.executorServicesCleanup();
             throw new TransportException("Interrupted while closing proton reactor", e);
         }
 
