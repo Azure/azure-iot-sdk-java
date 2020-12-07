@@ -55,7 +55,7 @@ public class MultiplexingSample
      * Add up to 998 device connection strings from args[4] on.
      *
      * Any additional arguments will be interpreted as additional connections strings. This allows this sample to be
-     * run with more than 2 devices. At
+     * run with more than 2 devices.
      */
     public static void main(String[] args)
             throws URISyntaxException, InterruptedException, MultiplexingClientException {
