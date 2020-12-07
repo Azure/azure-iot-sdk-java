@@ -1081,7 +1081,8 @@ public class InternalClient
 
     /**
      * Returns if this client is or ever was registered to a {@link MultiplexingClient} instance. Device clients that were
-     * cannot be used in non-multiplexed connections.
+     * cannot be used in non-multiplexed connections. Device clients that aren't registered to any multiplexing client
+     * will still return true.
      * @return true if this client is or ever was registered to a {@link MultiplexingClient} instance, false otherwise.
      */
     public boolean isMultiplexed()

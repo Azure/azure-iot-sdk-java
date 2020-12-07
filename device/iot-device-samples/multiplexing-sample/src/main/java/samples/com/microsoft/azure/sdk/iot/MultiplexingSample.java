@@ -178,6 +178,11 @@ public class MultiplexingSample
         }
         System.out.println("Successfully unregistered device " + deviceIdToUnregister + " from an active multiplexed connection.");
 
+        // Will always be true since this device client was registered to a multiplexing client at one point, even though
+        // it isn't right now. Clients like these cannot be used to crete non-multiplexed connections, but may
+        // be re-registered to any MultiplexingClient instance.
+        boolean isMultiplexed = multiplexedDeviceClients.get(deviceIdToUnregister).isMultiplexed();
+
         // This code demonstrates how to add a device to an active multiplexed connection without shutting down
         // the whole multiplexed connection or any of the other devices.
         System.out.println("Re-registering device " + deviceIdToUnregister + " to an active multiplexed connection...");
