@@ -63,10 +63,6 @@ public class TokenRenewalTests extends IntegrationTest
 
     private static final int TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS = 17 * 60 * 1000;
 
-    private static final long SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
-    private static final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
-    private static final long EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS = 120; //wait time beyond the expected grace period, just in case
-
     public TokenRenewalTests()
     {
         // This overrides the IntegrationTest level timeout that is too restrictive for this particular test
