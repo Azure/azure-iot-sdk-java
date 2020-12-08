@@ -952,41 +952,41 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 log.trace("Removing session handler for device {}", amqpsSessionHandler.getDeviceId());
                 this.sessionHandlers.remove(amqpsSessionHandler);
+
+                // Need to find the sas token renewal handler that is tied to this device
+                AmqpsSasTokenRenewalHandler sasTokenRenewalHandlerToRemove = null;
+                for (AmqpsSasTokenRenewalHandler existingSasTokenRenewalHandler : this.sasTokenRenewalHandlers)
+                {
+                    if (existingSasTokenRenewalHandler.amqpsSessionHandler.getDeviceId().equals(configToUnregister.getDeviceId()))
+                    {
+                        sasTokenRenewalHandlerToRemove = existingSasTokenRenewalHandler;
+
+                        // Stop the sas token renewal handler from sending any more authentication messages on behalf of this device
+                        log.trace("Closing sas token renewal handler for device {}", configToUnregister.getDeviceId());
+                        sasTokenRenewalHandlerToRemove.close();
+                        break;
+                    }
+                }
+
+                if (sasTokenRenewalHandlerToRemove != null)
+                {
+                    this.sasTokenRenewalHandlers.remove(sasTokenRenewalHandlerToRemove);
+                }
+
+                this.reconnectionsScheduled.remove(configToUnregister.getDeviceId());
+
+                log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
+                amqpsSessionHandler.closeSession();
+
+                configsUnregisteredSuccessfully.add(configToUnregister);
+
+                configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
             }
             else
             {
                 log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", configToUnregister.getDeviceId());
-                return;
+                configsUnregisteredSuccessfully.add(configToUnregister);
             }
-
-            // Need to find the sas token renewal handler that is tied to this device
-            AmqpsSasTokenRenewalHandler sasTokenRenewalHandlerToRemove = null;
-            for (AmqpsSasTokenRenewalHandler existingSasTokenRenewalHandler : this.sasTokenRenewalHandlers)
-            {
-                if (existingSasTokenRenewalHandler.amqpsSessionHandler.getDeviceId().equals(configToUnregister.getDeviceId()))
-                {
-                    sasTokenRenewalHandlerToRemove = existingSasTokenRenewalHandler;
-
-                    // Stop the sas token renewal handler from sending any more authentication messages on behalf of this device
-                    log.trace("Closing sas token renewal handler for device {}", configToUnregister.getDeviceId());
-                    sasTokenRenewalHandlerToRemove.close();
-                    break;
-                }
-            }
-
-            if (sasTokenRenewalHandlerToRemove != null)
-            {
-                this.sasTokenRenewalHandlers.remove(sasTokenRenewalHandlerToRemove);
-            }
-
-            this.reconnectionsScheduled.remove(configToUnregister.getDeviceId());
-
-            log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
-            amqpsSessionHandler.closeSession();
-
-            configsUnregisteredSuccessfully.add(configToUnregister);
-
-            configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         }
 
         this.multiplexingClientsToUnregister.removeAll(configsUnregisteredSuccessfully);
