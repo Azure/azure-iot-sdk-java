@@ -977,17 +977,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                 log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
                 amqpsSessionHandler.closeSession();
-
-                configsUnregisteredSuccessfully.add(configToUnregister);
-
-                configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
             }
             else
             {
                 log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", configToUnregister.getDeviceId());
-                configsUnregisteredSuccessfully.add(configToUnregister);
-                configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
             }
+
+            configsUnregisteredSuccessfully.add(configToUnregister);
+            configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
+
         }
 
         this.multiplexingClientsToUnregister.removeAll(configsUnregisteredSuccessfully);
