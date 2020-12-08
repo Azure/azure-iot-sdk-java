@@ -55,7 +55,7 @@ public class MultiplexingSample
      * Add up to 998 device connection strings from args[4] on.
      *
      * Any additional arguments will be interpreted as additional connections strings. This allows this sample to be
-     * run with more than 2 devices. At
+     * run with more than 2 devices.
      */
     public static void main(String[] args)
             throws URISyntaxException, InterruptedException, MultiplexingClientException {
@@ -177,6 +177,11 @@ public class MultiplexingSample
             System.exit(-1);
         }
         System.out.println("Successfully unregistered device " + deviceIdToUnregister + " from an active multiplexed connection.");
+
+        // Will always be true since this device client was registered to a multiplexing client at one point, even though
+        // it isn't right now. Clients like these cannot be used to crete non-multiplexed connections, but may
+        // be re-registered to any MultiplexingClient instance.
+        boolean isMultiplexed = multiplexedDeviceClients.get(deviceIdToUnregister).isMultiplexed();
 
         // This code demonstrates how to add a device to an active multiplexed connection without shutting down
         // the whole multiplexed connection or any of the other devices.

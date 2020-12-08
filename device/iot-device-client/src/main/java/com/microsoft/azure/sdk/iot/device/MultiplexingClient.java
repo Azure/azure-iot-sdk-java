@@ -243,6 +243,9 @@ public class MultiplexingClient
      * <p>
      * If the provided device client is already registered to this multiplexing client, then then this method will do nothing.
      * <p>
+     * Any subscriptions (twin, methods, cloud to device messages) set on this device client from when it was 
+     * previously registered to any multiplexing client will need to be set again as subscriptions and their callbacks are not preserved.
+     * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
      * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
@@ -289,6 +292,9 @@ public class MultiplexingClient
      * The registered device client must belong to the same IoT Hub as all previously registered device clients.
      * <p>
      * If the provided device client is already registered to this multiplexing client, then then this method will do nothing.
+     * <p>
+     * Any subscriptions (twin, methods, cloud to device messages) set on this device client from when it was 
+     * previously registered to any multiplexing client will need to be set again as subscriptions and their callbacks are not preserved.
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
@@ -338,6 +344,9 @@ public class MultiplexingClient
      * If any of these device clients are already registered to this multiplexing client, then then this method will
      * not do anything to that particular device client. All other provided device clients will still be registered though.
      * <p>
+     * Any subscriptions (twin, methods, cloud to device messages) set on these device clients from when it was 
+     * previously registered to any multiplexing client will need to be set again as subscriptions and their callbacks are not preserved.
+     * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
      * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
@@ -382,6 +391,9 @@ public class MultiplexingClient
      * <p>
      * If any of these device clients are already registered to this multiplexing client, then then this method will
      * not do anything to that particular device client. All other provided device clients will still be registered though.
+     * <p>
+     * Any subscriptions (twin, methods, cloud to device messages) set on these device clients from when it was 
+     * previously registered to any multiplexing client will need to be set again as subscriptions and their callbacks are not preserved.
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
@@ -496,6 +508,9 @@ public class MultiplexingClient
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
      * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
      * <p>
+     * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
+     * after this device is re-registered.
+     * <p>
      * @param deviceClient The device client to unregister from this multiplexing client.
      * @throws InterruptedException If the thread gets interrupted while waiting for the unregistration to succeed.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
@@ -523,6 +538,9 @@ public class MultiplexingClient
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
      * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * <p>
+     * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
+     * after this device is re-registered.
      * <p>
      * @param deviceClient The device client to unregister from this multiplexing client.
      * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all unregistrations to complete. If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException} is thrown.
@@ -552,6 +570,9 @@ public class MultiplexingClient
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
      * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
      * <p>
+     * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
+     * after these devices are re-registered.
+     * <p>
      * @param deviceClients The device clients to unregister from this multiplexing client.
      * @throws InterruptedException If the thread gets interrupted while waiting for the unregistration to succeed.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
@@ -575,6 +596,9 @@ public class MultiplexingClient
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
      * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * <p>
+     * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
+     * after these devices are re-registered.
      * <p>
      * @param deviceClients The device clients to unregister from this multiplexing client.
      * @param timeoutMilliseconds How long (in milliseconds) to let this operation wait for all unregistrations to complete. If this threshold is passed, a {@link com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException} is thrown.
@@ -601,6 +625,12 @@ public class MultiplexingClient
                 log.info("Unregistering device {} from multiplexing client", deviceClientToUnregister.getConfig().getDeviceId());
                 this.multiplexedDeviceClients.remove(deviceClientToUnregister.getConfig().getDeviceId());
                 deviceClientToUnregister.setDeviceIO(null);
+
+                // Clear the device client's subscriptions after it has been unregistered from the multiplexing client
+                // We may make this optional at some point in the future if users want to be able to preserve subscriptions.
+                deviceClientToUnregister.markTwinAsUnsubscribed();
+                deviceClientToUnregister.markMethodsAsUnsubscribed();
+                deviceClientToUnregister.setMessageCallback(null, null);
             }
 
             this.deviceIO.unregisterMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
