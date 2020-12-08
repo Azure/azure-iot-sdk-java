@@ -947,8 +947,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 }
             }
 
-            // If a device session currently exists for this device identity, then remove it
-            if (amqpsSessionHandler != null)
+            // If a device session doesn't currently exist for this device identity
+            if (amqpsSessionHandler == null)
+            {
+                log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", configToUnregister.getDeviceId());
+            }
+            else
             {
                 log.trace("Removing session handler for device {}", amqpsSessionHandler.getDeviceId());
                 this.sessionHandlers.remove(amqpsSessionHandler);
@@ -978,14 +982,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
                 amqpsSessionHandler.closeSession();
             }
-            else
-            {
-                log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", configToUnregister.getDeviceId());
-            }
 
             configsUnregisteredSuccessfully.add(configToUnregister);
             configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
-
         }
 
         this.multiplexingClientsToUnregister.removeAll(configsUnregisteredSuccessfully);
