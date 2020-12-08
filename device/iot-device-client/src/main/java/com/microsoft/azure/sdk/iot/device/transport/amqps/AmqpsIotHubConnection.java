@@ -948,45 +948,43 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 }
             }
 
-            // If a device session currently exists for this device identity, then remove it
-            if (amqpsSessionHandler != null)
+            // If a device session doesn't currently exist for this device identity
+            if (amqpsSessionHandler == null)
             {
-                log.trace("Removing session handler for device {}", amqpsSessionHandler.getDeviceId());
-                this.sessionHandlers.remove(amqpsSessionHandler);
+                log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", configToUnregister.getDeviceId());
             }
             else
             {
-                log.warn("Attempted to remove device session for device {} from multiplexed connection, but device was not currently registered.", configToUnregister.getDeviceId());
-                return;
-            }
+                log.trace("Removing session handler for device {}", amqpsSessionHandler.getDeviceId());
+                this.sessionHandlers.remove(amqpsSessionHandler);
 
-            // Need to find the sas token renewal handler that is tied to this device
-            AmqpsSasTokenRenewalHandler sasTokenRenewalHandlerToRemove = null;
-            for (AmqpsSasTokenRenewalHandler existingSasTokenRenewalHandler : this.sasTokenRenewalHandlers)
-            {
-                if (existingSasTokenRenewalHandler.amqpsSessionHandler.getDeviceId().equals(configToUnregister.getDeviceId()))
+                // Need to find the sas token renewal handler that is tied to this device
+                AmqpsSasTokenRenewalHandler sasTokenRenewalHandlerToRemove = null;
+                for (AmqpsSasTokenRenewalHandler existingSasTokenRenewalHandler : this.sasTokenRenewalHandlers)
                 {
-                    sasTokenRenewalHandlerToRemove = existingSasTokenRenewalHandler;
+                    if (existingSasTokenRenewalHandler.amqpsSessionHandler.getDeviceId().equals(configToUnregister.getDeviceId()))
+                    {
+                        sasTokenRenewalHandlerToRemove = existingSasTokenRenewalHandler;
 
-                    // Stop the sas token renewal handler from sending any more authentication messages on behalf of this device
-                    log.trace("Closing sas token renewal handler for device {}", configToUnregister.getDeviceId());
-                    sasTokenRenewalHandlerToRemove.close();
-                    break;
+                        // Stop the sas token renewal handler from sending any more authentication messages on behalf of this device
+                        log.trace("Closing sas token renewal handler for device {}", configToUnregister.getDeviceId());
+                        sasTokenRenewalHandlerToRemove.close();
+                        break;
+                    }
                 }
+
+                if (sasTokenRenewalHandlerToRemove != null)
+                {
+                    this.sasTokenRenewalHandlers.remove(sasTokenRenewalHandlerToRemove);
+                }
+
+                this.reconnectionsScheduled.remove(configToUnregister.getDeviceId());
+
+                log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
+                amqpsSessionHandler.closeSession();
             }
-
-            if (sasTokenRenewalHandlerToRemove != null)
-            {
-                this.sasTokenRenewalHandlers.remove(sasTokenRenewalHandlerToRemove);
-            }
-
-            this.reconnectionsScheduled.remove(configToUnregister.getDeviceId());
-
-            log.debug("Closing device session for multiplexed device {}", configToUnregister.getDeviceId());
-            amqpsSessionHandler.closeSession();
 
             configsUnregisteredSuccessfully.add(configToUnregister);
-
             configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         }
 
