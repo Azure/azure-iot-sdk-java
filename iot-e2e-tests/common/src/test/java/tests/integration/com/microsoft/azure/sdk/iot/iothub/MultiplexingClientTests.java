@@ -6,18 +6,32 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MultiplexingClient;
+import com.microsoft.azure.sdk.iot.device.MultiplexingClientOptions;
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
@@ -25,13 +39,22 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.BasicProxyAuthenticator;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ErrorInjectionHelper;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.EventCallback;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -40,7 +63,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static junit.framework.TestCase.*;
@@ -120,7 +151,7 @@ public class MultiplexingClientTests extends IntegrationTest
             setup(multiplexingDeviceSessionCount, null);
         }
 
-        public void setup(int multiplexingDeviceSessionCount, ProxySettings proxySettings) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException
+        public void setup(int multiplexingDeviceSessionCount, MultiplexingClientOptions options) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException
         {
             deviceIdentityArray = new ArrayList<>(multiplexingDeviceSessionCount);
             deviceClientArray = new ArrayList<>(multiplexingDeviceSessionCount);
@@ -135,7 +166,7 @@ public class MultiplexingClientTests extends IntegrationTest
             Tools.addDevicesWithRetry(deviceIdentityArray, iotHubConnectionString);
 
             IotHubConnectionString connectionString = IotHubConnectionString.createConnectionString(iotHubConnectionString);
-            this.multiplexingClient = new MultiplexingClient(connectionString.getHostName(), this.protocol, MultiplexingClientOptions.builder().proxySettings(proxySettings).build());
+            this.multiplexingClient = new MultiplexingClient(connectionString.getHostName(), this.protocol, options);
             for (int i = 0; i < multiplexingDeviceSessionCount; i++)
             {
                 this.deviceClientArray.add(i, new DeviceClient(registryManager.getDeviceConnectionString(deviceIdentityArray.get(i)), this.protocol));
@@ -450,7 +481,7 @@ public class MultiplexingClientTests extends IntegrationTest
         ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
 
         //re-setup test instance to use proxy instead
-        testInstance.setup(DEVICE_MULTIPLEX_COUNT, proxySettings);
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().proxySettings(proxySettings).build());
         testInstance.multiplexingClient.open();
 
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
@@ -519,20 +550,7 @@ public class MultiplexingClientTests extends IntegrationTest
             MessageCallback messageCallback = new MessageCallback(expectedMessageCorrelationId);
             testInstance.deviceClientArray.get(i).setMessageCallback(messageCallback, null);
 
-            com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message("some payload");
-            serviceMessage.setCorrelationId(expectedMessageCorrelationId);
-            serviceClient.send(testInstance.deviceIdentityArray.get(i).getDeviceId(), serviceMessage);
-
-            long startTime = System.currentTimeMillis();
-            while (!messageCallback.messageCallbackFired)
-            {
-                Thread.sleep(200);
-
-                if (System.currentTimeMillis() - startTime > MESSAGE_SEND_TIMEOUT_MILLIS)
-                {
-                    fail("Timed out waiting for message to be received");
-                }
-            }
+            testReceivingCloudToDeviceMessage(testInstance.deviceIdentityArray.get(i).getDeviceId(), messageCallback, expectedMessageCorrelationId);
 
             assertTrue("Message callback fired, but unexpected message was received", messageCallback.expectedMessageReceived);
         }
@@ -540,12 +558,62 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
+    // MessageCallback for cloud to device messages should not be preserved between registrations by default
+    @Test
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceMessageSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.multiplexingClient.open();
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            String expectedMessageCorrelationId = UUID.randomUUID().toString();
+            MessageCallback messageCallback = new MessageCallback(expectedMessageCorrelationId);
+            testInstance.deviceClientArray.get(i).setMessageCallback(messageCallback, null);
+
+            testReceivingCloudToDeviceMessage(testInstance.deviceIdentityArray.get(i).getDeviceId(), messageCallback, expectedMessageCorrelationId);
+        }
+
+        testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
+        testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            String expectedMessageCorrelationId = UUID.randomUUID().toString();
+            MessageCallback messageCallback = new MessageCallback(expectedMessageCorrelationId);
+            testInstance.deviceClientArray.get(i).setMessageCallback(messageCallback, null);
+            testReceivingCloudToDeviceMessage(testInstance.deviceIdentityArray.get(i).getDeviceId(), messageCallback, expectedMessageCorrelationId);
+        }
+
+        testInstance.multiplexingClient.close();
+    }
+
+    private static void testReceivingCloudToDeviceMessage(String deviceId, MessageCallback messageCallback, String expectedMessageCorrelationId) throws IOException, IotHubException, InterruptedException
+    {
+        com.microsoft.azure.sdk.iot.service.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.Message("some payload");
+        serviceMessage.setCorrelationId(expectedMessageCorrelationId);
+        serviceClient.send(deviceId, serviceMessage);
+
+        long startTime = System.currentTimeMillis();
+        while (!messageCallback.messageCallbackFired)
+        {
+            Thread.sleep(200);
+
+            if (System.currentTimeMillis() - startTime > MESSAGE_SEND_TIMEOUT_MILLIS)
+            {
+                fail("Timed out waiting for message to be received");
+            }
+        }
+
+        assertTrue("Message callback fired, but unexpected message was received", messageCallback.expectedMessageReceived);
+    }
+
     private class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public boolean messageCallbackFired = false;
         public boolean expectedMessageReceived = false;
 
-        final String expectedCorrelationId;
+        String expectedCorrelationId;
 
         public MessageCallback(String expectedMessageCorrelationId)
         {
@@ -563,6 +631,13 @@ public class MultiplexingClientTests extends IntegrationTest
 
             return IotHubMessageResult.COMPLETE;
         }
+
+        public void resetExpectations(String newExpectedMessageCorrelationId)
+        {
+            this.messageCallbackFired = false;
+            this.expectedMessageReceived = false;
+            this.expectedCorrelationId = newExpectedMessageCorrelationId;
+        }
     }
 
     @Test
@@ -578,40 +653,88 @@ public class MultiplexingClientTests extends IntegrationTest
             // Subscribe to methods on the multiplexed client
             String expectedMethodName = UUID.randomUUID().toString();
             DeviceMethodCallback deviceMethodCallback = new DeviceMethodCallback(expectedMethodName);
-            Success methodsSubscribedSuccess = new Success();
-            testInstance.deviceClientArray.get(i).subscribeToDeviceMethod(deviceMethodCallback, null, new IotHubEventCallback() {
-                @Override
-                public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
-                    ((Success) callbackContext).setCallbackStatusCode(responseStatus);
-                    ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
-                    ((Success) callbackContext).callbackWasFired();
-                }
-            }, methodsSubscribedSuccess);
-
-            // Wait for methods subscription to be acknowledged by hub
-            long startTime = System.currentTimeMillis();
-            while (methodsSubscribedSuccess.wasCallbackFired())
-            {
-                Thread.sleep(200);
-
-                if (System.currentTimeMillis() - startTime > DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS)
-                {
-                    throw new AssertionError("Timed out waiting for device method subscription to be acknowledged");
-                }
-            }
-
-            // Give the method subscription some extra buffer time before invoking the method
-            Thread.sleep(1000);
-
-            // Invoke method on the multiplexed device
-            deviceMethodServiceClient.invoke(testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodName, 200l, 200l, null);
-
-            // No need to wait for the device to receive the method invocation since the service client call does that already
-            assertTrue("Device method callback never fired on device", deviceMethodCallback.deviceMethodCallbackFired);
-            assertTrue("Device method callback fired, but unexpected method name was received", deviceMethodCallback.expectedMethodReceived);
+            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallback);
+            testDeviceMethod(deviceMethodServiceClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodName, deviceMethodCallback);
         }
 
         testInstance.multiplexingClient.close();
+    }
+
+    // Methods subscriptions and callbacks should not be preserved between registrations by default
+    @Test
+    @ContinuousIntegrationTest
+    @StandardTierHubOnlyTest
+    public void methodsSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.multiplexingClient.open();
+        DeviceMethod deviceMethodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+        List<DeviceMethodCallback> deviceMethodCallbacks = new ArrayList<>();
+        List<String> expectedMethodNames = new ArrayList<>();
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            // Subscribe to methods on the multiplexed client
+            String expectedMethodName = UUID.randomUUID().toString();
+            expectedMethodNames.add(expectedMethodName);
+            DeviceMethodCallback deviceMethodCallback = new DeviceMethodCallback(expectedMethodName);
+            deviceMethodCallbacks.add(deviceMethodCallback);
+            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallback);
+            testDeviceMethod(deviceMethodServiceClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames.get(i), deviceMethodCallbacks.get(i));
+        }
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            deviceMethodCallbacks.get(i).resetExpectations();
+        }
+
+        testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
+        testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            subscribeToDeviceMethod(testInstance.deviceClientArray.get(i), deviceMethodCallbacks.get(i));
+            testDeviceMethod(deviceMethodServiceClient, testInstance.deviceIdentityArray.get(i).getDeviceId(), expectedMethodNames.get(i), deviceMethodCallbacks.get(i));
+        }
+
+        testInstance.multiplexingClient.close();
+    }
+
+    private static void testDeviceMethod(DeviceMethod deviceMethodServiceClient, String deviceId, String expectedMethodName, DeviceMethodCallback deviceMethodCallback) throws IOException, IotHubException, InterruptedException {
+        // Give the method subscription some extra buffer time before invoking the method
+        Thread.sleep(1000);
+
+        // Invoke method on the multiplexed device
+        deviceMethodServiceClient.invoke(deviceId, expectedMethodName, 200l, 200l, null);
+
+        // No need to wait for the device to receive the method invocation since the service client call does that already
+        assertTrue("Device method callback never fired on device", deviceMethodCallback.deviceMethodCallbackFired);
+        assertTrue("Device method callback fired, but unexpected method name was received", deviceMethodCallback.expectedMethodReceived);
+    }
+
+    private static void subscribeToDeviceMethod(DeviceClient deviceClient, DeviceMethodCallback deviceMethodCallback) throws InterruptedException, IOException
+    {
+        Success methodsSubscribedSuccess = new Success();
+        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, null, new IotHubEventCallback() {
+            @Override
+            public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
+                ((Success) callbackContext).setCallbackStatusCode(responseStatus);
+                ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
+                ((Success) callbackContext).callbackWasFired();
+            }
+        }, methodsSubscribedSuccess);
+
+        // Wait for methods subscription to be acknowledged by hub
+        long startTime = System.currentTimeMillis();
+        while (methodsSubscribedSuccess.wasCallbackFired())
+        {
+            Thread.sleep(200);
+
+            if (System.currentTimeMillis() - startTime > DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS)
+            {
+                throw new AssertionError("Timed out waiting for device method subscription to be acknowledged");
+            }
+        }
     }
 
     private class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
@@ -635,6 +758,12 @@ public class MultiplexingClientTests extends IntegrationTest
             }
 
             return new DeviceMethodData(200, null);
+        }
+
+        public void resetExpectations()
+        {
+            deviceMethodCallbackFired = false;
+            expectedMethodReceived = false;
         }
     }
 
@@ -689,22 +818,7 @@ public class MultiplexingClientTests extends IntegrationTest
             String expectedPropertyKey = UUID.randomUUID().toString();
             String expectedPropertyValue = UUID.randomUUID().toString();
             TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
-            EventCallback twinEventCallback = new EventCallback(IotHubStatusCode.OK);
-            Success twinStarted = new Success();
-            testInstance.deviceClientArray.get(i).startDeviceTwin(twinEventCallback, twinStarted, twinPropertyCallBack, null);
-
-            long startTime = System.currentTimeMillis();
-            while (!twinStarted.wasCallbackFired())
-            {
-                Thread.sleep(200);
-
-                if (System.currentTimeMillis() - startTime > TWIN_SUBSCRIBE_TIMEOUT_MILLIS)
-                {
-                    fail("Timed out waiting for twin to start");
-                }
-            }
-
-            assertTrue("Failed to start twin. Unexpected status code " + twinStarted.getCallbackStatusCode(), twinStarted.getResult());
+            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBack);
 
             // Testing subscribing to desired properties
             Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange = new HashMap<>();
@@ -714,44 +828,137 @@ public class MultiplexingClientTests extends IntegrationTest
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_DESIRED_PROPERTY_SUBSCRIPTION_ACKNOWLEDGEMENT);
 
             // Send desired property update to multiplexed device
-            DeviceTwinDevice serviceClientTwin = new DeviceTwinDevice(testInstance.deviceIdentityArray.get(i).getDeviceId());
-            Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-            desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(expectedPropertyKey, expectedPropertyValue));
-            serviceClientTwin.setDesiredProperties(desiredProperties);
-            deviceTwinServiceClient.updateTwin(serviceClientTwin);
-
-            startTime = System.currentTimeMillis();
-            while (!twinPropertyCallBack.receivedCallback)
-            {
-                Thread.sleep(200);
-
-                if (System.currentTimeMillis() - startTime > DESIRED_PROPERTY_CALLBACK_TIMEOUT_MILLIS)
-                {
-                    fail("Timed out waiting for desired property callback to fire");
-                }
-            }
-
-            assertTrue("Desired property callback fired with unexpected key. Expected " + expectedPropertyKey + " but was " + twinPropertyCallBack.actualKey, twinPropertyCallBack.receivedExpectedKey);
-            assertTrue("Desired property callback fired with unexpected value. Expected " + expectedPropertyValue + " but was " + twinPropertyCallBack.actualValue, twinPropertyCallBack.receivedExpectedValue);
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBack, expectedPropertyKey, expectedPropertyValue);
 
             // Testing sending reported properties
-            String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
-            Set<Property> reportedProperties = new HashSet<>();
-            reportedProperties.add(new Property(expectedPropertyKey, expectedReportedPropertyValue));
-            testInstance.deviceClientArray.get(i).sendReportedProperties(reportedProperties);
-
-            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_REPORTED_PROPERTY_ACKNOWLEDGEMENT);
-
-            // Verify that the new reported property value can be seen from the service client
-            deviceTwinServiceClient.getTwin(serviceClientTwin);
-
-            Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> retrievedReportedProperties = serviceClientTwin.getReportedProperties();
-            assertEquals(1, retrievedReportedProperties.size());
-            com.microsoft.azure.sdk.iot.service.devicetwin.Pair retrievedReportedPropertyPair = retrievedReportedProperties.iterator().next();
-            assertTrue(retrievedReportedPropertyPair.getKey().equalsIgnoreCase(expectedPropertyKey));
-            String actualReportedPropertyValue = retrievedReportedPropertyPair.getValue().toString();
-            assertEquals(expectedReportedPropertyValue, actualReportedPropertyValue);
+            testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, expectedPropertyKey, expectedPropertyValue);
         }
+    }
+
+    // Twin subscriptions and callbacks should not be preserved between registrations by default
+    @Test
+    @ContinuousIntegrationTest
+    @StandardTierHubOnlyTest
+    public void twinSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.multiplexingClient.open();
+
+        DeviceTwin deviceTwinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
+        String expectedPropertyKey = UUID.randomUUID().toString();
+        String expectedPropertyValue = UUID.randomUUID().toString();
+        List<TwinPropertyCallBackImpl> twinPropertyCallBacks = new ArrayList<>();
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+
+            TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
+            twinPropertyCallBacks.add(twinPropertyCallBack);
+            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBack);
+        }
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+            // Testing subscribing to desired properties
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBacks.get(i), expectedPropertyKey, expectedPropertyValue);
+
+            // Testing sending reported properties
+            testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, expectedPropertyKey, expectedPropertyValue);
+        }
+
+        // unregister and then re-register the clients to see if their subscriptions were preserved or not
+        testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray);
+        testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+            boolean expectedExceptionThrown = false;
+            try
+            {
+                // Testing sending reported properties
+                testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, expectedPropertyKey, expectedPropertyValue);
+            }
+            catch (IOException e)
+            {
+                // IOException seems odd here, since we are testing what should be an IllegalStateException or UnsupportedOperationException,
+                // but it would be a breaking change to modify the device clien to throw that exception when a twin method is
+                // called without first starting twin.
+                expectedExceptionThrown = true;
+            }
+
+            assertTrue("Expected twin method to throw since twin has not been started since re-registering client", expectedExceptionThrown);
+        }
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+
+            TwinPropertyCallBackImpl twinPropertyCallBack = new TwinPropertyCallBackImpl(expectedPropertyKey, expectedPropertyValue);
+            twinPropertyCallBacks.add(twinPropertyCallBack);
+            startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBack);
+        }
+
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++) {
+            // Testing subscribing to desired properties
+            testDesiredPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, twinPropertyCallBacks.get(i), expectedPropertyKey, expectedPropertyValue);
+
+            // Testing sending reported properties
+            testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, expectedPropertyKey, expectedPropertyValue);
+        }
+    }
+
+    private static void startTwin(DeviceClient deviceClient, IotHubEventCallback twinEventCallback, TwinPropertyCallBack twinPropertyCallBack) throws IOException, InterruptedException {
+        Success twinStarted = new Success();
+        deviceClient.startDeviceTwin(twinEventCallback, twinStarted, twinPropertyCallBack, null);
+
+        long startTime = System.currentTimeMillis();
+        while (!twinStarted.wasCallbackFired())
+        {
+            Thread.sleep(200);
+
+            if (System.currentTimeMillis() - startTime > TWIN_SUBSCRIBE_TIMEOUT_MILLIS)
+            {
+                fail("Timed out waiting for twin to start");
+            }
+        }
+
+        assertTrue("Failed to start twin. Unexpected status code " + twinStarted.getCallbackStatusCode(), twinStarted.getResult());
+    }
+
+    private static void testDesiredPropertiesFlow(DeviceClient deviceClient, DeviceTwin deviceTwinServiceClient, TwinPropertyCallBackImpl twinPropertyCallBack, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
+        DeviceTwinDevice serviceClientTwin = new DeviceTwinDevice(deviceClient.getConfig().getDeviceId());
+        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(expectedPropertyKey, expectedPropertyValue));
+        serviceClientTwin.setDesiredProperties(desiredProperties);
+        deviceTwinServiceClient.updateTwin(serviceClientTwin);
+
+        long startTime = System.currentTimeMillis();
+        while (!twinPropertyCallBack.receivedCallback)
+        {
+            Thread.sleep(200);
+
+            if (System.currentTimeMillis() - startTime > DESIRED_PROPERTY_CALLBACK_TIMEOUT_MILLIS)
+            {
+                fail("Timed out waiting for desired property callback to fire");
+            }
+        }
+
+        assertTrue("Desired property callback fired with unexpected key. Expected " + expectedPropertyKey + " but was " + twinPropertyCallBack.actualKey, twinPropertyCallBack.receivedExpectedKey);
+        assertTrue("Desired property callback fired with unexpected value. Expected " + expectedPropertyValue + " but was " + twinPropertyCallBack.actualValue, twinPropertyCallBack.receivedExpectedValue);
+    }
+
+    private static void testReportedPropertiesFlow(DeviceClient deviceClient, DeviceTwin deviceTwinServiceClient, String expectedPropertyKey, String expectedPropertyValue) throws IOException, IotHubException, InterruptedException {
+        DeviceTwinDevice serviceClientTwin = new DeviceTwinDevice(deviceClient.getConfig().getDeviceId());
+        String expectedReportedPropertyValue = expectedPropertyValue + "-reported";
+        Set<Property> reportedProperties = new HashSet<>();
+        reportedProperties.add(new Property(expectedPropertyKey, expectedReportedPropertyValue));
+        deviceClient.sendReportedProperties(reportedProperties);
+
+        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_REPORTED_PROPERTY_ACKNOWLEDGEMENT);
+
+        // Verify that the new reported property value can be seen from the service client
+        deviceTwinServiceClient.getTwin(serviceClientTwin);
+
+        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> retrievedReportedProperties = serviceClientTwin.getReportedProperties();
+        assertEquals(1, retrievedReportedProperties.size());
+        com.microsoft.azure.sdk.iot.service.devicetwin.Pair retrievedReportedPropertyPair = retrievedReportedProperties.iterator().next();
+        assertTrue(retrievedReportedPropertyPair.getKey().equalsIgnoreCase(expectedPropertyKey));
+        String actualReportedPropertyValue = retrievedReportedPropertyPair.getValue().toString();
+        assertEquals(expectedReportedPropertyValue, actualReportedPropertyValue);
     }
 
     class ConnectionStatusChangeTracker implements IotHubConnectionStatusChangeCallback
@@ -880,6 +1087,7 @@ public class MultiplexingClientTests extends IntegrationTest
         // For each multiplexed device, use fault injection to drop the session and see if it can recover, one device at a time
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
+            log.info("Starting loop for device {}", testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
             Message errorIjectionMessage = ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(1, 10);
             Success messageSendSuccess = testSendingMessageFromDeviceClient(testInstance.deviceClientArray.get(i), errorIjectionMessage);
             waitForMessageToBeAcknowledged(messageSendSuccess, "Timed out waiting for error injection message to be acknowledged");
@@ -888,6 +1096,7 @@ public class MultiplexingClientTests extends IntegrationTest
             assertConnectionStateCallbackFiredDisconnectedRetrying(connectionStatusChangeTrackers[i]);
 
             // Next, the faulted device should eventually recover
+            log.info("Waiting for device {} to reconnect", testInstance.deviceClientArray.get(i).getConfig().getDeviceId());
             assertConnectionStateCallbackFiredConnected(connectionStatusChangeTrackers[i], FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS);
 
             for (int j = i + 1; j < DEVICE_MULTIPLEX_COUNT; j++)
