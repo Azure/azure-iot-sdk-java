@@ -107,6 +107,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
             {
                 // This flag signals to this session handler to close the session once the service has opened it remotely
                 // see above for more details on why.
+                log.trace("Session handler was closed but the service has not opened the session remotely yet, so the session will be closed once that happens.");
                 this.sessionHandlerClosedBeforeRemoteSessionOpened = true;
             }
         }
@@ -130,6 +131,9 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.sessionOpenedRemotely = true;
         if (this.sessionHandlerClosedBeforeRemoteSessionOpened)
         {
+            // If the session handler was closed earlier, before this session opened remotely, then now is the soonest
+            // that the session itself can safely be closed.
+            log.trace("Closing an out of date session now that the service has opened the session remotely.");
             this.session.close();
         }
         else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
