@@ -127,7 +127,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     public void onSessionRemoteOpen(Event e)
     {
         log.trace("Device session opened remotely for device {}", this.getDeviceId());
-
+        this.sessionOpenedRemotely = true;
         if (this.sessionHandlerClosedBeforeRemoteSessionOpened)
         {
             this.session.close();
