@@ -11,8 +11,6 @@ import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.engine.impl.EndpointImpl;
-import org.apache.qpid.proton.engine.impl.SessionImpl;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,6 +48,8 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     private boolean twinReceiverLinkOpened;
     private boolean methodsSenderLinkOpened;
     private boolean methodsReceiverLinkOpened;
+    private boolean sessionOpenedRemotely;
+    private boolean sessionHandlerClosedBeforeRemoteSessionOpened;
 
     AmqpsSessionHandler(final DeviceClientConfig deviceClientConfig, AmqpsSessionStateCallback amqpsSessionStateCallback)
     {
@@ -80,13 +80,36 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.twinReceiverLinkOpened = false;
         this.methodsSenderLinkOpened = false;
         this.methodsReceiverLinkOpened = false;
+        this.sessionOpenedRemotely = false;
+        this.sessionHandlerClosedBeforeRemoteSessionOpened = false;
     }
 
     public void closeSession()
     {
         if (this.session != null)
         {
-            this.session.close();
+            if (this.sessionOpenedRemotely)
+            {
+                // Closing a session locally before the session was opened remotely causes a NPE to throw from proton with
+                // error message "uncorrelated channel: X"
+
+                // The reason for this is that closing a session locally removes it from proton's list of sessions.
+                // So when the service sends a "begin session" frame for this closed session, proton doesn't know how to handle
+                // it, and just throws a NPE.
+
+                // To avoid this, we will purposefully delay closing this session locally until it has been opened remotely
+
+                // This is a difficult scenario to reproduce, but it typically happens during retry logic if the client gives
+                // up on a retry attempt prior to the service opening the session remotely.
+                this.session.close();
+            }
+            else
+            {
+                // This flag signals to this session handler to close the session once the service has opened it remotely
+                // see above for more details on why.
+                log.trace("Session handler was closed but the service has not opened the session remotely yet, so the session will be closed once that happens.");
+                this.sessionHandlerClosedBeforeRemoteSessionOpened = true;
+            }
         }
     }
 
@@ -105,7 +128,15 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     public void onSessionRemoteOpen(Event e)
     {
         log.trace("Device session opened remotely for device {}", this.getDeviceId());
-        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        this.sessionOpenedRemotely = true;
+        if (this.sessionHandlerClosedBeforeRemoteSessionOpened)
+        {
+            // If the session handler was closed earlier, before this session opened remotely, then now is the soonest
+            // that the session itself can safely be closed.
+            log.trace("Closing an out of date session now that the service has opened the session remotely.");
+            this.session.close();
+        }
+        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
         {
             log.trace("Opening worker links for device {}", this.getDeviceId());
             openLinks();
