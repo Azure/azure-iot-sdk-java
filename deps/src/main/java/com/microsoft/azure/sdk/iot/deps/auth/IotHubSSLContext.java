@@ -29,8 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
-public class IotHubSSLContext
-{
+public class IotHubSSLContext {
     private SSLContext sslContext = null;
 
     private static final String SSL_CONTEXT_INSTANCE = "TLSv1.2";
@@ -43,18 +42,17 @@ public class IotHubSSLContext
     /**
      * Creates a SSLContext for the IotHub.
      *
-     * @throws KeyStoreException  if no Provider supports a KeyStoreSpi implementation for the specified type or
-     *                            if the keystore has not been initialized,
-     *                            or the given alias already exists and does not identify an entry containing a trusted certificate,
-     *                            or this operation fails for some other reason.
-     * @throws KeyManagementException As per https://docs.oracle.com/javase/7/docs/api/java/security/KeyManagementException.html
-     * @throws IOException If the certificate provided was null or invalid
-     * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
+     * @throws KeyStoreException        if no Provider supports a KeyStoreSpi implementation for the specified type or
+     *                                  if the keystore has not been initialized,
+     *                                  or the given alias already exists and does not identify an entry containing a trusted certificate,
+     *                                  or this operation fails for some other reason.
+     * @throws KeyManagementException   As per https://docs.oracle.com/javase/7/docs/api/java/security/KeyManagementException.html
+     * @throws IOException              If the certificate provided was null or invalid
+     * @throws CertificateException     As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      * @throws NoSuchAlgorithmException if the default SSL Context cannot be created
      */
     public IotHubSSLContext()
-            throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException
-    {
+            throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException {
         //Codes_SRS_IOTHUBSSLCONTEXT_25_001: [**The constructor shall create a default certificate to be used with IotHub.**]**
         IotHubCertificateManager defaultCert = new IotHubCertificateManager();
         generateDefaultSSLContext(defaultCert);
@@ -62,12 +60,11 @@ public class IotHubSSLContext
 
     /**
      * Constructor that takes and saves an SSLContext object
+     *
      * @param sslContext the ssl context to save
      */
-    public IotHubSSLContext(SSLContext sslContext)
-    {
-        if (sslContext == null)
-        {
+    public IotHubSSLContext(SSLContext sslContext) {
+        if (sslContext == null) {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_028: [If the provided sslContext is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("sslContext cannot be null");
         }
@@ -80,29 +77,24 @@ public class IotHubSSLContext
      * Creates a default SSLContext for the IotHub with the specified certificate.
      *
      * @param trustedCert the certificate to be trusted
-     * @param isPath if the trustedCert is a path to the trusted cert, or if it is the certificate itself
-     *
-     * @throws KeyStoreException  if no Provider supports a KeyStoreSpi implementation for the specified type or
-     *                            if the keystore has not been initialized,
-     *                            or the given alias already exists and does not identify an entry containing a trusted certificate,
-     *                            or this operation fails for some other reason.
-     * @throws KeyManagementException As per https://docs.oracle.com/javase/7/docs/api/java/security/KeyManagementException.html
-     * @throws IOException If the certificate provided was null or invalid
-     * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
+     * @param isPath      if the trustedCert is a path to the trusted cert, or if it is the certificate itself
+     * @throws KeyStoreException        if no Provider supports a KeyStoreSpi implementation for the specified type or
+     *                                  if the keystore has not been initialized,
+     *                                  or the given alias already exists and does not identify an entry containing a trusted certificate,
+     *                                  or this operation fails for some other reason.
+     * @throws KeyManagementException   As per https://docs.oracle.com/javase/7/docs/api/java/security/KeyManagementException.html
+     * @throws IOException              If the certificate provided was null or invalid
+     * @throws CertificateException     As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      * @throws NoSuchAlgorithmException if the default SSL Context cannot be created
      */
     public IotHubSSLContext(String trustedCert, boolean isPath)
-            throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException
-    {
+            throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException {
         IotHubCertificateManager defaultCert = new IotHubCertificateManager();
 
-        if (isPath)
-        {
+        if (isPath) {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_025: [If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.]
             defaultCert.setCertificatesPath(trustedCert);
-        }
-        else
-        {
+        } else {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_026: [If the provided cert is not a path, this function shall set the default cert to the provided cert.]
             defaultCert.setCertificates(trustedCert);
         }
@@ -112,32 +104,28 @@ public class IotHubSSLContext
 
     /**
      * Creates a default SSLContext for the IotHub with the specified certificate.
-     * @param publicKeyCertificateString the public key for x509 authentication
-     * @param privateKeyString the private key for x509 authentication
-     * @param cert the trusted certificate
-     * @param isPath If the provided cert is a path, or the actual certificate itself
      *
-     * @throws KeyStoreException  if no Provider supports a KeyStoreSpi implementation for the specified type or
-     *                            if the keystore has not been initialized,
-     *                            or the given alias already exists and does not identify an entry containing a trusted certificate,
-     *                            or this operation fails for some other reason.
-     * @throws KeyManagementException As per https://docs.oracle.com/javase/7/docs/api/java/security/KeyManagementException.html
-     * @throws IOException If the certificate provided was null or invalid
-     * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
+     * @param publicKeyCertificateString the public key for x509 authentication
+     * @param privateKeyString           the private key for x509 authentication
+     * @param cert                       the trusted certificate
+     * @param isPath                     If the provided cert is a path, or the actual certificate itself
+     * @throws KeyStoreException        if no Provider supports a KeyStoreSpi implementation for the specified type or
+     *                                  if the keystore has not been initialized,
+     *                                  or the given alias already exists and does not identify an entry containing a trusted certificate,
+     *                                  or this operation fails for some other reason.
+     * @throws KeyManagementException   As per https://docs.oracle.com/javase/7/docs/api/java/security/KeyManagementException.html
+     * @throws IOException              If the certificate provided was null or invalid
+     * @throws CertificateException     As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
      * @throws NoSuchAlgorithmException if the default SSL Context cannot be created
      */
     public IotHubSSLContext(String publicKeyCertificateString, String privateKeyString, String cert, boolean isPath)
-            throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException
-    {
+            throws KeyStoreException, KeyManagementException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         IotHubCertificateManager defaultCert = new IotHubCertificateManager();
 
-        if (isPath)
-        {
+        if (isPath) {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_040: [If the provided cert is a path, this function shall set the path of the default cert to the provided cert path.]
             defaultCert.setCertificatesPath(cert);
-        }
-        else
-        {
+        } else {
             //Codes_SRS_IOTHUBSSLCONTEXT_34_041: [If the provided cert is not a path, this function shall set the default cert to the provided cert.]
             defaultCert.setCertificates(cert);
         }
@@ -154,26 +142,25 @@ public class IotHubSSLContext
      * Constructor that takes a public key certificate and private key pair.
      *
      * @param publicKeyCertificateString The PEM formatted public key certificate string
-     * @param privateKeyString The PEM formatted private key string
-     * @throws KeyManagementException If the SSLContext could not be initialized
-     * @throws IOException If an IO exception occurs
-     * @throws CertificateException If a certificate cannot be loaded
-     * @throws KeyStoreException If the provided certificates cannot be loaded into the JVM keystore
+     * @param privateKeyString           The PEM formatted private key string
+     * @throws KeyManagementException    If the SSLContext could not be initialized
+     * @throws IOException               If an IO exception occurs
+     * @throws CertificateException      If a certificate cannot be loaded
+     * @throws KeyStoreException         If the provided certificates cannot be loaded into the JVM keystore
      * @throws UnrecoverableKeyException if accessing the passphrase protected keystore fails due to the key
-     * @throws NoSuchAlgorithmException if the default SSLContext cannot be generated
+     * @throws NoSuchAlgorithmException  if the default SSLContext cannot be generated
      */
     public IotHubSSLContext(String publicKeyCertificateString, String privateKeyString)
-            throws KeyManagementException, IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException
-    {
+            throws KeyManagementException, IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
         generateSSLContextWithKeys(publicKeyCertificateString, privateKeyString, new IotHubCertificateManager());
     }
 
     /**
      * Getter for the IotHubSSLContext
+     *
      * @return SSLContext defined for the IotHub.
      */
-    public SSLContext getSSLContext()
-    {
+    public SSLContext getSSLContext() {
         //Codes_SRS_IOTHUBSSLCONTEXT_25_017: [*This method shall return the value of sslContext.**]**
         return this.sslContext;
     }
@@ -182,17 +169,16 @@ public class IotHubSSLContext
      * Creates an SSLContext from a public key certificate, private key, and certificate manager.
      *
      * @param publicKeyCertificateString The PEM formatted public key certificate string
-     * @param privateKeyString The PEM formatted private key string
-     * @throws KeyManagementException If the SSLContext could not be initialized
-     * @throws IOException If an IO exception occurs
-     * @throws CertificateException If a certificate cannot be loaded
-     * @throws KeyStoreException If the provided certificates cannot be loaded into the JVM keystore
+     * @param privateKeyString           The PEM formatted private key string
+     * @throws KeyManagementException    If the SSLContext could not be initialized
+     * @throws IOException               If an IO exception occurs
+     * @throws CertificateException      If a certificate cannot be loaded
+     * @throws KeyStoreException         If the provided certificates cannot be loaded into the JVM keystore
      * @throws UnrecoverableKeyException if accessing the passphrase protected keystore fails due to the key
-     * @throws NoSuchAlgorithmException if the default SSLContext cannot be generated
+     * @throws NoSuchAlgorithmException  if the default SSLContext cannot be generated
      */
     private void generateSSLContextWithKeys(String publicKeyCertificateString, String privateKeyString, IotHubCertificateManager certificateManager)
-            throws KeyManagementException, IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException
-    {
+            throws KeyManagementException, IOException, CertificateException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
         Key privateKey = IotHubSSLContext.parsePrivateKey(privateKeyString);
         Collection<X509Certificate> certChain = IotHubSSLContext.parsePublicKeyCertificate(publicKeyCertificateString);
 
@@ -202,7 +188,7 @@ public class IotHubSSLContext
         char[] temporaryPassword = generateTemporaryPassword();
 
         //Codes_SRS_IOTHUBSSLCONTEXT_34_020: [The constructor shall create a keystore containing the public key certificate and the private key.]
-        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        KeyStore keystore = KeyStore.getInstance("jks");
         keystore.load(null);
         keystore.setCertificateEntry(CERTIFICATE_ALIAS, certs[0]);
         keystore.setKeyEntry(PRIVATE_KEY_ALIAS, privateKey, temporaryPassword, certs);
@@ -226,15 +212,14 @@ public class IotHubSSLContext
     /**
      * Generates the default SSL Context and saves it to this object's SSLContext object
      *
-     * @throws KeyStoreException If the provided certificateManager's certificates cannot be loaded into the trust manager used in creating the SSLContext
-     * @throws IOException If a valid certificate could not be retrieved from the provided certificateManager
-     * @throws CertificateException If the provided certificateManager cannot retrieve any certificates for any of a variety of reasons
-     * @throws KeyManagementException If the generated SSLContext cannot be initialized given the provided certificateManager's certificates
+     * @throws KeyStoreException        If the provided certificateManager's certificates cannot be loaded into the trust manager used in creating the SSLContext
+     * @throws IOException              If a valid certificate could not be retrieved from the provided certificateManager
+     * @throws CertificateException     If the provided certificateManager cannot retrieve any certificates for any of a variety of reasons
+     * @throws KeyManagementException   If the generated SSLContext cannot be initialized given the provided certificateManager's certificates
      * @throws NoSuchAlgorithmException if default ssl context cannot be created or the trust manager cannot be created
      */
     private void generateDefaultSSLContext(IotHubCertificateManager certificateManager)
-            throws KeyStoreException, IOException, CertificateException, KeyManagementException, NoSuchAlgorithmException
-    {
+            throws KeyStoreException, IOException, CertificateException, KeyManagementException, NoSuchAlgorithmException {
         //Codes_SRS_IOTHUBSSLCONTEXT_25_002: [The constructor shall create default SSL context for TLSv1.2.]
         this.sslContext = SSLContext.getInstance(SSL_CONTEXT_INSTANCE);
 
@@ -250,25 +235,23 @@ public class IotHubSSLContext
 
     /**
      * Generate a trust key store that has the public key needed to trust all messages from Iot Hub
+     *
      * @param certificateManager the certificate manager to build the trust manager factory from
-     * @param trustKeyStore the trust key store to load. If this is null, a default trust key store shall be generated
+     * @param trustKeyStore      the trust key store to load. If this is null, a default trust key store shall be generated
      * @return The default trust manager factory
      * @throws NoSuchAlgorithmException if the default sslcontext cannot be created
-     * @throws KeyStoreException if the created key store cannot be created
-     * @throws IOException If a valid certificate could not be defined.
-     * @throws CertificateException If a certificate cannot be created by a certificate factory
+     * @throws KeyStoreException        if the created key store cannot be created
+     * @throws IOException              If a valid certificate could not be defined.
+     * @throws CertificateException     If a certificate cannot be created by a certificate factory
      */
     private TrustManagerFactory generateTrustManagerFactory(IotHubCertificateManager certificateManager, KeyStore trustKeyStore)
-            throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException
-    {
-        if (trustKeyStore == null)
-        {
+            throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException {
+        if (trustKeyStore == null) {
             trustKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustKeyStore.load(null);
         }
 
-        for (Certificate c : certificateManager.getCertificateCollection())
-        {
+        for (Certificate c : certificateManager.getCertificateCollection()) {
             trustKeyStore.setCertificateEntry(TRUSTED_IOT_HUB_CERT_PREFIX + UUID.randomUUID(), c);
         }
 
@@ -278,41 +261,33 @@ public class IotHubSSLContext
         return trustManagerFactory;
     }
 
-    private char[] generateTemporaryPassword()
-    {
+    private char[] generateTemporaryPassword() {
         byte[] randomBytes = new byte[256];
         char[] randomChars = new char[256];
         new SecureRandom().nextBytes(randomBytes);
 
-        for (int i = 0; i < 256; i++)
-        {
+        for (int i = 0; i < 256; i++) {
             randomChars[i] = (char) randomBytes[i];
         }
 
         return randomChars;
     }
 
-    private static Key parsePrivateKey(String privateKeyString) throws CertificateException
-    {
-        try
-        {
+    private static Key parsePrivateKey(String privateKeyString) throws CertificateException {
+        try {
             // Codes_SRS_IOTHUBSSLCONTEXT_34_031: [This function shall return a Private Key instance created by the provided PEM formatted privateKeyString.]
             Security.addProvider(new BouncyCastleProvider());
             PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
             Object possiblePrivateKey = privateKeyParser.readObject();
             return IotHubSSLContext.getPrivateKey(possiblePrivateKey);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // Codes_SRS_IOTHUBSSLCONTEXT_34_032: [If any exception is encountered while attempting to create the private key instance, this function shall throw a CertificateException.]
             throw new CertificateException(e);
         }
     }
 
-    private static Collection<X509Certificate> parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
-    {
-        try
-        {
+    private static Collection<X509Certificate> parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException {
+        try {
             Collection<X509Certificate> certChain = new ArrayList<>();
 
             // Codes_SRS_IOTHUBSSLCONTEXT_34_033: [This function shall return the X509Certificate cert chain specified by the PEM formatted publicKeyCertificateString.]
@@ -321,58 +296,41 @@ public class IotHubSSLContext
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             final PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
 
-            try
-            {
+            try {
                 PemObject possiblePublicKeyCertificate;
-                while (((possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject()) != null))
-                {
+                while (((possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject()) != null)) {
                     byte[] content = possiblePublicKeyCertificate.getContent();
-                    if (content.length > 0)
-                    {
+                    if (content.length > 0) {
                         final ByteArrayInputStream bais = new ByteArrayInputStream(content);
 
-                        while (bais.available() > 0)
-                        {
+                        while (bais.available() > 0) {
                             final Certificate cert = certFactory.generateCertificate(bais);
-                            if (cert instanceof X509Certificate)
-                            {
+                            if (cert instanceof X509Certificate) {
                                 certChain.add((X509Certificate) cert);
                             }
                         }
-                    }
-                    else
-                    {
+                    } else {
                         break;
                     }
                 }
-            }
-            finally
-            {
+            } finally {
                 publicKeyCertificateReader.close();
             }
 
             return certChain;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // Codes_SRS_IOTHUBSSLCONTEXT_34_034: [If any exception is encountered while attempting to create the public key certificate instance, this function shall throw a CertificateException.]
             throw new CertificateException(e);
         }
     }
 
-    private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
-    {
-        if (possiblePrivateKey instanceof PEMKeyPair)
-        {
+    private static Key getPrivateKey(Object possiblePrivateKey) throws IOException {
+        if (possiblePrivateKey instanceof PEMKeyPair) {
             return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) possiblePrivateKey)
                     .getPrivate();
-        }
-        else if (possiblePrivateKey instanceof PrivateKeyInfo)
-        {
+        } else if (possiblePrivateKey instanceof PrivateKeyInfo) {
             return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
-        }
-        else
-        {
+        } else {
             throw new IOException("Unable to parse private key, type unknown");
         }
     }
