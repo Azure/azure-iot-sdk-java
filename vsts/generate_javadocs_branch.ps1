@@ -20,10 +20,17 @@ function CreateJavadocReleaseBranch(
     $GitHubEmail,
     $Sources,
     $FolderName,
-    $UpdateServiceClientDocs,
+    $UpdateDepsDocs,
     $UpdateDeviceClientDocs,
-    $UpdateProvisioningClientDocs,
-    $UpdateDepsDocs) {
+    $UpdateServiceClientDocs,    
+    $UpdateProvisioningDeviceClientDocs,
+    $UpdateProvisioningServiceClientDocs,    
+    $UpdateTpmProviderEmulatorDocs,
+    $UpdateTpmProviderDocs,
+    $UpdateDiceProviderEmulatorDocs,
+    $UpdateDiceProviderDocs,
+    $UpdateSecurityProviderDocs,
+    $UpdateX509ProviderDocs) {
 
     if ($([string]::IsNullOrWhiteSpace($GitHubName) -eq $true)) {
         throw "GitHubName is null or empty"
@@ -56,84 +63,100 @@ function CreateJavadocReleaseBranch(
     TestLastExitCode  # stop if we can't create the branch
 
     Write-Host "Copying generated javadocs to replace current javadocs"
-    Set-Location apidocs
-
-    Remove-Item ..\deps -Force -Recurse
-    Copy-Item -Force -Path .\deps\* -Destination ..\deps
-    Copy-Item -Recurse -Force -Path .\deps\com -Destination ..\deps
-
-    Remove-Item ..\device -Force -Recurse
-    Copy-Item -Force -Path .\device\* -Destination ..\device
-    Copy-Item -Recurse -Force -Path .\device\com -Destination ..\device
-
-    Remove-Item ..\service -Force -Recurse
-    Copy-Item -Force -Path .\service\* -Destination ..\service
-    Copy-Item -Recurse -Force -Path .\service\com -Destination ..\service
-
-    Remove-Item ..\provisioning -Force -Recurse
-    New-Item -Path '../provisioning' -ItemType Directory
-    New-Item -Path '../provisioning/provisioning-device-client' -ItemType Directory
-    New-Item -Path '../provisioning/provisioning-service-client' -ItemType Directory
-    New-Item -Path '../provisioning/security' -ItemType Directory
-    New-Item -Path '../provisioning/security/dice-provider' -ItemType Directory
-    New-Item -Path '../provisioning/security/dice-provider-emulator' -ItemType Directory
-    New-Item -Path '../provisioning/security/security-provider' -ItemType Directory
-    New-Item -Path '../provisioning/security/tpm-provider' -ItemType Directory
-    New-Item -Path '../provisioning/security/tpm-provider-emulator' -ItemType Directory
-    New-Item -Path '../provisioning/security/x509-provider' -ItemType Directory
-
-    Copy-Item -Force -Path .\provisioning\provisioning-device-client\* -Destination ..\provisioning\provisioning-device-client
-    Copy-Item -Recurse -Force -Path .\provisioning\provisioning-device-client\com -Destination ..\provisioning\provisioning-device-client
-
-    Copy-Item -Force -Path .\provisioning\provisioning-service-client\* -Destination ..\provisioning\provisioning-service-client
-    Copy-Item -Recurse -Force -Path .\provisioning\provisioning-service-client\com -Destination ..\provisioning\provisioning-service-client
-
-    Copy-Item -Force -Path .\provisioning\security\tpm-provider-emulator\* -Destination ..\provisioning\security\tpm-provider-emulator
-    Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider-emulator\com -Destination ..\provisioning\security\tpm-provider-emulator
-
-    Copy-Item -Force -Path .\provisioning\security\tpm-provider\* -Destination ..\provisioning\security\tpm-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider\com -Destination ..\provisioning\security\tpm-provider
-
-    Copy-Item -Force -Path .\provisioning\security\dice-provider-emulator\* -Destination ..\provisioning\security\dice-provider-emulator
-    Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider-emulator\com -Destination ..\provisioning\security\dice-provider-emulator
-
-    Copy-Item -Force -Path .\provisioning\security\dice-provider\* -Destination ..\provisioning\security\dice-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider\com -Destination ..\provisioning\security\dice-provider
-
-    Copy-Item -Force -Path .\provisioning\security\security-provider\* -Destination ..\provisioning\security\security-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\security-provider\com -Destination ..\provisioning\security\security-provider
-
-    Copy-Item -Force -Path .\provisioning\security\x509-provider\* -Destination ..\provisioning\security\x509-provider
-    Copy-Item -Recurse -Force -Path .\provisioning\security\x509-provider\com -Destination ..\provisioning\security\x509-provider
-
-    # Create the folder to place content in if it does not exist.
-    if (Test-Path ..\$FolderName)
-    {
-        Remove-Item ../$FolderName -Recurse
-    }
-
-    # Move the generated content to the correct folder. The folder will be different for master and preview branches.
-    New-Item -Path ../$FolderName -ItemType Directory
+    Set-Location apidocs    
 
     if ($UpdateDepsDocs -eq "True")
     {
-        Move-Item -Force -Path ..\deps -Destination ..\$FolderName\deps
+        Remove-Item ..\$FolderName\deps -Force -Recurse
+        New-item -Path ..\$FolderName\deps -ItemType Directory
+        Copy-Item -Force -Path .\deps\* -Destination ..\$FolderName\deps
+        Copy-Item -Recurse -Force -Path .\deps\com -Destination ..\$FolderName\deps
     }
 
     if ($UpdateDeviceClientDocs -eq "True")
     {
-        Move-Item -Force -Path ..\device -Destination ..\$FolderName\device
+        Remove-Item ..\$FolderName\device -Force -Recurse
+        New-item -Path ..\$FolderName\device -ItemType Directory
+        Copy-Item -Force -Path .\device\* -Destination ..\$FolderName\device
+        Copy-Item -Recurse -Force -Path .\device\com -Destination ..\$FolderName\device
     }
 
     if ($UpdateServiceClientDocs -eq "True")
     {
-        Move-Item -Force -Path ..\service -Destination ..\$FolderName\service
+        Remove-Item ..\$FolderName\service -Force -Recurse
+        New-item -Path ..\$FolderName\service -ItemType Directory
+        Copy-Item -Force -Path .\service\* -Destination ..\$FolderName\service
+        Copy-Item -Recurse -Force -Path .\service\com -Destination ..\$FolderName\service
     }
 
-    if ($UpdateProvisioningClientDocs -eq "True")
+    if ($UpdateProvisioningDeviceClientDocs -eq "True")
     {
-        Move-Item -Force -Path ..\provisioning -Destination ..\$FolderName\provisioning
+        Remove-Item ..\$FolderName\provisioning\provisioning-device-client -Force -Recurse 
+        New-Item -Path ..\$FolderName\provisioning\provisioning-device-client -ItemType Directory   
+        Copy-Item -Force -Path .\provisioning\provisioning-device-client\* -Destination ..\$FolderName\provisioning\provisioning-device-client
+        Copy-Item -Recurse -Force -Path .\provisioning\provisioning-device-client\com -Destination ..\$FolderName\provisioning\provisioning-device-client   
     }
+
+    if ($UpdateProvisioningServiceClientDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\provisioning-service-client -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\provisioning-service-client -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\provisioning-service-client\* -Destination ..\$FolderName\provisioning\provisioning-service-client
+        Copy-Item -Recurse -Force -Path .\provisioning\provisioning-service-client\com -Destination ..\$FolderName\provisioning\provisioning-service-client
+    }
+
+    if ($UpdateTpmProviderEmulatorDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\tpm-provider-emulator -Force -Recurse 
+        New-Item -Path ..\$FolderName\provisioning\security\tpm-provider-emulator -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\tpm-provider-emulator\* -Destination ..\$FolderName\provisioning\security\tpm-provider-emulator
+        Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider-emulator\com -Destination ..\$FolderName\provisioning\security\tpm-provider-emulator
+    }
+
+    if ($UpdateTpmProviderDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\tpm-provider -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\security\tpm-provider -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\tpm-provider\* -Destination ..\$FolderName\provisioning\security\tpm-provider
+        Copy-Item -Recurse -Force -Path .\provisioning\security\tpm-provider\com -Destination ..\$FolderName\provisioning\security\tpm-provider
+    }
+
+    if ($UpdateDiceProviderEmulatorDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\dice-provider-emulator -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\security\dice-provider-emulator -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\dice-provider-emulator\* -Destination ..\$FolderName\provisioning\security\dice-provider-emulator
+        Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider-emulator\com -Destination ..\$FolderName\provisioning\security\dice-provider-emulator
+    }
+
+    if ($UpdateDiceProviderDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\dice-provider -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\security\dice-provider -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\dice-provider\* -Destination ..\$FolderName\provisioning\security\dice-provider
+        Copy-Item -Recurse -Force -Path .\provisioning\security\dice-provider\com -Destination ..\$FolderName\provisioning\security\dice-provider
+    }
+
+    if ($UpdateSecurityProviderDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\security-provider -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\security\security-provider -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\security-provider\* -Destination ..\$FolderName\provisioning\security\security-provider
+        Copy-Item -Recurse -Force -Path .\provisioning\security\security-provider\com -Destination ..\$FolderName\provisioning\security\security-provider
+    }
+
+    if ($UpdateX509ProviderDocs -eq "True")
+    {
+        Remove-Item ..\$FolderName\provisioning\security\x509-provider -Force -Recurse
+        New-Item -Path ..\$FolderName\provisioning\security\x509-provider -ItemType Directory
+        Copy-Item -Force -Path .\provisioning\security\x509-provider\* -Destination ..\$FolderName\provisioning\security\x509-provider
+        Copy-Item -Recurse -Force -Path .\provisioning\security\x509-provider\com -Destination ..\$FolderName\provisioning\security\x509-provider
+    }
+
+    Remove-Item ..\deps -Force -Recurse
+    Remove-Item ..\device -Force -Recurse
+    Remove-Item ..\service -Force -Recurse
+    Remove-Item ..\provisioning -Force -Recurse
 
     Set-Location ..
 
