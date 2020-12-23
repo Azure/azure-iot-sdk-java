@@ -63,7 +63,7 @@ function CreateJavadocReleaseBranch(
     TestLastExitCode  # stop if we can't create the branch
 
     Write-Host "Copying generated javadocs to replace current javadocs"
-    Set-Location apidocs    
+    Set-Location apidocs 
 
     if ($UpdateDepsDocs -eq "True")
     {
