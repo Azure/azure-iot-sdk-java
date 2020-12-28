@@ -708,6 +708,48 @@ public class InternalClient
     }
 
     /**
+     * Starts the device twin.
+     *
+     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     * @throws IllegalArgumentException if either callback is null
+     */
+    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+                           TwinPropertiesCallBack genericPropertiesCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        if (!this.deviceIO.isOpen())
+        {
+            //Codes_SRS_INTERNALCLIENT_34_081: [If device io has not been opened yet, this function shall throw an IOException.]
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (twinStatusCallback == null || genericPropertiesCallBack == null)
+        {
+            //Codes_SRS_INTERNALCLIENT_34_082: [If either callback is null, this function shall throw an IllegalArgumentException.]
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+        if (this.twin == null)
+        {
+            //Codes_SRS_INTERNALCLIENT_34_084: [This function shall initialize a DeviceTwin object and invoke getDeviceTwin on it.]
+            twin = new DeviceTwin(this.deviceIO, this.config, twinStatusCallback, twinStatusCallbackContext,
+                    genericPropertiesCallBack, genericPropertyCallBackContext);
+            twin.getDeviceTwin();
+        }
+        else
+        {
+            //Codes_SRS_INTERNALCLIENT_34_083: [If either callback is null, this function shall throw an IllegalArgumentException.]
+            throw new UnsupportedOperationException("You have already initialised twin");
+        }
+    }
+
+    /**
      * Get the current desired properties for this client
      * @throws IOException if the iot hub cannot be reached
      * @throws IOException if the twin has not been initialized yet

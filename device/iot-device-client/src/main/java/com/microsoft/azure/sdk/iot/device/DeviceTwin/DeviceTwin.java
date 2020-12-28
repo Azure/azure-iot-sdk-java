@@ -41,6 +41,7 @@ public class DeviceTwin
      */
     private PropertyCallBack<String, Object> deviceTwinGenericPropertyChangeCallback;
     private TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
+    private TwinPropertiesCallBack deviceTwinGenericTwinPropertiesChangeCallback;
     private Object deviceTwinGenericPropertyChangeCallbackContext;
 
     /*
@@ -152,6 +153,10 @@ public class DeviceTwin
         {
             if (desiredPropertyMap != null)
             {
+                if ( onDesiredPropertyChangeMap != null ) {
+                    reportDeviceTwinGenericPropertiesCallback(desiredPropertyMap);
+                }
+
                 for (Iterator desiredPropertyIt = desiredPropertyMap.entrySet().iterator(); desiredPropertyIt.hasNext();)
                 {
                     Map.Entry<String, String> desiredProperty = (Map.Entry<String, String>) desiredPropertyIt.next();
@@ -250,6 +255,8 @@ public class DeviceTwin
          */
         this.deviceTwinGenericPropertyChangeCallback = genericPropertyCallback;
         this.deviceTwinGenericTwinPropertyChangeCallback = null;
+        this.deviceTwinGenericTwinPropertiesChangeCallback = null;
+
     }
 
     public DeviceTwin(DeviceIO client, DeviceClientConfig config,
@@ -262,6 +269,21 @@ public class DeviceTwin
          **Codes_SRS_DEVICETWIN_21_004: [**The constructor shall save the generic property callback.**]**
          */
         this.deviceTwinGenericTwinPropertyChangeCallback = genericPropertyCallback;
+        this.deviceTwinGenericPropertyChangeCallback = null;
+        this.deviceTwinGenericTwinPropertiesChangeCallback = null;
+    }
+
+    public DeviceTwin(DeviceIO client, DeviceClientConfig config,
+                      IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
+                      TwinPropertiesCallBack genericPropertiesCallback, Object genericPropertyCallbackContext)
+    {
+        deviceTwinInternal(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
+
+        /*
+         **Codes_SRS_DEVICETWIN_21_004: [**The constructor shall save the generic property callback.**]**
+         */
+        this.deviceTwinGenericTwinPropertiesChangeCallback = genericPropertiesCallback;
+        this.deviceTwinGenericTwinPropertyChangeCallback = null;
         this.deviceTwinGenericPropertyChangeCallback = null;
     }
 
@@ -490,4 +512,17 @@ public class DeviceTwin
 
         return false;
     }
+
+    private boolean reportDeviceTwinGenericPropertiesCallback(TwinCollection properties)
+    {
+
+        if(deviceTwinGenericTwinPropertiesChangeCallback != null)
+        {
+            deviceTwinGenericTwinPropertiesChangeCallback.TwinPropertiesCallBack(properties, deviceTwinGenericPropertyChangeCallbackContext);
+            return true;
+        }
+
+        return false;
+    }
+
 }
