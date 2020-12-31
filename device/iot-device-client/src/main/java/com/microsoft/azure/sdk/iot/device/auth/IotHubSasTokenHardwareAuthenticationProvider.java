@@ -141,7 +141,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
             }
 
             Long expiryTimeUTC = (System.currentTimeMillis() / 1000) + secondsToLive;
-            byte[] token = this.securityProvider.signWithIdentity(encodedTokenScope.concat("\n" + String.valueOf(expiryTimeUTC)).getBytes());
+            byte[] token = this.securityProvider.signWithIdentity(encodedTokenScope.concat("\n" + expiryTimeUTC).getBytes());
             if (token == null || token.length == 0)
             {
                 //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_010: [If the call for the saved security provider to sign with identity returns null or empty bytes, this function shall throw an IOException.]

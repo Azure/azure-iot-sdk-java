@@ -91,7 +91,7 @@ private final class OnDesiredPropertyChange implements TwinPropertiesChangeCallb
 {
     @Override
     public void execute(HashMap<String, String> desiredPropertyMap);
-};
+}
 ```
 
 **SRS_DEVICETWIN_25_020: [**OnDesiredPropertyChange callback is registered with the serializer to be triggered when desired propery changes.**]**
@@ -109,7 +109,7 @@ private final class deviceTwinResponseMessageCallback implements MessageCallback
 {
     @Override
     public IotHubMessageResult execute(Message message, Object callbackContext);
-};
+}
 ```
 
 **SRS_DEVICETWIN_25_025: [**On receiving a message from IOTHub with desired property changes, the callback deviceTwinResponseMessageCallback is triggered.**]**

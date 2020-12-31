@@ -13,5 +13,5 @@ public enum AuthenticationType
 {
     SAS,
     SELF_SIGNED,
-    CERTIFICATE_AUTHORITY;
+    CERTIFICATE_AUTHORITY
 }

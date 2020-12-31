@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The information provided from IoT Hub that can be used with the Azure Storage SDK to upload a file from your device, including authentication.
@@ -138,7 +139,7 @@ public class FileUploadSasUriResponse
         String putString = HTTPS_URL_STRING +
                 hostName + "/" +
                 containerName + "/" +
-                URLEncoder.encode(blobName, UTF_8_STRING) + // Pass URL encoded blob name to support special characters
+                URLEncoder.encode(blobName, StandardCharsets.UTF_8) + // Pass URL encoded blob name to support special characters
                 sasToken;
 
         return new URI(putString);

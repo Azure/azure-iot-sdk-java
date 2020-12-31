@@ -77,7 +77,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         Message acknowledgedIotHubMessage = this.inProgressMessages.remove(deliveryTag);
         if (acknowledgedIotHubMessage == null)
         {
-            log.warn("Received acknowledgement for a message that this sender did not send", deliveryTag);
+            log.warn("Received acknowledgement for a message with delivery tag {} that this sender did not send", deliveryTag);
         }
         else
         {

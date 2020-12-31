@@ -52,7 +52,7 @@ private final class deviceMethodResponseCallback implements MessageCallback
 {
     @Override
     public IotHubMessageResult execute(Message message, Object callbackContext);
-};
+}
 ```
 
 **SRS_DEVICEMETHOD_25_007: [**On receiving a message from IOTHub for method invoke, the callback DeviceMethodResponseMessageCallback shall be triggered.**]**

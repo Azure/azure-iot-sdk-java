@@ -7,6 +7,6 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 public interface AmqpFeedbackReceivedEvent
 {
-    public void onFeedbackReceived(String feedbackJson);
+    void onFeedbackReceived(String feedbackJson);
 }
 

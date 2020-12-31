@@ -66,7 +66,7 @@ public class ProvisioningServiceClientExceptionManager
             // Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_12_011: [The function shall throw ProvisioningServiceClientUnknownException if the Http response status none of them above and greater than 300 copying the error Http reason to the exception]
             if(errorMessage.isEmpty())
             {
-                throw new ProvisioningServiceClientUnknownException("Http response unknown error reason " + Integer.toString(responseStatus));
+                throw new ProvisioningServiceClientUnknownException("Http response unknown error reason " + responseStatus);
             }
             else
             {
@@ -99,7 +99,7 @@ public class ProvisioningServiceClientExceptionManager
             default:
                 if(errorMessage.isEmpty())
                 {
-                    throw new ProvisioningServiceClientBadUsageException("Http response bad usage " + Integer.toString(responseStatus));
+                    throw new ProvisioningServiceClientBadUsageException("Http response bad usage " + responseStatus);
                 }
                 else
                 {
@@ -119,7 +119,7 @@ public class ProvisioningServiceClientExceptionManager
             default:
                 if(errorMessage.isEmpty())
                 {
-                    throw new ProvisioningServiceClientTransientException("Http response transient error " + Integer.toString(responseStatus));
+                    throw new ProvisioningServiceClientTransientException("Http response transient error " + responseStatus);
                 }
                 else
                 {

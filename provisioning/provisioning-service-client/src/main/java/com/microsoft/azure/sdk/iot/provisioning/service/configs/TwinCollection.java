@@ -378,7 +378,7 @@ public class TwinCollection extends HashMap<String, Object>
         }
 
         /* SRS_TWIN_COLLECTION_21_020: [If twinMetadata is not null, the toJsonElementWithMetadata shall include the $metadata in the returned jsonElement.] */
-        JsonObject jsonMetadata = new JsonObject();;
+        JsonObject jsonMetadata = new JsonObject();
         this.fillJsonMetadata(jsonMetadata);
         if(!jsonMetadata.entrySet().isEmpty())
         {
