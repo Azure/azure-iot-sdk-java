@@ -491,8 +491,8 @@ public class MultiplexingClient
             for (DeviceClient successfullyRegisteredClient : deviceClients)
             {
                 // Only update the local state map once the register call has succeeded
-                String deviceIdToRegister = successfullyRegisteredClient.getConfig().getDeviceId();
-                this.multiplexedDeviceClients.put(deviceIdToRegister, successfullyRegisteredClient);
+                String registeredDeviceId = successfullyRegisteredClient.getConfig().getDeviceId();
+                this.multiplexedDeviceClients.put(registeredDeviceId, successfullyRegisteredClient);
             }
         }
     }
