@@ -183,7 +183,6 @@ public class Socks5SocketFactory extends SocketFactory
             return isLocal() ? super.getLocalPort() : mProxied.mPort;
         }
 
-        @SneakyThrows
         @Override
         public InetAddress getLocalAddress()
         {
@@ -193,7 +192,11 @@ public class Socks5SocketFactory extends SocketFactory
             }
             if (mLocalIP == null)
             {
-                mLocalIP = InetAddress.getByName(mLocalHost);
+                try {
+                    mLocalIP = InetAddress.getByName(mLocalHost);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
             }
             return mLocalIP;
         }

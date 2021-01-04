@@ -1,6 +1,7 @@
 package io.swagger.server.api;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -38,7 +39,7 @@ public class MainApiVerticle extends AbstractVerticle {
         FileSystem vertxFileSystem = vertx.fileSystem();
         vertxFileSystem.readFile("swagger.json", readFile -> {
             if (readFile.succeeded()) {
-                Swagger swagger = new SwaggerParser().parse(readFile.result().toString(Charset.forName("utf-8")));
+                Swagger swagger = new SwaggerParser().parse(readFile.result().toString(StandardCharsets.UTF_8));
                 Router swaggerRouter = SwaggerRouter.swaggerRouter(router, swagger, vertx.eventBus(), new OperationIdServiceIdResolver(), new Function<RoutingContext, DeliveryOptions>() {
                     @Override
                     public DeliveryOptions apply(RoutingContext t) {

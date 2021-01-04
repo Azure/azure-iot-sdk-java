@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -240,7 +241,7 @@ public class QueryCollection
         //Codes_SRS_QUERYCOLLECTION_34_021: [The method shall create a QueryResponse object with the contents from the response body and its continuation token and return it.]
         this.isInitialQuery = false;
         return new QueryCollectionResponse<String>(
-        		new String(httpResponse.getBody(), "UTF-8"), this.responseContinuationToken);
+        		new String(httpResponse.getBody(), StandardCharsets.UTF_8), this.responseContinuationToken);
     }
 
     /**
