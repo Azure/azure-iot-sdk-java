@@ -1491,7 +1491,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         assertTrue("Expected bulk registration to throw an UnsupportedOperationException", expectedExceptionThrown);
 
-        // Because one of the devices in the bulk registration was MQTT, and therefore unsupported, none of the other clients
+        // Because one of the devices in the bulk registration has some unsupported feature (MQTT protocol, X509 auth, etc.), none of the other clients
         // should have been registered.
         for (int i = 0; i < this.testInstance.deviceClientArray.size(); i++)
         {
