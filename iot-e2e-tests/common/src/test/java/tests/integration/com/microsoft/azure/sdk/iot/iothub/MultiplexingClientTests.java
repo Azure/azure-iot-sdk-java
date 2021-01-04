@@ -1406,7 +1406,7 @@ public class MultiplexingClientTests extends IntegrationTest
         registryManager.addDevice(newDevice);
         String deviceConnectionString = registryManager.getDeviceConnectionString(newDevice);
 
-        // MQTT clients should throw unsupportedoperationexception when registered
+        // MQTT clients should throw UnsupportedOperationException when registered
         DeviceClient mqttDeviceClient = new DeviceClient(deviceConnectionString, IotHubClientProtocol.MQTT);
         registrationsUnwindForUnsupportedOperationExceptions(mqttDeviceClient);
     }

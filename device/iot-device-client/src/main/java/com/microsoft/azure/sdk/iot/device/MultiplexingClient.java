@@ -417,12 +417,6 @@ public class MultiplexingClient
         {
             List<DeviceClientConfig> deviceClientConfigsToRegister = new ArrayList<>();
 
-            // When registering in bulk, some clients may cause this method to throw (for example if the client uses MQTT),
-            // so it is important to be able to unwind the bulk operation when this happens. This list
-            // contains the Ids of the clients that were ready to be registered before encountering an error like that
-            // so that they can be removed from the local state.
-            List<String> partiallyRegisteredClientIds = new ArrayList<>();
-
             for (DeviceClient deviceClientToRegister : deviceClients)
             {
                 DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
@@ -439,19 +433,16 @@ public class MultiplexingClient
 
                 if (configToAdd.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
-                    unwindPreviousRegistrations(partiallyRegisteredClientIds);
                     throw new UnsupportedOperationException("Can only register to multiplex a device client that uses SAS token based authentication");
                 }
 
                 if (configToAdd.getProtocol() != this.protocol)
                 {
-                    unwindPreviousRegistrations(partiallyRegisteredClientIds);
                     throw new UnsupportedOperationException("A device client cannot be registered to a multiplexing client that specifies a different transport protocol.");
                 }
 
                 if (this.protocol == IotHubClientProtocol.AMQPS && this.multiplexedDeviceClients.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS)
                 {
-                    unwindPreviousRegistrations(partiallyRegisteredClientIds);
                     throw new UnsupportedOperationException(String.format("Multiplexed connections over AMQPS only support up to %d devices", MAX_MULTIPLEX_DEVICE_COUNT_AMQPS));
                 }
 
@@ -459,19 +450,16 @@ public class MultiplexingClient
                 // AMQPS_WS connection so this is the only way that users will know about this limit
                 if (this.protocol == IotHubClientProtocol.AMQPS_WS && this.multiplexedDeviceClients.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS)
                 {
-                    unwindPreviousRegistrations(partiallyRegisteredClientIds);
                     throw new UnsupportedOperationException(String.format("Multiplexed connections over AMQPS_WS only support up to %d devices", MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS));
                 }
 
                 if (!this.hostName.equalsIgnoreCase(configToAdd.getIotHubHostname()))
                 {
-                    unwindPreviousRegistrations(partiallyRegisteredClientIds);
                     throw new UnsupportedOperationException("A device client cannot be registered to a multiplexing client that specifies a different host name.");
                 }
 
                 if (deviceClientToRegister.getDeviceIO() != null && deviceClientToRegister.getDeviceIO().isOpen() && !deviceClientToRegister.isMultiplexed)
                 {
-                    unwindPreviousRegistrations(partiallyRegisteredClientIds);
                     throw new UnsupportedOperationException("Cannot register a device client to a multiplexed connection when the device client was already opened.");
                 }
 
@@ -488,9 +476,6 @@ public class MultiplexingClient
                 }
                 else
                 {
-                    String deviceIdToRegister = deviceClientToRegister.getConfig().getDeviceId();
-                    this.multiplexedDeviceClients.put(deviceIdToRegister, deviceClientToRegister);
-                    partiallyRegisteredClientIds.add(deviceIdToRegister);
                     deviceClientConfigsToRegister.add(configToAdd);
                 }
             }
@@ -502,6 +487,13 @@ public class MultiplexingClient
             }
 
             this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+
+            for (DeviceClient successfullyRegisteredClient : deviceClients)
+            {
+                // Only update the local state map once the register call has succeeded
+                String deviceIdToRegister = successfullyRegisteredClient.getConfig().getDeviceId();
+                this.multiplexedDeviceClients.put(deviceIdToRegister, successfullyRegisteredClient);
+            }
         }
     }
 
@@ -712,13 +704,5 @@ public class MultiplexingClient
     public void setRetryPolicy(RetryPolicy retryPolicy)
     {
         this.deviceIO.setMultiplexingRetryPolicy(retryPolicy);
-    }
-
-    private void unwindPreviousRegistrations(List<String> partiallyRegisteredClientIds)
-    {
-        for (String partiallyRegisteredClientId : partiallyRegisteredClientIds)
-        {
-            this.multiplexedDeviceClients.remove(partiallyRegisteredClientId);
-        }
     }
 }
