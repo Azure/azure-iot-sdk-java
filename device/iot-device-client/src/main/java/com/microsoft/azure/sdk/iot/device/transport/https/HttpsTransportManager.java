@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -243,14 +244,14 @@ public class HttpsTransportManager implements IotHubTransportManager
 
     private static URI getDeviceMethodUri(String deviceId) throws UnsupportedEncodingException, URISyntaxException
     {
-        deviceId = URLEncoder.encode(deviceId, "UTF-8");
+        deviceId = URLEncoder.encode(deviceId, StandardCharsets.UTF_8.name());
         return new URI(String.format(DeviceMethodUriFormat, deviceId));
     }
 
     private static URI getModuleMethodUri(String deviceId, String moduleId) throws UnsupportedEncodingException, URISyntaxException
     {
-        deviceId = URLEncoder.encode(deviceId, "UTF-8");
-        moduleId = URLEncoder.encode(moduleId, "UTF-8");
+        deviceId = URLEncoder.encode(deviceId, StandardCharsets.UTF_8.name());
+        moduleId = URLEncoder.encode(moduleId, StandardCharsets.UTF_8.name());
         return new URI(String.format(ModuleMethodUriFormat, deviceId, moduleId));
     }
 }

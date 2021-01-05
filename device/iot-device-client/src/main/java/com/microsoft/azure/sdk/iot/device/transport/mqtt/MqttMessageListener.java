@@ -7,5 +7,5 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 public interface MqttMessageListener
 {
-    public void onMessageArrived(int messageId);
+    void onMessageArrived(int messageId);
 }

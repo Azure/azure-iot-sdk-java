@@ -171,7 +171,7 @@ public class ServiceClientSample
 
         for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
         {
-            Message messageToSend = new Message(commandMessage + Integer.toString(i));
+            Message messageToSend = new Message(commandMessage + i);
             messageToSend.setDeliveryAcknowledgementFinal(DeliveryAcknowledgement.Full);
 
             // Setting standard properties
@@ -180,7 +180,7 @@ public class ServiceClientSample
 
             // Setting user properties
             propertiesToSend.clear();
-            propertiesToSend.put("key_" + Integer.toString(i), "value_" + Integer.toString(i));
+            propertiesToSend.put("key_" + i, "value_" + i);
             messageToSend.setProperties(propertiesToSend);
 
             // send the message

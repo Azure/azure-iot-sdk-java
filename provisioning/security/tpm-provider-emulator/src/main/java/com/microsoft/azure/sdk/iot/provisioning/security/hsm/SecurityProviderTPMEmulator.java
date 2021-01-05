@@ -428,7 +428,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         if (encUriData.buffer.length > maxUriDataSize)
         {
             //SRS_SecurityProviderTPMEmulator_25_021: [ This method shall throw SecurityProviderException if the encoded Uri length is greater than Maximum Uri Length . ]
-            throw new SecurityProviderException("Too long encrypted URI data string. Max supported length is " + Integer.toString(maxUriDataSize));
+            throw new SecurityProviderException("Too long encrypted URI data string. Max supported length is " + maxUriDataSize);
         }
 
         // The template of the symmetric key used by the Service

@@ -30,5 +30,5 @@ public interface SasTokenProvider
      * proactive token renewal.
      * @return a SAS token to be used for authentication.
      */
-    public char[] getSasToken();
+    char[] getSasToken();
 }

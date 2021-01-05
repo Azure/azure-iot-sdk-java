@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Authentication method that uses a shared access signature token and allows for token refresh.
@@ -53,7 +54,7 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
 
         // Codes_SRS_MODULEAUTHENTICATIONWITHTOKENREFRESH_34_002: [This function shall return the path
         // "<hostname>/devices/<device id>/modules/<module id> url encoded with utf-8.]
-        return URLEncoder.encode(String.format("%s/devices/%s/modules/%s", hostname, deviceId, moduleId), "UTF-8");
+        return URLEncoder.encode(String.format("%s/devices/%s/modules/%s", hostname, deviceId, moduleId), StandardCharsets.UTF_8.name());
     }
 
     /**

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface WebSocketHandler
 {
-    public enum WebSocketMessageType
+    enum WebSocketMessageType
     {
         WEB_SOCKET_MESSAGE_TYPE_UNKNOWN,
         WEB_SOCKET_MESSAGE_TYPE_CHUNK,
@@ -31,7 +31,7 @@ public interface WebSocketHandler
 
     int calculateHeaderSize(int payloadSize);
 
-    public class WebsocketTuple{
+    class WebsocketTuple{
 
         private long length;
         private WebSocketMessageType type;

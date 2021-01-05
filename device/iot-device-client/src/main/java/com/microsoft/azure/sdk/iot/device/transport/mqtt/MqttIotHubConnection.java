@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
@@ -140,7 +141,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
                 // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding
                 String userAgentString = this.config.getProductInfo().getUserAgentString();
-                String clientUserAgentIdentifier = "DeviceClientType=" + URLEncoder.encode(userAgentString, "UTF-8").replaceAll("\\+", "%20");
+                String clientUserAgentIdentifier = "DeviceClientType=" + URLEncoder.encode(userAgentString, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
                 String clientId = this.config.getDeviceId();
 
                 String moduleId = this.config.getModuleId();

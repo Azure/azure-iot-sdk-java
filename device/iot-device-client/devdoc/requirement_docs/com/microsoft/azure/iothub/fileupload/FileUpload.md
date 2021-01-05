@@ -23,7 +23,7 @@ public final class FileUpload
     
     public void closeNow();
 
-    protected static class FileUploadStatusCallBack implements IotHubEventCallback {};   
+    protected static class FileUploadStatusCallBack implements IotHubEventCallback {}   
 }
 ```
 
@@ -67,7 +67,7 @@ public void closeNow();
 
 ### FileUploadStatusCallBack
 ```java
-protected static class FileUploadStatusCallBack implements IotHubEventCallback {};   
+protected static class FileUploadStatusCallBack implements IotHubEventCallback {}   
 ```
 **SRS_FILEUPLOAD_21_019: [**The FileUploadStatusCallBack shall implements the `IotHubEventCallback` as result of the FileUploadTask.**]**  
 **SRS_FILEUPLOAD_21_020: [**The FileUploadStatusCallBack shall call the `statusCallback` reporting the received status.**]**  

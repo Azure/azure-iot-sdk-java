@@ -43,7 +43,7 @@ public class TwinProperty
         }
     }
 
-    private ConcurrentMap<String, Property> property = new ConcurrentHashMap<>();;
+    private ConcurrentMap<String, Property> property = new ConcurrentHashMap<>();
     private Integer version;
     private Boolean reportMetadata;
 
