@@ -25,11 +25,11 @@ import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHandler;
 import com.microsoft.azure.sdk.iot.deps.ws.WebSocketHeader;
 import org.junit.Test;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.*;
 
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -98,7 +98,7 @@ public class WebSocketHandlerImplTest
                 String keyBase64 = line.substring(19);
                 if (keyBase64.length() == 24)
                 {
-                    byte[] decoded = Base64.decodeBase64Local(keyBase64.getBytes());
+                    byte[] decoded = decodeBase64(keyBase64.getBytes());
 
                     if (decoded.length == 16)
                     {

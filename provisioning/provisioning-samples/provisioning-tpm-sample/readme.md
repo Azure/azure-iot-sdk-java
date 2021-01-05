@@ -245,7 +245,7 @@ Start adding the following to your main.
         try
         {
             securityClientTPMEmulator = new SecurityProviderTPMEmulator();
-            System.out.println("Endorsement Key : \n" + new String(Base64.encodeBase64Local(securityClientTPMEmulator.getEndorsementKey())));
+            System.out.println("Endorsement Key : \n" + new String(encodeBase64(securityClientTPMEmulator.getEndorsementKey())));
             System.out.println("Registration Id : \n" + securityClientTPMEmulator.getRegistrationId());
             System.out.println("Please visit Azure Portal [azure-portal] and create a TPM Individual Enrollment with the information above i.e EndorsementKey and RegistrationId \n" +
                                        "Press enter when you are ready to run registration after enrolling with the service");

@@ -9,7 +9,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser;
@@ -30,6 +29,7 @@ import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -47,8 +47,6 @@ public class ProvisioningTaskTest
     private static final String TEST_HUB = "TestHub";
     private static final String TEST_DEVICE_ID = "testDeviceId";
 
-    @Mocked
-    Base64 mockedBase64;
     @Mocked
     SecurityProvider mockedSecurityProvider;
     @Mocked
@@ -1472,7 +1470,7 @@ public class ProvisioningTaskTest
                 mockedDeviceRegistrationResultParser.getTpm();
                 result = mockedTpm;
                 mockedTpm.getAuthenticationKey();
-                result = "some auth key";
+                result = encodeBase64String("some auth key".getBytes());
                 mockedProvisioningDeviceClientConfig.getSecurityProvider();
                 result = mockedSecurityProviderTpm;
             }

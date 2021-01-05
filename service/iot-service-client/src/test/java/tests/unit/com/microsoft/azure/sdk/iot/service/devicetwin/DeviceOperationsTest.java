@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertNull;
 
 /**
@@ -35,7 +36,7 @@ public class DeviceOperationsTest
 {
     private static final String STANDARD_HOSTNAME = "testHostName.azure.net";
     private static final String STANDARD_SHAREDACCESSKEYNAME = "testKeyName";
-    private static final String STANDARD_SHAREDACCESSKEY = "1234567890ABCDEFGHIJKLMNOPQRESTUVWXYZab=";
+    private static final String STANDARD_SHAREDACCESSKEY = encodeBase64String("1234567890ABCDEFGHIJKLMNOPQRESTUVWXYZab=".getBytes());
     private static final String STANDARD_CONNECTIONSTRING =
             "HostName=" + STANDARD_HOSTNAME +
                     ";SharedAccessKeyName=" + STANDARD_SHAREDACCESSKEYNAME +

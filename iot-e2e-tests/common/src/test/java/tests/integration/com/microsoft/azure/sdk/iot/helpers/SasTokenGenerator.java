@@ -5,8 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
@@ -15,6 +13,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 public class SasTokenGenerator
 {
@@ -68,9 +69,9 @@ public class SasTokenGenerator
         try
         {
             byte[] textToSign = new String(resourceUri + "\n" + expiryTime).getBytes();
-            byte[] decodedDeviceKey = Base64.decodeBase64Local(devicePrimaryKey.getBytes());
+            byte[] decodedDeviceKey = decodeBase64(devicePrimaryKey.getBytes());
             byte[] signature = encryptHmacSha256(textToSign, decodedDeviceKey);
-            byte[] encryptedSignature = Base64.encodeBase64Local(signature);
+            byte[] encryptedSignature = encodeBase64(signature);
             String encryptedSignatureUtf8 = new String(encryptedSignature, StandardCharsets.UTF_8);
             return URLEncoder.encode(encryptedSignatureUtf8, ENCODING_CHARSET);
         }

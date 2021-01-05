@@ -5,12 +5,13 @@
 
 package com.microsoft.azure.sdk.iot.service.auth;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.service.Tools;
 
 import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 /**
  * Store primary and secondary keys
@@ -35,8 +36,8 @@ public class SymmetricKey
         {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(encryptionMethod);
             keyGenerator.init(new SecureRandom());
-            this.primaryKey = Base64.encodeBase64StringLocal(keyGenerator.generateKey().getEncoded());
-            this.secondaryKey = Base64.encodeBase64StringLocal(keyGenerator.generateKey().getEncoded());
+            this.primaryKey = encodeBase64String(keyGenerator.generateKey().getEncoded());
+            this.secondaryKey = encodeBase64String(keyGenerator.generateKey().getEncoded());
         }
         catch (NoSuchAlgorithmException e)
         {
