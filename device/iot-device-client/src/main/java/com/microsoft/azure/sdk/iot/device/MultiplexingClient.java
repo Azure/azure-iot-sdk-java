@@ -416,6 +416,7 @@ public class MultiplexingClient
         synchronized (this.operationLock)
         {
             List<DeviceClientConfig> deviceClientConfigsToRegister = new ArrayList<>();
+
             for (DeviceClient deviceClientToRegister : deviceClients)
             {
                 DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
@@ -459,7 +460,7 @@ public class MultiplexingClient
 
                 if (deviceClientToRegister.getDeviceIO() != null && deviceClientToRegister.getDeviceIO().isOpen() && !deviceClientToRegister.isMultiplexed)
                 {
-                    throw new IllegalStateException("Cannot register a device client to a multiplexed connection when the device client was already opened.");
+                    throw new UnsupportedOperationException("Cannot register a device client to a multiplexed connection when the device client was already opened.");
                 }
 
                 deviceClientToRegister.setAsMultiplexed();
@@ -475,7 +476,6 @@ public class MultiplexingClient
                 }
                 else
                 {
-                    this.multiplexedDeviceClients.put(deviceClientToRegister.getConfig().getDeviceId(), deviceClientToRegister);
                     deviceClientConfigsToRegister.add(configToAdd);
                 }
             }
@@ -487,6 +487,13 @@ public class MultiplexingClient
             }
 
             this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+
+            for (DeviceClient successfullyRegisteredClient : deviceClients)
+            {
+                // Only update the local state map once the register call has succeeded
+                String registeredDeviceId = successfullyRegisteredClient.getConfig().getDeviceId();
+                this.multiplexedDeviceClients.put(registeredDeviceId, successfullyRegisteredClient);
+            }
         }
     }
 
