@@ -194,8 +194,8 @@ public class Socks5SocketFactory extends SocketFactory
             {
                 try {
                     mLocalIP = InetAddress.getByName(mLocalHost);
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                } catch (UnknownHostException e)
+                {
                 }
             }
             return mLocalIP;
