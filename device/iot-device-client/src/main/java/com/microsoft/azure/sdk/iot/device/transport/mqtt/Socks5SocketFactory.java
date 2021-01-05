@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
+import lombok.SneakyThrows;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -190,11 +192,9 @@ public class Socks5SocketFactory extends SocketFactory
             }
             if (mLocalIP == null)
             {
-                try
-                {
+                try {
                     mLocalIP = InetAddress.getByName(mLocalHost);
-                }
-                catch (final UnknownHostException e)
+                } catch (UnknownHostException e)
                 {
                 }
             }
@@ -243,13 +243,7 @@ public class Socks5SocketFactory extends SocketFactory
 
                 if ((type != ATYP_DOMAINNAME))
                 {
-                    try
-                    {
-                        mIp = InetAddress.getByName(mHost);
-                    }
-                    catch (final UnknownHostException uh_ex)
-                    {
-                    }
+                    mIp = InetAddress.getByName(mHost);
                 }
             }
         }

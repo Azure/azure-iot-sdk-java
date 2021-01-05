@@ -99,7 +99,7 @@ public final class ProvisioningSasToken
             byte[] rawHmac = mac.doFinal(toSign.getBytes(StandardCharsets.UTF_8));
             // Convert raw bytes to Hex
             String signature = URLEncoder.encode(
-                    Base64.encodeBase64StringLocal(rawHmac), "UTF-8");
+                    Base64.encodeBase64StringLocal(rawHmac), StandardCharsets.UTF_8.name());
 
             // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
             return String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
