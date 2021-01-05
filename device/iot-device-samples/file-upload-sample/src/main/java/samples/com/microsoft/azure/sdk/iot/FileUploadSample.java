@@ -91,7 +91,7 @@ public class FileUploadSample
         client.closeNow();
     }
 
-    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws FileNotFoundException, IOException, URISyntaxException {
+    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException {
         File file = new File(fullFileName);
         if(file.isDirectory())
         {
@@ -103,7 +103,7 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws FileNotFoundException, IOException, URISyntaxException {
+    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException {
         String[] fileNameList = null;
 
         File file = new File(baseDirectory, relativePath);
@@ -125,7 +125,7 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws FileNotFoundException, IOException, URISyntaxException {
+    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, URISyntaxException {
         File file = new File(baseDirectory, relativeFileName);
         try (InputStream inputStream = new FileInputStream(file))
         {

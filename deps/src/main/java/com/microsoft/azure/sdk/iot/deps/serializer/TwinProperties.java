@@ -126,7 +126,7 @@ public class TwinProperties
         JsonElement reportedElement = this.reported.toJsonElement();
         propertiesJson.add(REPORTED_TAG, reportedElement);
 
-        return (JsonElement) propertiesJson;
+        return propertiesJson;
     }
 
     protected void update(Map<String, Object> jsonTree,

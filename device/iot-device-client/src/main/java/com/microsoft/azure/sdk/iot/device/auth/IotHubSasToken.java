@@ -190,12 +190,9 @@ public final class IotHubSasToken
             if(this.sasToken.startsWith("SharedAccessSignature"))
             {
                 Map<String, String> fieldValues = extractFieldValues(this.sasToken);
-                if(fieldValues.containsKey(ExpiryTimeFieldKey)
+                return fieldValues.containsKey(ExpiryTimeFieldKey)
                         && fieldValues.containsKey(SignatureFieldKey)
-                        && fieldValues.containsKey(ResourceURIFieldKey))
-                {
-                    return true;
-                }
+                        && fieldValues.containsKey(ResourceURIFieldKey);
             }
         }
         return false;

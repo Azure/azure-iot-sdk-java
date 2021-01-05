@@ -15,7 +15,7 @@ class AmqpsDeviceAuthenticationSAS extends AmqpsDeviceAuthentication
     AmqpsDeviceAuthenticationSAS(DeviceClientConfig deviceClientConfig);
     protected AmqpsSendReturnValue sendMessageAndGetDeliveryHash(MessageType messageType, byte[] msgData, int offset, int length, byte[] deliveryTag) throws IllegalStateException, IllegalArgumentException;
     protected AmqpsMessage getMessageFromReceiverLink(String linkName) throws IllegalArgumentException, IOException;
-    protected void setSslDomain(Transport transport, SSLContext sslContext) {};
+    protected void setSslDomain(Transport transport, SSLContext sslContext) {}
     protected Boolean isLinkFound(String linkName);
 ```
 

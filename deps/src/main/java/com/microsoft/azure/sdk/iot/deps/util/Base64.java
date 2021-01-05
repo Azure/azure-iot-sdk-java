@@ -276,7 +276,7 @@ public final class Base64
         /* Codes_SRS_BASE64_21_010: [If the `dataValues` is empty, the encodeBase64StringLocal shall return a empty string.] */
         if(dataValues.length == 0)
         {
-            return new String();
+            return "";
         }
 
         /* Codes_SRS_BASE64_21_008: [The encodeBase64StringLocal shall encoded the provided `dataValues` in a string using the Base64 format define in the RFC2045.] */

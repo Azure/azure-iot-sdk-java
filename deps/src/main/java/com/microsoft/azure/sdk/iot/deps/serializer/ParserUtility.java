@@ -12,6 +12,7 @@ import com.google.gson.JsonPrimitive;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,14 +57,7 @@ public class ParserUtility
         }
 
         /* Codes_SRS_PARSER_UTILITY_21_003: [The validateStringUTF8 shall throw IllegalArgumentException if the provided string contains at least one not UTF-8 character.] */
-        try
-        {
-            if(str.getBytes("UTF-8").length != str.length())
-            {
-                throw new IllegalArgumentException("parameter contains non UTF-8 character");
-            }
-        }
-        catch(UnsupportedEncodingException e)
+        if(str.getBytes(StandardCharsets.UTF_8).length != str.length())
         {
             throw new IllegalArgumentException("parameter contains non UTF-8 character");
         }

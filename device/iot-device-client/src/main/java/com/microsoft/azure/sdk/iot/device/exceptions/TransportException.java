@@ -18,7 +18,7 @@ public class TransportException extends DeviceClientException
         METHODS,
         FILE_UPLOAD,
         NOT_APPLICABLE
-    };
+    }
 
     protected IotHubService iotHubService = NOT_APPLICABLE;
 

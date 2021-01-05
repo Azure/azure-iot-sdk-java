@@ -32,7 +32,7 @@ public class MethodResult
         // Codes_SRS_DIRECTMETHODRESULT_34_003: [This constructor shall retrieve the payload and status from the provided json.]
         MethodResult result = new GsonBuilder().create().fromJson(json, MethodResult.class);
 
-        this.payload = result.payload != null ? result.payload : null;
+        this.payload = result.payload;
         this.status = result.status;
     }
 

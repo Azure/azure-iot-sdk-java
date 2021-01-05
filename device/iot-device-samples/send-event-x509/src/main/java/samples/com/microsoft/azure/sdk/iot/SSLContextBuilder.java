@@ -13,6 +13,7 @@ import javax.net.ssl.TrustManagerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -94,7 +95,7 @@ public class SSLContextBuilder
 
         privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----\n", "");
         privateKeyPEM = privateKeyPEM.replace("-----END PRIVATE KEY-----", "");
-        byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes("UTF-8"));
+        byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
         KeyFactory kf = KeyFactory.getInstance("RSA");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
         RSAPrivateKey privKey = (RSAPrivateKey) kf.generatePrivate(keySpec);

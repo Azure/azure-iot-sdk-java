@@ -18,5 +18,5 @@ import java.net.URISyntaxException;
  */
 public interface TrustBundleProvider
 {
-    public String getTrustBundleCerts(String providerUri, String apiVersion) throws URISyntaxException, TransportException, IOException, HsmException;
+    String getTrustBundleCerts(String providerUri, String apiVersion) throws URISyntaxException, TransportException, IOException, HsmException;
 }

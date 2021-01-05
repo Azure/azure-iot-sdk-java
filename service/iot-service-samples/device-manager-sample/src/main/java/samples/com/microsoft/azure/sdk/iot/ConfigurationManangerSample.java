@@ -209,7 +209,7 @@ public class ConfigurationManangerSample
         {
             for (Map.Entry<String, String> entry : queries.entrySet())
             {
-                String key = entry.getKey().toString();
+                String key = entry.getKey();
                 String val = entry.getValue();
                 System.out.println("    " + key + " : " + val);
             }
@@ -221,7 +221,7 @@ public class ConfigurationManangerSample
         {
             for (Map.Entry<String, Long> entry : results.entrySet())
             {
-                String key = entry.getKey().toString();
+                String key = entry.getKey();
                 Long val = entry.getValue();
                 System.out.println("    " + key + " : " + val);
             }
@@ -233,7 +233,7 @@ public class ConfigurationManangerSample
         {
             for (Map.Entry<String, String> entry : squeries.entrySet())
             {
-                String key = entry.getKey().toString();
+                String key = entry.getKey();
                 String val = entry.getValue();
                 System.out.println("    " + key + " : " + val);
             }
@@ -245,7 +245,7 @@ public class ConfigurationManangerSample
         {
             for (Map.Entry<String, Long> entry : sresults.entrySet())
             {
-                String key = entry.getKey().toString();
+                String key = entry.getKey();
                 Long val = entry.getValue();
                 System.out.println("    " + key + " : " + val);
             }

@@ -118,7 +118,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 return;
             }
 
-            this.log.debug("Opening MQTT connection...");
+            MqttIotHubConnection.log.debug("Opening MQTT connection...");
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
@@ -127,13 +127,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 SSLContext sslContext = this.config.getAuthenticationProvider().getSSLContext();
                 if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
                 {
-                    this.log.trace("MQTT connection will use sas token based auth");
+                    MqttIotHubConnection.log.trace("MQTT connection will use sas token based auth");
                     this.iotHubUserPassword = this.config.getSasTokenAuthentication().getSasToken();
                     this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
                 }
                 else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
                 {
-                    this.log.trace("MQTT connection will use X509 certificate based auth");
+                    MqttIotHubConnection.log.trace("MQTT connection will use X509 certificate based auth");
                     this.iotHubUserPassword = null;
                 }
 
@@ -201,14 +201,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 this.deviceMessaging.start();
                 this.state = IotHubConnectionStatus.CONNECTED;
 
-                this.log.debug("MQTT connection opened successfully");
+                MqttIotHubConnection.log.debug("MQTT connection opened successfully");
 
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_065: [If the connection opens successfully, this function shall notify the listener that connection was established.]
                 this.listener.onConnectionEstablished(this.connectionId);
             }
             catch (IOException e)
             {
-                this.log.error("Exception encountered while opening MQTT connection; closing connection", e);
+                MqttIotHubConnection.log.error("Exception encountered while opening MQTT connection; closing connection", e);
                 this.state = IotHubConnectionStatus.DISCONNECTED;
                 // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
                 // for any reason, the function shall throw a TransportException.]
@@ -241,7 +241,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             return;
         }
 
-        this.log.debug("Closing MQTT connection");
+        MqttIotHubConnection.log.debug("Closing MQTT connection");
 
         // Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [The function shall close the MQTT connection.]
         try
@@ -265,13 +265,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
 
             this.state = IotHubConnectionStatus.DISCONNECTED;
-            this.log.debug("Successfully closed MQTT connection");
+            MqttIotHubConnection.log.debug("Successfully closed MQTT connection");
         }
         catch (TransportException e)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_021: [If a TransportException is encountered while closing the three clients, this function shall set this object's state to closed and then rethrow the exception.]
             this.state = IotHubConnectionStatus.DISCONNECTED;
-            this.log.error("Exception encountered while closing MQTT connection, connection state is unknown", e);
+            MqttIotHubConnection.log.error("Exception encountered while closing MQTT connection, connection state is unknown", e);
             throw e;
         }
     }
@@ -290,21 +290,21 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         IotHubTransportMessage message = this.deviceMethod.receive();
         if (message != null)
         {
-            this.log.trace("Received MQTT device method message ({})", message);
+            MqttIotHubConnection.log.trace("Received MQTT device method message ({})", message);
             return message;
         }
 
         message = deviceTwin.receive();
         if (message != null)
         {
-            this.log.trace("Received MQTT device twin message ({})", message);
+            MqttIotHubConnection.log.trace("Received MQTT device twin message ({})", message);
             return message;
         }
 
         message = deviceMessaging.receive();
         if (message != null)
         {
-            this.log.trace("Received MQTT device messaging message ({})", message);
+            MqttIotHubConnection.log.trace("Received MQTT device messaging message ({})", message);
             return message;
         }
 
@@ -365,18 +365,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             if (message.getMessageType() == DEVICE_METHODS)
             {
                 this.deviceMethod.start();
-                this.log.trace("Sending MQTT device method message ({})", message);
+                MqttIotHubConnection.log.trace("Sending MQTT device method message ({})", message);
                 this.deviceMethod.send((IotHubTransportMessage) message);
             }
             else if (message.getMessageType() == DEVICE_TWIN)
             {
                 this.deviceTwin.start();
-                this.log.trace("Sending MQTT device twin message ({})", message);
+                MqttIotHubConnection.log.trace("Sending MQTT device twin message ({})", message);
                 this.deviceTwin.send((IotHubTransportMessage) message);
             }
             else
             {
-                this.log.trace("Sending MQTT device telemetry message ({})", message);
+                MqttIotHubConnection.log.trace("Sending MQTT device telemetry message ({})", message);
                 this.deviceMessaging.send(message);
             }
 
@@ -401,7 +401,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
 
         int messageId;
-        this.log.trace("Checking if MQTT layer can acknowledge the received message ({})", message);
+        MqttIotHubConnection.log.trace("Checking if MQTT layer can acknowledge the received message ({})", message);
         if (receivedMessagesToAcknowledge.containsKey(message))
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_052: [If this object has received the provided message from the service, this function shall retrieve the Mqtt messageId for that message.]
@@ -410,13 +410,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         else
         {
             TransportException e = new TransportException(new IllegalArgumentException("Provided message cannot be acknowledged because it was already acknowledged or was never received from service"));
-            this.log.error("Mqtt layer could not acknowledge received message because it has no mapping to an outstanding mqtt message id ({})", message, e);
+            MqttIotHubConnection.log.error("Mqtt layer could not acknowledge received message because it has no mapping to an outstanding mqtt message id ({})", message, e);
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_051: [If this object has not received the provided message from the service, this function shall throw a TransportException.]
             throw e;
         }
 
         boolean ackSent;
-        this.log.trace("Sending MQTT ACK for a received message ({})", message);
+        MqttIotHubConnection.log.trace("Sending MQTT ACK for a received message ({})", message);
         if (message.getMessageType() == DEVICE_METHODS)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_053: [If the provided message has message type DEVICE_METHODS, this function shall invoke the methods client to send the ack and return the result.]
@@ -438,7 +438,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         if (ackSent)
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_056: [If the ack was sent successfully, this function shall remove the provided message from the saved map of messages to acknowledge.]
-            this.log.trace("MQTT ACK was sent for a received message so it has been removed from the messages to acknowledge list ({})", message);
+            MqttIotHubConnection.log.trace("MQTT ACK was sent for a received message so it has been removed from the messages to acknowledge list ({})", message);
             this.receivedMessagesToAcknowledge.remove(message);
         }
 
@@ -464,19 +464,19 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         catch (TransportException e)
         {
             this.listener.onMessageReceived(null, new TransportException("Failed to receive message from service", e));
-            this.log.error("Encountered exception while receiving message over MQTT", e);
+            MqttIotHubConnection.log.error("Encountered exception while receiving message over MQTT", e);
         }
 
         if (transportMessage == null)
         {
             //Ack is not sent to service for this message because we cannot interpret the message. Service will likely re-send
             this.listener.onMessageReceived(null, new TransportException("Message sent from service could not be parsed"));
-            this.log.warn("Received message that could not be parsed. That message has been ignored.");
+            MqttIotHubConnection.log.warn("Received message that could not be parsed. That message has been ignored.");
         }
         else
         {
             //Codes_SRS_MQTTIOTHUBCONNECTION_34_059: [If a transport message is successfully received, this function shall save it in this object's map of messages to be acknowledged along with the provided messageId.]
-            this.log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
+            MqttIotHubConnection.log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
             this.receivedMessagesToAcknowledge.put(transportMessage, messageId);
 
             switch (transportMessage.getMessageType())

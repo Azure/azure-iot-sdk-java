@@ -215,8 +215,8 @@ public class Tools
             // Codes_SRS_SERVICE_SDK_JAVA_TOOLS_12_023: [The function shall append the input StringBuilder string using the following format: "name":"value" if isQuoted is false]
             strBuilder.append("\"");
 
-            if (Tools.isNullOrEmpty(name))
-                strBuilder.append("");
+            if (Tools.isNullOrEmpty(name)) {
+            }
             else
                 strBuilder.append(name);
 

@@ -159,7 +159,7 @@ public class RegisterTask implements Callable
 
         Long expiryTimeUTC = System.currentTimeMillis() / 1000 + expiryTime;
 
-        String value = tokenScope.concat("\n" + String.valueOf(expiryTimeUTC));
+        String value = tokenScope.concat("\n" + expiryTimeUTC);
         byte[] token = null;
         if (securityProvider instanceof SecurityProviderTpm)
         {

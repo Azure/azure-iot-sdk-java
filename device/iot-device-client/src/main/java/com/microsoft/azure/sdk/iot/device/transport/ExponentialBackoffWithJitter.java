@@ -79,7 +79,7 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
             int deltaBackoffLowbound = (int)(this.deltaBackoff * 0.8);
             int deltaBackoffUpperbound = (int)(this.deltaBackoff * 1.2);
             long randomDeltaBackOff = random.nextInt(deltaBackoffUpperbound - deltaBackoffLowbound);
-            long exponentialBackOffWithJitter = (int)((Math.pow(2.0, (double)currentRetryCount) - 1.0) * (randomDeltaBackOff + deltaBackoffLowbound));
+            long exponentialBackOffWithJitter = (int)((Math.pow(2.0, currentRetryCount) - 1.0) * (randomDeltaBackOff + deltaBackoffLowbound));
             long finalWaitTimeUntilNextRetry = (int)Math.min(this.minBackoff + (double)exponentialBackOffWithJitter, this.maxBackoff);
             return new RetryDecision(true, finalWaitTimeUntilNextRetry);
         }
