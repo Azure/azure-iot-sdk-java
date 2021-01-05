@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
@@ -32,6 +33,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
@@ -1396,6 +1398,107 @@ public class MultiplexingClientTests extends IntegrationTest
 
         assertTrue("Expected exception was not thrown", expectedExceptionThrown);
     }
+
+    @Test
+    public void registrationsUnwindForMqttClient() throws Exception
+    {
+        Device newDevice = Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SAS);
+        registryManager.addDevice(newDevice);
+        String deviceConnectionString = registryManager.getDeviceConnectionString(newDevice);
+
+        // MQTT clients should throw UnsupportedOperationException when registered
+        DeviceClient mqttDeviceClient = new DeviceClient(deviceConnectionString, IotHubClientProtocol.MQTT);
+        registrationsUnwindForUnsupportedOperationExceptions(mqttDeviceClient);
+    }
+
+    @Test
+    public void registrationsUnwindForX509Client() throws Exception
+    {
+        // Create a new device client that uses x509 auth, which should throw an UnsupportedOperationException
+        // since x509 auth isn't supported while multiplexing
+        Device x509Device = Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
+        registryManager.addDevice(x509Device);
+        String deviceConnectionString = registryManager.getDeviceConnectionString(x509Device);
+        DeviceClient x509DeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol, new IotHubSSLContext().getSSLContext());
+        registrationsUnwindForUnsupportedOperationExceptions(x509DeviceClient);
+    }
+
+    @Test
+    public void registrationsUnwindForAlreadyOpenClient() throws Exception
+    {
+        Device nonMultiplexedDevice = Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SAS);
+        registryManager.addDevice(nonMultiplexedDevice);
+        String deviceConnectionString = registryManager.getDeviceConnectionString(nonMultiplexedDevice);
+        DeviceClient nonMultiplexedDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
+
+        //By opening the client once, this client can no longer be registered to a multiplexing client
+        nonMultiplexedDeviceClient.open();
+        registrationsUnwindForUnsupportedOperationExceptions(nonMultiplexedDeviceClient);
+        nonMultiplexedDeviceClient.closeNow();
+    }
+
+    @Test
+    public void registrationsUnwindForClientOfDifferentHostName() throws Exception
+    {
+        Device nonMultiplexedDevice = Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SAS);
+        registryManager.addDevice(nonMultiplexedDevice);
+        String deviceConnectionString = registryManager.getDeviceConnectionString(nonMultiplexedDevice);
+
+        // intentionally change the hostname of the device to simulate registering a device with a different hostname
+        // to a multiplexing client. It shouldn't matter that the hostname itself isn't tied to an actual IoT Hub since
+        // no network requests should be made before this hostname validation.
+
+        String actualHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        deviceConnectionString = deviceConnectionString.replace(actualHostName, "some-fake-host-name.azure-devices.net");
+
+        DeviceClient deviceClientWithDifferentHostName = new DeviceClient(deviceConnectionString, testInstance.protocol);
+
+        registrationsUnwindForUnsupportedOperationExceptions(deviceClientWithDifferentHostName);
+    }
+
+    @Test
+    public void registrationsUnwindForDifferentProtocolClient() throws Exception
+    {
+        Device newDevice = Device.createDevice(UUID.randomUUID().toString(), AuthenticationType.SAS);
+        registryManager.addDevice(newDevice);
+        String deviceConnectionString = registryManager.getDeviceConnectionString(newDevice);
+
+        // Protocol for the new client is AMQPS if the test parameters are for AMQPS_WS, and vice versa. MultiplexingClient
+        // should throw an exception since this new client's protocol doesn't match, even though both AMQPS and AMQPS_WS are valid
+        // protocols
+        IotHubClientProtocol protocol = testInstance.protocol == IotHubClientProtocol.AMQPS ? IotHubClientProtocol.AMQPS_WS : IotHubClientProtocol.AMQPS;
+
+        DeviceClient differentProtocolDeviceClient = new DeviceClient(deviceConnectionString, protocol);
+        registrationsUnwindForUnsupportedOperationExceptions(differentProtocolDeviceClient);
+    }
+
+    public void registrationsUnwindForUnsupportedOperationExceptions(DeviceClient unsupportedDeviceClient) throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        this.testInstance.multiplexingClient.unregisterDeviceClients(this.testInstance.deviceClientArray);
+
+        this.testInstance.deviceClientArray.add(unsupportedDeviceClient);
+
+        boolean expectedExceptionThrown = false;
+        try
+        {
+            this.testInstance.multiplexingClient.registerDeviceClients(this.testInstance.deviceClientArray);
+        }
+        catch (UnsupportedOperationException e)
+        {
+            expectedExceptionThrown = true;
+        }
+
+        assertTrue("Expected bulk registration to throw an UnsupportedOperationException", expectedExceptionThrown);
+
+        // Because one of the devices in the bulk registration has some unsupported feature (MQTT protocol, X509 auth, etc.), none of the other clients
+        // should have been registered.
+        for (int i = 0; i < this.testInstance.deviceClientArray.size(); i++)
+        {
+            assertFalse(this.testInstance.multiplexingClient.isDeviceRegistered(this.testInstance.deviceClientArray.get(i).getConfig().getDeviceId()));
+        }
+    }
+
 
     private static void assertMultiplexedDevicesClosedGracefully(ConnectionStatusChangeTracker[] connectionStatusChangeTrackers)
     {
