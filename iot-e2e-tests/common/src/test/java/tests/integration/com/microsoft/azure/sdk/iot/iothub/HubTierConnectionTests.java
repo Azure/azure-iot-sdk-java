@@ -6,7 +6,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions.RegistryManagerOptionsBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.*;
 import org.junit.runner.RunWith;

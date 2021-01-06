@@ -7,7 +7,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 
 import java.nio.charset.StandardCharsets;

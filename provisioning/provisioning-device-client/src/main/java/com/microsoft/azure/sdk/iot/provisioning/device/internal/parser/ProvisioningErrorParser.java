@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.parser;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 
 import java.util.Map;
 

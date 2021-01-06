@@ -13,8 +13,6 @@ import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import mockit.*;
 import org.junit.Test;
 
-import java.security.NoSuchAlgorithmException;
-
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.*;
 

@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
-import org.apache.qpid.proton.engine.Link;
 
 @Slf4j
 public class ErrorLoggingBaseHandler extends BaseHandler

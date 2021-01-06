@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;

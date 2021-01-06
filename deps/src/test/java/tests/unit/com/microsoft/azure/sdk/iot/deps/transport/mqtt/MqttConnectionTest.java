@@ -6,12 +6,10 @@
 package tests.unit.com.microsoft.azure.sdk.iot.deps.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.deps.transport.mqtt.MqttMessage;
-import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.integration.junit4.JMockit;
 import org.eclipse.paho.client.mqttv3.*;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,8 +19,6 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 
 import com.microsoft.azure.sdk.iot.deps.transport.mqtt.*;
-
-import static org.junit.Assert.assertEquals;
 
 /** Unit tests for AmqpConnection.
  * Coverage : 100% method, 96% line */

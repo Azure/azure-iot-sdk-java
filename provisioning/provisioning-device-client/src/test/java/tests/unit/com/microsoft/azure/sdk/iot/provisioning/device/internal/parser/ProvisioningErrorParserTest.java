@@ -5,13 +5,11 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.parser;
 
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.ProvisioningErrorParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 
 public class ProvisioningErrorParserTest

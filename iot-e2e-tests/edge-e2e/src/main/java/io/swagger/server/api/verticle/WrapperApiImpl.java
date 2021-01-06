@@ -1,12 +1,9 @@
 package io.swagger.server.api.verticle;
 
 import glue.WrapperGlue;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-
-import java.io.Console;
 
 public class WrapperApiImpl implements WrapperApi  {
     private WrapperGlue _wrapperGlue= new WrapperGlue();

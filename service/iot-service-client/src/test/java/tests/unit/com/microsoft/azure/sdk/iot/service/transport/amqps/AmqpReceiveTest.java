@@ -7,7 +7,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
 import mockit.Deencapsulation;
 import mockit.Expectations;
@@ -24,7 +23,6 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /** Unit tests for AmqpReceive */
 @RunWith(JMockit.class)

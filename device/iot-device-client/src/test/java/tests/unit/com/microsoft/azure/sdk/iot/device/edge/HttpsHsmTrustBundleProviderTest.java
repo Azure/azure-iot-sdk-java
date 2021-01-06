@@ -15,8 +15,6 @@ import mockit.NonStrictExpectations;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import static junit.framework.TestCase.assertEquals;

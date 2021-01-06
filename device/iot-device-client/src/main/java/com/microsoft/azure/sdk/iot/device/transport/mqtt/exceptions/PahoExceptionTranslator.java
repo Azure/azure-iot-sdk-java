@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.eclipse.paho.client.mqttv3.MqttException;
 
 import java.net.NoRouteToHostException;

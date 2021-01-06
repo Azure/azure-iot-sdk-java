@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /** Unit tests for AmqpSend */
 @RunWith(JMockit.class)

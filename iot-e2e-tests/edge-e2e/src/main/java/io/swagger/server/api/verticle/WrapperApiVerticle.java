@@ -2,16 +2,11 @@ package io.swagger.server.api.verticle;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 import io.swagger.server.api.MainApiException;
-
-import java.util.List;
-import java.util.Map;
 
 public class WrapperApiVerticle extends AbstractVerticle {
     final static Logger LOGGER = LoggerFactory.getLogger(WrapperApiVerticle.class); 

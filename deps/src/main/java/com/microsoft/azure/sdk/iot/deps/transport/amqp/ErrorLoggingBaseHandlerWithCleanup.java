@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.qpid.proton.engine.BaseHandler;
 import org.apache.qpid.proton.engine.EndpointState;
 import org.apache.qpid.proton.engine.Event;
 

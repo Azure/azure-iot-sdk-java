@@ -3,7 +3,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorMessageParser;
 import org.junit.Test;
 
