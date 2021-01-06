@@ -1,6 +1,5 @@
 package io.swagger.server.api;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 

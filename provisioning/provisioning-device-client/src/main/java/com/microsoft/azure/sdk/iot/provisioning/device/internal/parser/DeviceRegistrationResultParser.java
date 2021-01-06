@@ -10,8 +10,6 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.parser;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Date;
-
 /**
  * Class that represents the REST API format for DeviceRegistrationResult
  * Format : https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_deviceregistrationresult

@@ -8,11 +8,9 @@
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.security;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.apache.commons.codec.binary.Base32;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.crypto.Mac;

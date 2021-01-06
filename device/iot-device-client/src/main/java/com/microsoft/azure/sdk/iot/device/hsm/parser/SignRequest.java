@@ -8,9 +8,10 @@ package com.microsoft.azure.sdk.iot.device.hsm.parser;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 
 import javax.crypto.Mac;
+
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 public class SignRequest
 {
@@ -46,7 +47,7 @@ public class SignRequest
     public void setData(byte[] data)
     {
         // Codes_SRS_HTTPHSMSIGNREQUEST_34_003: [This function shall save the provided data after base64 encoding it.]
-        this.data = Base64.encodeBase64StringLocal(data);
+        this.data = encodeBase64String(data);
     }
 
     public void setAlgo(Mac algo)

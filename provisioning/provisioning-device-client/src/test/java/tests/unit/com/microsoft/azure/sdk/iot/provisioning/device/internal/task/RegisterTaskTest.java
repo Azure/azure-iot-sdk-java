@@ -7,8 +7,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
-import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClient;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
@@ -69,8 +67,6 @@ public class RegisterTaskTest
     DeviceRegistrationParser mockedDeviceRegistrationParser;
     @Mocked
     UrlPathBuilder mockedUrlPathBuilder;
-    @Mocked
-    Base64 mockedBase64;
     @Mocked
     URLEncoder mockedUrlEncoder;
     @Mocked

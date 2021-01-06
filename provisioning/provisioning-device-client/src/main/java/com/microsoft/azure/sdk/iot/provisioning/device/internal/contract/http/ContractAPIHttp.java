@@ -10,7 +10,6 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.http;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
@@ -30,6 +29,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 @Slf4j
 public class ContractAPIHttp extends ProvisioningDeviceClientContract
@@ -199,8 +201,8 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         {
             //SRS_ContractAPIHttp_25_004: [This method shall retrieve the Url by calling 'generateRegisterUrl' on an object for UrlPathBuilder.]
             String url = new UrlPathBuilder(this.hostName, this.idScope, ProvisioningDeviceClientTransportProtocol.HTTPS).generateRegisterUrl(requestData.getRegistrationId());
-            String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
-            String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
+            String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()));
+            String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()));
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
             byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
@@ -221,7 +223,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 {
                     String tpmRegistrationResultJson = new String(httpResponse.getErrorReason(), StandardCharsets.UTF_8);
                     TpmRegistrationResultParser registerResponseTPMParser = TpmRegistrationResultParser.createFromJson(tpmRegistrationResultJson);
-                    byte[] base64DecodedAuthKey = Base64.decodeBase64Local(registerResponseTPMParser.getAuthenticationKey().getBytes());
+                    byte[] base64DecodedAuthKey = decodeBase64(registerResponseTPMParser.getAuthenticationKey().getBytes());
                     responseCallback.run(new ResponseData(base64DecodedAuthKey, ContractState.DPS_REGISTRATION_RECEIVED, 0), dpsAuthorizationCallbackContext);
                     return;
                 }
@@ -282,8 +284,8 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             if (requestData.getEndorsementKey() != null && requestData.getStorageRootKey() != null)
             {
                 //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]
-                String base64EncodedEk = new String(Base64.encodeBase64Local(requestData.getEndorsementKey()));
-                String base64EncodedSrk = new String(Base64.encodeBase64Local(requestData.getStorageRootKey()));
+                String base64EncodedEk = new String(encodeBase64(requestData.getEndorsementKey()));
+                String base64EncodedSrk = new String(encodeBase64(requestData.getStorageRootKey()));
                 payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             }
             else

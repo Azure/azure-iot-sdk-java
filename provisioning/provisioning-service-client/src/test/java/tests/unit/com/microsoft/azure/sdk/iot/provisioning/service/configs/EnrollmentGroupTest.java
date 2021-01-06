@@ -6,7 +6,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 import com.google.gson.*;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import mockit.*;
@@ -18,6 +17,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.*;
 
 /**
@@ -32,8 +32,8 @@ public class EnrollmentGroupTest
     private static final String VALID_PARSED_ETAG = "\"00000000-0000-0000-0000-00000000000\"";
     private static final String PRIMARY_KEY_TEXT = "validPrimaryKey";
     private static final String SECONDARY_KEY_TEXT = "validSecondaryKey";
-    private static final String VALID_PRIMARY_KEY = Base64.encodeBase64StringLocal(PRIMARY_KEY_TEXT.getBytes());
-    private static final String VALID_SECONDARY_KEY = Base64.encodeBase64StringLocal(SECONDARY_KEY_TEXT.getBytes());
+    private static final String VALID_PRIMARY_KEY = encodeBase64String(PRIMARY_KEY_TEXT.getBytes());
+    private static final String VALID_SECONDARY_KEY = encodeBase64String(SECONDARY_KEY_TEXT.getBytes());
 
     //PEM encoded representation of the public key certificate
     private static final String PUBLIC_KEY_CERTIFICATE_STRING =

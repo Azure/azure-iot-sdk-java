@@ -2,11 +2,7 @@ package io.swagger.server.api.verticle;
 
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import io.vertx.core.buffer.impl.BufferImpl;
 import io.vertx.core.json.JsonObject;
-
-import javax.json.Json;
-import javax.json.JsonBuilderFactory;
 
 public class WrappedDeviceTwinDevice extends DeviceTwinDevice
 {

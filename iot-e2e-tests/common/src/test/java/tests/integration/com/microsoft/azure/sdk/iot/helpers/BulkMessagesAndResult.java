@@ -4,7 +4,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 
 import java.util.List;
-import java.util.Set;
 
 public class BulkMessagesAndResult {
     public List<Message> messages;

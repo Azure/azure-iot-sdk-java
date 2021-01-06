@@ -4,7 +4,6 @@
  */
 package com.microsoft.azure.sdk.iot.deps.ws.impl;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidParameterException;
 import java.security.MessageDigest;
@@ -12,6 +11,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Scanner;
+
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 
 public class WebSocketUpgrade
@@ -201,7 +202,7 @@ public class WebSocketUpgrade
         SecureRandom secureRandom = new SecureRandom();
         secureRandom.nextBytes(key);
 
-        return Base64.encodeBase64StringLocal(key).trim();
+        return encodeBase64String(key).trim();
     }
 
     public String createUpgradeRequest()
@@ -301,7 +302,7 @@ public class WebSocketUpgrade
                     break;
                 }
 
-                String expectedKey = Base64.encodeBase64StringLocal(messageDigest.digest((this._webSocketKey + RFC_GUID).getBytes())).trim();
+                String expectedKey = encodeBase64String(messageDigest.digest((this._webSocketKey + RFC_GUID).getBytes())).trim();
 
                 if (line.contains(expectedKey))
                 {

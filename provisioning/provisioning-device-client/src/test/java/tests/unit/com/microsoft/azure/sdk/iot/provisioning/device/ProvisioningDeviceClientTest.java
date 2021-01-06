@@ -25,8 +25,6 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.Assert.assertEquals;
-
 /*
     Unit tests for ProvisioningDeviceClient
     Coverage : 100% methods, 100% lines

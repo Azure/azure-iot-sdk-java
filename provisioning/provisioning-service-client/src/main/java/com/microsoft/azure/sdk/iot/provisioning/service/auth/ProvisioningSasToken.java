@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.auth;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +12,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 /** 
  * Grants device access to an Provisioning for the specified amount of time.
@@ -81,13 +82,13 @@ public final class ProvisioningSasToken
         try
         {
             // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
-            targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), String.valueOf(StandardCharsets.UTF_8));
+            targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), StandardCharsets.UTF_8.name());
             // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_003: [The constructor shall create a string to sign by concatenating the target uri and the expiry time string (one year)]
             String toSign = targetUri + "\n" + this.expiryTime;
 
             // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_004: [The constructor shall create a key from the shared access key signing with HmacSHA256]
             // Get an hmac_sha1 key from the raw key bytes
-            byte[] keyBytes = Base64.decodeBase64Local(this.keyValue.getBytes(StandardCharsets.UTF_8));
+            byte[] keyBytes = decodeBase64(this.keyValue.getBytes(StandardCharsets.UTF_8));
             SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 
             // Get an hmac_sha1 Mac instance and initialize with the signing key
@@ -98,8 +99,7 @@ public final class ProvisioningSasToken
             // Compute the hmac on input data bytes
             byte[] rawHmac = mac.doFinal(toSign.getBytes(StandardCharsets.UTF_8));
             // Convert raw bytes to Hex
-            String signature = URLEncoder.encode(
-                    Base64.encodeBase64StringLocal(rawHmac), StandardCharsets.UTF_8.name());
+            String signature = URLEncoder.encode(encodeBase64String(rawHmac), StandardCharsets.UTF_8.name());
 
             // Codes_SRS_PROVISIONING_SERVICE_SASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
             return String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);

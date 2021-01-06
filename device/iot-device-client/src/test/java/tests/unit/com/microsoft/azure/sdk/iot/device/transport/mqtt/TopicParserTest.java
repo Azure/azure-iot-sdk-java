@@ -8,8 +8,6 @@ import com.microsoft.azure.sdk.iot.device.transport.mqtt.TopicParser;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static org.junit.Assert.*;
 
 public class TopicParserTest

@@ -32,8 +32,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-
 /*
  * Unit tests for ContractAPIAmqp
  * Code coverage : 50% methods, 28% lines

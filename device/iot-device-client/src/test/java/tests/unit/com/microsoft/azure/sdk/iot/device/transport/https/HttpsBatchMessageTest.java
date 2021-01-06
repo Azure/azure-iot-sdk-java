@@ -3,7 +3,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubSizeExceededException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsBatchMessage;
@@ -17,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.lessThan;
@@ -65,7 +65,7 @@ public class HttpsBatchMessageTest
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
-        final String expectedMsgBody = Base64.encodeBase64StringLocal(msgBody.getBytes());
+        final String expectedMsgBody = encodeBase64String(msgBody.getBytes());
         assertThat(testBatchBody, containsString(expectedMsgBody));
     }
 
