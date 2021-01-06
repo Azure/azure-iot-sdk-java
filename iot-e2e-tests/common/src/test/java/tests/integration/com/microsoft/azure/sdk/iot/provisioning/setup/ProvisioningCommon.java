@@ -26,7 +26,9 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import junit.framework.AssertionFailedError;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,6 +47,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.QueryTwinTests.QUERY_TIMEOUT_MILLISECONDS;
 
+@Slf4j
 public class ProvisioningCommon extends IntegrationTest
 {
     // Called from JVM runner
@@ -276,6 +279,25 @@ public class ProvisioningCommon extends IntegrationTest
                 e.printStackTrace();
                 fail("Failed to shutdown the tpm security provider emulator");
             }
+        }
+
+        try
+        {
+            if (testInstance.groupId != null && !testInstance.groupId.isEmpty())
+            {
+                log.debug("Deleting enrollment group with group Id {}", testInstance.groupId);
+                testInstance.provisioningServiceClient.deleteEnrollmentGroup(testInstance.groupId);
+            }
+
+            if (testInstance.individualEnrollment != null)
+            {
+                log.debug("Deleting individual enrollment with registration Id {}", testInstance.individualEnrollment.getRegistrationId());
+                testInstance.provisioningServiceClient.deleteIndividualEnrollment(testInstance.individualEnrollment.getRegistrationId());
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("Failed to clean up enrollments after test run", e);
         }
     }
 
