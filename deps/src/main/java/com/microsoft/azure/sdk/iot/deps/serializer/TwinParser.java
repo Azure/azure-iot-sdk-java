@@ -129,7 +129,7 @@ public class TwinParser
         /* Codes_SRS_TWINPARSER_21_100: [The setTagsCallback shall keep only one instance of the callback.] */
         /* Codes_SRS_TWINPARSER_21_101: [If the onTagsCallback is already set, the setTagsCallback shall replace the first one.] */
         /* Codes_SRS_TWINPARSER_21_102: [If callback is null, the setTagsCallback will set the onTagsCallback as null.] */
-        this.onTagsCallback = onTagsCallback;
+        TwinParser.onTagsCallback = onTagsCallback;
     }
 
     /**

@@ -315,14 +315,7 @@ public class WebSocketUpgrade
 
         scanner.close();
 
-        if ((isStatusLineOk) && (isUpgradeHeaderOk) && (isConnectionHeaderOk) && (isProtocolHeaderOk) && (isAcceptHeaderOk))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return isStatusLineOk && isUpgradeHeaderOk && isConnectionHeaderOk && isProtocolHeaderOk && isAcceptHeaderOk;
     }
 
     @Override

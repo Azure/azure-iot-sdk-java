@@ -240,12 +240,11 @@ public class ExportImportDevice
             {
                 return false;
             }
-            else if (!Tools.areEqual(this.getImportMode(), otherExportImportDevice.getImportMode()))
+            else
             {
-                return false;
+                return Tools.areEqual(this.getImportMode(), otherExportImportDevice.getImportMode());
             }
 
-            return true;
         }
 
         return false;
