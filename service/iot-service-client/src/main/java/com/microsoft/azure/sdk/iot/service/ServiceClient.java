@@ -286,7 +286,7 @@ public class ServiceClient
      */
      public FeedbackReceiver getFeedbackReceiver()
      {
-        return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options.getProxyOptions());
+        return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options.getProxyOptions(), options.getSslContext());
      }
 
     /**
@@ -296,7 +296,7 @@ public class ServiceClient
      */
     public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
     {
-        return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options.getProxyOptions());
+        return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options.getProxyOptions(), options.getSslContext());
     }
     
 }

@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 
 /**
@@ -28,6 +29,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FileUploadNotification fileUploadNotification;
     private ProxyOptions proxyOptions;
+    private final SSLContext sslContext;
 
     /**
      * Constructor to set up connection parameters
@@ -51,12 +53,27 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      */
     public AmqpFileUploadNotificationReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_001: [The constructor shall copy all input parameters to private member variables for event processing]
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
+     *                   SSL context will be generated.
+     */
+    public AmqpFileUploadNotificationReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
         this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
     }
 
     /**

@@ -5,6 +5,7 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.service.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -20,6 +21,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Continu
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -48,8 +50,6 @@ public class ServiceClientTests extends IntegrationTest
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8869;
-
-    private static final long MAX_TEST_MILLISECONDS = 1 * 60 * 1000;
 
     public ServiceClientTests(IotHubServiceClientProtocol protocol)
     {
@@ -110,7 +110,14 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
-        cloudToDeviceTelemetry(false, true);
+        cloudToDeviceTelemetry(false, true, false);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryWithCustomSSLContext() throws Exception
+    {
+        cloudToDeviceTelemetry(false, true, true);
     }
 
     @Test
@@ -123,7 +130,20 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true);
+        cloudToDeviceTelemetry(true, true, false);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryWithProxyAndCustomSSLContext() throws Exception
+    {
+        if (testInstance.protocol != IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            //Proxy support only exists for AMQPS_WS currently
+            return;
+        }
+
+        cloudToDeviceTelemetry(true, true, true);
     }
 
     @Test
@@ -131,10 +151,10 @@ public class ServiceClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void cloudToDeviceTelemetryWithNoPayload() throws Exception
     {
-        cloudToDeviceTelemetry(false, false);
+        cloudToDeviceTelemetry(false, false, false);
     }
 
-    public void cloudToDeviceTelemetry(boolean withProxy, boolean withPayload) throws Exception
+    public void cloudToDeviceTelemetry(boolean withProxy, boolean withPayload, boolean withCustomSSLContext) throws Exception
     {
         // Arrange
 
@@ -156,7 +176,13 @@ public class ServiceClientTests extends IntegrationTest
             proxyOptions = new ProxyOptions(testProxy);
         }
 
-        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).build();
+        SSLContext sslContext = null;
+        if (withCustomSSLContext)
+        {
+            sslContext = new IotHubSSLContext().getSSLContext();
+        }
+
+        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).sslContext(sslContext).build();
 
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
