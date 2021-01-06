@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -15,6 +14,8 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
@@ -148,7 +149,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
                 throw new IOException("Security provider could not sign data successfully");
             }
 
-            byte[] base64Signature = Base64.encodeBase64Local(token);
+            byte[] base64Signature = encodeBase64(token);
             String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature), ENCODING_FORMAT_NAME);
             return String.format(SASTOKEN_FORMAT, encodedTokenScope, base64UrlEncodedSignature, expiryTimeUTC);
         }

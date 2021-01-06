@@ -10,7 +10,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.device.internal.cont
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.UrlPathBuilder;
@@ -31,6 +30,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 
 /*
@@ -47,9 +48,6 @@ public class ContractAPIHttpTest
     private static final String TEST_SAS_TOKEN = "testSasToken";
     private static final byte[] TEST_EK = "testEK".getBytes();
     private static final byte[] TEST_SRK = "testSRK".getBytes();
-
-    @Mocked
-    Base64 mockedBas64;
 
     @Mocked
     DeviceRegistrationParser mockedDeviceRegistrationParser;
@@ -254,9 +252,7 @@ public class ContractAPIHttpTest
                 TpmRegistrationResultParser.createFromJson(new String(mockedHttpResponse.getBody()));
                 result = mockedTpmRegistrationResultParser;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
-                result = "some auth key";
-                Base64.decodeBase64Local((byte[]) any);
-                result = new byte[]{};
+                result = encodeBase64String("some auth key".getBytes());
                 new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();

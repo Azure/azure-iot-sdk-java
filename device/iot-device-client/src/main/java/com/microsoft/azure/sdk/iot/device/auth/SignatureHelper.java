@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
@@ -13,6 +11,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 /** Builds the authorization signature as a composition of functions. */
 public final class SignatureHelper
@@ -52,7 +53,7 @@ public final class SignatureHelper
     public static byte[] decodeDeviceKeyBase64(String deviceKey)
     {
         // Codes_SRS_SIGNATUREHELPER_11_003: [The function shall decode the device key using Base64.]
-        return Base64.decodeBase64Local(deviceKey.getBytes());
+        return decodeBase64(deviceKey.getBytes());
     }
 
     /**
@@ -102,7 +103,7 @@ public final class SignatureHelper
     public static byte[] encodeSignatureBase64(byte[] sig)
     {
         // Codes_SRS_SIGNATUREHELPER_11_006: [The function shall encode the signature using Base64.]
-        return Base64.encodeBase64Local(sig);
+        return encodeBase64(sig);
     }
 
     /**

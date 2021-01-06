@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -22,6 +21,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 /**
  * Utility class for generating self signed certificates, and computing their thumbprints
@@ -111,11 +112,11 @@ public class X509CertificateGenerator
 
     private static String getPrivateKeyPem(PrivateKey privateKey)
     {
-        return PRIVATE_KEY_HEADER + Base64.encodeBase64StringLocal(privateKey.getEncoded()) + PRIVATE_KEY_FOOTER;
+        return PRIVATE_KEY_HEADER + encodeBase64String(privateKey.getEncoded()) + PRIVATE_KEY_FOOTER;
     }
 
     private static String getPublicCertificatePem(X509Certificate certificate) throws CertificateEncodingException {
-        return PUBLIC_CERT_HEADER + Base64.encodeBase64StringLocal(certificate.getEncoded()) + PUBLIC_CERT_FOOTER;
+        return PUBLIC_CERT_HEADER + encodeBase64String(certificate.getEncoded()) + PUBLIC_CERT_FOOTER;
     }
 
     /**
