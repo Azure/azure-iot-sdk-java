@@ -7,7 +7,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
@@ -27,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
 public class ProvisioningTask implements Callable
@@ -34,7 +34,6 @@ public class ProvisioningTask implements Callable
     private static final int MAX_THREADS_TO_RUN = 2;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000000;
     private static final int MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE = 10000;
-    private static final int DEFAULT_DELAY_BETWEEN_STATUS_CHECKS = 2 * 1000; //2 seconds
     private static final String THREAD_NAME = "azure-iot-sdk-ProvisioningTask";
 
     private SecurityProvider securityProvider = null;
@@ -227,7 +226,7 @@ public class ProvisioningTask implements Callable
 
                         //Codes_SRS_ProvisioningTask_34_016: [Upon reaching the terminal state ASSIGNED, if the saved security client is an instance of SecurityClientTpm, the security client shall decrypt and store the authentication key from the statusResponseParser.]
                         String authenticationKey = registrationStatus.getTpm().getAuthenticationKey();
-                        ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(Base64.decodeBase64Local(authenticationKey.getBytes()));
+                        ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(decodeBase64(authenticationKey.getBytes()));
                     }
                     log.info("Device provisioning service assigned the device successfully");
                     this.invokeRegistrationCallback(registrationInfo, null);

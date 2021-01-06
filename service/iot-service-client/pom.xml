@@ -40,6 +40,8 @@
             <artifactId>client-runtime</artifactId>
             <version>${ms-rest-client-version}</version>
         </dependency>
+
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -69,12 +71,6 @@
            <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.6</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
             <groupId>org.apache.qpid</groupId>
             <artifactId>proton-j</artifactId>
             <version>0.30.0</version>
@@ -95,6 +91,12 @@
             <groupId>com.microsoft.azure</groupId>
             <artifactId>azure-storage</artifactId>
             <version>4.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
             <scope>test</scope>
         </dependency>
     </dependencies>

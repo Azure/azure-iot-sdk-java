@@ -45,6 +45,7 @@ import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothub.twin.QueryTwinTests.QUERY_TIMEOUT_MILLISECONDS;
 
@@ -560,7 +561,7 @@ public class ProvisioningCommon extends IntegrationTest
             if (testInstance.attestationType == AttestationType.TPM)
             {
                 securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
-                Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+                Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
             }
             else if (testInstance.attestationType == AttestationType.X509)

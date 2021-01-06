@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningConnect
 import com.microsoft.azure.sdk.iot.provisioning.service.auth.ProvisioningSasToken;
 import mockit.Deencapsulation;
 import mockit.Expectations;
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import org.junit.Test;
 
 import javax.crypto.Mac;
@@ -18,6 +17,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
+import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -51,7 +52,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = Base64.encodeBase64StringLocal("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes());
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
@@ -60,14 +61,13 @@ public class ProvisioningServiceSasTokenTest
         new Expectations()
         {
             URLEncoder urlEncoder;
-            Base64 base64;
             System system;
             SecretKeySpec secretKeySpec;
             Mac mac;
             {
                 urlEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 system.currentTimeMillis();
-                Base64.decodeBase64Local(sharedAccessKey.getBytes(charset));
+                decodeBase64(sharedAccessKey.getBytes(charset));
                 byte[] body = { 1 };
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
                 mac.getInstance(cryptoProvider);
@@ -91,7 +91,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = Base64.encodeBase64StringLocal("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes());
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
 
@@ -114,7 +114,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = Base64.encodeBase64StringLocal("key".getBytes());
+        String sharedAccessKey = encodeBase64String("key".getBytes());
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         // Act

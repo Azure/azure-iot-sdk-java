@@ -5,7 +5,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.hsm;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.hsm.HsmException;
 import com.microsoft.azure.sdk.iot.device.hsm.HttpsHsmClient;
@@ -40,9 +39,6 @@ public class HttpHsmSignatureProviderTest
 
     @Mocked
     SignResponse mockedSignResponse;
-
-    @Mocked
-    Base64 mockedBase64;
 
     private static final String expectedProviderUri = "someProviderUri";
     private static final String expectedApiVersion = "1.1.1";

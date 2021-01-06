@@ -53,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -207,7 +208,7 @@ public class ProvisioningTests extends ProvisioningCommon
         }
 
         SecurityProvider securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
-        Attestation attestation = new TpmAttestation(new String(com.microsoft.azure.sdk.iot.deps.util.Base64.encodeBase64Local(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+        Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
         testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
 

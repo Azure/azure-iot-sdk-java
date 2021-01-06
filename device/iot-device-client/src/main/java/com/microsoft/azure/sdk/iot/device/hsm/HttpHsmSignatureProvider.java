@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.hsm;
 
-import com.microsoft.azure.sdk.iot.deps.util.Base64;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
