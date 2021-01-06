@@ -721,30 +721,32 @@ public class InternalClient
      * @throws IllegalArgumentException if either callback is null
      */
     void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                           TwinPropertiesCallBack genericPropertiesCallBack, Object genericPropertyCallBackContext)
+                           TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         if (!this.deviceIO.isOpen())
         {
-            //Codes_SRS_INTERNALCLIENT_34_081: [If device io has not been opened yet, this function shall throw an IOException.]
             throw new IOException("Open the client connection before using it.");
         }
 
         if (twinStatusCallback == null || genericPropertiesCallBack == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_082: [If either callback is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("Callback cannot be null");
         }
+
         if (this.twin == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_084: [This function shall initialize a DeviceTwin object and invoke getDeviceTwin on it.]
-            twin = new DeviceTwin(this.deviceIO, this.config, twinStatusCallback, twinStatusCallbackContext,
-                    genericPropertiesCallBack, genericPropertyCallBackContext);
+            twin = new DeviceTwin(
+                    this.deviceIO,
+                    this.config,
+                    twinStatusCallback,
+                    twinStatusCallbackContext,
+                    genericPropertiesCallBack,
+                    genericPropertyCallBackContext);
             twin.getDeviceTwin();
         }
         else
         {
-            //Codes_SRS_INTERNALCLIENT_34_083: [If either callback is null, this function shall throw an IllegalArgumentException.]
             throw new UnsupportedOperationException("You have already initialised twin");
         }
     }
