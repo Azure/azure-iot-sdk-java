@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 

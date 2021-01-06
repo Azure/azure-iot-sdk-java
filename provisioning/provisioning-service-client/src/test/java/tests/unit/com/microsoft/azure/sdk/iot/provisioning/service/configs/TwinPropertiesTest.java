@@ -8,14 +8,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.TwinCollection;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.TwinProperties;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.TwinState;
 import mockit.Deencapsulation;
 import org.junit.Test;
 import tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.Helpers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for Device Provisioning Service TwinProperties

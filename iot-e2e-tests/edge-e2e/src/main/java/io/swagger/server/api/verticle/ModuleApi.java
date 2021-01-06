@@ -2,14 +2,10 @@ package io.swagger.server.api.verticle;
 
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
-import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.RoundtripMethodCallBody;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-
-import java.util.List;
-import java.util.Map;
 
 public interface ModuleApi  {
     //PUT_module_connectFromEnvironment_transportType

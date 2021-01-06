@@ -5,7 +5,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import mockit.Deencapsulation;
-import mockit.Mock;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import org.junit.Test;

@@ -12,8 +12,6 @@ import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.Provi
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ResponseData;
 
-import java.io.IOException;
-
 /**
  * Implementation of a SaslHandler that is designed to handle Sasl negotiation using TPM authentication against the Device Provisioning Service
  */

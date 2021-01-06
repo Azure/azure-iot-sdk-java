@@ -14,7 +14,6 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 import java.util.Queue;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Interface of what all a Transport Connection object must do. Serves to decouple the Message Queueing of the

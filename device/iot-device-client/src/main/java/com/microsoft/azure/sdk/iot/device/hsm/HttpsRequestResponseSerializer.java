@@ -10,7 +10,6 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 

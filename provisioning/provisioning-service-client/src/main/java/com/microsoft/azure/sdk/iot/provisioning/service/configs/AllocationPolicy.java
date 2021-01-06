@@ -3,8 +3,6 @@
 
 package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 
-import com.google.gson.annotations.SerializedName;
-
 /**
  * The Device Provisioning Service enrollment level allocation policies.
  *

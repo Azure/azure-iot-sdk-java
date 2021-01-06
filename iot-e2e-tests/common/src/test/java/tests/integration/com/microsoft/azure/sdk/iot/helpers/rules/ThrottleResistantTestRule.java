@@ -2,12 +2,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers.rules;
 
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyRequestsException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 /**
  * On lower tier IoT Hubs, this test project often hits throttling limits. Rather than add retry logic to every call

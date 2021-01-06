@@ -1,7 +1,5 @@
 package tests.unit.com.microsoft.azure.sdk.iot.deps.serializer;
 
-import com.google.gson.JsonElement;
-import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationContentParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationMetricsParser;
 import org.junit.Test;
 
@@ -10,8 +8,6 @@ import java.util.Map;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class ConfigurationMetricsParserTest
 {
