@@ -5,8 +5,8 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpResponseVerification;
@@ -369,7 +369,7 @@ public class AmqpSendHandlerTest
                 result = transportInternal;
                 new WebSocketImpl();
                 result = webSocket;
-                webSocket.configure(anyString, anyString, 443, anyString, null, null);
+                webSocket.configure(anyString, anyString, null, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
                 sasl.plain(anyString, anyString);
                 Proton.sslDomain();

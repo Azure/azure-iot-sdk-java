@@ -8,9 +8,9 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
@@ -109,7 +109,7 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
             if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
             {
                 WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEBSOCKET_PATH, AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
+                webSocket.configure(this.hostName, WEBSOCKET_PATH, null, AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 

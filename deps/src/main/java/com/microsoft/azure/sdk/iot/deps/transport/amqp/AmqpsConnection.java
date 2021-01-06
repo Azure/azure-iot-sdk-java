@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
+import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.deps.util.ObjectLock;
-import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -333,7 +333,8 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
             {
                 log.debug("Adding websocket layer");
                 WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, 0, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, null,AMQP_WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
