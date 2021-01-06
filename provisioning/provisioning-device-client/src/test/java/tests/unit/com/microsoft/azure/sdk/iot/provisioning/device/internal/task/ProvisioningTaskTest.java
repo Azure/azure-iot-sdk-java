@@ -28,7 +28,6 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
-import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

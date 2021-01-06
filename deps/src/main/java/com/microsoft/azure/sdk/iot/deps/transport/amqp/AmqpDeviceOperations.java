@@ -8,9 +8,7 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.message.impl.MessageImpl;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 

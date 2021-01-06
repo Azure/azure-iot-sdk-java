@@ -5,9 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
-import java.net.Authenticator;
 import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.Proxy.Type;
 

@@ -5,8 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import lombok.SneakyThrows;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;

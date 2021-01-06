@@ -8,7 +8,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.deps.transport.amqp;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.integration.junit4.JMockit;
-import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Data;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.message.impl.MessageImpl;

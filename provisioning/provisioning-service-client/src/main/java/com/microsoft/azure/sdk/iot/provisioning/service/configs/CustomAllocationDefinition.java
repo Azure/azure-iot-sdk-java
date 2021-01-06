@@ -6,8 +6,6 @@ package com.microsoft.azure.sdk.iot.provisioning.service.configs;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.net.URL;
-
 public class CustomAllocationDefinition
 {
     // the webhook url for allocation requests

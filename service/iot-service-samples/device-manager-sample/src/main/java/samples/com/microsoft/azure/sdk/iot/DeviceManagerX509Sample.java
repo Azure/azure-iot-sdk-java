@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 /** Manages device on IotHub - CRUD operations */
 public class DeviceManagerX509Sample

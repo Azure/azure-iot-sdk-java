@@ -23,8 +23,6 @@ import java.util.Map;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-
 /** Unit tests for AmqpConnection.
  * Coverage : 100% method, 100% line */
 @RunWith(JMockit.class)

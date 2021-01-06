@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin.serialization;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.OffsetDateTime;
 import java.util.Date;
 
 /*

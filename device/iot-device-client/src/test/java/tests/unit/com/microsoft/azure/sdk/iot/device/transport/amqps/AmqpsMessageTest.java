@@ -4,20 +4,13 @@
  */
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 
-import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
-import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
 import mockit.Mocked;
-import mockit.NonStrictExpectations;
 import mockit.Verifications;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
-import org.apache.qpid.proton.amqp.messaging.Rejected;
-import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.Delivery;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 /**
 *  Unit tests for AmqpsMessage

@@ -14,12 +14,10 @@ import org.apache.qpid.proton.Proton;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.integration.junit4.JMockit;
-import org.apache.qpid.proton.amqp.messaging.Rejected;
 import org.apache.qpid.proton.amqp.messaging.Released;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.reactor.*;
-import org.apache.qpid.proton.reactor.ReactorOptions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -27,7 +25,6 @@ import java.nio.BufferOverflowException;
 import java.util.concurrent.*;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
 

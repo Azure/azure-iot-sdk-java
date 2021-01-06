@@ -3,7 +3,6 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device.transport.https;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsResponse;
 import org.junit.Test;
 

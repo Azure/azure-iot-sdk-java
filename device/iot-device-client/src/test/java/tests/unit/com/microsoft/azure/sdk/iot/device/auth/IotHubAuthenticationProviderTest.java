@@ -7,8 +7,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubX509SoftwareAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import mockit.*;
 import org.junit.Test;
 
@@ -19,7 +17,6 @@ import java.security.cert.CertificateException;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 
 public class IotHubAuthenticationProviderTest
 {

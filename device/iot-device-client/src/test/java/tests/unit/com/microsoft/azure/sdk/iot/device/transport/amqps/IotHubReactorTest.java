@@ -8,7 +8,6 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport.amqps;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IotHubReactor;
 import mockit.Deencapsulation;
 import mockit.Mocked;
-import mockit.StrictExpectations;
 import mockit.Verifications;
 import org.apache.qpid.proton.reactor.Reactor;
 import org.junit.Test;
