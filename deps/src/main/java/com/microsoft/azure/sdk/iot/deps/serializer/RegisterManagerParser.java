@@ -114,10 +114,7 @@ public class RegisterManagerParser
         if((this.deviceId == null) || (deviceId == null) || (!this.deviceId.equals(deviceId)))
         {
             this.deviceId = deviceId;
-            if(this.deviceId != null)
-            {
-                return true;
-            }
+            return this.deviceId != null;
         }
         return false;
     }
