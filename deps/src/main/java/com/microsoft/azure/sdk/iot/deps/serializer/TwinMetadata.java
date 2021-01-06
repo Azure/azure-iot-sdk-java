@@ -62,7 +62,10 @@ public class TwinMetadata
         {
             updated = lastUpdatedVersion != null;
         }
-        else updated = !this.lastUpdatedVersion.equals(lastUpdatedVersion);
+        else
+        {
+            updated = !this.lastUpdatedVersion.equals(lastUpdatedVersion);
+        }
 
         this.lastUpdated = lastUpdated;
         this.lastUpdatedVersion = lastUpdatedVersion;

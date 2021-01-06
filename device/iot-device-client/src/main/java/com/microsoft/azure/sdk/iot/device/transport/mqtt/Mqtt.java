@@ -114,16 +114,16 @@ abstract public class Mqtt implements MqttCallback
                 //Codes_SRS_Mqtt_25_008: [If the MQTT connection is already open, the function shall do nothing.]
                 if (!this.mqttConnection.getMqttAsyncClient().isConnected())
                 {
-                    Mqtt.log.debug("Sending MQTT CONNECT packet...");
+                    log.debug("Sending MQTT CONNECT packet...");
                     //Codes_SRS_Mqtt_25_005: [The function shall establish an MQTT connection with an IoT Hub using the provided host name, user name, device ID, and sas token.]
                     IMqttToken connectToken = this.mqttConnection.getMqttAsyncClient().connect(Mqtt.this.mqttConnection.getConnectionOptions());
                     connectToken.waitForCompletion(CONNECTION_TIMEOUT);
-                    Mqtt.log.debug("Sent MQTT CONNECT packet was acknowledged");
+                    log.debug("Sent MQTT CONNECT packet was acknowledged");
                 }
             }
             catch (MqttException e)
             {
-                Mqtt.log.warn("Exception encountered while sending MQTT CONNECT packet", e);
+                log.warn("Exception encountered while sending MQTT CONNECT packet", e);
 
                 this.disconnect();
                 //Codes_SRS_Mqtt_34_044: [If an MqttException is encountered while connecting, this function shall throw the associated ProtocolException.]
@@ -143,7 +143,7 @@ abstract public class Mqtt implements MqttCallback
         {
             if (this.mqttConnection.isConnected())
             {
-                Mqtt.log.debug("Sending MQTT DISCONNECT packet");
+                log.debug("Sending MQTT DISCONNECT packet");
                 //Codes_SRS_Mqtt_34_055: [If an MQTT connection is connected, the function shall disconnect that connection.]
                 IMqttToken disconnectToken = this.mqttConnection.disconnect();
 
@@ -151,7 +151,7 @@ abstract public class Mqtt implements MqttCallback
                 {
                     disconnectToken.waitForCompletion(DISCONNECTION_TIMEOUT);
                 }
-                Mqtt.log.debug("Sent MQTT DISCONNECT packet was acknowledged");
+                log.debug("Sent MQTT DISCONNECT packet was acknowledged");
             }
 
             //Codes_SRS_Mqtt_25_009: [The function shall close the MQTT client.]
@@ -160,7 +160,7 @@ abstract public class Mqtt implements MqttCallback
         }
         catch (MqttException e)
         {
-            Mqtt.log.warn("Exception encountered while sending MQTT DISCONNECT packet", e);
+            log.warn("Exception encountered while sending MQTT DISCONNECT packet", e);
 
             //Codes_SRS_Mqtt_25_011: [If an MQTT connection is unable to be closed for any reason, the function shall throw a TransportException.]
             throw PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
@@ -235,16 +235,16 @@ abstract public class Mqtt implements MqttCallback
 
             synchronized (this.publishLock)
             {
-                Mqtt.log.trace("Publishing message ({}) to MQTT topic {}", message, publishTopic);
+                log.trace("Publishing message ({}) to MQTT topic {}", message, publishTopic);
                 //Codes_SRS_Mqtt_25_014: [The function shall publish message payload on the publishTopic specified to the IoT Hub given in the configuration.]
                 IMqttDeliveryToken publishToken = this.mqttConnection.getMqttAsyncClient().publish(publishTopic, mqttMessage);
                 unacknowledgedSentMessages.put(publishToken.getMessageId(), message);
-                Mqtt.log.trace("Message published to MQTT topic {}. Mqtt message id {} added to list of messages to wait for acknowledgement ({})", publishTopic, publishToken.getMessageId(), message);
+                log.trace("Message published to MQTT topic {}. Mqtt message id {} added to list of messages to wait for acknowledgement ({})", publishTopic, publishToken.getMessageId(), message);
             }
         }
         catch (MqttException e)
         {
-            Mqtt.log.warn("Message could not be published to MQTT topic {} ({})", publishTopic, message, e);
+            log.warn("Message could not be published to MQTT topic {} ({})", publishTopic, message, e);
 
             //Codes_SRS_Mqtt_25_047: [If the Mqtt Client Async throws MqttException, the function shall throw a ProtocolException with the message.]
             throw PahoExceptionTranslator.convertToMqttException(e, "Unable to publish message on topic : " + publishTopic);
@@ -288,18 +288,18 @@ abstract public class Mqtt implements MqttCallback
                     throw transportException;
                 }
 
-                Mqtt.log.debug("Sending MQTT SUBSCRIBE packet for topic {}", topic);
+                log.debug("Sending MQTT SUBSCRIBE packet for topic {}", topic);
 
                 //Codes_SRS_Mqtt_25_017: [The function shall subscribe to subscribeTopic specified to the IoT Hub given in the configuration.]
                 IMqttToken subToken = this.mqttConnection.getMqttAsyncClient().subscribe(topic, MqttConnection.QOS);
 
                 subToken.waitForCompletion(MqttConnection.MAX_SUBSCRIBE_ACK_WAIT_TIME);
-                Mqtt.log.debug("Sent MQTT SUBSCRIBE packet for topic {} was acknowledged", topic);
+                log.debug("Sent MQTT SUBSCRIBE packet for topic {} was acknowledged", topic);
 
             }
             catch (MqttException e)
             {
-                Mqtt.log.warn("Encountered exception while sending MQTT SUBSCRIBE packet for topic {}", topic, e);
+                log.warn("Encountered exception while sending MQTT SUBSCRIBE packet for topic {}", topic, e);
 
                 //Codes_SRS_Mqtt_25_048: [If the Mqtt Client Async throws MqttException for any reason, the function shall throw a ProtocolException with the message.]
                 throw PahoExceptionTranslator.convertToMqttException(e, "Unable to subscribe to topic :" + topic);
@@ -365,7 +365,7 @@ abstract public class Mqtt implements MqttCallback
     {
         TransportException ex = null;
 
-        Mqtt.log.warn("Mqtt connection lost", throwable);
+        log.warn("Mqtt connection lost", throwable);
 
         try
         {
@@ -387,7 +387,7 @@ abstract public class Mqtt implements MqttCallback
                 {
                     //Codes_SRS_Mqtt_34_055: [If the provided throwable is an instance of MqttException, this function shall derive the associated ConnectionStatusException and notify the listener of that derived exception.]
                     throwable = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
-                    Mqtt.log.trace("Mqtt connection loss interpreted into transport exception", throwable);
+                    log.trace("Mqtt connection loss interpreted into transport exception", throwable);
                 }
                 else
                 {
@@ -412,7 +412,7 @@ abstract public class Mqtt implements MqttCallback
     @Override
     public void messageArrived(String topic, MqttMessage mqttMessage)
     {
-        Mqtt.log.trace("Mqtt message arrived on topic {} with mqtt message id {}", topic, mqttMessage.getId());
+        log.trace("Mqtt message arrived on topic {} with mqtt message id {}", topic, mqttMessage.getId());
         //Codes_SRS_Mqtt_25_030: [The payload of the message and the topic is added to the received messages queue .]
         this.mqttConnection.getAllReceivedMessages().add(new MutablePair<>(topic, mqttMessage.getPayload()));
 
@@ -431,17 +431,17 @@ abstract public class Mqtt implements MqttCallback
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
     {
         Message deliveredMessage = null;
-        Mqtt.log.trace("Mqtt message with message id {} was acknowledge by service", iMqttDeliveryToken.getMessageId());
+        log.trace("Mqtt message with message id {} was acknowledge by service", iMqttDeliveryToken.getMessageId());
         synchronized (this.publishLock)
         {
             if (this.listener != null && unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
             {
-                Mqtt.log.trace("Mqtt message with message id {} that was acknowledge by service was sent by this client", iMqttDeliveryToken.getMessageId());
+                log.trace("Mqtt message with message id {} that was acknowledge by service was sent by this client", iMqttDeliveryToken.getMessageId());
                 deliveredMessage = unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
             }
             else
             {
-                Mqtt.log.warn("Mqtt message with message id {} that was acknowledge by service was not sent by this client, will be ignored", iMqttDeliveryToken.getMessageId());
+                log.warn("Mqtt message with message id {} that was acknowledge by service was not sent by this client, will be ignored", iMqttDeliveryToken.getMessageId());
             }
         }
 
@@ -480,7 +480,7 @@ abstract public class Mqtt implements MqttCallback
     protected boolean sendMessageAcknowledgement(int messageId) throws TransportException
     {
         //Codes_SRS_Mqtt_34_043: [This function shall invoke the saved mqttConnection object to send the message acknowledgement for the provided messageId and return that result.]
-        Mqtt.log.trace("Sending mqtt ack for received message with mqtt message id {}", messageId);
+        log.trace("Sending mqtt ack for received message with mqtt message id {}", messageId);
         return this.mqttConnection.sendMessageAcknowledgement(messageId);
     }
 

@@ -162,10 +162,10 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_007: [The function shall set the header field 'authorization' to be a valid SAS token generated from the configuration parameters.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_34_059: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_006: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
-            HttpsIotHubConnection.log.trace("Sending message using http request ({})", message);
+            log.trace("Sending message using http request ({})", message);
             HttpsResponse response = this.sendRequest(request);
             IotHubStatusCode status = IotHubStatusCode.getIotHubStatusCode(response.getStatus());
-            HttpsIotHubConnection.log.trace("Iot Hub responded to http message for iot hub message ({}) with status code {}", message, status);
+            log.trace("Iot Hub responded to http message for iot hub message ({}) with status code {}", message, status);
 
             IotHubTransportMessage transportMessage = new IotHubTransportMessage(httpsMessage.getBody(), message.getMessageType(), message.getMessageId(), message.getCorrelationId(), message.getProperties());
             if (status == IotHubStatusCode.OK || status == IotHubStatusCode.OK_EMPTY)
@@ -269,7 +269,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_25_041: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_015: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_023: [If the IoT Hub could not be reached, the function shall throw a TransportException.]
-            HttpsIotHubConnection.log.trace("Sending http request to check if any messages are ready to be received...");
+            log.trace("Sending http request to check if any messages are ready to be received...");
             HttpsResponse response = this.sendRequest(request);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_021: [If a response with IoT Hub status code OK is not received, the function shall return null.]
@@ -289,7 +289,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                 transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(message.getInputName()));
                 transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(message.getInputName()));
 
-                HttpsIotHubConnection.log.trace("Received http message with etag {} in transport message ({})", messageEtag, transportMessage);
+                log.trace("Received http message with etag {} in transport message ({})", messageEtag, transportMessage);
 
                 // Codes_SRS_HTTPSIOTHUBCONNECTION_11_070: [If the message status was OK this function shall save the received message and its eTag into its map.]
                 this.messageToETagMap.put(transportMessage, messageEtag);
@@ -354,7 +354,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     {
         synchronized (HTTPS_CONNECTION_LOCK)
         {
-            HttpsIotHubConnection.log.trace("Checking if http layer can correlate the received iot hub message to a received etag {}", message);
+            log.trace("Checking if http layer can correlate the received iot hub message to a received etag {}", message);
             String messageEtag = this.messageToETagMap.get(message);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_039: [If the function is called before receiveMessage() returns a message, the function shall throw an IllegalStateException.]
@@ -364,8 +364,8 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
                         + "result before a message is received or if the result was already sent");
             }
 
-            HttpsIotHubConnection.log.trace("Http layer correlated the received iot hub message ({}) to etag {}", message, messageEtag);
-            HttpsIotHubConnection.log.trace("Sending ACK with result {} for etag {}", result, messageEtag);
+            log.trace("Http layer correlated the received iot hub message ({}) to etag {}", message, messageEtag);
+            log.trace("Sending ACK with result {} for etag {}", result, messageEtag);
 
             String iotHubHostname = getHostName();
             String deviceId = this.config.getDeviceId();
@@ -444,7 +444,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             else
             {
                 //Codes_SRS_HTTPSIOTHUBCONNECTION_34_069: [If the IoT Hub status code in the response is OK_EMPTY or OK, the function shall remove the sent eTag from its map and return true.]
-                HttpsIotHubConnection.log.trace("Successfully sent ack for http message with etag {}. Removing it from saved list of outstanding messages to acknowledge", messageEtag);
+                log.trace("Successfully sent ack for http message with etag {}. Removing it from saved list of outstanding messages to acknowledge", messageEtag);
                 this.messageToETagMap.remove(message);
                 return true;
             }
