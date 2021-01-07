@@ -109,7 +109,7 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
             if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
             {
                 WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEBSOCKET_PATH, null, AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
+                webSocket.configure(this.hostName, WEBSOCKET_PATH, "", AMQPS_WS_PORT, WEBSOCKET_SUB_PROTOCOL, null, null);
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
