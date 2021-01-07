@@ -13,24 +13,24 @@ public class ServiceApiImpl implements ServiceApi
     @Override
     public void serviceConnectPut(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)
     {
-        this._serviceGlue.connect(connectionString, handler);
+        _serviceGlue.connect(connectionString, handler);
     }
 
     @Override
     public void serviceConnectionIdDeviceMethodDeviceIdPut(String connectionId, String deviceId, Object methodInvokeParameters, Handler<AsyncResult<Object>> handler)
     {
-        this._serviceGlue.invokeDeviceMethod(connectionId, deviceId, methodInvokeParameters, handler);
+        _serviceGlue.invokeDeviceMethod(connectionId, deviceId, methodInvokeParameters, handler);
     }
 
     @Override
     public void serviceConnectionIdDisconnectPut(String connectionId, Handler<AsyncResult<Void>> handler)
     {
-        this._serviceGlue.disconnect(connectionId, handler);
+        _serviceGlue.disconnect(connectionId, handler);
     }
 
     @Override
     public void serviceConnectionIdModuleMethodDeviceIdModuleIdPut(String connectionId, String deviceId, String moduleId, Object methodInvokeParameters, Handler<AsyncResult<Object>> handler)
     {
-        this._serviceGlue.invokeModuleMethod(connectionId, deviceId, moduleId, methodInvokeParameters, handler);
+        _serviceGlue.invokeModuleMethod(connectionId, deviceId, moduleId, methodInvokeParameters, handler);
     }
 }

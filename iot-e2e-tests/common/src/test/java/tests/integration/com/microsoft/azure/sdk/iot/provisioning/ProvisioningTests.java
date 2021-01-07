@@ -100,7 +100,6 @@ public class ProvisioningTests extends ProvisioningCommon
 
         testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL, AllocationPolicy.CUSTOM, null, allocDefinition, null);
         registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, jsonPayload, expectedHubToProvisionTo);
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
     }
 
     @Test
@@ -300,8 +299,6 @@ public class ProvisioningTests extends ProvisioningCommon
         //re-register device, test which hub it was provisioned to
         registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, reprovisionPolicy.getUpdateHubAssignment() ? iothubsToFinishAt : iothubsToStartAt);
         assertTwinIsCorrect(reprovisionPolicy, expectedReportedPropertyName, expectedReportedPropertyValue, !reprovisionPolicy.getUpdateHubAssignment());
-
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, enrollmentType);
     }
 
     private class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
@@ -413,51 +410,6 @@ public class ProvisioningTests extends ProvisioningCommon
                 assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
                         0, device.getReportedProperties().size());
             }
-        }
-    }
-
-    private void cleanUpReprovisionedDeviceAndEnrollment(String deviceId, EnrollmentType enrollmentType)
-    {
-        try
-        {
-            //delete provisioned device
-            RegistryManager registryManagerFarAway = RegistryManager.createFromConnectionString(farAwayIotHubConnectionString);
-            RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-
-            if (deviceId != null && !deviceId.isEmpty())
-            {
-                try
-                {
-                    registryManager.removeDevice(deviceId);
-                }
-                catch (IotHubNotFoundException e)
-                {
-                    //device wasn't in hub, can ignore this exception
-                }
-
-                try
-                {
-                    registryManagerFarAway.removeDevice(deviceId);
-                }
-                catch (IotHubNotFoundException e)
-                {
-                    //device wasn't in hub, can ignore this exception
-                }
-            }
-
-            //delete enrollment
-            if (enrollmentType == EnrollmentType.GROUP)
-            {
-                testInstance.provisioningServiceClient.deleteEnrollmentGroup(testInstance.groupId);
-            }
-            else
-            {
-                testInstance.provisioningServiceClient.deleteIndividualEnrollment(testInstance.individualEnrollment.getRegistrationId());
-            }
-        }
-        catch (Exception e)
-        {
-            //Don't really care if test tear down failed. Nightly jobs will clean up these enrollments if the above code fails in any way
         }
     }
 

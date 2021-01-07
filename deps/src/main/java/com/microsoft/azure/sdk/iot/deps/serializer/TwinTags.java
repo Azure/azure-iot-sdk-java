@@ -94,7 +94,7 @@ public class TwinTags
             }
         }
 
-        return (JsonElement)diffJson;
+        return diffJson;
     }
 
     private void addProperty(JsonObject diffJson, String key, Object newValue) throws IllegalArgumentException

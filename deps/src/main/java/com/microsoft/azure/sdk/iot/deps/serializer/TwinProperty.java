@@ -95,10 +95,7 @@ public class TwinProperty
         {
             /* Codes_SRS_TWINPARSER_21_078: [If any `value` is null, the updateDesiredProperty shall delete it from the collection and report on Json.] */
             /* Codes_SRS_TWINPARSER_21_084: [If any `value` is null, the updateReportedProperty shall delete it from the collection and report on Json.] */
-            if(property.containsKey(key))
-            {
-                property.remove(key);
-            }
+            property.remove(key);
             change = true;
         }
         else

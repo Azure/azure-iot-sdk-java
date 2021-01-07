@@ -153,13 +153,13 @@ public class TwinCollection extends HashMap<String, Object>
             {
                 if(entry.getValue() instanceof TwinCollection)
                 {
-                    super.put((String)entry.getKey(), new TwinCollection((TwinCollection)entry.getValue()));
+                    super.put(entry.getKey(), new TwinCollection((TwinCollection)entry.getValue()));
                 }
                 else
                 {
-                    super.put((String)entry.getKey(), entry.getValue());
+                    super.put(entry.getKey(), entry.getValue());
                 }
-                this.metadataMap.put((String)entry.getKey(), collection.getTwinMetadataFinal((String)entry.getKey()));
+                this.metadataMap.put(entry.getKey(), collection.getTwinMetadataFinal(entry.getKey()));
             }
         }
     }

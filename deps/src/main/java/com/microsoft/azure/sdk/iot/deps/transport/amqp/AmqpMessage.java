@@ -38,14 +38,14 @@ public class AmqpMessage
      */
     public void setBody(Data msgData)
     {
-        messageImpl.setBody((Section)msgData);
+        messageImpl.setBody(msgData);
     }
 
     public void setBody(byte[] msgData)
     {
         Binary binary = new Binary(msgData);
         Data dataSection = new Data(binary);
-        messageImpl.setBody((Section)dataSection);
+        messageImpl.setBody(dataSection);
     }
 
     /**
