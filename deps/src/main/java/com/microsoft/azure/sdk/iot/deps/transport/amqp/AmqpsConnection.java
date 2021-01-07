@@ -333,7 +333,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
             {
                 log.debug("Adding websocket layer");
                 WebSocketImpl webSocket = new WebSocketImpl();
-                webSocket.configure(this.hostName, WEB_SOCKET_PATH, null,AMQP_WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+                webSocket.configure(this.hostName, WEB_SOCKET_PATH, "", AMQP_WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
 
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
