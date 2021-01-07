@@ -107,7 +107,6 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public void testSubscribeToDesiredPropertiesWithVersionFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         // arrange
-        super.setUpNewDeviceAndModule();
         deviceUnderTest.sCDeviceForTwin.clearTwin();
         deviceUnderTest.dCDeviceForTwin.getDesiredProp().clear();
         Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
@@ -242,7 +241,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public void testSubscribeToDesiredPropertiesSequentiallyFlow(
             Object propertyValue,
             Object updatePropertyValue,
-            String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException
+            String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         // arrange
         deviceUnderTest.sCDeviceForTwin.clearTwin();
@@ -278,6 +277,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     @StandardTierHubOnlyTest
     public void testUpdateDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
+        super.setUpNewDeviceAndModule();
         addMultipleDevices(MAX_DEVICES);
 
         // Add desired properties for multiple devices
