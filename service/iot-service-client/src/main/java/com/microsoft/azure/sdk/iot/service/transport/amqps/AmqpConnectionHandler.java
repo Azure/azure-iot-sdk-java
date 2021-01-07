@@ -113,17 +113,17 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
-            Sasl sasl = transport.sasl();
-            sasl.plain(this.userName, this.sasToken);
-
             SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
             domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-            Ssl ssl = transport.ssl(domain);
+            transport.ssl(domain);
 
             if (this.proxyOptions != null)
             {
                 addProxyLayer(transport, this.hostName, AMQPS_WS_PORT);
             }
+
+            Sasl sasl = transport.sasl();
+            sasl.plain(this.userName, this.sasToken);
         }
     }
 

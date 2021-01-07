@@ -45,7 +45,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 {
     // Timeouts
     private static final int MAX_WAIT_TO_CLOSE_CONNECTION = 20 * 1000; // 20 second timeout
-    private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 10;
 
     // Web socket constants
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
