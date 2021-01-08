@@ -708,6 +708,50 @@ public class InternalClient
     }
 
     /**
+     * Starts the device twin.
+     *
+     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     * @throws IllegalArgumentException if either callback is null
+     */
+    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+                           TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        if (!this.deviceIO.isOpen())
+        {
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (twinStatusCallback == null || genericPropertiesCallBack == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        if (this.twin == null)
+        {
+            twin = new DeviceTwin(
+                    this.deviceIO,
+                    this.config,
+                    twinStatusCallback,
+                    twinStatusCallbackContext,
+                    genericPropertiesCallBack,
+                    genericPropertyCallBackContext);
+            twin.getDeviceTwin();
+        }
+        else
+        {
+            throw new UnsupportedOperationException("You have already initialised twin");
+        }
+    }
+
+    /**
      * Get the current desired properties for this client
      * @throws IOException if the iot hub cannot be reached
      * @throws IOException if the twin has not been initialized yet
