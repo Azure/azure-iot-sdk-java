@@ -20,6 +20,7 @@ import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.Reactor;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 
 @Slf4j
@@ -40,8 +41,9 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     protected final String sasToken;
     protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected final ProxyOptions proxyOptions;
+    protected final SSLContext sslContext;
 
-    protected AmqpConnectionHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    protected AmqpConnectionHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -71,6 +73,7 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
         this.hostName = hostName;
         this.userName = userName;
         this.sasToken = sasToken;
+        this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
     }
 
     @Override
@@ -182,8 +185,16 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
 
         try
         {
-            // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
-            domain.setSslContext(new IotHubSSLContext().getSSLContext());
+            if (this.sslContext == null)
+            {
+                // Need the base trusted certs for IotHub in our ssl context. IotHubSSLContext handles that
+                domain.setSslContext(new IotHubSSLContext().getSSLContext());
+            }
+            else
+            {
+                // Custom SSLContext set by user from service client options
+                domain.setSslContext(this.sslContext);
+            }
         }
         catch (Exception e)
         {

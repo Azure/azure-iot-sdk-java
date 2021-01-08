@@ -19,6 +19,7 @@ import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 
+import javax.net.ssl.SSLContext;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,16 +63,30 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
      */
     AmqpFileUploadNotificationReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions)
     {
-        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, proxyOptions, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters and initialize
+     * handshaker and flow controller for transport
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
+     *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
+     */
+    AmqpFileUploadNotificationReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
+        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
 
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
 
         // Add a child handler that performs some default handshaking
         // behaviour.
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_002: [The constructor shall initialize a new Handshaker (Proton) object to handle communication handshake]
         add(new Handshaker());
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_003: [The constructor shall initialize a new FlowController (Proton) object to handle communication handshake]
         add(new FlowController());
     }
 

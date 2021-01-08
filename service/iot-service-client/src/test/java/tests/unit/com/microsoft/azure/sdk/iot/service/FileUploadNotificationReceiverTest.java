@@ -15,6 +15,7 @@ import mockit.Mocked;
 import mockit.Verifications;
 import org.junit.Test;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
@@ -135,7 +136,7 @@ public class FileUploadNotificationReceiverTest
         new Verifications()
         {
             {
-                new AmqpFileUploadNotificationReceive(anyString, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any);
+                new AmqpFileUploadNotificationReceive(anyString, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any, (SSLContext) any);
                 times = 1;
 
             }

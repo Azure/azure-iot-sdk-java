@@ -18,6 +18,7 @@ import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.engine.*;
 import org.apache.qpid.proton.reactor.Handshaker;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.HashMap;
@@ -69,7 +70,23 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      */
     public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
     {
-        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions);
+        this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
+    }
+
+    /**
+     * Constructor to set up connection parameters and initialize handshaker for transport
+     *
+     * @param hostName The address string of the service (example: AAA.BBB.CCC)
+     * @param userName The username string to use SASL authentication (example: user@sas.service)
+     * @param sasToken The SAS token string
+     * @param iotHubServiceClientProtocol protocol to use
+     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
+     *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
+     */
+    public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
+        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
         add(new Handshaker());
     }
 
