@@ -696,7 +696,7 @@ public class ModuleGlue
 
     private Set<Property> objectToPropSet(JsonObject props)
     {
-        Set<Property> propSet = new HashSet<Property>();
+        Set<Property> propSet = new HashSet<>();
         for (String key : props.fieldNames())
         {
             // TODO: we may need to make this function recursive.

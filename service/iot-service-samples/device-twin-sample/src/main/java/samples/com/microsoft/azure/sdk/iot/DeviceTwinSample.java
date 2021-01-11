@@ -81,14 +81,14 @@ public class DeviceTwinSample
         System.out.println(device);
 
         //Update Twin Tags and Desired Properties
-        Set<Pair> tags = new HashSet<Pair>();
+        Set<Pair> tags = new HashSet<>();
         tags.add(new Pair("HomeID", UUID.randomUUID()));
         device.setTags(tags);
     }
 
     private static void changeDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
     {
-        Set<Pair> desiredProperties = new HashSet<Pair>();
+        Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
         desiredProperties.add(new Pair("hum", new Random().nextInt(HUMIDITY_RANGE)));
         device.setDesiredProperties(desiredProperties);
@@ -103,7 +103,7 @@ public class DeviceTwinSample
 
     private static void removeDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
     {
-        Set<Pair> desiredProperties = new HashSet<Pair>();
+        Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("hum", null));
         device.setDesiredProperties(desiredProperties);
         System.out.println("Updating Device twin (remove hum)");
@@ -117,7 +117,7 @@ public class DeviceTwinSample
     private static void scheduleUpdateDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
-        Set<Pair> desiredProperties = new HashSet<Pair>();
+        Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
         desiredProperties.add(new Pair("hum", new Random().nextInt(HUMIDITY_RANGE)));
         device.setDesiredProperties(desiredProperties);
@@ -150,7 +150,7 @@ public class DeviceTwinSample
     private static void cancelJob(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException, InterruptedException
     {
         // new set of desired properties
-        Set<Pair> desiredProperties = new HashSet<Pair>();
+        Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
         desiredProperties.add(new Pair("hum", new Random().nextInt(HUMIDITY_RANGE)));
         device.setDesiredProperties(desiredProperties);

@@ -53,7 +53,7 @@ public class WebSocketImplTest
     private String _webSocketPath = "path1/path2";
     private int _webSocketPort = 1234567890;
     private String _webSocketProtocol = "subprotocol_name";
-    private Map<String, String> _additionalHeaders = new HashMap<String, String>();
+    private Map<String, String> _additionalHeaders = new HashMap<>();
 
     private int _lengthOfUpgradeRequest = 311;
 

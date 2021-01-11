@@ -49,7 +49,7 @@ public class WebSocketUpgradeTest
         String webSocketProtocol = "subprotocol_name";
         String queryKey = "?iothub-no-client-cert=";
         String queryValue = "true";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -345,7 +345,7 @@ public class WebSocketUpgradeTest
         String webSocketProtocol = "subprotocol_name";
         String queryKey = "?iothub-no-client-cert=";
         String queryValue = "true";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -438,7 +438,7 @@ public class WebSocketUpgradeTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -454,7 +454,7 @@ public class WebSocketUpgradeTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -703,7 +703,7 @@ public class WebSocketUpgradeTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -722,7 +722,7 @@ public class WebSocketUpgradeTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");

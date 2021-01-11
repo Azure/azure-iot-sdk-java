@@ -144,7 +144,7 @@ public class JobClientSample
     {
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
         DeviceTwinDevice updateTwin = new DeviceTwinDevice(deviceId);
-        Set<Pair> tags = new HashSet<Pair>();
+        Set<Pair> tags = new HashSet<>();
         tags.add(new Pair("HomeID", UUID.randomUUID()));
         updateTwin.setTags(tags);
 
