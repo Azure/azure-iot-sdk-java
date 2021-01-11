@@ -78,7 +78,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private boolean reconnectionScheduled = false;
     private final Object executorServiceLock = new Object();
     private final Map<String, Boolean> reconnectionsScheduled = new ConcurrentHashMap<>();
-    private final Object executorServiceLock = new Object();
     private ExecutorService executorService;
     private final ProxySettings proxySettings;
 
