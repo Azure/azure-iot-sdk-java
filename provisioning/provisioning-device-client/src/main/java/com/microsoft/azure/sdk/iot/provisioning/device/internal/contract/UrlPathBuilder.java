@@ -87,35 +87,30 @@ public class UrlPathBuilder
 
     private String generateRegisterUrlHttp(String registrationId)
     {
-        StringBuilder registerUrl = new StringBuilder(url);
 
-        registerUrl.append(registrationId);
-        registerUrl.append(SLASH);
-        registerUrl.append(REGISTER);
-        registerUrl.append(QUESTION);
-        registerUrl.append(API_VERSION_STRING);
-        registerUrl.append(EQUALS);
-        registerUrl.append(SDKUtils.getServiceApiVersion());
-
-        return registerUrl.toString();
+        String registerUrl = url + registrationId +
+                SLASH +
+                REGISTER +
+                QUESTION +
+                API_VERSION_STRING +
+                EQUALS +
+                SDKUtils.getServiceApiVersion();
+        return registerUrl;
     }
 
     private String generateRequestUrlHttp(String registrationId, String operationsId)
     {
-        StringBuilder requestUrl = new StringBuilder(url);
 
-        requestUrl.append(registrationId);
-        requestUrl.append(SLASH);
-        requestUrl.append(OPERATIONS);
-        requestUrl.append(SLASH);
-        requestUrl.append(operationsId);
-
-        requestUrl.append(QUESTION);
-        requestUrl.append(API_VERSION_STRING);
-        requestUrl.append(EQUALS);
-        requestUrl.append(SDKUtils.getServiceApiVersion());
-
-        return requestUrl.toString();
+        String requestUrl = url + registrationId +
+                SLASH +
+                OPERATIONS +
+                SLASH +
+                operationsId +
+                QUESTION +
+                API_VERSION_STRING +
+                EQUALS +
+                SDKUtils.getServiceApiVersion();
+        return requestUrl;
     }
 
     /**
@@ -131,13 +126,12 @@ public class UrlPathBuilder
             throw new IllegalArgumentException("registration id cannot be null or empty");
         }
         //SRS_UrlPathBuilder_25_006: [ This method shall create a String using the following format after Url Encoding: <scope>/registrations/<registrationId> ]
-        StringBuilder sasTokenUrl = new StringBuilder();
-        sasTokenUrl.append(scope);
-        sasTokenUrl.append(SLASH);
-        sasTokenUrl.append(REGISTRATIONS);
-        sasTokenUrl.append(SLASH);
-        sasTokenUrl.append(registrationId);
-        return sasTokenUrl.toString();
+        String sasTokenUrl = scope +
+                SLASH +
+                REGISTRATIONS +
+                SLASH +
+                registrationId;
+        return sasTokenUrl;
     }
 
     /**

@@ -73,14 +73,13 @@ public class RoundtripMethodCallBody   {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class RoundtripMethodCallBody {\n");
-    
-    sb.append("    requestPayload: ").append(toIndentedString(requestPayload)).append("\n");
-    sb.append("    responsePayload: ").append(toIndentedString(responsePayload)).append("\n");
-    sb.append("    statusCode: ").append(toIndentedString(statusCode)).append("\n");
-    sb.append("}");
-    return sb.toString();
+
+    String sb = "class RoundtripMethodCallBody {\n" +
+            "    requestPayload: " + toIndentedString(requestPayload) + "\n" +
+            "    responsePayload: " + toIndentedString(responsePayload) + "\n" +
+            "    statusCode: " + toIndentedString(statusCode) + "\n" +
+            "}";
+    return sb;
   }
 
   /**
