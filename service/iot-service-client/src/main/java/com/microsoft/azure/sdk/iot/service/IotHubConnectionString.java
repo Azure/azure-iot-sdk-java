@@ -77,13 +77,12 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object
         // properties to a string using the following format: SharedAccessKeyName@SAS.root.IotHubName]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(this.sharedAccessKeyName);
-        stringBuilder.append(USER_SEPARATOR);
-        stringBuilder.append(USER_SAS);
-        stringBuilder.append(USER_ROOT);
-        stringBuilder.append(this.iotHubName);
-        return stringBuilder.toString();
+        String stringBuilder = this.sharedAccessKeyName +
+                USER_SEPARATOR +
+                USER_SAS +
+                USER_ROOT +
+                this.iotHubName;
+        return stringBuilder;
     }
 
     /**
@@ -103,18 +102,17 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         }
 
         //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_017: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId/methods/ **]**
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_TWIN);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_METHODS);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_TWIN +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_0 +
+                URL_PATH_METHODS +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -142,22 +140,21 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_017: [** The function shall create a URL object from the
         //given deviceId using the following format: https:hostname/twins/deviceId/modules/moduleId/methods/ **]**
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_TWIN);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_MODULES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(moduleId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_METHODS);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_TWIN +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_0 +
+                URL_PATH_MODULES +
+                URL_SEPARATOR_0 +
+                moduleId +
+                URL_SEPARATOR_0 +
+                URL_PATH_METHODS +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -177,18 +174,17 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_019: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/jobId?api-version=2016-11-14` **]**
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_JOBS);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_VERSION);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(jobId);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_JOBS +
+                URL_SEPARATOR_0 +
+                URL_PATH_VERSION +
+                URL_SEPARATOR_0 +
+                jobId +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -200,16 +196,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     public URL getUrlTwinQuery() throws MalformedURLException
     {
         //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_023: [ The function shall create a URL object from the given jobId using the following format: https:[hostname]/devices/query?api-version=2016-11-14 ]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_TWIN_DEVICES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_QUERY);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_TWIN_DEVICES +
+                URL_SEPARATOR_0 +
+                URL_PATH_QUERY +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -273,20 +268,19 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_021: [** The function shall create a URL object from the given jobId using the following format: `https:hostname/jobs/v2/jobId/cancel?api-version=2016-11-14` **]**
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_JOBS);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_VERSION);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(jobId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_CANCEL);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_JOBS +
+                URL_SEPARATOR_0 +
+                URL_PATH_VERSION +
+                URL_SEPARATOR_0 +
+                jobId +
+                URL_SEPARATOR_0 +
+                URL_PATH_CANCEL +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -306,16 +300,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         }
 
         //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_011: [** The function shall create a URL object from the given deviceId using the following format: https:hostname/twins/deviceId?api-version=201X-XX-XX **]**
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_TWIN);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_TWIN +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -343,20 +336,19 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         //Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_28_012: [** The function shall create a URL object from the given deviceId and moduleId
         // using the following format: https:hostname/twins/deviceId/modules/moduleId?api-version=201X-XX-XX **]**
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_TWIN);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_MODULES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(moduleId);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_TWIN +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_0 +
+                URL_PATH_MODULES +
+                URL_SEPARATOR_0 +
+                moduleId +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -378,16 +370,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_003: [The function shall create a URL object
         // from the given deviceId using the following format: https:hostname/devices/deviceId?api-version=201X-XX-XX]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_DEVICES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_DEVICES +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -417,20 +408,19 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_28_003: [The function shall create a URL object
         // from the given deviceId and moduleId using the following format: https:hostname/devices/deviceId?api-version=201X-XX-XX]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_DEVICES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_MODULES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(moduleId);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_DEVICES +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_0 +
+                URL_PATH_MODULES +
+                URL_SEPARATOR_0 +
+                moduleId +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -449,21 +439,19 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
             throw new IllegalArgumentException("deviceId cannot be null");
         }
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_DEVICES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_APPLY_CONTENT_CONFIGURATION);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_34_026: [The function shall return a URL in the format
         // "https:[hostname]/devices/[deviceId]/applyConfigurationContent?api-version=201X-XX-XX"]
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_DEVICES +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_0 +
+                URL_PATH_APPLY_CONTENT_CONFIGURATION +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -485,16 +473,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_28_005: [The function shall create a URL object
         // from the given configurationId using the following format: https:hostname/configurations/configurationId?api-version=201X-XX-XX]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_CONFIG);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(configurationId);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_CONFIG +
+                URL_SEPARATOR_0 +
+                configurationId +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -516,17 +503,16 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_28_007: [The function shall create a URL object
         // from the given configurationId using the following format: https:hostname/configurations/configurationId?api-version=201X-XX-XX]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_CONFIG);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_MAX_COUNT);
-        stringBuilder.append(maxCount.toString());
-        stringBuilder.append(URL_SEPARATOR_2);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_CONFIG +
+                URL_SEPARATOR_1 +
+                URL_MAX_COUNT +
+                maxCount.toString() +
+                URL_SEPARATOR_2 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -548,18 +534,17 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_28_009: [The function shall create a URL object
         // from the given deviceId using the following format: https:hostname/devices/deviceId/modules?api-version=201X-XX-XX]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_DEVICES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(deviceId);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_MODULES);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_DEVICES +
+                URL_SEPARATOR_0 +
+                deviceId +
+                URL_SEPARATOR_0 +
+                URL_PATH_MODULES +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -581,18 +566,17 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_005: [The function shall create a URL object from
         // the given integer using the following format: https:hostname/devices/?maxCount=XX&api-version=201X-XX-XX]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_DEVICES);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_MAX_COUNT);
-        stringBuilder.append(maxCount.toString());
-        stringBuilder.append(URL_SEPARATOR_2);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_DEVICES +
+                URL_SEPARATOR_0 +
+                URL_SEPARATOR_1 +
+                URL_MAX_COUNT +
+                maxCount.toString() +
+                URL_SEPARATOR_2 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -605,16 +589,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_006: [The function shall create a URL object from
         // the object properties using the following format: https:hostname/statistics/devices?api-version=201X-XX-XX]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_DEVICESTATISTICS);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_DEVICES);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_DEVICESTATISTICS +
+                URL_SEPARATOR_0 +
+                URL_PATH_DEVICES +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -627,16 +610,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     {
         // CODES_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_15_008: [The function shall create a URL object
         // from the object properties using the following format: https:hostname/jobs/create?api-version=201X-XX-XX.]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_JOBS);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append("create");
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_JOBS +
+                URL_SEPARATOR_0 +
+                "create" +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -649,16 +631,15 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     {
         // CODES_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_15_009: [The function shall create a URL object from
         // the object properties using the following format: https:hostname/jobs/jobId?api-version=201X-XX-XX.]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(URL_HTTPS);
-        stringBuilder.append(hostName);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(URL_PATH_JOBS);
-        stringBuilder.append(URL_SEPARATOR_0);
-        stringBuilder.append(jobId);
-        stringBuilder.append(URL_SEPARATOR_1);
-        stringBuilder.append(URL_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = URL_HTTPS +
+                hostName +
+                URL_SEPARATOR_0 +
+                URL_PATH_JOBS +
+                URL_SEPARATOR_0 +
+                jobId +
+                URL_SEPARATOR_1 +
+                URL_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     /**
@@ -671,27 +652,23 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_007: [The function shall serialize the object to a
         // string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=]
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(HOST_NAME_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.hostName);
-        stringBuilder.append(VALUE_PAIR_DELIMITER);
 
-        stringBuilder.append(SHARED_ACCESS_KEY_NAME_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.sharedAccessKeyName);
-        stringBuilder.append(VALUE_PAIR_DELIMITER);
-
-        stringBuilder.append(SHARED_ACCESS_KEY_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.sharedAccessKey);
-        stringBuilder.append(VALUE_PAIR_DELIMITER);
-
-        stringBuilder.append(SHARED_ACCESS_SIGNATURE_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.sharedAccessSignature);
-
-        return stringBuilder.toString();
+        String stringBuilder = HOST_NAME_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.hostName +
+                VALUE_PAIR_DELIMITER +
+                SHARED_ACCESS_KEY_NAME_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.sharedAccessKeyName +
+                VALUE_PAIR_DELIMITER +
+                SHARED_ACCESS_KEY_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.sharedAccessKey +
+                VALUE_PAIR_DELIMITER +
+                SHARED_ACCESS_SIGNATURE_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.sharedAccessSignature;
+        return stringBuilder;
     }
 
     /**

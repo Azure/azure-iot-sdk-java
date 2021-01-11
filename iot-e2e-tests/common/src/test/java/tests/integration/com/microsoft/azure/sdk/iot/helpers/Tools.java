@@ -238,12 +238,11 @@ public class Tools
 
     public static URL getBulkDeviceAddUrl(IotHubConnectionString iotHubConnectionString) throws MalformedURLException
     {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("https://");
-        stringBuilder.append(iotHubConnectionString.getHostName());
-        stringBuilder.append("/devices/?api-version=");
-        stringBuilder.append(TransportUtils.IOTHUB_API_VERSION);
-        return new URL(stringBuilder.toString());
+        String stringBuilder = "https://" +
+                iotHubConnectionString.getHostName() +
+                "/devices/?api-version=" +
+                TransportUtils.IOTHUB_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     public static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException
