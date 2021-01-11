@@ -60,7 +60,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(status);
-        assertTrue(status.equals("status"));
+        assertEquals("status", status);
 
     }
 
@@ -105,7 +105,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(status);
-        assertTrue(status.equals(String.valueOf(5)));
+        assertEquals(status, String.valueOf(5));
     }
 
     @Test
@@ -178,7 +178,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(status);
-        assertTrue(status.equals(String.valueOf(5)));
+        assertEquals(status, String.valueOf(5));
 
     }
 
@@ -194,7 +194,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(status);
-        assertTrue(status.equals(String.valueOf(5)));
+        assertEquals(status, String.valueOf(5));
 
     }
 
@@ -228,7 +228,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(version);
-        assertTrue(version.equals(String.valueOf(7)));
+        assertEquals(version, String.valueOf(7));
     }
 
     @Test
@@ -300,7 +300,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(version);
-        assertTrue(version.equals(String.valueOf(7)));
+        assertEquals(version, String.valueOf(7));
 
     }
 
@@ -316,7 +316,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(version);
-        assertTrue(version.equals(String.valueOf(7)));
+        assertEquals(version, String.valueOf(7));
 
     }
     /*
@@ -350,7 +350,7 @@ public class TopicParserTest
 
         //assert
         assertNotNull(methodName);
-        assertTrue(methodName.equals("methodName"));
+        assertEquals("methodName", methodName);
 
 
     }

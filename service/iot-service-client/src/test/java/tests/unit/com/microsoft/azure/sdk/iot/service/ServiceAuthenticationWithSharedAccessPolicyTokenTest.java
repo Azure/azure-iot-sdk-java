@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(JMockit.class)
 public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
@@ -53,7 +54,7 @@ public class ServiceAuthenticationWithSharedAccessPolicyTokenTest
         // Assert
         assertEquals(newPolicyName, iotHubConnectionString.getSharedAccessKeyName());
         assertEquals(newPolicyToken, iotHubConnectionString.getSharedAccessSignature());
-        assertEquals(null, iotHubConnectionString.getSharedAccessKey());
+        assertNull(iotHubConnectionString.getSharedAccessKey());
         // Act
         Deencapsulation.invoke(auth, "setPolicyName", policyName);
         Deencapsulation.invoke(auth, "setToken", sharedAccessKey);

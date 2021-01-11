@@ -13,8 +13,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Collection;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for IotHubCertificateManager
@@ -206,7 +205,7 @@ public class IotHubCertificateManagerTests
             //assert
 
             Collection<? extends Certificate> certificates = Deencapsulation.getField(testCertManager, "certificates");
-            assertTrue(certificates.size() == 1);
+            assertEquals(1, certificates.size());
         }
         finally
         {
@@ -246,7 +245,7 @@ public class IotHubCertificateManagerTests
             //assert
 
             Collection<? extends Certificate> certificates = Deencapsulation.getField(testCertManager, "certificates");
-            assertTrue(certificates.size() == 2);
+            assertEquals(2, certificates.size());
         }
         finally
         {
@@ -270,7 +269,7 @@ public class IotHubCertificateManagerTests
 
         //assert
         Collection<? extends Certificate> certificates = Deencapsulation.getField(testCertManager, "certificates");
-        assertTrue(certificates.size() == 1);
+        assertEquals(1, certificates.size());
     }
 
     //Tests_SRS_IOTHUBCERTIFICATEMANAGER_34_005: [**This function shall read the certificates from the provided
@@ -286,7 +285,7 @@ public class IotHubCertificateManagerTests
 
         //assert
         Collection<? extends Certificate> certificates = Deencapsulation.getField(testCertManager, "certificates");
-        assertTrue(certificates.size() == 2);
+        assertEquals(2, certificates.size());
     }
 
     //Tests_SRS_IOTHUBCERTIFICATEMANAGER_34_006: [**This method shall throw IllegalArgumentException if parameter is null or empty.**]**

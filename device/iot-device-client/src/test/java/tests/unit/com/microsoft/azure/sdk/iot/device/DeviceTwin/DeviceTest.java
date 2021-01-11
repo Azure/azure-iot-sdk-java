@@ -127,7 +127,7 @@ public class DeviceTest
         //assert
         HashSet<Property> testRepProp = testDev.getReportedProp();
         assertEquals("RepValue2", testRepProp.iterator().next().getValue().toString());
-        assertTrue(testRepProp.size() == 1);
+        assertEquals(1, testRepProp.size());
     }
 
     /*
@@ -251,7 +251,7 @@ public class DeviceTest
         //assert
         HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
-        assertEquals(testDesiredMap.get(test).getKey(), null);
+        assertNull(testDesiredMap.get(test).getKey());
     }
 
 
@@ -276,7 +276,7 @@ public class DeviceTest
         //assert
         HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> testDesiredMap = testDev.getDesiredProp();
         assertNotNull(testDesiredMap);
-        assertEquals(testDesiredMap.get(test).getKey(), null);
+        assertNull(testDesiredMap.get(test).getKey());
 
     }
 

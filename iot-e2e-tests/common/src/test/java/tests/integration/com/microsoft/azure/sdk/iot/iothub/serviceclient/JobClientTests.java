@@ -262,7 +262,7 @@ public class JobClientTests extends IntegrationTest
             {
                 System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
             }
-            assertTrue("Service throw an exception enqueuing jobs", false);
+            fail("Service throw an exception enqueuing jobs");
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
         for (Map.Entry<String, JobResult> job: jobResults.entrySet())
@@ -347,7 +347,7 @@ public class JobClientTests extends IntegrationTest
             {
                 System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
             }
-            assertTrue("Service throw an exception enqueuing jobs", false);
+            fail("Service throw an exception enqueuing jobs");
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
         for (Map.Entry<String, JobResult> jobResult: jobResults.entrySet())
@@ -445,7 +445,7 @@ public class JobClientTests extends IntegrationTest
         {
             if((timeout += MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS) >= TEST_TIMEOUT_MILLISECONDS)
             {
-                assertTrue("Device didn't receive the twin change", false);
+                fail("Device didn't receive the twin change");
             }
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
             changes = deviceTestManger.getTwinChanges();
@@ -459,7 +459,7 @@ public class JobClientTests extends IntegrationTest
             {
                 System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
             }
-            assertTrue("Service throw an exception enqueuing jobs", false);
+            fail("Service throw an exception enqueuing jobs");
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
         ConcurrentLinkedQueue<Object> temperatures = changes.get(STANDARD_PROPERTY_HOMETEMP);
@@ -557,7 +557,7 @@ public class JobClientTests extends IntegrationTest
             {
                 System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
             }
-            assertTrue("Service throw an exception enqueuing jobs", false);
+            fail("Service throw an exception enqueuing jobs");
         }
 
         // asserts for the client side.

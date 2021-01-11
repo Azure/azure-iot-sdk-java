@@ -491,7 +491,7 @@ public class WebSocketUpgradeTest
             assertTrue(webSocketUpgrade.validateUpgradeReply(responseStr.getBytes()));
         } catch (NoSuchAlgorithmException e)
         {
-            assertTrue(false);
+            fail();
         }
     }
 
@@ -525,7 +525,7 @@ public class WebSocketUpgradeTest
             assertFalse(webSocketUpgrade.validateUpgradeReply(responseStr.getBytes()));
         } catch (NoSuchAlgorithmException e)
         {
-            assertTrue(false);
+            fail();
         }
     }
 
@@ -578,7 +578,7 @@ public class WebSocketUpgradeTest
             assertFalse(webSocketUpgrade.validateUpgradeReply(responseStr.getBytes()));
         } catch (NoSuchAlgorithmException e)
         {
-            assertTrue(false);
+            fail();
         }
     }
 
@@ -609,7 +609,7 @@ public class WebSocketUpgradeTest
             assertFalse(webSocketUpgrade.validateUpgradeReply(responseStr.getBytes()));
         } catch (NoSuchAlgorithmException e)
         {
-            assertTrue(false);
+            fail();
         }
     }
 
@@ -640,7 +640,7 @@ public class WebSocketUpgradeTest
             assertFalse(webSocketUpgrade.validateUpgradeReply(responseStr.getBytes()));
         } catch (NoSuchAlgorithmException e)
         {
-            assertTrue(false);
+            fail();
         }
     }
 
@@ -671,7 +671,7 @@ public class WebSocketUpgradeTest
             assertFalse(webSocketUpgrade.validateUpgradeReply(responseStr.getBytes()));
         } catch (NoSuchAlgorithmException e)
         {
-            assertTrue(false);
+            fail();
         }
     }
 
@@ -742,7 +742,7 @@ public class WebSocketUpgradeTest
 
         assertTrue(actual.startsWith(expexted1));
         actual = actual.substring(expexted1.length() + 24);
-        assertTrue(actual.equals(expected2));
+        assertEquals(actual, expected2);
     }
 
     @Test

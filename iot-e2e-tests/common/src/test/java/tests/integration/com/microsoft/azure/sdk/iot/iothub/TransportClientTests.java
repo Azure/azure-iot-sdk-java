@@ -558,7 +558,7 @@ public class TransportClientTests extends IntegrationTest
     
     private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState, InternalClient client) throws IOException
     {
-        Assert.assertTrue(buildExceptionMessage("Wrong file upload notification length", client), fileUploadNotification.getBlobSizeInBytes() == fileUploadState.fileLength);
+        Assert.assertEquals(buildExceptionMessage("Wrong file upload notification length", client), (long) fileUploadNotification.getBlobSizeInBytes(), fileUploadState.fileLength);
 
         URL u = new URL(fileUploadNotification.getBlobUri());
         try (InputStream inputStream = u.openStream())
@@ -569,7 +569,7 @@ public class TransportClientTests extends IntegrationTest
             fileUploadState.fileInputStream.reset();
             int actualLen = (fileUploadState.fileLength == 0) ? (int) fileUploadState.fileLength : fileUploadState.fileInputStream.read(actualBuf, 0, (int) fileUploadState.fileLength);
             Assert.assertEquals(buildExceptionMessage("Incorrect file length", client), testLen, actualLen);
-            Assert.assertTrue(buildExceptionMessage("Arrays are not equal", client), Arrays.equals(testBuf, actualBuf));
+            Assert.assertArrayEquals(buildExceptionMessage("Arrays are not equal", client), testBuf, actualBuf);
         }
 
         Assert.assertTrue(buildExceptionMessage("Incorrect blob name", client), fileUploadNotification.getBlobName().contains(fileUploadState.blobName));

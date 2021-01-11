@@ -1141,8 +1141,8 @@ public class DeviceClientConfigTest
         Map<String, Pair<MessageCallback, Object>> actualMap = Deencapsulation.getField(config, "inputChannelMessageCallbacks");
         assertNotNull(actualMap);
         assertTrue(actualMap.containsKey(inputName));
-        assertTrue(actualMap.get(inputName).getKey().equals(mockedMessageCallback));
-        assertTrue(actualMap.get(inputName).getValue().equals(context));
+        assertEquals(actualMap.get(inputName).getKey(), mockedMessageCallback);
+        assertEquals(actualMap.get(inputName).getValue(), context);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_34_058: [If the provided inputName is already saved in the message callbacks map, and the provided callback is null, this function

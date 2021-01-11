@@ -18,6 +18,7 @@ import org.junit.Test;
 import java.security.NoSuchAlgorithmException;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.*;
 
 /**
@@ -173,7 +174,7 @@ public class DeviceTest
         assertEquals(utcTimeDefault, device.getConnectionStateUpdatedTime());
         assertEquals(offsetTimeDefault, device.getLastActivityTime());
         assertEquals(0, device.getCloudToDeviceMessageCount());
-        assertEquals(null, device.getCapabilities());
+        assertNull(device.getCapabilities());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_28_001: [The constructor shall set the deviceId, status and symmetricKey.]
@@ -221,7 +222,7 @@ public class DeviceTest
         assertEquals(utcTimeDefault, device.getConnectionStateUpdatedTime());
         assertEquals(offsetTimeDefault, device.getLastActivityTime());
         assertEquals(0, device.getCloudToDeviceMessageCount());
-        assertEquals(null, device.getCapabilities());
+        assertNull(device.getCapabilities());
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_DEVICE_34_018: [This method shall return a new instance of a DeviceParser object that is populated using the properties of this.]

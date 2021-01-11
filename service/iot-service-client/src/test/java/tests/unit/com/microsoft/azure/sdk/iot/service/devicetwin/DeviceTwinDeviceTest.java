@@ -183,7 +183,7 @@ public class DeviceTwinDeviceTest
         String devId = testDevice.getDeviceId();
 
         //assert
-        assertTrue(devId.equals("testDevice"));
+        assertEquals("testDevice", devId);
     }
 
     @Test
@@ -214,7 +214,7 @@ public class DeviceTwinDeviceTest
         String moduleId = testDevice.getModuleId();
 
         //assert
-        assertTrue(moduleId.equals("testModule"));
+        assertEquals("testModule", moduleId);
 
     }
 
@@ -381,8 +381,8 @@ public class DeviceTwinDeviceTest
         assertEquals(testTags.size(), actualTags.size());
         for(Pair test : actualTags)
         {
-            assertTrue(test.getKey().equals("testTag"));
-            assertTrue(test.getValue().equals("tagObject"));
+            assertEquals("testTag", test.getKey());
+            assertEquals("tagObject", test.getValue());
         }
     }
 
@@ -400,7 +400,7 @@ public class DeviceTwinDeviceTest
 
         //assert
         assertNotNull(actualTags);
-        assertTrue(actualTags.size() == 0);
+        assertEquals(0, actualTags.size());
     }
 
     /*
@@ -478,8 +478,8 @@ public class DeviceTwinDeviceTest
         assertEquals(testDesProp.size(), actualDesProp.size());
         for(Pair test : actualDesProp)
         {
-            assertTrue(test.getKey().equals("testDes"));
-            assertTrue(test.getValue().equals("desObject"));
+            assertEquals("testDes", test.getKey());
+            assertEquals("desObject", test.getValue());
         }
     }
 
@@ -497,7 +497,7 @@ public class DeviceTwinDeviceTest
 
         //assert
         assertNotNull(actualDesProp);
-        assertTrue(actualDesProp.size() == 0);
+        assertEquals(0, actualDesProp.size());
     }
 
     /*
@@ -520,8 +520,8 @@ public class DeviceTwinDeviceTest
         assertEquals(repMap.size(), actualRepProp.size());
         for(Pair test : actualRepProp)
         {
-            assertTrue(test.getKey().equals("testRep"));
-            assertTrue(test.getValue().equals("repObject"));
+            assertEquals("testRep", test.getKey());
+            assertEquals("repObject", test.getValue());
         }
     }
 
@@ -539,7 +539,7 @@ public class DeviceTwinDeviceTest
 
         //assert
         assertNotNull(actualRepProp);
-        assertTrue(actualRepProp.size() == 0);
+        assertEquals(0, actualRepProp.size());
     }
 
     /*
@@ -624,8 +624,8 @@ public class DeviceTwinDeviceTest
         assertEquals(testTags.size(), actualTags.size());
         for(Pair test : actualTags)
         {
-            assertTrue(test.getKey().equals("testTag"));
-            assertTrue(test.getValue().equals("tagObject"));
+            assertEquals("testTag", test.getKey());
+            assertEquals("tagObject", test.getValue());
         }
 
     }
@@ -663,8 +663,8 @@ public class DeviceTwinDeviceTest
         assertEquals(testDesProp.size(), actualDesProp.size());
         for(Pair test : actualDesProp)
         {
-            assertTrue(test.getKey().equals("testDes"));
-            assertTrue(test.getValue().equals("desObject"));
+            assertEquals("testDes", test.getKey());
+            assertEquals("desObject", test.getValue());
         }
 
     }
@@ -757,8 +757,8 @@ public class DeviceTwinDeviceTest
         assertEquals(testRepProp.size(), actualRepProp.size());
         for(Pair test : actualRepProp)
         {
-            assertTrue(test.getKey().equals("testRep"));
-            assertTrue(test.getValue().equals("repObject"));
+            assertEquals("testRep", test.getKey());
+            assertEquals("repObject", test.getValue());
         }
 
     }
@@ -819,8 +819,8 @@ public class DeviceTwinDeviceTest
 
         for(Map.Entry<String, Object> test : actualTags.entrySet())
         {
-            assertTrue(test.getKey().equals("testTag"));
-            assertTrue(test.getValue().equals("tagObject"));
+            assertEquals("testTag", test.getKey());
+            assertEquals("tagObject", test.getValue());
         }
     }
 
@@ -844,8 +844,8 @@ public class DeviceTwinDeviceTest
 
         for(Map.Entry<String, Object> test : actualTags.entrySet())
         {
-            assertTrue(test.getKey().equals("testTag"));
-            assertTrue(test.getValue().equals("tagObject"));
+            assertEquals("testTag", test.getKey());
+            assertEquals("tagObject", test.getValue());
         }
     }
 
@@ -865,7 +865,7 @@ public class DeviceTwinDeviceTest
         TwinCollection actualTags = Deencapsulation.invoke(testDevice, "getDesiredMap");
         assertNull(actualTags);
         Set<Pair> actualTagsSet = testDevice.getTags();
-        assertTrue(actualTagsSet.size() == 0);
+        assertEquals(0, actualTagsSet.size());
     }
 
     /*
@@ -888,8 +888,8 @@ public class DeviceTwinDeviceTest
 
         for(Map.Entry<String, Object> test : actualTags.entrySet())
         {
-            assertTrue(test.getKey().equals("testRep"));
-            assertTrue(test.getValue().equals("repObject"));
+            assertEquals("testRep", test.getKey());
+            assertEquals("repObject", test.getValue());
         }
     }
 
@@ -914,8 +914,8 @@ public class DeviceTwinDeviceTest
 
         for(Map.Entry<String, Object> test : actualTags.entrySet())
         {
-            assertTrue(test.getKey().equals("testRep"));
-            assertTrue(test.getValue().equals("repObject"));
+            assertEquals("testRep", test.getKey());
+            assertEquals("repObject", test.getValue());
         }
     }
 
@@ -940,8 +940,8 @@ public class DeviceTwinDeviceTest
 
         for(Map.Entry<String, ConfigurationInfo> test : actual.entrySet())
         {
-            assertTrue(test.getKey().equals("abc"));
-            assertTrue(test.getValue().equals(info));
+            assertEquals("abc", test.getKey());
+            assertEquals(test.getValue(), info);
         }
     }
 
@@ -1002,8 +1002,8 @@ public class DeviceTwinDeviceTest
 
         for(Map.Entry<String, Object> test : actualTags.entrySet())
         {
-            assertTrue(test.getKey().equals("testRep"));
-            assertTrue(test.getValue().equals("repObject"));
+            assertEquals("testRep", test.getKey());
+            assertEquals("repObject", test.getValue());
         }
     }
 
@@ -1028,8 +1028,8 @@ public class DeviceTwinDeviceTest
 
         for(Map.Entry<String, Object> test : actualTags.entrySet())
         {
-            assertTrue(test.getKey().equals("testRep"));
-            assertTrue(test.getValue().equals("repObject"));
+            assertEquals("testRep", test.getKey());
+            assertEquals("repObject", test.getValue());
         }
     }
 
@@ -1050,7 +1050,7 @@ public class DeviceTwinDeviceTest
 
         assertNull(actualTags);
         Set<Pair> actualTagsSet = testDevice.getDesiredProperties();
-        assertTrue(actualTagsSet.size() == 0);
+        assertEquals(0, actualTagsSet.size());
     }
 
     @Test
@@ -1073,9 +1073,9 @@ public class DeviceTwinDeviceTest
         assertNull(actualTags);
         assertNull(actualDes);
         Set<Pair> actualTagsSet = testDevice.getTags();
-        assertTrue(actualTagsSet.size() == 0);
+        assertEquals(0, actualTagsSet.size());
         Set<Pair> actualDesSet = testDevice.getDesiredProperties();
-        assertTrue(actualDesSet.size() == 0);
+        assertEquals(0, actualDesSet.size());
     }
 
     /*
@@ -1189,7 +1189,7 @@ public class DeviceTwinDeviceTest
         String testDeviceString = testDevice.tagsToString();
 
         //assert
-        assertTrue(testDeviceString.length() == 0);
+        assertEquals(0, testDeviceString.length());
     }
 
     /*
@@ -1230,7 +1230,7 @@ public class DeviceTwinDeviceTest
         String testDeviceString = testDevice.desiredPropertiesToString();
 
         //assert
-        assertTrue(testDeviceString.length() == 0);
+        assertEquals(0, testDeviceString.length());
     }
 
     /*
@@ -1272,7 +1272,7 @@ public class DeviceTwinDeviceTest
         String testDeviceString = testDevice.reportedPropertiesToString();
 
         //assert
-        assertTrue(testDeviceString.length() == 0);
+        assertEquals(0, testDeviceString.length());
     }
 
     // Tests_SRS_DEVICETWINDEVICE_34_040: [This method shall save the provided moduleId.]

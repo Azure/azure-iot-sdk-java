@@ -37,6 +37,7 @@ import java.util.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @DigitalTwinTest
 @Slf4j
@@ -162,7 +163,7 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // assert
         assertEquals(E2ETestConstants.THERMOSTAT_MODEL_ID, digitalTwin.getMetadata().getModelId());
-        assertEquals(true, digitalTwin.getMetadata().getWriteableProperties().containsKey(newProperty));
+        assertTrue(digitalTwin.getMetadata().getWriteableProperties().containsKey(newProperty));
         assertEquals(newPropertyValue, digitalTwin.getMetadata().getWriteableProperties().get(newProperty).getDesiredValue());
     }
 

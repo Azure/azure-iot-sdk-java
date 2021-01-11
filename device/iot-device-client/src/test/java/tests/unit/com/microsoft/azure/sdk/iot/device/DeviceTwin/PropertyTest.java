@@ -9,8 +9,7 @@ import org.junit.Test;
 
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the Property
@@ -181,7 +180,7 @@ public class PropertyTest
         //assert
         assertNotNull(testProp);
         assertEquals((int)testProp.getVersion(), 5);
-        assertEquals(true, testProp.getIsReported());
+        assertTrue(testProp.getIsReported());
         assertEquals(expectedLastUpdatedVersion, testProp.getLastUpdatedVersion());
         assertEquals(expectedLastUpdate, testProp.getLastUpdated());
     }
