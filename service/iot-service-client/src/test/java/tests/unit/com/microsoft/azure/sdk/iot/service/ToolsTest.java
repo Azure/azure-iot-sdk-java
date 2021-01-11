@@ -155,7 +155,7 @@ public class ToolsTest
     public void getValueStringByKey_keyName_null()
     {
         // Arrange
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         String keyName = null;
         String expResult = "";
         // Act
@@ -170,7 +170,7 @@ public class ToolsTest
     public void getValueStringByKey_good_case()
     {
         // Arrange
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("key1", "value1");
         map.put("key2", "value2");
         map.put("key3", "value3");
@@ -188,7 +188,7 @@ public class ToolsTest
     public void getValueStringByKey_good_case_trim()
     {
         // Arrange
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("key2", "    value2 ");
         String keyName = "key2";
         String expResult = "value2";
@@ -203,7 +203,7 @@ public class ToolsTest
     public void getValueStringByKey_value_null()
     {
         // Arrange
-        HashMap<String, String> map = new HashMap<String, String>();
+        HashMap<String, String> map = new HashMap<>();
         map.put("key2", null);
         String keyName = "key2";
         String expResult = "";

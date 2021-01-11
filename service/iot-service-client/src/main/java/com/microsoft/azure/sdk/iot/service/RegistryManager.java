@@ -617,7 +617,7 @@ public class RegistryManager
         }
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_053: [The function shall create an async wrapper around the removeDevice() function call, handle the return value or delegate exception]
-        final CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+        final CompletableFuture<Boolean> future = new CompletableFuture<>();
         executor.submit(() ->
         {
             try

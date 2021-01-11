@@ -45,7 +45,7 @@ public class WebSocketHandlerImplTest
         String queryKey = "?iothub-no-client-cert=";
         String queryValue = "true";
         String webSocketProtocol = "subprotocol_name";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -159,7 +159,7 @@ public class WebSocketHandlerImplTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -249,7 +249,7 @@ public class WebSocketHandlerImplTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");
@@ -278,7 +278,7 @@ public class WebSocketHandlerImplTest
         String webSocketPath = "path1/path2";
         int webSocketPort = 1234567890;
         String webSocketProtocol = "subprotocol_name";
-        Map<String, String> additionalHeaders = new HashMap<String, String>();
+        Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("header1", "content1");
         additionalHeaders.put("header2", "content2");
         additionalHeaders.put("header3", "content3");

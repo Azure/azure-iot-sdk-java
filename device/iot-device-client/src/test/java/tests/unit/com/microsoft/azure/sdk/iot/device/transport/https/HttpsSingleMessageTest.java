@@ -732,7 +732,7 @@ public class HttpsSingleMessageTest
         String to = "device4";
         String appProperty = "app_property_value";
 
-        final Map<String, String> headerFields = new HashMap<String, String>();
+        final Map<String, String> headerFields = new HashMap<>();
         headerFields.put(correlationIdKey, correlationId);
         headerFields.put(userIdKey, userId);
         headerFields.put(messageIdKey, messageId);

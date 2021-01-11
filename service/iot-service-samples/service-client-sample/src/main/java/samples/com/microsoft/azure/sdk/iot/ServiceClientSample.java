@@ -163,8 +163,8 @@ public class ServiceClientSample
     
      protected static void sendMultipleCommandsAndReadFromTheFeedbackReceiver() throws ExecutionException, InterruptedException, UnsupportedEncodingException
      {
-        List<CompletableFuture<Void>> futureList = new ArrayList<CompletableFuture<Void>>();
-        Map<String, String> propertiesToSend = new HashMap<String, String>();
+        List<CompletableFuture<Void>> futureList = new ArrayList<>();
+        Map<String, String> propertiesToSend = new HashMap<>();
         String commandMessage = "Cloud to Device Message: "; 
         
         System.out.println("sendMultipleCommandsAndReadFromTheFeedbackReceiver: Send count is : " + MAX_COMMANDS_TO_SEND);

@@ -701,7 +701,7 @@ public class DeviceTwinCommon extends IntegrationTest
             PropertyState propertyState = new PropertyState();
             propertyState.property = new Property(PROPERTY_KEY + i, PROPERTY_VALUE);
             deviceUnderTest.dCDeviceForTwin.propertyStateList[i] = propertyState;
-            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>(deviceUnderTest.dCOnProperty, propertyState));
+            desiredPropertiesCB.put(propertyState.property, new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(deviceUnderTest.dCOnProperty, propertyState));
         }
         internalClient.subscribeToTwinDesiredProperties(desiredPropertiesCB);
         Thread.sleep(DELAY_BETWEEN_OPERATIONS);

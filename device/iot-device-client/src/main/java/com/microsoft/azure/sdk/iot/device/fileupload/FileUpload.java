@@ -62,7 +62,7 @@ public final class FileUpload
             throw new IOException("Cannot create a pool of threads to manager uploads: " + e);
         }
         /* Codes_SRS_FILEUPLOAD_21_013: [The constructor shall create a list `fileUploadInProgressesSet` to control the pending uploads.] */
-        fileUploadInProgressesSet = new LinkedBlockingDeque<FileUploadInProgress>();
+        fileUploadInProgressesSet = new LinkedBlockingDeque<>();
         /* Codes_SRS_FILEUPLOAD_21_014: [The constructor shall create an Event callback `fileUploadStatusCallBack` to receive the upload status.] */
         fileUploadStatusCallBack = new FileUploadStatusCallBack();
 
