@@ -1244,8 +1244,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         testInstance.multiplexingClient.open();
 
-        // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
-        String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0)).toLowerCase();
+        // Get a valid connection string, but swap out the deviceId for a deviceId that does exist, but whose symmetric key is different
+        String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(1)).replace(testInstance.deviceIdentityArray.get(1).getDeviceId(), testInstance.deviceIdentityArray.get(0).getDeviceId());
 
         DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
 
@@ -1279,9 +1279,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         testInstance.multiplexingClient.unregisterDeviceClient(testInstance.deviceClientArray.get(0));
 
-
-        // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
-        String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0)).toLowerCase();
+        // Get a valid connection string, but swap out the deviceId for a deviceId that does exist, but whose symmetric key is different
+        String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(1)).replace(testInstance.deviceIdentityArray.get(1).getDeviceId(), testInstance.deviceIdentityArray.get(0).getDeviceId());
 
         DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
         testInstance.multiplexingClient.registerDeviceClient(clientWithIncorrectCredentials);
@@ -1324,8 +1323,19 @@ public class MultiplexingClientTests extends IntegrationTest
         List<DeviceClient> clientsWithIncorrectCredentials = new ArrayList<>();
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
-            String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i)).toLowerCase();
+            // shift the keys for each device so that device n uses key for device n + 1 (and final device uses key for device 0)
+            String incorrectConnectionString;
+            if (i == DEVICE_MULTIPLEX_COUNT - 1)
+            {
+                incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0));
+                incorrectConnectionString = incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(0).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
+            }
+            else
+            {
+                incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i+1));
+                incorrectConnectionString = incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(i+1).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
+            }
+
             DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
             clientsWithIncorrectCredentials.add(clientWithIncorrectCredentials);
         }
@@ -1368,8 +1378,18 @@ public class MultiplexingClientTests extends IntegrationTest
         List<DeviceClient> clientsWithIncorrectCredentials = new ArrayList<>();
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
-            // primary key is case sensitive, and contains upper case characters, so this should invalidate the connection string
-            String incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i)).toLowerCase();
+            // shift the keys for each device so that device n uses key for device n + 1 (and final device uses key for device 0)
+            String incorrectConnectionString;
+            if (i == DEVICE_MULTIPLEX_COUNT - 1)
+            {
+                incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(0));
+                incorrectConnectionString = incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(0).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
+            }
+            else
+            {
+                incorrectConnectionString = registryManager.getDeviceConnectionString(testInstance.deviceIdentityArray.get(i+1));
+                incorrectConnectionString =incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(i+1).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
+            }
             DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
             clientsWithIncorrectCredentials.add(clientWithIncorrectCredentials);
         }
