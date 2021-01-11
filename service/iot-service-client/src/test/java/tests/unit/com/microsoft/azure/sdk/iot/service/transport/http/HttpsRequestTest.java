@@ -27,6 +27,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpRequest. */
+@SuppressWarnings("EmptyMethod")
 @RunWith(JMockit.class)
 public class HttpsRequestTest
 {

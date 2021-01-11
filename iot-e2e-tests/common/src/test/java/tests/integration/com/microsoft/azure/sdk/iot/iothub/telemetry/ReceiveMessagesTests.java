@@ -44,6 +44,7 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
     }
 
     @Before
+    @SuppressWarnings("EmptyMethod")
     public void setupTest() throws Exception
     {
         super.setupTest();

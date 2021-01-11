@@ -22,6 +22,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -55,6 +56,13 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     {
         super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
         jsonParser = new JsonParser();
+    }
+
+    @Before
+    @SuppressWarnings("EmptyMethod")
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
+    {
+        super.setUpNewDeviceAndModule();
     }
 
     @Test

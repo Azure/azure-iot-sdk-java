@@ -94,17 +94,6 @@ public class SecurityProviderTpmTest
             return TEST_SIGN_DATA;
         }
 
-        @Override
-        public String getRegistrationId() throws SecurityProviderException
-        {
-            return super.getRegistrationId();
-        }
-
-        @Override
-        public SSLContext getSSLContext() throws SecurityProviderException
-        {
-            return super.getSSLContext();
-        }
     }
 
     //SRS_SecurityClientTpm_25_001: [ This method shall retrieve the EnrollmentKey from the implementation of this abstract class. ]

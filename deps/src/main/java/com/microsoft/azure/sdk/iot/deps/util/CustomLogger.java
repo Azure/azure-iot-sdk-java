@@ -11,38 +11,6 @@ public class CustomLogger
     {
     }
 
-    public void LogInfo(String message, Object...params)
-    {
-    }
-
-    public void LogDebug(String message, Object...params)
-    {
-    }
-
-    public void LogDebug(String message, Throwable t, Object...params)
-    {
-    }
-
-    public void LogTrace(String message, Object...params)
-    {
-    }
-
-    public void LogWarn(String message, Object...params)
-    {
-    }
-
-    public void LogFatal(String message, Object...params)
-    {
-    }
-
-    public void LogError(String message, Object...params)
-    {
-    }
-
-    public void LogError(Throwable exception)
-    {
-    }
-
     public String getMethodName()
     {
         return Thread.currentThread().getStackTrace()[CALLING_METHOD_NAME_DEPTH].getMethodName();
