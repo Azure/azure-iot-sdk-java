@@ -71,9 +71,6 @@ public class ContractAPIMqttTest
     @Mocked
     Map<String, Object> mockedHashMap;
 
-    //@Mocked
-    //Queue<MqttMessage> mockedQueue;
-
     @Mocked
     MqttMessage mockedMqttMessage;
 

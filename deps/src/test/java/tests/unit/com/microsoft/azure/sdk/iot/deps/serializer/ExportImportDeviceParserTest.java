@@ -299,7 +299,6 @@ public class ExportImportDeviceParserTest
         String serializedDevice = parser.toJson();
 
         // assert
-        //assertEquals(expectedJson, serializedDevice);
         assertTrue(serializedDevice.contains("\"tags\":{"));
     }    
 

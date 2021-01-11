@@ -1304,8 +1304,6 @@ public class DeviceClientTest
                 + "SharedAccessKey=adjkl234j52=";
 
         DeviceClient client = new DeviceClient(connString, mockTransportClient);
-//        Deencapsulation.setField(client, "config", mockConfig);
-//        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
         final String value = "certificatePath";
 
         // act

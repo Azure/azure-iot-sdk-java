@@ -33,6 +33,7 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("CommentedOutCode") // Test method may be used locally for some executions. Leaving for now.
 public class WebSocketHandlerImplTest
 {
     @Test

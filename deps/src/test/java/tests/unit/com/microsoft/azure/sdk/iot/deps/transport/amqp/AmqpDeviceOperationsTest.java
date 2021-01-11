@@ -307,9 +307,6 @@ public class AmqpDeviceOperationsTest
                 mockedLink.getName();
                 result = TEST_RECEIVER_LINK_NAME;
 
-                //new Target();
-                //result = mockedTarget;
-
                 mockedTarget.setAddress(anyString);
                 mockedLink.setTarget(mockedTarget);
                 mockedLink.setSenderSettleMode(SenderSettleMode.UNSETTLED);

@@ -5,6 +5,8 @@ import org.junit.Test;
 public class DeviceRegistrationResultParserTest
 {
 
+    // Not sure if this is needed for some conditional test. Leaving for now.
+    @SuppressWarnings("CommentedOutCode")
     @Test
     public void deviceRegistrationResultJsonSerializingSuccessful() throws Exception
     {
