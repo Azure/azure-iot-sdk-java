@@ -46,6 +46,7 @@ import java.util.Random;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("CommentedOutCode") // Test method may be used locally for some executions. Leaving for now.
 public class WebSocketImplTest
 {
     private int _allocatedWebSocketBufferSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);

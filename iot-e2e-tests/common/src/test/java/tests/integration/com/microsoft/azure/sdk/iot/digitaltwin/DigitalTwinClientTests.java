@@ -130,8 +130,6 @@ public class DigitalTwinClientTests extends IntegrationTest
             Set<Property> properties = new HashSet<>();
             properties.add(property);
             try {
-                //EmbeddedPropertyUpdate completedUpdate = new EmbeddedPropertyUpdate(property.getValue(), 200, property.getVersion(), "Successfully updated target temperature");
-                //Property reportedPropertyCompleted = new Property(property.getKey(), completedUpdate);
                 deviceClient.sendReportedProperties(properties);
             } catch (IOException e) {
             }

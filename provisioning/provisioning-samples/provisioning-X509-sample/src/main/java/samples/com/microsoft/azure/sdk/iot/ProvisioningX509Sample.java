@@ -17,6 +17,7 @@ import java.util.Scanner;
 /**
  * Provisioning Sample for X509
  */
+@SuppressWarnings("CommentedOutCode") // Ignored in samples as we use these comments to show other options.
 public class ProvisioningX509Sample
 {
     private static final String idScope = "[Your ID scope here]";
