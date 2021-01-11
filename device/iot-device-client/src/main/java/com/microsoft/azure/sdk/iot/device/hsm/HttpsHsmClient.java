@@ -72,14 +72,13 @@ public class HttpsHsmClient
         // Codes_SRS_HSMHTTPCLIENT_34_002: [This function shall build an http request with the url in the format
         // <base url>/modules/<url encoded name>/genid/<url encoded gen id>/sign?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
-        StringBuilder pathBuilder = new StringBuilder();
-        pathBuilder.append("/modules/" + URLEncoder.encode(moduleName, StandardCharsets.UTF_8.name()));
-        pathBuilder.append("/genid/" + URLEncoder.encode(generationId, StandardCharsets.UTF_8.name()));
-        pathBuilder.append("/sign");
 
         byte[] body = signRequest.toJson().getBytes();
-        
-        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.POST, body, uri,pathBuilder.toString(), API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+
+        String pathBuilder = "/modules/" + URLEncoder.encode(moduleName, StandardCharsets.UTF_8.name()) +
+                "/genid/" + URLEncoder.encode(generationId, StandardCharsets.UTF_8.name()) +
+                "/sign";
+        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.POST, body, uri, pathBuilder, API_VERSION_QUERY_STRING_PREFIX + apiVersion);
 
         int responseCode = response.getStatus();
         String responseBody = new String(response.getBody());
@@ -122,11 +121,11 @@ public class HttpsHsmClient
         // Codes_SRS_HSMHTTPCLIENT_34_008: [This function shall build an http request with the url in the format
         // <base url>/trust-bundle?api-version=<url encoded api version>.]
         String uri = baseUrl != null ? baseUrl.replaceFirst("/*$", "") : "";
-        StringBuilder pathBuilder = new StringBuilder();
-        pathBuilder.append("/trust-bundle");
 
         // Codes_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
-        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, pathBuilder.toString(), API_VERSION_QUERY_STRING_PREFIX + apiVersion);
+        HttpsResponse response = sendRequestBasedOnScheme(HttpsMethod.GET, new byte[0], uri, "/trust-bundle"
+                // Codes_SRS_HSMHTTPCLIENT_34_009: [This function shall send a GET http request to the built url.]
+                , API_VERSION_QUERY_STRING_PREFIX + apiVersion);
 
         int statusCode = response.getStatus();
         String body = response.getBody() != null ? new String(response.getBody()) : "";

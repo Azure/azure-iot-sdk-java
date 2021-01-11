@@ -38,13 +38,12 @@ public class ProvisioningConnectionString extends ProvisioningConnectionStringBu
     public String getUserString()
     {
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_21_001: [The getUserString shall serialize the object properties to a string using the following format: SharedAccessKeyName@SAS.root.deviceProvisioningServiceName] */
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(this.sharedAccessKeyName);
-        stringBuilder.append(USER_SEPARATOR);
-        stringBuilder.append(USER_SAS);
-        stringBuilder.append(USER_ROOT);
-        stringBuilder.append(this.deviceProvisioningServiceName);
-        return stringBuilder.toString();
+        String stringBuilder = this.sharedAccessKeyName +
+                USER_SEPARATOR +
+                USER_SAS +
+                USER_ROOT +
+                this.deviceProvisioningServiceName;
+        return stringBuilder;
     }
 
     /**
@@ -56,27 +55,23 @@ public class ProvisioningConnectionString extends ProvisioningConnectionStringBu
     public String toString()
     {
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_21_002: [The toString shall serialize the object to a string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=] */
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(HOST_NAME_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.hostName);
-        stringBuilder.append(VALUE_PAIR_DELIMITER);
 
-        stringBuilder.append(SHARED_ACCESS_KEY_NAME_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.sharedAccessKeyName);
-        stringBuilder.append(VALUE_PAIR_DELIMITER);
-
-        stringBuilder.append(SHARED_ACCESS_KEY_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.sharedAccessKey);
-        stringBuilder.append(VALUE_PAIR_DELIMITER);
-
-        stringBuilder.append(SHARED_ACCESS_SIGNATURE_PROPERTY_NAME);
-        stringBuilder.append(VALUE_PAIR_SEPARATOR);
-        stringBuilder.append(this.sharedAccessSignature);
-
-        return stringBuilder.toString();
+        String stringBuilder = HOST_NAME_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.hostName +
+                VALUE_PAIR_DELIMITER +
+                SHARED_ACCESS_KEY_NAME_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.sharedAccessKeyName +
+                VALUE_PAIR_DELIMITER +
+                SHARED_ACCESS_KEY_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.sharedAccessKey +
+                VALUE_PAIR_DELIMITER +
+                SHARED_ACCESS_SIGNATURE_PROPERTY_NAME +
+                VALUE_PAIR_SEPARATOR +
+                this.sharedAccessSignature;
+        return stringBuilder;
     }
 
     /**

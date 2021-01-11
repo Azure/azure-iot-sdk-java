@@ -49,12 +49,11 @@ public class ConnectResponse   {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ConnectResponse {\n");
-    
-    sb.append("    connectionId: ").append(toIndentedString(connectionId)).append("\n");
-    sb.append("}");
-    return sb.toString();
+
+    String sb = "class ConnectResponse {\n" +
+            "    connectionId: " + toIndentedString(connectionId) + "\n" +
+            "}";
+    return sb;
   }
 
   /**

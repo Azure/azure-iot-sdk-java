@@ -49,12 +49,11 @@ public class Certificate   {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class Certificate {\n");
-    
-    sb.append("    cert: ").append(toIndentedString(cert)).append("\n");
-    sb.append("}");
-    return sb.toString();
+
+    String sb = "class Certificate {\n" +
+            "    cert: " + toIndentedString(cert) + "\n" +
+            "}";
+    return sb;
   }
 
   /**
