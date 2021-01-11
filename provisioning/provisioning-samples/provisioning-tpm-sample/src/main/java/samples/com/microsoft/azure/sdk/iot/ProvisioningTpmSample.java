@@ -22,6 +22,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 /**
  * TPM sample
  */
+@SuppressWarnings("CommentedOutCode") // Ignored in samples as we use these comments to show other options.
 public class ProvisioningTpmSample
 {
     private static final String SCOPE_ID = "[Your scope ID here]";

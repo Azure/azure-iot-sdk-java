@@ -18,6 +18,7 @@ import java.util.Scanner;
 /**
  * Symmetric Key authenticated individual enrollment sample
  */
+@SuppressWarnings("CommentedOutCode") // Ignored in samples as we use these comments to show other options.
 public class ProvisioningSymmetricKeyIndividualEnrollmentSample
 {
     // The scope Id of your DPS instance. This value can be retrieved from the Azure Portal
