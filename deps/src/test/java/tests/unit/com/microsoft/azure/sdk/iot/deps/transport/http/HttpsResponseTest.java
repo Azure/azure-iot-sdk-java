@@ -34,12 +34,11 @@ public class HttpsResponseTest
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
         final byte[] errorReason = {};
-        final int expectedStatus = status;
         // Act
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         int testStatus = response.getStatus();
         // Assert
-        assertThat(testStatus, is(expectedStatus));
+        assertThat(testStatus, is(status));
     }
 
     // Tests_SRS_HTTPSRESPONSE_25_001: [The constructor shall store the input arguments so that the getters can return them later.]
@@ -52,14 +51,13 @@ public class HttpsResponseTest
         final byte[] body = { 1, 2, 3, 4 };
         final Map<String, List<String>> headerFields = new HashMap<>();
         byte[] errorReason = {};
-        final byte[] expectedBody = body;
         // Act
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         byte[] testBody = response.getBody();
         // Assert
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(body));
         testBody[0] = 3;
-        assertThat(testBody, is(not(expectedBody)));
+        assertThat(testBody, is(not(body)));
     }
 
     // Tests_SRS_HTTPSRESPONSE_25_001: [The constructor shall store the input arguments so that the getters can return them later.]
@@ -138,11 +136,10 @@ public class HttpsResponseTest
         final byte[] body = { 1 };
         final Map<String, List<String>> headerFields = new HashMap<>();
         final byte[] errorReason = { 2, 3, 4, 5 };
-        final byte[] expectedErrorReason = errorReason;
         // Act
         HttpResponse response = new HttpResponse(status, body, headerFields, errorReason);
         byte[] testErrorReason = response.getErrorReason();
         // Assert
-        assertThat(testErrorReason, is(expectedErrorReason));
+        assertThat(testErrorReason, is(errorReason));
     }
 }

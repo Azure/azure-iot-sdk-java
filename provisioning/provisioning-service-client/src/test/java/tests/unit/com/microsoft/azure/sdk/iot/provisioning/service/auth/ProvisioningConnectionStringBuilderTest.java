@@ -376,13 +376,12 @@ public class ProvisioningConnectionStringBuilderTest
         String connectionString = "HostName=" + deviceProvisioningServiceName + "." + iotHubHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + deviceProvisioningServiceName;
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
-        String expected = deviceProvisioningServiceName;
 
         // act
         String actual = Deencapsulation.invoke(provisioningConnectionString, "parseDeviceProvisioningServiceName", provisioningConnectionString);
 
         // assert
-        assertEquals("Parser error: DeviceProvisioningServiceName mismatch!", expected, actual);
+        assertEquals("Parser error: DeviceProvisioningServiceName mismatch!", deviceProvisioningServiceName, actual);
     }
 
     /* Tests_SRS_PROVISIONINGCONNECTIONSTRING_BUILDER_21_013: [The function shall return the substring of the host name until the first `.` character.] */
@@ -398,13 +397,12 @@ public class ProvisioningConnectionStringBuilderTest
         String connectionString = "HostName=" + deviceProvisioningServiceName + "." + iotHubHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + deviceProvisioningServiceName;
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
-        String expected = deviceProvisioningServiceName;
 
         // act
         String actual = Deencapsulation.invoke(provisioningConnectionString, "parseDeviceProvisioningServiceName", provisioningConnectionString);
 
         // assert
-        assertEquals("Parser error: DeviceProvisioningServiceName mismatch!", expected, actual);
+        assertEquals("Parser error: DeviceProvisioningServiceName mismatch!", deviceProvisioningServiceName, actual);
     }
 
     /* Tests_SRS_PROVISIONINGCONNECTIONSTRING_BUILDER_21_014: [The function shall return empty string if `.` character was not found.] */

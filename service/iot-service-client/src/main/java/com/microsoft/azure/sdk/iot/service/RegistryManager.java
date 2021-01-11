@@ -170,9 +170,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_011: [The function shall create a new Device object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
-        Device iotHubDevice = new Device(new DeviceParser(bodyStr));
-
-        return iotHubDevice;
+        return new Device(new DeviceParser(bodyStr));
     }
 
     /**
@@ -241,8 +239,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_020: [The function shall create a new Device object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
-        Device iotHubDevice = new Device(new DeviceParser(bodyStr));
-        return iotHubDevice;
+        return new Device(new DeviceParser(bodyStr));
     }
 
     /**
@@ -457,9 +454,8 @@ public class RegistryManager
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_041: [The function shall create a new Device object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        Device iotHubDevice = new Device(new DeviceParser(bodyStr));
 
-        return iotHubDevice;
+        return new Device(new DeviceParser(bodyStr));
     }
 
     /**
@@ -659,8 +655,7 @@ public class RegistryManager
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_059: [The function shall create a new RegistryStatistics object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        RegistryStatistics registryStatistics = new RegistryStatistics(new RegistryStatisticsParser(bodyStr));
-        return registryStatistics;
+        return new RegistryStatistics(new RegistryStatisticsParser(bodyStr));
     }
 
     /**
@@ -1081,9 +1076,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_008: [The function shall create a new Module object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
-        Module iotHubModule = new Module(new DeviceParser(bodyStr));
-
-        return iotHubModule;
+        return new Module(new DeviceParser(bodyStr));
     }
 
     /**
@@ -1126,8 +1119,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_016: [The function shall create a new Device object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
-        Module iotHubModule = new Module(new DeviceParser(bodyStr));
-        return iotHubModule;
+        return new Module(new DeviceParser(bodyStr));
     }
 
     /**
@@ -1233,9 +1225,8 @@ public class RegistryManager
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_033: [The function shall create a new Module object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        Module iotHubModule = new Module(new DeviceParser(bodyStr));
 
-        return iotHubModule;
+        return new Module(new DeviceParser(bodyStr));
     }
 
     /**
@@ -1355,9 +1346,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_048: [The function shall create a new Configuration object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
-        Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(bodyStr));
-
-        return iotHubConfiguration;
+        return new Configuration(new ConfigurationParser(bodyStr));
     }
 
     /**
@@ -1393,8 +1382,7 @@ public class RegistryManager
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_055: [The function shall create a new Device object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
 
-        Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(bodyStr));
-        return iotHubConfiguration;
+        return new Configuration(new ConfigurationParser(bodyStr));
     }
 
     /**
@@ -1500,9 +1488,8 @@ public class RegistryManager
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_072: [The function shall create a new Configuration object from the response and return with it]
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        Configuration iotHubConfiguration = new Configuration(new ConfigurationParser(bodyStr));
 
-        return iotHubConfiguration;
+        return new Configuration(new ConfigurationParser(bodyStr));
     }
 
     /**
@@ -1627,8 +1614,7 @@ public class RegistryManager
     private JobProperties ProcessJobResponse(HttpResponse response) throws IotHubException, JsonSyntaxException {
         IotHubExceptionManager.httpResponseVerification(response);
         String bodyStr = new String(response.getBody(), StandardCharsets.UTF_8);
-        JobProperties resultJobProperties = new JobProperties(new JobPropertiesParser(bodyStr));
-        return resultJobProperties;
+        return new JobProperties(new JobPropertiesParser(bodyStr));
     }
 
     private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String sasToken) throws IOException

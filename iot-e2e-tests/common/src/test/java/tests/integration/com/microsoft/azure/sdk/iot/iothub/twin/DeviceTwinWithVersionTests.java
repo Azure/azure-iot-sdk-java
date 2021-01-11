@@ -56,7 +56,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        List inputs =  Arrays.asList(
+        return Arrays.asList(
                 new Object[][]
                         {
                                 {AMQPS},
@@ -65,8 +65,6 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
                                 {MQTT_WS},
                         }
         );
-
-        return inputs;
     }
 
     private static final long BREATHE_TIME = 100; // 0.1 sec

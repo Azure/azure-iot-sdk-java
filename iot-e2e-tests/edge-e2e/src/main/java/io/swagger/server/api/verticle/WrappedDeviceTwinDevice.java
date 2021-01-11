@@ -18,12 +18,11 @@ public class WrappedDeviceTwinDevice extends DeviceTwinDevice
 
     public JsonObject toJsonObject()
     {
-        JsonObject twinObj = new JsonObject()
+
+        return new JsonObject()
                 .put("properties", new JsonObject()
                     .put("desired", mapToJson(this.getDesiredMap()))
                     .put("reported", mapToJson(this.getReportedMap())));
-
-        return twinObj;
     }
 
 }

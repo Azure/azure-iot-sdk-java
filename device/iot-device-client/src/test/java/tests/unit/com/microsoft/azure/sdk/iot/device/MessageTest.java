@@ -42,8 +42,7 @@ public class MessageTest
         Message msg = new Message(body);
         byte[] testBody = msg.getBytes();
 
-        byte[] expectedBody = body;
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(body));
     }
 
     // Tests_SRS_MESSAGE_11_025: [If the message body is null, the constructor shall throw an IllegalArgumentException.]

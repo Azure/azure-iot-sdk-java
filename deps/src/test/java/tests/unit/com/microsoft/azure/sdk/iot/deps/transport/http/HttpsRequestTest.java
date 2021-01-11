@@ -61,7 +61,6 @@ public class HttpsRequestTest
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = { 1, 2, 3 };
-        final byte[] expectedBody = body;
         new NonStrictExpectations()
         {
             {
@@ -76,7 +75,7 @@ public class HttpsRequestTest
         {
             {
                 new HttpConnection(mockUrl, (HttpMethod) any)
-                        .writeOutput(expectedBody);
+                        .writeOutput(body);
             }
         };
     }
@@ -360,7 +359,6 @@ public class HttpsRequestTest
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         final int status = 204;
-        final int expectedStatus = status;
         new NonStrictExpectations()
         {
             {
@@ -375,7 +373,7 @@ public class HttpsRequestTest
         HttpResponse response = request.send();
         int testStatus = response.getStatus();
         // Assert
-        assertThat(testStatus, is(expectedStatus));
+        assertThat(testStatus, is(status));
     }
 
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
@@ -386,7 +384,6 @@ public class HttpsRequestTest
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] requestBody = new byte[0];
         final byte[] responseBody = { 1, 2, 3, 0, 4 };
-        final byte[] expectedBody = responseBody;
         new NonStrictExpectations()
         {
             {
@@ -401,7 +398,7 @@ public class HttpsRequestTest
         HttpResponse response = request.send();
         byte[] testBody = response.getBody();
         // Assert
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(responseBody));
     }
 
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
@@ -413,7 +410,6 @@ public class HttpsRequestTest
         final HttpMethod httpsMethod = HttpMethod.GET;
         final byte[] body = new byte[0];
         final byte[] error = { 5, 6, 7, 0, 1 };
-        final byte[] expectedError = error;
         new NonStrictExpectations()
         {
             {
@@ -430,7 +426,7 @@ public class HttpsRequestTest
         HttpResponse response = request.send();
         byte[] testError = response.getErrorReason();
         // Assert
-        assertThat(testError, is(expectedError));
+        assertThat(testError, is(error));
     }
 
     // Tests_SRS_HTTPSREQUEST_25_006: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
@@ -474,7 +470,6 @@ public class HttpsRequestTest
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
         final int badStatus = 404;
-        final int expectedStatus = badStatus;
         new NonStrictExpectations()
         {
             {
@@ -491,7 +486,7 @@ public class HttpsRequestTest
         HttpResponse response = request.send();
         int testStatus = response.getStatus();
         // Assert
-        assertThat(testStatus, is(expectedStatus));
+        assertThat(testStatus, is(badStatus));
     }
 
     // Tests_SRS_HTTPSREQUEST_25_007: [If the client cannot connect to the server, the function shall throw an IOException.]
@@ -537,7 +532,6 @@ public class HttpsRequestTest
         headerFields.put(field, values);
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
-        final String expectedValues = value;
         new NonStrictExpectations()
         {
             {
@@ -554,7 +548,7 @@ public class HttpsRequestTest
         HttpResponse response = request.send();
         String testValues = response.getHeaderField(field);
         // Assert
-        assertThat(testValues, is(expectedValues));
+        assertThat(testValues, is(value));
     }
 
     // Tests_SRS_HTTPSREQUEST_25_009: [The function shall set the header field with the given name to the given value.]
@@ -593,7 +587,6 @@ public class HttpsRequestTest
         final HttpMethod httpsMethod = HttpMethod.POST;
         final byte[] body = new byte[0];
         final int readTimeout = 1;
-        final int expectedReadTimeout = readTimeout;
         new NonStrictExpectations()
         {
             {
@@ -608,7 +601,7 @@ public class HttpsRequestTest
         new Verifications()
         {
             {
-                mockConn.setReadTimeoutMillis(expectedReadTimeout);
+                mockConn.setReadTimeoutMillis(readTimeout);
             }
         };
     }

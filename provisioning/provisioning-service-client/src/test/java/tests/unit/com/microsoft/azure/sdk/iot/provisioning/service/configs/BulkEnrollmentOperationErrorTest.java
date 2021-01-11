@@ -30,8 +30,7 @@ public class BulkEnrollmentOperationErrorTest
     BulkEnrollmentOperationError makeBulkEnrollmentOperationError(String json)
     {
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
-        BulkEnrollmentOperationError result = gson.fromJson(json, BulkEnrollmentOperationError.class);
-        return result;
+        return gson.fromJson(json, BulkEnrollmentOperationError.class);
     }
 
     /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_001: [The getRegistrationId shall return the stored registrationId.] */
