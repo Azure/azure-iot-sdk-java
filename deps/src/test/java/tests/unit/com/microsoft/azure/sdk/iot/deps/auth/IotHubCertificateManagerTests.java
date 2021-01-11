@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
  * Methods: 100%
  * Lines: 100%
  */
+// Unsure if this is somehthing needed to run locally. Leaving for now.
+@SuppressWarnings("CommentedOutCode")
 public class IotHubCertificateManagerTests
 {
 /*
