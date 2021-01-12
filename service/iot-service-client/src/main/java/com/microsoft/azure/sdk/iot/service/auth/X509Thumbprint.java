@@ -140,14 +140,14 @@ public class X509Thumbprint
      */
     private String generateValidThumbprint()
     {
-        String thumbprint = "";
+        StringBuilder thumbprint = new StringBuilder();
         SecureRandom rand = new SecureRandom(); //SecureRandom chooses its own seed, better than providing timestamp
 
         for (int i = 0; i < THUMBPRINT_LENGTH; i++)
         {
-            thumbprint += Integer.toHexString(rand.nextInt(THUMBPRINT_DIGIT_MAX));
+            thumbprint.append(Integer.toHexString(rand.nextInt(THUMBPRINT_DIGIT_MAX)));
         }
 
-        return thumbprint;
+        return thumbprint.toString();
     }
 }

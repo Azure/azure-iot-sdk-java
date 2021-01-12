@@ -394,8 +394,7 @@ public class QueryTwinTests extends DeviceTwinCommon
             expectedDeviceIds.add(devicesUnderTest[deviceTwinDeviceIndex].sCDeviceForTwin.getDeviceId());
         }
 
-        Collection<DeviceTwinDevice> allQueriedDeviceTwinDevices = new ArrayList<>();
-        allQueriedDeviceTwinDevices.addAll(continuedDeviceTwinDeviceQuery);
+        Collection<DeviceTwinDevice> allQueriedDeviceTwinDevices = new ArrayList<>(continuedDeviceTwinDeviceQuery);
         continuedDeviceTwinDeviceQuery.addAll(queriedDeviceTwinDeviceCollection);
 
         for (DeviceTwinDevice deviceTwinDevice : allQueriedDeviceTwinDevices)

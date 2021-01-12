@@ -93,7 +93,7 @@ public class X509CertificateGenerator
         StringBuilder issuerStringBuilder = new StringBuilder(ISSUER_STRING);
         if (commonName != null && !commonName.isEmpty())
         {
-            issuerStringBuilder.append(", CN=" + commonName);
+            issuerStringBuilder.append(", CN=").append(commonName);
         }
 
         X500Name issuer = new X500Name(issuerStringBuilder.toString());

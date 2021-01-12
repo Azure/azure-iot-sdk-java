@@ -939,7 +939,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
 
         //assert
-        assertEquals(Deencapsulation.getField(config, "retryPolicy").getClass(), new ExponentialBackoffWithJitter().getClass());
+        assertEquals(Deencapsulation.getField(config, "retryPolicy").getClass(), ExponentialBackoffWithJitter.class);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]

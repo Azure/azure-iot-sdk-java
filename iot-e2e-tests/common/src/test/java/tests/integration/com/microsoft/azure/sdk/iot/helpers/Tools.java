@@ -158,8 +158,8 @@ public class Tools
         // IoT hub only allows for bulk adding of devices at up to 100 per request, so take the provided devices iterable
         // and break it into 100 devices or smaller chunks
         List<Device> subIterable = new ArrayList<>();
-        List<Device> devicesClone = new ArrayList<>(); //create a clone of the source list so elements can be removed from it instead
-        devicesClone.addAll(devices);
+        //create a clone of the source list so elements can be removed from it instead
+        List<Device> devicesClone = new ArrayList<>(devices);
         while (devicesClone.size() > 0)
         {
             Device device = devicesClone.remove(0);
