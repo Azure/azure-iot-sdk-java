@@ -52,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /** Unit tests for AmqpSendHandler */
+@SuppressWarnings({"ResultOfMethodCallIgnored", "ThrowableNotThrown"})
 @RunWith(JMockit.class)
 public class AmqpSendHandlerTest
 {

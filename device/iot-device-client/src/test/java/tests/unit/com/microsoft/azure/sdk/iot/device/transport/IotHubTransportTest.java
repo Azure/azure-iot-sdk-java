@@ -29,6 +29,7 @@ import static junit.framework.TestCase.*;
 /**
  * Unit tests for IotHubTransportPacket.
  */
+@SuppressWarnings("ThrowableNotThrown")
 public class IotHubTransportTest
 {
     @Mocked

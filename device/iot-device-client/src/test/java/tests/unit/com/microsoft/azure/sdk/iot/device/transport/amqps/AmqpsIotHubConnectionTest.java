@@ -94,6 +94,7 @@ import static org.junit.Assert.assertFalse;
  * 88% line
  */
 
+@SuppressWarnings("ThrowableNotThrown")
 public class AmqpsIotHubConnectionTest {
 
     final String hostName = "test.host.name";
