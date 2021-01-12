@@ -183,7 +183,7 @@ public class TwinProperty
 
     protected TwinMetadata getMetadata(String key)
     {
-        TwinMetadata twinMetadata = null;
+        TwinMetadata twinMetadata;
 
         synchronized (lock)
         {
@@ -204,7 +204,7 @@ public class TwinProperty
     {
         /* Codes_SRS_TWINPARSER_21_050: [The getDesiredPropertyMap shall return a map with all desired property key value pairs.] */
         /* Codes_SRS_TWINPARSER_21_051: [The getReportedPropertyMap shall return a map with all reported property key value pairs.] */
-        Map<String, Object> propertyMap = null;
+        Map<String, Object> propertyMap;
 
         synchronized (lock)
         {
@@ -239,7 +239,7 @@ public class TwinProperty
 
     protected Object get(String key)
     {
-        Object result = null;
+        Object result;
 
         synchronized (lock)
         {
@@ -291,8 +291,8 @@ public class TwinProperty
     protected void update(Map<String, Object> jsonTree,
                        TwinChangedCallback onCallback) throws IllegalArgumentException
     {
-        Map<String, Object> diffField = new HashMap<>();
-        Map<String, Object> diffMetadata = new HashMap<>();
+        Map<String, Object> diffField;
+        Map<String, Object> diffMetadata;
 
         try
         {

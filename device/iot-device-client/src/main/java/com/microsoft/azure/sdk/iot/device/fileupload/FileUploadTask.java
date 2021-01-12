@@ -122,7 +122,7 @@ public final class FileUploadTask implements Runnable
         Thread.currentThread().setName(THREAD_NAME);
 
         FileUploadCompletionNotification fileUploadCompletionNotification = null;
-        FileUploadSasUriResponse sasUriResponse = null;
+        FileUploadSasUriResponse sasUriResponse;
 
         try
         {

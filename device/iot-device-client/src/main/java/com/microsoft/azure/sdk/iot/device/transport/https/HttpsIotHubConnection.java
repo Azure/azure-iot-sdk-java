@@ -80,7 +80,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         synchronized (HTTPS_CONNECTION_LOCK)
         {
             // Here we check if it's a bulk message and serialize it.
-            HttpsMessage httpsMessage = null;
+            HttpsMessage httpsMessage;
 
             if (message instanceof BatchMessage)
             {

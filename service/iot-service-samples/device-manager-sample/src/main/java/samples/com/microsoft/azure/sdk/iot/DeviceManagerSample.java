@@ -70,7 +70,7 @@ public class DeviceManagerSample
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
         
-        Device returnDevice = null;
+        Device returnDevice;
         try
         {
             returnDevice = registryManager.getDevice(SampleUtils.deviceId);

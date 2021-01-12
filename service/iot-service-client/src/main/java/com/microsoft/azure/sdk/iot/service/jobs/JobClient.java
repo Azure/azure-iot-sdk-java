@@ -79,7 +79,7 @@ public class JobClient
             long maxExecutionTimeInSeconds)
             throws IllegalArgumentException, IOException, IotHubException
     {
-        URL url = null;
+        URL url;
 
         /* Codes_SRS_JOBCLIENT_21_005: [If the JobId is null, empty, or invalid, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
         if((jobId == null) || jobId.isEmpty())
@@ -152,7 +152,7 @@ public class JobClient
             long maxExecutionTimeInSeconds)
             throws IllegalArgumentException, IOException, IotHubException
     {
-        URL url = null;
+        URL url;
 
         /* Codes_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
         if((jobId == null) || jobId.isEmpty())

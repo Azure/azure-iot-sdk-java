@@ -50,7 +50,7 @@ public class HttpRequest
      */
     public HttpResponse send() throws IOException
     {
-        int responseStatus = -1;
+        int responseStatus;
         byte[] responseBody = new byte[0];
         byte[] errorReason = new byte[0];
         Map<String, List<String>> headerFields;

@@ -97,8 +97,6 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             String userAgentValue)
             throws IllegalArgumentException, IOException
     {
-        HttpRequest request = null;
-
         if (url == null)
         {
             throw new IllegalArgumentException("Null URL");
@@ -119,7 +117,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             throw new IllegalArgumentException("HTTP Request timeout shouldn't be negative");
         }
 
-        request = new HttpRequest(url, method, payload);
+        HttpRequest request = new HttpRequest(url, method, payload);
 
         /*
             Set this method with appropriate time value once discussion with service concludes
@@ -280,7 +278,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 headersMap.put(AUTHORIZATION, requestData.getSasToken());
             }
             //SRS_ContractAPIHttp_25_026: [ This method shall build the required Json input using parser. ]
-            byte[] payload = null;
+            byte[] payload;
             if (requestData.getEndorsementKey() != null && requestData.getStorageRootKey() != null)
             {
                 //SRS_ContractAPIHttp_25_027: [ This method shall base 64 encoded endorsement key, storage root key. ]

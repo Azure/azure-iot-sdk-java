@@ -41,12 +41,12 @@ public class IotHubConnectionString
     private static final Charset CONNECTION_STRING_CHARSET = StandardCharsets.UTF_8;
 
     private String hostName = null;
-    private String hubName = null;
+    private String hubName;
     private String deviceId = null;
     private String sharedAccessKey = null;
     private String sharedAccessToken = null;
     private String moduleId = null;
-    private boolean isUsingX509 = false;
+    private boolean isUsingX509;
     private String gatewayHostName = null;
 
     /**

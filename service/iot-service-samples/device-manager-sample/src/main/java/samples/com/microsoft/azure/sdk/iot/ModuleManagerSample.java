@@ -81,7 +81,7 @@ public class ModuleManagerSample
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
 
-        Module returnModule = null;
+        Module returnModule;
         try
         {
             returnModule = registryManager.getModule(SampleUtils.deviceId, SampleUtils.moduleId0);

@@ -49,7 +49,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class DesiredPropertiesTests extends DeviceTwinCommon
 {
-    private JsonParser jsonParser = new JsonParser();
+    private JsonParser jsonParser;
 
     public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
     {

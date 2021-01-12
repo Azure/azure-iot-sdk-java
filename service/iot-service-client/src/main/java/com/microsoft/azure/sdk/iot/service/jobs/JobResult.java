@@ -70,11 +70,11 @@ public class JobResult
 
     // System generated failure reason.
     // If status == failure, this represents a string containing the reason.
-    private String failureReason = null;
+    private String failureReason;
 
     // System generated status message.
     // Represents a string containing a message with status about the job execution.
-    private String statusMessage = null;
+    private String statusMessage;
 
     // System generated statistics.
     // Different number of devices in the job.
@@ -82,10 +82,10 @@ public class JobResult
 
     // The deviceId related to this response.
     // It can be null (e.g. in case of a parent orchestration).
-    private String deviceId = null;
+    private String deviceId;
 
     // The jobId of the parent orchestration, if any.
-    private String parentJobId = null;
+    private String parentJobId;
 
     // The outcome of the job in query, if any.
     private String outcome = null;

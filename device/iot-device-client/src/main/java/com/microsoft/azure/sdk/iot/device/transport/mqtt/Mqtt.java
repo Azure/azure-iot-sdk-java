@@ -38,7 +38,7 @@ abstract public class Mqtt implements MqttCallback
     private Map<Integer, Message> unacknowledgedSentMessages;
 
     // SAS token expiration check on retry
-    private boolean userSpecifiedSASTokenExpiredOnRetry = false;
+    private boolean userSpecifiedSASTokenExpiredOnRetry;
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
     final static char MESSAGE_PROPERTY_SEPARATOR = '&';

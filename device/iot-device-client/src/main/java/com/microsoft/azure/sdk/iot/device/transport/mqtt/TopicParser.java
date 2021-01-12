@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 public class TopicParser
 {
-    private String[] topicTokens = null;
+    private String[] topicTokens;
 
     private final String QUESTION = "?";
 

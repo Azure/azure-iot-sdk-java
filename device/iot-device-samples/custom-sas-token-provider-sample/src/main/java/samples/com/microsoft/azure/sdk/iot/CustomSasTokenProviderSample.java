@@ -125,7 +125,7 @@ public class CustomSasTokenProviderSample
         {
             SecretKeySpec secretKey = new SecretKeySpec(deviceKey, HMAC_SHA_256);
 
-            byte[] encryptedSig = null;
+            byte[] encryptedSig;
             Mac hMacSha256 = Mac.getInstance(HMAC_SHA_256);
             hMacSha256.init(secretKey);
             encryptedSig = hMacSha256.doFinal(signature);

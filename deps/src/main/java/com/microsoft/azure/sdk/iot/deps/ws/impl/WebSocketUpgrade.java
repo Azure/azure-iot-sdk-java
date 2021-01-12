@@ -291,7 +291,7 @@ public class WebSocketUpgrade
 
             if (line.toLowerCase().contains("sec-websocket-accept"))
             {
-                MessageDigest messageDigest = null;
+                MessageDigest messageDigest;
 
                 try
                 {

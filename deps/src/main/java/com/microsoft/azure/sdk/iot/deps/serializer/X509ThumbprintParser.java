@@ -50,7 +50,7 @@ public class X509ThumbprintParser
             throw new IllegalArgumentException("The provided Json must not be null or empty");
         }
 
-        X509ThumbprintParser parser = null;
+        X509ThumbprintParser parser;
         try
         {
             //Codes_SRS_X509ThumbprintParser_34_009: [The parser shall create and return an instance of a X509ThumbprintParser object based off the provided json.]

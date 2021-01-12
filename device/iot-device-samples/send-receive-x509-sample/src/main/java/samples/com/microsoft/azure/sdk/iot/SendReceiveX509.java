@@ -240,8 +240,8 @@ public class SendReceiveX509
         System.out.println("Sending the following event messages: ");
 
         String deviceId = "MyJavaDevice";
-        double temperature = 0.0;
-        double humidity = 0.0;
+        double temperature;
+        double humidity;
 
         for (int i = 0; i < numRequests; ++i)
         {

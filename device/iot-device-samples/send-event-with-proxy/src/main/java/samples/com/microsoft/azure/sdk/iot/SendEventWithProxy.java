@@ -165,8 +165,8 @@ public class SendEventWithProxy
             throw new IllegalArgumentException("Expected argument 5 (port number) to be an integer");
         }
 
-        String proxyUsername = "";
-        char[] proxyPassword = new char[0];
+        String proxyUsername;
+        char[] proxyPassword;
         if (args.length == 7)
         {
             proxyUsername = args[5];
