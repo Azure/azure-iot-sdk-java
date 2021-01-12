@@ -585,20 +585,6 @@ public class ProvisioningAmqpOperationsTest
         };
     }
 
-    @Test
-    public void UnusedFunctionsSucceeds() throws ProvisioningDeviceClientException
-    {
-        //arrange
-        ProvisioningAmqpOperations provisioningAmqpOperations = new ProvisioningAmqpOperations(TEST_SCOPE_ID, TEST_HOST_NAME);
-
-        //act
-        provisioningAmqpOperations.connectionEstablished();
-        provisioningAmqpOperations.connectionLost();
-        provisioningAmqpOperations.messageSent();
-
-        //assert
-    }
-
     // SRS_ProvisioningAmqpOperations_34_020: [If the provided sasl handler is null, this function shall open the underlying amqpConnection synchronously.]
     @Test
     public void openOpensAmqpConnectionSynchronouslyWithoutSaslHandler() throws ProvisioningDeviceClientException, IOException

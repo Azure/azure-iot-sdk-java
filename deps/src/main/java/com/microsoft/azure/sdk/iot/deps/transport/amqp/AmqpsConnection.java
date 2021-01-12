@@ -377,8 +377,6 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
             if (msgListener != null)
             {
-                msgListener.connectionEstablished();
-
                 openLatch.countDown();
             }
         }

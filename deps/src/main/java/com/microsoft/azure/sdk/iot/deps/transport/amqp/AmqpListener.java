@@ -8,11 +8,5 @@ public interface AmqpListener
 {
     void messageReceived(AmqpMessage message);
 
-    void connectionEstablished();
-
-    void connectionLost();
-
-    void messageSent();
-
     void messageSendFailed(String exceptionMessage);
 }

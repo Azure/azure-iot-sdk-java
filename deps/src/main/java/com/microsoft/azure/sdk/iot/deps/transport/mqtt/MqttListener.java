@@ -14,11 +14,6 @@ public interface MqttListener
     void messageReceived(MqttMessage message);
 
     /**
-     * Called when PAHO establishes a connection to a server
-     */
-    void connectionEstablished();
-
-    /**
      * Called by PAHO when the connection is lost
      * @param throwable the disconnection reason.
      */

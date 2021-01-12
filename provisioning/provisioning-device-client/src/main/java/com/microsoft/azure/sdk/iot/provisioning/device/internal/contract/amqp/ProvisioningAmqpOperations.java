@@ -313,27 +313,6 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     }
 
     /**
-     * connectionEstablished Unused
-     */
-    public void connectionEstablished()
-    {
-    }
-
-    /**
-     * connectionLost Unused
-     */
-    public void connectionLost()
-    {
-    }
-
-    /**
-     * messageSent Unused
-     */
-    public void messageSent()
-    {
-    }
-
-    /**
      * Function that gets called when amqp gets a message from the amqp endpoint
      * @param message Message received during transmission.
      */
