@@ -73,7 +73,7 @@ public class HttpsRequestResponseSerializer
 
         if (queryString != null && !queryString.isEmpty())
         {
-            builder.append("?" + queryString);
+            builder.append("?").append(queryString);
         }
 
         builder.append(SP);
@@ -82,7 +82,7 @@ public class HttpsRequestResponseSerializer
         builder.append(CR);
         builder.append(LF);
 
-        builder.append("Host: " + host + "\r\n");
+        builder.append("Host: ").append(host).append("\r\n");
 
         if (httpsRequest.getRequestHeaders() != null && !httpsRequest.getRequestHeaders().isEmpty())
         {
@@ -91,7 +91,7 @@ public class HttpsRequestResponseSerializer
 
         if (httpsRequest.getBody() != null && httpsRequest.getBody().length != 0)
         {
-            builder.append("Content-Length: " + httpsRequest.getBody().length + "\r\n");
+            builder.append("Content-Length: ").append(httpsRequest.getBody().length).append("\r\n");
         }
 
         // Headers end
@@ -216,14 +216,14 @@ public class HttpsRequestResponseSerializer
 
     private static byte[] readBody(BufferedReader bufferedReader) throws IOException
     {
-        String bodyString = "";
+        StringBuilder bodyString = new StringBuilder();
         String next = bufferedReader.readLine();
         while (next != null && !next.isEmpty())
         {
-            bodyString = bodyString + next;
+            bodyString.append(next);
             next = bufferedReader.readLine();
         }
 
-        return bodyString.getBytes();
+        return bodyString.toString().getBytes();
     }
 }

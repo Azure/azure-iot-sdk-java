@@ -196,7 +196,7 @@ public class IotHubSSLContext
         Key privateKey = IotHubSSLContext.parsePrivateKey(privateKeyString);
         Collection<X509Certificate> certChain = IotHubSSLContext.parsePublicKeyCertificate(publicKeyCertificateString);
 
-        X509Certificate[] certs = certChain.toArray(new X509Certificate[certChain.size()]);
+        X509Certificate[] certs = certChain.toArray(new X509Certificate[0]);
 
         //Codes_SRS_IOTHUBSSLCONTEXT_34_018: [This constructor shall generate a temporary password to protect the created keystore holding the private key.]
         char[] temporaryPassword = generateTemporaryPassword();

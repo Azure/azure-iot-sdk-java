@@ -525,21 +525,21 @@ public class DeviceTwinDevice
          */
         StringBuilder thisDevice = new StringBuilder();
 
-        thisDevice.append("Device ID: " + this.getDeviceId() + "\n");
+        thisDevice.append("Device ID: ").append(this.getDeviceId()).append("\n");
         if (this.moduleId != null && !this.moduleId.isEmpty())
         {
-            thisDevice.append("Module ID: " + this.getModuleId() + "\n");
+            thisDevice.append("Module ID: ").append(this.getModuleId()).append("\n");
         }
         if(this.getETag() != null)
         {
-            thisDevice.append("ETag: " + this.getETag() + "\n");
+            thisDevice.append("ETag: ").append(this.getETag()).append("\n");
         }
         if(this.getVersion() != null)
         {
-            thisDevice.append("Version: " + this.getVersion() + "\n");
+            thisDevice.append("Version: ").append(this.getVersion()).append("\n");
         }
 
-        thisDevice.append("Model ID: " + this.getModelId() + "\n");
+        thisDevice.append("Model ID: ").append(this.getModelId()).append("\n");
         thisDevice.append(tagsToString());
         thisDevice.append(reportedPropertiesToString());
         thisDevice.append(desiredPropertiesToString());
@@ -559,7 +559,7 @@ public class DeviceTwinDevice
         StringBuilder thisDeviceTags = new StringBuilder();
         if (tag != null)
         {
-            thisDeviceTags.append("Tags:" + this.tag.toString() + "\n");
+            thisDeviceTags.append("Tags:").append(this.tag.toString()).append("\n");
         }
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_017: [** This method shall return an empty string if tags map is empty or null and return **]**
@@ -580,7 +580,7 @@ public class DeviceTwinDevice
             /*
             **Codes_SRS_DEVICETWINDEVICE_25_018: [** This method shall convert the desiredProperties map to string (if present) and return **]**
              */
-            thisDeviceRepProp.append("Desired Properties: " + this.desiredProperties.toString() + "\n");
+            thisDeviceRepProp.append("Desired Properties: ").append(this.desiredProperties.toString()).append("\n");
         }
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_019: [** This method shall return an empty string if desiredProperties map is empty or null and return **]**
@@ -600,7 +600,7 @@ public class DeviceTwinDevice
             /*
             **Codes_SRS_DEVICETWINDEVICE_25_020: [** This method shall convert the reportedProperties map to string (if present) and return **]**
              */
-            thisDeviceDesProp.append("Reported Properties" + this.reportedProperties.toString() + "\n");
+            thisDeviceDesProp.append("Reported Properties").append(this.reportedProperties.toString()).append("\n");
         }
         /*
         **Codes_SRS_DEVICETWINDEVICE_25_021: [** This method shall return an empty string if reportedProperties map is empty or null and return **]**
