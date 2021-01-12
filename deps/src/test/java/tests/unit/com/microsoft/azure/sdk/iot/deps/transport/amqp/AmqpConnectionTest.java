@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /** Unit tests for AmqpConnection.
  * Coverage : 95% method, 100% line */
@@ -399,7 +399,7 @@ public class AmqpConnectionTest
         boolean result = amqpsConnection.sendAmqpMessage(mockedMessage);
 
         //assert
-        assertEquals(false, result);
+        assertFalse(result);
     }
 
     @Test
@@ -424,7 +424,7 @@ public class AmqpConnectionTest
         boolean result = amqpsConnection.sendAmqpMessage(mockedMessage);
 
         //assert
-        assertEquals(true, result);
+        assertTrue(result);
     }
 
     @Test
@@ -447,7 +447,7 @@ public class AmqpConnectionTest
         boolean result = amqpsConnection.sendAmqpMessage(mockedMessage);
 
         //assert
-        assertEquals(false, result);
+        assertFalse(result);
     }
 
     @Test
@@ -470,7 +470,7 @@ public class AmqpConnectionTest
         boolean result = amqpsConnection.sendAmqpMessage(mockedMessage);
 
         //assert
-        assertEquals(true, result);
+        assertTrue(result);
     }
 
     @Test

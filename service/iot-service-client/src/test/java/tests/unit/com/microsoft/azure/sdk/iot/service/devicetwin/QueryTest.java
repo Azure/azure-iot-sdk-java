@@ -779,7 +779,7 @@ public class QueryTest
         boolean hasNext = Deencapsulation.invoke(testQuery, "hasNext");
 
         //assert
-        assertEquals(true, hasNext);
+        assertTrue(hasNext);
     }
 
     //Tests_SRS_QUERY_25_021: [If no further query response is available, then this method shall continue to request query to IotHub if continuation token is available.]
@@ -809,7 +809,7 @@ public class QueryTest
         boolean hasNext = Deencapsulation.invoke(testQuery, "hasNext");
 
         //assert
-        assertEquals(false, hasNext);
+        assertFalse(hasNext);
     }
 
     @Test
@@ -843,7 +843,7 @@ public class QueryTest
         boolean hasNext = Deencapsulation.invoke(testQuery, "hasNext");
 
         //assert
-        assertEquals(false, hasNext);
+        assertFalse(hasNext);
 
         new Verifications()
         {

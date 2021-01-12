@@ -11,8 +11,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.junit.Test;
 
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit test for IotHubTransportMessage
@@ -62,9 +61,9 @@ public class IotHubTransportMessageTest
 
         // assert
         assertEquals(messageType, iotHubTransportMessage.getMessageType());
-        assertEquals(null, iotHubTransportMessage.getVersion());
-        assertEquals(null, iotHubTransportMessage.getRequestId());
-        assertEquals(null, iotHubTransportMessage.getStatus());
+        assertNull(iotHubTransportMessage.getVersion());
+        assertNull(iotHubTransportMessage.getRequestId());
+        assertNull(iotHubTransportMessage.getStatus());
         assertEquals(DEVICE_OPERATION_UNKNOWN, iotHubTransportMessage.getDeviceOperationType());
     }
 

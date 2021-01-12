@@ -231,7 +231,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlTwin(deviceId).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
 
     }
 
@@ -295,7 +295,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlMethod(deviceId).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     /*
@@ -356,7 +356,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlJobs(jobId).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     /*
@@ -417,7 +417,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlJobsCancel(jobId).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     /*
@@ -479,7 +479,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlQuery(jobType, jobStatus).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_024: [** If the jobType is null or empty, the function shall not include the jobType in the URL **]**
@@ -502,7 +502,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlQuery(jobType, jobStatus).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_025: [** If the jobStatus is null or empty, the function shall not include the jobStatus in the URL **]**
@@ -525,7 +525,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlQuery(jobType, jobStatus).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_21_024: [** If the jobType is null or empty, the function shall not include the jobType in the URL **]**
@@ -549,7 +549,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlQuery(jobType, jobStatus).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_25_023: [ The function shall create a URL object from the given jobId using the following format: https:[hostname]/devices/query?api-version=2016-11-14 ]
@@ -570,7 +570,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlTwinQuery().toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     /*
@@ -593,7 +593,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlCreateExportImportJob().toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     /*
@@ -617,7 +617,7 @@ public class IotHubConnectionStringTest
         String actual = iotHubConnectionString.getUrlImportExportJob(jobId).toString();
 
         // assert
-        assertTrue(actual.equals(expected));
+        assertEquals(actual, expected);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_28_001: [The function shall throw IllegalArgumentException if the deviceId string is empty or null]

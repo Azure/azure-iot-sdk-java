@@ -63,6 +63,6 @@ public class PairTest
         //assert
         assertNotNull(testPair);
         assertEquals(testPair.getValue(), "thisNewObject");
-        assertTrue(value.equals("thisObject"));
+        assertEquals("thisObject", value);
     }
 }

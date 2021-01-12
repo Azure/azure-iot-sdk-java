@@ -893,7 +893,7 @@ public class MqttTest
 
         //assert
         byte[] actualPayload = receivedMessage.getBytes();
-        assertTrue(actualPayload.length == payload.length);
+       assertEquals(actualPayload.length, payload.length);
         for (int i = 0; i < payload.length; i++)
         {
             assertEquals(actualPayload[i], payload[i]);
@@ -1051,10 +1051,10 @@ public class MqttTest
         Queue<Pair<String, byte[]>> actualQueue = Deencapsulation.getField(mockMqtt, "allReceivedMessages");
         Pair<String, byte[]> messagePair = actualQueue.poll();
         assertNotNull(messagePair);
-        assertTrue(messagePair.getKey().equals(MOCK_PARSE_TOPIC));
+        assertEquals(messagePair.getKey(), MOCK_PARSE_TOPIC);
 
         byte[] receivedPayload = messagePair.getValue();
-        assertTrue(actualPayload.length == receivedPayload.length);
+        assertEquals(actualPayload.length, receivedPayload.length);
         for (int i = 0; i < actualPayload.length; i++)
         {
             assertEquals(actualPayload[i], receivedPayload[i]);
@@ -1233,7 +1233,7 @@ public class MqttTest
 
         //assert
         byte[] actualPayload = receivedMessage.getBytes();
-        assertTrue(actualPayload.length == payload.length);
+        assertEquals(actualPayload.length, payload.length);
         for (int i = 0; i < payload.length; i++)
         {
             assertEquals(actualPayload[i], payload[i]);
@@ -1288,7 +1288,7 @@ public class MqttTest
 
         //assert
         byte[] actualPayload = receivedMessage.getBytes();
-        assertTrue(actualPayload.length == payload.length);
+        assertEquals(actualPayload.length, payload.length);
         for (int i = 0; i < payload.length; i++)
         {
             assertEquals(actualPayload[i], payload[i]);

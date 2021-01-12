@@ -93,12 +93,12 @@ public class Helpers
                 {
                     if(message == null)
                     {
-                        assertTrue("Expected key:" + key + " does not exist in Actual Map", false);
+                        fail("Expected key:" + key + " does not exist in Actual Map");
                     }
                     else
                     {
                         System.out.println("Expected key:" + key + " does not exist in Actual Map");
-                        assertTrue(message, false);
+                        fail(message);
                     }
                 }
                 else if(expectedValue instanceof Map)
@@ -111,12 +111,12 @@ public class Helpers
                     {
                         if(message == null)
                         {
-                            assertTrue("Map " + key + " contains invalid Object", false);
+                            fail("Map " + key + " contains invalid Object");
                         }
                         else
                         {
                             System.out.println("Map " + key + " contains invalid Object");
-                            assertTrue(message, false);
+                            fail(message);
                         }
                     }
                 }
@@ -136,7 +136,7 @@ public class Helpers
                     else
                     {
                         System.out.println("Map failed on " + key + ": <" + actualValue + "> != <" + expectedValue + ">");
-                        assertTrue(message, actualValue.equals(expectedValue));
+                        assertEquals(message, actualValue, expectedValue);
                     }
                 }
             }
@@ -185,12 +185,12 @@ public class Helpers
         }
         if (message == null)
         {
-            assertTrue("Map do not contains " + expectedElement, false);
+            fail("Map do not contains " + expectedElement);
         }
         else
         {
             System.out.println("Map do not contains " + expectedElement);
-            assertTrue(message, false);
+            fail(message);
         }
     }
 
@@ -324,7 +324,7 @@ public class Helpers
     {
         assertNotNull(expected);
         assertNotNull(test);
-        assertTrue(expected.size() == test.size());
+        assertEquals(expected.size(), test.size());
         for(Object o : expected)
         {
             assertTrue(test.contains(o));

@@ -235,7 +235,7 @@ public class DeviceMethodTest
             }
         };
 
-        assertTrue(result == IotHubMessageResult.COMPLETE);
+        assertSame(result, IotHubMessageResult.COMPLETE);
     }
 
     /*
@@ -267,7 +267,7 @@ public class DeviceMethodTest
         IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
 
         //assert
-        assertFalse(result == IotHubMessageResult.COMPLETE);
+        assertNotSame(result, IotHubMessageResult.COMPLETE);
 
         new Verifications()
         {
@@ -306,7 +306,7 @@ public class DeviceMethodTest
         IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
 
         //assert
-        assertFalse(result == IotHubMessageResult.COMPLETE);
+        assertNotSame(result, IotHubMessageResult.COMPLETE);
 
         new Verifications()
         {
@@ -347,7 +347,7 @@ public class DeviceMethodTest
         IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
 
         //assert
-        assertTrue(result == IotHubMessageResult.COMPLETE);
+        assertSame(result, IotHubMessageResult.COMPLETE);
 
         new Verifications()
         {
@@ -383,7 +383,7 @@ public class DeviceMethodTest
         IotHubMessageResult result =  testDeviceMethodResponseMessageCallback.execute(testMessage, null);
 
         //assert
-        assertFalse(result == IotHubMessageResult.COMPLETE);
+        assertNotSame(result, IotHubMessageResult.COMPLETE);
 
         new Verifications()
         {

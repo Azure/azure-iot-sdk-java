@@ -350,7 +350,7 @@ public class TemplateTest
         final Set actualSet = Deencapsulation.getField(testObject, "unionSet");
 
         assertNotNull(actualSet);
-        assertTrue(actualSet.size() == 2);
+        assertEquals(2, actualSet.size());
 
         /* Verify any call flow on mocked objects that is expected on act */
         new Verifications()

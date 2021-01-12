@@ -219,7 +219,7 @@ public class IotHubSasTokenTest
                 iotHubConnectionString.getModuleId(),
                 0);
         String tokenStr = token.toString();
-        assertTrue(tokenStr.equals(sastoken));
+        assertEquals(tokenStr, sastoken);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_25_008: [**The required format for the SAS Token shall be verified and IllegalArgumentException is thrown if unmatched.**]**
@@ -383,7 +383,7 @@ public class IotHubSasTokenTest
                 iotHubConnectionString.getModuleId(),
                 0);
         String tokenStr = token.toString();
-        assertTrue(tokenStr.equals(sastoken));
+        assertEquals(tokenStr, sastoken);
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_11_001: [**The SAS token shall have the format `SharedAccessSignature sig=<signature >&se=<expiryTime>&sr=<resourceURI>`. The params can be in any order.**]**
@@ -409,7 +409,7 @@ public class IotHubSasTokenTest
                 iotHubConnectionString.getModuleId(),
                 0);
         String tokenStr = token.toString();
-        assertTrue(tokenStr.equals(sastoken));
+        assertEquals(tokenStr, sastoken);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -8,8 +8,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PairTest
 {
@@ -25,8 +24,8 @@ public class PairTest
 
         //assert
         assertNotNull(testPair);
-        assertTrue(testPair.getKey().equals("TestKey"));
-        assertTrue(testPair.getValue().equals("TestObject"));
+        assertEquals("TestKey", testPair.getKey());
+        assertEquals("TestObject", testPair.getValue());
     }
 
     /*
@@ -61,7 +60,7 @@ public class PairTest
 
         //assert
         assertNotNull(testPair);
-        assertTrue(value.equals("TestObject"));
+        assertEquals("TestObject", value);
 
     }
 
@@ -80,7 +79,7 @@ public class PairTest
         //assert
         Object value = testPair.getValue();
         assertNotNull(testPair);
-        assertTrue(value.equals("newTestObject"));
+        assertEquals("newTestObject", value);
 
     }
 
@@ -98,7 +97,7 @@ public class PairTest
 
         //assert
         assertNotNull(testPair);
-        assertTrue(key.equals("TestKey"));
+        assertEquals("TestKey", key);
 
     }
 

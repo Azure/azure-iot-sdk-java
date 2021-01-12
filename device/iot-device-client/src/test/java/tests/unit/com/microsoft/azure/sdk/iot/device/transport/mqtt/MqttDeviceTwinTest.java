@@ -516,11 +516,11 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_GET_RESPONSE);
-            assertTrue(receivedMessage.getRequestId().equals(mockReqId));
-            assertTrue(receivedMessage.getStatus().equals("200"));
-            assertTrue(receivedMessage.getVersion() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
+            assertEquals(receivedMessage.getRequestId(), mockReqId);
+            assertEquals("200", receivedMessage.getStatus());
+            assertNull(receivedMessage.getVersion());
         }
     }
     @Test
@@ -554,11 +554,11 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
-            assertTrue(receivedMessage.getStatus().equals("200"));
-            assertTrue(receivedMessage.getRequestId().equals(mockReqId));
-            assertTrue(receivedMessage.getVersion().equals(mockVersion));
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+            assertEquals("200", receivedMessage.getStatus());
+            assertEquals(receivedMessage.getRequestId(), mockReqId);
+            assertEquals(receivedMessage.getVersion(), mockVersion);
         }
     }
     /*
@@ -587,11 +587,11 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
-            assertTrue(receivedMessage.getVersion().equals(mockVersion));
-            assertTrue(receivedMessage.getRequestId() == null);
-            assertTrue(receivedMessage.getStatus() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+            assertEquals(receivedMessage.getVersion(), mockVersion);
+            assertNull(receivedMessage.getRequestId());
+            assertNull(receivedMessage.getStatus());
         }
     }
     /*
@@ -683,11 +683,11 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_GET_RESPONSE);
-            assertTrue(receivedMessage.getRequestId().equals(mockReqId));
-            assertTrue(receivedMessage.getStatus().equals("200"));
-            assertTrue(receivedMessage.getVersion() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
+            assertEquals(receivedMessage.getRequestId(), mockReqId);
+            assertEquals("200", receivedMessage.getStatus());
+            assertNull(receivedMessage.getVersion());
         }
     }
 
@@ -717,11 +717,11 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_UNKNOWN);
-            assertTrue(receivedMessage.getRequestId() == null);
-            assertTrue(receivedMessage.getStatus().equals("200"));
-            assertTrue(receivedMessage.getVersion() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_UNKNOWN);
+            assertNull(receivedMessage.getRequestId());
+            assertEquals("200", receivedMessage.getStatus());
+            assertNull(receivedMessage.getVersion());
         }
     }
 
@@ -755,11 +755,11 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_GET_RESPONSE);
-            assertTrue(receivedMessage.getRequestId().equals(mockReqId));
-            assertTrue(receivedMessage.getStatus().equals("201"));
-            assertTrue(receivedMessage.getVersion().equals(mockVersion));
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
+            assertEquals(receivedMessage.getRequestId(), mockReqId);
+            assertEquals("201", receivedMessage.getStatus());
+            assertEquals(receivedMessage.getVersion(), mockVersion);
         }
 
     }
@@ -792,11 +792,11 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_GET_RESPONSE);
-            assertTrue(receivedMessage.getRequestId().equals(mockReqId));
-            assertTrue(receivedMessage.getStatus().equals("201"));
-            assertTrue(receivedMessage.getVersion() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
+            assertEquals(receivedMessage.getRequestId(), mockReqId);
+            assertEquals("201", receivedMessage.getStatus());
+            assertNull(receivedMessage.getVersion());
         }
     }
 
@@ -829,17 +829,17 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_GET_RESPONSE);
-            assertTrue(receivedMessage.getRequestId().equals(mockReqId));
-            assertTrue(receivedMessage.getStatus().equals("200"));
-            assertTrue(receivedMessage.getVersion() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
+            assertEquals(receivedMessage.getRequestId(), mockReqId);
+            assertEquals("200", receivedMessage.getStatus());
+            assertNull(receivedMessage.getVersion());
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
-            assertTrue(receivedMessageBytes.length == actualPayload.length);
+            assertEquals(receivedMessageBytes.length, actualPayload.length);
             for (int i = 0; i < receivedMessageBytes.length; i++)
             {
-                assertTrue(receivedMessageBytes[i] == actualPayload[i]);
+                assertEquals(receivedMessageBytes[i], actualPayload[i]);
             }
 
         }
@@ -879,14 +879,14 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
-            assertTrue(receivedMessage.getRequestId().equals(mockReqId));
-            assertTrue(receivedMessage.getStatus().equals("200"));
-            assertTrue(receivedMessage.getVersion().equals(mockVersion));
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE);
+            assertEquals(receivedMessage.getRequestId(), mockReqId);
+            assertEquals("200", receivedMessage.getStatus());
+            assertEquals(receivedMessage.getVersion(), mockVersion);
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
-            assertTrue(receivedMessageBytes.length == 0);
+            assertEquals(0, receivedMessageBytes.length);
         }
     }
 
@@ -916,17 +916,17 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
-            assertTrue(receivedMessage.getRequestId() == null);
-            assertTrue(receivedMessage.getStatus() == null);
-            assertTrue(receivedMessage.getVersion() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+            assertNull(receivedMessage.getRequestId());
+            assertNull(receivedMessage.getStatus());
+            assertNull(receivedMessage.getVersion());
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
-            assertTrue(receivedMessageBytes.length == actualPayload.length);
+            assertEquals(receivedMessageBytes.length, actualPayload.length);
             for (int i = 0; i < receivedMessageBytes.length; i++)
             {
-                assertTrue(receivedMessageBytes[i] == actualPayload[i]);
+                assertEquals(receivedMessageBytes[i], actualPayload[i]);
             }
         }
     }
@@ -956,17 +956,17 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
-            assertTrue(receivedMessage.getRequestId() == null);
-            assertTrue(receivedMessage.getStatus() == null);
-            assertTrue(receivedMessage.getVersion() == null);
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+            assertNull(receivedMessage.getRequestId());
+            assertNull(receivedMessage.getStatus());
+            assertNull(receivedMessage.getVersion());
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
-            assertTrue(receivedMessageBytes.length == actualPayload.length);
+            assertEquals(receivedMessageBytes.length, actualPayload.length);
             for (int i = 0; i < receivedMessageBytes.length; i++)
             {
-                assertTrue(receivedMessageBytes[i] == actualPayload[i]);
+                assertEquals(receivedMessageBytes[i], actualPayload[i]);
             }
         }
     }
@@ -996,17 +996,17 @@ public class MqttDeviceTwinTest
         {
             //assert
             assertNotNull(receivedMessage);
-            assertTrue(receivedMessage.getMessageType() == MessageType.DEVICE_TWIN);
-            assertTrue(receivedMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
-            assertTrue(receivedMessage.getRequestId() == null);
-            assertTrue(receivedMessage.getStatus() == null);
-            assertTrue(receivedMessage.getVersion().equals(mockVersion));
+            assertSame(receivedMessage.getMessageType(), MessageType.DEVICE_TWIN);
+            assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+            assertNull(receivedMessage.getRequestId());
+            assertNull(receivedMessage.getStatus());
+            assertEquals(receivedMessage.getVersion(), mockVersion);
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
-            assertTrue(receivedMessageBytes.length == actualPayload.length);
+            assertEquals(receivedMessageBytes.length, actualPayload.length);
             for (int i = 0; i < receivedMessageBytes.length; i++)
             {
-                assertTrue(receivedMessageBytes[i] == actualPayload[i]);
+                assertEquals(receivedMessageBytes[i], actualPayload[i]);
             }
         }
     }

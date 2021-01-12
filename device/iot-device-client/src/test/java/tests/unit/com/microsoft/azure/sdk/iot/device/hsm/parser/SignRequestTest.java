@@ -6,6 +6,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.hsm.parser;
 
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
+import junit.framework.TestCase;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import static org.junit.Assert.assertArrayEquals;
 
 public class SignRequestTest
 {
@@ -54,6 +56,6 @@ public class SignRequestTest
         //assert
         assertEquals(mockedMac, Deencapsulation.getField(request, "algo"));
         assertEquals(expectedKeyId, Deencapsulation.getField(request, "keyId"));
-        assertTrue(Arrays.equals(expectedEncodedData.getBytes(), request.getData()));
+        assertArrayEquals(expectedEncodedData.getBytes(), request.getData());
     }
 }
