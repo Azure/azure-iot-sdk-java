@@ -101,17 +101,6 @@ public class SecurityProviderX509Test
             return certificates;
         }
 
-        @Override
-        public String getRegistrationId() throws SecurityProviderException
-        {
-            return super.getRegistrationId();
-        }
-
-        @Override
-        public SSLContext getSSLContext() throws SecurityProviderException
-        {
-            return super.getSSLContext();
-        }
     }
 
     //SRS_SecurityClientX509_25_001: [ This method shall retrieve the commonName of the client certificate and return as registration Id. ]
