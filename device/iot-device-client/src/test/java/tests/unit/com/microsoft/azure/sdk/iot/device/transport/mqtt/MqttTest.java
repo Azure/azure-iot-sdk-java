@@ -306,7 +306,7 @@ public class MqttTest
     public void constructorThrowsExceptionIfConnectionIsNotInitialised() throws TransportException
     {
         //act
-        Mqtt mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
+        new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
     }
 
     /*
