@@ -107,7 +107,7 @@ public class RegistryGlue
         else
         {
             DeviceTwinDevice twin = new DeviceTwinDevice(deviceId, moduleId);
-            Set<Pair> newProps = new HashSet<Pair>();
+            Set<Pair> newProps = new HashSet<>();
             Map<String, Object> desiredProps = ((JsonObject) props).getJsonObject("properties").getJsonObject("desired").getMap();
             for (String key : desiredProps.keySet())
             {

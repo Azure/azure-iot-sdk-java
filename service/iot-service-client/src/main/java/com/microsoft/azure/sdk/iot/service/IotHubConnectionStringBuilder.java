@@ -80,7 +80,7 @@ public class IotHubConnectionStringBuilder
      */
     protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString) throws IOException
     {
-        Map<String, String> keyValueMap = new HashMap<String, String>();
+        Map<String, String> keyValueMap = new HashMap<>();
 
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_006: [The function shall throw IllegalArgumentException if the input string is empty or null]
         if (Tools.isNullOrEmpty(connectionString))

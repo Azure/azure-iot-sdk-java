@@ -24,7 +24,7 @@ public class MqttMessaging extends Mqtt
     public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
     {
         //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
-        super(mqttConnection, listener, messageListener, connectionId, unacknowledgedSentMessages);
+        super(mqttConnection, listener, messageListener, connectionId, unacknowledgedSentMessages, deviceId);
 
         if (deviceId == null || deviceId.isEmpty())
         {

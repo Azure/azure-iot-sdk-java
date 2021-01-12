@@ -110,6 +110,9 @@ public final class DeviceClient extends InternalClient implements Closeable
     private FileUpload fileUpload;
     private FileUploadTask fileUploadTask;
 
+    private static String MULTIPLEXING_CLOSE_ERROR_MESSAGE = "Cannot close a multiplexed client through this method. Must use multiplexingClient.unregisterDeviceClient(deviceClient)";
+    private static String MULTIPLEXING_OPEN_ERROR_MESSAGE = "Cannot open a multiplexed client through this method. Must use multiplexingClient.registerDeviceClient(deviceClient)";
+
     /**
      * Constructor that takes a connection string and a transport client as an argument.
      *
@@ -127,18 +130,19 @@ public final class DeviceClient extends InternalClient implements Closeable
      * RFC 3986 or if the provided {@code connString} is for an x509 authenticated device
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      * @throws UnsupportedOperationException if the connection string belongs to a module rather than a device
+     * @deprecated {@link MultiplexingClient} should be used instead of {@link TransportClient} for creating all multiplexed connections.
      */
+    @Deprecated
     public DeviceClient(String connString, TransportClient transportClient) throws URISyntaxException, IllegalArgumentException, UnsupportedOperationException
     {
-        // Codes_SRS_DEVICECLIENT_12_009: [The constructor shall interpret the connection string as a set of key-value pairs delimited by ';', using the object IotHubConnectionString.]
-        this.config = new DeviceClientConfig(new IotHubConnectionString(connString));
-        this.deviceIO = null;
-
         // Codes_SRS_DEVICECLIENT_12_018: [If the transportClient is null, the function shall throw an IllegalArgumentException.]
         if (transportClient == null)
         {
             throw new IllegalArgumentException("Transport client cannot be null.");
         }
+        
+        this.config = new DeviceClientConfig(new IotHubConnectionString(connString));
+        this.deviceIO = null;
 
         // Codes_SRS_DEVICECLIENT_12_010: [The constructor shall set the connection type to USE_TRANSPORTCLIENT.]
         this.ioTHubConnectionType = IoTHubConnectionType.USE_TRANSPORTCLIENT;
@@ -406,6 +410,11 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void open() throws IOException
     {
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
+        {
+            throw new UnsupportedOperationException(MULTIPLEXING_OPEN_ERROR_MESSAGE);
+        }
+
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.CLOSED)
@@ -440,6 +449,11 @@ public final class DeviceClient extends InternalClient implements Closeable
     @Deprecated
     public void close() throws IOException
     {
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
+        {
+            throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
+        }
+
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
@@ -476,6 +490,11 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void closeNow() throws IOException
     {
+        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
+        {
+            throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
+        }
+
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_TRANSPORTCLIENT)
         {
             if (this.transportClient.getTransportClientState() == TransportClient.TransportClientState.OPENED)
@@ -662,6 +681,37 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
+     * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
+     * reported properties and desired properties. After that callback is received, this device client will receive a callback
+     * each time a desired property is updated. That callback will either contain the full desired properties set, or
+     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * will cause this device client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacedevicetwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatedevicetwin">PATCH</a>
+     *
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                                TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertiesCallBack, genericPropertyCallBackContext);
+    }
+
+    /**
      * Registers a callback to be executed whenever the connection to the device is lost or established.
      * @deprecated as of release 1.10.0 by {@link #registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)}
      * @param callback the callback to be called.
@@ -696,6 +746,12 @@ public final class DeviceClient extends InternalClient implements Closeable
             throws IOException, IllegalArgumentException
     {
         this.subscribeToMethodsInternal(deviceMethodCallback, deviceMethodCallbackContext, deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
+    }
+
+    // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
+    void setConnectionType(IoTHubConnectionType connectionType)
+    {
+        this.ioTHubConnectionType = connectionType;
     }
 
     /**
@@ -766,6 +822,12 @@ public final class DeviceClient extends InternalClient implements Closeable
         {
             // Codes_SRS_DEVICECLIENT_12_026: [The function shall trow IllegalArgumentException if the value is null.]
             throw new IllegalArgumentException("value is null");
+        }
+
+        // deviceIO is only ever null when a client was registered to a multiplexing client, became unregistered, and hasn't be re-registered yet.
+        if (this.deviceIO == null)
+        {
+            throw new UnsupportedOperationException("Must re-register this client to a multiplexing client before using it");
         }
 
         switch (optionName)

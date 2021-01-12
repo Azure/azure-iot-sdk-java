@@ -42,6 +42,11 @@ public class InternalClient
     DeviceClientConfig config;
     DeviceIO deviceIO;
 
+    boolean isMultiplexed = false;
+
+    private IotHubConnectionStatusChangeCallback connectionStatusChangeCallback;
+    private Object connectionStatusChangeCallbackContext;
+
     private DeviceTwin twin;
     private DeviceMethod method;
 
@@ -177,13 +182,11 @@ public class InternalClient
             // Don't do anything, can be infinite.
         }
 
-        //Codes_SRS_INTERNALCLIENT_21_042: [The closeNow shall closeNow the deviceIO connection.]
         this.deviceIO.close();
     }
 
     public void closeNow() throws IOException
     {
-        //Codes_SRS_INTERNALCLIENT_21_008: [The closeNow shall closeNow the deviceIO connection.]
         this.deviceIO.close();
     }
 
@@ -202,6 +205,8 @@ public class InternalClient
      */
     public void sendEventAsync(Message message, IotHubEventCallback callback, Object callbackContext)
     {
+        verifyRegisteredIfMultiplexing();
+
         //Codes_SRS_INTERNALCLIENT_34_045: [This function shall set the provided message's connection device id to the config's saved device id.]
         message.setConnectionDeviceId(this.config.getDeviceId());
 
@@ -227,6 +232,8 @@ public class InternalClient
      */
     public void sendEventBatchAsync(List<Message> messages, IotHubEventCallback callback, Object callbackContext)
     {
+        verifyRegisteredIfMultiplexing();
+
         for (Message message: messages)
         {
             message.setConnectionDeviceId(this.config.getDeviceId());
@@ -258,6 +265,8 @@ public class InternalClient
      */
     public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (this.twin == null)
         {
             //Codes_SRS_INTERNALCLIENT_25_029: [If the client has not started twin before calling this method, the function shall throw an IOException.]
@@ -283,6 +292,8 @@ public class InternalClient
      */
     public void subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (this.twin == null)
         {
             //Codes_SRS_INTERNALCLIENT_34_087: [If the client has not started twin before calling this method, the function shall throw an IOException.]
@@ -309,6 +320,8 @@ public class InternalClient
      */
     public void sendReportedProperties(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (this.twin == null)
         {
             throw new IOException("Start twin before using it");
@@ -338,6 +351,8 @@ public class InternalClient
      */
     public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (this.twin == null)
         {
             throw new IOException("Start twin before using it");
@@ -376,8 +391,13 @@ public class InternalClient
      */
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext) throws IllegalArgumentException
     {
-        //Codes_SRS_INTERNALCLIENT_34_069: [This function shall register the provided callback and context with its device IO instance.]
-        this.deviceIO.registerConnectionStatusChangeCallback(callback, callbackContext);
+        this.connectionStatusChangeCallback = callback;
+        this.connectionStatusChangeCallbackContext = callbackContext;
+
+        if (this.deviceIO != null)
+        {
+            this.deviceIO.registerConnectionStatusChangeCallback(callback, callbackContext, this.getConfig().getDeviceId());
+        }
     }
 
     /**
@@ -600,6 +620,8 @@ public class InternalClient
             throws IOException, IllegalArgumentException, UnsupportedOperationException
 
     {
+        verifyRegisteredIfMultiplexing();
+
         if (!this.deviceIO.isOpen())
         {
             throw new IOException("Open the client connection before using it.");
@@ -627,6 +649,20 @@ public class InternalClient
         }
     }
 
+    // only used by the MultiplexingClient class to signal to this client that it needs to re-register twin
+    // callbacks
+    void markTwinAsUnsubscribed()
+    {
+        this.twin = null;
+    }
+
+    // only used by the MultiplexingClient class to signal to this client that it needs to re-register methods
+    // callbacks
+    void markMethodsAsUnsubscribed()
+    {
+        this.method = null;
+    }
+
     /**
      * Starts the device twin.
      *
@@ -644,6 +680,8 @@ public class InternalClient
                                  TwinPropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (!this.deviceIO.isOpen())
         {
             //Codes_SRS_INTERNALCLIENT_34_081: [If device io has not been opened yet, this function shall throw an IOException.]
@@ -670,6 +708,50 @@ public class InternalClient
     }
 
     /**
+     * Starts the device twin.
+     *
+     * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     * @throws IllegalArgumentException if either callback is null
+     */
+    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+                           TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        if (!this.deviceIO.isOpen())
+        {
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (twinStatusCallback == null || genericPropertiesCallBack == null)
+        {
+            throw new IllegalArgumentException("Callback cannot be null");
+        }
+
+        if (this.twin == null)
+        {
+            twin = new DeviceTwin(
+                    this.deviceIO,
+                    this.config,
+                    twinStatusCallback,
+                    twinStatusCallbackContext,
+                    genericPropertiesCallBack,
+                    genericPropertyCallBackContext);
+            twin.getDeviceTwin();
+        }
+        else
+        {
+            throw new UnsupportedOperationException("You have already initialised twin");
+        }
+    }
+
+    /**
      * Get the current desired properties for this client
      * @throws IOException if the iot hub cannot be reached
      * @throws IOException if the twin has not been initialized yet
@@ -677,6 +759,8 @@ public class InternalClient
      */
     void getTwinInternal() throws IOException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (this.twin == null)
         {
             //Codes_SRS_INTERNALCLIENT_21_040: [If the client has not started twin before calling this method, the function shall throw an IOException.]
@@ -732,6 +816,8 @@ public class InternalClient
                                               IotHubEventCallback methodStatusCallback, Object methodStatusCallbackContext)
             throws IOException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (!this.deviceIO.isOpen())
         {
             throw new IOException("Open the client connection before using it.");
@@ -767,7 +853,18 @@ public class InternalClient
      */
     void setDeviceIO(DeviceIO deviceIO)
     {
+        // deviceIO may be set to null in the case when a device client was multiplexing and was unregistered
         this.deviceIO = deviceIO;
+
+        // Since connection status callbacks can be registered before associating a device client with a multiplexing client, the callback and its
+        // context also need to be registered when the device IO is set.
+        if (this.deviceIO != null && this.connectionStatusChangeCallback != null)
+        {
+            this.deviceIO.registerConnectionStatusChangeCallback(
+                    this.connectionStatusChangeCallback,
+                    this.connectionStatusChangeCallbackContext,
+                    this.getConfig().getDeviceId());
+        }
     }
 
     void setOption_SetCertificatePath(Object value)
@@ -970,18 +1067,32 @@ public class InternalClient
      */
     public void setProxySettings(ProxySettings proxySettings)
     {
+        if (this.isMultiplexed)
+        {
+            throw new IllegalStateException(
+                    "Cannot set the proxy settings of a multiplexed device. " +
+                            "Proxy settings for the multiplexed connection can only be set at multiplexing client constructor time.");
+        }
+
+        verifyRegisteredIfMultiplexing();
+
         if (this.deviceIO.isOpen())
         {
             throw new IllegalStateException("Cannot set proxy after connection was already opened");
         }
 
         IotHubClientProtocol protocol = this.deviceIO.getProtocol();
-        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS)
+        if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS && proxySettings != null)
         {
             throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
         }
 
         this.config.setProxy(proxySettings);
+    }
+
+    protected void setAsMultiplexed()
+    {
+        this.isMultiplexed = true;
     }
 
     private void commonConstructorVerification(IotHubConnectionString connectionString, IotHubClientProtocol protocol)
@@ -1001,5 +1112,25 @@ public class InternalClient
         {
             throw new UnsupportedOperationException("Communication with edgehub only supported by MQTT/MQTT_WS and AMQPS/AMQPS_WS");
         }
+    }
+
+    private void verifyRegisteredIfMultiplexing()
+    {
+        // deviceIO is only ever null when a client was registered to a multiplexing client, became unregistered, and hasn't be re-registered yet.
+        if (this.deviceIO == null && this.isMultiplexed)
+        {
+            throw new UnsupportedOperationException("Must re-register this client to a multiplexing client before using it");
+        }
+    }
+
+    /**
+     * Returns if this client is or ever was registered to a {@link MultiplexingClient} instance. Device clients that were
+     * cannot be used in non-multiplexed connections. Device clients that aren't registered to any multiplexing client
+     * will still return true.
+     * @return true if this client is or ever was registered to a {@link MultiplexingClient} instance, false otherwise.
+     */
+    public boolean isMultiplexed()
+    {
+        return this.isMultiplexed;
     }
 }

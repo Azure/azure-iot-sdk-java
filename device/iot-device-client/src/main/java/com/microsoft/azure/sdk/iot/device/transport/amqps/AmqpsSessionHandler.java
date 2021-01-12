@@ -48,6 +48,8 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     private boolean twinReceiverLinkOpened;
     private boolean methodsSenderLinkOpened;
     private boolean methodsReceiverLinkOpened;
+    private boolean sessionOpenedRemotely;
+    private boolean sessionHandlerClosedBeforeRemoteSessionOpened;
 
     AmqpsSessionHandler(final DeviceClientConfig deviceClientConfig, AmqpsSessionStateCallback amqpsSessionStateCallback)
     {
@@ -62,6 +64,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         //All events that happen to this session will be handled in this class (onSessionRemoteOpen, for instance)
         BaseHandler.setHandler(this.session, this);
 
+        log.trace("Opening device session for device {}", getDeviceId());
         this.session.open();
 
         //erase all state from previous connection state other than subscribeToMethodsOnReconnection/subscribeToTwinOnReconnection
@@ -77,11 +80,37 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.twinReceiverLinkOpened = false;
         this.methodsSenderLinkOpened = false;
         this.methodsReceiverLinkOpened = false;
+        this.sessionOpenedRemotely = false;
+        this.sessionHandlerClosedBeforeRemoteSessionOpened = false;
     }
 
     public void closeSession()
     {
-        this.session.close();
+        if (this.session != null)
+        {
+            if (this.sessionOpenedRemotely)
+            {
+                // Closing a session locally before the session was opened remotely causes a NPE to throw from proton with
+                // error message "uncorrelated channel: X"
+
+                // The reason for this is that closing a session locally removes it from proton's list of sessions.
+                // So when the service sends a "begin session" frame for this closed session, proton doesn't know how to handle
+                // it, and just throws a NPE.
+
+                // To avoid this, we will purposefully delay closing this session locally until it has been opened remotely
+
+                // This is a difficult scenario to reproduce, but it typically happens during retry logic if the client gives
+                // up on a retry attempt prior to the service opening the session remotely.
+                this.session.close();
+            }
+            else
+            {
+                // This flag signals to this session handler to close the session once the service has opened it remotely
+                // see above for more details on why.
+                log.trace("Session handler was closed but the service has not opened the session remotely yet, so the session will be closed once that happens.");
+                this.sessionHandlerClosedBeforeRemoteSessionOpened = true;
+            }
+        }
     }
 
     public String getDeviceId()
@@ -90,17 +119,27 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     }
 
     @Override
+    public void onSessionFinal(Event e)
+    {
+        this.session.free();
+    }
+
+    @Override
     public void onSessionRemoteOpen(Event e)
     {
         log.trace("Device session opened remotely for device {}", this.getDeviceId());
-        if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
+        this.sessionOpenedRemotely = true;
+        if (this.sessionHandlerClosedBeforeRemoteSessionOpened)
         {
-            openLinks();
+            // If the session handler was closed earlier, before this session opened remotely, then now is the soonest
+            // that the session itself can safely be closed.
+            log.trace("Closing an out of date session now that the service has opened the session remotely.");
+            this.session.close();
         }
-        else
+        else if (this.deviceClientConfig.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
         {
-            // do nothing but log the event. SAS token based connections can't open links until cbs links are open, and authentication messages have been sent
-            log.trace("Device session for device {} opened locally", this.getDeviceId());
+            log.trace("Opening worker links for device {}", this.getDeviceId());
+            openLinks();
         }
     }
 
@@ -117,14 +156,15 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         if (session.getLocalState() == EndpointState.ACTIVE)
         {
             //Service initiated this session close
-            log.debug("Amqp device session closed remotely unexpectedly for device {}", getDeviceId());
-            this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(session.getRemoteCondition());
-
             this.session.close();
+
+            log.debug("Amqp device session closed remotely unexpectedly for device {}", getDeviceId());
+            this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(session.getRemoteCondition(), this.getDeviceId());
         }
         else
         {
             log.trace("Amqp device session closed remotely as expected for device {}", getDeviceId());
+            this.amqpsSessionStateCallback.onSessionClosedAsExpected(this.getDeviceId());
         }
     }
 
@@ -153,6 +193,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
         if (allLinksOpen)
         {
+            log.trace("Device session for device {} has finished opening its worker links. Notifying the connection layer.", this.getDeviceId());
             this.amqpsSessionStateCallback.onDeviceSessionOpened(this.getDeviceId());
         }
 
@@ -186,7 +227,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.twinReceiverLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance());
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
                 this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
             }
         }
@@ -196,7 +237,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.twinSenderLinkOpened && this.explicitInProgressTwinSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance());
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressTwinSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
                 this.explicitInProgressTwinSubscriptionMessage = null; //By setting this to null, this session can handle another twin subscription message
             }
         }
@@ -206,7 +247,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.methodsReceiverLinkOpened && this.explicitInProgressMethodsSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage, Accepted.getInstance());
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
                 this.explicitInProgressMethodsSubscriptionMessage = null; //By setting this to null, this session can handle another method subscription message
             }
         }
@@ -216,7 +257,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
             if (this.methodsSenderLinkOpened && this.explicitInProgressMethodsSubscriptionMessage != null)
             {
-                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage, Accepted.getInstance());
+                this.amqpsSessionStateCallback.onMessageAcknowledged(this.explicitInProgressMethodsSubscriptionMessage, Accepted.getInstance(), this.getDeviceId());
                 this.explicitInProgressMethodsSubscriptionMessage = null; //By setting this to null, this session can handle another method subscription message
             }
         }
@@ -232,7 +273,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         }
         else
         {
-            this.amqpsSessionStateCallback.onMessageAcknowledged(message, deliveryState);
+            this.amqpsSessionStateCallback.onMessageAcknowledged(message, deliveryState, this.getDeviceId());
         }
     }
 
@@ -247,7 +288,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     {
         log.trace("Link closed unexpectedly for the amqp session of device {}", this.getDeviceId());
         this.session.close();
-        this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(errorCondition);
+        this.amqpsSessionStateCallback.onSessionClosedUnexpectedly(errorCondition, this.getDeviceId());
     }
 
     public boolean acknowledgeReceivedMessage(IotHubTransportMessage message, DeliveryState ackType)
@@ -305,7 +346,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     if (this.methodsSenderLinkOpened && this.methodsReceiverLinkOpened)
                     {
                         // No need to do anything. Method links are already opened
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance());
+                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
                         return true;
                     }
 
@@ -313,7 +354,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     {
                         createMethodLinks();
                         this.explicitInProgressMethodsSubscriptionMessage = transportMessage;
-                        return true; //connection layer doesn't care about this delivery ta
+                        return true; //connection layer doesn't care about this delivery tag
                     }
                     else
                     {
@@ -331,7 +372,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                     {
                         // No need to do anything. Twin links are already opened and desired properties subscription is automatically
                         // sent once the twin links are opened.
-                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance());
+                        this.amqpsSessionStateCallback.onMessageAcknowledged(message, Accepted.getInstance(), this.getDeviceId());
                         return true;
                     }
 
@@ -374,7 +415,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                             }
                         }
                     }
-                    
+
                     AmqpsSendResult amqpsSendResult = senderLinkHandler.sendMessageAndGetDeliveryTag(message);
 
                     if (amqpsSendResult.isDeliverySuccessful())

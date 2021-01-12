@@ -16,7 +16,6 @@ import org.apache.qpid.proton.reactor.Reactor;
  * and then will schedule the next timer task appropriately.
  */
 @Slf4j
-@AllArgsConstructor
 public class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationMessageCallback
 {
     //If the sas token renewal cannot be sent, try again in this many milliseconds
@@ -24,6 +23,20 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
 
     AmqpsCbsSessionHandler amqpsCbsSessionHandler;
     AmqpsSessionHandler amqpsSessionHandler;
+    private boolean isClosed;
+    private AmqpsSasTokenRenewalHandler nextToAuthenticate;
+
+    public AmqpsSasTokenRenewalHandler(AmqpsCbsSessionHandler amqpsCbsSessionHandler, AmqpsSessionHandler amqpsSessionHandler)
+    {
+        this.amqpsCbsSessionHandler = amqpsCbsSessionHandler;
+        this.amqpsSessionHandler = amqpsSessionHandler;
+        this.isClosed = false;
+    }
+
+    public void setNextToAuthenticate(AmqpsSasTokenRenewalHandler nextToAuthenticate)
+    {
+        this.nextToAuthenticate = nextToAuthenticate;
+    }
 
     @Override
     public void onTimerTask(Event event)
@@ -42,26 +55,49 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
 
     public void sendAuthenticationMessage(Reactor reactor) throws TransportException
     {
-        log.debug("Sending authentication message for device {}", amqpsSessionHandler.getDeviceId());
-        amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getDeviceClientConfig(), this);
+        if (!isClosed)
+        {
+            log.debug("Sending authentication message for device {}", amqpsSessionHandler.getDeviceId());
+            amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getDeviceClientConfig(), this);
 
-        scheduleRenewal(reactor);
+            scheduleRenewal(reactor);
+        }
     }
 
     @Override
-    public DeliveryState handleAuthenticationResponseMessage(int status, String description)
+    public DeliveryState handleAuthenticationResponseMessage(int status, String description, Reactor reactor)
     {
+        try
+        {
+            if (nextToAuthenticate != null)
+            {
+                nextToAuthenticate.sendAuthenticationMessage(reactor);
+                nextToAuthenticate = null; //only need to chain the next authentication once, so remove this connection
+            }
+        }
+        catch (TransportException e)
+        {
+            log.error("Failed to send authentication message for device {}", nextToAuthenticate.amqpsSessionHandler.getDeviceId(), e);
+        }
+
         if (status == 200)
         {
             log.debug("CBS message authentication succeeded for device {}", this.amqpsSessionHandler.getDeviceId());
             amqpsSessionHandler.openLinks();
-            return Accepted.getInstance();
         }
         else
         {
-            this.amqpsCbsSessionHandler.onAuthenticationFailed(IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(status), description));
-            return Accepted.getInstance();
+            TransportException exception = IotHubStatusCode.getConnectionStatusException(IotHubStatusCode.getIotHubStatusCode(status), description);
+            this.amqpsCbsSessionHandler.onAuthenticationFailed(this.amqpsSessionHandler.getDeviceId(), exception);
         }
+
+        return Accepted.getInstance();
+    }
+
+    // Once closed, this handler will stop sending authentication messages for its device. This object may not be re-opened.
+    public void close()
+    {
+        this.isClosed = true;
     }
 
     private void scheduleRenewal(Reactor reactor)

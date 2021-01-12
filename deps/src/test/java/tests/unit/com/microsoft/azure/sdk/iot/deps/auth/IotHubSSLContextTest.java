@@ -60,7 +60,7 @@ public class IotHubSSLContextTest
     @Mocked BouncyCastleProvider mockedBouncyCastleProvider;
     @Mocked Security mockedSecurity;
 
-    private final static Collection<Certificate> testCollection = new LinkedHashSet<Certificate>();
+    private final static Collection<Certificate> testCollection = new LinkedHashSet<>();
 
     private void generateSSLContextExpectations() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException
     {

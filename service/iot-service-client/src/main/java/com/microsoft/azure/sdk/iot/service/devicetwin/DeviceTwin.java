@@ -467,7 +467,7 @@ public class DeviceTwin
         }
 
         //Codes_SRS_DEVICETWIN_34_079: [The returned QueryCollectionResponse object shall contain the continuation token needed to retrieve the next set with.]
-        return new QueryCollectionResponse<DeviceTwinDevice>(deviceTwinDeviceList, queryResults.getContinuationToken());
+        return new QueryCollectionResponse<>(deviceTwinDeviceList, queryResults.getContinuationToken());
     }
 
     /**
