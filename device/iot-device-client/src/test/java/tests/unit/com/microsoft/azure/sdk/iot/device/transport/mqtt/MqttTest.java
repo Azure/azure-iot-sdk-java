@@ -101,11 +101,6 @@ public class MqttTest
         {
             new MockUp<MqttMessaging>()
             {
-                @Mock
-                void $clinit()
-                {
-                    // Do nothing here (usually).
-                }
 
                 @Mock
                 Pair<String, byte[]> peekMessage() throws IOException
@@ -119,11 +114,6 @@ public class MqttTest
         {
             new MockUp<MqttDeviceTwin>()
             {
-                @Mock
-                void $clinit()
-                {
-                    // Do nothing here (usually).
-                }
 
                 @Mock
                 Pair<String, byte[]> peekMessage() throws IOException

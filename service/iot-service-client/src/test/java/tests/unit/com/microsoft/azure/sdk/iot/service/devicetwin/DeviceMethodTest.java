@@ -442,6 +442,7 @@ public class DeviceMethodTest
     }
 
     /* Tests_SRS_DEVICEMETHOD_21_013: [The invoke shall deserialize the payload using the `serializer.MethodParser`.] */
+    @SuppressWarnings("EmptyMethod")
     @Test (expected = IllegalArgumentException.class)
     public void invokeThrowOnCreateMethodResponseFailed(
             @Mocked final DeviceOperations request,
