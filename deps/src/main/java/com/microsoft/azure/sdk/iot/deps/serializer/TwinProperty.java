@@ -29,7 +29,7 @@ public class TwinProperty
     private static final String LAST_UPDATE_TAG = "$lastUpdated";
     private static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
 
-    private Object lock = new Object();
+    private final Object lock = new Object();
 
     private class Property
     {

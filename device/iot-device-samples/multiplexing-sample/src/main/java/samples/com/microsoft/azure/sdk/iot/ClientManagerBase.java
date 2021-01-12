@@ -26,6 +26,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
      * Initialize the connection status as DISCONNECTED
      */
     protected ConnectionStatus lastKnownConnectionStatus = ConnectionStatus.DISCONNECTED;
+    private final Object lastKnownConnectionStatusLock = new Object();
 
     // Tracks connection status of the dependency connection (multiplexing client connection status for example in this case for DeviceClientManager)
     protected ConnectionStatusTracker dependencyConnectionStatusTracker;
@@ -63,7 +64,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
 
     public void closeNow()
     {
-        synchronized (lastKnownConnectionStatus)
+        synchronized (lastKnownConnectionStatusLock)
         {
             try
             {
@@ -89,7 +90,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
      */
     public void open() throws IOException, MultiplexingClientException
     {
-        synchronized (lastKnownConnectionStatus)
+        synchronized (lastKnownConnectionStatusLock)
         {
             // Do not attempt to CONNECT if the connection status is not DISCONNECTED. This ensure that only one process is going to attempt to connect
             if (lastKnownConnectionStatus != ConnectionStatus.DISCONNECTED)
@@ -154,7 +155,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                 @Override
                 public void run() {
                     log.debug("Attempting reconnect for client: " + getClientId() + " ...");
-                    synchronized (lastKnownConnectionStatus)
+                    synchronized (lastKnownConnectionStatusLock)
                     {
                         if (lastKnownConnectionStatus == ConnectionStatus.CONNECTED)
                         {
@@ -199,7 +200,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
     {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         // Lock the lastKnownConnectionStus so no other process will be able to change it while the client manager is attempting to open the connection.
-        synchronized (lastKnownConnectionStatus)
+        synchronized (lastKnownConnectionStatusLock)
         {
             while (lastKnownConnectionStatus == ConnectionStatus.CONNECTING)
             {

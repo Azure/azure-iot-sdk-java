@@ -89,7 +89,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
 
     // This lock is used to keep calls to open/close/connection status changes synchronous.
-    private Object stateLock = new Object();
+    private final Object stateLock = new Object();
 
     /**
      * Constructor that takes a connection string as an argument.
