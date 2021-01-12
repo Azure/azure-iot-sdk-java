@@ -58,13 +58,6 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         jsonParser = new JsonParser();
     }
 
-    @Before
-    @SuppressWarnings("EmptyMethod")
-    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
-    {
-        super.setUpNewDeviceAndModule();
-    }
-
     @Test
     @StandardTierHubOnlyTest
     public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
