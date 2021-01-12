@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -99,9 +100,9 @@ public class IotHubServiceSasTokenTest
         String token = iotHubServiceSasToken.toString();
 
         // Assert
-        assertEquals(token.contains("SharedAccessSignature sr=hostname.b.c.d&sig="), true);
-        assertEquals(token.contains("&se="), true);
-        assertEquals(token.contains("&skn=ACCESSKEYNAME"), true);
+        assertTrue(token.contains("SharedAccessSignature sr=hostname.b.c.d&sig="));
+        assertTrue(token.contains("&se="));
+        assertTrue(token.contains("&skn=ACCESSKEYNAME"));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_007: [The constructor shall throw Exception if building the token failed]

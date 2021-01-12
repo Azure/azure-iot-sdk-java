@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinMetadata;
+import org.junit.Assert;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,9 +20,7 @@ import java.util.TimeZone;
 import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test helpers.
@@ -102,11 +101,11 @@ public class Helpers
                 {
                     if(message == null)
                     {
-                        assertTrue("Expected key:" + key + " does not exist in Actual Map", false);
+                        fail("Expected key:" + key + " does not exist in Actual Map");
                     }
                     else
                     {
-                        assertTrue(message, false);
+                        fail(message);
                     }
                 }
                 else if(expectedValue instanceof Map)
@@ -119,11 +118,11 @@ public class Helpers
                     {
                         if(message == null)
                         {
-                            assertTrue("Map contains invalid Object", false);
+                            fail("Map contains invalid Object");
                         }
                         else
                         {
-                            assertTrue(message, false);
+                            fail(message);
                         }
                     }
                 }
@@ -131,11 +130,11 @@ public class Helpers
                 {
                     if(message == null)
                     {
-                        assertTrue("Map failed on " + key + ": " + actualValue + " != " + expectedValue, actualValue.toString().equals(expectedValue.toString()));
+                        Assert.assertEquals("Map failed on " + key + ": " + actualValue + " != " + expectedValue, actualValue.toString(), expectedValue.toString());
                     }
                     else
                     {
-                        assertTrue(message, actualValue.toString().equals(expectedValue.toString()));
+                        Assert.assertEquals(message, actualValue.toString(), expectedValue.toString());
                     }
                 }
                 else
@@ -146,7 +145,7 @@ public class Helpers
                     }
                     else
                     {
-                        assertTrue(message, actualValue.equals(expectedValue));
+                        Assert.assertEquals(message, actualValue, expectedValue);
                     }
                 }
             }
@@ -239,11 +238,11 @@ public class Helpers
                 {
                     if(message == null)
                     {
-                        assertTrue("Expected key:" + key + " does not exist in Actual TwinCollection", false);
+                        fail("Expected key:" + key + " does not exist in Actual TwinCollection");
                     }
                     else
                     {
-                        assertTrue(message, false);
+                        fail(message);
                     }
                 }
                 else if(expectedValue instanceof TwinCollection)
@@ -256,11 +255,11 @@ public class Helpers
                     {
                         if(message == null)
                         {
-                            assertTrue("TwinCollection contains invalid Object", false);
+                            fail("TwinCollection contains invalid Object");
                         }
                         else
                         {
-                            assertTrue(message, false);
+                            fail(message);
                         }
                     }
                 }
@@ -268,11 +267,11 @@ public class Helpers
                 {
                     if(message == null)
                     {
-                        assertTrue("TwinCollection failed on " + key + ": " + actualValue + " != " + expectedValue, actualValue.toString().equals(expectedValue.toString()));
+                        Assert.assertEquals("TwinCollection failed on " + key + ": " + actualValue + " != " + expectedValue, actualValue.toString(), expectedValue.toString());
                     }
                     else
                     {
-                        assertTrue(message, actualValue.toString().equals(expectedValue.toString()));
+                        Assert.assertEquals(message, actualValue.toString(), expectedValue.toString());
                     }
                 }
                 else
@@ -283,7 +282,7 @@ public class Helpers
                     }
                     else
                     {
-                        assertTrue(message, actualValue.equals(expectedValue));
+                        Assert.assertEquals(message, actualValue, expectedValue);
                     }
                 }
             }

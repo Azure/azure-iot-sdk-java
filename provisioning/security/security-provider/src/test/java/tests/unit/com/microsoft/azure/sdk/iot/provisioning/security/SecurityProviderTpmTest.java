@@ -27,8 +27,7 @@ import java.security.cert.CertificateException;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertNotNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /*
      Unit tests for SecurityProviderTpm and SecurityProvider
@@ -119,7 +118,7 @@ public class SecurityProviderTpmTest
         String actualRegistrationId = securityClientTpm.getRegistrationId();
         //assert
         assertNotNull(actualRegistrationId);
-        assertTrue(actualRegistrationId.equals(actualRegistrationId.toLowerCase()));
+        assertEquals(actualRegistrationId, actualRegistrationId.toLowerCase());
         assertFalse(actualRegistrationId.contains("="));
         new Verifications()
         {

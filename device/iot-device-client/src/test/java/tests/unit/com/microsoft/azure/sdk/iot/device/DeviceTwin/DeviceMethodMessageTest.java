@@ -7,8 +7,7 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /* Unit tests for IotHubTransportMessage
 * 100% methods covered
@@ -27,7 +26,7 @@ public class DeviceMethodMessageTest
         IotHubTransportMessage testDMMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
 
         //assert
-        assertTrue(testDMMessage.getMessageType() == MessageType.DEVICE_METHODS);
+        assertSame(testDMMessage.getMessageType(), MessageType.DEVICE_METHODS);
 
     }
 

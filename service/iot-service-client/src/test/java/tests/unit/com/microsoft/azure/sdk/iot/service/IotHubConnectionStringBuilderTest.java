@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(JMockit.class)
 public class IotHubConnectionStringBuilderTest
@@ -610,7 +611,7 @@ public class IotHubConnectionStringBuilderTest
         // Assert
         assertEquals(newPolicyName, iotHubConnectionString.getSharedAccessKeyName());
         assertEquals(newPolicyKey, iotHubConnectionString.getSharedAccessKey());
-        assertEquals(null, iotHubConnectionString.getSharedAccessSignature());
+        assertNull(iotHubConnectionString.getSharedAccessSignature());
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_023: [The function shall populate and set the authenticationMethod on the given target iotHubConnectionString object]
@@ -641,6 +642,6 @@ public class IotHubConnectionStringBuilderTest
         assertEquals(auth, iotHubConnectionString.getAuthenticationMethod());
         assertEquals(newPolicyName, iotHubConnectionString.getSharedAccessKeyName());
         assertEquals(newPolicyKey, iotHubConnectionString.getSharedAccessSignature());
-        assertEquals(null, iotHubConnectionString.getSharedAccessKey());
+        assertNull(iotHubConnectionString.getSharedAccessKey());
     }
 }

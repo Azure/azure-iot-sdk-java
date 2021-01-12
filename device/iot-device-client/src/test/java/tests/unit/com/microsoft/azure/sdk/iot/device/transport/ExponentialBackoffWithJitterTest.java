@@ -73,7 +73,7 @@ public class ExponentialBackoffWithJitterTest
         RetryDecision actual = exp.getRetryDecision(0, null);
 
         //assert
-        assertEquals(true, actual.shouldRetry());
+        assertTrue(actual.shouldRetry());
         assertEquals(0, actual.getDuration());
     }
 

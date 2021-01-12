@@ -29,7 +29,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /*
  * Unit tests for ContractAPIHttp
@@ -142,7 +142,7 @@ public class ProvisioningAmqpOperationsTest
         boolean isConnected = provisioningAmqpOperations.isAmqpConnected();
 
         //assert
-        assertEquals(false, isConnected);
+        assertFalse(isConnected);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class ProvisioningAmqpOperationsTest
         boolean isConnected = provisioningAmqpOperations.isAmqpConnected();
 
         //assert
-        assertEquals(true, isConnected);
+        assertTrue(isConnected);
     }
 
     // SRS_ProvisioningAmqpOperations_07_004: [open shall throw ProvisioningDeviceClientException if either registrationId or sslContext are null or empty.]

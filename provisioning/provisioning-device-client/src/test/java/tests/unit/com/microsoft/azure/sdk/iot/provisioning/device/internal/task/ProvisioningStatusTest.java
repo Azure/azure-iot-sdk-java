@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ProvisioningStatus.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /* Unit tests for Provisioning Status
  * Coverage 100% line, 100% method
@@ -61,6 +62,6 @@ public class ProvisioningStatusTest
     public void fromStringReturnsUnknown() throws Exception
     {
         ProvisioningStatus status = Deencapsulation.invoke(ProvisioningStatus.class, "fromString", "unknown");
-        assertEquals(null, status);
+        assertNull(status);
     }
 }
