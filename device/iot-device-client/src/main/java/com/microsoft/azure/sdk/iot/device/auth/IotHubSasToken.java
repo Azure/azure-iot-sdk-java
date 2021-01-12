@@ -247,7 +247,7 @@ public final class IotHubSasToken
             throw new IllegalArgumentException("Malformed signature");
         }
 
-        Map<String, String> parsedFields = new HashMap<String, String>();
+        Map<String, String> parsedFields = new HashMap<>();
         String[] fields = lines[SASTokenFieldSegmentIndex].trim().split(FieldPairSeparator);
 
         for (String field : fields)

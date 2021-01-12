@@ -99,9 +99,8 @@ public final class IotHubServiceSasToken
             String signature = URLEncoder.encode(encodeBase64String(rawHmac), StandardCharsets.UTF_8.name());
 
             // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
-            String token = String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
 
-            return token;
+            return String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
         }
         catch (Exception e)
         {

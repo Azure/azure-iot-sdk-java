@@ -169,8 +169,7 @@ public class HttpsRequestResponseSerializer
 
     private static String preProcessRequestPath(String path)
     {
-        String dnsSafePath = path.replace("[", "").replace("]", "");
-        return dnsSafePath;
+        return path.replace("[", "").replace("]", "");
     }
 
     private static Map<String, List<String>> readHeaderFields(BufferedReader bufferedReader) throws IOException

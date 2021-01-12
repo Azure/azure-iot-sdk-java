@@ -36,7 +36,6 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     private static final String HTTPS_PROPERTY_IF_MATCH_TAG = "if-match";
     private static final String HTTPS_PROPERTY_ETAG_TAG = "etag";
 
-
     private IotHubListener listener;
 
     /** The HTTPS connection lock. */
@@ -171,7 +170,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
             if (status == IotHubStatusCode.OK || status == IotHubStatusCode.OK_EMPTY)
             {
                 //Codes_SRS_HTTPSIOTHUBCONNECTION_34_067: [If the response from the service is OK or OK_EMPTY, this function shall notify its listener that a message was sent with no exception.]
-                this.listener.onMessageSent(transportMessage, null);
+                this.listener.onMessageSent(transportMessage, this.config.getDeviceId(), null);
             }
 
             // Status codes other than 200 and 204 have their errors handled in the IotHubTransport layer once this method returns,
@@ -312,7 +311,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
     }
 
     @Override
-    public void open(Queue<DeviceClientConfig> deviceClientConfigs)
+    public void open()
     {
 
     }
@@ -470,8 +469,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
         request.setSSLContext(this.getSSLContext());
 
-        HttpsResponse response = request.send();
-        return response;
+        return request.send();
     }
 
     private URL buildUrlFromString(String url) throws TransportException

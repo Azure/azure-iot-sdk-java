@@ -131,7 +131,7 @@ public class MqttTest
                     return new MutablePair<>(MOCK_PARSE_TOPIC, new byte[0]);
                 }
             };
-            return new MqttDeviceTwin(mockedMqttConnection, "", new HashMap<Integer, Message>());
+            return new MqttDeviceTwin(mockedMqttConnection, "", new HashMap<Integer, Message>(), null);
         }
     }
 
@@ -1336,7 +1336,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
     @Test
-    public void deliveryCompleteNotifiesListener() throws TransportException
+    public void deliveryCompleteNotifiesListener(@Mocked final org.slf4j.Logger mockLogger) throws TransportException
     {
         //arrange
         final int expectedMessageId = 13;
@@ -1348,7 +1348,10 @@ public class MqttTest
         unacknowledgedMessages.put(12, otherMessage);
         unacknowledgedMessages.put(expectedMessageId, expectedMessage);
         Deencapsulation.setField(mockMqtt, "unacknowledgedSentMessages", unacknowledgedMessages);
-        new NonStrictExpectations()
+        final String deviceId = "someDeviceId";
+        Deencapsulation.setField(mockMqtt, "deviceId", deviceId);
+        Deencapsulation.setField(mockMqtt, "log", mockLogger);
+        new Expectations()
         {
             {
                 mockMqttDeliveryToken.getMessageId();
@@ -1364,9 +1367,9 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockedIotHubListener.onMessageSent(expectedMessage, null);
+                mockedIotHubListener.onMessageSent(expectedMessage, deviceId, null);
                 times = 1;
-                mockedIotHubListener.onMessageSent(otherMessage, null);
+                mockedIotHubListener.onMessageSent(otherMessage, deviceId, null);
                 times = 0;
             }
         };
@@ -1405,7 +1408,7 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockedIotHubListener.onMessageSent(expectedMessage, null);
+                mockedIotHubListener.onMessageSent(expectedMessage, null, null);
                 times = 0;
             }
         };
@@ -1444,7 +1447,7 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockedIotHubListener.onMessageSent(expectedMessage, null);
+                mockedIotHubListener.onMessageSent(expectedMessage, null, null);
                 times = 0;
             }
         };
@@ -1483,7 +1486,7 @@ public class MqttTest
         new Verifications()
         {
             {
-                mockedIotHubListener.onMessageSent(expectedMessage, null);
+                mockedIotHubListener.onMessageSent(expectedMessage, null, null);
                 times = 0;
             }
         };

@@ -26,8 +26,7 @@ public class MessagePropertyTest
         MessageProperty property = new MessageProperty(name, value);
         String testName = property.getName();
 
-        final String expectedName = name;
-        assertThat(testName, is(expectedName));
+        assertThat(testName, is(name));
     }
 
     // Tests_SRS_MESSAGEPROPERTY_11_001: [The constructor shall save the property name and value.]
@@ -41,8 +40,7 @@ public class MessagePropertyTest
         MessageProperty property = new MessageProperty(name, value);
         String testValue = property.getValue();
 
-        final String expectedValue = value;
-        assertThat(testValue, is(expectedValue));
+        assertThat(testValue, is(value));
 		
     }
 
@@ -55,8 +53,7 @@ public class MessagePropertyTest
         MessageProperty property = new MessageProperty(name, value);
         String testValue = property.getValue();
 
-        final String expectedValue = value;
-        assertThat(testValue, is(expectedValue));
+        assertThat(testValue, is(value));
     }
     
     // Tests_SRS_MESSAGEPROPERTY_11_008: [If the name is a reserved property name, the function shall throw an IllegalArgumentException.]

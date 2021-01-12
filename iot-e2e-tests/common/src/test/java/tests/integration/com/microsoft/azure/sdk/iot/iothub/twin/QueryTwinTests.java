@@ -60,14 +60,12 @@ public class QueryTwinTests extends DeviceTwinCommon
         IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        List inputs = Arrays.asList(
+        return Arrays.asList(
                     new Object[][]
                             {
                                     //Query is only supported over http and only with sas based authentication
                                     {HTTPS, SAS, ClientType.DEVICE_CLIENT, null, null, null},
                             });
-
-        return inputs;
     }
 
     @Test

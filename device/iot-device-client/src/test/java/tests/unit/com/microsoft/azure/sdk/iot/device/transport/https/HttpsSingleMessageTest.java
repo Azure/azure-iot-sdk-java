@@ -57,11 +57,10 @@ public class HttpsSingleMessageTest
                 HttpsSingleMessage.parseHttpsMessage(mockMsg);
         byte[] testBody = httpsMsg.getBody();
 
-        byte[] expectedBody = body;
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(body));
 
-        expectedBody[0] = 0x34;
-        assertThat(testBody, is(not(expectedBody)));
+        body[0] = 0x34;
+        assertThat(testBody, is(not(body)));
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_21_002: [The parsed HttpsSingleMessage shall set the contentType as `binary/octet-stream`.]
@@ -126,12 +125,11 @@ public class HttpsSingleMessageTest
 
         final String expectedPrefix = "iothub-app-";
         final String expectedPropertyName = expectedPrefix + propertyName;
-        final String expectedPropertyValue = propertyValue;
         new Verifications()
         {
             {
                 new MessageProperty(expectedPropertyName,
-                        expectedPropertyValue);
+                        propertyValue);
             }
         };
     }
@@ -161,11 +159,10 @@ public class HttpsSingleMessageTest
                 HttpsSingleMessage.parseHttpsMessage(mockResponse);
         byte[] testBody = httpsMsg.getBody();
 
-        byte[] expectedBody = body;
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(body));
 
-        expectedBody[0] = 0x34;
-        assertThat(testBody, is(not(expectedBody)));
+        body[0] = 0x34;
+        assertThat(testBody, is(not(body)));
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_34_014: [If the message contains a system property, the parsed HttpsSingleMessage shall add the corresponding property with property value]
@@ -249,11 +246,10 @@ public class HttpsSingleMessageTest
         // assert
         byte[] testBody = httpsMsg.getBody();
 
-        byte[] expectedBody = body;
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(body));
 
-        expectedBody[0] = 0x34;
-        assertThat(testBody, is(not(expectedBody)));
+        body[0] = 0x34;
+        assertThat(testBody, is(not(body)));
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_21_017: [The parsed HttpsSingleMessage shall set the contentType as `application/json;charset=utf-8`.]
@@ -321,12 +317,11 @@ public class HttpsSingleMessageTest
         // assert
         final String expectedPrefix = "iothub-app-";
         final String expectedPropertyName = expectedPrefix + propertyName;
-        final String expectedPropertyValue = propertyValue;
         new Verifications()
         {
             {
                 new MessageProperty(expectedPropertyName,
-                        expectedPropertyValue);
+                        propertyValue);
             }
         };
     }
@@ -520,7 +515,6 @@ public class HttpsSingleMessageTest
                 HttpsSingleMessage.parseHttpsMessage(mockResponse);
         httpsMsg.toMessage();
 
-        final byte[] expectedBody = body;
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_11_008: [The function shall return an IoT Hub message with application-defined properties that have the prefix 'iothub-app' removed.]
@@ -561,12 +555,11 @@ public class HttpsSingleMessageTest
         httpsMsg.toMessage();
 
         final String expectedPropertyName = "test-property-name";
-        final String expectedPropertyValue = propertyValue;
         new Verifications()
         {
             {
                 mockMsg.setProperty(expectedPropertyName,
-                        expectedPropertyValue);
+                        propertyValue);
             }
         };
     }
@@ -599,12 +592,11 @@ public class HttpsSingleMessageTest
                 HttpsSingleMessage.parseHttpsMessage(mockMsg);
         byte[] testBody = httpsMsg.getBody();
 
-        byte[] expectedBody = body;
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(body));
 
         testBody[0] = 0x34;
         testBody = httpsMsg.getBody();
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(body));
     }
 
     // Tests_SRS_HTTPSSINGLEMESSAGE_11_010: [The function shall return the message body as a string encoded using charset UTF-8.]
@@ -701,14 +693,11 @@ public class HttpsSingleMessageTest
         HttpsSingleMessage httpsMsg = HttpsSingleMessage.parseHttpsMessage(mockMsg);
         MessageProperty[] testProperties = httpsMsg.getProperties();
 
-        final MessageProperty[] expectedProperties = properties;
-        assertThat(testProperties.length, is(expectedProperties.length));
-        final String expectedPropertyName = httpsPropertyName;
-        final String expectedPropertyValue = propertyValue;
+        assertThat(testProperties.length, is(properties.length));
         new Verifications()
         {
             {
-                new MessageProperty(expectedPropertyName, expectedPropertyValue);
+                new MessageProperty(httpsPropertyName, propertyValue);
                 times = 2;
             }
         };
@@ -732,7 +721,7 @@ public class HttpsSingleMessageTest
         String to = "device4";
         String appProperty = "app_property_value";
 
-        final Map<String, String> headerFields = new HashMap<String, String>();
+        final Map<String, String> headerFields = new HashMap<>();
         headerFields.put(correlationIdKey, correlationId);
         headerFields.put(userIdKey, userId);
         headerFields.put(messageIdKey, messageId);

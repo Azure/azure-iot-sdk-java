@@ -35,13 +35,12 @@ public class JobsParserTest
 
     private TwinState makeTwinSample()
     {
-        TwinState twinState = TwinState.createFromTwinJson(
+        return TwinState.createFromTwinJson(
                 "{\"tags\":{" +
                     "\"tag1\":{\"KeyChar\":\"c\",\"KeyBool\":true,\"keyString\":\"value1\",\"keyEnum\":\"val1\",\"keyDouble\":1234.456}}," +
                 "\"properties\":{" +
                     "\"desired\":{\"key1\":\"value1\",\"key2\":1234,\"key3\":\"value3\"}," +
                     "\"reported\":{\"key1\":\"value1\",\"key3\":\"value3\"}}}");
-        return twinState;
     }
 
     /* Tests_SRS_JOBSPARSER_21_001: [The constructor shall evaluate and store the commons parameters using the internal function commonFields.] */

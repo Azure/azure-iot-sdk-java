@@ -240,8 +240,8 @@ public class QueryCollection
 
         //Codes_SRS_QUERYCOLLECTION_34_021: [The method shall create a QueryResponse object with the contents from the response body and its continuation token and return it.]
         this.isInitialQuery = false;
-        return new QueryCollectionResponse<String>(
-        		new String(httpResponse.getBody(), StandardCharsets.UTF_8), this.responseContinuationToken);
+        return new QueryCollectionResponse<>(
+                new String(httpResponse.getBody(), StandardCharsets.UTF_8), this.responseContinuationToken);
     }
 
     /**

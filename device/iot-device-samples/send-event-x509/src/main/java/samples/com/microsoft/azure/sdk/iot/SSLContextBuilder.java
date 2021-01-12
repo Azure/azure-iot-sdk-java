@@ -98,8 +98,7 @@ public class SSLContextBuilder
         byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
         KeyFactory kf = KeyFactory.getInstance("RSA");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-        RSAPrivateKey privKey = (RSAPrivateKey) kf.generatePrivate(keySpec);
-        return privKey;
+        return (RSAPrivateKey) kf.generatePrivate(keySpec);
     }
 
     public static X509Certificate[] parsePublicKeyCertificateString(String pemString) throws GeneralSecurityException

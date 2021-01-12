@@ -233,8 +233,7 @@ public class HttpsTransportManager implements IotHubTransportManager
         if (responseMessage.getStatus() != IotHubStatusCode.OK && responseMessage.getStatus() != IotHubStatusCode.OK_EMPTY)
         {
             //Codes_SRS_HTTPSTRANSPORTMANAGER_34_026 [If the http response contains an error code, this function shall throw the associated exception.]
-            IotHubServiceException exception = IotHubStatusCode.getConnectionStatusException(responseMessage.getStatus(), new String(responseMessage.getBytes()));
-            throw exception;
+            throw IotHubStatusCode.getConnectionStatusException(responseMessage.getStatus(), new String(responseMessage.getBytes()));
         }
 
         //Codes_SRS_HTTPSTRANSPORTMANAGER_34_027 [If the http response doesn't contain an error code, this function return a method result with the response message body as the method result body.]

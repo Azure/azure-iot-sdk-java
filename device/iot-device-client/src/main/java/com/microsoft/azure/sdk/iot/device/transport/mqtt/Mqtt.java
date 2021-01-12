@@ -70,6 +70,7 @@ abstract public class Mqtt implements MqttCallback
 
     private IotHubListener listener;
     private String connectionId;
+    private final String deviceId;
 
     /**
      * Constructor to instantiate mqtt broker connection.
@@ -77,9 +78,10 @@ abstract public class Mqtt implements MqttCallback
      * @param listener the listener to be called back upon connection established/lost and upon a message being delivered
      * @param messageListener the listener to be called back upon a message arriving
      * @param connectionId the id of the connection
+     * @param deviceId the Id of the device this connection belongs to
      * @throws IllegalArgumentException if the provided mqttConnection is null
      */
-    public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener, String connectionId, Map<Integer, Message> unacknowledgedSentMessages) throws IllegalArgumentException
+    public Mqtt(MqttConnection mqttConnection, IotHubListener listener, MqttMessageListener messageListener, String connectionId, Map<Integer, Message> unacknowledgedSentMessages, String deviceId) throws IllegalArgumentException
     {
         if (mqttConnection == null)
         {
@@ -88,6 +90,7 @@ abstract public class Mqtt implements MqttCallback
         }
 
         //Codes_SRS_Mqtt_25_003: [The constructor shall retrieve lock, queue from the provided connection information and save the connection.]
+        this.deviceId = deviceId;
         this.mqttConnection = mqttConnection;
         this.allReceivedMessages = mqttConnection.getAllReceivedMessages();
         this.stateLock = mqttConnection.getMqttLock();
@@ -462,7 +465,7 @@ abstract public class Mqtt implements MqttCallback
         }
 
         //Codes_SRS_Mqtt_34_042: [If this object has a saved listener, that listener shall be notified of the successfully delivered message.]
-        this.listener.onMessageSent(deliveredMessage, null);
+        this.listener.onMessageSent(deliveredMessage, this.deviceId, null);
     }
 
     public Pair<String, byte[]> peekMessage()

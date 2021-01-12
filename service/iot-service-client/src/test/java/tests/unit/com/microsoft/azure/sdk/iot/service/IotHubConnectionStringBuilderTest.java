@@ -352,11 +352,10 @@ public class IotHubConnectionStringBuilderTest
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-        String expected = iotHubName;
         // Act
         String actual = Deencapsulation.invoke(iotHubConnectionString, "parseIotHubName", iotHubConnectionString);
         // Assert
-        assertEquals("Parser error: IotHubName mismatch!", expected, actual);
+        assertEquals("Parser error: IotHubName mismatch!", iotHubName, actual);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_013: [The function shall return the substring of the host name until the first “.” character]
@@ -372,11 +371,10 @@ public class IotHubConnectionStringBuilderTest
         String connectionString = "HostName=" + iotHubName + "." + iotHostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         String userString = sharedAccessKeyName +  "@SAS.root." + iotHubName;
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-        String expected = iotHubName;
         // Act
         String actual = Deencapsulation.invoke(iotHubConnectionString, "parseIotHubName", iotHubConnectionString);
         // Assert
-        assertEquals("Parser error: IotHubName mismatch!", expected, actual);
+        assertEquals("Parser error: IotHubName mismatch!", iotHubName, actual);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_014: [The function shall return empty string if “.” character was not found]

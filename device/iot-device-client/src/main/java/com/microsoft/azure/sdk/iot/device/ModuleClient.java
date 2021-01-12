@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.SignatureProvider;
@@ -543,6 +544,37 @@ public class ModuleClient extends InternalClient
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
+    }
+
+    /**
+     * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
+     * reported properties and desired properties. After that callback is received, this module client will receive a callback
+     * each time a desired property is updated. That callback will either contain the full desired properties set, or
+     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
+     * will cause this module client to only receive the updated desired properties. Similarly, the version
+     * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
+     * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
+     * but it builds the patch such that all properties are included in the patch. As a result, the device side will receive full twin
+     * updates, not partial updates.
+     *
+     * See <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/replacemoduletwin">PUT</a> and
+     * <a href="https://docs.microsoft.com/en-us/rest/api/iothub/service/twin/updatemoduletwin">PATCH</a>
+     *
+     * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
+     * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
+     * @param genericPropertiesCallBack the TwinPropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     *
+     * @throws IllegalArgumentException if the callback is {@code null}
+     * @throws UnsupportedOperationException if called more than once on the same device
+     * @throws IOException if called when client is not opened
+     */
+    public void startTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                                TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
+            throws IOException, IllegalArgumentException, UnsupportedOperationException
+    {
+        this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertiesCallBack, genericPropertyCallBackContext);
     }
 
     /**

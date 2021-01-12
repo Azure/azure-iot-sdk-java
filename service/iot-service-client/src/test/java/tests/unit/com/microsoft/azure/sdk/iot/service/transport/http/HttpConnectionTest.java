@@ -340,7 +340,6 @@ public class HttpConnectionTest
         final String field = "test-field";
         final String value = "test-value";
         final int timeout = 1;
-        final int expectedTimeout = timeout;
         new NonStrictExpectations()
         {
             {
@@ -359,7 +358,7 @@ public class HttpConnectionTest
         new Verifications()
         {
             {
-                mockUrl.openConnection().setReadTimeout(expectedTimeout);
+                mockUrl.openConnection().setReadTimeout(timeout);
             }
         };
     }
@@ -370,7 +369,6 @@ public class HttpConnectionTest
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.POST;
         final int timeout = 1;
-        final int expectedTimeout = timeout;
         new NonStrictExpectations()
         {
             {
@@ -391,7 +389,7 @@ public class HttpConnectionTest
         new Verifications()
         {
             {
-                mockUrl.openConnection().setConnectTimeout(expectedTimeout);
+                mockUrl.openConnection().setConnectTimeout(timeout);
             }
         };
     }
@@ -750,7 +748,6 @@ public class HttpConnectionTest
         // Arrange
         final HttpMethod httpsMethod = HttpMethod.GET;
         final int status = 204;
-        int expectedStatus = status;
         new NonStrictExpectations()
         {
             {
@@ -769,7 +766,7 @@ public class HttpConnectionTest
         // Act
         int testStatus = conn.getResponseStatus();
         // Assert
-        assertThat(testStatus, is(expectedStatus));
+        assertThat(testStatus, is(status));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_021: [The function shall throw an IOException if no response was received.]
@@ -815,7 +812,6 @@ public class HttpConnectionTest
         final Map<String, List<String>> responseHeaders = new HashMap<>();
         responseHeaders.put(field0, values0);
         responseHeaders.put(field1, values1);
-        final Map<String, List<String>> expectedResponseHeaders = responseHeaders;
         new NonStrictExpectations()
         {
             {
@@ -836,11 +832,11 @@ public class HttpConnectionTest
         Map<String, List<String>> testResponseHeaders = conn.getResponseHeaders();
         // Assert
         assertThat(testResponseHeaders.size(),
-                is(expectedResponseHeaders.size()));
+                is(responseHeaders.size()));
         // the list of values for each field is of size 1, so the lists
         // can be directly compared.
-        assertThat(testResponseHeaders.get(field0),is(expectedResponseHeaders.get(field0)));
-        assertThat(testResponseHeaders.get(field1),is(expectedResponseHeaders.get(field1)));
+        assertThat(testResponseHeaders.get(field0),is(responseHeaders.get(field0)));
+        assertThat(testResponseHeaders.get(field1),is(responseHeaders.get(field1)));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_HTTPSCONNECTION_12_023: [The function shall throw an IOException if no response was received.]

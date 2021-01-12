@@ -62,8 +62,7 @@ public class IotHubCompleteUriTest
 
         String testUriStr = completeUri.toString();
 
-        final String expectedUriStr = uriStr;
-        assertThat(testUriStr, is(expectedUriStr));
+        assertThat(testUriStr, is(uriStr));
     }
 
     // Tests_SRS_IOTHUBCOMPLETEURI_11_003: [The function shall return the hostname given in the constructor.] 
@@ -85,8 +84,7 @@ public class IotHubCompleteUriTest
 
         String testHostname = completeUri.getHostname();
 
-        final String expectedHostname = hostname;
-        assertThat(testHostname, is(expectedHostname));
+        assertThat(testHostname, is(hostname));
     }
 
     // Tests_SRS_IOTHUBCOMPLETEURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/devicebound/[eTag].]
@@ -108,7 +106,6 @@ public class IotHubCompleteUriTest
 
         String testPath = completeUri.getPath();
 
-        final String expectedPath = path;
-        assertThat(testPath, is(expectedPath));
+        assertThat(testPath, is(path));
     }
 }

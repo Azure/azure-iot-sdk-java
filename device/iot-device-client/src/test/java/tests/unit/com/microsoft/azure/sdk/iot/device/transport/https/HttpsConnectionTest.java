@@ -378,11 +378,10 @@ public class HttpsConnectionTest
 
         conn.setReadTimeout(timeout);
 
-        final int expectedTimeout = timeout;
         new Verifications()
         {
             {
-                mockUrl.openConnection().setReadTimeout(expectedTimeout);
+                mockUrl.openConnection().setReadTimeout(timeout);
             }
         };
     }
@@ -409,11 +408,10 @@ public class HttpsConnectionTest
 
         conn.setConnectTimeout(timeout);
 
-        final int expectedTimeout = timeout;
         new Verifications()
         {
             {
-                mockUrl.openConnection().setConnectTimeout(expectedTimeout);
+                mockUrl.openConnection().setConnectTimeout(timeout);
             }
         };
     }
@@ -915,8 +913,7 @@ public class HttpsConnectionTest
 
         int testStatus = conn.getResponseStatus();
 
-        int expectedStatus = status;
-        assertThat(testStatus, is(expectedStatus));
+        assertThat(testStatus, is(status));
     }
 
     // Tests_SRS_HTTPSCONNECTION_11_016: [The function shall throw a TransportException if no response was received.]
@@ -979,16 +976,14 @@ public class HttpsConnectionTest
         Map<String, List<String>> testResponseHeaders =
                 conn.getResponseHeaders();
 
-        final Map<String, List<String>> expectedResponseHeaders =
-                responseHeaders;
         assertThat(testResponseHeaders.size(),
-                is(expectedResponseHeaders.size()));
+                is(responseHeaders.size()));
         // the list of values for each field is of size 1, so the lists
         // can be directly compared.
         assertThat(testResponseHeaders.get(field0),
-                is(expectedResponseHeaders.get(field0)));
+                is(responseHeaders.get(field0)));
         assertThat(testResponseHeaders.get(field1),
-                is(expectedResponseHeaders.get(field1)));
+                is(responseHeaders.get(field1)));
     }
 
     // Tests_SRS_HTTPSCONNECTION_11_018: [The function shall throw an IOException if no response was received.]

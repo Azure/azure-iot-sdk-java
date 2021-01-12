@@ -155,8 +155,7 @@ public class IotHubSasTokenTest
         String testSignature = tokenStr.substring(signatureStartIdx,
                 signatureEndIdx);
 
-        final String expectedSignature = signature;
-        assertThat(testSignature, is(expectedSignature));
+        assertThat(testSignature, is(signature));
     }
 
     // Tests_SRS_IOTHUBSASTOKEN_11_013: [**The token generated from DeviceClientConfig shall use correct expiry time (seconds rather than milliseconds)]

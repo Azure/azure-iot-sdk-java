@@ -20,18 +20,10 @@ public final class Signature
      */
     public Signature(String resourceUri, long expiryTime, String deviceKey)
     {
-        // Codes_SRS_SIGNATURE_11_001: [The signature shall be computed from a composition of functions as such: encodeSignatureWebSafe(encodeSignatureUtf8(encodeSignatureBase64(encryptSignatureHmacSha256(buildRawSignature(scope, expiryTime))))).]
-        byte[] rawSig = SignatureHelper.buildRawSignature(resourceUri,
-                expiryTime);
-        // Codes_SRS_SIGNATURE_11_002: [The device key shall be decoded using Base64 before the signature computation begins, excluding buildRawSignature().]
-        byte[] decodedDeviceKey = SignatureHelper.decodeDeviceKeyBase64(
-                deviceKey);
-        byte[] encryptedSig =
-                SignatureHelper.encryptSignatureHmacSha256(rawSig,
-                        decodedDeviceKey);
-        byte[] encryptedSigBase64 = SignatureHelper.encodeSignatureBase64(
-                encryptedSig);
-        // Codes_SRS_SIGNATURE_11_003: [The signature string shall be encoded using charset UTF-8.]
+        byte[] rawSig = SignatureHelper.buildRawSignature(resourceUri, expiryTime);
+        byte[] decodedDeviceKey = SignatureHelper.decodeDeviceKeyBase64(deviceKey);
+        byte[] encryptedSig = SignatureHelper.encryptSignatureHmacSha256(rawSig, decodedDeviceKey);
+        byte[] encryptedSigBase64 = SignatureHelper.encodeSignatureBase64(encryptedSig);
         String utf8Sig = SignatureHelper.encodeSignatureUtf8(encryptedSigBase64);
         this.sig = SignatureHelper.encodeSignatureWebSafe(utf8Sig);
     }
@@ -44,7 +36,6 @@ public final class Signature
     @Override
     public String toString()
     {
-        // Codes_SRS_SIGNATURE_11_005: [The function shall return the string representation of the signature.]
         return this.sig;
     }
 }

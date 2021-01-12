@@ -372,9 +372,8 @@ public class JobResultTest
         final Date now = new Date();
 
         MethodParser methodParser = new MethodParser("methodName", null, null, new TwinCollection());
-        MethodParser methodParserResponse = mockedMethodParser;
 
-        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse, "scheduleUpdateTwin");
+        JobsResponseParserExpectations(json, null, methodParser, now, mockedMethodParser, "scheduleUpdateTwin");
         new NonStrictExpectations()
         {
             {
@@ -390,12 +389,12 @@ public class JobResultTest
                 mockedJobsResponseParser.getCloudToDeviceMethod();
                 result = methodParser;
                 mockedJobsResponseParser.getOutcome();
-                result = methodParserResponse;
-                methodParserResponse.toJson();
+                result = mockedMethodParser;
+                mockedMethodParser.toJson();
                 result = json;
-                methodParserResponse.getStatus();
+                mockedMethodParser.getStatus();
                 result = methodReturnStatus;
-                methodParserResponse.getPayload();
+                mockedMethodParser.getPayload();
                 result = methodReturnPayload;
 
                 Deencapsulation.newInstance(JobStatistics.class, mockedJobsStatisticsParser);
@@ -428,9 +427,8 @@ public class JobResultTest
         final Date now = new Date();
 
         MethodParser methodParser = new MethodParser("methodName", null, null, new TwinCollection());
-        MethodParser methodParserResponse = mockedMethodParser;
 
-        JobsResponseParserExpectations(json, null, methodParser, now, methodParserResponse, "scheduleUpdateTwin");
+        JobsResponseParserExpectations(json, null, methodParser, now, mockedMethodParser, "scheduleUpdateTwin");
         new NonStrictExpectations()
         {
             {
@@ -446,10 +444,10 @@ public class JobResultTest
                 mockedJobsResponseParser.getCloudToDeviceMethod();
                 result = methodParser;
                 mockedJobsResponseParser.getOutcome();
-                result = methodParserResponse;
-                methodParserResponse.toJson();
+                result = mockedMethodParser;
+                mockedMethodParser.toJson();
                 result = json;
-                methodParserResponse.getStatus();
+                mockedMethodParser.getStatus();
                 result = new IllegalArgumentException();
 
                 Deencapsulation.newInstance(JobStatistics.class, mockedJobsStatisticsParser);

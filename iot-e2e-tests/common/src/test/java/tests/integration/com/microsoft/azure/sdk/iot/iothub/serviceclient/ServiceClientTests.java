@@ -81,15 +81,13 @@ public class ServiceClientTests extends IntegrationTest
 
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
 
-        List inputs = Arrays.asList(
+        return Arrays.asList(
                 new Object[][]
                         {
                                 {IotHubServiceClientProtocol.AMQPS},
                                 {IotHubServiceClientProtocol.AMQPS_WS}
                         }
         );
-
-        return inputs;
     }
 
     @BeforeClass

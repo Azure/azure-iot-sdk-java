@@ -84,14 +84,13 @@ public class BulkEnrollmentOperationTest
         individualEnrollment2.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
         individualEnrollment2.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
 
-        List<IndividualEnrollment> individualEnrollments = new LinkedList<IndividualEnrollment>()
+        return new LinkedList<IndividualEnrollment>()
         {
             {
                 add(individualEnrollment1);
                 add(individualEnrollment2);
             }
         };
-        return individualEnrollments;
     }
 
     /* SRS_BULK_OPERATION_21_001: [The toJson shall return a String with the mode and the collection of enrollments using a JSON format.] */
