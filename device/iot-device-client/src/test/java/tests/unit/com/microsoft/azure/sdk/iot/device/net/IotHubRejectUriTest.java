@@ -65,8 +65,7 @@ public class IotHubRejectUriTest
 
         String testUriStr = rejectUri.toString();
 
-        final String expectedUriStr = uriStr;
-        assertThat(testUriStr, is(expectedUriStr));
+        assertThat(testUriStr, is(uriStr));
     }
 
     // Tests_SRS_IOTHUBREJECTURI_11_003: [The function shall return the hostname given in the constructor.] 
@@ -89,8 +88,7 @@ public class IotHubRejectUriTest
 
         String testHostname = rejectUri.getHostname();
 
-        final String expectedHostname = hostname;
-        assertThat(testHostname, is(expectedHostname));
+        assertThat(testHostname, is(hostname));
     }
 
     // Tests_SRS_IOTHUBREJECTURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/devicebound/[eTag].]
@@ -113,7 +111,6 @@ public class IotHubRejectUriTest
 
         String testPath = rejectUri.getPath();
 
-        final String expectedPath = path;
-        assertThat(testPath, is(expectedPath));
+        assertThat(testPath, is(path));
     }
 }

@@ -59,8 +59,7 @@ public class IotHubMessageUriTest
 
         String testUriStr = messageUri.toString();
 
-        final String expectedUriStr = uriStr;
-        assertThat(testUriStr, is(expectedUriStr));
+        assertThat(testUriStr, is(uriStr));
     }
 
     // Tests_SRS_IOTHUBMESSAGEURI_11_003: [The function shall return the hostname given in the constructor.] 
@@ -82,8 +81,7 @@ public class IotHubMessageUriTest
 
         String testHostname = messageUri.getHostname();
 
-        final String expectedHostname = hostname;
-        assertThat(testHostname, is(expectedHostname));
+        assertThat(testHostname, is(hostname));
     }
 
     // Tests_SRS_IOTHUBMESSAGEURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/devicebound.]
@@ -105,7 +103,6 @@ public class IotHubMessageUriTest
 
         String testPath = messageUri.getPath();
 
-        final String expectedPath = path;
-        assertThat(testPath, is(expectedPath));
+        assertThat(testPath, is(path));
     }
 }

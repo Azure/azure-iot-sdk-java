@@ -73,12 +73,11 @@ public class HttpsRequestTest
 
         request.send();
 
-        final byte[] expectedBody = body;
         new Verifications()
         {
             {
                 new HttpsConnection(mockUrl, (HttpsMethod) any, null, true)
-                        .writeOutput(expectedBody);
+                        .writeOutput(body);
             }
         };
     }
@@ -290,8 +289,7 @@ public class HttpsRequestTest
         HttpsResponse response = request.send();
         int testStatus = response.getStatus();
 
-        final int expectedStatus = status;
-        assertThat(testStatus, is(expectedStatus));
+        assertThat(testStatus, is(status));
     }
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body (if 200 status code), header fields, and error reason (if any).]
@@ -316,8 +314,7 @@ public class HttpsRequestTest
         HttpsResponse response = request.send();
         byte[] testBody = response.getBody();
 
-        final byte[] expectedBody = responseBody;
-        assertThat(testBody, is(expectedBody));
+        assertThat(testBody, is(responseBody));
     }
 
     // Tests_SRS_HTTPSREQUEST_11_009: [The function shall return the HTTPS response received, including the status code, body, header fields, and error reason (if any).]
@@ -398,13 +395,11 @@ public class HttpsRequestTest
                 new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setReadTimeout(readTimeout);
 
-        final int expectedReadTimeout = readTimeout;
-
         request.send();
         new Verifications()
         {
             {
-                mockConn.setReadTimeout(expectedReadTimeout);
+                mockConn.setReadTimeout(readTimeout);
             }
         };
     }
@@ -427,13 +422,11 @@ public class HttpsRequestTest
                 new HttpsRequest(mockUrl, httpsMethod, body, "");
         request.setConnectTimeout(readTimeout);
 
-        final int expectedConnectTimeout = readTimeout;
-
         request.send();
         new Verifications()
         {
             {
-                mockConn.setConnectTimeout(expectedConnectTimeout);
+                mockConn.setConnectTimeout(readTimeout);
             }
         };
     }

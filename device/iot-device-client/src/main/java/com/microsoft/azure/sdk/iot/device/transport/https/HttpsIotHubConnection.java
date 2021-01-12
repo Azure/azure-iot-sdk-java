@@ -469,8 +469,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
 
         request.setSSLContext(this.getSSLContext());
 
-        HttpsResponse response = request.send();
-        return response;
+        return request.send();
     }
 
     private URL buildUrlFromString(String url) throws TransportException

@@ -87,7 +87,6 @@ public class SignatureTest
                 new Signature(resourceUri, expiryTime, deviceKey);
         String testSigStr = sig.toString();
 
-        final String expectedSigStr = sigStr;
-        assertThat(testSigStr, is(expectedSigStr));
+        assertThat(testSigStr, is(sigStr));
     }
 }

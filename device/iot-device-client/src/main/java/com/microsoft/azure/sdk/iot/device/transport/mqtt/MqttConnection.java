@@ -71,8 +71,7 @@ public class MqttConnection
         {
             this.mqttAsyncClient = null;
             this.connectionOptions = null;
-            TransportException transportException = PahoExceptionTranslator.convertToMqttException(e, "Unable to create mqttAsyncClient");
-            throw transportException;
+            throw PahoExceptionTranslator.convertToMqttException(e, "Unable to create mqttAsyncClient");
         }
 
         //Codes_SRS_MQTTCONNECTION_25_003: [The constructor shall create lock, queue for this MqttConnection.]

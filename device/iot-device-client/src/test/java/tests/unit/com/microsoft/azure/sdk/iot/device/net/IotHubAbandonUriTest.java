@@ -64,8 +64,7 @@ public class IotHubAbandonUriTest
 
         String testUriStr = abandonUri.toString();
 
-        final String expectedUriStr = uriStr;
-        assertThat(testUriStr, is(expectedUriStr));
+        assertThat(testUriStr, is(uriStr));
     }
 
     // Tests_SRS_IOTHUBABANDONURI_11_003: [The function shall return the hostname given in the constructor.] 
@@ -88,8 +87,7 @@ public class IotHubAbandonUriTest
 
         String testHostname = abandonUri.getHostname();
 
-        final String expectedHostname = hostname;
-        assertThat(testHostname, is(expectedHostname));
+        assertThat(testHostname, is(hostname));
     }
 
     // Tests_SRS_IOTHUBABANDONURI_11_004: [The function shall return a URI with the format '/devices/[deviceId]/messages/devicebound/[eTag]/abandon'.]
@@ -112,7 +110,6 @@ public class IotHubAbandonUriTest
 
         String testPath = abandonUri.getPath();
 
-        final String expectedPath = path;
-        assertThat(testPath, is(expectedPath));
+        assertThat(testPath, is(path));
     }
 }

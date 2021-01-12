@@ -229,13 +229,12 @@ public class AmqpsProvisioningSymmetricKeySaslHandlerTest
     {
         //arrange
         AmqpsProvisioningSymmetricKeySaslHandler handler = Deencapsulation.newInstance(AmqpsProvisioningSymmetricKeySaslHandler.class, new Class[]{String.class, String.class, String.class}, idScope, registrationId, sasToken);
-        String expectedPassword = sasToken;
 
         //act
         String actualPassword = handler.getPlainPassword();
 
         //assert
-        assertEquals(expectedPassword, actualPassword);
+        assertEquals(sasToken, actualPassword);
     }
 
 }
