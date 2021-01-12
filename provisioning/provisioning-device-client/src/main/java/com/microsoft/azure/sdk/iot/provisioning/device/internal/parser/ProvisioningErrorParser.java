@@ -47,13 +47,13 @@ public class ProvisioningErrorParser
     {
         //Codes_SRS_PROVISIONING_ERROR_PARSER_34_002: [This function shall return a string containing the saved error code, message, and tracking id]
         StringBuilder errorMessage = new StringBuilder();
-        errorMessage.append("Service error: " + ((errorCode == 0) ? "null" : errorCode) + " - " + ((message == null) ? "null" : message) + " - TrackingId: " + ((trackingId == null) ? "null" : trackingId));
+        errorMessage.append("Service error: ").append((errorCode == 0) ? "null" : errorCode).append(" - ").append((message == null) ? "null" : message).append(" - TrackingId: ").append((trackingId == null) ? "null" : trackingId);
         errorMessage.append("\n");
         if (info != null)
         {
             for (String key : info.keySet())
             {
-                errorMessage.append(key + " : " + info.get(key));
+                errorMessage.append(key).append(" : ").append(info.get(key));
             }
         }
 

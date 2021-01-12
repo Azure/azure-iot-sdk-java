@@ -126,7 +126,7 @@ public class SSLContextBuilder
             throw new GeneralSecurityException("Unable to generate x509 certificate from public key certificate string", e);
         }
 
-        return collection.toArray(new X509Certificate[collection.size()]);
+        return collection.toArray(new X509Certificate[0]);
     }
 
     private static char[] generateTemporaryPassword()

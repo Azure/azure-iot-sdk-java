@@ -68,7 +68,7 @@ public class DeviceConnectionString
             stringBuilder.append(";x509=true");
         }
 
-        stringBuilder.append(";ModuleId=" + module.getId());
+        stringBuilder.append(";ModuleId=").append(module.getId());
 
         return stringBuilder.toString();
     }

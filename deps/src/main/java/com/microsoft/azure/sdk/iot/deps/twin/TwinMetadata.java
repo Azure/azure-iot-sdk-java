@@ -184,7 +184,7 @@ public class TwinMetadata
         {
             return null;
         }
-        return new Integer(this.lastUpdatedVersion);
+        return this.lastUpdatedVersion;
     }
 
     /**
