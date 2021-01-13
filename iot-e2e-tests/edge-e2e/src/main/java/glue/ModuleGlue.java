@@ -328,7 +328,7 @@ public class ModuleGlue
         }
     }
 
-    private ModuleTwinPropertyCallBack _deviceTwinPropertyCallback = new ModuleTwinPropertyCallBack();
+    private final ModuleTwinPropertyCallBack _deviceTwinPropertyCallback = new ModuleTwinPropertyCallBack();
 
     private static class IotHubEventCallbackImpl implements IotHubEventCallback
     {
@@ -359,7 +359,7 @@ public class ModuleGlue
         }
     }
 
-    private IotHubEventCallbackImpl _deviceTwinStatusCallback = new IotHubEventCallbackImpl();
+    private final IotHubEventCallbackImpl _deviceTwinStatusCallback = new IotHubEventCallbackImpl();
 
 
     public void enableTwin(String connectionId, final Handler<AsyncResult<Void>> handler)

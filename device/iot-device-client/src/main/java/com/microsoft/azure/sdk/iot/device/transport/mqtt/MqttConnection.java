@@ -22,8 +22,8 @@ public class MqttConnection
 {
     private MqttAsyncClient mqttAsyncClient = null;
     private MqttConnectOptions connectionOptions = null;
-    private ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
-    private Object mqttLock;
+    private final ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
+    private final Object mqttLock;
 
     //mqtt connection options
     private static final int KEEP_ALIVE_INTERVAL = 230;

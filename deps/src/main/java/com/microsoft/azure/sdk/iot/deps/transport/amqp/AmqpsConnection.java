@@ -39,17 +39,17 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 
     private long nextTag;
 
-    private Boolean useWebSockets;
+    private final Boolean useWebSockets;
     private Boolean isOpen;
 
-    private String hostName;
-    private String fullHostAddress;
+    private final String hostName;
+    private final String fullHostAddress;
 
     private Connection connection;
     private Session session;
     private ExecutorService executorService;
 
-    private AmqpDeviceOperations amqpDeviceOperations;
+    private final AmqpDeviceOperations amqpDeviceOperations;
 
     private Reactor reactor;
 
@@ -60,7 +60,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     private CountDownLatch openLatch;
     private final ObjectLock closeLock;
 
-    private SSLContext sslContext;
+    private final SSLContext sslContext;
 
     /**
      * Constructor for the Amqp library

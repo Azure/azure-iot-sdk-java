@@ -23,7 +23,7 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
     private long deltaBackoff = 100;
     private boolean firstFastRetry = true;
 
-    private SecureRandom random = new SecureRandom();
+    private final SecureRandom random = new SecureRandom();
 
     /**
      * Constructor with default backoff values and firstFastRetry

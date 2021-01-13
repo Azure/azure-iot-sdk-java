@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 
 public class EventCallback implements IotHubEventCallback
 {
-    private IotHubStatusCode expectedStatusCode;
+    private final IotHubStatusCode expectedStatusCode;
     public EventCallback(IotHubStatusCode expectedStatusCode)
     {
         this.expectedStatusCode = expectedStatusCode;

@@ -68,7 +68,7 @@ public class QueryResponseParserTest
     private static final String VALID_TWIN_JSON_ARRAY_2 = "[" + VALID_TWIN_JSON + ","
                                                             + VALID_TWIN_JSON + "]";
 
-    private static Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     private static String buildJsonInputArrayFromJson(String itemsArray)
     {

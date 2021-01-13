@@ -41,9 +41,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 public class RegistryManagerTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
-    private static String deviceIdPrefix = "java-crud-e2e-test-";
-    private static String moduleIdPrefix = "java-crud-module-e2e-test-";
-    private static String configIdPrefix = "java-crud-adm-e2e-test-";
+    private static final String deviceIdPrefix = "java-crud-e2e-test-";
+    private static final String moduleIdPrefix = "java-crud-module-e2e-test-";
+    private static final String configIdPrefix = "java-crud-adm-e2e-test-";
     private static String hostName;
     private static final String primaryThumbprint =   "0000000000000000000000000000000000000000";
     private static final String secondaryThumbprint = "1111111111111111111111111111111111111111";
@@ -71,7 +71,7 @@ public class RegistryManagerTests extends IntegrationTest
         public String deviceId;
         public String moduleId;
         public String configId;
-        private RegistryManager registryManager;
+        private final RegistryManager registryManager;
 
         public RegistryManagerTestInstance() throws InterruptedException, IOException, IotHubException, URISyntaxException
         {

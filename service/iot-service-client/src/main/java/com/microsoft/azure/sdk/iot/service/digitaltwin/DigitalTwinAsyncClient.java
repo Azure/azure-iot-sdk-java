@@ -36,8 +36,8 @@ import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
  * </p>
  * */
 public class DigitalTwinAsyncClient {
-    private DigitalTwinsImpl _protocolLayer;
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private final DigitalTwinsImpl _protocolLayer;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     DigitalTwinAsyncClient(String connectionString) {
     ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);

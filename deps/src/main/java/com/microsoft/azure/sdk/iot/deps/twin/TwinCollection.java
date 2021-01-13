@@ -102,7 +102,7 @@ public class TwinCollection extends HashMap<String, Object>
     // the Twin collection metadata
     private static final String METADATA_TAG = "$metadata";
     private TwinMetadata twinMetadata;
-    private Map<String, TwinMetadata> metadataMap = new HashMap<>();
+    private final Map<String, TwinMetadata> metadataMap = new HashMap<>();
 
     /**
      * Constructor

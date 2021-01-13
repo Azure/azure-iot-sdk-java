@@ -54,8 +54,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private MqttDeviceTwin deviceTwin;
     private MqttDeviceMethod deviceMethod;
 
-    private Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
-    private Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
+    private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
+    private final Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}

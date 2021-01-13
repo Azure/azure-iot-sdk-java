@@ -56,7 +56,7 @@ public class ProvisioningAmqpOperationsTest
     private AmqpMessage mockedAmqpMessage;
 
     @Mocked
-    private LinkedBlockingQueue<AmqpMessage> mockedQueueMessage = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<AmqpMessage> mockedQueueMessage = new LinkedBlockingQueue<>();
 
     @Mocked
     private byte[] mockedData;
@@ -65,7 +65,7 @@ public class ProvisioningAmqpOperationsTest
     private Binary mockedBinaryData;
 
     @Mocked
-    private ObjectLock mockedObjectLock = new ObjectLock();
+    private final ObjectLock mockedObjectLock = new ObjectLock();
 
     @Mocked
     private SaslHandler mockedSaslHandler;

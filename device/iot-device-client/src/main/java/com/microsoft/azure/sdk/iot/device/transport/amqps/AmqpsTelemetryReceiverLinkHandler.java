@@ -29,7 +29,7 @@ public final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHa
 
     private static final String LINK_TYPE = "telemetry";
 
-    private DeviceClientConfig deviceClientConfig;
+    private final DeviceClientConfig deviceClientConfig;
 
     AmqpsTelemetryReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
     {

@@ -13,7 +13,7 @@ public class RequestData
 {
     private byte[] endorsementKey;
     private byte[] storageRootKey;
-    private String registrationId;
+    private final String registrationId;
     private String operationId;
 
     private SSLContext sslContext;

@@ -28,7 +28,7 @@ public class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStat
     private Session session;
     private AmqpsCbsSenderLinkHandler cbsSenderLinkHandler;
     private AmqpsCbsReceiverLinkHandler cbsReceiverLinkHandler;
-    private AmqpsSessionStateCallback connectionStateCallback;
+    private final AmqpsSessionStateCallback connectionStateCallback;
     private boolean senderOpened;
     private boolean receiverOpened;
 

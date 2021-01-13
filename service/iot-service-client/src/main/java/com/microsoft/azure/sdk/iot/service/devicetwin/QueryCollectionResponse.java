@@ -11,8 +11,8 @@ import java.util.Collection;
 
 public class QueryCollectionResponse<E>
 {
-    private Collection<E> responseElementsCollection;
-    private String continuationToken;
+    private final Collection<E> responseElementsCollection;
+    private final String continuationToken;
 
     /**
      * Constructor that takes a json string and parses it into a Collection.

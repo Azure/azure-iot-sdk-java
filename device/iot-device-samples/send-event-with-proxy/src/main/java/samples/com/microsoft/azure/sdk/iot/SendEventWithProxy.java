@@ -17,7 +17,7 @@ import java.util.List;
 /** Sends a number of event messages to an IoT Hub. */
 public class SendEventWithProxy
 {
-    private static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
     protected static class EventCallback implements IotHubEventCallback
     {

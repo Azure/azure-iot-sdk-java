@@ -13,14 +13,14 @@ public final class DeviceMethod
 {
     private DeviceMethodCallback deviceMethodCallback;
     private Object deviceMethodCallbackContext;
-    private IotHubEventCallback deviceMethodStatusCallback;
-    private Object deviceMethodStatusCallbackContext;
+    private final IotHubEventCallback deviceMethodStatusCallback;
+    private final Object deviceMethodStatusCallbackContext;
     private final ObjectLock DEVICE_METHOD_LOCK = new ObjectLock();
 
     private boolean isSubscribed = false;
 
-    private DeviceIO deviceIO;
-    private DeviceClientConfig config;
+    private final DeviceIO deviceIO;
+    private final DeviceClientConfig config;
 
     private final class deviceMethodResponseCallback implements MessageCallback
     {

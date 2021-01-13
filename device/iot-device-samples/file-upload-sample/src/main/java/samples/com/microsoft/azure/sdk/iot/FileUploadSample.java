@@ -23,7 +23,7 @@ import java.util.Scanner;
  */
 public class FileUploadSample
 {
-    private static List<String> fileNameList = new ArrayList<>();
+    private static final List<String> fileNameList = new ArrayList<>();
 
     /**
      * Upload file or directories to blobs using IoT Hub.

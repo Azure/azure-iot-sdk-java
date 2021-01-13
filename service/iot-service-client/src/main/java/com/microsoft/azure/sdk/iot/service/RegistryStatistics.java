@@ -9,9 +9,9 @@ import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
 
 public class RegistryStatistics
 {
-    private long totalDeviceCount;
-    private long enabledDeviceCount;
-    private long disabledDeviceCount;
+    private final long totalDeviceCount;
+    private final long enabledDeviceCount;
+    private final long disabledDeviceCount;
 
     private RegistryStatistics()
     {

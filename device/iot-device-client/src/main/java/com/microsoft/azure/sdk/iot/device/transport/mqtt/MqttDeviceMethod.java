@@ -17,8 +17,8 @@ import java.util.Map;
 @Slf4j
 public class MqttDeviceMethod extends Mqtt
 {
-    private String subscribeTopic;
-    private String responseTopic;
+    private final String subscribeTopic;
+    private final String responseTopic;
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
 

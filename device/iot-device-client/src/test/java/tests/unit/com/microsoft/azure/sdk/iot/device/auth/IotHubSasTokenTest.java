@@ -293,7 +293,7 @@ public class IotHubSasTokenTest
     @Test(expected = IllegalArgumentException.class)
     public void doesNotSetSASTokenWithoutSig() throws URISyntaxException
     {
-        String sastoken = "SharedAccessSignature sr=srValue&se=" + Long.MAX_VALUE;;
+        String sastoken = "SharedAccessSignature sr=srValue&se=" + Long.MAX_VALUE;
         final IotHubConnectionString iotHubConnectionString =
                 Deencapsulation.newInstance(IotHubConnectionString.class,
                         new Class[] {String.class, String.class, String.class, String.class},

@@ -15,7 +15,7 @@ import java.util.Iterator;
  */
 public class QueryResponse implements Iterator<Object>
 {
-    private Iterator<?> responseElementsIterator;
+    private final Iterator<?> responseElementsIterator;
 
     /**
      * Creates an object for the query response

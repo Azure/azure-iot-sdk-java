@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -34,9 +35,9 @@ public class DeviceEmulator
     private static final int DEVICE_METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 60 * 1000;
     private static final int METHOD_SUBSCRIBE_CHECK_PERIOD_MILLISECONDS = 1000;
 
-    private InternalClient client;
-    private DeviceStatus deviceStatus = new DeviceStatus();
-    private ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = new ConcurrentHashMap<>();
+    private final InternalClient client;
+    private final DeviceStatus deviceStatus = new DeviceStatus();
+    private final ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = new ConcurrentHashMap<>();
 
     private DeviceMethodCallback deviceMethodCallback;
     private Object deviceMethodCallbackContext;
@@ -330,13 +331,13 @@ public class DeviceEmulator
 
     private String loopback(Object methodData) throws UnsupportedEncodingException
     {
-        String payload = new String((byte[])methodData, "UTF-8").replace("\"", "");
+        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
         return METHOD_LOOPBACK + ":" + payload;
     }
 
     private String delayInMilliseconds(Object methodData) throws UnsupportedEncodingException, InterruptedException
     {
-        String payload = new String((byte[])methodData, "UTF-8").replace("\"", "");
+        String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
         long delay = Long.parseLong(payload);
         Thread.sleep(delay);
         return METHOD_DELAY_IN_MILLISECONDS + ":succeed";

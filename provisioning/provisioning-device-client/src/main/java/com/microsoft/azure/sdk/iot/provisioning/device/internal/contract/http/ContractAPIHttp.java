@@ -36,8 +36,8 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 @Slf4j
 public class ContractAPIHttp extends ProvisioningDeviceClientContract
 {
-    private String idScope;
-    private String hostName;
+    private final String idScope;
+    private final String hostName;
 
     /*
      *  Values for Http header

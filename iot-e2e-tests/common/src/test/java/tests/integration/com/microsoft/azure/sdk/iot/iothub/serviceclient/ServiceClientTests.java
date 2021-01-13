@@ -43,8 +43,8 @@ public class ServiceClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";
-    private static String deviceIdPrefix = "java-service-client-e2e-test";
-    private static String content = "abcdefghijklmnopqrstuvwxyz1234567890";
+    private static final String deviceIdPrefix = "java-service-client-e2e-test";
+    private static final String content = "abcdefghijklmnopqrstuvwxyz1234567890";
     private static String hostName;
 
     protected static HttpProxyServer proxyServer;
@@ -58,8 +58,8 @@ public class ServiceClientTests extends IntegrationTest
 
     private class ServiceClientITRunner
     {
-        private IotHubServiceClientProtocol protocol;
-        private String deviceId;
+        private final IotHubServiceClientProtocol protocol;
+        private final String deviceId;
 
         public ServiceClientITRunner(IotHubServiceClientProtocol protocol)
         {
@@ -69,7 +69,7 @@ public class ServiceClientTests extends IntegrationTest
         }
     }
 
-    private ServiceClientITRunner testInstance;
+    private final ServiceClientITRunner testInstance;
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs() throws IOException

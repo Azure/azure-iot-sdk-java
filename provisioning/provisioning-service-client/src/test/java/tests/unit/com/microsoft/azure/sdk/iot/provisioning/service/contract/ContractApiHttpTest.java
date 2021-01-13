@@ -420,7 +420,7 @@ public class ContractApiHttpTest
         new Verifications()
         {
             {
-                mockedHttpRequest.setHeaderField("authorization", VALID_SASTOKEN);;
+                mockedHttpRequest.setHeaderField("authorization", VALID_SASTOKEN);
                 times = 1;
                 mockedHttpRequest.setHeaderField("Request-Id", "1001");
                 times = 1;

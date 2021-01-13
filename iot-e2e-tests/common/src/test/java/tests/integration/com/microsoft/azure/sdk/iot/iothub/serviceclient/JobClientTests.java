@@ -46,8 +46,8 @@ public class JobClientTests extends IntegrationTest
 
     private static final int MAX_DEVICES = 1;
 
-    private static String DEVICE_ID_NAME = "E2EJavaJob";
-    private static String JOB_ID_NAME = "JobTest";
+    private static final String DEVICE_ID_NAME = "E2EJavaJob";
+    private static final String JOB_ID_NAME = "JobTest";
 
     private static final long MAX_TIME_WAIT_FOR_PREVIOUSLY_SCHEDULED_JOBS_TO_FINISH_IN_MILLIS = 6 * 60 * 1000; // 6 minutes
     private static final long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(120);
@@ -57,7 +57,7 @@ public class JobClientTests extends IntegrationTest
     private static final String PAYLOAD_STRING = "This is a valid payload";
     private static int newTemperature = 70;
 
-    private static List<DeviceTestManager> devices = new LinkedList<>();
+    private static final List<DeviceTestManager> devices = new LinkedList<>();
     private static Device testDevice;
 
     private static final int MAX_NUMBER_JOBS = 3;
@@ -271,7 +271,7 @@ public class JobClientTests extends IntegrationTest
             JobResult jobResult = job.getValue();
             assertNotNull(jobResult);
             assertEquals("JobResult reported incorrect jobId", jobId, jobResult.getJobId());
-            String expectedTemperature = Integer.toString(twinExpectedTemperature.get(jobId)) + ".0";
+            String expectedTemperature = twinExpectedTemperature.get(jobId) + ".0";
             assertTrue("Device do not change " + STANDARD_PROPERTY_HOMETEMP + " to " + expectedTemperature, receivedTemperatures.contains(expectedTemperature));
         }
     }
@@ -478,7 +478,7 @@ public class JobClientTests extends IntegrationTest
             }
             else
             {
-                String temperature = Integer.toString(twinExpectedTemperature.get(jobId)) + ".0";
+                String temperature = twinExpectedTemperature.get(jobId) + ".0";
                 assertTrue("Device do not change " + STANDARD_PROPERTY_HOMETEMP + " to " + temperature, temperatures.contains(temperature));
             }
         }
