@@ -368,7 +368,7 @@ public class InternalClient
             throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
         }
 
-        if(version < 0)
+        if (version < 0)
         {
             throw new IllegalArgumentException("Version cannot be null.");
         }
@@ -724,6 +724,8 @@ public class InternalClient
                            TwinPropertiesCallback genericPropertiesCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
+        verifyRegisteredIfMultiplexing();
+
         if (!this.deviceIO.isOpen())
         {
             throw new IOException("Open the client connection before using it.");
@@ -929,6 +931,7 @@ public class InternalClient
             {
                 try
                 {
+                    verifyRegisteredIfMultiplexing();
                     this.deviceIO.setSendPeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
@@ -952,6 +955,7 @@ public class InternalClient
             {
                 try
                 {
+                    verifyRegisteredIfMultiplexing();
                     this.deviceIO.setReceivePeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
