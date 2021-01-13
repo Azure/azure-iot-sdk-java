@@ -369,7 +369,7 @@ public class TwinCollectionTest
         final class UserType
         {
             int a = 10;
-            String b = VALID_VALUE_NAME;
+            final String b = VALID_VALUE_NAME;
         }
 
         TwinCollection twinCollection = new TwinCollection();

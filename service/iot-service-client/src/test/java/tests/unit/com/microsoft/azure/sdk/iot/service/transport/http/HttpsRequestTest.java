@@ -216,7 +216,7 @@ public class HttpsRequestTest
         final String userAgentValue = TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion;
         new MockUp<HttpConnection>()
         {
-            Map<String, String> testHeaderFields = new HashMap<>();
+            final Map<String, String> testHeaderFields = new HashMap<>();
 
             @Mock
             public void $init(URL url, HttpMethod method)

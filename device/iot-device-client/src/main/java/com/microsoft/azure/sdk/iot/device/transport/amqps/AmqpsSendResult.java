@@ -7,9 +7,9 @@ public class AmqpsSendResult
     private static final int failedDeliveryTag = -1;
 
     @Getter
-    private boolean deliverySuccessful;
+    private final boolean deliverySuccessful;
     @Getter
-    private int deliveryTag;
+    private final int deliveryTag;
 
     /**
      * Create a return value object containing the delivery status and the delivery hash

@@ -23,14 +23,14 @@ public class ServiceClient
 {
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    private AmqpSend amqpMessageSender;
+    private final AmqpSend amqpMessageSender;
     private final String hostName;
     private final String userName;
     private final String sasToken;
     protected IotHubConnectionString iotHubConnectionString;
-    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
 
-    private ServiceClientOptions options;
+    private final ServiceClientOptions options;
 
     /**
      * Create ServiceClient from the specified connection string

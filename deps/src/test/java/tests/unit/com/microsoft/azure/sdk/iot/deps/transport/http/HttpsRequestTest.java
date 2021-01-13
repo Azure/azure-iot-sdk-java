@@ -213,7 +213,7 @@ public class HttpsRequestTest
         final String value1 = "test-value1";
         new MockUp<HttpConnection>()
         {
-            Map<String, String> testHeaderFields = new HashMap<>();
+            final Map<String, String> testHeaderFields = new HashMap<>();
 
             @Mock
             void $init(URL url, HttpMethod method)

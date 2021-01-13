@@ -129,7 +129,7 @@ public class HttpsRequestTest
         final String userAgentValue = TransportUtils.USER_AGENT_STRING;
         new MockUp<HttpsConnection>()
         {
-            Map<String, String> testHeaderFields = new HashMap<>();
+            final Map<String, String> testHeaderFields = new HashMap<>();
 
             @Mock
             public void $init(URL url, HttpsMethod method, ProxySettings proxySettings)

@@ -85,7 +85,7 @@ public class IotHubCertificateManager
                     "-----END CERTIFICATE-----\r\n";
 
     private Collection<? extends Certificate> certificates;
-    private CertificateFactory certificateFactory;
+    private final CertificateFactory certificateFactory;
 
     /**
      * Certificate manager for IotHub creating default certificates

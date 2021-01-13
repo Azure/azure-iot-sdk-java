@@ -837,7 +837,6 @@ public class JobsResponseParserTest
                         "\"createdDateTimeUtc\":\"2017-07-11T23:55:14.0580263Z\"," +
                         "\"lastUpdatedDateTimeUtc\":\"2017-07-11T23:55:14.198687Z\"," +
                         "\"outcome\":{\"deviceMethodResponse\":{\"status\":404,\"payload\":\"executed reboot\"}}}";
-        ;
         JobsResponseParser jobsResponseParser = JobsResponseParser.createFromJson(json);
 
         // act

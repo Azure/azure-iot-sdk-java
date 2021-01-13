@@ -20,12 +20,12 @@ public class FileUploadNotification
          *      enqueuedTimeUtc: 2016-06-01T21:22:43.7996883Z
    */
 
-    private String deviceId;
-    private String blobUri;
-    private String blobName;
-    private Date lastUpdatedTimeDate;
-    private Long blobSizeInBytes;
-    private Date enqueuedTimeUtcDate;
+    private final String deviceId;
+    private final String blobUri;
+    private final String blobName;
+    private final Date lastUpdatedTimeDate;
+    private final Long blobSizeInBytes;
+    private final Date enqueuedTimeUtcDate;
 
     public FileUploadNotification(String deviceId, String blobUri, String blobName, Date lastUpdatedTimeDate, Long blobSizeInBytes, Date enqueuedTimeUtcDate) throws IOException
     {

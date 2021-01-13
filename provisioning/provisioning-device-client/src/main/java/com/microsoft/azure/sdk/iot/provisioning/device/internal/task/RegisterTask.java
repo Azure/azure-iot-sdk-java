@@ -37,7 +37,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 @Slf4j
 public class RegisterTask implements Callable
 {
-    private static int MAX_WAIT_FOR_REGISTRATION_RESPONSE = 90*1000; // 90 seconds
+    private static final int MAX_WAIT_FOR_REGISTRATION_RESPONSE = 90*1000; // 90 seconds
     private static final int SLEEP_INTERVAL_WHEN_WAITING_FOR_RESPONSE = 4*1000; //4 seconds
     private static final int DEFAULT_EXPIRY_TIME_IN_SECS = 3600; // 1 Hour
     private static final String SASTOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=";

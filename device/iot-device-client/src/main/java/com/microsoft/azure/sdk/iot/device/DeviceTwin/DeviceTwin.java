@@ -39,13 +39,13 @@ public class DeviceTwin
     /*
         Callbacks to respond to its user on desired property changes
      */
-    private PropertyCallBack<String, Object> deviceTwinGenericPropertyChangeCallback;
-    private TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
+    private final PropertyCallBack<String, Object> deviceTwinGenericPropertyChangeCallback;
+    private final TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
     private Object deviceTwinGenericPropertyChangeCallbackContext;
 
     // Callback for providing user all of a given desired property update message's contents, rather than providing
     // one callback per updated property.
-    private TwinPropertiesCallback deviceTwinGenericTwinPropertiesChangeCallback;
+    private final TwinPropertiesCallback deviceTwinGenericTwinPropertiesChangeCallback;
 
     /*
         Map of callbacks to call when a particular desired property changed

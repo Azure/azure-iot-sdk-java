@@ -31,7 +31,7 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
 
     // When a CBS receiver link gets a message, it has a correlation id (UUID) that can be used to map it back to whatever
     // handler is waiting on that authentication message.
-    private Map<UUID, AuthenticationMessageCallback> correlationMap = new ConcurrentHashMap<>();
+    private final Map<UUID, AuthenticationMessageCallback> correlationMap = new ConcurrentHashMap<>();
 
     AmqpsCbsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback)
     {

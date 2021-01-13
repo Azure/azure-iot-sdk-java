@@ -125,7 +125,7 @@ public class FileUploadTests extends IntegrationTest
         public AuthenticationType authenticationType;
         private FileUploadState[] fileUploadState;
         private MessageState[] messageStates;
-        private boolean withProxy;
+        private final boolean withProxy;
 
         public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException
         {

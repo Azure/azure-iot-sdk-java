@@ -45,7 +45,7 @@ public class ProvisioningTask implements Callable
     private Authorization authorization = null;
     private ProvisioningDeviceClientStatus dpsStatus = null;
 
-    private ExecutorService executor;
+    private final ExecutorService executor;
 
     /**
      * Constructor for creating a provisioning task

@@ -90,7 +90,7 @@ public class DeviceParser
     @SerializedName(SCOPE_NAME)
     private String scope;
 
-    private transient Gson gson = new Gson();
+    private final transient Gson gson = new Gson();
 
     /**
      * Converts this into json format and returns it

@@ -7,7 +7,7 @@ import org.apache.qpid.proton.engine.Transport;
 
 public class SaslListenerImpl implements SaslListener
 {
-    private SaslHandler saslHandler;
+    private final SaslHandler saslHandler;
     private Exception savedException;
 
     private static final String PLAIN = "PLAIN";

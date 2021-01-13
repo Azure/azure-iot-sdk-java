@@ -24,9 +24,9 @@ public final class FileUpload
 {
     private static final int MAX_UPLOAD_PARALLEL = 10;
 
-    private HttpsTransportManager httpsTransportManager;
-    private ScheduledExecutorService taskScheduler;
-    private FileUploadStatusCallBack fileUploadStatusCallBack;
+    private final HttpsTransportManager httpsTransportManager;
+    private final ScheduledExecutorService taskScheduler;
+    private final FileUploadStatusCallBack fileUploadStatusCallBack;
     private static Queue<FileUploadInProgress> fileUploadInProgressesSet;
 
     /**

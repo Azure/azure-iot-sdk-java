@@ -28,14 +28,14 @@ abstract public class Mqtt implements MqttCallback
     private static final int CONNECTION_TIMEOUT = 60 * 1000;
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
 
-    private MqttConnection mqttConnection;
-    private MqttMessageListener messageListener;
+    private final MqttConnection mqttConnection;
+    private final MqttMessageListener messageListener;
     ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
     private final Object stateLock;
     protected final Object incomingLock;
     private final Object publishLock;
 
-    private Map<Integer, Message> unacknowledgedSentMessages;
+    private final Map<Integer, Message> unacknowledgedSentMessages;
 
     // SAS token expiration check on retry
     private boolean userSpecifiedSASTokenExpiredOnRetry = false;
@@ -68,8 +68,8 @@ abstract public class Mqtt implements MqttCallback
     private final static String INPUTS_PATH_STRING = "inputs";
     private final static String MODULES_PATH_STRING = "modules";
 
-    private IotHubListener listener;
-    private String connectionId;
+    private final IotHubListener listener;
+    private final String connectionId;
     private final String deviceId;
 
     /**

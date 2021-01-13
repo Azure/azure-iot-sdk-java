@@ -241,7 +241,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        private List messageIdListStoredOnReceive;
+        private final List messageIdListStoredOnReceive;
 
         public MessageCallbackForBackToBackC2DMessages(List messageIdListStoredOnReceive)
         {

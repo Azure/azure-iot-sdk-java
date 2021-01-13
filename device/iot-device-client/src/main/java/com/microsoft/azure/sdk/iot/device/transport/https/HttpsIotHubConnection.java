@@ -49,7 +49,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
      * message and used when sending a message result back to
      * the IoT Hub.
      */
-    private Map<Message, String> messageToETagMap = new HashMap<>();
+    private final Map<Message, String> messageToETagMap = new HashMap<>();
 
     /**
      * Constructs an instance from the given {@link DeviceClientConfig}

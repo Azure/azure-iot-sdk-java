@@ -14,11 +14,11 @@ public class ServiceConnectionString {
     private static final String SHARED_ACCESS_KEY_REGEX = "^.+$";
     private static final String SHARED_ACCESS_SIGNATURE_REGEX = "^.+$";
 
-    private String hostName;
-    private String httpsEndpoint;
-    private String sharedAccessKeyName;
-    private String sharedAccessKey;
-    private String sharedAccessSignature;
+    private final String hostName;
+    private final String httpsEndpoint;
+    private final String sharedAccessKeyName;
+    private final String sharedAccessKey;
+    private final String sharedAccessSignature;
 
     @Builder
     ServiceConnectionString(@NonNull String hostName, @NonNull String httpsEndpoint, String sharedAccessKeyName, String sharedAccessKey, String sharedAccessSignature) {

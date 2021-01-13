@@ -19,10 +19,10 @@ import java.util.UUID;
 
 public class DeviceManagerImportSample
 {
-    private static String importContainerName = "importcontainersample";
-    private static String importBlobName = "devices.txt";
-    private static Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-    private static Integer numberOfDevice = 10;
+    private static final String importContainerName = "importcontainersample";
+    private static final String importBlobName = "devices.txt";
+    private static final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    private static final Integer numberOfDevice = 10;
 
     public static void main(String[] args) throws Exception
     {

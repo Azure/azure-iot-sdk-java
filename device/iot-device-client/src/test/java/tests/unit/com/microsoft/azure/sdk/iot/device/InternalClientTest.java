@@ -73,9 +73,9 @@ public class InternalClientTest
     @Mocked
     ProxySettings mockProxySettings;
 
-    private static long SEND_PERIOD_MILLIS = 10L;
-    private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
-    private static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
+    private static final long SEND_PERIOD_MILLIS = 10L;
+    private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
+    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     /* Tests_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
     @Test (expected = IllegalArgumentException.class)

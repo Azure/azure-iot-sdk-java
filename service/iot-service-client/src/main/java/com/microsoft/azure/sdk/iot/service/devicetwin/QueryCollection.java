@@ -25,21 +25,21 @@ public class QueryCollection
     private static final String ITEM_TYPE_KEY = "x-ms-item-type";
     private static final String PAGE_SIZE_KEY = "x-ms-max-item-count";
 
-    private int pageSize;
-    private String query;
-    private boolean isSqlQuery;
+    private final int pageSize;
+    private final String query;
+    private final boolean isSqlQuery;
 
-    private QueryType requestQueryType;
+    private final QueryType requestQueryType;
     private QueryType responseQueryType;
 
     private String responseContinuationToken;
 
-    private IotHubConnectionString iotHubConnectionString;
-    private URL url;
-    private HttpMethod httpMethod;
+    private final IotHubConnectionString iotHubConnectionString;
+    private final URL url;
+    private final HttpMethod httpMethod;
 
-    private int httpConnectTimeout;
-    private int httpReadTimeout;
+    private final int httpConnectTimeout;
+    private final int httpReadTimeout;
 
     private Proxy proxy;
 

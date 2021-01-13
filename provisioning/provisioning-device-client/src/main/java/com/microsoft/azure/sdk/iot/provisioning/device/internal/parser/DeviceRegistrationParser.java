@@ -30,8 +30,8 @@ public class DeviceRegistrationParser
      */
     class TpmAttestation
     {
-        private String endorsementKey;
-        private String storageRootKey;
+        private final String endorsementKey;
+        private final String storageRootKey;
 
         TpmAttestation(String endorsementKey, String storageRootKey)
         {

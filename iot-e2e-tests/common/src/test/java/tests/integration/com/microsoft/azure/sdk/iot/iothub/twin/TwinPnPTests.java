@@ -107,7 +107,7 @@ public class TwinPnPTests extends IntegrationTest
         public String privateKey;
         public String x509Thumbprint;
 
-        private DeviceTwin twinServiceClient;
+        private final DeviceTwin twinServiceClient;
         private DeviceTwinDevice twin;
 
         public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException

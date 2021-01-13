@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class X509AttestationTest
 {
     //PEM encoded representation of the public key certificate
-    private static String PUBLIC_CERTIFICATE_STRING =
+    private static final String PUBLIC_CERTIFICATE_STRING =
             "-----BEGIN CERTIFICATE-----\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
@@ -31,7 +31,7 @@ public class X509AttestationTest
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "-----END CERTIFICATE-----\n";
-    private static String CA_REFERENCES_STRING = "validCertificateName";
+    private static final String CA_REFERENCES_STRING = "validCertificateName";
 
     /* SRS_X509_ATTESTATION_21_001: [The constructor shall throw IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
     @Test (expected = IllegalArgumentException.class)

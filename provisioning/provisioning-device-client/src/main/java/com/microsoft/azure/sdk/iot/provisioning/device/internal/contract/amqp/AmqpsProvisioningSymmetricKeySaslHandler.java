@@ -18,8 +18,8 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
     private final static String USERNAME_FORMAT = "%s/registrations/%s";
     private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-    private String idScope;
-    private String registrationId;
+    private final String idScope;
+    private final String registrationId;
     private String sasToken;
 
     /**

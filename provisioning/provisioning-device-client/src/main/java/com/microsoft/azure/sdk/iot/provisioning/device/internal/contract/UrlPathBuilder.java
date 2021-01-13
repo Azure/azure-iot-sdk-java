@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class UrlPathBuilder
 {
-    private String scope;
+    private final String scope;
     private ProvisioningDeviceClientTransportProtocol provisioningDeviceClientTransportProtocol;
     private StringBuilder url;
 

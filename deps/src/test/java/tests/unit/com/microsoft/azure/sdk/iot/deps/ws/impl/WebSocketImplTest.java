@@ -49,14 +49,14 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("CommentedOutCode") // Test method may be used locally for some executions. Leaving for now.
 public class WebSocketImplTest
 {
-    private int _allocatedWebSocketBufferSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
-    private String _hostName = "host_XXX";
-    private String _webSocketPath = "path1/path2";
-    private int _webSocketPort = 1234567890;
-    private String _webSocketProtocol = "subprotocol_name";
-    private Map<String, String> _additionalHeaders = new HashMap<>();
+    private final int _allocatedWebSocketBufferSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
+    private final String _hostName = "host_XXX";
+    private final String _webSocketPath = "path1/path2";
+    private final int _webSocketPort = 1234567890;
+    private final String _webSocketProtocol = "subprotocol_name";
+    private final Map<String, String> _additionalHeaders = new HashMap<>();
 
-    private int _lengthOfUpgradeRequest = 311;
+    private final int _lengthOfUpgradeRequest = 311;
 
     private void init()
     {
@@ -708,7 +708,7 @@ public class WebSocketImplTest
         webSocketImpl.configure(_hostName, _webSocketPath, _webSocketPort, _webSocketProtocol, _additionalHeaders, mockWebSocketHandler);
 
         TransportInput mockTransportInput = spy(new TransportInput() {
-            ByteBuffer bb = ByteBufferUtils.newWriteableBuffer(4224);
+            final ByteBuffer bb = ByteBufferUtils.newWriteableBuffer(4224);
 
             @Override
             public int capacity() {
@@ -1084,7 +1084,7 @@ public class WebSocketImplTest
         webSocketImpl.configure(_hostName, _webSocketPath, _webSocketPort, _webSocketProtocol, _additionalHeaders, mockWebSocketHandler);
 
         TransportInput mockTransportInput = spy(new TransportInput() {
-            ByteBuffer bb = ByteBufferUtils.newWriteableBuffer(4224);
+            final ByteBuffer bb = ByteBufferUtils.newWriteableBuffer(4224);
 
             @Override
             public int capacity() {
@@ -1171,7 +1171,7 @@ public class WebSocketImplTest
         webSocketImpl.configure(_hostName, _webSocketPath, _webSocketPort, _webSocketProtocol, _additionalHeaders, mockWebSocketHandler);
 
         TransportInput mockTransportInput = spy(new TransportInput() {
-            ByteBuffer bb = ByteBufferUtils.newWriteableBuffer(4224);
+            final ByteBuffer bb = ByteBufferUtils.newWriteableBuffer(4224);
 
             @Override
             public int capacity() {
