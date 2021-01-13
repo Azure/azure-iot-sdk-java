@@ -667,7 +667,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection);
+                ParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };
@@ -722,7 +722,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection);
+                ParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };

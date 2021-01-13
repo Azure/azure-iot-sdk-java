@@ -1109,7 +1109,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
 
@@ -1145,7 +1145,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(statistics);
@@ -1184,7 +1184,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = jobPropertiesJson.getBytes();
             }
@@ -1207,7 +1207,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(jobProperties);
@@ -1277,7 +1277,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = jobPropertiesJson.getBytes();
             }
@@ -1298,7 +1298,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(jobProperties);
@@ -1366,7 +1366,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = jobPropertiesJson.getBytes();
             }
@@ -1387,7 +1387,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(jobProperties);
@@ -1429,7 +1429,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = jobPropertiesJson.getBytes();
             }
@@ -1452,7 +1452,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(importJobProperties);
@@ -1511,7 +1511,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = jobPropertiesJson.getBytes();
             }
@@ -1532,7 +1532,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(jobProperties);
@@ -2436,7 +2436,7 @@ public class RegistryManagerTest
                 mockHttpRequest.send();
                 times = 1;
 
-                mockIotHubExceptionManager.httpResponseVerification(mockHttpResponse);
+                IotHubExceptionManager.httpResponseVerification(mockHttpResponse);
                 times = 1;
 
             }
@@ -2501,7 +2501,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = deviceJson.getBytes();
                 Deencapsulation.invoke(device, "toDeviceParser");
@@ -2524,7 +2524,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(responseDevice);
@@ -2541,7 +2541,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = devicesJson.getBytes();
             }
@@ -2580,7 +2580,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = moduleJson.getBytes();
                 Deencapsulation.invoke(module, "toDeviceParser");
@@ -2603,7 +2603,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(responseModule);
@@ -2620,7 +2620,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = modulesJson.getBytes();
             }
@@ -2659,7 +2659,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = configJson.getBytes();
                 Deencapsulation.invoke(config, "toConfigurationParser");
@@ -2682,7 +2682,7 @@ public class RegistryManagerTest
                 mockHttpRequest.setHeaderField("Content-Type", "application/json");
                 mockHttpRequest.setHeaderField("charset", "utf-8");
                 mockHttpRequest.send();
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
             }
         };
         assertNotNull(responseConfig);
@@ -2699,7 +2699,7 @@ public class RegistryManagerTest
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
-                mockIotHubExceptionManager.httpResponseVerification((HttpResponse) any);
+                IotHubExceptionManager.httpResponseVerification((HttpResponse) any);
                 mockHttpResponse.getBody();
                 result = configsJson.getBytes();
             }
