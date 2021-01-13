@@ -428,6 +428,7 @@ public class Thermostat {
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
     }
 
+    @SuppressWarnings("SameParameterValue") // For this sample, type is always Date.class, but it can be other service-allowed values as well.
     private static <T> T getCommandRequestValue(@NonNull String jsonPayload, @NonNull Class<T> type) {
         return gson.fromJson(jsonPayload, type);
     }

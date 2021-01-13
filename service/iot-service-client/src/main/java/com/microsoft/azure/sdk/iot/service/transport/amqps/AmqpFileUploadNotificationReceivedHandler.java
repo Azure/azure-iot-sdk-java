@@ -46,33 +46,6 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
      * @param userName The username string to use SASL authentication (example: user@sas.service)
      * @param sasToken The SAS token string
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
-     */
-    AmqpFileUploadNotificationReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null);
-    }
-
-    /**
-     * Constructor to set up connection parameters and initialize
-     * handshaker and flow controller for transport
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken The SAS token string
-     * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     */
-    AmqpFileUploadNotificationReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, proxyOptions, null);
-    }
-
-    /**
-     * Constructor to set up connection parameters and initialize
-     * handshaker and flow controller for transport
-     * @param hostName The address string of the service (example: AAA.BBB.CCC)
-     * @param userName The username string to use SASL authentication (example: user@sas.service)
-     * @param sasToken The SAS token string
-     * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.

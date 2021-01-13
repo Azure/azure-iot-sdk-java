@@ -1621,6 +1621,7 @@ public class IotHubTransport implements IotHubListener
      * @param sleepFor length of time to sleep for
      * @param unit time unit associated with sleepFor
      */
+    @SuppressWarnings("SameParameterValue") // The TimeUnit is currently always MilliSeconds, but this method can be used generically as well.
     private static void sleepUninterruptibly(long sleepFor, TimeUnit unit)
     {
         boolean interrupted = false;

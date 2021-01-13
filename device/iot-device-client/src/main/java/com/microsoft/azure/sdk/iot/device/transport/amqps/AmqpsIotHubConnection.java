@@ -1014,6 +1014,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // This is currently always "true", but can be "false" if required.
     private void closeConnectionWithException(String errorMessage, boolean isRetryable) throws TransportException
     {
         TransportException transportException = new TransportException(errorMessage);

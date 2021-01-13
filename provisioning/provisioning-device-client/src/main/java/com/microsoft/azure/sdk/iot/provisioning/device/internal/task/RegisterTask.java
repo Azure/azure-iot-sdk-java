@@ -145,9 +145,9 @@ public class RegisterTask implements Callable
         }
     }
 
-    private String constructSasToken(int expiryTime) throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityProviderException
+    private String constructSasToken() throws ProvisioningDeviceClientException, UnsupportedEncodingException, SecurityProviderException
     {
-        if (expiryTime <= 0)
+        if (RegisterTask.DEFAULT_EXPIRY_TIME_IN_SECS <= 0)
         {
             throw new IllegalArgumentException("expiry time cannot be negative or zero");
         }
@@ -158,7 +158,7 @@ public class RegisterTask implements Callable
             throw new ProvisioningDeviceClientException("Could not construct token scope");
         }
 
-        Long expiryTimeUTC = System.currentTimeMillis() / 1000 + expiryTime;
+        Long expiryTimeUTC = System.currentTimeMillis() / 1000 + RegisterTask.DEFAULT_EXPIRY_TIME_IN_SECS;
 
         String value = tokenScope.concat("\n" + expiryTimeUTC);
         byte[] token = null;
@@ -194,7 +194,7 @@ public class RegisterTask implements Callable
             2. Sign the HSM with the string of format <tokenScope>/n<expiryTime> and receive a token
             3. Encode the token to Base64 format and UrlEncode it to generate the signature. ]*/
 
-            String sasToken = this.constructSasToken(DEFAULT_EXPIRY_TIME_IN_SECS);
+            String sasToken = this.constructSasToken();
             requestData.setSasToken(sasToken);
 
             //SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]

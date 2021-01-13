@@ -207,14 +207,14 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
             }
 
             log.trace("Message was sent over {} sender link with delivery tag {} and hash {}", getLinkInstanceType(), new String(deliveryTag), delivery.hashCode());
-            return new AmqpsSendResult(true, deliveryTag);
+            return new AmqpsSendResult(deliveryTag);
         }
         catch (Exception e)
         {
             log.warn("Encountered a problem while sending a message on {} sender link with link correlation id {}", getLinkInstanceType(), this.linkCorrelationId, e);
             this.senderLink.advance();
             delivery.free();
-            return new AmqpsSendResult(false);
+            return new AmqpsSendResult();
         }
     }
 

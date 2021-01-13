@@ -749,6 +749,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client
+    @SuppressWarnings("SameParameterValue") // This can be the current multiplexing client or the deprecated transport client.
     void setConnectionType(IoTHubConnectionType connectionType)
     {
         this.ioTHubConnectionType = connectionType;

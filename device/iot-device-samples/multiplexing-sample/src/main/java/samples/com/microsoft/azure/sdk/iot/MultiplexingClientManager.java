@@ -53,6 +53,7 @@ public class MultiplexingClientManager extends ClientManagerBase
      * @param multiplexingClient the multiplexing client
      * @param multiplexClientId user defined Id for the multiplexing client.
      */
+    @SuppressWarnings("SameParameterValue") // For the purpose of this sample, multiplexClientId is "MultiplexingClient", but it can be assigned to any user defined value.
     MultiplexingClientManager(MultiplexingClient multiplexingClient, String multiplexClientId)
     {
         this.multiplexingClient = multiplexingClient;

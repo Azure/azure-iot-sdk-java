@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.deps.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.deps.transport.http.HttpResponse;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ResponseCallback;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
@@ -92,9 +91,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             URL url,
             HttpMethod method,
             byte[] payload,
-            Integer timeoutInMs,
-            Map<String, String> headersMap,
-            String userAgentValue)
+            Map<String, String> headersMap)
             throws IllegalArgumentException, IOException
     {
         HttpRequest request = null;
@@ -114,7 +111,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             throw new IllegalArgumentException("Null payload");
         }
 
-        if (timeoutInMs < 0)
+        if (ContractAPIHttp.DEFAULT_HTTP_TIMEOUT_MS < 0)
         {
             throw new IllegalArgumentException("HTTP Request timeout shouldn't be negative");
         }
@@ -126,7 +123,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             request.setReadTimeoutMillis(timeoutInMs);
         */
 
-        request.setHeaderField(USER_AGENT, userAgentValue);
+        request.setHeaderField(USER_AGENT, "com.microsoft.azure.sdk.iot.dps.dps-device-client/1.8.5");
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
         request.setHeaderField(CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
@@ -206,7 +203,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             //SRS_ContractAPIHttp_25_025: [ This method shall build the required Json input using parser. ]
             byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), base64EncodedEk, base64EncodedSrk).toJson().getBytes();
             //SRS_ContractAPIHttp_25_005: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8".]
-            HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, null, SDKUtils.PROVISIONING_DEVICE_CLIENT_IDENTIFIER + SDKUtils.PROVISIONING_DEVICE_CLIENT_VERSION);
+            HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, null);
             //SRS_ContractAPIHttp_25_006: [This method shall set the SSLContext for the Http Request.]
             httpRequest.setSSLContext(requestData.getSslContext());
             HttpResponse httpResponse = null;
@@ -294,7 +291,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             }
 
             //SRS_ContractAPIHttp_25_013: [This method shall prepare the PUT request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]
-            HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, DEFAULT_HTTP_TIMEOUT_MS, headersMap, SDKUtils.PROVISIONING_DEVICE_CLIENT_IDENTIFIER + SDKUtils.PROVISIONING_DEVICE_CLIENT_VERSION);
+            HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.PUT, payload, headersMap);
             //SRS_ContractAPIHttp_25_014: [This method shall set the SSLContext for the Http Request.]
             httpRequest.setSSLContext(requestData.getSslContext());
             //SRS_ContractAPIHttp_25_015: [This method shall send http request and verify the status by calling 'ProvisioningDeviceClientExceptionManager.verifyHttpResponse'.]
@@ -356,7 +353,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
                 headersMap.put(AUTHORIZATION, requestData.getSasToken());
             }
             //SRS_ContractAPIHttp_25_020: [This method shall prepare the GET request by setting following headers on a HttpRequest 1. User-Agent : User Agent String for the SDK 2. Accept : "application/json" 3. Content-Type: "application/json; charset=utf-8" 4. Authorization: specified sas token as authorization if a non null value is given.]
-            HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.GET, new byte[0], DEFAULT_HTTP_TIMEOUT_MS, headersMap, SDKUtils.PROVISIONING_DEVICE_CLIENT_IDENTIFIER + SDKUtils.PROVISIONING_DEVICE_CLIENT_VERSION);
+            HttpRequest httpRequest = this.prepareRequest(new URL(url), HttpMethod.GET, new byte[0], headersMap);
             //SRS_ContractAPIHttp_25_021: [This method shall set the SSLContext for the Http Request.]
             httpRequest.setSSLContext(requestData.getSslContext());
             //SRS_ContractAPIHttp_25_022: [This method shall send http request and verify the status by calling 'ProvisioningDeviceClientExceptionManager.verifyHttpResponse'.]
