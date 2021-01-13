@@ -26,6 +26,7 @@ import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpRequest.
  * Coverage 66% method, 75% line */
+@SuppressWarnings("EmptyMethod")
 @RunWith(JMockit.class)
 public class HttpsRequestTest
 {

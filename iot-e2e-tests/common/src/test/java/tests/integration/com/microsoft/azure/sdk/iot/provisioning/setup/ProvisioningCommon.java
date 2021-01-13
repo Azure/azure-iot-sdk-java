@@ -158,11 +158,8 @@ public class ProvisioningCommon extends IntegrationTest
             }
             else
             {
-                return Arrays.asList(
-                        new Object[][]
-                                {
-                                        //no tests to run for pull request builds
-                                });
+                //no tests to run for pull request builds
+                return Collections.emptyList();
             }
         }
         else
@@ -361,11 +358,7 @@ public class ProvisioningCommon extends IntegrationTest
 
     public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, String jsonPayload, String... expectedIotHubsToProvisionTo) throws Exception
     {
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        for (String iothubToProvisionTo : expectedIotHubsToProvisionTo)
-        {
-            expectedHubsToProvisionTo.add(iothubToProvisionTo);
-        }
+        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>(Arrays.asList(expectedIotHubsToProvisionTo));
         return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedHubsToProvisionTo, jsonPayload);
     }
 

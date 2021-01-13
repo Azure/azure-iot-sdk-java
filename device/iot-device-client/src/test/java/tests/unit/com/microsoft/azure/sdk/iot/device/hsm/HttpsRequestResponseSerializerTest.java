@@ -252,7 +252,7 @@ public class HttpsRequestResponseSerializerTest
 
         for (int i = 0; i < MAX_HEADER_COUNT + 1; i++)
         {
-            stringToDeserialize.append("header" + i + ":value" + i + "\r\n");
+            stringToDeserialize.append("header").append(i).append(":value").append(i).append("\r\n");
         }
 
         stringToDeserialize.append("\r\n");

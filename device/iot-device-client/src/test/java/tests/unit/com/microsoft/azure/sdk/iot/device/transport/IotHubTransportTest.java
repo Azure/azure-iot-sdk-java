@@ -1398,6 +1398,7 @@ public class IotHubTransportTest
 
     //Tests_SRS_IOTHUBTRANSPORT_34_044: [This function continue to dequeue packets saved in the waiting
     // queue and send them until connection status isn't CONNECTED or until 10 messages have been sent]
+    @SuppressWarnings("EmptyMethod")
     @Test
     public void sendMessagesSendsMessages()
     {
@@ -1866,6 +1867,7 @@ public class IotHubTransportTest
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_061: [This function shall close the saved connection, and then invoke openConnection and return null.]
+    @SuppressWarnings("EmptyMethod")
     @Test
     public void singleReconnectAttemptSuccess() throws TransportException
     {

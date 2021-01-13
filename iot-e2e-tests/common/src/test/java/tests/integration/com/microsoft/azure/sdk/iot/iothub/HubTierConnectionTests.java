@@ -88,8 +88,7 @@ public class HubTierConnectionTests extends IntegrationTest
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
 
-        List inputs = new ArrayList();
-        inputs.addAll(Arrays.asList(
+        List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
                         {
                                 //sas token device client
