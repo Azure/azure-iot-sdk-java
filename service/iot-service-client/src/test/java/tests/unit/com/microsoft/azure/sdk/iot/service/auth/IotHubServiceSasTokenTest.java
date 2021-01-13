@@ -66,11 +66,11 @@ public class IotHubServiceSasTokenTest
             final SecretKeySpec secretKeySpec;
             Mac mac;
             {
-                urlEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
-                system.currentTimeMillis();
+                URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
+                System.currentTimeMillis();
                 byte[] body = { 1 };
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
-                mac.getInstance(cryptoProvider);
+                Mac.getInstance(cryptoProvider);
             }
         };
         // Act
