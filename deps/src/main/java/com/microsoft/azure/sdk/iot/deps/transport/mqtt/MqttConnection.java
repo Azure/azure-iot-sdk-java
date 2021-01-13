@@ -135,10 +135,6 @@ public class MqttConnection implements MqttCallback
             {
                 IMqttToken connectToken = this.mqttAsyncClient.connect(this.connectionOptions);
                 connectToken.waitForCompletion();
-                if (this.mqttListener != null)
-                {
-                    this.mqttListener.connectionEstablished();
-                }
             }
         }
         catch (MqttException e)

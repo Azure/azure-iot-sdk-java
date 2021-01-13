@@ -357,11 +357,6 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
     }
 
     @Override
-    public void connectionEstablished()
-    {
-    }
-
-    @Override
     public void connectionLost(Throwable throwable)
     {
         lostConnection = throwable;
