@@ -39,7 +39,7 @@ public class IotHubTransport implements IotHubListener
 
     // for multiplexing. A particular device can be disconnected retrying while the tcp connection is fine and the other
     // device sessions are open.
-    private Map<String, IotHubConnectionStatus> deviceConnectionStates = new HashMap<>();
+    private final Map<String, IotHubConnectionStatus> deviceConnectionStates = new HashMap<>();
 
     private final Map<String, Exception> multiplexingDeviceRegistrationFailures = new ConcurrentHashMap<>();
 
@@ -73,7 +73,7 @@ public class IotHubTransport implements IotHubListener
 
     // Callback for notifying the DeviceIO layer of connection status change events. The deviceIO layer
     // should stop spawning send/receive threads when this layer is disconnected or disconnected retrying
-    private IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback;
+    private final IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback;
 
     // Lock on reading and writing on the inProgressPackets map
     final private Object inProgressMessagesLock = new Object();

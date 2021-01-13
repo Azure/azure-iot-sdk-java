@@ -1,8 +1,8 @@
 package io.swagger.server.api;
 
 public class MainApiException extends Exception {
-    private int statusCode;
-    private String statusMessage;
+    private final int statusCode;
+    private final String statusMessage;
 
     public MainApiException(int statusCode, String statusMessage) {
         super();

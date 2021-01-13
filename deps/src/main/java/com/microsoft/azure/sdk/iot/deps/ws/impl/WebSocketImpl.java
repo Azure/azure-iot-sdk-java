@@ -21,14 +21,14 @@ import static org.apache.qpid.proton.engine.impl.ByteBufferUtils.pourAll;
 
 public class WebSocketImpl implements WebSocket, TransportLayer
 {
-    private int _maxFrameSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
+    private final int _maxFrameSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
     private boolean _tail_closed = false;
     private final ByteBuffer _inputBuffer;
     private boolean _head_closed = false;
     private final ByteBuffer _outputBuffer;
-    private ByteBuffer _pingBuffer;
-    private ByteBuffer _wsInputBuffer;
-    private ByteBuffer _temp;
+    private final ByteBuffer _pingBuffer;
+    private final ByteBuffer _wsInputBuffer;
+    private final ByteBuffer _temp;
 
     private int _underlyingOutputSize = 0;
     private int _webSocketHeaderSize = 0;
@@ -47,7 +47,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
     private WebSocketHandler.WebSocketMessageType _lastType;
     private long _lastLength;
     private long _bytesRead = 0;
-    private int _dataStart = 0;
+    private final int _dataStart = 0;
     private WebSocketFrameReadState _frameReadState = WebSocketFrameReadState.INIT_READ;
 
     public WebSocketImpl()

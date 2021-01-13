@@ -15,11 +15,11 @@ import java.util.Map;
 
 public class MqttMessaging extends Mqtt
 {
-    private String moduleId;
-    private String eventsSubscribeTopic;
-    private String inputsSubscribeTopic;
-    private String publishTopic;
-    private boolean isEdgeHub;
+    private final String moduleId;
+    private final String eventsSubscribeTopic;
+    private final String inputsSubscribeTopic;
+    private final String publishTopic;
+    private final boolean isEdgeHub;
 
     public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
     {

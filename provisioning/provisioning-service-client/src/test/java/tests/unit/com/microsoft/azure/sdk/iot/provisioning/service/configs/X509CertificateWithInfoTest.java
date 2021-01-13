@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class X509CertificateWithInfoTest
 {
     //PEM encoded representation of the public key certificate
-    private static String PUBLIC_CERTIFICATE_STRING =
+    private static final String PUBLIC_CERTIFICATE_STRING =
             "-----BEGIN CERTIFICATE-----\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +

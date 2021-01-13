@@ -36,7 +36,7 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
     private static final String FILE_NOTIFICATION_RECEIVE_TAG = "filenotificationreceiver";
     private static final String FILENOTIFICATION_ENDPOINT = "/messages/serviceBound/filenotifications";
 
-    private AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
+    private final AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
     private Receiver fileUploadNotificationReceiverLink;
 
     /**

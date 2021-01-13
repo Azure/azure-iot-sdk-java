@@ -28,7 +28,7 @@ public class AmqpSend
     protected final String sasToken;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    private ProxyOptions proxyOptions;
+    private final ProxyOptions proxyOptions;
 
     /**
      * Constructor to set up connection parameters

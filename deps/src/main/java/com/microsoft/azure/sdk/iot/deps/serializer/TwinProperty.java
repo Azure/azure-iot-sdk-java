@@ -33,8 +33,8 @@ public class TwinProperty
 
     private class Property
     {
-        private Object value;
-        private TwinMetadata metadata;
+        private final Object value;
+        private final TwinMetadata metadata;
         private Property(Object val, Integer propertyVersion)
         {
             this.value = val;
@@ -42,7 +42,7 @@ public class TwinProperty
         }
     }
 
-    private ConcurrentMap<String, Property> property = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Property> property = new ConcurrentHashMap<>();
     private Integer version;
     private Boolean reportMetadata;
 

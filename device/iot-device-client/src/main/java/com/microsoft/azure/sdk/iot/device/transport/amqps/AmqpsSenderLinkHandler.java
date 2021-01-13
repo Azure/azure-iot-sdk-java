@@ -34,7 +34,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
     String senderLinkAddress;
     Sender senderLink;
     private long nextTag = 0;
-    private AmqpsLinkStateCallback amqpsLinkStateCallback;
+    private final AmqpsLinkStateCallback amqpsLinkStateCallback;
 
     AmqpsSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, String linkCorrelationId)
     {

@@ -25,14 +25,14 @@ public class AmqpsProvisioningSaslHandler implements SaslHandler
     private final static long MAX_MILLISECONDS_TIMEOUT_FOR_SAS_TOKEN_WAIT = 60*1000; // 1 minute
     private final static long WAIT_INTERVALS = 4*1000; // 4 second wait intervals when waiting and checking for sas token
 
-    private String idScope;
-    private String registrationId;
-    private byte[] endorsementKey;
-    private byte[] storageRootKey;
+    private final String idScope;
+    private final String registrationId;
+    private final byte[] endorsementKey;
+    private final byte[] storageRootKey;
     private byte[] challengeKey;
     private ChallengeState challengeState;
-    private ResponseCallback responseCallback;
-    private Object authorizationCallbackContext;
+    private final ResponseCallback responseCallback;
+    private final Object authorizationCallbackContext;
     private String sasToken;
 
     /**

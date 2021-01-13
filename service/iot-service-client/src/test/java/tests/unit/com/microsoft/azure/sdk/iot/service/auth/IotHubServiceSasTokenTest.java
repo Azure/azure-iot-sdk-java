@@ -63,7 +63,7 @@ public class IotHubServiceSasTokenTest
         {
             URLEncoder urlEncoder;
             System system;
-            SecretKeySpec secretKeySpec;
+            final SecretKeySpec secretKeySpec;
             Mac mac;
             {
                 urlEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));

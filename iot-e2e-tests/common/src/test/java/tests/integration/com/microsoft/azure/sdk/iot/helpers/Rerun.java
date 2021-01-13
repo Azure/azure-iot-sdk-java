@@ -11,7 +11,7 @@ import org.junit.runners.model.Statement;
 
 public class Rerun implements TestRule
 {
-    private int count;
+    private final int count;
 
     public Rerun(int count)
     {

@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class MqttDeviceTwin extends Mqtt
 {
-    private String subscribeTopic;
+    private final String subscribeTopic;
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
 

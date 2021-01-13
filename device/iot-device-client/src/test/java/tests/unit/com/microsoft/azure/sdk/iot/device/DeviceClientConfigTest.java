@@ -65,9 +65,9 @@ public class DeviceClientConfigTest
     @Mocked
     MessageCallback mockedMessageCallback;
 
-    private static String expectedDeviceId = "deviceId";
-    private static String expectedModuleId = "moduleId";
-    private static String expectedHostname = "hostname";
+    private static final String expectedDeviceId = "deviceId";
+    private static final String expectedModuleId = "moduleId";
+    private static final String expectedHostname = "hostname";
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
     @Test

@@ -18,8 +18,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class NoRetryTest
 {
-    private int currentRetryCount;
-    private TransportException lastException;
+    private final int currentRetryCount;
+    private final TransportException lastException;
     private NoRetry retryNoRetry;
 
     public NoRetryTest(int currentRetryCount, TransportException lastException)

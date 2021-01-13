@@ -19,7 +19,7 @@ public class FileUploadNotificationReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
     private final ExecutorService executor = Executors.newFixedThreadPool(3);
-    private AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive;
+    private final AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive;
 
     /**
      * Constructor to verify initialization parameters

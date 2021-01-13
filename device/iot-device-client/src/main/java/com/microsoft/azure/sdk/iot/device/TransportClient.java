@@ -37,11 +37,11 @@ public class TransportClient
     public static long SEND_PERIOD_MILLIS = 10L;
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
 
-    private IotHubClientProtocol iotHubClientProtocol;
+    private final IotHubClientProtocol iotHubClientProtocol;
     private DeviceIO deviceIO;
     private TransportClientState transportClientState;
 
-    private ArrayList<DeviceClient> deviceClientList;
+    private final ArrayList<DeviceClient> deviceClientList;
 
     /**
      * Constructor that takes a protocol as an argument.

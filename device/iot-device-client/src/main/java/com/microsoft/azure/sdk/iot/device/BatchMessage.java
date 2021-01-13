@@ -10,7 +10,7 @@ public class BatchMessage extends Message
     /**
      * List of nested messages.
      */
-    private List<Message> nestedMessages;
+    private final List<Message> nestedMessages;
 
     /**
      * Creates a batch message

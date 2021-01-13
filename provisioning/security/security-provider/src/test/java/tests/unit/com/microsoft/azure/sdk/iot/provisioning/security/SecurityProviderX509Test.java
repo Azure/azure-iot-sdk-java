@@ -64,10 +64,10 @@ public class SecurityProviderX509Test
 
     class SecurityProviderX509TestImpl extends SecurityProviderX509
     {
-        private String cn;
-        private X509Certificate x509Certificate;
-        private Key key;
-        private Collection<X509Certificate> certificates;
+        private final String cn;
+        private final X509Certificate x509Certificate;
+        private final Key key;
+        private final Collection<X509Certificate> certificates;
 
         SecurityProviderX509TestImpl(String cn, X509Certificate x509Certificate, Key key, Collection<X509Certificate> certificates)
         {

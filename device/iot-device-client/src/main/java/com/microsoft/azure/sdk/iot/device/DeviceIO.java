@@ -79,7 +79,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     private long sendPeriodInMilliseconds;
     private long receivePeriodInMilliseconds;
 
-    private IotHubTransport transport;
+    private final IotHubTransport transport;
     private IotHubSendTask sendTask = null;
     private IotHubReceiveTask receiveTask = null;
 

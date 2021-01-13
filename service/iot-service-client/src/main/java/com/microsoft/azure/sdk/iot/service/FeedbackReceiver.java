@@ -25,7 +25,7 @@ public class FeedbackReceiver extends Receiver
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
     private String deviceId;
-    private AmqpReceive amqpReceive;
+    private final AmqpReceive amqpReceive;
 
     /**
      * Constructor to verify initialization parameters

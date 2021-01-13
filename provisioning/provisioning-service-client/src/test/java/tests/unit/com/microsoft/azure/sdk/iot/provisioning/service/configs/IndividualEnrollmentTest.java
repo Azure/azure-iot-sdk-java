@@ -104,7 +104,7 @@ public class IndividualEnrollmentTest
             mockedJsonElement.addProperty("mockedKey1","mockedValue1");
             return mockedJsonElement;
         }
-    };
+    }
 
     private static IndividualEnrollment makeStandardEnrollment()
     {

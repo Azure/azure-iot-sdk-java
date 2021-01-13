@@ -26,9 +26,9 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     private final String userName;
     private final String sasToken;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
-    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FeedbackBatch feedbackBatch;
-    private ProxyOptions proxyOptions;
+    private final ProxyOptions proxyOptions;
     private final SSLContext sslContext;
 
     /**

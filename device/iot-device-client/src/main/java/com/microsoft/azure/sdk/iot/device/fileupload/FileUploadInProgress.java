@@ -14,8 +14,8 @@ import java.util.concurrent.Future;
  */
 public final class FileUploadInProgress
 {
-    private IotHubEventCallback statusCallback;
-    private Object statusCallbackContext;
+    private final IotHubEventCallback statusCallback;
+    private final Object statusCallbackContext;
     private Future task;
 
     /**
