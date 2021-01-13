@@ -115,6 +115,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Method is designed to be generic
     private TPMT_PUBLIC createPersistentPrimary(Tpm tpm, TPM_HANDLE hPersistent, TPM_RH hierarchy, TPMT_PUBLIC inPub, String primaryRole) throws SecurityProviderException
     {
         ReadPublicResponse rpResp = tpm._allowErrors().ReadPublic(hPersistent);
