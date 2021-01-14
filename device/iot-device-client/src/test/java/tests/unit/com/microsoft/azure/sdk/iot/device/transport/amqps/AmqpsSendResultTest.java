@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class AmqpsSendResultTest
 {
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembersUnsuccessfulDelivery()
     {
         //arrange
         byte[] expectedDeliveryTag = "-1".getBytes();
@@ -34,7 +34,7 @@ public class AmqpsSendResultTest
     }
 
     @Test
-    public void constructorInitializesAllMembersWithDeliveryTag() {
+    public void constructorInitializesAllMembersSuccessfulDelivery() {
         //arrange
         int expectedDeliveryTag = 56;
         byte[] deliveryTag = String.valueOf(expectedDeliveryTag).getBytes();
