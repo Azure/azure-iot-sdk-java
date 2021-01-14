@@ -58,7 +58,7 @@ public class TwinProperty
         this.reportMetadata = true;
     }
 
-    @SuppressWarnings("SameParameterValue") // Value for "propertyVersion" is currently null, but this method can be used generically as well.
+    @SuppressWarnings("SameParameterValue") // Value for "propertyVersion" is currently always null, but this method can be used generically as well.
     protected Boolean addProperty(String key, Object value, Integer propertyVersion) throws IllegalArgumentException
     {
         /* Codes_SRS_TWINPARSER_21_059: [The updateDesiredProperty shall only change properties in the map, keep the others as is.] */

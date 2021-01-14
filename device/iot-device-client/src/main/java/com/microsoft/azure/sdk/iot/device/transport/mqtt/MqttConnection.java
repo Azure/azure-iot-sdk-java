@@ -214,7 +214,7 @@ public class MqttConnection
      * Setter for mqttAsyncClient
      * @param mqttAsyncClient set mqttAsyncClient. Can be {@code null}.
      */
-    @SuppressWarnings("SameParameterValue") // This is currently only set to null during mqtt disconnection, but can be used elsewhere as well.
+    @SuppressWarnings("SameParameterValue") // "mqttAsyncClient" is currently only set to null during mqtt disconnection, but can be used elsewhere as well.
     void setMqttAsyncClient(MqttAsyncClient mqttAsyncClient)
     {
         //Codes_SRS_MQTTCONNECTION_25_011: [Setter for the MqttAsyncClient which can be null.]

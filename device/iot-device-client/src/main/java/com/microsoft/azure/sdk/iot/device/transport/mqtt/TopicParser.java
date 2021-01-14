@@ -52,7 +52,7 @@ public class TopicParser
         return status;
     }
 
-    @SuppressWarnings("SameParameterValue") // Method is designed to be generic.
+    @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexReqID".
     String getRequestId(int tokenIndexReqID) throws TransportException
     {
         String reqId = null;
@@ -115,7 +115,7 @@ public class TopicParser
     }
 
 
-    @SuppressWarnings("SameParameterValue") // Method is designed to be generic
+    @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexMethod"
     String getMethodName(int tokenIndexMethod) throws TransportException
     {
         String methodName = null;
