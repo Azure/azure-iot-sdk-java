@@ -50,19 +50,6 @@ public class AmqpsSendResultTest
     }
 
     @Test
-    public void isDeliverySuccessfulAndGetDeliveryHashReturns()
-    {
-        //arrange
-        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class);
-
-        //act
-        boolean actualIsDeliverySuccessful = Deencapsulation.invoke(amqpsSendResult, "isDeliverySuccessful");
-
-        //assert
-        assertTrue(actualIsDeliverySuccessful);
-    }
-
-    @Test
     public void getDeliveryTagWorks()
     {
         //arrange
