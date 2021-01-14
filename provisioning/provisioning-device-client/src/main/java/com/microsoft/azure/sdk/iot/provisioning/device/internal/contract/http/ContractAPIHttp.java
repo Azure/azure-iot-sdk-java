@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils.*;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
@@ -48,6 +49,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private static final String ACCEPT_CHARSET = "charset=utf-8";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String USER_AGENT_VALUE = PROVISIONING_DEVICE_CLIENT_IDENTIFIER + PROVISIONING_DEVICE_CLIENT_VERSION;
     private static final Integer DEFAULT_HTTP_TIMEOUT_MS = Integer.MAX_VALUE;
     private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 401;
 
@@ -123,7 +125,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
             request.setReadTimeoutMillis(timeoutInMs);
         */
 
-        request.setHeaderField(USER_AGENT, "com.microsoft.azure.sdk.iot.dps.dps-device-client/1.8.5");
+        request.setHeaderField(USER_AGENT, USER_AGENT_VALUE);
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
         request.setHeaderField(CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
