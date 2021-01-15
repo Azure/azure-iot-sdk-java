@@ -34,6 +34,7 @@ import static org.junit.Assert.*;
  * Unit test for Mqtt class.
  * 100% methods, 92% lines covered
  */
+@SuppressWarnings("ThrowableNotThrown")
 public class MqttTest
 {
     private static final String expectedInputName = "someInputName";

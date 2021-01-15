@@ -70,7 +70,7 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
             if (amqpsMessage.getApplicationProperties() != null && amqpsMessage.getProperties() != null)
             {
                 Properties properties = amqpsMessage.getProperties();
-                Object correlationId = properties.getCorrelationId();
+                UUID correlationId = (UUID) properties.getCorrelationId();
                 Map<String, Object> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
 
                 if (!this.correlationMap.containsKey(correlationId))

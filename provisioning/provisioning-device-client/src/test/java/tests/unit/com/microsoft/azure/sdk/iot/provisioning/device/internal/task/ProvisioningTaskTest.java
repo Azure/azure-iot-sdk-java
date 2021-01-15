@@ -37,6 +37,7 @@ import static org.junit.Assert.assertNotNull;
   Coverage : 100% method, 99% line
 */
 
+@SuppressWarnings("ThrowableNotThrown")
 @RunWith(JMockit.class)
 public class ProvisioningTaskTest
 {
