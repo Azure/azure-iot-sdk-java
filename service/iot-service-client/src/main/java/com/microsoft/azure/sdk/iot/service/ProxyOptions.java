@@ -12,7 +12,7 @@ import java.net.Proxy;
 public class ProxyOptions
 {
     @Getter
-    private Proxy proxy;
+    private final Proxy proxy;
 
     /**
      * Create the proxy options for connecting to a proxy

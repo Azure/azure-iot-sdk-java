@@ -39,14 +39,14 @@ public class ModuleClient extends InternalClient
 {
     private static final String DEFAULT_API_VERSION = "2018-06-28";
 
-    private static long SEND_PERIOD_MILLIS = 10;
+    private static final long SEND_PERIOD_MILLIS = 10;
 
-    private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10;
-    private static long RECEIVE_PERIOD_MILLIS_MQTT = 10;
-    private static long RECEIVE_PERIOD_MILLIS_HTTPS = 25 * 60 * 1000; /*25 minutes*/
+    private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10;
+    private static final long RECEIVE_PERIOD_MILLIS_MQTT = 10;
+    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25 * 60 * 1000; /*25 minutes*/
 
-    private static int DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS = 60 * 60; //1 hour
-    private static int DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE = 85; //Token will go 85% of its life before renewing
+    private static final int DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS = 60 * 60; //1 hour
+    private static final int DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE = 85; //Token will go 85% of its life before renewing
 
     private static final String IotEdgedUriVariableName = "IOTEDGE_WORKLOADURI";
     private static final String IotHubHostnameVariableName = "IOTEDGE_IOTHUBHOSTNAME";
@@ -259,7 +259,7 @@ public class ModuleClient extends InternalClient
             log.debug("Creating module client with the provided connection string");
 
             //Codes_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
-            ModuleClient moduleClient = null;
+            ModuleClient moduleClient;
             try
             {
                 moduleClient = new ModuleClient(connectionString, protocol, clientOptions);
@@ -368,6 +368,7 @@ public class ModuleClient extends InternalClient
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // The SEND_PERIOD is currently 10ms for all protocols, but can be made configurable in the future.
     private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
     {
         super(iotHubAuthenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);

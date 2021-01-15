@@ -17,8 +17,8 @@ public class ProvisioningX509CertGen
     {
         try
         {
-            String aliasCertCnName, rootCertCnName, signerCertCnName = null;
-            SecurityProviderDiceEmulator securityClient = null;
+            String aliasCertCnName, rootCertCnName, signerCertCnName;
+            SecurityProviderDiceEmulator securityClient;
             Scanner scanner = new Scanner(System.in);
             System.out.println("Do you want to input common name : Y/N(use default)");
             String isCnName = scanner.next();

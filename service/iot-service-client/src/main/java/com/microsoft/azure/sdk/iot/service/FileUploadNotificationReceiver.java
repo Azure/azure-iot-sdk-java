@@ -19,34 +19,7 @@ public class FileUploadNotificationReceiver extends Receiver
 {
     private final long DEFAULT_TIMEOUT_MS = 60000;
     private final ExecutorService executor = Executors.newFixedThreadPool(3);
-    private AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive;
-
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol The iot hub protocol name
-     */
-    FileUploadNotificationReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-    }
-
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol The iot hub protocol name
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     */
-    FileUploadNotificationReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
-    {
-        this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
-    }
+    private final AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive;
 
     /**
      * Constructor to verify initialization parameters

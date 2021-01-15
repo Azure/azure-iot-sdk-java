@@ -40,14 +40,14 @@ public class IotHubConnectionString
      */
     private static final Charset CONNECTION_STRING_CHARSET = StandardCharsets.UTF_8;
 
-    private String hostName = null;
-    private String hubName = null;
-    private String deviceId = null;
-    private String sharedAccessKey = null;
-    private String sharedAccessToken = null;
-    private String moduleId = null;
-    private boolean isUsingX509 = false;
-    private String gatewayHostName = null;
+    private String hostName;
+    private String hubName;
+    private String deviceId;
+    private String sharedAccessKey;
+    private String sharedAccessToken;
+    private String moduleId;
+    private boolean isUsingX509;
+    private String gatewayHostName;
 
     /**
      * CONSTRUCTOR.
@@ -314,10 +314,9 @@ public class IotHubConnectionString
         int iotHubNameEndIdx = hostName.indexOf(".");
         if (iotHubNameEndIdx == -1)
         {
-            String errStr = String.format(
-                    "Provided hostname did not include a valid IoT Hub name as its prefix. "
-                            + "An IoT Hub hostname has the following format: "
-                            + "[iotHubName].[valid URI chars]");
+            String errStr = "Provided hostname did not include a valid IoT Hub name as its prefix. "
+                    + "An IoT Hub hostname has the following format: "
+                    + "[iotHubName].[valid URI chars]";
             throw new IllegalArgumentException(errStr);
         }
         return hostName.substring(0, iotHubNameEndIdx);

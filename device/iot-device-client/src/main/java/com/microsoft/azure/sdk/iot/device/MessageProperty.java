@@ -63,9 +63,9 @@ public final class MessageProperty {
     }
 
     /** The property name. */
-    private String name;
+    private final String name;
     /** The property value. */
-    private String value;
+    private final String value;
 
     /**
      * Constructor.

@@ -35,11 +35,11 @@ public class IotHubSasTokenAuthenticationProviderTest
     @Mocked
     IotHubSasToken mockSasToken;
 
-    private static String expectedDeviceId = "deviceId";
-    private static String expectedHostname = "hostname";
-    private static String expectedDeviceKey = "deviceKey";
-    private static String expectedSasToken = "sasToken";
-    private static long expectedExpiryTime = 3600;
+    private static final String expectedDeviceId = "deviceId";
+    private static final String expectedHostname = "hostname";
+    private static final String expectedDeviceKey = "deviceKey";
+    private static final String expectedSasToken = "sasToken";
+    private static final long expectedExpiryTime = 3600;
     private static final long MILLISECONDS_PER_SECOND = 1000L;
     private static final long MINIMUM_EXPIRATION_TIME_OFFSET = 1L;
 

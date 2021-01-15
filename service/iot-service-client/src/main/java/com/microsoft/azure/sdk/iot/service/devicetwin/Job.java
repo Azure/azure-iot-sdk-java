@@ -17,8 +17,8 @@ import java.util.UUID;
  */
 public class Job
 {
-    private String jobId;
-    private JobClient jobClient;
+    private final String jobId;
+    private final JobClient jobClient;
 
     /**
      * CONSTRUCTOR

@@ -89,7 +89,7 @@ public class HttpsBatchMessageTest
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
         final String expectedMsgBase64 =
-                "\"base64Encoded\":" + Boolean.toString(true);
+                "\"base64Encoded\":" + true;
         assertThat(testBatchBody, containsString(expectedMsgBase64));
     }
 

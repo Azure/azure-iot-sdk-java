@@ -86,7 +86,7 @@ public class DeviceTwin
             throw new IllegalArgumentException("Instantiate a device and set device id to be used");
         }
 
-        URL url = null;
+        URL url;
         if ((device.getModuleId() == null) || device.getModuleId().length() ==0)
         {
             /*

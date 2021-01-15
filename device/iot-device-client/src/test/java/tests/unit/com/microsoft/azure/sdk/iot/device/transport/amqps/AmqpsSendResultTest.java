@@ -8,7 +8,7 @@ import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSendResult;
 import mockit.Deencapsulation;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
 *  Unit tests for AmqpsSendResult
@@ -18,61 +18,44 @@ import static org.junit.Assert.assertEquals;
 public class AmqpsSendResultTest
 {
     @Test
-    public void constructorInitializesAllMembers()
+    public void constructorInitializesAllMembersUnsuccessfulDelivery()
     {
         //arrange
-        boolean isDeliverySuccessful = false;
         byte[] expectedDeliveryTag = "-1".getBytes();
 
         //act
-        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, isDeliverySuccessful);
+        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class);
         boolean actualIsDeliverySuccessful = Deencapsulation.getField(amqpsSendResult, "deliverySuccessful");
         int actualDeliveryTag = Deencapsulation.getField(amqpsSendResult, "deliveryTag");
 
         //assert
-        assertEquals(isDeliverySuccessful, actualIsDeliverySuccessful);
+        assertFalse(actualIsDeliverySuccessful);
         assertEquals(new String(expectedDeliveryTag), String.valueOf(actualDeliveryTag));
     }
 
     @Test
-    public void constructorInitializesAllMembersWithDeliveryTag() {
+    public void constructorInitializesAllMembersSuccessfulDelivery() {
         //arrange
-        boolean isDeliverySuccessful = false;
         int expectedDeliveryTag = 56;
         byte[] deliveryTag = String.valueOf(expectedDeliveryTag).getBytes();
 
         //act
-        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, isDeliverySuccessful, deliveryTag);
+        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, (Object) deliveryTag);
         boolean actualIsDeliverySuccessful = Deencapsulation.getField(amqpsSendResult, "deliverySuccessful");
         int actualDeliveryTag = Deencapsulation.getField(amqpsSendResult, "deliveryTag");
 
         //assert
-        assertEquals(isDeliverySuccessful, actualIsDeliverySuccessful);
+        assertTrue(actualIsDeliverySuccessful);
         assertEquals(expectedDeliveryTag, actualDeliveryTag);
-    }
-
-    @Test
-    public void isDeliverySuccessfulAndGetDeliveryHashReturns()
-    {
-        //arrange
-        boolean isDeliverySuccessful = true;
-        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, isDeliverySuccessful);
-
-        //act
-        boolean actualIsDeliverySuccessful = Deencapsulation.invoke(amqpsSendResult, "isDeliverySuccessful");
-
-        //assert
-        assertEquals(isDeliverySuccessful, actualIsDeliverySuccessful);
     }
 
     @Test
     public void getDeliveryTagWorks()
     {
         //arrange
-        boolean isDeliverySuccessful = true;
         byte[] deliveryTag = String.valueOf(24).getBytes();
         int deliveryTagInt = Integer.parseInt(new String(deliveryTag));
-        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, isDeliverySuccessful, deliveryTag);
+        AmqpsSendResult amqpsSendResult = Deencapsulation.newInstance(AmqpsSendResult.class, (Object) deliveryTag);
 
         //act
         int actualDeliveryTag = amqpsSendResult.getDeliveryTag();

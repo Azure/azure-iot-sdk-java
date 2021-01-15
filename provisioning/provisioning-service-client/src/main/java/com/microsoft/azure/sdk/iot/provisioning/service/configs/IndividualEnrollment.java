@@ -130,7 +130,7 @@ public class IndividualEnrollment extends Serializable
     private static final String CREATED_DATETIME_UTC_TAG = "createdDateTimeUtc";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(CREATED_DATETIME_UTC_TAG)
-    private String createdDateTimeUtc = null;
+    private final String createdDateTimeUtc = null;
     @Expose(serialize = false, deserialize = false)
     private Date createdDateTimeUtcDate;
 
@@ -138,7 +138,7 @@ public class IndividualEnrollment extends Serializable
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
-    private String lastUpdatedDateTimeUtc = null;
+    private final String lastUpdatedDateTimeUtc = null;
     private transient Date lastUpdatedDateTimeUtcDate;
 
     // the eTag

@@ -39,7 +39,7 @@ public class JobQueryResponseError
         }
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        JobQueryResponseError jobQueryResponseError = null;
+        JobQueryResponseError jobQueryResponseError;
         try
         {
             //Codes_SRSJOB_QUERY_RESPONSE_ERROR_25_004: [This method shall save the values of code and description to this object.]

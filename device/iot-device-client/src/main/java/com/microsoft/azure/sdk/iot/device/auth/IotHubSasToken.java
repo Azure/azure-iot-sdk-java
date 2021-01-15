@@ -22,7 +22,7 @@ public final class IotHubSasToken
     /** Components of the SAS token. */
     private String signature = null;
     /** The time, as a UNIX timestamp, before which the token is valid. */
-    private long expiryTime = 0L;
+    private long expiryTime;
     /**
      * The URI for a connection from a device to an IoT Hub. Does not include a
      * protocol.

@@ -25,21 +25,21 @@ public class QueryCollection
     private static final String ITEM_TYPE_KEY = "x-ms-item-type";
     private static final String PAGE_SIZE_KEY = "x-ms-max-item-count";
 
-    private int pageSize;
-    private String query;
-    private boolean isSqlQuery;
+    private final int pageSize;
+    private final String query;
+    private final boolean isSqlQuery;
 
-    private QueryType requestQueryType;
+    private final QueryType requestQueryType;
     private QueryType responseQueryType;
 
     private String responseContinuationToken;
 
-    private IotHubConnectionString iotHubConnectionString;
-    private URL url;
-    private HttpMethod httpMethod;
+    private final IotHubConnectionString iotHubConnectionString;
+    private final URL url;
+    private final HttpMethod httpMethod;
 
-    private int httpConnectTimeout;
-    private int httpReadTimeout;
+    private final int httpConnectTimeout;
+    private final int httpReadTimeout;
 
     private Proxy proxy;
 
@@ -143,6 +143,7 @@ public class QueryCollection
      * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown, of if the query string is null or empty,
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
+    @SuppressWarnings("SameParameterValue") // Generic method for executing queries, "requestQueryType" and "httpMethod" can have any service-allowed value.
     protected QueryCollection(String query, int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
@@ -221,7 +222,7 @@ public class QueryCollection
 
         //Codes_SRS_QUERYCOLLECTION_34_015: [If this is a sql query, the payload of the query message shall be set to the json bytes representation of this object's query string.]
         //Codes_SRS_QUERYCOLLECTION_34_016: [If this is not a sql query, the payload of the query message shall be set to empty bytes.]
-        byte[] payload = null;
+        byte[] payload;
         if (isSqlQuery)
         {
             QueryRequestParser requestParser = new QueryRequestParser(this.query);

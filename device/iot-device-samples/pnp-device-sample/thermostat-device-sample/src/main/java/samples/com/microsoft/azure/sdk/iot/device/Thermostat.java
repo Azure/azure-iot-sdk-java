@@ -171,7 +171,7 @@ public class Thermostat {
 
     private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
-        ProvisioningDeviceClient provisioningDeviceClient = null;
+        ProvisioningDeviceClient provisioningDeviceClient;
         ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
         provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, provisioningProtocol, securityClientSymmetricKey);
@@ -428,6 +428,7 @@ public class Thermostat {
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
     }
 
+    @SuppressWarnings("SameParameterValue") // For this sample, type is always Date.class, but it can be other service-allowed values as well.
     private static <T> T getCommandRequestValue(@NonNull String jsonPayload, @NonNull Class<T> type) {
         return gson.fromJson(jsonPayload, type);
     }

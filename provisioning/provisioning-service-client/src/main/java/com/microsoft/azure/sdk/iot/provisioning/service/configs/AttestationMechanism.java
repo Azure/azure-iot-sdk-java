@@ -24,7 +24,7 @@ public final class AttestationMechanism
     private static final String ATTESTATION_TYPE_TAG = "type";
     @Expose(serialize = true, deserialize = true)
     @SerializedName(ATTESTATION_TYPE_TAG)
-    private AttestationMechanismType type = AttestationMechanismType.NONE;
+    private AttestationMechanismType type;
 
     // This is the TpmAttestation that contains the TPM keys. It is valid on AttestationMechanismType.TPM.
     private static final String TPM_ATTESTATION_TAG = "tpm";

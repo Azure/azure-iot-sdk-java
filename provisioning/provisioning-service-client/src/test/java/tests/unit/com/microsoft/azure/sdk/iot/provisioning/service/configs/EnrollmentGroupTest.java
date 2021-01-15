@@ -124,7 +124,7 @@ public class EnrollmentGroupTest
             mockedJsonElement.addProperty("mockedKey1","mockedValue1");
             return mockedJsonElement;
         }
-    };
+    }
 
     private static EnrollmentGroup makeStandardX509EnrollmentGroup()
     {

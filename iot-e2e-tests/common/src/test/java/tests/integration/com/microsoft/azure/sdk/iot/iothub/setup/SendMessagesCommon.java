@@ -55,8 +55,7 @@ public class SendMessagesCommon extends IntegrationTest
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
 
-        List inputs = new ArrayList();
-        inputs.addAll(Arrays.asList(
+        List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
                         {
                                 //sas token device client, no proxy

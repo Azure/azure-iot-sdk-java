@@ -44,7 +44,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
     String linkCorrelationId;
     String receiverLinkAddress;
     Receiver receiverLink;
-    private AmqpsLinkStateCallback amqpsLinkStateCallback;
+    private final AmqpsLinkStateCallback amqpsLinkStateCallback;
 
     AmqpsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, String linkCorrelationId)
     {

@@ -15,7 +15,7 @@ public enum ProvisioningStatus
     FAILED("failed"),
     DISABLED("disabled");
 
-    private String status;
+    private final String status;
 
     /**
      * Constructor to create an enum

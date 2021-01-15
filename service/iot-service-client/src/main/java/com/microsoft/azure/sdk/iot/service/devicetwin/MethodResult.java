@@ -13,12 +13,12 @@ public final class MethodResult
     /**
      * Status of the Invoke Method.
      */
-    private Integer status;
+    private final Integer status;
 
     /**
      * Payload with the result of the Invoke Method
      */
-    private Object payload;
+    private final Object payload;
 
     public MethodResult(Integer status, Object payload)
     {

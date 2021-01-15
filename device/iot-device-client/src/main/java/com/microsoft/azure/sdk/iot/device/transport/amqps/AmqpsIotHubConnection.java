@@ -89,8 +89,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // Proton-j primitives and wrappers for the device and authentication sessions
     private Connection connection;
     private Reactor reactor;
-    private Queue<AmqpsSessionHandler> sessionHandlers = new ConcurrentLinkedQueue<>();
-    private Queue<AmqpsSasTokenRenewalHandler> sasTokenRenewalHandlers = new ConcurrentLinkedQueue<>();
+    private final Queue<AmqpsSessionHandler> sessionHandlers = new ConcurrentLinkedQueue<>();
+    private final Queue<AmqpsSasTokenRenewalHandler> sasTokenRenewalHandlers = new ConcurrentLinkedQueue<>();
     private AmqpsCbsSessionHandler amqpsCbsSessionHandler;
 
     // Multiplexed device registrations and un-registrations come from a non-reactor thread, so they get queued into these
@@ -1014,6 +1014,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // "isRetryable" is currently always "true", but can be "false" if required.
     private void closeConnectionWithException(String errorMessage, boolean isRetryable) throws TransportException
     {
         TransportException transportException = new TransportException(errorMessage);
@@ -1096,7 +1097,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final IotHubReactor iotHubReactor;
         private final IotHubListener listener;
-        private String connectionId;
+        private final String connectionId;
 
         ReactorRunner(IotHubReactor iotHubReactor, IotHubListener listener, String connectionId)
         {

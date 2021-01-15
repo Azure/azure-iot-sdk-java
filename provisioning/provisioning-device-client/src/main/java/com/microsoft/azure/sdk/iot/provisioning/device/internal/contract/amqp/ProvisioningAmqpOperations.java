@@ -36,8 +36,8 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     private final ObjectLock receiveLock = new ObjectLock();
 
     private Map<String, Object> messageAppProperties;
-    private String idScope;
-    private String hostName;
+    private final String idScope;
+    private final String hostName;
     private String messageSendFailedExceptionMessage;
 
     /**
@@ -310,27 +310,6 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     public Map<String, Object> getAmqpMessageProperties()
     {
         return this.messageAppProperties;
-    }
-
-    /**
-     * connectionEstablished Unused
-     */
-    public void connectionEstablished()
-    {
-    }
-
-    /**
-     * connectionLost Unused
-     */
-    public void connectionLost()
-    {
-    }
-
-    /**
-     * messageSent Unused
-     */
-    public void messageSent()
-    {
     }
 
     /**

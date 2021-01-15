@@ -28,35 +28,35 @@ public class JobResult
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
 
     // Job identifier
-    private String jobId;
+    private final String jobId;
 
     // Required if jobType is updateTwin or cloudToDeviceMethod.
     // Condition for device query to get devices to execute the job on
-    private String queryCondition;
+    private final String queryCondition;
 
     // Scheduled job start time in UTC.
-    private Date createdTime;
+    private final Date createdTime;
 
     // System generated start time in UTC.
-    private Date startTime;
+    private final Date startTime;
 
     // System generated last Updated Time in UTC.
-    private Date lastUpdatedDateTime;
+    private final Date lastUpdatedDateTime;
 
     // System generated end time in UTC.
     // Represents the time the job stopped processing.
-    private Date endTime;
+    private final Date endTime;
 
     // Max execution time in seconds (ttl duration)
-    private Long maxExecutionTimeInSeconds;
+    private final Long maxExecutionTimeInSeconds;
 
     // Required.
     // The type of job to execute.
-    private JobType jobType;
+    private final JobType jobType;
 
     // Required.
     // The status of job to execute.
-    private JobStatus jobStatus;
+    private final JobStatus jobStatus;
 
     // Required if jobType is cloudToDeviceMethod.
     // The method type and parameters.
@@ -70,11 +70,11 @@ public class JobResult
 
     // System generated failure reason.
     // If status == failure, this represents a string containing the reason.
-    private String failureReason = null;
+    private String failureReason;
 
     // System generated status message.
     // Represents a string containing a message with status about the job execution.
-    private String statusMessage = null;
+    private String statusMessage;
 
     // System generated statistics.
     // Different number of devices in the job.
@@ -82,10 +82,10 @@ public class JobResult
 
     // The deviceId related to this response.
     // It can be null (e.g. in case of a parent orchestration).
-    private String deviceId = null;
+    private String deviceId;
 
     // The jobId of the parent orchestration, if any.
-    private String parentJobId = null;
+    private String parentJobId;
 
     // The outcome of the job in query, if any.
     private String outcome = null;

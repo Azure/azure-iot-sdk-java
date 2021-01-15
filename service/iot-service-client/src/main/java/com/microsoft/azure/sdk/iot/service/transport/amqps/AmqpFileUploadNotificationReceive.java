@@ -26,9 +26,9 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private final String userName;
     private final String sasToken;
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
-    private IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FileUploadNotification fileUploadNotification;
-    private ProxyOptions proxyOptions;
+    private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    private final ProxyOptions proxyOptions;
     private final SSLContext sslContext;
 
     /**
@@ -85,7 +85,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_003: [The function shall create an AmqpsReceiveHandler object to handle reactor events]
         if (amqpReceiveHandler == null)
         {
-            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this, this.proxyOptions);
+            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this, this.proxyOptions, this.sslContext);
         }
     }
 

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /** Unit tests for HttpsRequest. */
+@SuppressWarnings("EmptyMethod")
 public class HttpsRequestTest
 {
     // Tests_SRS_HTTPSREQUEST_11_001: [The function shall open a connection with the given URL as the endpoint.]
@@ -128,7 +129,7 @@ public class HttpsRequestTest
         final String userAgentValue = TransportUtils.USER_AGENT_STRING;
         new MockUp<HttpsConnection>()
         {
-            Map<String, String> testHeaderFields = new HashMap<>();
+            final Map<String, String> testHeaderFields = new HashMap<>();
 
             @Mock
             public void $init(URL url, HttpsMethod method, ProxySettings proxySettings)

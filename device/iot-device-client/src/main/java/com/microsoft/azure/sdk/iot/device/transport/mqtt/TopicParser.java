@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 public class TopicParser
 {
-    private String[] topicTokens = null;
+    private String[] topicTokens;
 
     private final String QUESTION = "?";
 
@@ -36,25 +36,23 @@ public class TopicParser
             throw new TransportException(new IllegalArgumentException("Invalid token Index for status"));
         }
 
-        if (topicTokens.length > tokenIndexStatus)
-        {
-            String token = topicTokens[tokenIndexStatus];
+        String token = topicTokens[tokenIndexStatus];
 
-            if (token != null)
-            {
-                //Codes_SRS_TopicParser_25_004: [This method shall return the status corresponding to the tokenIndexStatus from tokens if it is not null.]
-                status = token;
-            }
-            else
-            {
-                //Codes_SRS_TopicParser_25_005: [If token corresponding to tokenIndexStatus is null then this method shall throw TransportException.]
-                throw new TransportException("Status could not be parsed");
-            }
+        if (token != null)
+        {
+            //Codes_SRS_TopicParser_25_004: [This method shall return the status corresponding to the tokenIndexStatus from tokens if it is not null.]
+            status = token;
+        }
+        else
+        {
+            //Codes_SRS_TopicParser_25_005: [If token corresponding to tokenIndexStatus is null then this method shall throw TransportException.]
+            throw new TransportException("Status could not be parsed");
         }
 
         return status;
     }
 
+    @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexReqID".
     String getRequestId(int tokenIndexReqID) throws TransportException
     {
         String reqId = null;
@@ -65,25 +63,22 @@ public class TopicParser
             throw new TransportException(new IllegalArgumentException("Invalid token Index for request id"));
         }
 
-        if (topicTokens.length > tokenIndexReqID)
+        String token = topicTokens[tokenIndexReqID];
+
+        //Codes_SRS_TopicParser_25_008: [If the topic token does not contain request id then this method shall return null.]
+        if (token.contains(REQ_ID) && token.contains(QUESTION)) // restriction for request id
         {
-            String token = topicTokens[tokenIndexReqID];
+            int startIndex = token.indexOf(REQ_ID) + REQ_ID.length();
+            int endIndex = token.length();
 
-            //Codes_SRS_TopicParser_25_008: [If the topic token does not contain request id then this method shall return null.]
-            if (token.contains(REQ_ID) && token.contains(QUESTION)) // restriction for request id
+            if (token.contains(VERSION) && !token.contains(QUESTION + VERSION))
             {
-                int startIndex = token.indexOf(REQ_ID) + REQ_ID.length();
-                int endIndex = token.length();
-
-                if (token.contains(VERSION) && !token.contains(QUESTION + VERSION))
-                {
-                    // version after rid in the query
-                    endIndex = token.indexOf(VERSION) - 1;
-                }
-
-                //Codes_SRS_TopicParser_25_007: [This method shall return the request ID value corresponding to the tokenIndexReqID from tokens.]
-                reqId = token.substring(startIndex, endIndex);
+                // version after rid in the query
+                endIndex = token.indexOf(VERSION) - 1;
             }
+
+            //Codes_SRS_TopicParser_25_007: [This method shall return the request ID value corresponding to the tokenIndexReqID from tokens.]
+            reqId = token.substring(startIndex, endIndex);
         }
 
         return reqId;
@@ -99,30 +94,28 @@ public class TopicParser
             throw new TransportException(new IllegalArgumentException("Invalid token Index for Version"));
         }
 
-        if (topicTokens.length > tokenIndexVersion)
+        String token = topicTokens[tokenIndexVersion];
+
+        //Codes_SRS_TopicParser_25_010: [This method shall return the version value(if present) corresponding to the tokenIndexVersion from tokens.]
+        //Codes_SRS_TopicParser_25_011: [If the topic token does not contain version then this method shall return null.]
+        if (token.contains(VERSION) && token.contains(QUESTION) ) //restriction for version
         {
-            String token = topicTokens[tokenIndexVersion];
-            
-            //Codes_SRS_TopicParser_25_010: [This method shall return the version value(if present) corresponding to the tokenIndexVersion from tokens.]
-            //Codes_SRS_TopicParser_25_011: [If the topic token does not contain version then this method shall return null.]
-            if (token.contains(VERSION) && token.contains(QUESTION) ) //restriction for version
+            int startIndex = token.indexOf(VERSION) + VERSION.length();
+            int endIndex = token.length();
+
+            if(!token.contains(QUESTION + REQ_ID) && token.contains(REQ_ID))
             {
-                int startIndex = token.indexOf(VERSION) + VERSION.length();
-                int endIndex = token.length();
-
-                if(!token.contains(QUESTION + REQ_ID) && token.contains(REQ_ID))
-                {
-                    endIndex = token.indexOf(REQ_ID) - 1;
-                }
-
-                version = token.substring(startIndex, endIndex);
+                endIndex = token.indexOf(REQ_ID) - 1;
             }
+
+            version = token.substring(startIndex, endIndex);
         }
 
         return version;
     }
 
 
+    @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexMethod"
     String getMethodName(int tokenIndexMethod) throws TransportException
     {
         String methodName = null;
@@ -133,20 +126,17 @@ public class TopicParser
             throw new TransportException(new IllegalArgumentException("Invalid token Index for Method Name"));
         }
 
-        if (topicTokens.length > tokenIndexMethod)
+        String token = topicTokens[tokenIndexMethod];
+
+        //Codes_SRS_TopicParser_25_013: [This method shall return the method name(if present) corresponding to the tokenIndexMethod from tokens.]
+        //Codes_SRS_TopicParser_25_014: [If the topic token does not contain method name or is null then this method shall throw TransportException.]
+        if (token != null)
         {
-            String token = topicTokens[tokenIndexMethod];
-            
-            //Codes_SRS_TopicParser_25_013: [This method shall return the method name(if present) corresponding to the tokenIndexMethod from tokens.]
-            //Codes_SRS_TopicParser_25_014: [If the topic token does not contain method name or is null then this method shall throw TransportException.]
-            if (token != null)
-            {
-                methodName = token;
-            }
-            else
-            {
-                throw new TransportException(new IllegalArgumentException("method name could not be parsed"));
-            }
+            methodName = token;
+        }
+        else
+        {
+            throw new TransportException(new IllegalArgumentException("method name could not be parsed"));
         }
 
         return methodName;

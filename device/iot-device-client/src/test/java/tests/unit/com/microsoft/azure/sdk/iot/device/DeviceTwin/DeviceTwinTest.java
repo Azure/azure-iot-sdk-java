@@ -385,7 +385,7 @@ public class DeviceTwinTest
             }
         };
 
-        final String json = "{\"" + prop2 + "\":" + Integer.toString(val2) + ",\"" + prop1 + "\":\"" + val1 + "\"}";
+        final String json = "{\"" + prop2 + "\":" + val2 + ",\"" + prop1 + "\":\"" + val1 + "\"}";
 
         new NonStrictExpectations()
         {
@@ -468,7 +468,7 @@ public class DeviceTwinTest
             }
         };
 
-        final String json = "{\"" + prop2 + "\":" + Integer.toString(val2) + ",\"" + prop1 + "\":\"" + val1 + "\"}";
+        final String json = "{\"" + prop2 + "\":" + val2 + ",\"" + prop1 + "\":\"" + val1 + "\"}";
 
         new NonStrictExpectations()
         {
@@ -517,7 +517,7 @@ public class DeviceTwinTest
             }
         };
 
-        final String json = "{\"" + prop2 + "\":" + Integer.toString(val2) + ",\"" + prop1 + "\":\"" + val1 + "\"}";
+        final String json = "{\"" + prop2 + "\":" + val2 + ",\"" + prop1 + "\":\"" + val1 + "\"}";
 
         new NonStrictExpectations()
         {

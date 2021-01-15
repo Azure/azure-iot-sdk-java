@@ -15,7 +15,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class SymmetricKeyParser
 {
-    private transient Gson gson = new Gson();
+    private final transient Gson gson = new Gson();
 
     private static final String PRIMARY_KEY_SERIALIZED_NAME = "primaryKey";
     @SerializedName(PRIMARY_KEY_SERIALIZED_NAME)

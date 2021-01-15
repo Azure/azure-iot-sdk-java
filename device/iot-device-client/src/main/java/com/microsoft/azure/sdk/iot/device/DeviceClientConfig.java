@@ -89,7 +89,7 @@ public final class DeviceClientConfig
     /** The context to be passed in to the message callback. */
     private Object defaultDeviceTelemetryMessageContext;
 
-    private Map<String, Pair<MessageCallback, Object>> inputChannelMessageCallbacks = new HashMap<>();
+    private final Map<String, Pair<MessageCallback, Object>> inputChannelMessageCallbacks = new HashMap<>();
 
     private ProductInfo productInfo;
 

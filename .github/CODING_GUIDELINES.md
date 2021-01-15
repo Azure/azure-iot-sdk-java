@@ -138,8 +138,8 @@ The following sample is generated from Intellij when set to follow the above men
 ```java
 public class ThisIsASampleClass extends C1 implements I1, I2, I3, I4, I5
 {
-    private int f1 = 1;
-    private String field2 = "";
+    private final int f1 = 1;
+    private final String field2 = "";
     private static final long WAIT_TIME_IN_SECS = 10L;
 
     /**

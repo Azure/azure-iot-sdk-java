@@ -23,9 +23,9 @@ public class ProvisioningDeviceClient
 {
     private static final int MAX_THREADS_TO_RUN = 1;
 
-    private ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
-    private ProvisioningDeviceClientContract provisioningDeviceClientContract;
-    private ExecutorService executor;
+    private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
+    private final ProvisioningDeviceClientContract provisioningDeviceClientContract;
+    private final ExecutorService executor;
 
     /**
      * Creates an instance of ProvisioningDeviceClient

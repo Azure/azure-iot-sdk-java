@@ -12,9 +12,9 @@ public class TransportUtils
     private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
     private static final String CLIENT_VERSION = "1.28.0";
 
-    private static String JAVA_RUNTIME = System.getProperty("java.version");
-    private static String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");
-    private static String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
+    private static final String JAVA_RUNTIME = System.getProperty("java.version");
+    private static final String OPERATING_SYSTEM = System.getProperty("java.runtime.name").toLowerCase().contains("android") ? "Android" : System.getProperty("os.name");
+    private static final String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
 
     public final static String USER_AGENT_STRING = JAVA_DEVICE_CLIENT_IDENTIFIER + "/" + CLIENT_VERSION + " (" + JAVA_RUNTIME + "; " + OPERATING_SYSTEM +"; " + PROCESSOR_ARCHITECTURE + ")";
 

@@ -67,11 +67,11 @@ public class IotHubSSLContextTest
         new NonStrictExpectations()
         {
             {
-                mockedSSLContext.getInstance(anyString);
+                SSLContext.getInstance(anyString);
                 result = mockedSSLContext;
-                mockedTrustManagerFactory.getInstance(anyString);
+                TrustManagerFactory.getInstance(anyString);
                 result = mockedTrustManagerFactory;
-                mockedKeyStore.getInstance(anyString);
+                KeyStore.getInstance(anyString);
                 result = mockedKeyStore;
                 Deencapsulation.invoke(mockedCertificateManager, "getCertificateCollection");
                 result = testCollection;

@@ -49,8 +49,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         messageProperties.put("name2", "value2");
         messageProperties.put("name3", "value3");
 
-        List inputs = new ArrayList();
-        inputs.addAll(Arrays.asList(
+        List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
                         {
                                 //sas token module client
@@ -242,7 +241,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallbackForBackToBackC2DMessages implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        private List messageIdListStoredOnReceive;
+        private final List messageIdListStoredOnReceive;
 
         public MessageCallbackForBackToBackC2DMessages(List messageIdListStoredOnReceive)
         {

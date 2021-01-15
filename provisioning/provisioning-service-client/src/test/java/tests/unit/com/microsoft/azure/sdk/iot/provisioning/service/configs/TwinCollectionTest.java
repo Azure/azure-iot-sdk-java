@@ -369,7 +369,7 @@ public class TwinCollectionTest
         final class UserType
         {
             int a = 10;
-            String b = VALID_VALUE_NAME;
+            final String b = VALID_VALUE_NAME;
         }
 
         TwinCollection twinCollection = new TwinCollection();
@@ -667,7 +667,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection);
+                ParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };
@@ -722,7 +722,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection);
+                ParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };

@@ -51,7 +51,7 @@ public final class FileUploadTask implements Runnable
 {
     private static final Charset DEFAULT_IOTHUB_MESSAGE_CHARSET = StandardCharsets.UTF_8;
 
-    private HttpsTransportManager httpsTransportManager;
+    private final HttpsTransportManager httpsTransportManager;
 
     private String blobName;
     private InputStream inputStream;
@@ -122,7 +122,7 @@ public final class FileUploadTask implements Runnable
         Thread.currentThread().setName(THREAD_NAME);
 
         FileUploadCompletionNotification fileUploadCompletionNotification = null;
-        FileUploadSasUriResponse sasUriResponse = null;
+        FileUploadSasUriResponse sasUriResponse;
 
         try
         {

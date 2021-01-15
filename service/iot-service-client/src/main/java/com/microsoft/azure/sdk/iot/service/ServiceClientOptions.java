@@ -15,7 +15,7 @@ public class ServiceClientOptions
      * The options that specify what proxy to tunnel through. If null, no proxy will be used
      */
     @Getter
-    private ProxyOptions proxyOptions;
+    private final ProxyOptions proxyOptions;
 
 
     /**
@@ -23,5 +23,5 @@ public class ServiceClientOptions
      * SSL context that trusts the IoT Hub public certificates.
      */
     @Getter
-    private SSLContext sslContext;
+    private final SSLContext sslContext;
 }

@@ -23,7 +23,7 @@ public class TwinTags
     private static final String VERSION_TAG = "$version";
     private static final String METADATA_TAG = "$metadata";
 
-    private Map<String, Object> tags;
+    private final Map<String, Object> tags;
 
     protected TwinTags()
     {

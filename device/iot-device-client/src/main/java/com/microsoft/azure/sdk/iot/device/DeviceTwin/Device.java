@@ -9,8 +9,8 @@ import java.util.Iterator;
 
 abstract public class Device implements PropertyCallBack<String, Object>
 {
-    private HashSet<Property> reportedProp = new HashSet<>();
-    private HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredProp = new HashMap<>();
+    private final HashSet<Property> reportedProp = new HashSet<>();
+    private final HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredProp = new HashMap<>();
 
     public HashSet<Property> getReportedProp()
     {

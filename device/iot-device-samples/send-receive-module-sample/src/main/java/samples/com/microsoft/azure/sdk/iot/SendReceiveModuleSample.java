@@ -17,17 +17,17 @@ import java.util.Scanner;
 /** Sends a number of event messages to an IoT Hub from a module and then listen for messages sent to the module. */
 public class SendReceiveModuleSample
 {
-    private static String SAMPLE_USAGE = "The program should be called with the following args: \n"
+    private static final String SAMPLE_USAGE = "The program should be called with the following args: \n"
             + "1. [Device connection string] - String containing Hostname, Device Id, Module Id & Device Key in one of the following formats: HostName=<iothub_host_name>;deviceId=<device_id>;SharedAccessKey=<device_key>;moduleId=<module_id>\n"
             + "2. [number of requests to send]\n"
             + "3. (mqtt | amqps | amqps_ws | mqtt_ws)\n"
             + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n";
 
-    private static String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
-    private static String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'mqtt_ws', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
+    private static final String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
+    private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'mqtt_ws', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
     private  static final int D2C_MESSAGE_TIMEOUT = 5000; // 5 seconds
-    private  static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private  static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
     protected static class EventCallback implements IotHubEventCallback
     {
@@ -288,8 +288,8 @@ public class SendReceiveModuleSample
         System.out.println("Updated token expiry time to " + time);
 
         String deviceId = "MyJavaDevice";
-        double temperature = 0.0;
-        double humidity = 0.0;
+        double temperature;
+        double humidity;
 
         for (int i = 0; i < numRequests; ++i)
         {

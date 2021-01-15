@@ -303,7 +303,7 @@ public class ParserUtilityTest
         final class localClass
         {
             int a;
-        };
+        }
         final Map<String, Object> mapSample = new HashMap<String, Object>()
         {
             {

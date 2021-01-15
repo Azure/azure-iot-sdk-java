@@ -27,7 +27,7 @@ public final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHand
 
     private static final String LINK_TYPE = "methods";
 
-    private DeviceClientConfig deviceClientConfig;
+    private final DeviceClientConfig deviceClientConfig;
 
     AmqpsMethodsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId)
     {
