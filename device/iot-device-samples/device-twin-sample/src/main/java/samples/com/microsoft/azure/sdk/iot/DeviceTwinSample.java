@@ -22,7 +22,7 @@ public class DeviceTwinSample
     private enum CAMERA{ DETECTED_BURGLAR, SAFELY_WORKING }
     private static final int MAX_EVENTS_TO_REPORT = 5;
 
-    private static AtomicBoolean Succeed = new AtomicBoolean(false);
+    private static final AtomicBoolean Succeed = new AtomicBoolean(false);
 
     protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
     {

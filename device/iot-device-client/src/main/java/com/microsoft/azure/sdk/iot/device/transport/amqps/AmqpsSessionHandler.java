@@ -35,11 +35,11 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     //Carries over state between reconnections
     private boolean subscribeToMethodsOnReconnection = false;
     private boolean subscribeToTwinOnReconnection = false;
-    private AmqpsSessionStateCallback amqpsSessionStateCallback;
+    private final AmqpsSessionStateCallback amqpsSessionStateCallback;
 
     //Should not carry over state between reconnects
-    private List<AmqpsSenderLinkHandler> senderLinkHandlers = new ArrayList<>();
-    private List<AmqpsReceiverLinkHandler> receiverLinkHandlers = new ArrayList<>();
+    private final List<AmqpsSenderLinkHandler> senderLinkHandlers = new ArrayList<>();
+    private final List<AmqpsReceiverLinkHandler> receiverLinkHandlers = new ArrayList<>();
     private Session session;
     private boolean alreadyCreatedTelemetryLinks;
     private boolean alreadyCreatedTwinLinks;

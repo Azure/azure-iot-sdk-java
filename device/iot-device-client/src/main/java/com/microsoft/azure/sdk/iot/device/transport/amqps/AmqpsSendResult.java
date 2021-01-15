@@ -7,24 +7,23 @@ public class AmqpsSendResult
     private static final int failedDeliveryTag = -1;
 
     @Getter
-    private boolean deliverySuccessful;
+    private final boolean deliverySuccessful;
     @Getter
-    private int deliveryTag;
+    private final int deliveryTag;
 
     /**
      * Create a return value object containing the delivery status and the delivery hash
      *
-     * @param deliverySuccessful the delivery state
      */
-    AmqpsSendResult(boolean deliverySuccessful)
+    AmqpsSendResult()
     {
-        this.deliverySuccessful = deliverySuccessful;
+        this.deliverySuccessful = false;
         this.deliveryTag = failedDeliveryTag;
     }
 
-    AmqpsSendResult(boolean deliverySuccessful, byte[] deliveryTag)
+    AmqpsSendResult(byte[] deliveryTag)
     {
-        this.deliverySuccessful = deliverySuccessful;
+        this.deliverySuccessful = true;
         this.deliveryTag = Integer.parseInt(new String(deliveryTag));
     }
 }

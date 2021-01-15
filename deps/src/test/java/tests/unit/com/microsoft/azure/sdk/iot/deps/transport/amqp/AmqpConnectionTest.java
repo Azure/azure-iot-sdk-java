@@ -97,7 +97,7 @@ public class AmqpConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockedProton.reactor((ReactorOptions)any, (Handler)any);
+                Proton.reactor((ReactorOptions)any, (Handler)any);
                 result = mockedReactor;
             }
         };
@@ -116,7 +116,7 @@ public class AmqpConnectionTest
         new NonStrictExpectations()
         {
             {
-                mockedProton.reactor((ReactorOptions)any, (Handler)any);
+                Proton.reactor((ReactorOptions)any, (Handler)any);
                 result = new IOException();
             }
         };
@@ -318,7 +318,7 @@ public class AmqpConnectionTest
                 mockedConnection.getTransport();
                 result = mockedTransport;
 
-                mockedProton.sslDomain();
+                Proton.sslDomain();
                 result = domain;
 
                 mockedTransport.ssl(domain);

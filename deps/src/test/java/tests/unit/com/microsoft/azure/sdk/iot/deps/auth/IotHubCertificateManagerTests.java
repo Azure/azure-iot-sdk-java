@@ -71,7 +71,7 @@ public class IotHubCertificateManagerTests
         }
     }
 */
-    private String someSingleValidCertificate =
+    private final String someSingleValidCertificate =
             "-----BEGIN CERTIFICATE-----\r\n" +
                     "MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ\r\n" +
                     "RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD\r\n" +
@@ -94,7 +94,7 @@ public class IotHubCertificateManagerTests
                     "R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp\r\n" +
                     "-----END CERTIFICATE-----\r\n";
 
-    private String someValidCertificates =
+    private final String someValidCertificates =
             "-----BEGIN CERTIFICATE-----\r\n" +
                     "MIIEMzCCAxugAwIBAgIDCYPzMA0GCSqGSIb3DQEBCwUAME0xCzAJBgNVBAYTAkRF\r\n" +
                     "MRUwEwYDVQQKDAxELVRydXN0IEdtYkgxJzAlBgNVBAMMHkQtVFJVU1QgUm9vdCBD\r\n" +

@@ -11,19 +11,19 @@ import com.microsoft.azure.sdk.iot.deps.serializer.JobsStatisticsParser;
 public class JobStatistics
 {
     // Number of devices in the job
-    private int deviceCount;
+    private final int deviceCount;
 
     // The number of failed jobs
-    private int failedCount;
+    private final int failedCount;
 
     // The number of Succeeded jobs
-    private int succeededCount;
+    private final int succeededCount;
 
     // The number of running jobs
-    private int runningCount;
+    private final int runningCount;
 
     // The number of pending (scheduled) jobs
-    private int pendingCount;
+    private final int pendingCount;
 
 
     /**

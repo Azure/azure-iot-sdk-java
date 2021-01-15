@@ -119,13 +119,13 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
-            SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
+            SslDomain domain = makeDomain();
             domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
             Ssl ssl = transport.ssl(domain);
 
             if (this.proxyOptions != null)
             {
-                addProxyLayer(transport, this.hostName, AMQPS_WS_PORT);
+                addProxyLayer(transport, this.hostName);
             }
         }
     }
@@ -176,10 +176,9 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
 
     /**
      * Create Proton SslDomain object from Address using the given Ssl mode
-     * @param mode The proton enum value of requested Ssl mode
      * @return The created Ssl domain
      */
-    private SslDomain makeDomain(SslDomain.Mode mode)
+    private SslDomain makeDomain()
     {
         SslDomain domain = Proton.sslDomain();
 
@@ -201,17 +200,17 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
             this.savedException = e;
         }
 
-        domain.init(mode);
+        domain.init(SslDomain.Mode.CLIENT);
 
         return domain;
     }
 
-    private void addProxyLayer(Transport transport, String hostName, int port)
+    private void addProxyLayer(Transport transport, String hostName)
     {
         log.trace("Adding proxy layer to amqp_ws connection");
         ProxyImpl proxy = new ProxyImpl();
         final ProxyHandler proxyHandler = new ProxyHandlerImpl();
-        proxy.configure(hostName + ":" + port, null, proxyHandler, transport);
+        proxy.configure(hostName + ":" + AmqpConnectionHandler.AMQPS_WS_PORT, null, proxyHandler, transport);
         ((TransportInternal) transport).addTransportLayer(proxy);
     }
 }

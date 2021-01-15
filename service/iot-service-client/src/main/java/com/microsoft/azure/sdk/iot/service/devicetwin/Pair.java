@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 public class Pair
 {
-    private String key;
+    private final String key;
     private Object value;
     private static final int MAX_ALLOWABLE_KEY_LENGTH = 128;
 

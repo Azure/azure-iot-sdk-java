@@ -35,7 +35,7 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
     public static final String RECEIVE_TAG = "receiver";
     public static final String ENDPOINT = "/messages/servicebound/feedback";
 
-    private AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
+    private final AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent;
     private Receiver feedbackReceiverLink;
 
 

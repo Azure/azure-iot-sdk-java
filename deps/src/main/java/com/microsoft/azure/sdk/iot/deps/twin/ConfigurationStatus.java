@@ -13,7 +13,7 @@ public enum ConfigurationStatus
     @SerializedName("applied")
     APPLIED(2);
 
-    private int numVal;
+    private final int numVal;
 
     ConfigurationStatus(int numVal)
     {

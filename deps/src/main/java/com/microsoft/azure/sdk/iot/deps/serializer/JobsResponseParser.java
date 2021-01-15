@@ -114,12 +114,12 @@ public class JobsResponseParser
     // Ignored by the json serializer if null.
     private static final String CLOUDTODEVICEMETHOD_TAG = "cloudToDeviceMethod";
     @SerializedName(CLOUDTODEVICEMETHOD_TAG)
-    private MethodParser cloudToDeviceMethod = null;
+    private final MethodParser cloudToDeviceMethod = null;
 
     // The outcome for job query if any.
     private static final String OUTCOME_TAG = "outcome";
     @SerializedName(OUTCOME_TAG)
-    private JsonElement outcome = null;
+    private final JsonElement outcome = null;
 
     // The contents of outcome for job query if any.
     private static final String DEVICE_METHOD_RESPONSE_TAG = "deviceMethodResponse";
@@ -136,35 +136,35 @@ public class JobsResponseParser
     // If status == failure, this represents a string containing the reason.
     private static final String FAILUREREASON_TAG = "failureReason";
     @SerializedName(FAILUREREASON_TAG)
-    private String failureReason = null;
+    private final String failureReason = null;
 
     // System generated status message.
     // Represents a string containing a message with status about the job execution.
     private static final String STATUSMESSAGE_TAG = "statusMessage";
     @SerializedName(STATUSMESSAGE_TAG)
-    private String statusMessage = null;
+    private final String statusMessage = null;
 
     // System generated statistics.
     // Different number of devices in the job.
     private static final String DEVICEJOBSSTATISTICS_TAG = "deviceJobStatistics";
     @SerializedName(DEVICEJOBSSTATISTICS_TAG)
-    private JobsStatisticsParser deviceJobStatistics = null;
+    private final JobsStatisticsParser deviceJobStatistics = null;
 
     // The deviceId related to this response.
     // It can be null (e.g. in case of a parent orchestration).
     private static final String DEVICEID_TAG = "deviceId";
     @SerializedName(DEVICEID_TAG)
-    private String deviceId = null;
+    private final String deviceId = null;
 
     // The jobId of the parent orchestration, if any.
     private static final String PARENTJOBID_TAG = "parentJobId";
     @SerializedName(PARENTJOBID_TAG)
-    private String parentJobId = null;
+    private final String parentJobId = null;
 
     // The error on the Job Response, if any.
     private static final String ERROR_TAG = "error";
     @SerializedName(ERROR_TAG)
-    private JobQueryResponseError error = null;
+    private final JobQueryResponseError error = null;
 
     /**
      * Static constructor to create a instance based on the provided json

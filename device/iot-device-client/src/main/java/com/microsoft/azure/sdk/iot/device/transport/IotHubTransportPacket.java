@@ -13,9 +13,9 @@ import com.microsoft.azure.sdk.iot.device.Message;
  */
 public final class IotHubTransportPacket
 {
-    private Message message;
-    private IotHubEventCallback eventCallback;
-    private Object callbackContext;
+    private final Message message;
+    private final IotHubEventCallback eventCallback;
+    private final Object callbackContext;
     private IotHubStatusCode status;
     private final long startTimeMillis;
     private int currentRetryAttempt;

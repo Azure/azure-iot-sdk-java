@@ -17,7 +17,7 @@ public class X509ThumbprintParser
     @SerializedName(SECONDARY_THUMBPRINT_SERIALIZED_NAME)
     private String secondaryThumbprint;
 
-    private transient Gson gson = new Gson();
+    private final transient Gson gson = new Gson();
 
     /**
      * Empty constructor: Used only to keep GSON happy.

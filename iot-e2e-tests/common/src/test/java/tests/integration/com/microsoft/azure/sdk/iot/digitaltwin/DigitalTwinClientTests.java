@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
@@ -59,11 +59,10 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Parameterized.Parameters(name = "{index}: Digital Twin Test: protocol={0}")
     public static Collection<Object[]> data() {
-        List inputs = new ArrayList();
-            inputs.addAll(Arrays.asList(new Object[][]{
-                    {MQTT},
-                    {MQTT_WS},
-            }));
+        List inputs = new ArrayList(Arrays.asList(new Object[][]{
+                {MQTT},
+                {MQTT_WS},
+        }));
         return inputs;
     }
 

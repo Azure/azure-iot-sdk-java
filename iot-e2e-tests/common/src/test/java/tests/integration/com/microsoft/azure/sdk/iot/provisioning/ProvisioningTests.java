@@ -303,7 +303,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
     private class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
     {
-        private CountDownLatch twinLock;
+        private final CountDownLatch twinLock;
 
         public StubTwinCallback(CountDownLatch twinLock)
         {

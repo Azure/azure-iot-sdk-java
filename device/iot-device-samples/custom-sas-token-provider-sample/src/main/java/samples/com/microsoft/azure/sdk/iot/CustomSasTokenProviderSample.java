@@ -27,7 +27,7 @@ import java.util.List;
 public class CustomSasTokenProviderSample
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private static List<String> failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private static final List<String> failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
     /**
      * Helper class for turning symmetric keys into SAS tokens. It also provides some helpful functions around
@@ -46,8 +46,8 @@ public class CustomSasTokenProviderSample
 
         // When deciding whether to renew SAS tokens or not, it is wise to renew proactively to avoid clock skew issues
         // between client and server.
-        private int renewalBufferSeconds;
-        private long expiryTimeSeconds;
+        private final int renewalBufferSeconds;
+        private final long expiryTimeSeconds;
         private final char[] sasToken;
 
         /**
@@ -149,11 +149,11 @@ public class CustomSasTokenProviderSample
      */
     protected static class SasTokenProviderImpl implements SasTokenProvider
     {
-        private String deviceKey;
-        private String hostName;
-        private String deviceId;
-        private int secondsToLivePerToken;
-        private int renewalBufferSeconds;
+        private final String deviceKey;
+        private final String hostName;
+        private final String deviceId;
+        private final int secondsToLivePerToken;
+        private final int renewalBufferSeconds;
 
         private SasTokenHelper cachedSasToken;
 

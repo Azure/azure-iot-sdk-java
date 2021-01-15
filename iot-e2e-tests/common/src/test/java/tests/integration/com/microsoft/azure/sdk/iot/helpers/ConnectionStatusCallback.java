@@ -13,7 +13,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubConnectionStateCallback;
  */
 public class ConnectionStatusCallback implements IotHubConnectionStateCallback
 {
-    private IotHubConnectionState expectedState;
+    private final IotHubConnectionState expectedState;
 
     public ConnectionStatusCallback(IotHubConnectionState expectedState)
     {

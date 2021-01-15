@@ -21,9 +21,9 @@ import java.util.Base64;
 public class SecurityProviderSymmetricKey extends SecurityProvider
 {
     private static final String HMAC_SHA_256 = "HmacSHA256";
-    private byte[] primaryKey;
+    private final byte[] primaryKey;
     private byte[] secondaryKey;
-    private String registrationId;
+    private final String registrationId;
     private static final String HMAC_SHA256 = "HmacSHA256";
 
     /**

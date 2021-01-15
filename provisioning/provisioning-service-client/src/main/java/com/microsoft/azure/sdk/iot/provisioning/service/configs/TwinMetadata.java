@@ -54,7 +54,7 @@ public class TwinMetadata
 
     // the entity last updated version in the TwinCollection
     static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
-    private Integer lastUpdatedVersion;
+    private final Integer lastUpdatedVersion;
 
     /**
      * CONSTRUCTOR

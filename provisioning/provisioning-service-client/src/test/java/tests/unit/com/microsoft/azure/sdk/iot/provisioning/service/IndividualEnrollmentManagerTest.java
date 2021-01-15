@@ -337,7 +337,7 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
+                BulkEnrollmentOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 times = 1;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
@@ -376,7 +376,7 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
+                BulkEnrollmentOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 times = 1;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
@@ -411,7 +411,7 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
+                BulkEnrollmentOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
                 result = new ProvisioningServiceClientTransportException();
@@ -442,7 +442,7 @@ public class IndividualEnrollmentManagerTest
         new StrictExpectations()
         {
             {
-                mockedBulkOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
+                BulkEnrollmentOperation.toJson(BulkOperationMode.CREATE, individualEnrollments);
                 result = bulkEnrollmentPayload;
                 mockedContractApiHttp.request(HttpMethod.POST, bulkEnrollmentPath, null, bulkEnrollmentPayload);
                 result = new ProvisioningServiceClientBadFormatException();

@@ -268,25 +268,25 @@ public class HttpsRequest
 
     public String getRequestHeaders()
     {
-        String headerString = "";
+        StringBuilder headerString = new StringBuilder();
 
         for (String key : this.headers.keySet())
         {
-            headerString += (key);
-            headerString += ": ";
+            headerString.append(key);
+            headerString.append(": ");
 
             for (String value : this.headers.get(key))
             {
-                headerString += value;
-                headerString += "; ";
+                headerString.append(value);
+                headerString.append("; ");
             }
-            headerString = headerString.substring(0, headerString.length() - 2);
+            headerString = new StringBuilder(headerString.substring(0, headerString.length() - 2));
 
-            headerString += "\r\n";
+            headerString.append("\r\n");
         }
 
         //Codes_SRS_HTTPSCONNECTION_34_030: [The function shall return all the request headers in the format "<key>: <value1>; <value2>\r\n <key>: <value1>\r\n...".]
-        return headerString;
+        return headerString.toString();
     }
 
     @SuppressWarnings("unused")

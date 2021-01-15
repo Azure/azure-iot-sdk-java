@@ -189,7 +189,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         public IotHubClientProtocol protocol;
         private com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;
 
-        private DeviceTwin twinServiceClient;
+        private final DeviceTwin twinServiceClient;
         private TestDevice testDevice;
         public RegistryManager registryManager;
 

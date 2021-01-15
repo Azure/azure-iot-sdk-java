@@ -16,7 +16,7 @@ import java.util.List;
 public class SendEventX509
 {
     //PEM encoded representation of the public key certificate
-    private static String publicKeyCertificateString =
+    private static final String publicKeyCertificateString =
             "-----BEGIN CERTIFICATE-----\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
@@ -31,7 +31,7 @@ public class SendEventX509
             "-----END CERTIFICATE-----\n";
 
     //PEM encoded representation of the private key
-    private static String privateKeyString =
+    private static final String privateKeyString =
             "-----BEGIN EC PRIVATE KEY-----\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
@@ -39,7 +39,7 @@ public class SendEventX509
             "-----END EC PRIVATE KEY-----\n";
 
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private  static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private  static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
   
     protected static class EventCallback implements IotHubEventCallback
     {

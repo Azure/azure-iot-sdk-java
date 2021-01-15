@@ -314,10 +314,9 @@ public class IotHubConnectionString
         int iotHubNameEndIdx = hostName.indexOf(".");
         if (iotHubNameEndIdx == -1)
         {
-            String errStr = String.format(
-                    "Provided hostname did not include a valid IoT Hub name as its prefix. "
-                            + "An IoT Hub hostname has the following format: "
-                            + "[iotHubName].[valid URI chars]");
+            String errStr = "Provided hostname did not include a valid IoT Hub name as its prefix. "
+                    + "An IoT Hub hostname has the following format: "
+                    + "[iotHubName].[valid URI chars]";
             throw new IllegalArgumentException(errStr);
         }
         return hostName.substring(0, iotHubNameEndIdx);

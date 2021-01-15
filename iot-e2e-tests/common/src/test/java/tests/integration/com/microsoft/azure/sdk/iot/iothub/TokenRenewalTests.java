@@ -119,15 +119,8 @@ public class TokenRenewalTests extends IntegrationTest
         // to ensure that the first sas token has expired, and that the sas token was renewed successfully.
         final long WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE = EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS + EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS;
 
-        for (DeviceClient multiplexedDeviceClient : amqpMultiplexedClients)
-        {
-            clients.add(multiplexedDeviceClient);
-        }
-
-        for (DeviceClient multiplexedDeviceClient : amqpwsMultiplexedClients)
-        {
-            clients.add(multiplexedDeviceClient);
-        }
+        clients.addAll(amqpMultiplexedClients);
+        clients.addAll(amqpwsMultiplexedClients);
 
         // Multiplexed clients have this sas token expiry set already
         for (InternalClient client : clients)

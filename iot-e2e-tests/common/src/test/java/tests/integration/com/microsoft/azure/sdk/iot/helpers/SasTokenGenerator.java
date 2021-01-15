@@ -51,7 +51,7 @@ public class SasTokenGenerator
         //Codes_SRS_SAS_TOKEN_GENERATOR_34_001: [This method shall return the created Sas token in the format "HostName=<hostname>;DeviceId=<deviceId>;SharedAccessSignature=SharedAccessSignature sr=<deviceUri>&sig=<signature>&se=<tokenExpirationTime>".]
 
         return String.format("HostName=%s;DeviceId=%s;SharedAccessSignature=SharedAccessSignature sig=%s&se=%s&sr=%s", hostname, deviceId, signature,
-                String.valueOf(tokenExpirationTime), deviceUri);
+                tokenExpirationTime, deviceUri);
     }
 
     /**

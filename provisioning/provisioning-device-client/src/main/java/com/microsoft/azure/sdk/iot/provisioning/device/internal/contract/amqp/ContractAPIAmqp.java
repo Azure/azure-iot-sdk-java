@@ -20,10 +20,10 @@ import java.util.Map;
 
 public class ContractAPIAmqp extends ProvisioningDeviceClientContract
 {
-    private ProvisioningAmqpOperations provisioningAmqpOperations;
-    private boolean useWebSockets;
+    private final ProvisioningAmqpOperations provisioningAmqpOperations;
+    private final boolean useWebSockets;
 
-    private String idScope;
+    private final String idScope;
     private SaslHandler amqpSaslHandler;
 
     private void processRetryAfterValue(Map<String, Object> appProperties)

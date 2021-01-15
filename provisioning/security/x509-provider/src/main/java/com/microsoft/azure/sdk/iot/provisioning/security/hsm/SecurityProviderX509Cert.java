@@ -34,13 +34,13 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
     private static final String COMMA = ",";
     private static final String EQUALS = "=";
     private final String commonNameLeaf;
-    private X509Certificate leafCertificatePublic;
-    private Key leafPrivateKey;
-    private Collection<X509Certificate> signerCertificates;
+    private final X509Certificate leafCertificatePublic;
+    private final Key leafPrivateKey;
+    private final Collection<X509Certificate> signerCertificates;
 
-    private String leafCertificatePublicPem;
-    private String leafPrivateKeyPem;
-    private Collection<String> signerCertificatesPem;
+    private final String leafCertificatePublicPem;
+    private final String leafPrivateKeyPem;
+    private final Collection<String> signerCertificatesPem;
     /**
      * Constructor to build the DICE certs from the simulator
      */

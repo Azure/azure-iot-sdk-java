@@ -98,7 +98,7 @@ public class QueryCollectionTest
         new NonStrictExpectations()
         {
             {
-                mockParserUtility.validateQuery((String) any);
+                ParserUtility.validateQuery((String) any);
                 result = new IllegalArgumentException();
             }
         };

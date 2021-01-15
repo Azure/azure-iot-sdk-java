@@ -29,13 +29,13 @@ public class Query
     private static final String PAGE_SIZE_KEY = "x-ms-max-item-count";
 
     private int pageSize;
-    private String query;
-    private boolean isSqlQuery;
+    private final String query;
+    private final boolean isSqlQuery;
 
     private String requestContinuationToken;
     private String responseContinuationToken;
 
-    private QueryType requestQueryType;
+    private final QueryType requestQueryType;
     private QueryType responseQueryType;
 
     private QueryResponse queryResponse;

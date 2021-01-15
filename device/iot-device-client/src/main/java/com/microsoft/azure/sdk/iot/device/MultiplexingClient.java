@@ -50,8 +50,8 @@ public class MultiplexingClient
     private final Object operationLock = new Object();
 
     // Optional settings from MultiplexingClientOptions
-    private SSLContext sslContext;
-    private ProxySettings proxySettings;
+    private final SSLContext sslContext;
+    private final ProxySettings proxySettings;
 
     /**
      * The maximum number of devices that can be multiplexed together on a single multiplexed AMQPS connection

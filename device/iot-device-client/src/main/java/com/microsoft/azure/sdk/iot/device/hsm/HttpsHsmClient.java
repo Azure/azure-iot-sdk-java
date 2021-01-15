@@ -28,8 +28,8 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class HttpsHsmClient
 {
-    private String baseUrl;
-    private String scheme;
+    private final String baseUrl;
+    private final String scheme;
 
     private static final String HTTPS_SCHEME = "https";
     private static final String HTTP_SCHEME = "http";

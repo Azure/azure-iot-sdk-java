@@ -29,14 +29,14 @@ import static org.junit.Assert.assertFalse;
  */
 public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
 {
-    private static String expectedDeviceId = "deviceId";
-    private static String expectedHostname = "hostname";
-    private static String expectedGatewayHostname = "gateway";
-    private static String expectedModuleId = "moduleId";
-    private static String expectedDeviceKey = "deviceKey";
-    private static String expectedSasToken = "sasToken";
-    private static long expectedExpiryTime = 3601;
-    private static long expectedBufferPercent = 20;
+    private static final String expectedDeviceId = "deviceId";
+    private static final String expectedHostname = "hostname";
+    private static final String expectedGatewayHostname = "gateway";
+    private static final String expectedModuleId = "moduleId";
+    private static final String expectedDeviceKey = "deviceKey";
+    private static final String expectedSasToken = "sasToken";
+    private static final long expectedExpiryTime = 3601;
+    private static final long expectedBufferPercent = 20;
 
     @Mocked IotHubSasToken mockSasToken;
     @Mocked IotHubSSLContext mockIotHubSSLContext;

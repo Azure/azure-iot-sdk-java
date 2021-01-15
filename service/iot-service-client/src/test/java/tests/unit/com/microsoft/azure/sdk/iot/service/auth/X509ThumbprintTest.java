@@ -32,7 +32,7 @@ public class X509ThumbprintTest
     {
         X509Thumbprint thumbprint = Deencapsulation.newInstance(X509Thumbprint.class);
         expectedPrimaryThumbprint = Deencapsulation.invoke(thumbprint, "getPrimaryThumbprint");
-        expectedSecondaryThumbprint = Deencapsulation.invoke(thumbprint, "getSecondaryThumbprint");;
+        expectedSecondaryThumbprint = Deencapsulation.invoke(thumbprint, "getSecondaryThumbprint");
     }
 
     //Tests_SRS_X509THUMBPRINT_34_001: [The function shall return the primary thumbprint value of this.]

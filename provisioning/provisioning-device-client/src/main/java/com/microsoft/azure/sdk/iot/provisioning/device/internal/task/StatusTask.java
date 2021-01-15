@@ -23,10 +23,10 @@ public class StatusTask implements Callable
 {
     private static final int MAX_WAIT_FOR_STATUS_RESPONSE = 100;
     private static final String THREAD_NAME = "azure-iot-sdk-StatusTask";
-    private ProvisioningDeviceClientContract provisioningDeviceClientContract;
-    private SecurityProvider securityProvider;
-    private String operationId;
-    private Authorization authorization;
+    private final ProvisioningDeviceClientContract provisioningDeviceClientContract;
+    private final SecurityProvider securityProvider;
+    private final String operationId;
+    private final Authorization authorization;
 
     private class ResponseCallbackImpl implements ResponseCallback
     {

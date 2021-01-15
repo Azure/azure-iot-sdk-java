@@ -469,7 +469,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection);
+                ParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };
@@ -521,7 +521,7 @@ public class TwinCollectionTest
         // arrange
         final class UserType
         {
-            private int a = 10;
+            private final int a = 10;
             protected String b = VALID_VALUE_NAME;
         }
 

@@ -26,10 +26,10 @@ public class IotHubAuthenticationProviderTest
     @Mocked
     SSLContext mockedSSLContext;
     
-    private static String expectedHostname = "hostname";
-    private static String expectedGatewayHostname = "gatewayhostname";
-    private static String expectedDeviceId = "deviceId";
-    private static String expectedModuleId = "moduleId";
+    private static final String expectedHostname = "hostname";
+    private static final String expectedGatewayHostname = "gatewayhostname";
+    private static final String expectedDeviceId = "deviceId";
+    private static final String expectedModuleId = "moduleId";
     
     private class IotHubAuthenticationProviderMock extends IotHubAuthenticationProvider
     {
