@@ -387,6 +387,7 @@ public class AmqpsProvisioningSaslHandler implements SaslHandler
         return result;
     }
 
+    @SuppressWarnings("SameParameterValue") // The "controlByte" is currently always an initial segment control byte, but this method can be used generically as well.
     private static byte[] prependByteArrayWithControlByte(byte controlByte, byte[] bytes)
     {
         byte[] newByteArray = new byte[bytes.length + 1];

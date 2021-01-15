@@ -27,6 +27,9 @@ public class FileUploadNotificationReceiverTest
     @Mocked
     ProxyOptions mockedProxyOptions;
 
+    @Mocked
+    SSLContext mockedSslContext;
+
     // Tests_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_001: [** The constructor shall throw IllegalArgumentException if any the input string is null or empty **]**
     // Assert
     @Test (expected = IllegalArgumentException.class)
@@ -38,7 +41,7 @@ public class FileUploadNotificationReceiverTest
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
     }
 
     // Assert
@@ -51,7 +54,7 @@ public class FileUploadNotificationReceiverTest
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
     }
 
     // Assert
@@ -64,7 +67,7 @@ public class FileUploadNotificationReceiverTest
         final String sasToken = null;
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
     }
 
     // Assert
@@ -77,7 +80,7 @@ public class FileUploadNotificationReceiverTest
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = null;
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
     }
     
   
@@ -91,7 +94,7 @@ public class FileUploadNotificationReceiverTest
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
     }
 
     // Assert
@@ -104,7 +107,7 @@ public class FileUploadNotificationReceiverTest
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
     }
 
     // Assert
@@ -117,7 +120,7 @@ public class FileUploadNotificationReceiverTest
         final String sasToken = "";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_002: [** The constructor shall create a new instance of AmqpFileUploadNotificationReceive object **]**
@@ -131,7 +134,7 @@ public class FileUploadNotificationReceiverTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
 
         // Act
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         new Verifications()
         {
@@ -152,7 +155,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         // Act
         fileUploadNotificationReceiver.open();
@@ -176,7 +179,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         // Act
         fileUploadNotificationReceiver.close();
@@ -200,7 +203,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         // Act
         fileUploadNotificationReceiver.receive();
@@ -226,7 +229,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
         Deencapsulation.setField(fileUploadNotificationReceiver, "amqpFileUploadNotificationReceive", null);
         // Act
         fileUploadNotificationReceiver.receive(timeoutMs);
@@ -242,7 +245,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         // Act
         fileUploadNotificationReceiver.receive(timeoutMs);
@@ -266,7 +269,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         // Act
         CompletableFuture<Void> completableFuture = fileUploadNotificationReceiver.openAsync();
@@ -293,7 +296,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         // Act
         CompletableFuture<Void> completableFuture = fileUploadNotificationReceiver.closeAsync();
@@ -320,7 +323,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
 
         // Act
         CompletableFuture<FileUploadNotification> completableFuture = fileUploadNotificationReceiver.receiveAsync();
@@ -348,7 +351,7 @@ public class FileUploadNotificationReceiverTest
         final String userName = "xxx";
         final String sasToken = "xxx";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions);
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = Deencapsulation.newInstance(FileUploadNotificationReceiver.class, hostName, userName, sasToken, iotHubServiceClientProtocol, mockedProxyOptions, mockedSslContext);
         // Act
         CompletableFuture<FileUploadNotification> completableFuture = fileUploadNotificationReceiver.receiveAsync(timeoutMs);
         completableFuture.get();

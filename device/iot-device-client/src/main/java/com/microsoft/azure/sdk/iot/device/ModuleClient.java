@@ -368,6 +368,7 @@ public class ModuleClient extends InternalClient
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // The SEND_PERIOD is currently 10ms for all protocols, but can be made configurable in the future.
     private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
     {
         super(iotHubAuthenticationProvider, protocol, sendPeriodMillis, receivePeriodMillis);
