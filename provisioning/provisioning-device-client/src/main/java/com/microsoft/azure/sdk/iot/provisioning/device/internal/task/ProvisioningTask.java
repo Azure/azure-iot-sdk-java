@@ -35,14 +35,14 @@ public class ProvisioningTask implements Callable
     private static final int MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE = 10000;
     private static final String THREAD_NAME = "azure-iot-sdk-ProvisioningTask";
 
-    private SecurityProvider securityProvider = null;
-    private ProvisioningDeviceClientContract provisioningDeviceClientContract = null;
-    private ProvisioningDeviceClientConfig provisioningDeviceClientConfig = null;
+    private SecurityProvider securityProvider;
+    private ProvisioningDeviceClientContract provisioningDeviceClientContract;
+    private ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
 
-    private ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback = null;
-    private Object dpsRegistrationCallbackContext = null;
+    private ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback;
+    private Object dpsRegistrationCallbackContext;
 
-    private Authorization authorization = null;
+    private Authorization authorization;
     private ProvisioningDeviceClientStatus dpsStatus = null;
 
     private final ExecutorService executor;

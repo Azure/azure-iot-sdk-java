@@ -42,11 +42,11 @@ public class RegisterTask implements Callable
     private static final int DEFAULT_EXPIRY_TIME_IN_SECS = 3600; // 1 Hour
     private static final String SASTOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=";
     private static final String THREAD_NAME = "azure-iot-sdk-RegisterTask";
-    private ResponseCallback responseCallback = null;
-    private ProvisioningDeviceClientContract provisioningDeviceClientContract = null;
-    private Authorization authorization = null;
-    private SecurityProvider securityProvider = null;
-    private ProvisioningDeviceClientConfig provisioningDeviceClientConfig = null;
+    private ResponseCallback responseCallback;
+    private ProvisioningDeviceClientContract provisioningDeviceClientContract;
+    private Authorization authorization;
+    private SecurityProvider securityProvider;
+    private ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
 
     private class ResponseCallbackImpl implements ResponseCallback
     {

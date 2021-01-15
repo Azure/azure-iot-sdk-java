@@ -259,7 +259,7 @@ public class ModuleClient extends InternalClient
             log.debug("Creating module client with the provided connection string");
 
             //Codes_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
-            ModuleClient moduleClient = null;
+            ModuleClient moduleClient;
             try
             {
                 moduleClient = new ModuleClient(connectionString, protocol, clientOptions);

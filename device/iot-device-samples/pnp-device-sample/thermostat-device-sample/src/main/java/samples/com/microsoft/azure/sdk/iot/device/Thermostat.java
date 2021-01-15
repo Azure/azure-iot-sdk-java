@@ -171,7 +171,7 @@ public class Thermostat {
 
     private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
-        ProvisioningDeviceClient provisioningDeviceClient = null;
+        ProvisioningDeviceClient provisioningDeviceClient;
         ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
         provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, provisioningProtocol, securityClientSymmetricKey);

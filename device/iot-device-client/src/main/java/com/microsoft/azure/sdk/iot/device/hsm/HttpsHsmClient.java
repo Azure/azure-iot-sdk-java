@@ -233,7 +233,7 @@ public class HttpsHsmClient
         log.debug("Sending data over unix socket...");
 
         UnixSocketChannel channel = null;
-        HttpsResponse response = null;
+        HttpsResponse response;
         try
         {
             //write to socket

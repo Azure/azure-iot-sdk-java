@@ -37,7 +37,7 @@ public class SaslListenerImpl implements SaslListener
         else
         {
             String[] mechanisms = sasl.getRemoteMechanisms();
-            String chosenMechanism = null;
+            String chosenMechanism;
             try
             {
                 // Codes_SRS_SASLLISTENERIMPL_34_002: [This function shall retrieve the remote mechanisms and give them to the saved saslHandler object to decide which mechanism to use.]

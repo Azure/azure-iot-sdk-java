@@ -155,7 +155,7 @@ public class HttpsRequest
             connection.setConnectTimeout(this.connectTimeout);
         }
 
-        int responseStatus = -1;
+        int responseStatus;
         byte[] responseBody = new byte[0];
         byte[] errorReason = new byte[0];
         Map<String, List<String>> headerFields;

@@ -52,7 +52,7 @@ public class TpmRegistrationResultParser
         }
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        TpmRegistrationResultParser tpmRegistrationResultParserParser = null;
+        TpmRegistrationResultParser tpmRegistrationResultParserParser;
 
         try
         {

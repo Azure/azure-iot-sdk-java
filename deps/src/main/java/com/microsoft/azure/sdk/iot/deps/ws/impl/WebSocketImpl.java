@@ -42,7 +42,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
     private String _protocol = "";
     private Map<String, String> _additionalHeaders = null;
 
-    protected Boolean _isWebSocketEnabled = false;
+    protected Boolean _isWebSocketEnabled;
 
     private WebSocketHandler.WebSocketMessageType _lastType;
     private long _lastLength;

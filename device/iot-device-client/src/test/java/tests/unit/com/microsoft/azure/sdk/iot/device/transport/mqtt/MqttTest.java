@@ -295,9 +295,8 @@ public class MqttTest
     @Test(expected = IllegalArgumentException.class)
     public void constructorThrowsExceptionIfConnectionIsNotInitialised() throws TransportException
     {
-        Mqtt mockMqtt = null;
         //act
-        mockMqtt = new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
+        new MqttMessaging(null, CLIENT_ID, mockedIotHubListener, null, "", "", false, new HashMap<Integer, Message>());
     }
 
     /*
@@ -1028,7 +1027,7 @@ public class MqttTest
     public void messageArrivedAddsToQueue() throws TransportException, MqttException
     {
         //arrange
-        Mqtt mockMqtt = null;
+        Mqtt mockMqtt;
         final byte[] actualPayload = {0x61, 0x62, 0x63};
         baseConstructorExpectations();
         baseConnectExpectation();
@@ -1074,7 +1073,7 @@ public class MqttTest
     public void connectionLostAttemptsToReconnectWithSASTokenStillValid(final @Mocked ReconnectionNotifier reconnectionTask, final @Mocked TransportException mockedTransportException) throws IOException, MqttException
     {
         //arrange
-        Mqtt mockMqtt = null;
+        Mqtt mockMqtt;
         final Throwable t = new Throwable();
         baseConstructorExpectations();
 

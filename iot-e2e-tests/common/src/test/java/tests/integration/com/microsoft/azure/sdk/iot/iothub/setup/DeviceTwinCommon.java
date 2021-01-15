@@ -581,7 +581,7 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         // Check status periodically for success or until timeout
         long startTime = System.currentTimeMillis();
-        long timeElapsed = 0;
+        long timeElapsed;
         while (deviceUnderTest.deviceTwinStatus != OK)
         {
             Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
@@ -624,7 +624,7 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         // Check status periodically for success or until timeout
         long startTime = System.currentTimeMillis();
-        long timeElapsed = 0;
+        long timeElapsed;
 
         for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {

@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class MqttConnection
 {
-    private MqttAsyncClient mqttAsyncClient = null;
-    private MqttConnectOptions connectionOptions = null;
+    private MqttAsyncClient mqttAsyncClient;
+    private MqttConnectOptions connectionOptions;
     private final ConcurrentLinkedQueue<Pair<String, byte[]>> allReceivedMessages;
     private final Object mqttLock;
 

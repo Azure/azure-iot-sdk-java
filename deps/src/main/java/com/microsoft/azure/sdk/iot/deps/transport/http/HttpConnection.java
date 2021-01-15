@@ -290,7 +290,7 @@ public class HttpConnection
             throws IOException
     {
         ArrayList<Byte> byteBuffer = new ArrayList<>();
-        int nextByte = -1;
+        int nextByte;
         // read(byte[]) reads the byte into the buffer and returns the number
         // of bytes read, or -1 if the end of the stream has been reached.
         while ((nextByte = stream.read()) > -1)
