@@ -41,12 +41,7 @@ public class MainApiVerticle extends AbstractVerticle {
         vertxFileSystem.readFile("swagger.json", readFile -> {
             if (readFile.succeeded()) {
                 Swagger swagger = new SwaggerParser().parse(readFile.result().toString(StandardCharsets.UTF_8));
-                Router swaggerRouter = SwaggerRouter.swaggerRouter(router, swagger, vertx.eventBus(), new OperationIdServiceIdResolver(), new Function<RoutingContext, DeliveryOptions>() {
-                    @Override
-                    public DeliveryOptions apply(RoutingContext t) {
-                        return new DeliveryOptions().setSendTimeout(90000);
-                    }
-                });
+                Router swaggerRouter = SwaggerRouter.swaggerRouter(router, swagger, vertx.eventBus(), new OperationIdServiceIdResolver(), t -> new DeliveryOptions().setSendTimeout(90000));
                 deployVerticles(startFuture);
 
                 vertx.createHttpServer()

@@ -164,14 +164,7 @@ public class IotHubServicesCommon
                                                                          AuthenticationType authType) throws IOException, InterruptedException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
-        {
-            @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
-            {
-                actualStatusUpdates.add(new Pair<>(status, throwable));
-            }
-        }, new Object());
+        client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable)), new Object());
 
         sendMessages(client, protocol, messagesToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, interMessageDelay, actualStatusUpdates);
 
@@ -320,14 +313,7 @@ public class IotHubServicesCommon
                                                                                   AuthenticationType authType) throws IOException, InterruptedException
     {
         final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
-        client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
-        {
-            @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
-            {
-                statusUpdates.add(new Pair<>(status, throwable));
-            }
-        }, new Object());
+        client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> statusUpdates.add(new Pair<>(status, throwable)), new Object());
 
         client.open();
 

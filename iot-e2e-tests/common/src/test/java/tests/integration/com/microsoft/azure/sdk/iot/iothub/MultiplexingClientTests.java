@@ -717,13 +717,10 @@ public class MultiplexingClientTests extends IntegrationTest
     private static void subscribeToDeviceMethod(DeviceClient deviceClient, DeviceMethodCallback deviceMethodCallback) throws InterruptedException, IOException
     {
         Success methodsSubscribedSuccess = new Success();
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, null, new IotHubEventCallback() {
-            @Override
-            public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
-                ((Success) callbackContext).setCallbackStatusCode(responseStatus);
-                ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
-                ((Success) callbackContext).callbackWasFired();
-            }
+        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, null, (responseStatus, callbackContext) -> {
+            ((Success) callbackContext).setCallbackStatusCode(responseStatus);
+            ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
+            ((Success) callbackContext).callbackWasFired();
         }, methodsSubscribedSuccess);
 
         // Wait for methods subscription to be acknowledged by hub

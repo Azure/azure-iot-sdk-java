@@ -178,23 +178,19 @@ public class TemperatureController {
         maxTemperature.put(THERMOSTAT_1, 0.0d);
         maxTemperature.put(THERMOSTAT_2, 0.0d);
 
-        new Thread(new Runnable() {
-            @SneakyThrows({InterruptedException.class, IOException.class})
-            @Override
-            public void run() {
-                while (true) {
-                    if (temperatureReset.get()) {
-                        // Generate a random value between 5.0°C and 45.0°C for the current temperature reading for each "Thermostat" component.
-                        temperature.put(THERMOSTAT_1, BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue());
-                        temperature.put(THERMOSTAT_2, BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue());
-                    }
-
-                    sendTemperatureReading(THERMOSTAT_1);
-                    sendTemperatureReading(THERMOSTAT_2);
-
-                    temperatureReset.set(temperature.get(THERMOSTAT_1) == 0 && temperature.get(THERMOSTAT_2) == 0);
-                    Thread.sleep(5 * 1000);
+        new Thread(() -> {
+            while (true) {
+                if (temperatureReset.get()) {
+                    // Generate a random value between 5.0°C and 45.0°C for the current temperature reading for each "Thermostat" component.
+                    temperature.put(THERMOSTAT_1, BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue());
+                    temperature.put(THERMOSTAT_2, BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue());
                 }
+
+                sendTemperatureReading(THERMOSTAT_1);
+                sendTemperatureReading(THERMOSTAT_2);
+
+                temperatureReset.set(temperature.get(THERMOSTAT_1) == 0 && temperature.get(THERMOSTAT_2) == 0);
+                Thread.sleep(5 * 1000);
             }
         }).start();
     }
