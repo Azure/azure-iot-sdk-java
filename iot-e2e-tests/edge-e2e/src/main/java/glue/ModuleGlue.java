@@ -151,7 +151,7 @@ public class ModuleGlue
             ModuleClient client = new ModuleClient(connectionString, protocol);
 
             String cert = caCertificate.getCert();
-            if (cert != null && cert.isEmpty())
+            if (cert != null && !cert.isEmpty())
             {
                 client.setOption("SetCertificateAuthority", cert);
             }
