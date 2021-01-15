@@ -17,7 +17,7 @@ import java.util.Scanner;
  */
 public class DeviceMethodSample
 {
-    private static IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
+    private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
     private static final int METHOD_SUCCESS = 200;
     private static final int METHOD_HUNG = 300;
     private static final int METHOD_NOT_FOUND = 404;

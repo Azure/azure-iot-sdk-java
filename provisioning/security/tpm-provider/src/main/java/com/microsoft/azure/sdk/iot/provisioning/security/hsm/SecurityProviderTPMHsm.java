@@ -46,9 +46,9 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
             // TPMU_PUBLIC_ID       unique
             new TPM2B_PUBLIC_KEY_RSA());
     private final String registrationId;
-    private Tpm tpm = null;
-    private TPMT_PUBLIC ekPublic = null;
-    private TPMT_PUBLIC srkPublic = null;
+    private Tpm tpm;
+    private TPMT_PUBLIC ekPublic;
+    private TPMT_PUBLIC srkPublic;
     private TPM2B_PUBLIC idKeyPub = null;
 
     /**
@@ -115,6 +115,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Method is designed to be generic (params can be passed any acceptable values)
     private TPMT_PUBLIC createPersistentPrimary(Tpm tpm, TPM_HANDLE hPersistent, TPM_RH hierarchy, TPMT_PUBLIC inPub, String primaryRole) throws SecurityProviderException
     {
         ReadPublicResponse rpResp = tpm._allowErrors().ReadPublic(hPersistent);

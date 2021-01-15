@@ -45,6 +45,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     }
 
     @Before
+    @SuppressWarnings("EmptyMethod")
     public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         super.setUpNewDeviceAndModule();

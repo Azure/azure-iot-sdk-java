@@ -68,12 +68,12 @@ public class Query implements Iterator
     private static final String PATH_SEPARATOR = "/";
     private static final String PATH_QUERY = "query";
 
-    private String querySpecificationJson;
+    private final String querySpecificationJson;
     private int pageSize;
     private String continuationToken;
-    private ContractApiHttp contractApiHttp;
+    private final ContractApiHttp contractApiHttp;
     private boolean hasNext;
-    private String queryPath;
+    private final String queryPath;
 
     /**
      * INTERNAL CONSTRUCTOR

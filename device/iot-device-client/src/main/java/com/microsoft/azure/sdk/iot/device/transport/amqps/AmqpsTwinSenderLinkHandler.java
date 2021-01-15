@@ -49,7 +49,7 @@ final class AmqpsTwinSenderLinkHandler extends AmqpsSenderLinkHandler
     //This map is shared between the twin sender and receiver links. Twin sender links attach a correlation Id to each
     // request, and the receiver link needs to know those correlation Ids so that it can tell what type of twin
     // response each message received is.
-    private Map<String, DeviceOperations> twinOperationCorrelationMap;
+    private final Map<String, DeviceOperations> twinOperationCorrelationMap;
 
     AmqpsTwinSenderLinkHandler(Sender sender, AmqpsLinkStateCallback amqpsLinkStateCallback, DeviceClientConfig deviceClientConfig, String linkCorrelationId, Map<String, DeviceOperations> twinOperationCorrelationMap)
     {

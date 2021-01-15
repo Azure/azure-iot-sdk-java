@@ -941,7 +941,6 @@ public class WebSocketHandlerImplTest
         int messageLength = 10;
         ByteBuffer srcBuffer = ByteBuffer.allocate(messageLength);
         ByteBuffer dstBuffer = ByteBuffer.allocate(messageLength);
-        ;
 
         spyWebSocketHandler.wrapBuffer(srcBuffer, dstBuffer);
     }
@@ -956,7 +955,6 @@ public class WebSocketHandlerImplTest
         ByteBuffer srcBuffer = ByteBuffer.allocate(messageLength);
         srcBuffer.flip();
         ByteBuffer dstBuffer = ByteBuffer.allocate(messageLength);
-        ;
 
         spyWebSocketHandler.wrapBuffer(srcBuffer, dstBuffer);
     }

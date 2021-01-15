@@ -77,8 +77,8 @@ public class TransportClientTests extends IntegrationTest
 
     private static RegistryManager registryManager;
 
-    private static String expectedCorrelationId = "1234";
-    private static String expectedMessageId = "5678";
+    private static final String expectedCorrelationId = "1234";
+    private static final String expectedMessageId = "5678";
 
     private static final String REMOTE_FILE_NAME = "File";
     private static final String REMOTE_FILE_NAME_EXT = ".txt";
@@ -136,7 +136,7 @@ public class TransportClientTests extends IntegrationTest
         public String[] clientConnectionStringArrayList = new String[MAX_DEVICE_MULTIPLEX];
         public ArrayList<InternalClient> clientArrayList;
         public TransportClient transportClient;
-        private DeviceState[] devicesUnderTest = new DeviceState[MAX_DEVICE_MULTIPLEX];
+        private final DeviceState[] devicesUnderTest = new DeviceState[MAX_DEVICE_MULTIPLEX];
         private FileUploadState[] fileUploadState;
         private MessageState[] messageStates;
         private FileUploadNotificationReceiver fileUploadNotificationReceiver;
@@ -756,12 +756,12 @@ public class TransportClientTests extends IntegrationTest
 
     protected static class RunnableInvoke implements Runnable
     {
-        private String deviceId;
-        private String methodName;
-        private String methodPayload;
-        private CountDownLatch latch;
+        private final String deviceId;
+        private final String methodName;
+        private final String methodPayload;
+        private final CountDownLatch latch;
         private MethodResult result = null;
-        private DeviceMethod methodServiceClient;
+        private final DeviceMethod methodServiceClient;
 
         private Exception exception = null;
 
@@ -811,9 +811,9 @@ public class TransportClientTests extends IntegrationTest
 
     protected static class MultiplexRunnable implements Runnable
     {
-        private InternalClient client;
-        private String messageString;
-        private AtomicBoolean success;
+        private final InternalClient client;
+        private final String messageString;
+        private final AtomicBoolean success;
 
         @Override
         public void run()

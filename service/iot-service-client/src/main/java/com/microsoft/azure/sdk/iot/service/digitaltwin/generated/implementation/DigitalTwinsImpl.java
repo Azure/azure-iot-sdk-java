@@ -39,9 +39,9 @@ import rx.Observable;
  */
 public class DigitalTwinsImpl implements DigitalTwins {
     /** The Retrofit service to perform REST calls. */
-    private DigitalTwinsService service;
+    private final DigitalTwinsService service;
     /** The service client containing this operation class. */
-    private IotHubGatewayServiceAPIsImpl client;
+    private final IotHubGatewayServiceAPIsImpl client;
 
     /**
      * Initializes an instance of DigitalTwins.

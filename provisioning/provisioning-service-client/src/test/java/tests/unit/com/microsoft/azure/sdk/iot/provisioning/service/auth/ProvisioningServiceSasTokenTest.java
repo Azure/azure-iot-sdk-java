@@ -63,15 +63,15 @@ public class ProvisioningServiceSasTokenTest
         {
             URLEncoder urlEncoder;
             System system;
-            SecretKeySpec secretKeySpec;
+            final SecretKeySpec secretKeySpec;
             Mac mac;
             {
-                urlEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
-                system.currentTimeMillis();
+                URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
+                System.currentTimeMillis();
                 decodeBase64(sharedAccessKey.getBytes(charset));
                 byte[] body = { 1 };
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
-                mac.getInstance(cryptoProvider);
+                Mac.getInstance(cryptoProvider);
             }
         };
         // Act

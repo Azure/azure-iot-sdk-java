@@ -53,20 +53,20 @@ public class CorrelationDetailsLoggingAssert
     public static String buildExceptionMessage(String baseMessage, Collection<String> deviceIds, String protocol, String hostname, Collection<String> moduleIds)
     {
         String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        String correlationString = "Hostname: " + hostname;
+        StringBuilder correlationString = new StringBuilder("Hostname: " + hostname);
         if (deviceIds != null && deviceIds.size() > 0)
         {
-            correlationString += " Device id: ";
+            correlationString.append(" Device id: ");
             boolean isFirstDevice = true;
             for (String deviceId : deviceIds)
             {
                 if (isFirstDevice)
                 {
-                    correlationString += deviceId;
+                    correlationString.append(deviceId);
                 }
                 else
                 {
-                    correlationString += ", " + deviceId;
+                    correlationString.append(", ").append(deviceId);
                 }
 
                 isFirstDevice = false;
@@ -75,17 +75,17 @@ public class CorrelationDetailsLoggingAssert
 
         if (moduleIds != null && moduleIds.size() > 0)
         {
-            correlationString += " Module id: ";
+            correlationString.append(" Module id: ");
             boolean isFirstModule = true;
             for (String moduleId : moduleIds)
             {
                 if (isFirstModule)
                 {
-                    correlationString += moduleId;
+                    correlationString.append(moduleId);
                 }
                 else
                 {
-                    correlationString += ", " + moduleId;
+                    correlationString.append(", ").append(moduleId);
                 }
 
                 isFirstModule = false;
@@ -94,10 +94,10 @@ public class CorrelationDetailsLoggingAssert
 
         if (protocol != null && !protocol.isEmpty())
         {
-            correlationString += " Protocol: " + protocol;
+            correlationString.append(" Protocol: ").append(protocol);
         }
         
-        correlationString += " Timestamp: " + timeStamp;
+        correlationString.append(" Timestamp: ").append(timeStamp);
 
         return baseMessage + "\n(Correlation details: <" + correlationString + ">)";
     }

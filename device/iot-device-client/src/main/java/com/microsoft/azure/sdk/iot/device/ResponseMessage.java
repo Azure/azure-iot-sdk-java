@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.device;
  */
 public final class ResponseMessage extends Message
 {
-    private IotHubStatusCode status;
+    private final IotHubStatusCode status;
 
     /**
      * CONSTRUCTOR

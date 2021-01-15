@@ -32,11 +32,11 @@ public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
     private static final int DEFAULT_TOKEN_TIME_TO_LIVE_IN_SECS = 60 * 60;
     private final Lock lock;
 
-    private String hostName;
-    private String sharedAccessKeyName;
-    private String sharedAccessKey;
+    private final String hostName;
+    private final String sharedAccessKeyName;
+    private final String sharedAccessKey;
 
-    private int timeToLiveInSecs;
+    private final int timeToLiveInSecs;
     private String cachedSasToken;
     private long tokenExpiryTimeInMilliSecs;
 

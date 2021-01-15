@@ -11,8 +11,8 @@ import javax.net.ssl.SSLContext;
 
 public class Authorization
 {
-    private String sasToken = null;
-    private SSLContext sslContext = null;
+    private String sasToken;
+    private SSLContext sslContext;
 
     /**
      * Constructor to create {@code null} SSLContext and SasToken

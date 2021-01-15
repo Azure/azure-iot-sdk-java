@@ -19,7 +19,7 @@ import java.util.List;
  * </p>
  * */
 public class DigitalTwinClient {
-    private DigitalTwinAsyncClient digitalTwinAsyncClient;
+    private final DigitalTwinAsyncClient digitalTwinAsyncClient;
 
     DigitalTwinClient(String connectionString) {
         digitalTwinAsyncClient = DigitalTwinAsyncClient.createFromConnectionString(connectionString);

@@ -65,9 +65,9 @@ public class DeviceClientTest
     @Mocked
     ProductInfo mockedProductInfo;
 
-    private static long SEND_PERIOD_MILLIS = 10L;
-    private static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
-    private static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
+    private static final long SEND_PERIOD_MILLIS = 10L;
+    private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
+    private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     private static final long SEND_PERIOD = 10;
     private static final long RECEIVE_PERIOD = 10;

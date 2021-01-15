@@ -41,8 +41,8 @@ public class QuerySpecificationBuilder
     private static final String WHERE = "where" + SPACE;
     private static final String GROUP_BY = "group by" + SPACE;
 
-    private String selection;
-    private FromType fromType;
+    private final String selection;
+    private final FromType fromType;
     private String where;
     private String groupBy;
 

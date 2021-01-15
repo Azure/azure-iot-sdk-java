@@ -17,7 +17,7 @@ import java.util.List;
 /** Sends a number of event messages to an IoT Hub. */
 public class SendEventWithProxy
 {
-    private static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
     protected static class EventCallback implements IotHubEventCallback
     {
@@ -165,8 +165,8 @@ public class SendEventWithProxy
             throw new IllegalArgumentException("Expected argument 5 (port number) to be an integer");
         }
 
-        String proxyUsername = "";
-        char[] proxyPassword = new char[0];
+        String proxyUsername;
+        char[] proxyPassword;
         if (args.length == 7)
         {
             proxyUsername = args[5];

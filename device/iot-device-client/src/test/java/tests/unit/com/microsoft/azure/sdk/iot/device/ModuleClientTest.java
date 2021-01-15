@@ -155,7 +155,7 @@ public class ModuleClientTest
         new Expectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
 
                 mockedDeviceClientConfig.getModuleId();
@@ -469,7 +469,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
             }
         };
@@ -507,7 +507,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
             }
         };
@@ -545,7 +545,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
             }
         };
@@ -583,7 +583,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
             }
         };
@@ -617,7 +617,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
             }
         };
@@ -659,7 +659,7 @@ public class ModuleClientTest
         new Expectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
 
                 new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion);
@@ -713,7 +713,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
             }
         };
@@ -750,7 +750,7 @@ public class ModuleClientTest
         new NonStrictExpectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
             }
         };
@@ -782,7 +782,7 @@ public class ModuleClientTest
         new Expectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
 
                 new IotHubConnectionString(expectedEdgeHubConnectionString);
@@ -824,7 +824,7 @@ public class ModuleClientTest
         new Expectations()
         {
             {
-                mockedSystem.getenv();
+                System.getenv();
                 result = mockedSystemVariables;
 
                 new IotHubConnectionString(expectedIotHubConnectionString);

@@ -65,9 +65,9 @@ public class DeviceClientConfigTest
     @Mocked
     MessageCallback mockedMessageCallback;
 
-    private static String expectedDeviceId = "deviceId";
-    private static String expectedModuleId = "moduleId";
-    private static String expectedHostname = "hostname";
+    private static final String expectedDeviceId = "deviceId";
+    private static final String expectedModuleId = "moduleId";
+    private static final String expectedHostname = "hostname";
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
     @Test
@@ -939,7 +939,7 @@ public class DeviceClientConfigTest
         DeviceClientConfig config = Deencapsulation.newInstance(DeviceClientConfig.class, mockIotHubConnectionString);
 
         //assert
-        assertEquals(Deencapsulation.getField(config, "retryPolicy").getClass(), new ExponentialBackoffWithJitter().getClass());
+        assertEquals(Deencapsulation.getField(config, "retryPolicy").getClass(), ExponentialBackoffWithJitter.class);
     }
 
     //Tests_SRS_DEVICECLIENTCONFIG_28_002: [This function shall throw IllegalArgumentException retryPolicy is null.]

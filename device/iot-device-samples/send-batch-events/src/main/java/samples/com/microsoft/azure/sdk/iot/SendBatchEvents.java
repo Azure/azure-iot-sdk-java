@@ -16,7 +16,7 @@ import java.util.List;
 public class SendBatchEvents
 {
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private  static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private  static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
     protected static class EventCallback implements IotHubEventCallback
     {
@@ -187,8 +187,8 @@ public class SendBatchEvents
         System.out.println("Sending the following event messages in batch:");
 
         String deviceId = "MyJavaDevice";
-        double temperature = 0.0;
-        double humidity = 0.0;
+        double temperature;
+        double humidity;
 
         List<Message> messageList = new ArrayList<>();
 

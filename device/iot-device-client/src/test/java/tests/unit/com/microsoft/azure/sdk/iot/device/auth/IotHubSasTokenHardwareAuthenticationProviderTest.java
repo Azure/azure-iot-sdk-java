@@ -44,11 +44,11 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
 
     private static final String encodingName = StandardCharsets.UTF_8.displayName();
 
-    private static String expectedDeviceId = "deviceId";
-    private static String expectedModuleId = "moduleId";
-    private static String expectedHostname = "hostname";
-    private static String expectedGatewayHostname = "gateway";
-    private static String expectedSasToken = "sasToken";
+    private static final String expectedDeviceId = "deviceId";
+    private static final String expectedModuleId = "moduleId";
+    private static final String expectedHostname = "hostname";
+    private static final String expectedGatewayHostname = "gateway";
+    private static final String expectedSasToken = "sasToken";
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_033: [This constructor shall generate and save a sas token from the security provider with the default time to live.]
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_034: [This constructor shall retrieve and save the ssl context from the security provider.]

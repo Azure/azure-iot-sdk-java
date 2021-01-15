@@ -22,6 +22,7 @@ import javax.crypto.Mac;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 
 import static junit.framework.TestCase.assertEquals;
@@ -137,7 +138,7 @@ public class HttpHsmSignatureProviderTest
         new Verifications()
         {
             {
-                mockedSignRequest.setData(data.getBytes("UTF-8"));
+                mockedSignRequest.setData(data.getBytes(StandardCharsets.UTF_8));
                 mockedSignRequest.setKeyId("primary");
                 mockedSignRequest.setAlgo((Mac) Deencapsulation.getField(signatureProvider, "defaultSignRequestAlgo"));
                 mockedHttpsHsmClient.sign(expectedApiVersion, keyName, mockedSignRequest, expectedGenId);

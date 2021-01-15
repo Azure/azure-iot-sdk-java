@@ -19,7 +19,7 @@ import java.util.Scanner;
 public class SendReceive
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private static List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
 
     /** Used as a counter in the message callback. */
     protected static class Counter
@@ -298,8 +298,8 @@ public class SendReceive
         System.out.println("Updated token expiry time to " + time);
 
         String deviceId = "MyJavaDevice";
-        double temperature = 0.0;
-        double humidity = 0.0;
+        double temperature;
+        double humidity;
 
         for (int i = 0; i < numRequests; ++i)
         {

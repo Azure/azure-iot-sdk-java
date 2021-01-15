@@ -87,7 +87,7 @@ public class ToolsTest
         {
             Tools tools;
             {
-                tools.isNullOrEmpty(anyString);
+                Tools.isNullOrEmpty(anyString);
             }
         };
         // Act
@@ -107,7 +107,7 @@ public class ToolsTest
         {
             Tools tools;
             {
-                tools.isNullOrEmpty(anyString);
+                Tools.isNullOrEmpty(anyString);
             }
         };
         // Act
@@ -127,7 +127,7 @@ public class ToolsTest
         {
             Tools tools;
             {
-                tools.isNullOrEmpty(anyString);
+                Tools.isNullOrEmpty(anyString);
             }
         };
         // Act

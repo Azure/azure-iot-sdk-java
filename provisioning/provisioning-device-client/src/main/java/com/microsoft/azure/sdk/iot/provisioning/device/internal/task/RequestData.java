@@ -9,11 +9,12 @@ package com.microsoft.azure.sdk.iot.provisioning.device.internal.task;
 
 import javax.net.ssl.SSLContext;
 
+@SuppressWarnings("SameParameterValue") // Some constructors currently are passed null params, but they are designed to be generic.
 public class RequestData
 {
     private byte[] endorsementKey;
     private byte[] storageRootKey;
-    private String registrationId;
+    private final String registrationId;
     private String operationId;
 
     private SSLContext sslContext;

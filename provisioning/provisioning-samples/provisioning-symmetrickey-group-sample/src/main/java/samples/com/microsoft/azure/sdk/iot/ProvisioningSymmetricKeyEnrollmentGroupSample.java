@@ -82,7 +82,7 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-        SecurityProviderSymmetricKey securityClientSymmetricKey = null;
+        SecurityProviderSymmetricKey securityClientSymmetricKey;
         Scanner scanner = new Scanner(System.in);
         DeviceClient deviceClient = null;
 

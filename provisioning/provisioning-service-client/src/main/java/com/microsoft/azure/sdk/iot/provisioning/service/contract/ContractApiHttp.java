@@ -76,7 +76,7 @@ public class ContractApiHttp
     private static final String HEADER_FIELD_VALUE_CONTENT_TYPE = "application/json";
     private static final String HEADER_FIELD_VALUE_CHARSET = "utf-8";
 
-    private ProvisioningConnectionString provisioningConnectionString;
+    private final ProvisioningConnectionString provisioningConnectionString;
 
     /**
      * PRIVATE CONSTRUCTOR

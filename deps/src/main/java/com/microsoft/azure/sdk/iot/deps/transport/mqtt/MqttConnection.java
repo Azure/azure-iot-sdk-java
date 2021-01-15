@@ -32,7 +32,7 @@ public class MqttConnection implements MqttCallback
     private static final boolean SET_CLEAN_SESSION = false;
     static final int MAX_WAIT_TIME = 1000;
 
-    private MqttListener mqttListener;
+    private final MqttListener mqttListener;
 
     /**
      * Constructor to create MqttAsync Client with Paho
@@ -135,10 +135,6 @@ public class MqttConnection implements MqttCallback
             {
                 IMqttToken connectToken = this.mqttAsyncClient.connect(this.connectionOptions);
                 connectToken.waitForCompletion();
-                if (this.mqttListener != null)
-                {
-                    this.mqttListener.connectionEstablished();
-                }
             }
         }
         catch (MqttException e)

@@ -143,16 +143,15 @@ public class HttpResponse
 
     protected static String flattenValuesList(List<String> values)
     {
-        String valuesStr = "";
+        StringBuilder valuesStr = new StringBuilder();
         for (String value : values)
         {
-            valuesStr += value + ",";
+            valuesStr.append(value).append(",");
         }
         // remove the trailing comma.
-        valuesStr =
-                valuesStr.substring(0, Math.max(0, valuesStr.length() - 1));
+        valuesStr = new StringBuilder(valuesStr.substring(0, Math.max(0, valuesStr.length() - 1)));
 
-        return valuesStr;
+        return valuesStr.toString();
     }
 
     protected HttpResponse()

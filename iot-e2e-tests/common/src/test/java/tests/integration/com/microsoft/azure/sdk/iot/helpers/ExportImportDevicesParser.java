@@ -14,7 +14,7 @@ public class ExportImportDevicesParser {
     private static final String DEVICES = "devices";
     @SerializedName(DEVICES)
     Iterable<ExportImportDeviceParser> exportImportDevices;
-    private transient static Gson gson = new Gson();
+    private final transient static Gson gson = new Gson();
 
     /**
      * Converts this into json and returns it

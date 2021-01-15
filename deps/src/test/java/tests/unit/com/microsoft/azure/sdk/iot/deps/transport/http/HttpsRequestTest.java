@@ -26,6 +26,7 @@ import static org.junit.Assert.assertThat;
 
 /** Unit tests for HttpRequest.
  * Coverage 66% method, 75% line */
+@SuppressWarnings("EmptyMethod")
 @RunWith(JMockit.class)
 public class HttpsRequestTest
 {
@@ -212,7 +213,7 @@ public class HttpsRequestTest
         final String value1 = "test-value1";
         new MockUp<HttpConnection>()
         {
-            Map<String, String> testHeaderFields = new HashMap<>();
+            final Map<String, String> testHeaderFields = new HashMap<>();
 
             @Mock
             void $init(URL url, HttpMethod method)

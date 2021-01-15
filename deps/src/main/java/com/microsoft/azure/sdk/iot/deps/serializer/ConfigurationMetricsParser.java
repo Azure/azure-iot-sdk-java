@@ -19,7 +19,7 @@ public class ConfigurationMetricsParser
     @SerializedName(QUERIES_NAME)
     private Map<String, String> queries;
 
-    private transient static Gson gson = new Gson();
+    private final transient static Gson gson = new Gson();
 
     /**
      * Empty constructor: Used only to keep GSON happy.

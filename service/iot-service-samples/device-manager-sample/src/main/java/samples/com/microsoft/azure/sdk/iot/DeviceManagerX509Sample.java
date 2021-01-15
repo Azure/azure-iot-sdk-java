@@ -55,7 +55,7 @@ public class DeviceManagerX509Sample
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
 
-        Device device = null;
+        Device device;
 
         if (isSelfSigned)
         {
@@ -93,7 +93,7 @@ public class DeviceManagerX509Sample
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
 
-        Device returnDevice = null;
+        Device returnDevice;
         try
         {
             returnDevice = registryManager.getDevice(SampleUtils.deviceId);
@@ -123,7 +123,7 @@ public class DeviceManagerX509Sample
     {
         RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
 
-        Device device = null;
+        Device device;
         if (isSelfSigned)
         {
             device = Device.createDevice(SampleUtils.deviceId, AuthenticationType.SELF_SIGNED);
