@@ -405,6 +405,8 @@ public class MqttDeviceTwin extends Mqtt
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // This method currently has a single caller (with a single value for "message"),
+    // but can be used to create a new TransportException with any message string.
     private void throwDeviceTwinTransportException(String message) throws TransportException
     {
         TransportException transportException = new TransportException(message);
