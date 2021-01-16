@@ -141,7 +141,7 @@ public class SendEventWithProxy
         else
         {
             System.out.format(
-                    "Received a protocol string that could not be understood: %d.\n"
+                    "Received a protocol string that could not be understood: %s.\n"
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key> or HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>;GatewayHostName=<gateway> \n"
                             + "2. [number of requests to send]\n"
