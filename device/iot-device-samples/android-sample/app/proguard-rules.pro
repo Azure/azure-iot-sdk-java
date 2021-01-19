@@ -15,3 +15,5 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keep class com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.RegistrationOperationStatusParser { *; }
+-keep class com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.DeviceRegistrationResultParser { *; }

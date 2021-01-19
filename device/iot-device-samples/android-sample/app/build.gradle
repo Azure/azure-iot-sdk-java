@@ -1,20 +1,24 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "com.iothub.azure.microsoft.com.androidsample"
         minSdkVersion 26
-        targetSdkVersion 27
+        targetSdkVersion 30
         multiDexEnabled true
         versionCode 1
         versionName "1.0"
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -48,6 +52,9 @@ dependencies {
         exclude module: 'slf4j-api'
         exclude module:'azure-storage'
     }
+    implementation 'com.microsoft.azure.sdk.iot.provisioning:provisioning-device-client:1.8.5'
+    implementation 'com.microsoft.azure.sdk.iot.provisioning.security:x509-provider:1.1.4'
+
     implementation 'org.slf4j:slf4j-android:1.7.29'
     implementation 'com.microsoft.azure.android:azure-storage-android:2.0.0'
     implementation 'org.apache.commons:commons-lang3:3.6'
