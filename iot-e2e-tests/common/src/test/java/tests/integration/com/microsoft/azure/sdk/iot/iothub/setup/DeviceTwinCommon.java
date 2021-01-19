@@ -166,7 +166,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected DeviceState[] devicesUnderTest;
 
     protected DeviceTwinTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
