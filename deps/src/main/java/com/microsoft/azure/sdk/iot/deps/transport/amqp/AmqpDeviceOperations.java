@@ -102,7 +102,7 @@ public class AmqpDeviceOperations
      */
     public synchronized boolean isReceiverLinkTag(String name)
     {
-        return name != null && this.receiverLinkTag.equals(name);
+        return this.receiverLinkTag.equals(name);
     }
 
     /**
