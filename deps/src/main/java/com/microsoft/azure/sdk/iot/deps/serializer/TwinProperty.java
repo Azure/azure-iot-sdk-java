@@ -371,7 +371,7 @@ public class TwinProperty
         {
             if (entry.getKey().equals(VERSION_TAG))
             {
-                version = new Integer( (int) ((double) entry.getValue()));
+                version = (int) ((double) entry.getValue());
                 break;
             }
         }

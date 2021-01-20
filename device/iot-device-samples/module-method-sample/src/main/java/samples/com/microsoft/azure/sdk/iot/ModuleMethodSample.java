@@ -52,21 +52,13 @@ public class ModuleMethodSample
         public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
             DeviceMethodData deviceMethodData ;
-            switch (methodName)
+            int status = method_default(methodData);
+            if ("command".equals(methodName))
             {
-                case "command" :
-                {
-                    int status = method_command(methodData);
-
-                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
-                    break;
-                }
-                default:
-                {
-                    int status = method_default(methodData);
-                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
-                }
+                status = method_command(methodData);
             }
+
+            deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
 
             return deviceMethodData;
         }
