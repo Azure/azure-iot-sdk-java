@@ -80,13 +80,9 @@ public final class SignatureHelper
             hMacSha256.init(secretKey);
             encryptedSig = hMacSha256.doFinal(sig);
         }
-        catch (NoSuchAlgorithmException e)
+        catch (NoSuchAlgorithmException | InvalidKeyException e)
         {
             // should never happen, since the algorithm is hard-coded.
-        }
-        catch (InvalidKeyException e)
-        {
-            // should never happen, since the input key type is hard-coded.
         }
 
         return encryptedSig;
