@@ -110,7 +110,12 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the observable to the Object object
      */
     public Observable<Object> getDigitalTwinAsync(String id) {
-        return getDigitalTwinWithServiceResponseAsync(id).map(response -> response.body());
+        return getDigitalTwinWithServiceResponseAsync(id).map(new Func1<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>, Object>() {
+            @Override
+            public Object call(ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders> response) {
+                return response.body();
+            }
+        });
     }
 
     /**
@@ -126,12 +131,15 @@ public class DigitalTwinsImpl implements DigitalTwins {
         }
         final String apiVersion = "2020-09-30";
         return service.getDigitalTwin(id, apiVersion)
-            .flatMap((Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>>>) response -> {
-                try {
-                    ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders> clientResponse = getDigitalTwinDelegate(response);
-                    return Observable.just(clientResponse);
-                } catch (Throwable t) {
-                    return Observable.error(t);
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>>>() {
+                @Override
+                public Observable<ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders>> call(Response<ResponseBody> response) {
+                    try {
+                        ServiceResponseWithHeaders<Object, DigitalTwinGetDigitalTwinHeaders> clientResponse = getDigitalTwinDelegate(response);
+                        return Observable.just(clientResponse);
+                    } catch (Throwable t) {
+                        return Observable.error(t);
+                    }
                 }
             });
     }
@@ -177,7 +185,12 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
     public Observable<Void> updateDigitalTwinAsync(String id, List<Object> digitalTwinPatch) {
-        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch).map(response -> response.body());
+        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch).map(new Func1<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>, Void>() {
+            @Override
+            public Void call(ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> response) {
+                return response.body();
+            }
+        });
     }
 
     /**
@@ -199,12 +212,15 @@ public class DigitalTwinsImpl implements DigitalTwins {
         final String apiVersion = "2020-09-30";
         final String ifMatch = null;
         return service.updateDigitalTwin(id, digitalTwinPatch, ifMatch, apiVersion)
-            .flatMap((Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>>>) response -> {
-                try {
-                    ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> clientResponse = updateDigitalTwinDelegate(response);
-                    return Observable.just(clientResponse);
-                } catch (Throwable t) {
-                    return Observable.error(t);
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>>>() {
+                @Override
+                public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> call(Response<ResponseBody> response) {
+                    try {
+                        ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> clientResponse = updateDigitalTwinDelegate(response);
+                        return Observable.just(clientResponse);
+                    } catch (Throwable t) {
+                        return Observable.error(t);
+                    }
                 }
             });
     }
@@ -247,7 +263,12 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the {@link ServiceResponseWithHeaders} object if successful.
      */
     public Observable<Void> updateDigitalTwinAsync(String id, List<Object> digitalTwinPatch, String ifMatch) {
-        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch, ifMatch).map(response -> response.body());
+        return updateDigitalTwinWithServiceResponseAsync(id, digitalTwinPatch, ifMatch).map(new Func1<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>, Void>() {
+            @Override
+            public Void call(ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> response) {
+                return response.body();
+            }
+        });
     }
 
     /**
@@ -269,12 +290,15 @@ public class DigitalTwinsImpl implements DigitalTwins {
         Validator.validate(digitalTwinPatch);
         final String apiVersion = "2020-09-30";
         return service.updateDigitalTwin(id, digitalTwinPatch, ifMatch, apiVersion)
-            .flatMap((Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>>>) response -> {
-                try {
-                    ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> clientResponse = updateDigitalTwinDelegate(response);
-                    return Observable.just(clientResponse);
-                } catch (Throwable t) {
-                    return Observable.error(t);
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>>>() {
+                @Override
+                public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> call(Response<ResponseBody> response) {
+                    try {
+                        ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders> clientResponse = updateDigitalTwinDelegate(response);
+                        return Observable.just(clientResponse);
+                    } catch (Throwable t) {
+                        return Observable.error(t);
+                    }
                 }
             });
     }
@@ -324,7 +348,12 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the observable to the Object object
      */
     public Observable<Object> invokeRootLevelCommandAsync(String id, String commandName) {
-        return invokeRootLevelCommandWithServiceResponseAsync(id, commandName).map(response -> response.body());
+        return invokeRootLevelCommandWithServiceResponseAsync(id, commandName).map(new Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>, Object>() {
+            @Override
+            public Object call(ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders> response) {
+                return response.body();
+            }
+        });
     }
 
     /**
@@ -348,12 +377,15 @@ public class DigitalTwinsImpl implements DigitalTwins {
         final Integer connectTimeoutInSeconds = null;
         final Integer responseTimeoutInSeconds = null;
         return service.invokeRootLevelCommand(id, commandName, payload, apiVersion, connectTimeoutInSeconds, responseTimeoutInSeconds)
-            .flatMap((Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>>>) response -> {
-                try {
-                    ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders> clientResponse = invokeRootLevelCommandDelegate(response);
-                    return Observable.just(clientResponse);
-                } catch (Throwable t) {
-                    return Observable.error(t);
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>>>() {
+                @Override
+                public Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>> call(Response<ResponseBody> response) {
+                    try {
+                        ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders> clientResponse = invokeRootLevelCommandDelegate(response);
+                        return Observable.just(clientResponse);
+                    } catch (Throwable t) {
+                        return Observable.error(t);
+                    }
                 }
             });
     }
@@ -406,7 +438,12 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the observable to the Object object
      */
     public Observable<Object> invokeRootLevelCommandAsync(String id, String commandName, Object payload, Integer connectTimeoutInSeconds, Integer responseTimeoutInSeconds) {
-        return invokeRootLevelCommandWithServiceResponseAsync(id, commandName, payload, connectTimeoutInSeconds, responseTimeoutInSeconds).map(response -> response.body());
+        return invokeRootLevelCommandWithServiceResponseAsync(id, commandName, payload, connectTimeoutInSeconds, responseTimeoutInSeconds).map(new Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>, Object>() {
+            @Override
+            public Object call(ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders> response) {
+                return response.body();
+            }
+        });
     }
 
     /**
@@ -430,12 +467,15 @@ public class DigitalTwinsImpl implements DigitalTwins {
         }
         final String apiVersion = "2020-09-30";
         return service.invokeRootLevelCommand(id, commandName, payload, apiVersion, connectTimeoutInSeconds, responseTimeoutInSeconds)
-            .flatMap((Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>>>) response -> {
-                try {
-                    ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders> clientResponse = invokeRootLevelCommandDelegate(response);
-                    return Observable.just(clientResponse);
-                } catch (Throwable t) {
-                    return Observable.error(t);
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>>>() {
+                @Override
+                public Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>> call(Response<ResponseBody> response) {
+                    try {
+                        ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders> clientResponse = invokeRootLevelCommandDelegate(response);
+                        return Observable.just(clientResponse);
+                    } catch (Throwable t) {
+                        return Observable.error(t);
+                    }
                 }
             });
     }
@@ -488,7 +528,12 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the observable to the Object object
      */
     public Observable<Object> invokeComponentCommandAsync(String id, String componentPath, String commandName) {
-        return invokeComponentCommandWithServiceResponseAsync(id, componentPath, commandName).map(response -> response.body());
+        return invokeComponentCommandWithServiceResponseAsync(id, componentPath, commandName).map(new Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>, Object>() {
+            @Override
+            public Object call(ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders> response) {
+                return response.body();
+            }
+        });
     }
 
     /**
@@ -516,12 +561,15 @@ public class DigitalTwinsImpl implements DigitalTwins {
         final Integer connectTimeoutInSeconds = null;
         final Integer responseTimeoutInSeconds = null;
         return service.invokeComponentCommand(id, componentPath, commandName, payload, apiVersion, connectTimeoutInSeconds, responseTimeoutInSeconds)
-            .flatMap((Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>>>) response -> {
-                try {
-                    ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders> clientResponse = invokeComponentCommandDelegate(response);
-                    return Observable.just(clientResponse);
-                } catch (Throwable t) {
-                    return Observable.error(t);
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>>>() {
+                @Override
+                public Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>> call(Response<ResponseBody> response) {
+                    try {
+                        ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders> clientResponse = invokeComponentCommandDelegate(response);
+                        return Observable.just(clientResponse);
+                    } catch (Throwable t) {
+                        return Observable.error(t);
+                    }
                 }
             });
     }
@@ -577,7 +625,12 @@ public class DigitalTwinsImpl implements DigitalTwins {
      * @return the observable to the Object object
      */
     public Observable<Object> invokeComponentCommandAsync(String id, String componentPath, String commandName, Object payload, Integer connectTimeoutInSeconds, Integer responseTimeoutInSeconds) {
-        return invokeComponentCommandWithServiceResponseAsync(id, componentPath, commandName, payload, connectTimeoutInSeconds, responseTimeoutInSeconds).map(response -> response.body());
+        return invokeComponentCommandWithServiceResponseAsync(id, componentPath, commandName, payload, connectTimeoutInSeconds, responseTimeoutInSeconds).map(new Func1<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>, Object>() {
+            @Override
+            public Object call(ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders> response) {
+                return response.body();
+            }
+        });
     }
 
     /**
@@ -605,12 +658,15 @@ public class DigitalTwinsImpl implements DigitalTwins {
         }
         final String apiVersion = "2020-09-30";
         return service.invokeComponentCommand(id, componentPath, commandName, payload, apiVersion, connectTimeoutInSeconds, responseTimeoutInSeconds)
-            .flatMap((Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>>>) response -> {
-                try {
-                    ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders> clientResponse = invokeComponentCommandDelegate(response);
-                    return Observable.just(clientResponse);
-                } catch (Throwable t) {
-                    return Observable.error(t);
+            .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>>>() {
+                @Override
+                public Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>> call(Response<ResponseBody> response) {
+                    try {
+                        ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders> clientResponse = invokeComponentCommandDelegate(response);
+                        return Observable.just(clientResponse);
+                    } catch (Throwable t) {
+                        return Observable.error(t);
+                    }
                 }
             });
     }
