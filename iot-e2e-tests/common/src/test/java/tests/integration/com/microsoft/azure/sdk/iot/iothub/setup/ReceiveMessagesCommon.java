@@ -310,13 +310,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             return false;
         }
 
-        if (msg.getMessageId() == null || !msg.getMessageId().equals(expectedMessageId))
-        {
-            return false;
-        }
-
-        //all system properties are as expected
-        return true;
+        return msg.getMessageId() != null && msg.getMessageId().equals(expectedMessageId);//all system properties are as expected
     }
 
     protected void sendMessageToDevice(String deviceId, String protocolName) throws IotHubException, IOException
