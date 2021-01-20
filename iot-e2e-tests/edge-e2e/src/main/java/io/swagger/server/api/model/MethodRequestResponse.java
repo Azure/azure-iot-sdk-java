@@ -62,11 +62,10 @@ public class MethodRequestResponse   {
   @Override
   public String toString() {
 
-    String sb = "class MethodRequestResponse {\n" +
-            "    requestPayload: " + toIndentedString(requestPayload) + "\n" +
-            "    responseId: " + toIndentedString(responseId) + "\n" +
-            "}";
-    return sb;
+      return "class MethodRequestResponse {\n" +
+              "    requestPayload: " + toIndentedString(requestPayload) + "\n" +
+              "    responseId: " + toIndentedString(responseId) + "\n" +
+              "}";
   }
 
   /**
