@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.auth;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
@@ -16,6 +18,7 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 /** Builds the authorization signature as a composition of functions. */
+@Slf4j
 public final class SignatureHelper
 {
     /**
@@ -82,7 +85,9 @@ public final class SignatureHelper
         }
         catch (NoSuchAlgorithmException | InvalidKeyException e)
         {
-            // should never happen, since the algorithm and input key are hard-coded.
+            // will never happen since the algorithm and input key are hard-coded. Don't want to bother
+            // adding these exceptions to the thrown exceptions of this method because of that.
+            log.error("Unexpected error encountered while encrypting signature", e);
         }
 
         return encryptedSig;
