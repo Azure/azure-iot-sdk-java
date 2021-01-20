@@ -249,6 +249,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private TPMT_PUBLIC createPersistentPrimary(Tpm tpm, TPM_HANDLE hPersistent, TPM_RH hierarchy, TPMT_PUBLIC inPub, String primaryRole) throws SecurityProviderException
     {
         ReadPublicResponse rpResp = tpm._allowErrors().ReadPublic(hPersistent);

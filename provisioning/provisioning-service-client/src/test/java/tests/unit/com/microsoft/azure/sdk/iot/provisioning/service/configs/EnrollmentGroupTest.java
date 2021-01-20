@@ -74,6 +74,7 @@ public class EnrollmentGroupTest
         String mockedEtag;
         JsonObject mockedJsonElement;
 
+        @SuppressWarnings("SameParameterValue") // Since this is a constructor "enrollmentGroupId" can be passed any value.
         MockEnrollmentGroup(
                 String enrollmentGroupId,
                 Attestation attestation)

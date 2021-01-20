@@ -500,7 +500,8 @@ public class MethodParserTest
         methodParser.toJsonElement();
     }
 
-    private static final TestMethod createMethodRequestWithTimeout(
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
+    private static TestMethod createMethodRequestWithTimeout(
             String methodName,
             long responseTimeOut,
             long connectTimeout,
@@ -524,7 +525,8 @@ public class MethodParserTest
         return testMethod;
     }
 
-    private static final TestMethod createMethodRequestWithOutTimeout(String methodName, String payload, boolean wrapPayloadAsString, Object expectedPayload)
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
+    private static TestMethod createMethodRequestWithOutTimeout(String methodName, String payload, boolean wrapPayloadAsString, Object expectedPayload)
     {
         TestMethod testMethod = new TestMethod();
         testMethod.name = methodName;
@@ -537,7 +539,8 @@ public class MethodParserTest
         return testMethod;
     }
 
-    private static final TestMethod createMethodRequestWithResponseTimeout(
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
+    private static TestMethod createMethodRequestWithResponseTimeout(
             String methodName,
             long responseTimeOut,
             String payload,
@@ -558,7 +561,8 @@ public class MethodParserTest
         return testMethod;
     }
 
-    private static final TestMethod createMethodRequestWithConnectTimeout(
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
+    private static TestMethod createMethodRequestWithConnectTimeout(
             String methodName,
             long connectTimeout,
             String payload,
@@ -579,7 +583,7 @@ public class MethodParserTest
         return testMethod;
     }
 
-    private static final TestMethod createMethodResponse(Integer status, String payload, boolean wrapPayloadAsString, Object expectedPayload)
+    private static TestMethod createMethodResponse(Integer status, String payload, boolean wrapPayloadAsString, Object expectedPayload)
     {
         TestMethod testMethod = new TestMethod();
         testMethod.status = status;
@@ -593,7 +597,7 @@ public class MethodParserTest
         return testMethod;
     }
 
-    private static final TestMethod createMethodResponse(String json)
+    private static TestMethod createMethodResponse(String json)
     {
         TestMethod testMethod = new TestMethod();
         testMethod.json = json;

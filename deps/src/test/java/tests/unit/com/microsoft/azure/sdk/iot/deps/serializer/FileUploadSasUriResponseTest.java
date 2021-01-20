@@ -27,6 +27,7 @@ public class FileUploadSasUriResponseTest
     private static final String VALID_SAS_TOKEN = "1234asdfSAStoken";
     private static final String INVALID_SAS_TOKEN = "\u1234asdfSAStoken";
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the expected assertion param can be passed any value.
     private static void assertFileUploadResponse(FileUploadSasUriResponse fileUploadSasUriResponse, String expectedHostName, String expectedContainerName, String expectedCorrelationId, String expectedBlobName, String expectedSasToken)
     {
         assertNotNull(fileUploadSasUriResponse);
@@ -44,6 +45,7 @@ public class FileUploadSasUriResponseTest
         assertEquals(expectedSasToken, sasToken);
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static String createJson(String hostName, String containerName, String correlationId, String blobName, String sasToken)
     {
         return "{\n" +
