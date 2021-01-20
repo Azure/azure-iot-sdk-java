@@ -1541,6 +1541,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static void assertDeviceSessionClosesGracefully(ConnectionStatusChangeTracker connectionStatusChangeTracker, int timeoutMillis) throws InterruptedException {
         long startTime = System.currentTimeMillis();
         while (connectionStatusChangeTracker.isOpen)
