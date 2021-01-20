@@ -83,7 +83,7 @@ public class JobsResponseParser
     @SerializedName(LAST_UPDATED_TIME_UTC_TAG)
     private String lastUpdatedTime;
 
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     private Date lastUpdatedTimeDate;
 
     // Max execution time in seconds (ttl duration)

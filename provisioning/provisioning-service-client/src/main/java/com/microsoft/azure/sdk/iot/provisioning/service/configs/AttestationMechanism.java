@@ -22,25 +22,25 @@ public final class AttestationMechanism
 {
     // The AttestationMechanismType that identifies if the attestation is TPM (TpmAttestation), X509 (X509Attestation) or Symmetric Keys (SymmetricKeysAttestation).
     private static final String ATTESTATION_TYPE_TAG = "type";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ATTESTATION_TYPE_TAG)
     private AttestationMechanismType type;
 
     // This is the TpmAttestation that contains the TPM keys. It is valid on AttestationMechanismType.TPM.
     private static final String TPM_ATTESTATION_TAG = "tpm";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(TPM_ATTESTATION_TAG)
     private TpmAttestation tpm;
 
     // This is the X509Attestation that contains the X509 certificates. It is valid on AttestationMechanismType.X509.
     private static final String X509_ATTESTATION_TAG = "x509";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(X509_ATTESTATION_TAG)
     private X509Attestation x509;
 
     // This is the SymmetricKeyAttestation that contains the Symmetric Keys. It is valid on AttestationMechanismType.SYMMETRIC_KEY.
     private static final String SYMMETRIC_KEY_TAG = "symmetricKey";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SYMMETRIC_KEY_TAG)
     private SymmetricKeyAttestation symmetricKey;
 

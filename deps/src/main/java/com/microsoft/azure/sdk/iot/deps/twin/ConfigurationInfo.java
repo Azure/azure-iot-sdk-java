@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 public class ConfigurationInfo
 {
     private static final String STATUS_NAME = "status";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_NAME)
     protected ConfigurationStatus status;
 

@@ -63,13 +63,13 @@ public class X509CertificateWithInfo
 {
     // the X509 certificate
     private static final String CERTIFICATE_TAG = "certificate";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CERTIFICATE_TAG)
     private String certificate;
 
     // the X509 certificate info
     private static final String CERTIFICATE_INFO_TAG = "info";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CERTIFICATE_INFO_TAG)
     private X509CertificateInfo info;
 

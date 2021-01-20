@@ -20,13 +20,13 @@ public class TpmAttestation extends Attestation
 {
     // the endorsement key for TPM [mandatory]
     private static final String ENDORSEMENT_KEY_TAG = "endorsementKey";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ENDORSEMENT_KEY_TAG)
     private String endorsementKey;
 
     // the storage root key for TPM [optional]
     private static final String STORAGE_ROOT_KEY_TAG = "storageRootKey";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STORAGE_ROOT_KEY_TAG)
     private String storageRootKey;
 

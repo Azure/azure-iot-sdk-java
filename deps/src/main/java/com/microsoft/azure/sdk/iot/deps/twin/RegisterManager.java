@@ -21,7 +21,7 @@ public class RegisterManager
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
     private static final String DEVICE_ID_TAG = "deviceId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DEVICE_ID_TAG)
     protected String deviceId = null;
 
@@ -32,7 +32,7 @@ public class RegisterManager
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
     private static final String MODULE_ID_TAG = "moduleId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(MODULE_ID_TAG)
     protected String moduleId = null;
 
@@ -40,7 +40,7 @@ public class RegisterManager
      * Device generation Id
      */
     private static final String GENERATION_ID_TAG = "generationId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(GENERATION_ID_TAG)
     protected String generationId = null;
 
@@ -49,7 +49,7 @@ public class RegisterManager
      * of this JSON description. This is a hash.
      */
     private static final String ETAG_TAG = "etag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ETAG_TAG)
     protected String eTag = null;
 
@@ -57,7 +57,7 @@ public class RegisterManager
      * An Integer representing a Twin version.
      */
     private static final String VERSION_TAG = "version";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(VERSION_TAG)
     protected Integer version = null;
 
@@ -67,7 +67,7 @@ public class RegisterManager
      * If "disabled" this device cannot receive or send messages, and statusReason must be set.
      */
     private static final String STATUS_TAG = "status";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_TAG)
     protected TwinStatus status = null;
 
@@ -76,7 +76,7 @@ public class RegisterManager
      * (all UTF-8 chars allowed).
      */
     private static final String STATUS_REASON_TAG = "statusReason";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_REASON_TAG)
     protected String statusReason = null;
 
@@ -84,7 +84,7 @@ public class RegisterManager
      * Datetime of last time the state was updated.
      */
     private static final String STATUS_UPDATED_TIME_TAG = "statusUpdatedTime";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_UPDATED_TIME_TAG)
     protected String statusUpdatedTime = null;
 
@@ -93,7 +93,7 @@ public class RegisterManager
      * {"connected" | "disconnected"}
      */
     private static final String CONNECTION_STATE_TAG = "connectionState";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONNECTION_STATE_TAG)
     protected TwinConnectionState connectionState = null;
 
@@ -101,7 +101,7 @@ public class RegisterManager
      * Datetime of last time the connection state was updated.
      */
     private static final String CONNECTION_STATE_UPDATED_TIME_TAG = "connectionStateUpdatedTime";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONNECTION_STATE_UPDATED_TIME_TAG)
     protected String connectionStateUpdatedTime = null;
 
@@ -109,7 +109,7 @@ public class RegisterManager
      * Datetime of last time the device authenticated, received, or sent a message.
      */
     private static final String LAST_ACTIVITY_TIME_TAG = "lastActivityTime";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(LAST_ACTIVITY_TIME_TAG)
     protected String lastActivityTime = null;
 
@@ -117,7 +117,7 @@ public class RegisterManager
      * Datetime of last time the device authenticated, received, or sent a message.
      */
     private static final String CAPABILITIES_TAG = "capabilities";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CAPABILITIES_TAG)
     protected DeviceCapabilities capabilities = null;
 
@@ -127,7 +127,7 @@ public class RegisterManager
      * The value will be null for a pnp device until the device connects and registers with the model id.
      */
     private static final String MODEL_ID = "modelId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(MODEL_ID)
     protected String modelId = null;
 

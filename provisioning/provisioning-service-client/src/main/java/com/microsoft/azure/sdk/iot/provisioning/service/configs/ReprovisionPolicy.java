@@ -15,13 +15,13 @@ public class ReprovisionPolicy
 {
     // the flag for updating hub assignment
     private static final String UPDATE_HUB_ASSIGNMENT_TAG = "updateHubAssignment";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(UPDATE_HUB_ASSIGNMENT_TAG)
     private boolean updateHubAssignment;
 
     // the flag for migrating the device data on reprovisioning
     private static final String MIGRATE_DEVICE_DATA_TAG = "migrateDeviceData";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(MIGRATE_DEVICE_DATA_TAG)
     private boolean migrateDeviceData;
 

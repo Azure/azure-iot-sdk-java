@@ -13,80 +13,80 @@ import java.util.Date;
 public class DeviceParser
 {
     private static final String E_TAG_NAME = "etag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(E_TAG_NAME)
     private String eTag;
 
     private static final String DEVICE_ID_NAME = "deviceId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DEVICE_ID_NAME)
     private String deviceId;
 
     private static final String MODULE_ID_NAME = "moduleId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(MODULE_ID_NAME)
     private String moduleId;
 
     private static final String GENERATION_ID_NAME = "generationId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(GENERATION_ID_NAME)
     private String generationId;
 
     private static final String STATUS_NAME = "status";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_NAME)
     private String status;
 
     private static final String STATUS_REASON = "statusReason";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_REASON)
     private String statusReason;
 
     private static final String STATUS_UPDATED_TIME_NAME = "statusUpdatedTime";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(STATUS_UPDATED_TIME_NAME)
     private String statusUpdatedTimeString;
     private transient Date statusUpdatedTime;
 
     private static final String CONNECTION_STATE_NAME = "connectionState";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONNECTION_STATE_NAME)
     private String connectionState;
 
     private static final String CONNECTION_STATE_UPDATED_TIME_NAME = "connectionStateUpdatedTime";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(CONNECTION_STATE_UPDATED_TIME_NAME)
     private String connectionStateUpdatedTimeString;
     private transient Date connectionStateUpdatedTime;
 
     private static final String LAST_ACTIVITY_TIME_NAME = "lastActivityTime";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(LAST_ACTIVITY_TIME_NAME)
     private String lastActivityTimeString;
     private transient Date lastActivityTime;
 
     private static final String CLOUD_TO_MESSAGE_COUNT_NAME = "cloudToDeviceMessageCount";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CLOUD_TO_MESSAGE_COUNT_NAME)
     private long cloudToDeviceMessageCount;
 
     private static final String AUTHENTICATION_NAME = "authentication";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(AUTHENTICATION_NAME)
     private AuthenticationParser authenticationParser;
 
     private static final String MANAGED_BY = "managedBy";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(MANAGED_BY)
     private String managedBy;
 
     private static final String CAPABILITIES_NAME = "capabilities";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CAPABILITIES_NAME)
     private DeviceCapabilitiesParser capabilities;
 
     private static final String SCOPE_NAME = "deviceScope";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SCOPE_NAME)
     private String scope;
 
