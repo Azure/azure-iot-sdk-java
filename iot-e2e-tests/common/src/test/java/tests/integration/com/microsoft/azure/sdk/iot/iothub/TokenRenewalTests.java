@@ -279,13 +279,12 @@ public class TokenRenewalTests extends IntegrationTest
 
     private void openEachClient(List<InternalClient> clients) throws IOException
     {
-        for (int clientIndex = 0; clientIndex < clients.size(); clientIndex++)
+        for (InternalClient client : clients)
         {
             try
             {
-                clients.get(clientIndex).open();
-            }
-            catch (UnsupportedOperationException ex)
+                client.open();
+            } catch (UnsupportedOperationException ex)
             {
                 //client was a multiplexing client which was already opened, safe to ignore
             }

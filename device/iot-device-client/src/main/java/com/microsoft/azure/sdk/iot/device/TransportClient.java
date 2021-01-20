@@ -146,9 +146,9 @@ public class TransportClient
     public void closeNow() throws IOException
     {
         // Codes_SRS_TRANSPORTCLIENT_12_015: [If the registered device list is not empty the function shall call closeFileUpload on all devices.]
-        for (int i = 0; i < this.deviceClientList.size(); i++)
+        for (DeviceClient aDeviceClientList : this.deviceClientList)
         {
-            deviceClientList.get(i).closeFileUpload();
+            aDeviceClientList.closeFileUpload();
         }
 
         // Codes_SRS_TRANSPORTCLIENT_12_014: [If the deviceIO not null the function shall call closeWithoutWrappingException on the deviceIO and set the deviceIO to null.]
@@ -203,10 +203,10 @@ public class TransportClient
             throw new UnsupportedOperationException("TransportClient.setRetryPolicy only works when there is at least one registered device client.");
         }
 
-        for (int i = 0; i < this.deviceClientList.size(); i++)
+        for (DeviceClient aDeviceClientList : this.deviceClientList)
         {
             // Codes_SRS_TRANSPORTCLIENT_28_002: [The function shall set the retry policies to all registered device clients.]
-            deviceClientList.get(i).getConfig().setRetryPolicy(retryPolicy);
+            aDeviceClientList.getConfig().setRetryPolicy(retryPolicy);
         }
 
         log.debug("Retry policy updated successfully in the transport client");

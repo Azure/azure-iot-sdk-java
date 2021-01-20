@@ -89,7 +89,7 @@ public class QueryOptionsTest
     public void getPageSizeSuccess()
     {
         //arrange
-        Integer expectedPageSize = new Integer(758);
+        Integer expectedPageSize = 758;
         QueryOptions options = new QueryOptions();
         Deencapsulation.setField(options, "pageSize", expectedPageSize);
 
@@ -113,7 +113,7 @@ public class QueryOptionsTest
     public void setPageSizeThrowsForZeroPageSize()
     {
         //act
-        new QueryOptions().setPageSize(new Integer(0));
+        new QueryOptions().setPageSize(0);
     }
 
     //Tests_SRS_QUERYOPTIONS_34_005: [If the provided page size is null or is not a positive integer, an IllegalArgumentException shall be thrown.]
@@ -121,7 +121,7 @@ public class QueryOptionsTest
     public void setPageSizeThrowsForNegativePageSize()
     {
         //act
-        new QueryOptions().setPageSize(new Integer(-25));
+        new QueryOptions().setPageSize(-25);
     }
 
     //Tests_SRS_QUERYOPTIONS_34_007: [This function shall save the provided page size.]
@@ -129,7 +129,7 @@ public class QueryOptionsTest
     public void setPageSizeSuccess()
     {
         //arrange
-        Integer expectedPageSize = new Integer(758);
+        Integer expectedPageSize = 758;
         QueryOptions options = new QueryOptions();
 
         //act

@@ -51,23 +51,23 @@ public class IotHubServicesCommon
         {
             client.open();
 
-            for (int i = 0; i < messagesToSend.size(); ++i)
+            for (MessageAndResult aMessagesToSend : messagesToSend)
             {
-                if ((protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS) && isErrorInjectionMessage(messagesToSend.get(i)))
+                if ((protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS) && isErrorInjectionMessage(aMessagesToSend))
                 {
                     // error injection message will not be ack'd by service if sent over MQTT/MQTT_WS, so the SDK's
                     // retry logic will try to send it again after the connection drops. By setting expiry time,
                     // we ensure that error injection message isn't resent to service too many times. The message will still likely
                     // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
-                    messagesToSend.get(i).message.setExpiryTime(1000);
+                    aMessagesToSend.message.setExpiryTime(1000);
 
                     // Since the message won't be ack'd, then we don't need to validate the status code when this message's callback is fired
-                    messagesToSend.get(i).statusCode = null;
+                    aMessagesToSend.statusCode = null;
                 }
 
-                sendMessageAndWaitForResponse(client, messagesToSend.get(i), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+                sendMessageAndWaitForResponse(client, aMessagesToSend, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
 
-                if (isErrorInjectionMessage(messagesToSend.get(i)))
+                if (isErrorInjectionMessage(aMessagesToSend))
                 {
                     //wait until error injection message takes affect before sending the next message
                     long startTime = System.currentTimeMillis();
@@ -456,9 +456,9 @@ public class IotHubServicesCommon
     private static boolean isErrorInjectionMessage(MessageAndResult messageAndResult)
     {
         MessageProperty[] properties = messageAndResult.message.getProperties();
-        for (int i = 0; i < properties.length; i++)
+        for (MessageProperty property : properties)
         {
-            if (properties[i].getValue().equals(ErrorInjectionHelper.FaultCloseReason_Boom.toString()) || properties[i].getValue().equals(ErrorInjectionHelper.FaultCloseReason_Bye.toString()))
+            if (property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Boom.toString()) || property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Bye.toString()))
             {
                 return true;
             }
@@ -524,9 +524,9 @@ public class IotHubServicesCommon
 
     public static boolean actualStatusUpdatesContainsStatus(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, IotHubConnectionStatus status)
     {
-        for (int i = 0; i < actualStatusUpdates.size(); i++)
+        for (Pair<IotHubConnectionStatus, Throwable> actualStatusUpdate : actualStatusUpdates)
         {
-            if (actualStatusUpdates.get(i).getKey() == status)
+            if (actualStatusUpdate.getKey() == status)
             {
                 return true;
             }

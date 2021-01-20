@@ -16,12 +16,12 @@ public class DeviceConnectionString
         StringBuilder stringBuilder = new StringBuilder();
         String[] tokenArray = iotHubConnectionString.split(";");
         String hostName = "";
-        for (int i = 0; i < tokenArray.length; i++)
+        for (String aTokenArray : tokenArray)
         {
-            String[] keyValueArray = tokenArray[i].split("=");
+            String[] keyValueArray = aTokenArray.split("=");
             if (keyValueArray[0].equals("HostName"))
             {
-                hostName =  tokenArray[i] + ';';
+                hostName = aTokenArray + ';';
                 break;
             }
         }
@@ -46,12 +46,12 @@ public class DeviceConnectionString
         StringBuilder stringBuilder = new StringBuilder();
         String[] tokenArray = iotHubConnectionString.split(";");
         String hostName = "";
-        for (int i = 0; i < tokenArray.length; i++)
+        for (String aTokenArray : tokenArray)
         {
-            String[] keyValueArray = tokenArray[i].split("=");
+            String[] keyValueArray = aTokenArray.split("=");
             if (keyValueArray[0].equals("HostName"))
             {
-                hostName =  tokenArray[i] + ';';
+                hostName = aTokenArray + ';';
                 break;
             }
         }

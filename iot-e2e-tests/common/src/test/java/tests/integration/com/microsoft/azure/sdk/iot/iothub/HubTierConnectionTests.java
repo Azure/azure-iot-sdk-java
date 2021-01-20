@@ -235,9 +235,9 @@ public class HubTierConnectionTests extends IntegrationTest
 
     public static boolean actualStatusUpdatesContainsStatus(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, IotHubConnectionStatus status)
     {
-        for (int i = 0; i < actualStatusUpdates.size(); i++)
+        for (Pair<IotHubConnectionStatus, Throwable> actualStatusUpdate : actualStatusUpdates)
         {
-            if (actualStatusUpdates.get(i).getKey() == status)
+            if (actualStatusUpdate.getKey() == status)
             {
                 return true;
             }

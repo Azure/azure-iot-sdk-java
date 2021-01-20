@@ -81,9 +81,8 @@ public class ConfigurationManangerSample
             List<Configuration> configList = registryManager.getConfigurations(20);
             System.out.println(configList.size() + " Configurations found");
 
-            for (int i = 0; i < configList.size(); i++)
+            for (Configuration config : configList)
             {
-                Configuration config = configList.get(i);
                 System.out.println("Configuration Id: " + config.getId());
             }
         }
