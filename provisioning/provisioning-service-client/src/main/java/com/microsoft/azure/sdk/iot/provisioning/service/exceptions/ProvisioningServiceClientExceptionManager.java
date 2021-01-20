@@ -111,20 +111,17 @@ public class ProvisioningServiceClientExceptionManager
     private static void throwProvisioningServiceClientTransientException(int responseStatus, String errorMessage)
             throws ProvisioningServiceClientTransientException
     {
-        switch (responseStatus)
+        if (responseStatus == 500)
+        {// Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_21_007: [The function shall throw ProvisioningServiceClientInternalServerErrorException if the response status equal 500]
+            throw new ProvisioningServiceClientInternalServerErrorException(errorMessage);
+        }
+        if (errorMessage.isEmpty())
         {
-            case 500:
-                // Codes_SRS_SERVICE_SDK_JAVA_PROVISIONINGSERVICECLIENTEXCEPTIONMANAGER_21_007: [The function shall throw ProvisioningServiceClientInternalServerErrorException if the response status equal 500]
-                throw new ProvisioningServiceClientInternalServerErrorException(errorMessage);
-            default:
-                if(errorMessage.isEmpty())
-                {
-                    throw new ProvisioningServiceClientTransientException("Http response transient error " + responseStatus);
-                }
-                else
-                {
-                    throw new ProvisioningServiceClientTransientException(errorMessage);
-                }
+            throw new ProvisioningServiceClientTransientException("Http response transient error " + responseStatus);
+        }
+        else
+        {
+            throw new ProvisioningServiceClientTransientException(errorMessage);
         }
     }
 }

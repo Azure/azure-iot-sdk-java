@@ -109,12 +109,9 @@ public class MqttDeviceMethod extends Mqtt
 
                 if (requestMap.containsKey(message.getRequestId()))
                 {
-                    switch (requestMap.remove(message.getRequestId()))
+                    if (requestMap.remove(message.getRequestId()) != DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST)
                     {
-                        case DEVICE_OPERATION_METHOD_RECEIVE_REQUEST:
-                            break;
-                        default:
-                            throwMethodsTransportException("Mismatched request and response operation");
+                        throwMethodsTransportException("Mismatched request and response operation");
                     }
                 }
                 else

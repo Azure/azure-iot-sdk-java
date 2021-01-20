@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 {
-    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
+    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 60 * 1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
 
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";

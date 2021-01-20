@@ -34,7 +34,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class HubTierConnectionTests extends IntegrationTest
 {
-    protected static final long WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 180000;

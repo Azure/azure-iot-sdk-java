@@ -86,13 +86,9 @@ public class ConfigurationManangerSample
                 System.out.println("Configuration Id: " + config.getId());
             }
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
     }
 
@@ -116,13 +112,9 @@ public class ConfigurationManangerSample
             System.out.println("Add configuration " + config.getId() + " succeeded.");
             printConfiguration(config);
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();
@@ -138,13 +130,9 @@ public class ConfigurationManangerSample
             returnConfig = registryManager.getConfiguration(SampleUtils.configurationId);
             printConfiguration(returnConfig);
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();
@@ -162,13 +150,9 @@ public class ConfigurationManangerSample
             config = registryManager.updateConfiguration(config);
             printConfiguration(config);
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();
@@ -183,13 +167,9 @@ public class ConfigurationManangerSample
             registryManager.removeConfiguration(SampleUtils.configurationId);
             System.out.println("Device removed: " + SampleUtils.configurationId);
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();

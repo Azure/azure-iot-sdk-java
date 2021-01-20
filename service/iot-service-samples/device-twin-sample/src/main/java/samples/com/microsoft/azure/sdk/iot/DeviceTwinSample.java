@@ -62,11 +62,7 @@ public class DeviceTwinSample
             // ======================================= query twin =====================================
             queryTwin(twinClient);
         }
-        catch (IotHubException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        catch (IOException e)
+        catch (IotHubException | IOException e)
         {
             System.out.println(e.getMessage());
         }

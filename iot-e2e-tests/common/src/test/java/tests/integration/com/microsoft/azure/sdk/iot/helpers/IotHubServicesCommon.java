@@ -22,7 +22,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 public class IotHubServicesCommon
 {
     //if error injection message has not taken effect after 1 minute, the test will timeout
-    private final static long ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000;
+    private final static long ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT_MILLISECONDS = 60 * 1000;
     private final static String TEST_ASC_SECURITY_MESSAGE = "{ \"AgentVersion\": \"0.0.1\", "
             + "\"AgentId\" : \"{4C1B4747-E4C7-4681-B31D-4B39E390E7F8}\", "
             + "\"MessageSchemaVersion\" : \"1.0\", \"Events\" : "

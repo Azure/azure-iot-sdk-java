@@ -174,13 +174,9 @@ public class HttpsConnection
         {
             this.connection.setRequestMethod(method.name());
         }
-        catch (java.net.ProtocolException e)
+        catch (ProtocolException | SecurityException e)
         {
             // should never happen, since the method names are hard-coded.
-            throw new TransportException(e);
-        }
-        catch (SecurityException e)
-        {
             throw new TransportException(e);
         }
     }
