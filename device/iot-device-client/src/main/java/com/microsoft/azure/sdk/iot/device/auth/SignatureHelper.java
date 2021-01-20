@@ -82,7 +82,7 @@ public final class SignatureHelper
         }
         catch (NoSuchAlgorithmException | InvalidKeyException e)
         {
-            // should never happen, since the algorithm is hard-coded.
+            // should never happen, since the algorithm and input key are hard-coded.
         }
 
         return encryptedSig;
