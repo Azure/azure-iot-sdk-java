@@ -112,11 +112,6 @@ public class MqttDeviceTwinTest
             //act
             testTwin.start();
         }
-        finally
-        {
-            //assert
-
-        }
     }
 
     /*
