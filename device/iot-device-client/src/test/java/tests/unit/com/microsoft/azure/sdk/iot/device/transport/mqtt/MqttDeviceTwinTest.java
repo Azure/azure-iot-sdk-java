@@ -96,22 +96,19 @@ public class MqttDeviceTwinTest
     @Test (expected = IOException.class)
     public void startThrowsExceptionIfSubscribesFails(@Mocked final Mqtt mockMqtt) throws TransportException
     {
-        try
+        //arrange
+        new StrictExpectations()
         {
-            //arrange
-            new StrictExpectations()
             {
-                {
-                    Deencapsulation.invoke(mockMqtt, "subscribe", resTopic);
-                    result = mockIOException;
-                }
-            };
+                Deencapsulation.invoke(mockMqtt, "subscribe", resTopic);
+                result = mockIOException;
+            }
+        };
 
-            MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "", new HashMap<Integer, Message>(), null);
+        MqttDeviceTwin testTwin = new MqttDeviceTwin(mockedMqttConnection, "", new HashMap<Integer, Message>(), null);
 
-            //act
-            testTwin.start();
-        }
+        //act
+        testTwin.start();
     }
 
     /*
