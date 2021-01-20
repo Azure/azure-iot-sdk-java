@@ -111,7 +111,7 @@ public class RegisterManagerParser
         validateDeviceManager(deviceId, null, null);
 
         /* Codes_SRS_TWIN_21_159: [The updateDeviceManager shall replace the `deviceId` by the provided one.] */
-        if((this.deviceId == null) || (deviceId == null) || (!this.deviceId.equals(deviceId)))
+        if((this.deviceId == null) || (!this.deviceId.equals(deviceId)))
         {
             this.deviceId = deviceId;
             return this.deviceId != null;

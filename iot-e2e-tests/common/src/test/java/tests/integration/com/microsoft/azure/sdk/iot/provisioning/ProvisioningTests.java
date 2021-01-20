@@ -375,7 +375,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
     private void assertTwinIsCorrect(ReprovisionPolicy reprovisionPolicy, String expectedPropertyName, String expectedPropertyValue, boolean inFarAwayHub) throws IOException, IotHubException
     {
-        if (reprovisionPolicy != null && reprovisionPolicy.getMigrateDeviceData() == true)
+        if (reprovisionPolicy != null && reprovisionPolicy.getMigrateDeviceData())
         {
             DeviceTwin twinClient;
             if (inFarAwayHub)

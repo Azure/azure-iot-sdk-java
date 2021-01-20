@@ -725,7 +725,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onSessionClosedAsExpected(String deviceId)
     {
         // don't want to signal Client_Close to transport layer if this is in the middle of a disconnected_retrying event
-        if (this.reconnectionsScheduled.get(deviceId) == null || this.reconnectionsScheduled.get(deviceId) == false)
+        if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
         {
             log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
             this.listener.onMultiplexedDeviceSessionLost(null, this.connectionId, deviceId);
@@ -841,7 +841,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private void scheduleDeviceSessionReconnection(Throwable throwable, String deviceId)
     {
-        if (this.reconnectionsScheduled.get(deviceId) == null || this.reconnectionsScheduled.get(deviceId) == false)
+        if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
         {
             this.reconnectionsScheduled.put(deviceId, true);
             log.warn("Amqp session for device {} was closed, creating a thread to notify transport layer", deviceId, throwable);

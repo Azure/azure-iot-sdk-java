@@ -2398,14 +2398,13 @@ public class DeviceClientTest
     private void deviceClientInstanceExpectation(final IotHubClientProtocol protocol)
     {
         final long receivePeriod;
-        switch (protocol)
+        if (protocol == IotHubClientProtocol.HTTPS)
         {
-            case HTTPS:
-                receivePeriod = RECEIVE_PERIOD_MILLIS_HTTPS;
-                break;
-            default:
-                receivePeriod = RECEIVE_PERIOD_MILLIS_AMQPS;
-                break;
+            receivePeriod = RECEIVE_PERIOD_MILLIS_HTTPS;
+        }
+        else
+        {
+            receivePeriod = RECEIVE_PERIOD_MILLIS_AMQPS;
         }
 
         new Expectations()
