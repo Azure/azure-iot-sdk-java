@@ -67,7 +67,7 @@ public class DeviceMethodCommon extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected DeviceMethodTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     protected static Collection inputsCommon() throws IOException
     {
