@@ -580,7 +580,7 @@ public class JobClientTests extends IntegrationTest
         StringBuilder pendingJobIds = new StringBuilder();
         for (String jobId : jobIdsPending)
         {
-            pendingJobIds.append(jobId + " ");
+            pendingJobIds.append(jobId).append(" ");
         }
         return pendingJobIds.toString();
     }
