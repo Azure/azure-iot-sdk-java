@@ -282,10 +282,7 @@ public class FeedbackReceiver extends Receiver
         {
             FeedbackBatch responseFeedbackBatch = receive(timeoutMs);
             future.complete(responseFeedbackBatch);
-        } catch (IOException e)
-        {
-            future.completeExceptionally(e);
-        } catch (InterruptedException e)
+        } catch (IOException | InterruptedException e)
         {
             future.completeExceptionally(e);
         }

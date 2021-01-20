@@ -65,11 +65,7 @@ public class DeviceMethodSample
             // ================================== cancel job scheduled ================================
             cancelScheduleInvokeMethod(methodClient);
         }
-        catch (IotHubException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        catch (IOException e)
+        catch (IotHubException | IOException e)
         {
             System.out.println(e.getMessage());
         }
