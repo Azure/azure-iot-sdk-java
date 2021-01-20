@@ -357,9 +357,9 @@ public class AmqpsProvisioningSaslHandler implements SaslHandler
     {
         // Determine the length of the result array
         int totalLength = 0;
-        for (int i = 0; i < arrays.length; i++)
+        for (byte[] array : arrays)
         {
-            totalLength += arrays[i].length;
+            totalLength += array.length;
         }
 
         //for X arrays, there will be X-1 delimiters

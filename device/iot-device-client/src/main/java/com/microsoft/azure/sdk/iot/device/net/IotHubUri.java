@@ -79,11 +79,8 @@ public final class IotHubUri
         uriBuilder.append(API_VERSION);
         if (queryParams != null)
         {
-            Iterator<Map.Entry<String, String>> paramIter =
-                    queryParams.entrySet().iterator();
-            while (paramIter.hasNext())
+            for (Map.Entry<String, String> param : queryParams.entrySet())
             {
-                Map.Entry<String, String> param = paramIter.next();
                 uriBuilder.append("&");
                 // Codes_SRS_IOTHUBURI_11_013: [The constructor shall URL-encode each query param.]
                 appendQueryParam(uriBuilder, param.getKey(),
