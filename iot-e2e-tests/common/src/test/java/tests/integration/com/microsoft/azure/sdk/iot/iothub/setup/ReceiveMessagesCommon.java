@@ -101,7 +101,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected static String expectedCorrelationId = "1234";
     protected static String expectedMessageId = "5678";
-    protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     public ReceiveMessagesTestInstance testInstance;
 
