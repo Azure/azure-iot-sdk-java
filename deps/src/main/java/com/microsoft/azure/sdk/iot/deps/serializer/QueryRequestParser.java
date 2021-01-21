@@ -13,7 +13,7 @@ import com.google.gson.annotations.SerializedName;
 public class QueryRequestParser
 {
     private static final String QUERY_TAG = "query";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(QUERY_TAG)
     private String query = null;
 

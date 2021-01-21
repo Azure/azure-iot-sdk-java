@@ -102,19 +102,19 @@ public class TwinState extends RegisterManager
 {
     // the twin tags
     private static final String TAGS_TAG = "tags";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(TAGS_TAG)
     private TwinCollection tags;
 
     // the twin desired properties
     private static final String PROPERTIES_TAG = "properties";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(PROPERTIES_TAG)
     private TwinProperties properties;
 
     // the twin configurations
     private static final String CONFIGURATION_TAG = "configurations";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(CONFIGURATION_TAG)
     private Map<String, ConfigurationInfo> configurations;
 

@@ -20,7 +20,7 @@ public class QuerySpecification extends Serializable
 {
     // the query specification
     private static final String QUERY_TAG = "query";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(QUERY_TAG)
     private String query;
 

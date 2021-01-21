@@ -15,7 +15,7 @@ import com.google.gson.annotations.SerializedName;
 public class ErrorResponse
 {
     private static final String MESSAGE_NAME = "message";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(MESSAGE_NAME)
     private String message;
 

@@ -13,7 +13,7 @@ import com.google.gson.annotations.SerializedName;
 public class SignResponse
 {
     private static final String DIGEST_NAME = "digest";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DIGEST_NAME)
     public String digest;
 

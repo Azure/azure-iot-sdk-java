@@ -15,22 +15,22 @@ import com.google.gson.annotations.SerializedName;
 public class FileUploadCompletionNotification
 {
     private static final String CORRELATION_ID_TAG = "correlationId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CORRELATION_ID_TAG)
     private String correlationId = null;
 
     private static final String IS_SUCCESS_TAG = "isSuccess";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IS_SUCCESS_TAG)
     private Boolean isSuccess = null;
 
     private static final String STATUS_CODE_TAG = "statusCode";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_CODE_TAG)
     private Integer statusCode = null;
 
     private static final String STATUS_DESCRIPTION_TAG = "statusDescription";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_DESCRIPTION_TAG)
     private String statusDescription = null;
 

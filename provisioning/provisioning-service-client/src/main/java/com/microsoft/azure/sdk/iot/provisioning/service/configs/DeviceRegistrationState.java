@@ -38,58 +38,58 @@ public class DeviceRegistrationState
 {
     // the registration identifier
     private static final String REGISTRATION_ID_TAG = "registrationId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(REGISTRATION_ID_TAG)
     private String registrationId;
 
     // the device identifier
     private static final String DEVICE_ID_TAG = "deviceId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DEVICE_ID_TAG)
     private String deviceId;
 
     // the created date and time
     private static final String CREATED_DATETIME_UTC_TAG = "createdDateTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CREATED_DATETIME_UTC_TAG)
     private final String createdDateTimeUtc = null;
     private transient Date createdDateTimeUtcDate;
 
     // last update date and time
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
     private final String lastUpdatedDateTimeUtc = null;
     private transient Date lastUpdatedDateTimeUtcDate;
 
     // assigned hub
     private static final String ASSIGNED_HUB_TAG = "assignedHub";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ASSIGNED_HUB_TAG)
     private String assignedHub;
 
     // registration status
     private static final String STATE_TAG = "status";
     private static final String QUOTED_STATE_TAG = "\"" + STATE_TAG + "\"";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATE_TAG)
     private EnrollmentStatus status;
 
     // error code
     private static final String ERROR_CODE_TAG = "errorCode";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ERROR_CODE_TAG)
     private Integer errorCode;
 
     // error message
     private static final String ERROR_MESSAGE_TAG = "errorMessage";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ERROR_MESSAGE_TAG)
     private String errorMessage;
 
     // the eTag
     private static final String ETAG_TAG = "etag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ETAG_TAG)
     private String etag;
 

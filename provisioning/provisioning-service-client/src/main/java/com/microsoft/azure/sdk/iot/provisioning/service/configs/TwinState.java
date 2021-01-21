@@ -76,13 +76,13 @@ public class TwinState
 {
     // the twin tags
     private static final String TAGS_TAG = "tags";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(TAGS_TAG)
     private TwinCollection tags;
 
     // the twin desired properties
     private static final String DESIRED_PROPERTIES_TAG = "properties";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DESIRED_PROPERTIES_TAG)
     private TwinProperties properties;
 

@@ -15,7 +15,7 @@ import com.google.gson.annotations.SerializedName;
 public class TrustBundleResponse
 {
     private static final String CERTIFICATE_NAME = "certificate";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(CERTIFICATE_NAME)
     private String certificates;
 
