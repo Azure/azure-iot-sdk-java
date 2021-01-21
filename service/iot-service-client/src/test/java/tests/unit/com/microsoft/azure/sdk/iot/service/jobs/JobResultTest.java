@@ -51,6 +51,7 @@ public class JobResultTest
     final static String DATEFORMAT_JSON = "MMM d, yyyy h:mm:ss a";
 
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private void JobsResponseParserExpectations(String json, TwinState twinState, MethodParser methodParser, Date date, MethodParser methodParserResponse, String jobTypeStr)
     {
         new NonStrictExpectations()
@@ -100,6 +101,7 @@ public class JobResultTest
         };
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private void jobsResponseParserWithNullDeviceIdExpectations(String json, TwinState twinState, MethodParser methodParser, Date date, MethodParser methodParserResponse, String jobTypeStr)
     {
         new NonStrictExpectations()

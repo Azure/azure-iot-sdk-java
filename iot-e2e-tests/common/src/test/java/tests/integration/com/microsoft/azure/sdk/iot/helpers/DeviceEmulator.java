@@ -97,6 +97,7 @@ public class DeviceEmulator
      *                                    deviceMethodStatusCallback is not null.
      * @throws IOException if the client failed to subscribe on the device method.
      */
+    @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDeviceMethod(
             DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
             IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
@@ -178,6 +179,7 @@ public class DeviceEmulator
      * @param mustSubscribeToDesiredProperties is a boolean to define if it should or not subscribe to the desired properties.
      * @throws IOException if failed to start the Device twin.
      */
+    @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDeviceTwin(IotHubEventCallback deviceTwinStatusCallBack, Object deviceTwinStatusCallbackContext,
                                Device deviceTwin, Object propertyCallBackContext, boolean mustSubscribeToDesiredProperties) throws IOException
     {

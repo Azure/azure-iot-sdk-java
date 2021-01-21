@@ -10,13 +10,13 @@ public class CustomAllocationDefinition
 {
     // the webhook url for allocation requests
     private static final String WEBHOOK_URL_TAG = "webhookUrl";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(WEBHOOK_URL_TAG)
     private String webhookUrl;
 
     // the API version of the provisioning service types (such as IndividualEnrollment) sent in the custom allocation request.
     private static final String API_VERSION_TAG = "apiVersion";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(API_VERSION_TAG)
     private String apiVersion;
 

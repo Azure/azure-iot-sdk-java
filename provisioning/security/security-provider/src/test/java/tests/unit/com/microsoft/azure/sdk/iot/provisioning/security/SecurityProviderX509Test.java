@@ -69,6 +69,7 @@ public class SecurityProviderX509Test
         private final Key key;
         private final Collection<X509Certificate> certificates;
 
+        @SuppressWarnings("SameParameterValue") // Since this is a constructor "cn" can be passed any value.
         SecurityProviderX509TestImpl(String cn, X509Certificate x509Certificate, Key key, Collection<X509Certificate> certificates)
         {
             this.cn = cn;

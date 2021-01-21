@@ -25,34 +25,34 @@ import java.util.Date;
 public class FileUploadNotificationParser
 {
     private static final String DEVICE_ID_TAG = "deviceId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DEVICE_ID_TAG)
     private String deviceId = null;
 
     private static final String BLOB_URI_TAG = "blobUri";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(BLOB_URI_TAG)
     private String blobUri = null;
 
     private static final String BLOB_NAME_TAG = "blobName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(BLOB_NAME_TAG)
     private String blobName = null;
 
     private static final String LAST_UPDATED_TIME_TAG = "lastUpdatedTime";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(LAST_UPDATED_TIME_TAG)
     private String lastUpdatedTime = null;
 
     private transient Date lastUpdatedTimeDate;
 
     private static final String BLOB_SIZE_IN_BYTES_TAG = "blobSizeInBytes";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(BLOB_SIZE_IN_BYTES_TAG)
     private Long blobSizeInBytes = null;
 
     private static final String ENQUEUED_TIME_UTC_TAG = "enqueuedTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ENQUEUED_TIME_UTC_TAG)
     private String enqueuedTimeUtc = null;
 

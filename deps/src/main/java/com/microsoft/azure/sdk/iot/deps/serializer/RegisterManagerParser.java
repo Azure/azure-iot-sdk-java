@@ -24,7 +24,7 @@ public class RegisterManagerParser
      * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
      */
     private static final String DEVICE_ID_TAG = "deviceId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DEVICE_ID_TAG)
     protected String deviceId = null;
 
@@ -32,7 +32,7 @@ public class RegisterManagerParser
      * Device generation Id
      */
     private static final String GENERATION_ID_TAG = "generationId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(GENERATION_ID_TAG)
     protected String generationId = null;
 
@@ -41,7 +41,7 @@ public class RegisterManagerParser
      * of this JSON description. This is a hash.
      */
     private static final String ETAG_TAG = "etag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ETAG_TAG)
     protected String eTag = null;
 
@@ -49,7 +49,7 @@ public class RegisterManagerParser
      * An Integer representing a Twin version.
      */
     private static final String VERSION_TAG = "version";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(VERSION_TAG)
     protected Integer version = null;
 
@@ -59,7 +59,7 @@ public class RegisterManagerParser
      * If "disabled" this device cannot receive or send messages, and statusReason must be set.
      */
     private static final String STATUS_TAG = "status";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_TAG)
     protected TwinStatus status = null;
 
@@ -68,7 +68,7 @@ public class RegisterManagerParser
      * (all UTF-8 chars allowed).
      */
     private static final String STATUS_REASON_TAG = "statusReason";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_REASON_TAG)
     protected String statusReason = null;
 
@@ -76,7 +76,7 @@ public class RegisterManagerParser
      * Datetime of last time the state was updated.
      */
     private static final String STATUS_UPDATED_TIME_TAG = "statusUpdatedTime";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_UPDATED_TIME_TAG)
     protected String statusUpdatedTime = null;
 
@@ -85,7 +85,7 @@ public class RegisterManagerParser
      * {"connected" | "disconnected"}
      */
     private static final String CONNECTION_STATE_TAG = "connectionState";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONNECTION_STATE_TAG)
     protected TwinConnectionState connectionState = null;
 
@@ -93,7 +93,7 @@ public class RegisterManagerParser
      * Datetime of last time the connection state was updated.
      */
     private static final String CONNECTION_STATE_UPDATED_TIME_TAG = "connectionStateUpdatedTime";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONNECTION_STATE_UPDATED_TIME_TAG)
     protected String connectionStateUpdatedTime = null;
 
@@ -101,7 +101,7 @@ public class RegisterManagerParser
      * Datetime of last time the device authenticated, received, or sent a message.
      */
     private static final String LAST_ACTIVITY_TIME_TAG = "lastActivityTime";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(LAST_ACTIVITY_TIME_TAG)
     protected String lastActivityTime = null;
 
