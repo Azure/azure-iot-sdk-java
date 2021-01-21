@@ -481,12 +481,8 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             if (_isWebSocketEnabled)
             {
                 _head_closed = true;
-                _underlyingInput.close_tail();
             }
-            else
-            {
-                _underlyingInput.close_tail();
-            }
+            _underlyingInput.close_tail();
         }
 
         @Override

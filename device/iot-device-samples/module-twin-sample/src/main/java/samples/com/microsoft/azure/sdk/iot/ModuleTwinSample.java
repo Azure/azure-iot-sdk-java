@@ -37,14 +37,7 @@ public class ModuleTwinSample
         @Override
         public void execute(IotHubStatusCode status, Object context)
         {
-            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
-            {
-                Succeed.set(true);
-            }
-            else
-            {
-                Succeed.set(false);
-            }
+            Succeed.set((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY));
             System.out.println("IoT Hub responded to device twin operation with status " + status.name());
         }
     }
