@@ -21,7 +21,7 @@ public class SendBatchEvents
     // Sample can safely assume the context will always be a List<Message> so the cast is safe
     @SuppressWarnings("unchecked")
     protected static class EventCallback implements IotHubEventCallback
-    {asdf
+    {
         public void execute(IotHubStatusCode status, Object context)
         {
             List<Message> messages = (List<Message>) context;
