@@ -130,7 +130,7 @@ public final class FileUpload
         newUpload.setTask(taskScheduler.submit(fileUploadTask));
     }
 
-    private final class FileUploadStatusCallBack implements IotHubEventCallback
+    private static final class FileUploadStatusCallBack implements IotHubEventCallback
     {
         @Override
         public synchronized void execute(IotHubStatusCode status, Object context)

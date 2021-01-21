@@ -136,7 +136,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     public MultiplexingClientTestInstance testInstance;
 
-    public class MultiplexingClientTestInstance
+    public static class MultiplexingClientTestInstance
     {
         public IotHubClientProtocol protocol;
         public List<Device> deviceIdentityArray;
@@ -610,7 +610,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assertTrue("Message callback fired, but unexpected message was received", messageCallback.expectedMessageReceived);
     }
 
-    private class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    private static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public boolean messageCallbackFired = false;
         public boolean expectedMessageReceived = false;
@@ -736,7 +736,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    private class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    private static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
     {
         public boolean deviceMethodCallbackFired = false;
         public boolean expectedMethodReceived = false;
@@ -766,7 +766,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    class TwinPropertyCallBackImpl implements TwinPropertyCallBack
+    static class TwinPropertyCallBackImpl implements TwinPropertyCallBack
     {
         String expectedKey;
         String expectedValue;
@@ -960,7 +960,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assertEquals(expectedReportedPropertyValue, actualReportedPropertyValue);
     }
 
-    class ConnectionStatusChangeTracker implements IotHubConnectionStatusChangeCallback
+    static class ConnectionStatusChangeTracker implements IotHubConnectionStatusChangeCallback
     {
         public boolean isOpen = false;
 

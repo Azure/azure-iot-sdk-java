@@ -233,7 +233,7 @@ public class DeviceEmulator
 
     InternalClient getClient() {return client;}
 
-    private class DeviceStatus
+    private static class DeviceStatus
     {
         int statusOk;
         int statusError;
@@ -258,7 +258,7 @@ public class DeviceEmulator
         }
     }
 
-    protected class DeviceTwinProperty extends Device
+    protected static class DeviceTwinProperty extends Device
     {
         @Override
         public synchronized void PropertyCall(String propertyKey, Object propertyValue, Object context)

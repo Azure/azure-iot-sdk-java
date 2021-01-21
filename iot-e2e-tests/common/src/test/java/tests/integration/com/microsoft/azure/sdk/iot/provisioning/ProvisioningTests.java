@@ -299,7 +299,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTwinIsCorrect(reprovisionPolicy, expectedReportedPropertyName, expectedReportedPropertyValue, !reprovisionPolicy.getUpdateHubAssignment());
     }
 
-    private class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
+    private static class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
     {
         private final CountDownLatch twinLock;
 
