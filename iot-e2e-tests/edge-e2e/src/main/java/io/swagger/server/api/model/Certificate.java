@@ -50,10 +50,9 @@ public class Certificate   {
   @Override
   public String toString() {
 
-    String sb = "class Certificate {\n" +
-            "    cert: " + toIndentedString(cert) + "\n" +
-            "}";
-    return sb;
+      return "class Certificate {\n" +
+              "    cert: " + toIndentedString(cert) + "\n" +
+              "}";
   }
 
   /**

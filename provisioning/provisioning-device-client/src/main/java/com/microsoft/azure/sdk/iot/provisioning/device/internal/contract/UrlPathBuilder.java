@@ -88,20 +88,19 @@ public class UrlPathBuilder
     private String generateRegisterUrlHttp(String registrationId)
     {
 
-        String registerUrl = url + registrationId +
+        return url + registrationId +
                 SLASH +
                 REGISTER +
                 QUESTION +
                 API_VERSION_STRING +
                 EQUALS +
                 SDKUtils.getServiceApiVersion();
-        return registerUrl;
     }
 
     private String generateRequestUrlHttp(String registrationId, String operationsId)
     {
 
-        String requestUrl = url + registrationId +
+        return url + registrationId +
                 SLASH +
                 OPERATIONS +
                 SLASH +
@@ -110,7 +109,6 @@ public class UrlPathBuilder
                 API_VERSION_STRING +
                 EQUALS +
                 SDKUtils.getServiceApiVersion();
-        return requestUrl;
     }
 
     /**
@@ -126,12 +124,11 @@ public class UrlPathBuilder
             throw new IllegalArgumentException("registration id cannot be null or empty");
         }
         //SRS_UrlPathBuilder_25_006: [ This method shall create a String using the following format after Url Encoding: <scope>/registrations/<registrationId> ]
-        String sasTokenUrl = scope +
+        return scope +
                 SLASH +
                 REGISTRATIONS +
                 SLASH +
                 registrationId;
-        return sasTokenUrl;
     }
 
     /**

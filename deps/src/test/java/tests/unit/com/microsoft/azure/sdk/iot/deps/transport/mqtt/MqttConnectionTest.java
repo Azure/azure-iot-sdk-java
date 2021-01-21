@@ -60,8 +60,7 @@ public class MqttConnectionTest
     @Mocked
     private org.eclipse.paho.client.mqttv3.MqttMessage mockedPahoMqttMessage;
 
-    @Mocked
-    private Throwable mockedThrowable;
+    private Throwable mockedThrowable = new Throwable();
 
     @Test (expected = IllegalArgumentException.class)
     public void mqttConnectionConstructorThrowsWhenHostnameNULL() throws IOException, MqttException

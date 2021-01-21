@@ -74,12 +74,11 @@ public class RoundtripMethodCallBody   {
   @Override
   public String toString() {
 
-    String sb = "class RoundtripMethodCallBody {\n" +
-            "    requestPayload: " + toIndentedString(requestPayload) + "\n" +
-            "    responsePayload: " + toIndentedString(responsePayload) + "\n" +
-            "    statusCode: " + toIndentedString(statusCode) + "\n" +
-            "}";
-    return sb;
+      return "class RoundtripMethodCallBody {\n" +
+              "    requestPayload: " + toIndentedString(requestPayload) + "\n" +
+              "    responsePayload: " + toIndentedString(responsePayload) + "\n" +
+              "    statusCode: " + toIndentedString(statusCode) + "\n" +
+              "}";
   }
 
   /**
