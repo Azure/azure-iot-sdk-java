@@ -1030,6 +1030,7 @@ public class WebSocketImplTest
         assertSame(webSocketImpl.getState(), WebSocket.WebSocketState.PN_WS_FAILED);
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private byte[] createMessage(int size)
     {
         byte[] data = new byte[size];

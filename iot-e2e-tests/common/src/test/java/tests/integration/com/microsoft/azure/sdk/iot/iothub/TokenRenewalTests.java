@@ -106,10 +106,11 @@ public class TokenRenewalTests extends IntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
         List<InternalClient> clients = createClientsToTest();
+        String hostname = clients.get(0).getConfig().getIotHubHostname();
         ArrayList<DeviceClient> amqpMultiplexedClients = new ArrayList<>();
-        MultiplexingClient amqpMultiplexingClient = createMultiplexedClientToTest(AMQPS, amqpMultiplexedClients);
+        MultiplexingClient amqpMultiplexingClient = createMultiplexedClientToTest(AMQPS, amqpMultiplexedClients, hostname);
         ArrayList<DeviceClient> amqpwsMultiplexedClients = new ArrayList<>();
-        MultiplexingClient amqpWsMultiplexingClient = createMultiplexedClientToTest(AMQPS_WS, amqpwsMultiplexedClients);
+        MultiplexingClient amqpWsMultiplexingClient = createMultiplexedClientToTest(AMQPS_WS, amqpwsMultiplexedClients, hostname);
 
         // Allow registry operations some buffer time before attempting to open connections for them
         Thread.sleep(2000);
@@ -252,17 +253,16 @@ public class TokenRenewalTests extends IntegrationTest
         return clients;
     }
 
-    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> createdClients) throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException {
-        String hostName = createdClients.get(0).getConfig().getIotHubHostname();
-        MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, protocol);
+    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException {
+        MultiplexingClient multiplexingClient = new MultiplexingClient(hostname, protocol);
 
         for (int i = 0; i < MULTIPLEX_COUNT; i++)
         {
             DeviceClient deviceClientToMultiplex = (DeviceClient) createDeviceClient(protocol, true);
-            createdClients.add(deviceClientToMultiplex);
+            clientsToCreate.add(deviceClientToMultiplex);
         }
 
-        multiplexingClient.registerDeviceClients(createdClients);
+        multiplexingClient.registerDeviceClients(clientsToCreate);
 
         return multiplexingClient;
     }
