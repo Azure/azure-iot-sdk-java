@@ -170,6 +170,8 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
+    //Renaming it to isOpen would be confusing considering this layer's state is either open/closed/reconnecting
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isClosed()
     {
         return this.connectionStatus == IotHubConnectionStatus.DISCONNECTED;

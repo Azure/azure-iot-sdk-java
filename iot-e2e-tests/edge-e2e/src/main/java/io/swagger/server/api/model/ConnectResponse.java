@@ -50,10 +50,9 @@ public class ConnectResponse   {
   @Override
   public String toString() {
 
-    String sb = "class ConnectResponse {\n" +
-            "    connectionId: " + toIndentedString(connectionId) + "\n" +
-            "}";
-    return sb;
+      return "class ConnectResponse {\n" +
+              "    connectionId: " + toIndentedString(connectionId) + "\n" +
+              "}";
   }
 
   /**
