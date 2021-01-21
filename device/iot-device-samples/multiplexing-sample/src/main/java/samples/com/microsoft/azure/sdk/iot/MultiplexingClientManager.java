@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**

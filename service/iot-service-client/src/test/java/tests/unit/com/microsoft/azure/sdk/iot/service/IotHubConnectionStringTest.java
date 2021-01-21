@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for Iot Hub Connection String class.

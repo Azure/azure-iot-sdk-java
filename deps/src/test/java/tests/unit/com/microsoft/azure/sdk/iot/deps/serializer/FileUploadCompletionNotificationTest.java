@@ -24,6 +24,7 @@ public class FileUploadCompletionNotificationTest
     private static final Boolean VALID_IS_SUCCESS = true;
     private static final Integer VALID_STATUS_CODE = 200;
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the expected assertion param can be passed any value.
     private static void assertFileUploadStatus(FileUploadCompletionNotification fileUploadStatusParser, String expectedCorrelationId, Boolean expectedIsSuccess, Integer expectedStatusCode, String expectedStatusDescription)
     {
         assertNotNull(fileUploadStatusParser);
@@ -39,6 +40,7 @@ public class FileUploadCompletionNotificationTest
         assertEquals(expectedStatusDescription, statusDescription);
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static String createJson(String correlationId, Boolean isSuccess, Integer statusCode, String statusDescription)
     {
         return "{\n" +
