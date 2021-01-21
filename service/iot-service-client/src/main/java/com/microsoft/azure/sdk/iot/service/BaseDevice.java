@@ -350,10 +350,6 @@ public class BaseDevice
         {
             throw new IllegalArgumentException();
         }
-
-        /**
-         * Flip-flop helper for sending a forced update
-         */
     }
 
     /*
