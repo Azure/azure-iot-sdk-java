@@ -19,7 +19,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import javax.net.ssl.SSLContext;
 import java.util.concurrent.Callable;
 
-public class StatusTask implements Callable
+public class StatusTask implements Callable<RegistrationOperationStatusParser>
 {
     private static final int MAX_WAIT_FOR_STATUS_RESPONSE = 100;
     private static final String THREAD_NAME = "azure-iot-sdk-StatusTask";

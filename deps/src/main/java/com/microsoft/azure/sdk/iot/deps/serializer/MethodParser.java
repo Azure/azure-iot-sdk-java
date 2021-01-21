@@ -323,6 +323,7 @@ public class MethodParser
         return toJsonElement().toString();
     }
 
+    // Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
     @SuppressWarnings("unchecked")
     private JsonElement jsonizePayload(Object payload)
     {

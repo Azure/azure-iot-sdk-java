@@ -16,8 +16,10 @@ import java.util.List;
 public class SendBatchEvents
 {
     private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private  static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
+    // Sample can safely assume the context will always be a List<Message> so the cast is safe
+    @SuppressWarnings("unchecked")
     protected static class EventCallback implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)

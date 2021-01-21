@@ -115,6 +115,8 @@ public class TwinMetadata
      *         data and version metadata, or {@code null} for the other cases.
      * @throws IllegalArgumentException If no valid parameter was provide and the class will be empty, or if the DateTime is invalid.
      */
+    // Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
+    @SuppressWarnings("unchecked")
     static TwinMetadata tryExtractFromMap(Object metadata)
     {
         /* SRS_TWIN_METADATA_21_004: [The tryExtractFromMap shall return null if the provided metadata is not a Map.] */
