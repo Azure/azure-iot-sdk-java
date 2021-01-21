@@ -185,9 +185,6 @@ public class ProvisioningCommon extends IntegrationTest
                                 {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
                                 {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
                                 {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
-
-                                // Intentionally not doing TPM tests here. There is a separate class for running those
-                                // tests in serial
                         });
     }
 
