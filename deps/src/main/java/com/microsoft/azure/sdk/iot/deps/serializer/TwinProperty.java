@@ -219,14 +219,7 @@ public class TwinProperty
                 for (Map.Entry<String, Property> entry : property.entrySet())
                 {
                     Object value = entry.getValue().value;
-                    if (value == null)
-                    {
-                        propertyMap.put(entry.getKey(), null);
-                    }
-                    else
-                    {
-                        propertyMap.put(entry.getKey(), value);
-                    }
+                    propertyMap.put(entry.getKey(), value);
                 }
             }
         }
