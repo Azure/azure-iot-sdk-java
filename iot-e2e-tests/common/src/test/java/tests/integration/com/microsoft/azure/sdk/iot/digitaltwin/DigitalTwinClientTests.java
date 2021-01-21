@@ -59,11 +59,10 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Parameterized.Parameters(name = "{index}: Digital Twin Test: protocol={0}")
     public static Collection<Object[]> data() {
-        List inputs = new ArrayList(Arrays.asList(new Object[][]{
+        return (List) new ArrayList(Arrays.asList(new Object[][]{
                 {MQTT},
                 {MQTT_WS},
         }));
-        return inputs;
     }
 
     @BeforeClass
