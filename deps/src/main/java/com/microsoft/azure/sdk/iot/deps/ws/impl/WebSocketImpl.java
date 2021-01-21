@@ -21,7 +21,6 @@ import static org.apache.qpid.proton.engine.impl.ByteBufferUtils.pourAll;
 
 public class WebSocketImpl implements WebSocket, TransportLayer
 {
-    private final int _maxFrameSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
     private boolean _tail_closed = false;
     private final ByteBuffer _inputBuffer;
     private boolean _head_closed = false;
@@ -52,6 +51,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
     public WebSocketImpl()
     {
+        int _maxFrameSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
         _inputBuffer = newWriteableBuffer(_maxFrameSize);
         _outputBuffer = newWriteableBuffer(_maxFrameSize);
         _pingBuffer = newWriteableBuffer(_maxFrameSize);

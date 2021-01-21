@@ -19,11 +19,6 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public class SymmetricKey
 {
-    private transient final int MinKeyLengthInBytes = 16;
-    private transient final int MaxKeyLengthInBytes = 64;
-    private transient final String DeviceKeyLengthInvalid = "DeviceKeyLengthInvalid";
-    private final String encryptionMethod = "AES";
-
     private String primaryKey;
     private String secondaryKey;
 
@@ -34,6 +29,7 @@ public class SymmetricKey
     {
         try
         {
+            String encryptionMethod = "AES";
             KeyGenerator keyGenerator = KeyGenerator.getInstance(encryptionMethod);
             keyGenerator.init(new SecureRandom());
             this.primaryKey = encodeBase64String(keyGenerator.generateKey().getEncoded());
@@ -134,9 +130,12 @@ public class SymmetricKey
     {
         if (key != null)
         {
-            if ((key.length() < MinKeyLengthInBytes) || (key.length() > MaxKeyLengthInBytes))
+            int minKeyLengthInBytes = 16;
+            int maxKeyLengthInBytes = 64;
+            if ((key.length() < minKeyLengthInBytes) || (key.length() > maxKeyLengthInBytes))
             {
-                throw new IllegalArgumentException(DeviceKeyLengthInvalid);
+                String deviceKeyLengthInvalid = "DeviceKeyLengthInvalid";
+                throw new IllegalArgumentException(deviceKeyLengthInvalid);
             }
         }
     }

@@ -16,8 +16,6 @@ import java.util.NoSuchElementException;
 public class RawTwinQuery
 {
     private IotHubConnectionString iotHubConnectionString = null;
-    private final long USE_DEFAULT_TIMEOUT = 0;
-    private final int DEFAULT_PAGE_SIZE = 100;
 
     private RawTwinQuery()
     {
@@ -74,6 +72,7 @@ public class RawTwinQuery
         Query rawQuery = new Query(sqlQuery, pageSize, QueryType.RAW);
         //Codes_SRS_RAW_QUERY_25_006: [ The method shall build the URL for this operation by calling getUrlTwinQuery ]
         //Codes_SRS_RAW_QUERY_25_008: [ The method shall send a Query Request to IotHub as HTTP Method Post on the query Object by calling sendQueryRequest.]
+        long USE_DEFAULT_TIMEOUT = 0;
         rawQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
         return rawQuery;
     }
@@ -88,6 +87,7 @@ public class RawTwinQuery
     public synchronized Query query(String sqlQuery) throws IotHubException, IOException
     {
         //Codes_SRS_RAW_QUERY_25_009: [ If the pageSize if not provided then a default pageSize of 100 is used for the query.]
+        int DEFAULT_PAGE_SIZE = 100;
         return this.query(sqlQuery, DEFAULT_PAGE_SIZE);
     }
 

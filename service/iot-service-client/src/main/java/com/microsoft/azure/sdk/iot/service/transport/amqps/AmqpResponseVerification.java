@@ -18,7 +18,6 @@ public class AmqpResponseVerification implements AmqpError
 {
     private Symbol errorCondition = null;
     private String errorDescription = null;
-    private Map errorInfo = null;
     //Codes_SRS_SERVICE_SDK_JAVA_AMQPRESPONSEVERIFICATION_25_006: [** The function shall save null exception if the amqp delivery state is accepted or received or released or modified **]**
     private IotHubException exception = null;
 
@@ -39,7 +38,6 @@ public class AmqpResponseVerification implements AmqpError
             ErrorCondition errorCond = rejectedState.getError();
             this.errorCondition = errorCond.getCondition();
             this.errorDescription = errorCond.getDescription();
-            this.errorInfo = errorCond.getInfo();
             this.amqpResponseVerifier();
         }
         else if (state.getClass().equals(Received.class))

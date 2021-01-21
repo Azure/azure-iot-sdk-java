@@ -28,9 +28,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private final DeviceClientConfig config;
     private IotHubConnectionStatus state = IotHubConnectionStatus.DISCONNECTED;
 
-    private String iotHubUserName;
     private char[] iotHubUserPassword;
-    private MqttConnection mqttConnection;
 
     //string constants
     private static final String WS_SSL_PREFIX = "wss://";
@@ -156,13 +154,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + ModelIdParam + "=" + modelId;
                 }
 
-                this.iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
+                String iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
 
                 String host = this.config.getGatewayHostname();
                 if (host == null || host.isEmpty())
                 {
                     host = this.config.getIotHubHostname();
                 }
+                MqttConnection mqttConnection;
                 if (this.config.isUseWebsocket())
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
@@ -177,20 +176,20 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                     }
 
                     mqttConnection = new MqttConnection(wsServerUri,
-                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext, this.config.getProxySettings());
+                            clientId, iotHubUserName, this.iotHubUserPassword, sslContext, this.config.getProxySettings());
                 }
                 else
                 {
                     //Codes_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
                     final String serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
                     mqttConnection = new MqttConnection(serverUri,
-                            clientId, this.iotHubUserName, this.iotHubUserPassword, sslContext, null);
+                            clientId, iotHubUserName, this.iotHubUserPassword, sslContext, null);
                 }
 
                 //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]
                 String deviceId = this.config.getDeviceId();
                 this.deviceMessaging = new MqttMessaging(mqttConnection, deviceId, this.listener, this, this.connectionId, this.config.getModuleId(), this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(), unacknowledgedSentMessages);
-                this.mqttConnection.setMqttCallback(this.deviceMessaging);
+                mqttConnection.setMqttCallback(this.deviceMessaging);
                 this.deviceMethod = new MqttDeviceMethod(mqttConnection, this.connectionId, unacknowledgedSentMessages, deviceId);
                 this.deviceTwin = new MqttDeviceTwin(mqttConnection, this.connectionId, unacknowledgedSentMessages, deviceId);
 

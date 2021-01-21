@@ -280,11 +280,6 @@ public class Configuration
     }
 
     /**
-     * Flip-flop helper for sending a forced update
-     */
-    private Boolean forceUpdate;
-
-    /**
      * Setter for force update boolean
      *
      * @param forceUpdate - Boolean controlling if the update should be forced or not
@@ -297,7 +292,9 @@ public class Configuration
             throw new IllegalArgumentException("forceUpdate cannot be null");
         }
 
-        this.forceUpdate = forceUpdate;
+        /**
+         * Flip-flop helper for sending a forced update
+         */
     }
 
     /**

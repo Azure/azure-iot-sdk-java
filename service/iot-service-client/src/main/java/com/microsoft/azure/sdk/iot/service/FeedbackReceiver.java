@@ -24,7 +24,6 @@ public class FeedbackReceiver extends Receiver
     private final long DEFAULT_TIMEOUT_MS = 60000;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    private String deviceId;
     private final AmqpReceive amqpReceive;
 
     /**
@@ -57,8 +56,6 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
         
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_002: [The constructor shall store deviceId]
-        this.deviceId = deviceId;
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
