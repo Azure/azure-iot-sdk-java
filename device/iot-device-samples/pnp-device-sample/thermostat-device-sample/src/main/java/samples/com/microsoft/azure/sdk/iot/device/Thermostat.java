@@ -151,16 +151,20 @@ public class Thermostat {
         String methodName = "getMaxMinReport";
         deviceClient.subscribeToDeviceMethod(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
 
-        new Thread(() -> {
-            while (true) {
-                if (temperatureReset) {
-                    // Generate a random value between 5.0°C and 45.0°C for the current temperature reading.
-                    temperature = BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue();
-                    temperatureReset = false;
-                }
+        new Thread(new Runnable() {
+            @SneakyThrows({InterruptedException.class, IOException.class})
+            @Override
+            public void run() {
+                while (true) {
+                    if (temperatureReset) {
+                        // Generate a random value between 5.0°C and 45.0°C for the current temperature reading.
+                        temperature = BigDecimal.valueOf(random.nextDouble() * 40 + 5).setScale(1, RoundingMode.HALF_UP).doubleValue();
+                        temperatureReset = false;
+                    }
 
-                sendTemperatureReading();
-                Thread.sleep(5 * 1000);
+                    sendTemperatureReading();
+                    Thread.sleep(5 * 1000);
+                }
             }
         }).start();
     }
