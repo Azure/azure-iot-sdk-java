@@ -40,6 +40,11 @@
         <module>custom-sas-token-provider-sample</module>
     </modules>
     <dependencies>
+        <!--suppress MavenDuplicateDependenciesInspection -->
+        <!--
+        This duplicate dependency declaration warning can be ignored as one child Pom.xml duplicates this dependency declaration
+        demonstrate how to exclude in order to demonstrate excluding bouncycastle dependency from the device client library.
+        -->
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>${iot-device-client-artifact-id}</artifactId>
