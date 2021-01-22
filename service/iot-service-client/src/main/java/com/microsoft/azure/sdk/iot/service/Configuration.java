@@ -291,10 +291,6 @@ public class Configuration
         {
             throw new IllegalArgumentException("forceUpdate cannot be null");
         }
-
-        /**
-         * Flip-flop helper for sending a forced update
-         */
     }
 
     /**
