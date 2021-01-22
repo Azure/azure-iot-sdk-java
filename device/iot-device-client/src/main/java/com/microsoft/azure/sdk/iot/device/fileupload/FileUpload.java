@@ -27,7 +27,7 @@ public final class FileUpload
     private final HttpsTransportManager httpsTransportManager;
     private final ScheduledExecutorService taskScheduler;
     private final FileUploadStatusCallBack fileUploadStatusCallBack;
-    private static Queue<FileUploadInProgress> fileUploadInProgressesSet;
+    private final Queue<FileUploadInProgress> fileUploadInProgressesSet;
 
     /**
      * CONSTRUCTOR
@@ -130,7 +130,7 @@ public final class FileUpload
         newUpload.setTask(taskScheduler.submit(fileUploadTask));
     }
 
-    private static final class FileUploadStatusCallBack implements IotHubEventCallback
+    private final class FileUploadStatusCallBack implements IotHubEventCallback
     {
         @Override
         public synchronized void execute(IotHubStatusCode status, Object context)
@@ -144,7 +144,7 @@ public final class FileUpload
                 /* Codes_SRS_FILEUPLOAD_21_021: [The FileUploadStatusCallBack shall delete the `FileUploadInProgress` that store this file upload context.] */
                 try
                 {
-                    fileUploadInProgressesSet.remove(context);
+                    FileUpload.this.fileUploadInProgressesSet.remove(context);
                 }
                 catch (ClassCastException | NullPointerException | UnsupportedOperationException e)
                 {
