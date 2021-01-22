@@ -1553,12 +1553,7 @@ public class IotHubTransport implements IotHubListener
      */
     private boolean hasOperationTimedOut(long startTime)
     {
-        if (startTime == 0)
-        {
-            return false;
-        }
-
-        if (this.getDefaultConfig() == null)
+        if (startTime == 0 || this.getDefaultConfig() == null)
         {
             // multiplexed connection with no registered devices, and that scenario doesn't have a device operation timeout
             return false;
