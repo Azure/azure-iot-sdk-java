@@ -303,16 +303,15 @@ public class MqttDeviceTwin extends Mqtt
                             {
                                 //Codes_SRS_MQTTDEVICETWIN_25_044: [If the topic is of type response then this method shall set data and operation type as DEVICE_OPERATION_TWIN_GET_RESPONSE if data is not null]
                                 message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                             else
                             {
                                 // Case for $iothub/twin/res/{status}/?$rid={request id}
                                 //Codes_SRS_MQTTDEVICETWIN_25_045: [If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty]
                                 message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             }
+                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             // Case for $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
                             if (topicTokens.length > STATUS_TOKEN)

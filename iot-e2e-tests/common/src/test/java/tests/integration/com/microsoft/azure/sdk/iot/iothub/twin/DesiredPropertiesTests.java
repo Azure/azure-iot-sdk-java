@@ -49,7 +49,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class DesiredPropertiesTests extends DeviceTwinCommon
 {
-    private JsonParser jsonParser;
+    private final JsonParser jsonParser;
 
     public DesiredPropertiesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
     {
@@ -181,27 +181,22 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             final int index = i;
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
+            executor.submit(() -> {
+                try
                 {
-                    try
+                    Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
+                    desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + index, updatePropertyValue));
+                    synchronized (desiredPropertiesUpdateLock)
                     {
-                        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
-                        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(PROPERTY_KEY + index, updatePropertyValue));
-                        synchronized (desiredPropertiesUpdateLock)
-                        {
-                            Set currentDesiredProperties = deviceUnderTest.sCDeviceForTwin.getDesiredProperties();
-                            desiredProperties.addAll(currentDesiredProperties);
-                            deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
-                            testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
-                        }
+                        Set currentDesiredProperties = deviceUnderTest.sCDeviceForTwin.getDesiredProperties();
+                        desiredProperties.addAll(currentDesiredProperties);
+                        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+                        testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
                     }
-                    catch (IotHubException | IOException e)
-                    {
-                        fail(e.getMessage());
-                    }
+                }
+                catch (IotHubException | IOException e)
+                {
+                    fail(e.getMessage());
                 }
             });
             Thread.sleep(DELAY_BETWEEN_OPERATIONS);

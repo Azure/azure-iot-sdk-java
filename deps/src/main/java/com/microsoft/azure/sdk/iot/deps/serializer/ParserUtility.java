@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 /**
  * Set of static functions to help the serializer.
  */
+// Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
+@SuppressWarnings("unchecked")
 public class ParserUtility
 {
     private static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
@@ -167,31 +169,17 @@ public class ParserUtility
         {
             Object value = entry.getValue();
 
-            /* Codes_SRS_PARSER_UTILITY_21_051: [The validateMap shall throws IllegalArgumentException if any value contains illegal type (array or invalid class).] */
-            if((value != null) && ((value.getClass().isArray()) || (value.getClass().isLocalClass())))
+            if ((value != null) && ((value.getClass().isArray()) || (value.getClass().isLocalClass())))
             {
                 throw new IllegalArgumentException("Map contains illegal value type " + value.getClass().getName());
             }
 
-            if((value != null) && (value instanceof Map))
+
+            if (value instanceof Map)
             {
-                /* Codes_SRS_PARSER_UTILITY_21_052: [The validateMap shall throws IllegalArgumentException if the provided map contains more than maxLevel levels and those extra levels contain more than just metadata.] */
                 validateMapInternal((Map<String, Object>) value);
             }
         }
-    }
-
-    private static boolean mapOnlyContainsMetaData(Map<String, Object> map)
-    {
-        for (String key : map.keySet())
-        {
-            if (!(key.equals(TwinMetadata.LAST_UPDATE_TAG)) && !(key.equals(TwinMetadata.LAST_UPDATE_VERSION_TAG)))
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
