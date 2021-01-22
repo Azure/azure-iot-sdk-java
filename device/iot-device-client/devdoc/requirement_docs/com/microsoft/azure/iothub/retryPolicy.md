@@ -41,7 +41,7 @@ In our SDK, a retry policy is a combination of 2 things:
 
 Currently, the default error filter cannot be altered. 
 
-* NOTE: The list of Exceptions marked as retry-able by the SDK can be found [here](./transport/tranpsortExceptions.md).
+* NOTE: The list of Exceptions marked as retry-able by the SDK can be found [here](transport/transportExceptions.md).
 
 ### Retry algorithms
 
