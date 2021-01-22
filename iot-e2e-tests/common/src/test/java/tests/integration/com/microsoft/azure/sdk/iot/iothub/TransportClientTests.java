@@ -307,30 +307,18 @@ public class TransportClientTests extends IntegrationTest
             {
                 final int indexI = i;
                 final int indexJ = j;
-                executor.submit(new Runnable()
-                {
-                    @Override
-                    public void run()
+                executor.submit(() -> {
+                    try
                     {
-                        try
-                        {
-                            ((DeviceClient)testInstance.clientArrayList.get(indexJ)).uploadToBlobAsync(testInstance.fileUploadState[indexI].blobName, testInstance.fileUploadState[indexI].fileInputStream, testInstance.fileUploadState[indexI].fileLength, new FileUploadCallback(), testInstance.fileUploadState[indexI]);
-                        }
-                        catch (IOException e)
-                        {
-                            Assert.fail(buildExceptionMessage(e.getMessage(), testInstance.clientArrayList.get(indexJ)));
-                        }
+                        ((DeviceClient)testInstance.clientArrayList.get(indexJ)).uploadToBlobAsync(testInstance.fileUploadState[indexI].blobName, testInstance.fileUploadState[indexI].fileInputStream, testInstance.fileUploadState[indexI].fileLength, new FileUploadCallback(), testInstance.fileUploadState[indexI]);
+                    }
+                    catch (IOException e)
+                    {
+                        Assert.fail(buildExceptionMessage(e.getMessage(), testInstance.clientArrayList.get(indexJ)));
                     }
                 });
 
-                executor.submit(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        testInstance.clientArrayList.get(indexJ).sendEventAsync(new com.microsoft.azure.sdk.iot.device.Message(testInstance.messageStates[indexI].messageBody), new FileUploadCallback(), testInstance.messageStates[indexI]);
-                    }
-                });
+                executor.submit(() -> testInstance.clientArrayList.get(indexJ).sendEventAsync(new Message(testInstance.messageStates[indexI].messageBody), new FileUploadCallback(), testInstance.messageStates[indexI]));
 
                 // assert
                 FileUploadNotification fileUploadNotification = testInstance.fileUploadNotificationReceiver.receive(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
@@ -514,35 +502,30 @@ public class TransportClientTests extends IntegrationTest
         for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
         {
             final int finalI = i;
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
+            executor.submit(() -> {
+                // testSendReportedPropertiesMultiThreaded
+                try
                 {
-                    // testSendReportedPropertiesMultiThreaded
-                    try
-                    {
-                        testInstance.devicesUnderTest[finalI].dCDeviceForTwin.createNewReportedProperties(1);
-                        testInstance.devicesUnderTest[finalI].deviceClient.sendReportedProperties(testInstance.devicesUnderTest[finalI].dCDeviceForTwin.getReportedProp());
-                    }
-                    catch (IOException e)
-                    {
-                        Assert.fail(buildExceptionMessage(e.getMessage(), testInstance.devicesUnderTest[finalI].deviceClient));
-                    }
-                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + testInstance.devicesUnderTest[finalI].deviceTwinStatus, testInstance.devicesUnderTest[finalI].deviceClient), SUCCESS, testInstance.devicesUnderTest[finalI].deviceTwinStatus);
-
-                    // testUpdateReportedPropertiesMultiThreaded
-                    try
-                    {
-                        testInstance.devicesUnderTest[finalI].dCDeviceForTwin.updateExistingReportedProperty(finalI);
-                        testInstance.devicesUnderTest[finalI].deviceClient.sendReportedProperties(testInstance.devicesUnderTest[finalI].dCDeviceForTwin.getReportedProp());
-                    }
-                    catch (IOException e)
-                    {
-                        Assert.fail(buildExceptionMessage(e.getMessage(), testInstance.devicesUnderTest[finalI].deviceClient));
-                    }
-                    Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + testInstance.devicesUnderTest[finalI].deviceTwinStatus, testInstance.devicesUnderTest[finalI].deviceClient), SUCCESS, testInstance.devicesUnderTest[finalI].deviceTwinStatus);
+                    testInstance.devicesUnderTest[finalI].dCDeviceForTwin.createNewReportedProperties(1);
+                    testInstance.devicesUnderTest[finalI].deviceClient.sendReportedProperties(testInstance.devicesUnderTest[finalI].dCDeviceForTwin.getReportedProp());
                 }
+                catch (IOException e)
+                {
+                    Assert.fail(buildExceptionMessage(e.getMessage(), testInstance.devicesUnderTest[finalI].deviceClient));
+                }
+                Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + testInstance.devicesUnderTest[finalI].deviceTwinStatus, testInstance.devicesUnderTest[finalI].deviceClient), SUCCESS, testInstance.devicesUnderTest[finalI].deviceTwinStatus);
+
+                // testUpdateReportedPropertiesMultiThreaded
+                try
+                {
+                    testInstance.devicesUnderTest[finalI].dCDeviceForTwin.updateExistingReportedProperty(finalI);
+                    testInstance.devicesUnderTest[finalI].deviceClient.sendReportedProperties(testInstance.devicesUnderTest[finalI].dCDeviceForTwin.getReportedProp());
+                }
+                catch (IOException e)
+                {
+                    Assert.fail(buildExceptionMessage(e.getMessage(), testInstance.devicesUnderTest[finalI].deviceClient));
+                }
+                Assert.assertEquals(buildExceptionMessage("Expected SUCCESS but was " + testInstance.devicesUnderTest[finalI].deviceTwinStatus, testInstance.devicesUnderTest[finalI].deviceClient), SUCCESS, testInstance.devicesUnderTest[finalI].deviceTwinStatus);
             });
         }
         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS);

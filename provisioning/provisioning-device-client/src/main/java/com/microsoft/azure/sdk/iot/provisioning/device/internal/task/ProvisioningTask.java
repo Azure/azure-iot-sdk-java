@@ -28,21 +28,21 @@ import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDevice
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
-public class ProvisioningTask implements Callable
+public class ProvisioningTask implements Callable<Object>
 {
     private static final int MAX_THREADS_TO_RUN = 2;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000000;
     private static final int MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE = 10000;
     private static final String THREAD_NAME = "azure-iot-sdk-ProvisioningTask";
 
-    private SecurityProvider securityProvider;
-    private ProvisioningDeviceClientContract provisioningDeviceClientContract;
-    private ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
+    private final SecurityProvider securityProvider;
+    private final ProvisioningDeviceClientContract provisioningDeviceClientContract;
+    private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
 
-    private ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback;
-    private Object dpsRegistrationCallbackContext;
+    private final ProvisioningDeviceClientRegistrationCallback provisioningDeviceClientRegistrationCallback;
+    private final Object dpsRegistrationCallbackContext;
 
-    private Authorization authorization;
+    private final Authorization authorization;
     private ProvisioningDeviceClientStatus dpsStatus = null;
 
     private final ExecutorService executor;
@@ -108,9 +108,9 @@ public class ProvisioningTask implements Callable
     {
         RegisterTask registerTask = new RegisterTask(this.provisioningDeviceClientConfig, securityProvider,
                                                      provisioningDeviceClientContract, authorization);
-        FutureTask<RegistrationOperationStatusParser> futureRegisterTask = new FutureTask<RegistrationOperationStatusParser>(registerTask);
+        FutureTask<RegistrationOperationStatusParser> futureRegisterTask = new FutureTask<>(registerTask);
         executor.submit(futureRegisterTask);
-        RegistrationOperationStatusParser registrationOperationStatusParser =  futureRegisterTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION,
+        RegistrationOperationStatusParser registrationOperationStatusParser = futureRegisterTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION,
                                                                                                       TimeUnit.MILLISECONDS);
        if (registrationOperationStatusParser == null)
         {

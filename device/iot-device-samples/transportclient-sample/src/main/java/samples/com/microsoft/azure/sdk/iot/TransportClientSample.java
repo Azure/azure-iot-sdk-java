@@ -23,7 +23,7 @@ import java.util.Scanner;
 public class TransportClientSample
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on closeNow
+    private static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on closeNow
 
     private static final int METHOD_SUCCESS = 200;
     private static final int METHOD_HUNG = 300;
@@ -187,10 +187,10 @@ public class TransportClientSample
         }
     }
 
-    protected static class onHomeTempChange implements PropertyCallBack
+    protected static class onHomeTempChange implements PropertyCallBack<String, Object>
     {
         @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        public void PropertyCall(String propertyKey, Object propertyValue, Object context)
         {
             if (propertyValue.equals(80))
             {
@@ -200,10 +200,10 @@ public class TransportClientSample
 
     }
 
-    protected static class onCameraActivity implements PropertyCallBack
+    protected static class onCameraActivity implements PropertyCallBack<String, Object>
     {
         @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        public void PropertyCall(String propertyKey, Object propertyValue, Object context)
         {
             System.out.println(propertyKey + " changed to " + propertyValue);
             if (propertyValue.equals(CAMERA.DETECTED_BURGLAR))

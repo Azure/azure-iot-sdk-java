@@ -25,9 +25,9 @@ public class MqttMessageTest
     private static final String TEST_TOPIC = "testTopic";
     private static final String TEST_TOPIC_2 = "testTopic_2";
 
-    private String mockedtopic = "someTopic";
+    private final String mockedtopic = "someTopic";
 
-    private byte[] mockedPayload = "somePayload".getBytes();
+    private final byte[] mockedPayload = "somePayload".getBytes();
 
     @Mocked
     private org.eclipse.paho.client.mqttv3.MqttMessage mockedMqttMessage;

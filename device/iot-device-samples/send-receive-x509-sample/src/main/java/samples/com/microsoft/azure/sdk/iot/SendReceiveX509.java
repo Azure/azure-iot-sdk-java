@@ -42,7 +42,7 @@ public class SendReceiveX509
             "-----END EC PRIVATE KEY-----\n";
 
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
     /** Used as a counter in the message callback. */
     protected static class Counter

@@ -21,6 +21,7 @@ public class QueryCollectionResponse<E>
      * @param continuationToken The continuation token to save
      * @throws IllegalArgumentException if responseElementsCollection is null or empty
      */
+    @SuppressWarnings("unchecked")
     QueryCollectionResponse(String jsonString, String continuationToken)
     {
         if (jsonString == null || jsonString.length() == 0)

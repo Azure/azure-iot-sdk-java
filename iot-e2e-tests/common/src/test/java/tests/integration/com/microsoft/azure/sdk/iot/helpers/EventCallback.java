@@ -23,14 +23,7 @@ public class EventCallback implements IotHubEventCallback
             //null case is for testing that the callback is fired, but not caring what the status code was.
             // In some error injection scenarios, the status code reported cannot be predicted, but the callback
             // still must have been fired.
-            if (this.expectedStatusCode == null || status.equals(expectedStatusCode))
-            {
-                success.setResult(true);
-            }
-            else
-            {
-                success.setResult(false);
-            }
+            success.setResult(this.expectedStatusCode == null || status.equals(expectedStatusCode));
 
             success.callbackWasFired();
 

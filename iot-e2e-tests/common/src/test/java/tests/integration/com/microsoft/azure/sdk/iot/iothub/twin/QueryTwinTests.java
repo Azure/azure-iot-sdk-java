@@ -162,111 +162,101 @@ public class QueryTwinTests extends DeviceTwinCommon
             devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
-        executor.submit(new Runnable()
-        {
-            @Override
-            public void run()
+        executor.submit(() -> {
+            try
             {
-                try
+                // Raw Query for multiple devices having same property
+                final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
+                final String groupBy = "properties.desired." + queryProperty;
+                final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
+
+                boolean querySucceeded = false;
+                long startTime = System.currentTimeMillis();
+                while (!querySucceeded)
                 {
-                    // Raw Query for multiple devices having same property
-                    final String select = "properties.desired." + queryProperty + " AS " + queryProperty + "," + " COUNT() AS numberOfDevices";
-                    final String groupBy = "properties.desired." + queryProperty;
-                    final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
+                    Query rawTwinQuery = testInstance.rawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
 
-                    boolean querySucceeded = false;
-                    long startTime = System.currentTimeMillis();
-                    while (!querySucceeded)
+                    while (testInstance.rawTwinQueryClient.hasNext(rawTwinQuery))
                     {
-                        Query rawTwinQuery = testInstance.rawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
-
-                        while (testInstance.rawTwinQueryClient.hasNext(rawTwinQuery))
+                        String result = testInstance.rawTwinQueryClient.next(rawTwinQuery);
+                        assertNotNull(result);
+                        Map map = gson.fromJson(result, Map.class);
+                        if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
                         {
-                            String result = testInstance.rawTwinQueryClient.next(rawTwinQuery);
-                            assertNotNull(result);
-                            Map map = gson.fromJson(result, Map.class);
-                            if (map.containsKey("numberOfDevices") && map.containsKey(queryProperty))
+                            // Casting as a double first to get the value from the map, but then casting to an int because the
+                            // number of devices should always be an integer
+                            int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
+                            if (actualNumberOfDevices == expectedNumberOfDevices)
                             {
-                                // Casting as a double first to get the value from the map, but then casting to an int because the
-                                // number of devices should always be an integer
-                                int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
-                                if (actualNumberOfDevices == expectedNumberOfDevices)
-                                {
-                                    querySucceeded = true;
-                                }
-                                else
-                                {
-                                    log.info("Expected device count not correct, re-running query");
-                                    Thread.sleep(200);
-                                }
+                                querySucceeded = true;
+                            }
+                            else
+                            {
+                                log.info("Expected device count not correct, re-running query");
+                                Thread.sleep(200);
                             }
                         }
+                    }
 
-                        if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-                        {
-                            fail("Timed out waiting for query results to match expectations");
-                        }
+                    if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+                    {
+                        fail("Timed out waiting for query results to match expectations");
                     }
                 }
-                catch (Exception e)
-                {
-                    fail(e.getMessage());
-                }
-
             }
+            catch (Exception e)
+            {
+                fail(e.getMessage());
+            }
+
         });
 
         final double expectedNumberOfDevicesEven = noOfEvenDevices;
-        executor.submit(new Runnable()
-        {
-            @Override
-            public void run()
+        executor.submit(() -> {
+            try
             {
-                try
+                // Raw Query for multiple devices having same property
+                final String select = "properties.desired." + queryPropertyEven + " AS " + queryPropertyEven + "," + " COUNT() AS numberOfDevices";
+                final String groupBy = "properties.desired." + queryPropertyEven;
+                final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
+
+                boolean querySucceeded = false;
+                long startTime = System.currentTimeMillis();
+                while (!querySucceeded)
                 {
-                    // Raw Query for multiple devices having same property
-                    final String select = "properties.desired." + queryPropertyEven + " AS " + queryPropertyEven + "," + " COUNT() AS numberOfDevices";
-                    final String groupBy = "properties.desired." + queryPropertyEven;
-                    final SqlQuery sqlQuery = SqlQuery.createSqlQuery(select, SqlQuery.FromType.DEVICES, null, groupBy);
+                    Query rawTwinQuery = testInstance.rawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
 
-                    boolean querySucceeded = false;
-                    long startTime = System.currentTimeMillis();
-                    while (!querySucceeded)
+                    while (testInstance.rawTwinQueryClient.hasNext(rawTwinQuery))
                     {
-                        Query rawTwinQuery = testInstance.rawTwinQueryClient.query(sqlQuery.getQuery(), PAGE_SIZE);
-
-                        while (testInstance.rawTwinQueryClient.hasNext(rawTwinQuery))
+                        String result = testInstance.rawTwinQueryClient.next(rawTwinQuery);
+                        assertNotNull(result);
+                        Map map = gson.fromJson(result, Map.class);
+                        if (map.containsKey("numberOfDevices") && map.containsKey(queryPropertyEven))
                         {
-                            String result = testInstance.rawTwinQueryClient.next(rawTwinQuery);
-                            assertNotNull(result);
-                            Map map = gson.fromJson(result, Map.class);
-                            if (map.containsKey("numberOfDevices") && map.containsKey(queryPropertyEven))
+                            // Casting as a double first to get the value from the map, but then casting to an int because the
+                            // number of devices should always be an integer
+                            int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
+                            if (actualNumberOfDevices == expectedNumberOfDevicesEven)
                             {
-                                // Casting as a double first to get the value from the map, but then casting to an int because the
-                                // number of devices should always be an integer
-                                int actualNumberOfDevices = (int) (double) map.get("numberOfDevices");
-                                if (actualNumberOfDevices == expectedNumberOfDevicesEven)
-                                {
-                                    querySucceeded = true;
-                                }
-                                else
-                                {
-                                    log.info("Expected device count not correct, re-running query");
-                                    Thread.sleep(200);
-                                }
+                                querySucceeded = true;
+                            }
+                            else
+                            {
+                                log.info("Expected device count not correct, re-running query");
+                                Thread.sleep(200);
                             }
                         }
+                    }
 
-                        if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
-                        {
-                            fail("Timed out waiting for query results to match expectations");
-                        }
+                    if (System.currentTimeMillis() - startTime > QUERY_TIMEOUT_MILLISECONDS)
+                    {
+                        fail("Timed out waiting for query results to match expectations");
                     }
                 }
-                catch (Exception e)
-                {
-                    fail(e.getMessage());
-                }
+            }
+            catch (Exception e)
+            {
+                fail(e.getMessage());
             }
         });
 
@@ -453,88 +443,78 @@ public class QueryTwinTests extends DeviceTwinCommon
 
         // Query multiple devices having same property
 
-        executor.submit(new Runnable()
-        {
-            @Override
-            public void run()
+        executor.submit(() -> {
+            try
             {
-                try
+                final String where = "is_defined(properties.desired." + queryProperty + ")";
+                SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
+                final Query twinQuery = testInstance.twinServiceClient.queryTwin(sqlQuery.getQuery(), PAGE_SIZE);
+
+                for (int i = 0; i < MAX_DEVICES; i++)
                 {
-                    final String where = "is_defined(properties.desired." + queryProperty + ")";
-                    SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, where, null);
-                    final Query twinQuery = testInstance.twinServiceClient.queryTwin(sqlQuery.getQuery(), PAGE_SIZE);
-
-                    for (int i = 0; i < MAX_DEVICES; i++)
+                    try
                     {
-                        try
+                        if (testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery))
                         {
-                            if (testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery))
-                            {
-                                DeviceTwinDevice d = testInstance.twinServiceClient.getNextDeviceTwin(twinQuery);
+                            DeviceTwinDevice d = testInstance.twinServiceClient.getNextDeviceTwin(twinQuery);
 
-                                assertNotNull(d.getVersion());
-                                for (Pair dp : d.getDesiredProperties())
-                                {
-                                    assertEquals(dp.getKey(), queryProperty);
-                                    assertEquals(dp.getValue(), queryPropertyValue);
-                                }
+                            assertNotNull(d.getVersion());
+                            for (Pair dp : d.getDesiredProperties())
+                            {
+                                assertEquals(dp.getKey(), queryProperty);
+                                assertEquals(dp.getValue(), queryPropertyValue);
                             }
                         }
-                        catch (Exception e)
-                        {
-                            fail(e.getMessage());
-                        }
-
-                        assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery));
                     }
+                    catch (Exception e)
+                    {
+                        fail(e.getMessage());
+                    }
+
+                    assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery));
                 }
-                catch (Exception e)
-                {
-                    fail(e.getMessage());
-                }
+            }
+            catch (Exception e)
+            {
+                fail(e.getMessage());
             }
         });
 
         final int maximumEvenDevices = noOfEvenDevices;
-        executor.submit(new Runnable()
-        {
-            @Override
-            public void run()
+        executor.submit(() -> {
+            try
             {
-                try
+                final String whereEvenDevices = "is_defined(properties.desired." + queryPropertyEven + ")";
+                SqlQuery sqlQueryEvenDevices = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, whereEvenDevices, null);
+                final Query twinQueryEven = testInstance.twinServiceClient.queryTwin(sqlQueryEvenDevices.getQuery(), PAGE_SIZE);
+
+                for (int i = 0; i < maximumEvenDevices; i++)
                 {
-                    final String whereEvenDevices = "is_defined(properties.desired." + queryPropertyEven + ")";
-                    SqlQuery sqlQueryEvenDevices = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, whereEvenDevices, null);
-                    final Query twinQueryEven = testInstance.twinServiceClient.queryTwin(sqlQueryEvenDevices.getQuery(), PAGE_SIZE);
-
-                    for (int i = 0; i < maximumEvenDevices; i++)
+                    try
                     {
-                        try
+                        if (testInstance.twinServiceClient.hasNextDeviceTwin(twinQueryEven))
                         {
-                            if (testInstance.twinServiceClient.hasNextDeviceTwin(twinQueryEven))
-                            {
-                                DeviceTwinDevice d = testInstance.twinServiceClient.getNextDeviceTwin(twinQueryEven);
+                            DeviceTwinDevice d = testInstance.twinServiceClient.getNextDeviceTwin(twinQueryEven);
 
-                                assertNotNull(d.getVersion());
-                                for (Pair dp : d.getDesiredProperties())
-                                {
-                                    assertEquals(dp.getKey(), queryPropertyEven);
-                                    assertEquals(dp.getValue(), queryPropertyValueEven);
-                                }
+                            assertNotNull(d.getVersion());
+                            for (Pair dp : d.getDesiredProperties())
+                            {
+                                assertEquals(dp.getKey(), queryPropertyEven);
+                                assertEquals(dp.getValue(), queryPropertyValueEven);
                             }
                         }
-                        catch (Exception e)
-                        {
-                            fail(e.getMessage());
-                        }
-
-                        assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQueryEven));
                     }
+                    catch (Exception e)
+                    {
+                        fail(e.getMessage());
+                    }
+
+                    assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQueryEven));
                 }
-                catch (Exception e)
-                {
-                    fail(e.getMessage());
-                }
+            }
+            catch (Exception e)
+            {
+                fail(e.getMessage());
             }
         });
 

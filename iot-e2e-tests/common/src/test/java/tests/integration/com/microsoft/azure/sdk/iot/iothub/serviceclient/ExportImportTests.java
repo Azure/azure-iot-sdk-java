@@ -230,13 +230,12 @@ public class ExportImportTests extends IntegrationTest
                 {
                     JobProperties exportJobProperties = JobProperties.createForExportJob(containerSasUri, excludeKeys, storageAuthenticationType.get());
                     exportJob = registryManager.exportDevices(exportJobProperties);
-                    exportJobScheduled = true;
                 }
                 else
                 {
                     exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
-                    exportJobScheduled = true;
                 }
+                exportJobScheduled = true;
 
             }
             catch (IotHubTooManyDevicesException e)
@@ -337,13 +336,12 @@ public class ExportImportTests extends IntegrationTest
                     // For a given StorageAuthenticationType, create JobProperties and pass it
                     JobProperties importJobProperties = JobProperties.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
                     importJob = registryManager.importDevices(importJobProperties);
-                    importJobScheduled = true;
                 }
                 else
                 {
                     importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
-                    importJobScheduled = true;
                 }
+                importJobScheduled = true;
             }
             catch (IotHubTooManyDevicesException e)
             {

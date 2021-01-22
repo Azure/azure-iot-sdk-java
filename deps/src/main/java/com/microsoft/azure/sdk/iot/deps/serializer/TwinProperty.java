@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @deprecated As of release 0.4.0, replaced by {@link com.microsoft.azure.sdk.iot.deps.twin.TwinCollection}
  */
+// Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
+@SuppressWarnings("unchecked")
 @Deprecated
 public class TwinProperty
 {
@@ -219,14 +221,7 @@ public class TwinProperty
                 for (Map.Entry<String, Property> entry : property.entrySet())
                 {
                     Object value = entry.getValue().value;
-                    if (value == null)
-                    {
-                        propertyMap.put(entry.getKey(), null);
-                    }
-                    else
-                    {
-                        propertyMap.put(entry.getKey(), value);
-                    }
+                    propertyMap.put(entry.getKey(), value);
                 }
             }
         }

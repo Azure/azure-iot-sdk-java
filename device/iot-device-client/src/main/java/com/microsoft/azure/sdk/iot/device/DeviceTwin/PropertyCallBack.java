@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 
-public interface PropertyCallBack <Type1, Type2>
+public interface PropertyCallBack<Type1, Type2>
 {
     void PropertyCall(Type1 propertyKey, Type2 propertyValue,  Object context);
 }

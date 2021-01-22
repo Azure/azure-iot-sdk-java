@@ -45,6 +45,8 @@ import java.util.Map;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
+// Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
+@SuppressWarnings("unchecked")
 public class TwinMetadata
 {
     // the entity last updated date and time in the TwinCollection
@@ -145,8 +147,6 @@ public class TwinMetadata
             return null;
         }
 
-        /* SRS_TWIN_METADATA_21_005: [If the provide metadata contains date or version, the tryExtractFromMap shall return a new instance of TwinMetadata with this information.] */
-        /* SRS_TWIN_METADATA_21_006: [The tryExtractFromMap shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date or the version in a Number.] */
         String lastUpdated = null;
         Integer lastUpdatedVersion = null;
         for(Map.Entry<? extends String, Object> entry: ((Map<? extends String, Object>)metadata).entrySet())
@@ -180,10 +180,6 @@ public class TwinMetadata
     public Integer getLastUpdatedVersion()
     {
         /* SRS_TWIN_METADATA_21_007: [The getLastUpdatedVersion shall return the stored lastUpdatedVersion.] */
-        if(this.lastUpdatedVersion == null)
-        {
-            return null;
-        }
         return this.lastUpdatedVersion;
     }
 
