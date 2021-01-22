@@ -188,7 +188,7 @@ public class HttpsRequestResponseSerializer
             }
         }
 
-        for(String header : headers)
+        for (String header : headers)
         {
             if (header == null || header.isEmpty())
             {
@@ -199,14 +199,13 @@ public class HttpsRequestResponseSerializer
             int headerSeparatorPosition = header.indexOf(HeaderSeparator);
             if (headerSeparatorPosition <= 0)
             {
-                // Codes_SRS_HTTPREQUESTRESPONSESERIALIZER_34_008: [If a header is not separated from its value by a':', this function shall throw an IOException.]
                 throw new IOException("Header is invalid " + header + ".");
             }
 
             String headerName = header.substring(0, headerSeparatorPosition);
             String headerValue = header.substring(headerSeparatorPosition + 1);
 
-            List headerValues = new ArrayList();
+            List<String> headerValues = new ArrayList<>();
             headerValues.add(headerValue);
             headerFields.put(headerName, headerValues);
         }

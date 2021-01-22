@@ -28,7 +28,7 @@ import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDevice
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
-public class ProvisioningTask implements Callable
+public class ProvisioningTask implements Callable<Object>
 {
     private static final int MAX_THREADS_TO_RUN = 2;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000000;
@@ -108,9 +108,9 @@ public class ProvisioningTask implements Callable
     {
         RegisterTask registerTask = new RegisterTask(this.provisioningDeviceClientConfig, securityProvider,
                                                      provisioningDeviceClientContract, authorization);
-        FutureTask<RegistrationOperationStatusParser> futureRegisterTask = new FutureTask<RegistrationOperationStatusParser>(registerTask);
+        FutureTask<RegistrationOperationStatusParser> futureRegisterTask = new FutureTask<>(registerTask);
         executor.submit(futureRegisterTask);
-        RegistrationOperationStatusParser registrationOperationStatusParser =  futureRegisterTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION,
+        RegistrationOperationStatusParser registrationOperationStatusParser = futureRegisterTask.get(MAX_TIME_TO_WAIT_FOR_REGISTRATION,
                                                                                                       TimeUnit.MILLISECONDS);
        if (registrationOperationStatusParser == null)
         {

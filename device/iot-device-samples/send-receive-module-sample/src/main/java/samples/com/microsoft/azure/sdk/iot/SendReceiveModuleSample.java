@@ -27,7 +27,7 @@ public class SendReceiveModuleSample
     private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'mqtt_ws', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
     private  static final int D2C_MESSAGE_TIMEOUT = 5000; // 5 seconds
-    private  static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on close
+    private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
     protected static class EventCallback implements IotHubEventCallback
     {
