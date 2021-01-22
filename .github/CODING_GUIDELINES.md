@@ -274,7 +274,7 @@ The header is mandatory and the body and footer are optional.
 
 Any line of the commit message cannot be longer 100 characters! This allows the message to be easier to read on GitHub as well as in various git tools.
 
-Footer should contain a [closing reference](#https://help.github.com/articles/closing-issues-using-keywords/) to an issue if any.
+Footer should contain a [closing reference](https://help.github.com/articles/closing-issues-using-keywords/) to an issue if any.
 
 **Revert**
 

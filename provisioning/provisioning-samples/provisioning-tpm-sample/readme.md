@@ -38,7 +38,7 @@ Note that the samples for Windows and Linux use Maven.
     Please obtain details of IdScope and globalEndpoint from the [portal][azure-portal] where you have created your service. Follow instructions in step <11> to retreive this information from portal.
     You can choose one of available protocols [HTTPS, AMQP, MQTT, AMQP_WS, MQTT_WS] for registration. 
 
-5. Start the TPM simulator as described in section [TPM Simulator](###TPM Simulator)
+5. Start the TPM simulator as described in section [TPM Simulator](#TPM-simulator)
 
 6. In a command line, build your sample:
     ```
@@ -461,9 +461,9 @@ This part of the tutorial builds on top of the code you wrote in the previous se
 7. Now you can close the simulator when you are done running your sample.
 
 
-[azure-portal]: www.portal.azure.com
+[azure-portal]: https://www.portal.azure.com
 [povisioning-device-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-device-client
 [povisioning-service-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client
 [povisioning-single-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-sample
 [povisioning-group-enrollment-sample]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/service-enrollment-group-sample
-[tpm-simulator]:(../../provisioning-tools/tpm-simulator/Simulator.exe)
+[tpm-simulator]:../../provisioning-tools/tpm-simulator/Simulator.exe
