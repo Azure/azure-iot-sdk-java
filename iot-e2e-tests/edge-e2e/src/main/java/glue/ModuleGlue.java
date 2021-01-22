@@ -63,22 +63,17 @@ public class ModuleGlue
         System.out.printf("ConnectFromEnvironment called with transport %s%n", transportType);
 
         //This is the default URL stream handler factory
-        URLStreamHandlerFactory fac = new URLStreamHandlerFactory()
-        {
-            @Override
-            public URLStreamHandler createURLStreamHandler(String protocol)
+        URLStreamHandlerFactory fac = protocol -> {
+            if (protocol.equals("http"))
             {
-                if (protocol.equals("http"))
-                {
-                    return new sun.net.www.protocol.http.Handler();
-                }
-                else if(protocol.equals("https"))
-                {
-                    return new sun.net.www.protocol.https.Handler();
-                }
-
-                return null;
+                return new sun.net.www.protocol.http.Handler();
             }
+            else if(protocol.equals("https"))
+            {
+                return new sun.net.www.protocol.https.Handler();
+            }
+
+            return null;
         };
 
         try
