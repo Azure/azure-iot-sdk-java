@@ -12,37 +12,37 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 public class ExportImportDeviceParser
 {
     private static final String ID_NAME = "id";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ID_NAME)
     private String id;
 
     private static final String E_TAG_NAME = "eTag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(E_TAG_NAME)
     private String eTag;
 
     private static final String IMPORT_MODE_NAME = "importMode";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IMPORT_MODE_NAME)
     private String importMode;
 
     private static final String STATUS_NAME = "status";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_NAME)
     private String status;
 
     private static final String STATUS_REASON_NAME = "statusReason";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_REASON_NAME)
     private String statusReason;
 
     private static final String AUTHENTICATION_NAME = "authentication";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(AUTHENTICATION_NAME)
     private AuthenticationParser authentication;
     
     private static final String TAGS_NAME = "tags";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(TAGS_NAME)
     private TwinCollection tags;
 

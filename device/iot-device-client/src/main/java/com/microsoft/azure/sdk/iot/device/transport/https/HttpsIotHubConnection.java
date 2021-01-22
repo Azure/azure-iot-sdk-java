@@ -19,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * An HTTPS connection between a device and an IoT Hub. Contains functionality
@@ -80,7 +79,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         synchronized (HTTPS_CONNECTION_LOCK)
         {
             // Here we check if it's a bulk message and serialize it.
-            HttpsMessage httpsMessage = null;
+            HttpsMessage httpsMessage;
 
             if (message instanceof BatchMessage)
             {

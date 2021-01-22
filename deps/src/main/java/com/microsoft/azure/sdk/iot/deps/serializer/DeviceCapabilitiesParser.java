@@ -9,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
 public class DeviceCapabilitiesParser
 {
     private static final String IOT_EDGE_NAME = "iotEdge";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IOT_EDGE_NAME)
     private Boolean iotEdge;
 

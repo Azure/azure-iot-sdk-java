@@ -707,7 +707,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Thread.sleep(1000);
 
         // Invoke method on the multiplexed device
-        deviceMethodServiceClient.invoke(deviceId, expectedMethodName, 200l, 200l, null);
+        deviceMethodServiceClient.invoke(deviceId, expectedMethodName, 200L, 200L, null);
 
         // No need to wait for the device to receive the method invocation since the service client call does that already
         assertTrue("Device method callback never fired on device", deviceMethodCallback.deviceMethodCallbackFired);
@@ -1538,6 +1538,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static void assertDeviceSessionClosesGracefully(ConnectionStatusChangeTracker connectionStatusChangeTracker, int timeoutMillis) throws InterruptedException {
         long startTime = System.currentTimeMillis();
         while (connectionStatusChangeTracker.isOpen)

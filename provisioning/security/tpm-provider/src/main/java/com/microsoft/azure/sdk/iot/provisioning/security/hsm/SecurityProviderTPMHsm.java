@@ -46,9 +46,9 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
             // TPMU_PUBLIC_ID       unique
             new TPM2B_PUBLIC_KEY_RSA());
     private final String registrationId;
-    private Tpm tpm = null;
-    private TPMT_PUBLIC ekPublic = null;
-    private TPMT_PUBLIC srkPublic = null;
+    private final Tpm tpm;
+    private final TPMT_PUBLIC ekPublic;
+    private final TPMT_PUBLIC srkPublic;
     private TPM2B_PUBLIC idKeyPub = null;
 
     /**

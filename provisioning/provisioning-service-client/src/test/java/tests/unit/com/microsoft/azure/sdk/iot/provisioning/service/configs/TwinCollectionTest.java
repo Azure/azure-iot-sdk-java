@@ -148,6 +148,8 @@ public class TwinCollectionTest
         final class MockedTwinCollection extends TwinCollection
         {
             private Map<? extends String, ?> mockedMap;
+
+            @SuppressWarnings("SameParameterValue") // Since this is a constructor "map" can be passed any value.
             private MockedTwinCollection(Map<? extends String, Object> map)
             {
                 super(map);
@@ -667,7 +669,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection);
+                ParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };
@@ -722,7 +724,7 @@ public class TwinCollectionTest
         new Verifications()
         {
             {
-                mockedParserUtility.validateMap(twinCollection);
+                ParserUtility.validateMap(twinCollection);
                 times = 0;
             }
         };

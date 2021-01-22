@@ -223,7 +223,7 @@ public class DeviceMethodTest
         new NonStrictExpectations()
         {
             {
-                mockedIotHubConnectionString.createConnectionString(STANDARD_CONNECTIONSTRING);
+                IotHubConnectionStringBuilder.createConnectionString(STANDARD_CONNECTIONSTRING);
                 result = new IllegalArgumentException();
             }
         };

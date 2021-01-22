@@ -18,7 +18,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -66,11 +65,11 @@ public class IotHubServiceSasTokenTest
             final SecretKeySpec secretKeySpec;
             Mac mac;
             {
-                urlEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
-                system.currentTimeMillis();
+                URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
+                System.currentTimeMillis();
                 byte[] body = { 1 };
                 secretKeySpec = new SecretKeySpec(body, cryptoProvider);
-                mac.getInstance(cryptoProvider);
+                Mac.getInstance(cryptoProvider);
             }
         };
         // Act

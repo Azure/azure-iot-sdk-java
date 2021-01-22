@@ -34,19 +34,19 @@ public class BulkEnrollmentOperationError
 {
     // the registration identifier
     private static final String REGISTRATION_ID_TAG = "registrationId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(REGISTRATION_ID_TAG)
     private String registrationId;
 
     // the error code
     private static final String ERROR_CODE_TAG = "errorCode";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ERROR_CODE_TAG)
     private Integer errorCode;
 
     // the error status
     private static final String ERROR_STATUS_TAG = "errorStatus";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ERROR_STATUS_TAG)
     private String errorStatus;
 

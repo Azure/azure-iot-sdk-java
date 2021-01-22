@@ -56,15 +56,9 @@ public class ServiceClientSample
         {
             sendMultipleCommandsAndReadFromTheFeedbackReceiver();
         }
-        catch(UnsupportedEncodingException e)
+        catch(UnsupportedEncodingException | ExecutionException | InterruptedException e)
         {
            System.out.println("Exception:" + e.getMessage());
-        } catch (InterruptedException e) 
-        {
-            System.out.println("Exception:" + e.getMessage());
-        } catch (ExecutionException e) 
-        {
-            System.out.println("Exception:" + e.getMessage());
         }
 
         // Receive FileUploadNotification

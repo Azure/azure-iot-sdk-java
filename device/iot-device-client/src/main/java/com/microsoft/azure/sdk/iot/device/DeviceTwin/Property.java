@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class Property
 {
-    private Pair<String, Object> property = null;
+    private final Pair<String, Object> property;
     private Integer version = null;
     private boolean isReported = false;
     private Date lastUpdated;

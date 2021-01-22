@@ -83,6 +83,7 @@ public class JobClientTests extends IntegrationTest
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         String queryContent = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS,
@@ -117,6 +118,7 @@ public class JobClientTests extends IntegrationTest
         throw new AssertionError("queryDeviceJob did not find the job");
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private JobResult queryJobResponseResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         Query query = jobClient.queryJobResponse(jobType, jobStatus);
@@ -560,7 +562,7 @@ public class JobClientTests extends IntegrationTest
         StringBuilder pendingJobIds = new StringBuilder();
         for (String jobId : jobIdsPending)
         {
-            pendingJobIds.append(jobId + " ");
+            pendingJobIds.append(jobId).append(" ");
         }
         return pendingJobIds.toString();
     }

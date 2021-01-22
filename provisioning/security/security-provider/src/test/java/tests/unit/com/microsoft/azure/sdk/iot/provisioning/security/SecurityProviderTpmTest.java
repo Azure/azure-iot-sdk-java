@@ -64,6 +64,8 @@ public class SecurityProviderTpmTest
     class SecurityProviderTPMTestImpl extends SecurityProviderTpm
     {
         byte[] ek;
+
+        @SuppressWarnings("SameParameterValue") // Since this is a constructor "ek" can be passed any value.
         SecurityProviderTPMTestImpl(byte[] ek)
         {
             this.ek = ek;

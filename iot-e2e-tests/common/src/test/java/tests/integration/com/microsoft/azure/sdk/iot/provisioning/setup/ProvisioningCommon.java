@@ -26,7 +26,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -170,48 +169,23 @@ public class ProvisioningCommon extends IntegrationTest
 
     public static Collection inputsCommon()
     {
-        if (IntegrationTest.isPullRequest)
-        {
-            return Arrays.asList(
-                    new Object[][]
-                            {
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
+        // Intentionally not doing TPM tests here. There is a separate class for running those
+        // tests in serial
+        return Arrays.asList(
+                new Object[][]
+                        {
+                                {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
 
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
-
-                                    // Intentionally not doing TPM tests here. There is a separate class for running those
-                                    // tests in serial
-                            });
-        }
-        else
-        {
-            return Arrays.asList(
-                    new Object[][]
-                            {
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
-
-                                    {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
-
-                                    // Intentionally not doing TPM tests here. There is a separate class for running those
-                                    // tests in serial
-                            });
-        }
+                                {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
+                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
+                        });
     }
 
     public ProvisioningCommon(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)

@@ -80,8 +80,8 @@ public class DeviceClientManagerSample {
     }
 
     private static Message composeMessage(int counter) {
-        double temperature = 0.0;
-        double humidity = 0.0;
+        double temperature;
+        double humidity;
 
         temperature = 20 + Math.random() * 10;
         humidity = 30 + Math.random() * 20;

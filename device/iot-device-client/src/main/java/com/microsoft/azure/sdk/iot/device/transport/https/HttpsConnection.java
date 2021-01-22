@@ -174,13 +174,9 @@ public class HttpsConnection
         {
             this.connection.setRequestMethod(method.name());
         }
-        catch (java.net.ProtocolException e)
+        catch (ProtocolException | SecurityException e)
         {
             // should never happen, since the method names are hard-coded.
-            throw new TransportException(e);
-        }
-        catch (SecurityException e)
-        {
             throw new TransportException(e);
         }
     }
@@ -366,7 +362,7 @@ public class HttpsConnection
         try
         {
             ArrayList<Byte> byteBuffer = new ArrayList<>();
-            int nextByte = -1;
+            int nextByte;
             // read(byte[]) reads the byte into the buffer and returns the number
             // of bytes read, or -1 if the end of the stream has been reached.
             while ((nextByte = stream.read()) > -1)

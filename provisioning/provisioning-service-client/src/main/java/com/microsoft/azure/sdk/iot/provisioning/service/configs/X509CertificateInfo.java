@@ -40,51 +40,51 @@ public class X509CertificateInfo
 {
     // the subject name of the X509 certificate
     private static final String SUBJECT_NAME_TAG = "subjectName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SUBJECT_NAME_TAG)
     private String subjectName;
 
     // the sha1 thumbprint of the X509 certificate
     private static final String SHA1_THUMBPRINT_TAG = "sha1Thumbprint";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SHA1_THUMBPRINT_TAG)
     private String sha1Thumbprint;
 
     // the sha256 thumbprint of the X509 certificate
     private static final String SHA256_THUMBPRINT_TAG = "sha256Thumbprint";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SHA256_THUMBPRINT_TAG)
     private String sha256Thumbprint;
 
     // the issuer name of the X509 certificate
     private static final String ISSUER_NAME_TAG = "issuerName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ISSUER_NAME_TAG)
     private String issuerName;
 
     // the no before date and time
     private static final String NO_BEFORE_UTC_TAG = "notBeforeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(NO_BEFORE_UTC_TAG)
     private String notBeforeUtc = null;
     private transient Date notBeforeUtcDate;
 
     // the no after date and time
     private static final String NO_AFTER_UTC_TAG = "notAfterUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(NO_AFTER_UTC_TAG)
     private String notAfterUtc = null;
     private transient Date notAfterUtcDate;
 
     // the serial number of the X509 certificate
     private static final String SERIAL_NUMBER_TAG = "serialNumber";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SERIAL_NUMBER_TAG)
     private String serialNumber;
 
     // the version of the X509 certificate
     private static final String VERSION_TAG = "version";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(VERSION_TAG)
     private Integer version;
 

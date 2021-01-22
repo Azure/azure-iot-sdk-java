@@ -31,6 +31,7 @@ public class IotHubConnectionStringTest
     private static final String VALID_MODULEID = "moduleId";
     private static final String VALID_GATEWAYHOSTNAME = "edgeHubHostName";
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the expected assertion param can be passed any value.
     private void assertConnectionString(Object iotHubConnectionString, String expectedHostName,
                                         String expectedDeviceId, String expectedSharedAccessKey, String expectedSharedAccessToken)
     {
@@ -586,7 +587,7 @@ public class IotHubConnectionStringTest
         new NonStrictExpectations()
         {
             {
-                iotHubSasToken.isExpired(anyString);
+                IotHubSasToken.isExpired(anyString);
                 result = true;
             }
         };
@@ -604,7 +605,7 @@ public class IotHubConnectionStringTest
         new NonStrictExpectations()
         {
             {
-                iotHubSasToken.isExpired(anyString);
+                IotHubSasToken.isExpired(anyString);
                 result = true;
             }
         };

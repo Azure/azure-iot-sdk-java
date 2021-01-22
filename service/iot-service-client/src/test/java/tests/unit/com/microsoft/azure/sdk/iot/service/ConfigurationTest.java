@@ -158,7 +158,7 @@ public class ConfigurationTest
         }});
         parserMetric.setResults(new HashMap<String, Long>()
         {{
-            put("resultKey", new Long(100));
+            put("resultKey", 100L);
         }});
         parserCA.setMetrics(parserMetric);
         ConfigurationMetricsParser parserSystemMetric = new ConfigurationMetricsParser();
@@ -168,7 +168,7 @@ public class ConfigurationTest
         }});
         parserSystemMetric.setResults(new HashMap<String, Long>()
         {{
-            put("sresultKey", new Long(101));
+            put("sresultKey", 101L);
         }});
         parserCA.setSystemMetrics(parserSystemMetric);
 

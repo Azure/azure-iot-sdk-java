@@ -95,80 +95,80 @@ public class EnrollmentGroup extends Serializable
 {
     // the enrollment group identifier
     private static final String ENROLLMENT_GROUP_ID_TAG = "enrollmentGroupId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ENROLLMENT_GROUP_ID_TAG)
     private String enrollmentGroupId;
 
     // the attestation
     private static final String ATTESTATION_TAG = "attestation";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ATTESTATION_TAG)
     private AttestationMechanism attestation;
 
     // the iothub host name
     private static final String IOTHUB_HOST_NAME_TAG = "iotHubHostName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IOTHUB_HOST_NAME_TAG)
     private String iotHubHostName;
 
     // the initial Twin state identifier (Twin is a special case and will be manually serialized).
     private static final String INITIAL_TWIN_STATE_TAG = "initialTwin";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(INITIAL_TWIN_STATE_TAG)
     private TwinState initialTwin;
 
     // the provisioning status
     private static final String PROVISIONING_STATUS_TAG = "provisioningStatus";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(PROVISIONING_STATUS_TAG)
     private ProvisioningStatus provisioningStatus;
 
     // the datetime this resource was created
     private static final String CREATED_DATETIME_UTC_TAG = "createdDateTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CREATED_DATETIME_UTC_TAG)
     private final String createdDateTimeUtc = null;
     private transient Date createdDateTimeUtcDate;
 
     // the datetime this resource was last updated
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
     private final String lastUpdatedDateTimeUtc = null;
     private transient Date lastUpdatedDateTimeUtcDate;
 
     // the eTag
     private static final String ETAG_TAG = "etag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ETAG_TAG)
     private String etag;
 
     // the reprovisioning policy
     private static final String REPROVISION_POLICY_TAG = "reprovisionPolicy";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(REPROVISION_POLICY_TAG)
     private ReprovisionPolicy reprovisionPolicy;
 
     // the custom allocation definition
     private static final String CUSTOM_ALLOCATION_DEFINITION_TAG = "customAllocationDefinition";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CUSTOM_ALLOCATION_DEFINITION_TAG)
     private CustomAllocationDefinition customAllocationDefinition;
 
     // the allocation policy of the resource. overrides the tenant level allocation policy
     private static final String ALLOCATION_POLICY_TAG = "allocationPolicy";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ALLOCATION_POLICY_TAG)
     private AllocationPolicy allocationPolicy;
 
     // the list of names of IoT hubs the device in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
     private static final String IOT_HUBS_TAG = "iotHubs";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IOT_HUBS_TAG)
     private Collection<String> iotHubs;
 
     private static final String DEVICE_CAPABILITIES_TAG = "capabilities";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DEVICE_CAPABILITIES_TAG)
     private DeviceCapabilities capabilities;
 

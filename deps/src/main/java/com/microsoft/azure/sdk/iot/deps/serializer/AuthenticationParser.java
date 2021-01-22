@@ -9,17 +9,17 @@ import com.google.gson.annotations.SerializedName;
 public class AuthenticationParser
 {
     private static final String SYMMETRIC_KEY_NAME = "symmetricKey";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SYMMETRIC_KEY_NAME)
     private SymmetricKeyParser symmetricKey;
 
     private static final String X509_THUMBPRINT_NAME = "x509Thumbprint";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(X509_THUMBPRINT_NAME)
     private X509ThumbprintParser thumbprint;
 
     private static final String AUTHENTICATION_TYPE_NAME = "type";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(AUTHENTICATION_TYPE_NAME)
     private AuthenticationTypeParser type;
 

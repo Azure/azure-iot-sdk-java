@@ -42,7 +42,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
     private String _protocol = "";
     private Map<String, String> _additionalHeaders = null;
 
-    protected Boolean _isWebSocketEnabled = false;
+    protected Boolean _isWebSocketEnabled;
 
     private WebSocketHandler.WebSocketMessageType _lastType;
     private long _lastLength;
@@ -182,7 +182,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
             for (Map.Entry<String, String> entry : _additionalHeaders.entrySet())
             {
-                builder.append(entry.getKey() + ":" + entry.getValue()).append(", ");
+                builder.append(entry.getKey()).append(":").append(entry.getValue()).append(", ");
             }
 
             int lastIndex = builder.lastIndexOf(", ");
@@ -481,12 +481,8 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             if (_isWebSocketEnabled)
             {
                 _head_closed = true;
-                _underlyingInput.close_tail();
             }
-            else
-            {
-                _underlyingInput.close_tail();
-            }
+            _underlyingInput.close_tail();
         }
 
         @Override

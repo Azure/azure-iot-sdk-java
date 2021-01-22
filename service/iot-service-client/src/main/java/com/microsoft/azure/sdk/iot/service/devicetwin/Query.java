@@ -185,7 +185,7 @@ public class Query
         this.httpConnectTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
         this.httpReadTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS;
 
-        byte[] payload = null;
+        byte[] payload;
         Map<String, String> queryHeaders = new HashMap<>();
 
         if (this.requestContinuationToken != null)
@@ -280,7 +280,7 @@ public class Query
 
         this.proxy = proxy;
 
-        byte[] payload = null;
+        byte[] payload;
         Map<String, String> queryHeaders = new HashMap<>();
 
         if (this.requestContinuationToken != null)

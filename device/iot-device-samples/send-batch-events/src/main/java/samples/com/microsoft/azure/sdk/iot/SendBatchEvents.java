@@ -187,8 +187,8 @@ public class SendBatchEvents
         System.out.println("Sending the following event messages in batch:");
 
         String deviceId = "MyJavaDevice";
-        double temperature = 0.0;
-        double humidity = 0.0;
+        double temperature;
+        double humidity;
 
         List<Message> messageList = new ArrayList<>();
 

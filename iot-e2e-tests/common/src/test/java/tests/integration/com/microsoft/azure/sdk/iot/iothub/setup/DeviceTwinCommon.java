@@ -166,7 +166,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected DeviceState[] devicesUnderTest;
 
     protected DeviceTwinTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
@@ -295,6 +295,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method "numberOfDevices" can be passed any value.
     protected void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(numberOfDevices, true);
@@ -512,7 +513,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void readReportedPropertiesAndVerify(DeviceState deviceState, String startsWithKey, String startsWithValue, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
+    protected void readReportedPropertiesAndVerify(DeviceState deviceState, String startsWithValue, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
     {
         int actualCount = 0;
 
@@ -535,7 +536,7 @@ public class DeviceTwinCommon extends IntegrationTest
             for (Pair p : repProperties)
             {
                 String val = (String) p.getValue();
-                if (p.getKey().startsWith(startsWithKey) && val.startsWith(startsWithValue))
+                if (p.getKey().startsWith(DeviceTwinCommon.PROPERTY_KEY) && val.startsWith(startsWithValue))
                 {
                     actualCount++;
                 }
@@ -581,7 +582,7 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         // Check status periodically for success or until timeout
         long startTime = System.currentTimeMillis();
-        long timeElapsed = 0;
+        long timeElapsed;
         while (deviceUnderTest.deviceTwinStatus != OK)
         {
             Thread.sleep(PERIODIC_WAIT_TIME_FOR_VERIFICATION);
@@ -604,9 +605,10 @@ public class DeviceTwinCommon extends IntegrationTest
         // Assert
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, numOfProp);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE, numOfProp);
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method "numOfProp" can be passed any value.
     protected void sendReportedArrayPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException
     {
         // Act
@@ -624,7 +626,7 @@ public class DeviceTwinCommon extends IntegrationTest
     {
         // Check status periodically for success or until timeout
         long startTime = System.currentTimeMillis();
-        long timeElapsed = 0;
+        long timeElapsed;
 
         for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {

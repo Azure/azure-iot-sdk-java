@@ -235,6 +235,6 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
 
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, 2);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE, 2);
     }
 }

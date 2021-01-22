@@ -52,7 +52,7 @@ public class RegistrationOperationStatusParser
         }
 
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-        RegistrationOperationStatusParser registrationOperationStatusParser = null;
+        RegistrationOperationStatusParser registrationOperationStatusParser;
 
         try
         {

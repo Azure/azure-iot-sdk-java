@@ -766,11 +766,11 @@ public class HttpsSingleMessageTest
 
     private static boolean propertyAssignedCorrectly(MessageProperty[] properties, String name, String value)
     {
-        for (int i = 0; i < properties.length; i++)
+        for (MessageProperty property : properties)
         {
-            if (properties[i].getName().equals(name))
+            if (property.getName().equals(name))
             {
-                if (properties[i].getValue().equals(value))
+                if (property.getValue().equals(value))
                 {
                     return true;
                 }

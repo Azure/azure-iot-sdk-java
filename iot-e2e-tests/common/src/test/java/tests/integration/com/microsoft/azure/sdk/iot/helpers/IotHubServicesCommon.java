@@ -22,7 +22,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 public class IotHubServicesCommon
 {
     //if error injection message has not taken effect after 1 minute, the test will timeout
-    private final static long ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000;
+    private final static long ERROR_INJECTION_MESSAGE_EFFECT_TIMEOUT_MILLISECONDS = 60 * 1000;
     private final static String TEST_ASC_SECURITY_MESSAGE = "{ \"AgentVersion\": \"0.0.1\", "
             + "\"AgentId\" : \"{4C1B4747-E4C7-4681-B31D-4B39E390E7F8}\", "
             + "\"MessageSchemaVersion\" : \"1.0\", \"Events\" : "
@@ -51,23 +51,23 @@ public class IotHubServicesCommon
         {
             client.open();
 
-            for (int i = 0; i < messagesToSend.size(); ++i)
+            for (MessageAndResult messageAndResult : messagesToSend)
             {
-                if ((protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS) && isErrorInjectionMessage(messagesToSend.get(i)))
+                if ((protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS) && isErrorInjectionMessage(messageAndResult))
                 {
                     // error injection message will not be ack'd by service if sent over MQTT/MQTT_WS, so the SDK's
                     // retry logic will try to send it again after the connection drops. By setting expiry time,
                     // we ensure that error injection message isn't resent to service too many times. The message will still likely
                     // be sent 3 or 4 times causing 3 or 4 disconnections, but the test should recover anyways.
-                    messagesToSend.get(i).message.setExpiryTime(1000);
+                    messageAndResult.message.setExpiryTime(1000);
 
                     // Since the message won't be ack'd, then we don't need to validate the status code when this message's callback is fired
-                    messagesToSend.get(i).statusCode = null;
+                    messageAndResult.statusCode = null;
                 }
 
-                sendMessageAndWaitForResponse(client, messagesToSend.get(i), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
+                sendMessageAndWaitForResponse(client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
 
-                if (isErrorInjectionMessage(messagesToSend.get(i)))
+                if (isErrorInjectionMessage(messageAndResult))
                 {
                     //wait until error injection message takes affect before sending the next message
                     long startTime = System.currentTimeMillis();
@@ -442,9 +442,9 @@ public class IotHubServicesCommon
     private static boolean isErrorInjectionMessage(MessageAndResult messageAndResult)
     {
         MessageProperty[] properties = messageAndResult.message.getProperties();
-        for (int i = 0; i < properties.length; i++)
+        for (MessageProperty property : properties)
         {
-            if (properties[i].getValue().equals(ErrorInjectionHelper.FaultCloseReason_Boom.toString()) || properties[i].getValue().equals(ErrorInjectionHelper.FaultCloseReason_Bye.toString()))
+            if (property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Boom.toString()) || property.getValue().equals(ErrorInjectionHelper.FaultCloseReason_Bye.toString()))
             {
                 return true;
             }
@@ -510,9 +510,9 @@ public class IotHubServicesCommon
 
     public static boolean actualStatusUpdatesContainsStatus(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, IotHubConnectionStatus status)
     {
-        for (int i = 0; i < actualStatusUpdates.size(); i++)
+        for (Pair<IotHubConnectionStatus, Throwable> actualStatusUpdate : actualStatusUpdates)
         {
-            if (actualStatusUpdates.get(i).getKey() == status)
+            if (actualStatusUpdate.getKey() == status)
             {
                 return true;
             }

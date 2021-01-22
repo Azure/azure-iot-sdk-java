@@ -604,15 +604,10 @@ public class TransportClientTests extends IntegrationTest
             return false;
         }
 
-        if (msg.getMessageId() == null || !msg.getMessageId().equals(expectedMessageId))
-        {
-            return false;
-        }
-
-        //all system properties are as expected
-        return true;
+        return msg.getMessageId() != null && msg.getMessageId().equals(expectedMessageId);//all system properties are as expected
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private void sendMessageToDevice(String deviceId, String protocolName) throws IotHubException, IOException
     {
         String messageString = "Java service e2e test message to be received over " + protocolName + " protocol";
@@ -623,6 +618,7 @@ public class TransportClientTests extends IntegrationTest
         serviceClient.send(deviceId, serviceMessage);
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private void waitForMessageToBeReceived(Success messageReceived, String protocolName, InternalClient client)
     {
         try
@@ -748,6 +744,7 @@ public class TransportClientTests extends IntegrationTest
 
         private Exception exception = null;
 
+        @SuppressWarnings("SameParameterValue") // Since this is a constructor, the constructor params can be passed any value.
         RunnableInvoke(DeviceMethod methodServiceClient, String deviceId, String methodName, String methodPayload, CountDownLatch latch)
         {
             this.methodServiceClient = methodServiceClient;
@@ -1016,6 +1013,7 @@ public class TransportClientTests extends IntegrationTest
         testInstance.messageStates = null;
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private int readReportedProperties(DeviceState deviceState, String startsWithKey, String startsWithValue) throws IOException , IotHubException, InterruptedException
     {
         int totalCount = 0;

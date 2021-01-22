@@ -35,8 +35,8 @@ public class FileUploadSample
     public static void main(String[] args)
             throws IOException, URISyntaxException
     {
-        String connString = null;
-        String fullFileName = null;
+        String connString;
+        String fullFileName;
 
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -102,7 +102,7 @@ public class FileUploadSample
     }
 
     private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException {
-        String[] fileNameList = null;
+        String[] fileNameList;
 
         File file = new File(baseDirectory, relativePath);
         if(file.isDirectory())

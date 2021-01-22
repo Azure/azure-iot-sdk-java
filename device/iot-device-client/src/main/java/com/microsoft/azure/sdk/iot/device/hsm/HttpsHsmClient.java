@@ -233,7 +233,7 @@ public class HttpsHsmClient
         log.debug("Sending data over unix socket...");
 
         UnixSocketChannel channel = null;
-        HttpsResponse response = null;
+        HttpsResponse response;
         try
         {
             //write to socket
@@ -276,7 +276,7 @@ public class HttpsHsmClient
         log.debug("Reading response from unix socket channel...");
 
         ByteBuffer buf = ByteBuffer.allocateDirect(10);
-        String response = "";
+        StringBuilder response = new StringBuilder();
         int numRead = 0;
         while (numRead >= 0)
         {
@@ -297,10 +297,10 @@ public class HttpsHsmClient
             // e159 Getting Bytes from a ByteBuffer
             for (int i=0; i<numRead; i++)
             {
-                response = response + new String(new byte[] {buf.get()}, StandardCharsets.US_ASCII);
+                response.append(new String(new byte[]{buf.get()}, StandardCharsets.US_ASCII));
             }
         }
 
-        return response;
+        return response.toString();
     }
 }

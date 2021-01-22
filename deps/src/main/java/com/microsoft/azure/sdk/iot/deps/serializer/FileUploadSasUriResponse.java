@@ -23,27 +23,27 @@ public class FileUploadSasUriResponse
     private static final String HTTPS_URL_STRING = "https://";
 
     private static final String CORRELATION_ID_TAG = "correlationId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CORRELATION_ID_TAG)
     private String correlationId = null;
 
     private static final String HOST_NAME_TAG = "hostName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(HOST_NAME_TAG)
     private String hostName = null;
 
     private static final String CONTAINER_NAME_TAG = "containerName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONTAINER_NAME_TAG)
     private String containerName = null;
 
     private static final String BLOB_NAME_TAG = "blobName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(BLOB_NAME_TAG)
     private String blobName = null;
 
     private static final String SAS_TOKEN_TAG = "sasToken";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SAS_TOKEN_TAG)
     private String sasToken = null;
 

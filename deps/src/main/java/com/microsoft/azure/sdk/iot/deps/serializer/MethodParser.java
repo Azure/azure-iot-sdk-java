@@ -39,25 +39,25 @@ public class MethodParser
 
     /* Codes_SRS_METHODPARSER_21_015: [The toJsonElement shall include name as `methodName` in the json.] */
     private static final String METHOD_NAME_TAG = "methodName";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(METHOD_NAME_TAG)
     private String name;
 
     /* Codes_SRS_METHODPARSER_21_016: [The toJsonElement shall include responseTimeout in seconds as `responseTimeoutInSeconds` in the json.] */
     private static final String RESPONSE_TIMEOUT_IN_SECONDS_TAG = "responseTimeoutInSeconds";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(RESPONSE_TIMEOUT_IN_SECONDS_TAG)
     private Long responseTimeout;
 
     /* Codes_SRS_METHODPARSER_21_031: [The toJsonElement shall include connectTimeout in seconds as `connectTimeoutInSeconds` in the json.] */
     private static final String CONNECT_TIMEOUT_IN_SECONDS_TAG = "connectTimeoutInSeconds";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(CONNECT_TIMEOUT_IN_SECONDS_TAG)
     private Long connectTimeout;
 
     /* Codes_SRS_METHODPARSER_21_024: [The class toJsonElement include status as `status` in the json.] */
     private static final String STATUS_TAG = "status";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(STATUS_TAG)
     private Integer status;
 

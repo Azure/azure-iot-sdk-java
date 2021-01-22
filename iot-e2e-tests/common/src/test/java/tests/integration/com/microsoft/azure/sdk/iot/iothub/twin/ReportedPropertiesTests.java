@@ -98,7 +98,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         }
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
             waitAndVerifyTwinStatusBecomesSuccess();
         }
 
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -138,7 +138,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         waitAndVerifyTwinStatusBecomesSuccess();
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -183,7 +183,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected OK but twin status was " + deviceUnderTest.deviceTwinStatus, internalClient), OK, deviceUnderTest.deviceTwinStatus);
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
     }
 
     @Test
@@ -211,6 +211,6 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
         waitAndVerifyTwinStatusBecomesSuccess();
 
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
     }
 }
