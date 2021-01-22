@@ -34,7 +34,7 @@ public class FeedbackReceiver extends Receiver
      * @param userName The iot hub user name
      * @param sasToken The iot hub SAS token for the given device
      * @param iotHubServiceClientProtocol The iot hub protocol name
-     * @param deviceId The device id
+     * @param deviceId The device id (not used)
      */
     public @Deprecated FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
     {
