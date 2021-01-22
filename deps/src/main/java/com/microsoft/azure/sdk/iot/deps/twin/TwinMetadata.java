@@ -180,10 +180,6 @@ public class TwinMetadata
     public Integer getLastUpdatedVersion()
     {
         /* SRS_TWIN_METADATA_21_007: [The getLastUpdatedVersion shall return the stored lastUpdatedVersion.] */
-        if(this.lastUpdatedVersion == null)
-        {
-            return null;
-        }
         return this.lastUpdatedVersion;
     }
 
