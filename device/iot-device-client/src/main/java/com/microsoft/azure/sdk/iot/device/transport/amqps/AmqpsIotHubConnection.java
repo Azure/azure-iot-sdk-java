@@ -586,7 +586,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 // AMQPS_WS has an issue where the remote host kills the connection if 31+ multiplexed devices are all
                 // authenticated at once. To work around this, the authentications will be done at most 30 at a time.
                 // Once a given device's authentication finishes, it will trigger the next authentication
-                List<AmqpsSasTokenRenewalHandler> handlers = new ArrayList(sasTokenRenewalHandlers);
+                List<AmqpsSasTokenRenewalHandler> handlers = new ArrayList<>(sasTokenRenewalHandlers);
                 int maxInFlightAuthenticationMessages = 30;
                 for (int i = 0; i < handlers.size() - maxInFlightAuthenticationMessages; i++)
                 {
