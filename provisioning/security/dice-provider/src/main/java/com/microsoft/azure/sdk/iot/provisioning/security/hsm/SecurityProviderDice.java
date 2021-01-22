@@ -19,7 +19,6 @@ import java.util.LinkedList;
 public class SecurityProviderDice extends SecurityProviderX509
 {
     private final String commonNameAlias;
-    private final String commonNameSigner;
     private final String commonNameRoot;
 
     // read this data from DICE HW after boot
@@ -45,7 +44,7 @@ public class SecurityProviderDice extends SecurityProviderX509
     {
         //SRS_SecurityClientDiceEmulator_25_001: [ Constructor shall create a default unique names for Alias Certificate, Signer Certificate and Root certificate ]
         this.commonNameAlias = "microsoftriotcore";
-        this.commonNameSigner = "microsoftriotcoresigner";
+        String commonNameSigner = "microsoftriotcoresigner";
         this.commonNameRoot = "microsoftriotcoreroot";
 
         //SRS_SecurityClientDiceEmulator_25_002: [ Constructor shall create a diceBundle by calling CreateDeviceAuthBundle ]

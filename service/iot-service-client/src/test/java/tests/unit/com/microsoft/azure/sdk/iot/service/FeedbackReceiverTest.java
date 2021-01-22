@@ -248,33 +248,6 @@ public class FeedbackReceiverTest
         FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_002: [The constructor shall store deviceId]
-    // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
-    @Test
-    public void constructor_save_properties() throws Exception
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String deviceId = "xxx";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        new Expectations()
-        {
-            {
-                amqpReceive = new AmqpReceive(anyString, anyString, anyString, iotHubServiceClientProtocol);
-
-            }
-        };
-        // Act
-        FeedbackReceiver feedbackReceiver = new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
-        // Assert
-        assertEquals(deviceId, Deencapsulation.getField(feedbackReceiver, "deviceId"));
-    }
-    
-   
-  
-
     // Tests_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_004: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
     // Assert
     @Test (expected = IOException.class)
