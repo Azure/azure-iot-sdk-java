@@ -214,7 +214,7 @@ public class WebSocketHandlerImpl implements WebSocketHandler
                     retVal = WebSocketMessageType.WEB_SOCKET_MESSAGE_TYPE_HEADER_CHUNK;
                 }
             }
-            else if (payloadLength == WebSocketHeader.PAYLOAD_EXTENDED_64)
+            else
             {
                 //Check if we have enough bytes to read
                 try
@@ -244,10 +244,6 @@ public class WebSocketHandlerImpl implements WebSocketHandler
                 else if(opcode == WebSocketHeader.OPCODE_CONTINUATION)
                 {
                     retVal = WebSocketMessageType.WEB_SOCKET_MESSAGE_TYPE_CHUNK;
-                }
-                else
-                {
-                    retVal = WebSocketMessageType.WEB_SOCKET_MESSAGE_TYPE_UNKNOWN;
                 }
             }
 

@@ -23,25 +23,21 @@ public class MqttMessaging extends Mqtt
 
     public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
     {
-        //Codes_SRS_MqttMessaging_25_002: [The constructor shall use the configuration to instantiate super class and passing the parameters.]
         super(mqttConnection, listener, messageListener, connectionId, unacknowledgedSentMessages, deviceId);
 
         if (deviceId == null || deviceId.isEmpty())
         {
-            //Codes_SRS_MqttMessaging_25_001: [The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .]
             throw new IllegalArgumentException("Device id cannot be null or empty");
         }
 
         if (moduleId == null || moduleId.isEmpty())
         {
-            //Codes_SRS_MqttMessaging_25_003: [The constructor construct publishTopic and eventsSubscribeTopic from deviceId.]
             this.publishTopic = "devices/" + deviceId + "/messages/events/";
             this.eventsSubscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
             this.inputsSubscribeTopic = null;
         }
         else
         {
-            //Codes_SRS_MqttMessaging_34_031: [The constructor construct publishTopic and eventsSubscribeTopic from deviceId and moduleId.]
             this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
             this.eventsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
             this.inputsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
@@ -53,24 +49,20 @@ public class MqttMessaging extends Mqtt
 
     public void start() throws TransportException
     {
-        //Codes_SRS_MqttMessaging_25_020: [start method shall be call connect to establish a connection to IOT Hub with the given configuration.]
         this.connect();
 
         if (!this.isEdgeHub)
         {
-            //Codes_SRS_MqttMessaging_34_035: [start method shall subscribe to the cloud to device events if not communicating to an edgeHub.]
             this.subscribe(this.eventsSubscribeTopic);
         }
         else if (this.moduleId != null && !this.moduleId.isEmpty())
         {
-            //Codes_SRS_MqttMessaging_34_036: [start method shall subscribe to the inputs channel if communicating as a module to an edgehub.]
             this.subscribe(this.inputsSubscribeTopic);
         }
     }
 
     public void stop() throws TransportException
     {
-        //Codes_SRS_MqttMessaging_25_022: [stop method shall be call disconnect to tear down a connection to IOT Hub with the given configuration.]
         this.disconnect();
     }
 
@@ -84,25 +76,15 @@ public class MqttMessaging extends Mqtt
     {
         if (message == null || message.getBytes() == null)
         {
-            //Codes_SRS_MqttMessaging_25_025: [send method shall throw an IllegalArgumentException if the message is null.]
             throw new IllegalArgumentException("Message cannot be null");
         }
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(this.publishTopic);
 
-        boolean separatorNeeded = false;
+        boolean separatorNeeded;
 
-        //Codes_SRS_MqttMessaging_34_029: [If the message has a To, this method shall append that To to publishTopic before publishing using the key name `$.to`.]
-        //Codes_SRS_MqttMessaging_34_030: [If the message has a UserId, this method shall append that userId to publishTopic before publishing using the key name `$.uid`.]
-        //Codes_SRS_MqttMessaging_34_028: [If the message has a correlationId, this method shall append that correlationid to publishTopic before publishing using the key name `$.cid`.]
-        //Codes_SRS_MqttMessaging_21_027: [send method shall append the messageid to publishTopic before publishing using the key name `$.mid`.]
-        //Codes_SRS_MqttMessaging_34_026: [This method shall append each custom property's name and value to the publishTopic before publishing.]
-        //Codes_SRS_MqttMessaging_34_032: [If the message has a OutputName, this method shall append that to publishTopic before publishing using the key name `$.on`.]
-        //Codes_SRS_MqttMessaging_34_032: [If the message has a content type, this method shall append that to publishTopic before publishing using the key name `$.ct`.]
-        //Codes_SRS_MqttMessaging_34_032: [If the message has a content encoding, this method shall append that to publishTopic before publishing using the key name `$.ce`.]
-        //Codes_SRS_MqttMessaging_34_034: [If the message has a creation time utc, this method shall append that to publishTopic before publishing using the key name `$.ctime`.]
-        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MESSAGE_ID, message.getMessageId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, false, MESSAGE_ID, message.getMessageId(), false);
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CORRELATION_ID, message.getCorrelationId(), false);
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, USER_ID, message.getUserId(), false);
         separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, TO, message.getTo(), false);
@@ -129,7 +111,6 @@ public class MqttMessaging extends Mqtt
 
         String messagePublishTopic = stringBuilder.toString();
 
-        //Codes_SRS_MqttMessaging_25_024: [send method shall publish a message to the IOT Hub on the publish topic by calling method publish().]
         this.publish(messagePublishTopic, message);
     }
 

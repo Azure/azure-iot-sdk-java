@@ -130,15 +130,19 @@ public class IndividualEnrollment extends Serializable
     private static final String CREATED_DATETIME_UTC_TAG = "createdDateTimeUtc";
     @Expose
     @SerializedName(CREATED_DATETIME_UTC_TAG)
-    private final String createdDateTimeUtc = null;
+    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
+    private String createdDateTimeUtc;
+
     @Expose(serialize = false, deserialize = false)
     private Date createdDateTimeUtcDate;
 
     // the datetime this resource was last updated
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
+
     @Expose
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
-    private final String lastUpdatedDateTimeUtc = null;
+    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
+    private String lastUpdatedDateTimeUtc;
     private transient Date lastUpdatedDateTimeUtcDate;
 
     // the eTag
@@ -207,7 +211,6 @@ public class IndividualEnrollment extends Serializable
      */
     public IndividualEnrollment(String registrationId, Attestation attestation)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_001: [The constructor shall judge and store the provided parameters using the IndividualEnrollment setters.] */
         this.setRegistrationId(registrationId);
         this.setAttestation(attestation);
     }
@@ -245,22 +248,17 @@ public class IndividualEnrollment extends Serializable
      */
     public IndividualEnrollment(String json)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
         if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_003: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_004: [The constructor shall deserialize the provided JSON for the enrollment class and subclasses.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         IndividualEnrollment result = gson.fromJson(json, IndividualEnrollment.class);
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_005: [The constructor shall judge and store the provided mandatory parameters `registrationId` and `attestation` using the IndividualEnrollment setters.] */
         this.setRegistrationId(result.registrationId);
         this.setAttestation(result.attestation);
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_006: [If the `deviceId`, `iotHubHostName`, `provisioningStatus`, or `registrationState` is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.deviceId != null)
         {
             this.setDeviceIdFinal(result.deviceId);
@@ -278,7 +276,6 @@ public class IndividualEnrollment extends Serializable
             this.setRegistrationState(result.registrationState);
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_007: [If the initialTwin is not null, the constructor shall convert the raw Twin and store it.] */
         if (result.initialTwin != null)
         {
             /*
@@ -290,40 +287,29 @@ public class IndividualEnrollment extends Serializable
             this.initialTwin = new TwinState(result.initialTwin.getTags(), result.initialTwin.getDesiredProperty());
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_009: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.createdDateTimeUtc != null)
         {
             this.setCreatedDateTimeUtc(result.createdDateTimeUtc);
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_010: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.lastUpdatedDateTimeUtc != null)
         {
             this.setLastUpdatedDateTimeUtc(result.lastUpdatedDateTimeUtc);
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_011: [If the etag is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.etag != null)
         {
             this.setEtagFinal(result.etag);
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_052: [If the device capabilities is not null, the constructor shall judge and store it using the IndividualEnrollment setter.] */
         if (result.capabilities != null)
         {
             this.setCapabilitiesFinal(result.capabilities);
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_066: [This function shall set the iothubs list to the value from the json.] */
         this.setIotHubs(result.getIotHubs());
-
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_067: [This function shall set the allocation policy to the value from the json.] */
         this.setAllocationPolicy(result.getAllocationPolicy());
-
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_068: [This function shall set the custom allocation definition to the value from the json.] */
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
-
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_069: [This function shall set the reprovision policy to the value from the json.] */
         this.setReprovisionPolicy(result.getReprovisionPolicy());
     }
 
@@ -340,11 +326,9 @@ public class IndividualEnrollment extends Serializable
      */
     public JsonElement toJsonElement()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_013: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         JsonObject enrollmentJson = gson.toJsonTree(this).getAsJsonObject();
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_014: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
         if (initialTwin != null)
         {
             enrollmentJson.add(INITIAL_TWIN_STATE_TAG, initialTwin.toJsonElement());
@@ -360,7 +344,6 @@ public class IndividualEnrollment extends Serializable
      */
     public String getRegistrationId()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_016: [The getRegistrationId shall return a String with the stored registrationId.] */
         return this.registrationId;
     }
 
@@ -377,7 +360,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setRegistrationId(String registrationId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_018: [The setRegistrationId shall store the provided registrationId.] */
         this.registrationId = registrationId;
     }
 
@@ -388,7 +370,6 @@ public class IndividualEnrollment extends Serializable
      */
     public String getDeviceId()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_019: [The getDeviceId shall return a String with the stored deviceId.] */
         return this.deviceId;
     }
 
@@ -404,20 +385,17 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setDeviceId(String deviceId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
         setDeviceIdFinal(deviceId);
     }
 
     /**
      * Setter for the deviceId.
      *
-     *
      * @param deviceId the {@code String} with the new deviceID. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided deviceId is {@code null}, empty, or invalid.
      */
     public final void setDeviceIdFinal(String deviceId)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_021: [The setDeviceId shall store the provided deviceId.] */
         this.deviceId = deviceId;
     }
 
@@ -428,7 +406,6 @@ public class IndividualEnrollment extends Serializable
      */
     public DeviceRegistrationState getDeviceRegistrationState()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_022: [The getDeviceRegistrationState shall return a DeviceRegistrationState with the stored registrationState.] */
         return this.registrationState;
     }
 
@@ -441,7 +418,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setRegistrationState(DeviceRegistrationState registrationState)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_024: [The setRegistrationState shall store the provided registrationState.] */
         this.registrationState = registrationState;
     }
 
@@ -453,7 +429,6 @@ public class IndividualEnrollment extends Serializable
      */
     public Attestation getAttestation() throws ProvisioningServiceClientException
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_025: [The getAttestation shall return a AttestationMechanism with the stored attestation.] */
         return this.attestation.getAttestation();
     }
 
@@ -470,7 +445,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setAttestation(AttestationMechanism attestationMechanism)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_027: [The setAttestation shall store the provided attestation.] */
         try
         {
             this.setAttestation(attestationMechanism.getAttestation());
@@ -497,13 +471,11 @@ public class IndividualEnrollment extends Serializable
      */
     public void setAttestation(Attestation attestation)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_050: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
         if (attestation == null)
         {
             throw new IllegalArgumentException("attestation cannot be null");
         }
 
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_051: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
         this.attestation = new AttestationMechanism(attestation);
     }
 
@@ -514,7 +486,6 @@ public class IndividualEnrollment extends Serializable
      */
     public String getIotHubHostName()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_028: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
         return this.iotHubHostName;
     }
 
@@ -537,7 +508,6 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setIotHubHostName(String iotHubHostName)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
 
@@ -557,7 +527,6 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setIotHubHostNameFinal(String iotHubHostName)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_030: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
 
@@ -568,7 +537,6 @@ public class IndividualEnrollment extends Serializable
      */
     public TwinState getInitialTwin()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_031: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
         return this.initialTwin;
     }
 
@@ -584,7 +552,6 @@ public class IndividualEnrollment extends Serializable
      */
     public void setInitialTwin(TwinState initialTwin)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_033: [The setInitialTwin shall store the provided initialTwin.] */
         this.initialTwin = initialTwin;
     }
 
@@ -595,7 +562,6 @@ public class IndividualEnrollment extends Serializable
      */
     public ProvisioningStatus getProvisioningStatus()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_034: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
         return this.provisioningStatus;
     }
 
@@ -614,7 +580,6 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
         this.provisioningStatus = provisioningStatus;
     }
 
@@ -630,7 +595,6 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_036: [The setProvisioningStatus shall store the provided provisioningStatus.] */
         this.provisioningStatus = provisioningStatus;
     }
 
@@ -641,7 +605,6 @@ public class IndividualEnrollment extends Serializable
      */
     public Date getCreatedDateTimeUtc()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_037: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
         return this.createdDateTimeUtcDate;
     }
 
@@ -661,8 +624,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_038: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_039: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
         this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(createdDateTimeUtc);
     }
 
@@ -673,7 +634,6 @@ public class IndividualEnrollment extends Serializable
      */
     public Date getLastUpdatedDateTimeUtc()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_040: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
         return this.lastUpdatedDateTimeUtcDate;
     }
 
@@ -693,8 +653,6 @@ public class IndividualEnrollment extends Serializable
      */
     protected final void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_041: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_042: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
         this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtc);
     }
 
@@ -705,7 +663,6 @@ public class IndividualEnrollment extends Serializable
      */
     public String getEtag()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_046: [The getEtag shall return a String with the stored etag.] */
         return this.etag;
     }
 
@@ -720,7 +677,6 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setEtag(String etag)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
 
@@ -732,13 +688,11 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setEtagFinal(String etag)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_048: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
 
     public DeviceCapabilities getCapabilities()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_054: [This function shall return the saved capabilities.] */
         return this.capabilities;
     }
 
@@ -750,7 +704,6 @@ public class IndividualEnrollment extends Serializable
     @Deprecated
     public void setCapabilities(DeviceCapabilities capabilities)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_053: [This function shall save the provided capabilities.] */
         this.capabilities = capabilities;
     }
 
@@ -759,7 +712,6 @@ public class IndividualEnrollment extends Serializable
      */
     public final void setCapabilitiesFinal(DeviceCapabilities capabilities)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_053: [This function shall save the provided capabilities.] */
         this.capabilities = capabilities;
     }
 
@@ -770,7 +722,6 @@ public class IndividualEnrollment extends Serializable
      */
     public ReprovisionPolicy getReprovisionPolicy()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_057: [This function shall get the reprovision policy.] */
         return this.reprovisionPolicy;
     }
 
@@ -781,7 +732,6 @@ public class IndividualEnrollment extends Serializable
      */
     public void setReprovisionPolicy(ReprovisionPolicy reprovisionPolicy)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_058: [This function shall set the reprovision policy.] */
         this.reprovisionPolicy = reprovisionPolicy;
     }
 
@@ -792,7 +742,6 @@ public class IndividualEnrollment extends Serializable
      */
     public AllocationPolicy getAllocationPolicy()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_059: [This function shall get the allocation policy.] */
         return this.allocationPolicy;
     }
 
@@ -803,7 +752,6 @@ public class IndividualEnrollment extends Serializable
      */
     public void setAllocationPolicy(AllocationPolicy allocationPolicy)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_060: [This function shall set the allocation policy.] */
         this.allocationPolicy = allocationPolicy;
     }
 
@@ -814,7 +762,6 @@ public class IndividualEnrollment extends Serializable
      */
     public Collection<String> getIotHubs()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_061: [This function shall get the iothubs list.] */
         return this.iotHubs;
     }
 
@@ -825,7 +772,6 @@ public class IndividualEnrollment extends Serializable
      */
     public void setIotHubs(Collection<String> iotHubs)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_062: [This function shall set the iothubs list.] */
         this.iotHubs = iotHubs;
     }
 
@@ -836,7 +782,6 @@ public class IndividualEnrollment extends Serializable
      */
     public CustomAllocationDefinition getCustomAllocationDefinition()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_063: [This function shall get the custom allocation definition.] */
         return this.customAllocationDefinition;
     }
 
@@ -847,7 +792,6 @@ public class IndividualEnrollment extends Serializable
      */
     public void setCustomAllocationDefinition(CustomAllocationDefinition customAllocationDefinition)
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_34_064: [This function shall set the custom allocation definition.] */
         this.customAllocationDefinition = customAllocationDefinition;
     }
     
@@ -860,6 +804,6 @@ public class IndividualEnrollment extends Serializable
     @SuppressWarnings("unused")
     IndividualEnrollment()
     {
-        /* SRS_INDIVIDUAL_ENROLLMENT_21_049: [The IndividualEnrollment shall provide an empty constructor to make GSON happy.] */
+        // Empty constructor for gson to use when deserializing
     }
 }

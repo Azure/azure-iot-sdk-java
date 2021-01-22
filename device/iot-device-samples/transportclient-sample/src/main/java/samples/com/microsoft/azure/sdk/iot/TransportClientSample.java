@@ -250,10 +250,6 @@ public class TransportClientSample
             protocol = IotHubClientProtocol.AMQPS_WS;
         }
 
-        String pathToCertificate1 = null;
-        String pathToCertificate2 = null;
-        String pathToCertificate3 = null;
-
         int numRequests = 3;
 
         System.out.println("Successfully read input parameters.");
@@ -261,10 +257,6 @@ public class TransportClientSample
         TransportClient transportClient = new TransportClient(protocol);
 
         DeviceClient client1 = new DeviceClient(connString1, transportClient);
-        if (pathToCertificate1 != null)
-        {
-            client1.setOption("SetCertificatePath", pathToCertificate1);
-        }
         System.out.println("Successfully created an IoT Hub Client 1.");
 
         long time1 = 2400;
@@ -278,10 +270,6 @@ public class TransportClientSample
 
 
         DeviceClient client2 = new DeviceClient(connString2, transportClient);
-        if (pathToCertificate2 != null)
-        {
-            client2.setOption("SetCertificatePath", pathToCertificate2);
-        }
         System.out.println("Successfully created an IoT Hub Client 2.");
 
         long time2 = 2400;
@@ -294,10 +282,6 @@ public class TransportClientSample
         System.out.println("Successfully set message callback for Client 2.");
 
         DeviceClient client3 = new DeviceClient(connString3, transportClient);
-        if (pathToCertificate3 != null)
-        {
-            client3.setOption("SetCertificatePath", pathToCertificate3);
-        }
         System.out.println("Successfully created an IoT Hub client3.");
 
         long time3 = 2400;

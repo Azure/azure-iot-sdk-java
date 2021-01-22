@@ -168,7 +168,7 @@ public final class IotHubSasToken
         }
         else
         {
-            return null;
+            throw new IllegalArgumentException("SasToken hasn't been initialized");
         }
     }
 

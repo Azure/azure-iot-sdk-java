@@ -99,6 +99,9 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
         this.isClosed = true;
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but this code only executes when our config
+    // uses SAS_TOKEN auth, and that is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     private void scheduleRenewal(Reactor reactor)
     {
         int sasTokenRenewalPeriod = this.amqpsSessionHandler.getDeviceClientConfig().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();

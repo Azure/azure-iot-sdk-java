@@ -384,6 +384,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
+    // The warning is for how sessionHandlers.peek() may return null, but for x509 cases, this code only executes
+    // if one session handler is present in the list, so it is a false positive
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void onConnectionLocalOpen(Event event)
     {

@@ -227,7 +227,7 @@ public class IotHubTransport implements IotHubListener
                 }
             }
         }
-        else if (message != null)
+        else
         {
             log.warn("A message was acknowledged by IoT Hub, but this client has no record of sending it ({})", message);
         }
@@ -1102,6 +1102,9 @@ public class IotHubTransport implements IotHubListener
      * If multiplexing, this will close all open device sessions and the amqp connection and then will attempt to re-open all
      * of them.
      */
+    // warning is about how this.getDefaultConfig() may return null. In this case, it never will since we already check
+    // the deviceClientConfigs size prior to getting the default config
+    @SuppressWarnings("ConstantConditions")
     private void reconnect(TransportException transportException)
     {
         long reconnectionStartTimeMillis = System.currentTimeMillis();
@@ -1110,8 +1113,6 @@ public class IotHubTransport implements IotHubListener
         boolean hasReconnectOperationTimedOut = this.hasOperationTimedOut(reconnectionStartTimeMillis);
         RetryDecision retryDecision = null;
 
-        //Codes_SRS_IOTHUBTRANSPORT_34_066: [This function shall attempt to reconnect while this object's state is
-        // DISCONNECTED_RETRYING, the operation hasn't timed out, and the last transport exception is retryable.]
         while (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING
                 && !hasReconnectOperationTimedOut
                 && transportException != null
@@ -1531,11 +1532,17 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
-    /**
-     * @return if the saved sas token has expired and needs manual renewal
-     */
+    // warning is about how getSasTokenAuthentication() may return null. In this case, it never will since we only
+    // check SAS token expiry when using SAS based auth, and there is always a SAS token authentication provider
+    // when using SAS based auth.
+    @SuppressWarnings("ConstantConditions")
     private boolean isSasTokenExpired()
     {
+        if (this.getDefaultConfig() == null)
+        {
+            return false;
+        }
+
         return this.getDefaultConfig().getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN
                 && this.getDefaultConfig().getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary();
     }
@@ -1548,12 +1555,15 @@ public class IotHubTransport implements IotHubListener
     {
         if (startTime == 0)
         {
-            //Codes_SRS_IOTHUBTRANSPORT_34_077: [If the provided start time is 0, this function shall return false.]
             return false;
         }
 
-        //Codes_SRS_IOTHUBTRANSPORT_34_044: [This function shall return if the provided start time was long enough ago
-        // that it has passed the device operation timeout threshold.]
+        if (this.getDefaultConfig() == null)
+        {
+            // multiplexed connection with no registered devices, and that scenario doesn't have a device operation timeout
+            return false;
+        }
+
         return (System.currentTimeMillis() - startTime) > this.getDefaultConfig().getOperationTimeout();
     }
 
@@ -1592,8 +1602,13 @@ public class IotHubTransport implements IotHubListener
 
     private DeviceClientConfig getDefaultConfig()
     {
-        Iterator<DeviceClientConfig> configsIterator = this.deviceClientConfigs.values().iterator();
-        return configsIterator.hasNext() ? configsIterator.next() : null;
+        for (DeviceClientConfig config : this.deviceClientConfigs.values())
+        {
+            return config;
+        }
+
+        // should only happen when using multiplexing client and opening the connection before registering any devices
+        return null;
     }
 
     private void addToWaitingQueue(IotHubTransportPacket packet)
