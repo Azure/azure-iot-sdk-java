@@ -39,7 +39,6 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
     private final Collection<X509Certificate> signerCertificates;
 
     private final String leafCertificatePublicPem;
-    private final String leafPrivateKeyPem;
     private final Collection<String> signerCertificatesPem;
     /**
      * Constructor to build the DICE certs from the simulator
@@ -57,13 +56,12 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         }
 
         this.leafCertificatePublicPem = leafPublicPem;
-        this.leafPrivateKeyPem = leafPrivateKey;
         this.signerCertificatesPem = signerCertificates;
         this.signerCertificates = new LinkedList<>();
         try
         {
             this.leafCertificatePublic = SecurityProviderX509Cert.parsePublicKeyCertificate(leafCertificatePublicPem);
-            this.leafPrivateKey = SecurityProviderX509Cert.parsePrivateKey(leafPrivateKeyPem);
+            this.leafPrivateKey = SecurityProviderX509Cert.parsePrivateKey(leafPrivateKey);
             for (String cert : signerCertificates)
             {
                 this.signerCertificates.add(SecurityProviderX509Cert.parsePublicKeyCertificate(cert));

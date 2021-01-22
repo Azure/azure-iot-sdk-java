@@ -64,7 +64,6 @@ public class QueryCollectionTest
     private static final long expectedTimeout = 10000;
     private static HashMap<String, String> expectedValidRequestHeaders;
     private static HashMap<String, String> expectedValidResponseHeaders;
-    private static HashMap<String, String> expectedResponseHeadersMismatchedType;
     private static HashMap<String, String> expectedResponseHeadersUnknownQueryType;
 
     private static final int expectedPageSize = 22;
@@ -80,7 +79,7 @@ public class QueryCollectionTest
         expectedValidResponseHeaders.put("x-ms-continuation", expectedResponseContinuationToken);
         expectedValidResponseHeaders.put("x-ms-item-type", "raw");
 
-        expectedResponseHeadersMismatchedType = new HashMap<>();
+        HashMap<String, String> expectedResponseHeadersMismatchedType = new HashMap<>();
         expectedResponseHeadersMismatchedType.put("x-ms-continuation", expectedResponseContinuationToken);
         expectedResponseHeadersMismatchedType.put("x-ms-item-type", "twin");
 
