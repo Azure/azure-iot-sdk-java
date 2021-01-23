@@ -162,8 +162,7 @@ public class ProxiedSSLSocket extends SSLSocket
     }
 
     @RequiredArgsConstructor
-    static
-    class HttpConnectResponseReader
+    static class HttpConnectResponseReader
     {
         private boolean alreadyRead = false;
         @NonNull private final InputStream inputStream;

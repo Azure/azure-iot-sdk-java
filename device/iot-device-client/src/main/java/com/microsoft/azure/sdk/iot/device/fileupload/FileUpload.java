@@ -27,7 +27,7 @@ public final class FileUpload
     private final HttpsTransportManager httpsTransportManager;
     private final ScheduledExecutorService taskScheduler;
     private final FileUploadStatusCallBack fileUploadStatusCallBack;
-    private static Queue<FileUploadInProgress> fileUploadInProgressesSet;
+    static Queue<FileUploadInProgress> fileUploadInProgressesSet;
 
     /**
      * CONSTRUCTOR
@@ -112,31 +112,6 @@ public final class FileUpload
         FileUploadTask fileUploadTask = new FileUploadTask(blobName, inputStream, streamLength, httpsTransportManager, fileUploadStatusCallBack, newUpload);
 
         newUpload.setTask(taskScheduler.submit(fileUploadTask));
-    }
-
-    private static final class FileUploadStatusCallBack implements IotHubEventCallback
-    {
-        @Override
-        public synchronized void execute(IotHubStatusCode status, Object context)
-        {
-            if(context instanceof FileUploadInProgress)
-            {
-                FileUploadInProgress uploadInProgress = (FileUploadInProgress) context;
-                uploadInProgress.triggerCallback(status);
-                try
-                {
-                    fileUploadInProgressesSet.remove(context);
-                }
-                catch (ClassCastException | NullPointerException | UnsupportedOperationException e)
-                {
-                    log.error("FileUploadStatusCallBack received callback for unknown FileUpload", e);
-                }
-            }
-            else
-            {
-                log.error("FileUploadStatusCallBack received callback for unknown FileUpload");
-            }
-        }
     }
 
     /**
