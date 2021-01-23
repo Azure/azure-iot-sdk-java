@@ -48,7 +48,7 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
     private final SecurityProvider securityProvider;
     private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
 
-    private class ResponseCallbackImpl implements ResponseCallback
+    private static class ResponseCallbackImpl implements ResponseCallback
     {
         @Override
         public void run(ResponseData responseData, Object context) throws ProvisioningDeviceClientException

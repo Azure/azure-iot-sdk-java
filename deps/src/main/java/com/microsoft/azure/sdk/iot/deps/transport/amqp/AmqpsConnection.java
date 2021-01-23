@@ -518,7 +518,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     /**
      * Class which runs the reactor.
      */
-    private class ReactorRunner implements Callable
+    private static class ReactorRunner implements Callable
     {
         private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final AmqpReactor amqpReactor;

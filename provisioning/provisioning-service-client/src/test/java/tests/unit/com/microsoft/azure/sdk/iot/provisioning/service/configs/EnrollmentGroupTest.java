@@ -61,7 +61,7 @@ public class EnrollmentGroupTest
     private static final Date VALID_DATE = new Date(System.currentTimeMillis()/1000 * 1000);
     private static final String VALID_DATE_AS_STRING = ParserUtility.dateTimeUtcToString(VALID_DATE);
 
-    private final class MockEnrollmentGroup extends EnrollmentGroup
+    private static final class MockEnrollmentGroup extends EnrollmentGroup
     {
         String mockedEnrollmentGroupId;
         AttestationMechanism mockedAttestationMechanism;

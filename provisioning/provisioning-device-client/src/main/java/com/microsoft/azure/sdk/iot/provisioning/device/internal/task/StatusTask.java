@@ -28,7 +28,7 @@ public class StatusTask implements Callable<RegistrationOperationStatusParser>
     private final String operationId;
     private final Authorization authorization;
 
-    private class ResponseCallbackImpl implements ResponseCallback
+    private static class ResponseCallbackImpl implements ResponseCallback
     {
         @Override
         public void run(ResponseData responseData, Object context) throws ProvisioningDeviceClientException
