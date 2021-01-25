@@ -22,8 +22,10 @@ public class IotHubReactor
         this.reactor.setTimeout(10);
         this.reactor.start();
 
+        //noinspection StatementWithEmptyBody
         while (this.reactor.process())
         {
+            // The empty while loop is to ensure that reactor thread runs as long as it has messages to process
         }
         this.reactor.stop();
         this.reactor.process();
