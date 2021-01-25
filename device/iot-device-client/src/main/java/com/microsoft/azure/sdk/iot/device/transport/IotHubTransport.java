@@ -1528,7 +1528,7 @@ public class IotHubTransport implements IotHubListener
         }
         else
         {
-            log.trace("Device {} did not have a connection status change callback registered, so no callback was fired.");
+            log.trace("Device {} did not have a connection status change callback registered, so no callback was fired.", deviceId);
         }
     }
 

@@ -566,7 +566,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         if (this.deviceSessionsOpenedLatches.containsKey(deviceId))
         {
-            log.trace("Device session for device {} opened, counting down the device sessions opening latch");
+            log.trace("Device session for device {} opened, counting down the device sessions opening latch", deviceId);
             this.deviceSessionsOpenedLatches.get(deviceId).countDown();
             this.listener.onMultiplexedDeviceSessionEstablished(this.connectionId, deviceId);
         }
