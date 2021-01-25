@@ -24,7 +24,7 @@ public class X509RegistrationResultParser
      * Class representing X509CertificateInfo
      * https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_x509certificateinfo
      */
-    public class X509CertificateInfo
+    public static class X509CertificateInfo
     {
         private static final String SUBJECT_NAME = "subjectName";
         @SerializedName(SUBJECT_NAME)

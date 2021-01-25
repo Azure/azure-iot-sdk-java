@@ -62,7 +62,7 @@ public class SecurityProviderX509Test
     @Mocked
     X509KeyManager mockedX509KeyManager;
 
-    class SecurityProviderX509TestImpl extends SecurityProviderX509
+    static class SecurityProviderX509TestImpl extends SecurityProviderX509
     {
         private final String cn;
         private final X509Certificate x509Certificate;

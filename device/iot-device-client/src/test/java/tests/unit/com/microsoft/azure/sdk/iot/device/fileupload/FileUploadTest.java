@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadInProgress;
+import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadStatusCallBack;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.*;
@@ -358,7 +359,7 @@ public class FileUploadTest
         final Map<String, Object> context = new HashMap<>();
         constructorExpectations();
         FileUpload fileUpload = new FileUpload(mockConfig);
-        IotHubEventCallback testFileUploadStatusCallBack = Deencapsulation.newInnerInstance("FileUploadStatusCallBack", fileUpload);
+        IotHubEventCallback testFileUploadStatusCallBack = new FileUploadStatusCallBack();
 
         //act
         testFileUploadStatusCallBack.execute(IotHubStatusCode.OK_EMPTY, mockFileUploadInProgress);
@@ -393,7 +394,7 @@ public class FileUploadTest
             }
         };
         FileUpload fileUpload = new FileUpload(mockConfig);
-        IotHubEventCallback testFileUploadStatusCallBack = Deencapsulation.newInnerInstance("FileUploadStatusCallBack", fileUpload);
+        IotHubEventCallback testFileUploadStatusCallBack = new FileUploadStatusCallBack();
 
         //act
         testFileUploadStatusCallBack.execute(IotHubStatusCode.OK_EMPTY, mockFileUploadInProgress);
@@ -424,7 +425,7 @@ public class FileUploadTest
             }
         };
         FileUpload fileUpload = new FileUpload(mockConfig);
-        IotHubEventCallback testFileUploadStatusCallBack = Deencapsulation.newInnerInstance("FileUploadStatusCallBack", fileUpload);
+        IotHubEventCallback testFileUploadStatusCallBack = new FileUploadStatusCallBack();
 
         //act
         testFileUploadStatusCallBack.execute(IotHubStatusCode.OK_EMPTY, mockFileUploadInProgress);

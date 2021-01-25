@@ -472,7 +472,6 @@ public class MultiplexingClient
                 if (deviceAlreadyRegistered)
                 {
                     log.debug("Device {} wasn't registered to the multiplexed connection because it is already registered.", configToAdd.getDeviceId());
-                    continue;
                 }
                 else
                 {

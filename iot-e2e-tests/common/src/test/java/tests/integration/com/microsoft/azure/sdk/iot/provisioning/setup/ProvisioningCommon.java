@@ -195,7 +195,7 @@ public class ProvisioningCommon extends IntegrationTest
 
     public ProvisioningTestInstance testInstance;
 
-    public class ProvisioningTestInstance
+    public static class ProvisioningTestInstance
     {
         public ProvisioningDeviceClientTransportProtocol protocol;
         public AttestationType attestationType;
@@ -272,7 +272,7 @@ public class ProvisioningCommon extends IntegrationTest
         }
     }
 
-    public class ProvisioningStatus
+    public static class ProvisioningStatus
     {
         public ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationResult();
         public Exception exception;
