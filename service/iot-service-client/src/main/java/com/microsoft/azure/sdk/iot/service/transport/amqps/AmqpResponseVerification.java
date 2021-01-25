@@ -12,8 +12,6 @@ import org.apache.qpid.proton.amqp.transport.AmqpError;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.ErrorCondition;
 
-import java.util.Map;
-
 public class AmqpResponseVerification implements AmqpError
 {
     private Symbol errorCondition = null;
