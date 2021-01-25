@@ -339,11 +339,6 @@ public class BaseDevice
     }
 
     /**
-     * Flip-flop helper for sending a forced update
-     */
-    private Boolean forceUpdate;
-
-    /**
      * Setter for force update boolean
      *
      * @param forceUpdate - Boolean controlling if the update should be forced or not
@@ -355,8 +350,6 @@ public class BaseDevice
         {
             throw new IllegalArgumentException();
         }
-
-        this.forceUpdate = forceUpdate;
     }
 
     /*

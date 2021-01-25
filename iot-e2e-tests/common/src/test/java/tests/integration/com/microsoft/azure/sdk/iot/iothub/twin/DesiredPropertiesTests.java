@@ -341,7 +341,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     }
 
     @AllArgsConstructor
-    class TwinPropertiesCallbackImpl implements TwinPropertiesCallback
+    static class TwinPropertiesCallbackImpl implements TwinPropertiesCallback
     {
         TwinCollection expectedProperties;
 

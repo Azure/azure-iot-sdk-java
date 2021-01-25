@@ -55,7 +55,7 @@ public class ServiceClientTests extends IntegrationTest
         this.testInstance = new ServiceClientITRunner(protocol);
     }
 
-    private class ServiceClientITRunner
+    private static class ServiceClientITRunner
     {
         private final IotHubServiceClientProtocol protocol;
         private final String deviceId;

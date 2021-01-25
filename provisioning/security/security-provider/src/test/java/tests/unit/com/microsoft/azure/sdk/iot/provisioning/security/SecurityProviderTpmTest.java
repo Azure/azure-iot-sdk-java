@@ -61,7 +61,7 @@ public class SecurityProviderTpmTest
     @Mocked
     UUID mockedUUID;
 
-    class SecurityProviderTPMTestImpl extends SecurityProviderTpm
+    static class SecurityProviderTPMTestImpl extends SecurityProviderTpm
     {
         byte[] ek;
 

@@ -147,7 +147,7 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
-    public class HubTierConnectionTestInstance
+    public static class HubTierConnectionTestInstance
     {
         public DeviceClient client;
         public IotHubClientProtocol protocol;

@@ -282,15 +282,6 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
 
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION));
-
-        final char[] actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
-
-        assertEquals(expectedSasToken, actualUserPassword);
-
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
         assertEquals(expectedState, actualState);
@@ -328,15 +319,6 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
-
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&model-id=" + modelId));
-
-        final char[] actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
-
-        assertEquals(expectedSasToken, actualUserPassword);
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -381,14 +363,6 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
 
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&"));
-
-        char[] actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
-
-        assertEquals(expectedToken, actualUserPassword);
-
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
         assertEquals(expectedState, actualState);
@@ -427,10 +401,6 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
-
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&"));
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");

@@ -66,7 +66,7 @@ public class RegistryManagerTests extends IntegrationTest
 
     public RegistryManagerTests.RegistryManagerTestInstance testInstance;
 
-    public class RegistryManagerTestInstance
+    public static class RegistryManagerTestInstance
     {
         public String deviceId;
         public String moduleId;

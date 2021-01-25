@@ -119,7 +119,7 @@ public class FileUploadTests extends IntegrationTest
 
     public FileUploadTestInstance testInstance;
 
-    public class FileUploadTestInstance
+    public static class FileUploadTestInstance
     {
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;

@@ -22,7 +22,7 @@ public class ThrottleResistantTestRule implements TestRule
         return new ThrottleResistantStatement(base, description);
     }
 
-    private class ThrottleResistantStatement extends Statement {
+    private static class ThrottleResistantStatement extends Statement {
 
         private final Statement base;
         private final Description description;

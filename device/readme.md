@@ -33,6 +33,6 @@ This folder contains the client library for Java.
 This folder contains various Java samples that illustrate how to use the client library.
 
 [devbox-setup]: ../doc/java-devbox-setup.md
-[run-java-sample]: ./iot-device-samples/
-[how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted/
-[java-api-reference]: https://azure.github.io/azure-iot-sdk-java/master/device/
+[run-java-sample]: ./iot-device-samples
+[how-to-build-a-java-app-from-scratch]: https://azure.microsoft.com/documentation/articles/iot-hub-java-java-getstarted
+[java-api-reference]: https://azure.github.io/azure-iot-sdk-java/master/device
