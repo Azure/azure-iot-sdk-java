@@ -7,7 +7,6 @@
         <version>0.26.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-e2e-common</artifactId>
     <name>IoT Hub Java SDK common</name>
     <version>0.26.0</version>

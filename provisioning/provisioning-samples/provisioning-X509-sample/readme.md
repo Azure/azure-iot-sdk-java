@@ -414,7 +414,7 @@ This part of the tutorial builds on top of the code you wrote in the previous se
 ```
 
 
-[azure-portal]: www.portal.azure.com
+[azure-portal]: https://www.portal.azure.com
 [x509-cert-generator]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-tools/provisioning-x509-cert-generator
 [povisioning-device-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-device-client
 [povisioning-service-client]:https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client

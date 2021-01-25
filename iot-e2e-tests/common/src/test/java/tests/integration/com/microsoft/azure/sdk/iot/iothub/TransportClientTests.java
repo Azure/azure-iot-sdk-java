@@ -862,7 +862,7 @@ public class TransportClientTests extends IntegrationTest
         DeviceTwinDevice sCDeviceForTwin;
     }
 
-    class PropertyState
+    static class PropertyState
     {
         boolean callBackTriggered;
         Property property;

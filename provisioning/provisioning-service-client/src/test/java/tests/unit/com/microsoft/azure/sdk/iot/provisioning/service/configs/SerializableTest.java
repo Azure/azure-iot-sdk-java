@@ -22,7 +22,7 @@ public class SerializableTest
             "    \"prop3\":\"val3\"" +
             "}";
 
-    final class mockedChild extends Serializable
+    static final class mockedChild extends Serializable
     {
         protected JsonElement toJsonElement()
         {

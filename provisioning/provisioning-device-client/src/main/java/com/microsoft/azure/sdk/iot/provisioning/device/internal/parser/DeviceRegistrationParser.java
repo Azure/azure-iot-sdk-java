@@ -28,7 +28,7 @@ public class DeviceRegistrationParser
     /**
      * Inner class describing TPM Attestation i.e it holds EndorsementKey and StorageRootKey
      */
-    class TpmAttestation
+    static class TpmAttestation
     {
         private final String endorsementKey;
         private final String storageRootKey;

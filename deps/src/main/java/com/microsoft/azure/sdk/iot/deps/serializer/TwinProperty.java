@@ -33,7 +33,7 @@ public class TwinProperty
 
     private final Object lock = new Object();
 
-    private class Property
+    private static class Property
     {
         private final Object value;
         private final TwinMetadata metadata;

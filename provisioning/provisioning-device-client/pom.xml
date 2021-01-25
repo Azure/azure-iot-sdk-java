@@ -9,7 +9,6 @@
         <version>1.8.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
     <artifactId>${provisioning-device-client-artifact-id}</artifactId>
     <name>Provisioning Device Client</name>
     <version>${provisioning-device-client-version}</version>

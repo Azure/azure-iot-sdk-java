@@ -36,6 +36,11 @@
         </plugins>
     </build>
     <dependencies>
+        <!--suppress MavenDuplicateDependenciesInspection -->
+        <!--
+        This duplicate dependency declaration is only here so that it can demonstrate how to exclude
+        bouncycastle dependency from the device client library.
+        -->
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>${iot-device-client-artifact-id}</artifactId>

@@ -273,7 +273,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         }
     }
 
-    public class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    public static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public IotHubMessageResult execute(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
         {

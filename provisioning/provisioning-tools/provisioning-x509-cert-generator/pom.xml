@@ -6,7 +6,6 @@
         <version>1.8.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.provisioning.tools</groupId>
     <artifactId>provisioning-x509-cert-generator</artifactId>
     <name>Provisioning X509 cert generator</name>
     <version>1.8.1</version>

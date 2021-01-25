@@ -16,7 +16,7 @@ public class DigitalTwinTestRule implements TestRule {
         return new IgnorableStatement(base, description);
     }
 
-    private class IgnorableStatement extends Statement {
+    private static class IgnorableStatement extends Statement {
 
         private final Statement base;
         private final Description description;

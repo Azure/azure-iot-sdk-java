@@ -31,7 +31,7 @@ public class IotHubAuthenticationProviderTest
     private static final String expectedDeviceId = "deviceId";
     private static final String expectedModuleId = "moduleId";
     
-    private class IotHubAuthenticationProviderMock extends IotHubAuthenticationProvider
+    private static class IotHubAuthenticationProviderMock extends IotHubAuthenticationProvider
     {
         public IotHubAuthenticationProviderMock(String hostname, String gatewayHostname, String deviceId, String moduleId)
         {

@@ -1235,7 +1235,7 @@ public class IotHubTransport implements IotHubListener
     /**
      * Task for adding a packet back to the waiting queue. Used for delaying message retry
      */
-    public class MessageRetryRunnable implements Runnable
+    public static class MessageRetryRunnable implements Runnable
     {
         final IotHubTransportPacket transportPacket;
         final Queue<IotHubTransportPacket> waitingPacketsQueue;
