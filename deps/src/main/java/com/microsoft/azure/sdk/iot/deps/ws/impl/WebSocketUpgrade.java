@@ -308,8 +308,6 @@ public class WebSocketUpgrade
                 {
                     isAcceptHeaderOk = true;
                 }
-
-                continue;
             }
         }
 
