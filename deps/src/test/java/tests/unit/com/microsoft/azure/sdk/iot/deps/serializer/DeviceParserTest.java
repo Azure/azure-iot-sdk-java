@@ -29,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(JMockit.class)
 public class DeviceParserTest
 {
-    private static Date validDate;
     private static String validDateString;
     private static final String SIMPLEDATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
@@ -43,7 +42,7 @@ public class DeviceParserTest
     @Before
     public void setUp() throws ParseException
     {
-        validDate = new Date();
+        Date validDate = new Date();
         validDateString =  new SimpleDateFormat(SIMPLEDATEFORMAT).format(validDate);
     }
 

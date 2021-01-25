@@ -122,7 +122,7 @@ public class DeviceMethodCommon extends IntegrationTest
         this.testInstance = new DeviceMethodTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    public class DeviceMethodTestInstance
+    public static class DeviceMethodTestInstance
     {
         public DeviceTestManager deviceTestManager;
         public IotHubClientProtocol protocol;

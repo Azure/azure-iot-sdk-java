@@ -178,7 +178,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
             // To get around it, we just nested the meaningful exception into an IOException. The multiplexing client doesn't
             // have to do the same thing though, so this code un-nests the exception when possible.
             Throwable cause = e.getCause();
-            if (cause != null && cause instanceof TransportException)
+            if (cause instanceof TransportException)
             {
                 throw (TransportException) cause;
             }

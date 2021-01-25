@@ -202,7 +202,7 @@ public class DeviceTwinCommon extends IntegrationTest
         public IotHubStatusCode deviceTwinStatus;
     }
 
-    public class PropertyState
+    public static class PropertyState
     {
         public boolean callBackTriggered;
         public Property property;
@@ -433,7 +433,7 @@ public class DeviceTwinCommon extends IntegrationTest
         this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    public class DeviceTwinTestInstance
+    public static class DeviceTwinTestInstance
     {
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;

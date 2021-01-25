@@ -19,7 +19,7 @@ import static junit.framework.TestCase.assertFalse;
 
 public class IotHubSasTokenWithRefreshAuthenticationProviderTest
 {
-    private class IotHubImplSasTokenWithRefreshAuthenticationProvider extends IotHubSasTokenWithRefreshAuthenticationProvider
+    private static class IotHubImplSasTokenWithRefreshAuthenticationProvider extends IotHubSasTokenWithRefreshAuthenticationProvider
     {
         @SuppressWarnings("SameParameterValue") // Since this is a constructor, the constructor params can be passed any value.
         protected IotHubImplSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage)
