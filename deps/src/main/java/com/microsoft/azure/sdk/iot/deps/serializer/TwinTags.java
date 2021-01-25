@@ -35,7 +35,7 @@ public class TwinTags
     protected synchronized JsonElement update(Map<String, Object> tagsMap) throws IllegalArgumentException
     {
         JsonElement innerDiff = updateFromMap(tagsMap, tags);
-        if((innerDiff == null) || (innerDiff.toString().equals("{}")))
+        if(innerDiff.toString().equals("{}"))
         {
             return null;
         }
@@ -82,7 +82,7 @@ public class TwinTags
                             oldMap.put(key, new HashMap<String, Object>());
                         }
                         JsonElement innerDiff = updateFromMap((Map<String, Object>)newValue, (Map<String, Object>)oldMap.get(key));
-                        if((innerDiff != null) && (!innerDiff.toString().equals("{}")))
+                        if(!innerDiff.toString().equals("{}"))
                         {
                             diffJson.add(key, innerDiff);
                         }
