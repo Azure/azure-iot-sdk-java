@@ -6,7 +6,6 @@
         <version>1.18.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>${iot-service-client-artifact-id}</artifactId>
     <name>Iot Hub Java Service SDK</name>
     <version>${iot-service-client-version}</version>
