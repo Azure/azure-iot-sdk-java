@@ -108,7 +108,7 @@ public class ServiceClientTest
         {
             {
                 iotHubServiceSasToken = new IotHubServiceSasToken(withNotNull());
-                amqpSend = new AmqpSend(anyString, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any);
+                amqpSend = new AmqpSend(anyString, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any, (SSLContext) any);
             }
         };
         // Act
