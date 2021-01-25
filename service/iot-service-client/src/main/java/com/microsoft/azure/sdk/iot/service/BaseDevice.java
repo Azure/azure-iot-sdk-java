@@ -390,6 +390,7 @@ public class BaseDevice
         deviceParser.setAuthenticationParser(new AuthenticationParser());
         deviceParser.getAuthenticationParser().setType(AuthenticationTypeParser.valueOf(this.authentication.getAuthenticationType().toString()));
 
+        //noinspection StatementWithEmptyBody
         if (this.authentication.getAuthenticationType() == AuthenticationType.CERTIFICATE_AUTHORITY)
         {
             // do nothing
@@ -468,6 +469,8 @@ public class BaseDevice
         }
 
         this.authentication = new AuthenticationMechanism(authenticationType);
+
+        //noinspection StatementWithEmptyBody
         if (authenticationType == AuthenticationType.CERTIFICATE_AUTHORITY)
         {
             //do nothing

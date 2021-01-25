@@ -532,7 +532,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
         public Object call()
         {
             Thread.currentThread().setName(THREAD_NAME);
-            log.trace("Amqp reactor thread {} has finished", THREAD_NAME);
+            log.trace("Amqp reactor thread {} has started", THREAD_NAME);
 
             try
             {

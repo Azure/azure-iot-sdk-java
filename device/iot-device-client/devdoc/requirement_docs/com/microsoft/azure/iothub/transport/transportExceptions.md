@@ -22,15 +22,15 @@ protected static class IotHubConnectionStatusChangeCallbackLogger implements Iot
 
         if (status == IotHubConnectionStatus.DISCONNECTED)
         {
-            //connection was lost, and is not being re-established. Look at provided exception for how to resolve this issue. 
+            System.out.println("The connection was lost, and is not being re-established. Look at provided exception for how to resolve this issue."); 
         }
         else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
         {
-            //connection was lost, but is being re-established. 
+            System.out.println(" The connection was lost, but is being re-established."); 
         }
         else if (status == IotHubConnectionStatus.CONNECTED)
         {
-            //Connection was successfully re-established. 
+            System.out.println(" The connection was successfully established."); 
         }
     }
 }
