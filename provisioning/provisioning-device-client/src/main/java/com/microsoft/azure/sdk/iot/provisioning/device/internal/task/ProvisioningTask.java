@@ -142,7 +142,7 @@ public class ProvisioningTask implements Callable<Object>
         Thread.sleep(provisioningDeviceClientContract.getRetryValue());
         StatusTask statusTask = new StatusTask(securityProvider, provisioningDeviceClientContract, operationId,
                                                this.authorization);
-        FutureTask<RegistrationOperationStatusParser> futureStatusTask = new FutureTask<RegistrationOperationStatusParser>(statusTask);
+        FutureTask<RegistrationOperationStatusParser> futureStatusTask = new FutureTask<>(statusTask);
         executor.submit(futureStatusTask);
         RegistrationOperationStatusParser statusRegistrationOperationStatusParser =  futureStatusTask.get(MAX_TIME_TO_WAIT_FOR_STATUS_UPDATE, TimeUnit.MILLISECONDS);
 

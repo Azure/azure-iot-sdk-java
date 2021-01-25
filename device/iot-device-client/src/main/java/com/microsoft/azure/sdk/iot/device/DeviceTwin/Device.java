@@ -14,9 +14,6 @@ abstract public class Device implements PropertyCallBack<String, Object>
 
     public HashSet<Property> getReportedProp()
     {
-        /*
-        **Codes_SRS_DEVICE_25_001: [**This method shall return a HashSet of properties that user has set by calling hasReportedProp.**]**
-         */
         return reportedProp;
     }
 
@@ -29,15 +26,9 @@ abstract public class Device implements PropertyCallBack<String, Object>
     {
         if (reportedProp == null)
         {
-            /*
-            **Codes_SRS_DEVICE_25_004: [**If the parameter reportedProp is null then this method shall throw IllegalArgumentException**]**
-             */
             throw new IllegalArgumentException("Reported property cannot be null");
         }
-        /*
-        **Codes_SRS_DEVICE_25_002: [**The function shall add the new property to the map.**]**
-        **Codes_SRS_DEVICE_25_003: [**If the already existing property is altered and added then the this method shall replace the old one.**]**
-         */
+
         Property duplicateProperty = null;
         for (Property property : this.reportedProp)
         {
@@ -58,9 +49,6 @@ abstract public class Device implements PropertyCallBack<String, Object>
 
     public HashMap<Property, Pair<PropertyCallBack<String, Object>, Object>> getDesiredProp()
     {
-        /*
-        **Codes_SRS_DEVICE_25_005: [**The function shall return the HashMap containing the property and its callback and context pair set by the user so far.**]**
-         */
         return this.desiredProp;
     }
 
@@ -68,37 +56,24 @@ abstract public class Device implements PropertyCallBack<String, Object>
     {
         if (desiredProp  == null)
         {
-            /*
-            **Codes_SRS_DEVICE_25_007: [**If the parameter desiredProp is null then this method shall throw IllegalArgumentException**]**
-             */
             throw new IllegalArgumentException("desired property cannot be null");
         }
-        /*
-        **Codes_SRS_DEVICE_25_006: [**The function shall add the property and its callback and context pair to the user map of desired properties.**]**
-        **Codes_SRS_DEVICE_25_008: [**This method shall add the parameters to the map even if callback and object pair are null**]**
-         */
+
         this.desiredProp.put(desiredProp, new Pair<>(desiredPropCallBack, desiredPropCallBackContext));
     }
 
     public void clean()
     {
-        //Codes_SRS_DEVICE_34_009: [The method shall remove all the reported and desired properties set by the user so far.]
-        if (reportedProp != null)
+        for (Iterator repProperty = reportedProp.iterator(); repProperty.hasNext();)
         {
-            for (Iterator repProperty = reportedProp.iterator(); repProperty.hasNext();)
-            {
-                repProperty.next();
-                repProperty.remove();
-            }
+            repProperty.next();
+            repProperty.remove();
         }
 
-        if (desiredProp != null)
+        for (Iterator desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext();)
         {
-            for (Iterator desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext();)
-            {
-                desiredProperty.next();
-                desiredProperty.remove();
-            }
+            desiredProperty.next();
+            desiredProperty.remove();
         }
     }
 }

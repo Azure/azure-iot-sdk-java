@@ -121,7 +121,6 @@ public final class FileUploadTask implements Runnable
     {
         Thread.currentThread().setName(THREAD_NAME);
 
-        FileUploadCompletionNotification fileUploadCompletionNotification = null;
         FileUploadSasUriResponse sasUriResponse;
 
         try
@@ -135,6 +134,8 @@ public final class FileUploadTask implements Runnable
             return;
         }
 
+        FileUploadCompletionNotification fileUploadCompletionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false, -1, "Failed to upload to storage.");
+
         try
         {
             CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
@@ -144,7 +145,6 @@ public final class FileUploadTask implements Runnable
         catch (StorageException | IOException | IllegalArgumentException | URISyntaxException e)
         {
             log.error("File upload failed to upload the stream to the blob", e);
-            fileUploadCompletionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), false, -1, "Failed to upload to storage.");
         }
         finally
         {

@@ -483,6 +483,9 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         }
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, the fact that this method is only called
+    // when using SAS based authentication is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     private String getSasToken() throws TransportException
     {
         try

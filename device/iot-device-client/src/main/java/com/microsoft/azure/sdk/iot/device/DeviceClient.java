@@ -917,6 +917,9 @@ public final class DeviceClient extends InternalClient implements Closeable
         super.setOption(optionName, value);
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     @Override
     void setOption_SetSASTokenExpiryTime(Object value) throws IllegalArgumentException
     {

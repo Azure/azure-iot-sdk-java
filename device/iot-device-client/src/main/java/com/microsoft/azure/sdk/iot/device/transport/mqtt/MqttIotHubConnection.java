@@ -78,12 +78,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             {
                 throw new IllegalArgumentException("deviceID cannot be null or empty.");
             }
-            if (config.getIotHubName() == null || config.getIotHubName().length() == 0)
-            {
-                throw new IllegalArgumentException("hubName cannot be null or empty.");
-            }
 
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
             this.config = config;
             this.deviceMessaging = null;
             this.deviceMethod = null;
@@ -98,14 +93,15 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      *
      * @throws TransportException if a connection could not to be established.
      */
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     public void open() throws TransportException
     {
         connectionId = UUID.randomUUID().toString();
 
         synchronized (MQTT_CONNECTION_LOCK)
         {
-            //Codes_SRS_MQTTIOTHUBCONNECTION_15_006: [If the MQTT connection is already open,
-            // the function shall do nothing.]
             if (this.state == IotHubConnectionStatus.CONNECTED)
             {
                 return;
@@ -113,8 +109,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             log.debug("Opening MQTT connection...");
 
-            // Codes_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection
-            // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
             try
             {
                 SSLContext sslContext = this.config.getAuthenticationProvider().getSSLContext();
@@ -139,7 +133,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 String moduleId = this.config.getModuleId();
                 if (moduleId != null && !moduleId.isEmpty())
                 {
-                    //Codes_SRS_MQTTIOTHUBCONNECTION_34_065: [If the config contains a module id, this function shall create the clientId for the connection to be <deviceId>/<moduleId>.]
                     clientId += "/" + moduleId;
                 }
 
@@ -164,7 +157,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 MqttConnection mqttConnection;
                 if (this.config.isUseWebsocket())
                 {
-                    //Codes_SRS_MQTTIOTHUBCONNECTION_25_018: [The function shall establish an MQTT WS connection with a server uri as wss://<hostName>/$iothub/websocket?iothub-no-client-cert=true if websocket was enabled.]
                     final String wsServerUri;
                     if (this.webSocketQueryString == null)
                     {
@@ -180,13 +172,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 }
                 else
                 {
-                    //Codes_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
                     final String serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
                     mqttConnection = new MqttConnection(serverUri,
                             clientId, iotHubUserName, this.iotHubUserPassword, sslContext, null);
                 }
 
-                //Codes_SRS_MQTTIOTHUBCONNECTION_34_030: [This function shall instantiate this object's MqttMessaging object with this object as the listener.]
                 String deviceId = this.config.getDeviceId();
                 this.deviceMessaging = new MqttMessaging(mqttConnection, deviceId, this.listener, this, this.connectionId, this.config.getModuleId(), this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(), unacknowledgedSentMessages);
                 mqttConnection.setMqttCallback(this.deviceMessaging);
@@ -198,15 +188,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
                 log.debug("MQTT connection opened successfully");
 
-                //Codes_SRS_MQTTIOTHUBCONNECTION_34_065: [If the connection opens successfully, this function shall notify the listener that connection was established.]
                 this.listener.onConnectionEstablished(this.connectionId);
             }
             catch (IOException e)
             {
                 log.error("Exception encountered while opening MQTT connection; closing connection", e);
                 this.state = IotHubConnectionStatus.DISCONNECTED;
-                // Codes_SRS_MQTTIOTHUBCONNECTION_15_005: [If an MQTT connection is unable to be established
-                // for any reason, the function shall throw a TransportException.]
                 if (this.deviceMethod != null)
                 {
                     this.deviceMethod.stop();

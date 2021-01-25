@@ -163,15 +163,16 @@ public class InternalClient
         this.deviceIO = null;
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     public void open() throws IOException
     {
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
-            //Codes_SRS_INTERNALCLIENT_34_044: [If the SAS token has expired before this call, throw a Security Exception]
             throw new SecurityException("Your SasToken is expired");
         }
 
-        //Codes_SRS_INTERNALCLIENT_21_006: [The open shall open the deviceIO connection.]
         this.deviceIO.open();
     }
 
@@ -496,6 +497,9 @@ public class InternalClient
      * @param value an object of the appropriate type for the option's value
      * @throws IllegalArgumentException if the provided optionName is null
      */
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     public void setOption(String optionName, Object value)
     {
         if (optionName == null)
@@ -970,6 +974,9 @@ public class InternalClient
         }
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     void setOption_SetSASTokenExpiryTime(Object value)
     {
         if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)

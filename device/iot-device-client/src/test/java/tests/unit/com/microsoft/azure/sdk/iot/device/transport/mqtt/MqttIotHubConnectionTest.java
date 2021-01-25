@@ -216,46 +216,6 @@ public class MqttIotHubConnectionTest
         new MqttIotHubConnection(mockConfig);
     }
 
-    // Tests_SRS_MQTTIOTHUBCONNECTION_15_003: [The constructor shall throw a new IllegalArgumentException
-    // if any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfSasTokenIsEmpty() throws TransportException
-    {
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = iotHubHostName;
-                mockConfig.getIotHubName();
-                result = "";
-                mockConfig.getDeviceId();
-                result = deviceId;
-            }
-        };
-
-        new MqttIotHubConnection(mockConfig);
-    }
-
-    // Tests_SRS_MQTTIOTHUBCONNECTION_15_003: [The constructor shall throw a new IllegalArgumentException
-    // if any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfSasTokenIsNull() throws TransportException
-    {
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = iotHubHostName;
-                mockConfig.getIotHubName();
-                result = null;
-                mockConfig.getDeviceId();
-                result = deviceId;
-            }
-        };
-
-        new MqttIotHubConnection(mockConfig);
-    }
-
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection with an IoT Hub
     // using the provided host name, user name, device ID, and sas token.]
     // Tests_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
@@ -1137,8 +1097,6 @@ public class MqttIotHubConnectionTest
                 result = expectedModuleId;
                 mockConfig.getIotHubHostname();
                 result = "hostname.com";
-                mockConfig.getIotHubName();
-                result = "hostname";
                 mockConfig.getProductInfo();
                 result = mockedProductInfo;
                 mockedProductInfo.getUserAgentString();

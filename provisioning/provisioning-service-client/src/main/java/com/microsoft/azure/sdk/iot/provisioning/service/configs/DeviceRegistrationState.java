@@ -52,14 +52,16 @@ public class DeviceRegistrationState
     private static final String CREATED_DATETIME_UTC_TAG = "createdDateTimeUtc";
     @Expose
     @SerializedName(CREATED_DATETIME_UTC_TAG)
-    private final String createdDateTimeUtc = null;
+    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
+    private String createdDateTimeUtc;
     private transient Date createdDateTimeUtcDate;
 
     // last update date and time
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
     @Expose
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
-    private final String lastUpdatedDateTimeUtc = null;
+    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
+    private String lastUpdatedDateTimeUtc;
     private transient Date lastUpdatedDateTimeUtcDate;
 
     // assigned hub
@@ -104,77 +106,60 @@ public class DeviceRegistrationState
      */
     public DeviceRegistrationState(String json)
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_001: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_002: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_DEVICE_REGISTRATION_STATE_21_003: [The constructor shall deserialize the provided JSON for the DeviceRegistrationState class.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         DeviceRegistrationState result = gson.fromJson(json, DeviceRegistrationState.class);
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_005: [The constructor shall store the provided registrationId.] */
         this.registrationId = result.registrationId;
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_006: [The constructor shall throw IllegalArgumentException if the provided deviceId is empty, or invalid.] */
-        if(result.deviceId != null)
+        if (result.deviceId != null)
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_007: [The constructor shall store the provided deviceId.] */
             this.deviceId = result.deviceId;
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_008: [If the createdDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
-        if(result.createdDateTimeUtc != null)
+        if (result.createdDateTimeUtc != null)
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_031: [Te constructor shall throw IllegalArgumentException if the createdDateTimeUtc is empty or invalid.] */
             this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(result.createdDateTimeUtc);
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_009: [If the lastUpdatedDateTimeUtc is provided, the constructor shall parse it as date and time UTC.] */
-        if(result.lastUpdatedDateTimeUtc != null)
+        if (result.lastUpdatedDateTimeUtc != null)
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_032: [Te constructor shall throw IllegalArgumentException if the lastUpdatedDateTimeUtc is empty or invalid.] */
             this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(result.lastUpdatedDateTimeUtc);
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_010: [If the assignedHub is not null, the constructor shall judge and store it.] */
-        if(result.assignedHub != null)
+        if (result.assignedHub != null)
         {
             this.assignedHub = result.assignedHub;
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_014: [The constructor shall throw IllegalArgumentException if the provided status is invalid.] */
-        if(result.status == null)
+        if (result.status == null)
         {
-            if(json.contains(QUOTED_STATE_TAG))
+            if (json.contains(QUOTED_STATE_TAG))
             {
                 throw new IllegalArgumentException("status is nor valid");
             }
         }
         else
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_015: [If the errorCode is not null, the constructor shall store the provided status.] */
             this.status = result.status;
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_016: [If the errorCode is not null, the constructor shall store it.] */
-        if(result.errorCode != null)
+        if (result.errorCode != null)
         {
             this.errorCode = result.errorCode;
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_017: [If the errorMessage is not null, the constructor shall store it.] */
-        if(result.errorMessage != null)
+        if (result.errorMessage != null)
         {
             this.errorMessage = result.errorMessage;
         }
 
-        /* SRS_DEVICE_REGISTRATION_STATE_21_018: [If the etag is not null, the constructor shall judge and store it.] */
-        if(result.etag != null)
+        if (result.etag != null)
         {
-            /* SRS_DEVICE_REGISTRATION_STATE_21_019: [The constructor shall throw IllegalArgumentException if an provided etag is empty or invalid.] */
             ParserUtility.validateStringUTF8(result.etag);
             this.etag = result.etag;
         }
@@ -187,7 +172,6 @@ public class DeviceRegistrationState
      */
     public String getRegistrationId()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_020: [The getRegistrationId shall return a String with the stored registrationId.] */
         return this.registrationId;
     }
 
@@ -198,7 +182,6 @@ public class DeviceRegistrationState
      */
     public String getDeviceId()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_021: [The getDeviceId shall return a String with the stored deviceId.] */
         return this.deviceId;
     }
 
@@ -209,7 +192,6 @@ public class DeviceRegistrationState
      */
     public Date getCreatedDateTimeUtc()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_022: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtc.] */
         return this.createdDateTimeUtcDate;
     }
 
@@ -220,7 +202,6 @@ public class DeviceRegistrationState
      */
     public Date getLastUpdatedDateTimeUtc()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_023: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtc.] */
         return this.lastUpdatedDateTimeUtcDate;
     }
 
@@ -231,7 +212,6 @@ public class DeviceRegistrationState
      */
     public String getAssignedHub()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_024: [The getAssignedHub shall return a String with the stored assignedHub.] */
         return this.assignedHub;
     }
 
@@ -242,7 +222,6 @@ public class DeviceRegistrationState
      */
     public EnrollmentStatus getStatus()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_026: [The getStatus shall return an EnrollmentStatus with the stored status.] */
         return this.status;
     }
 
@@ -253,7 +232,6 @@ public class DeviceRegistrationState
      */
     public Integer getErrorCode()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_027: [The getErrorCode shall return a Integer with the stored errorCode.] */
         return this.errorCode;
     }
 
@@ -264,7 +242,6 @@ public class DeviceRegistrationState
      */
     public String getErrorMessage()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_028: [The getErrorMessage shall return a String with the stored errorMessage.] */
         return this.errorMessage;
     }
 
@@ -275,7 +252,6 @@ public class DeviceRegistrationState
      */
     public String getEtag()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_029: [The getEtag shall return a String with the stored etag.] */
         return this.etag;
     }
 
@@ -289,6 +265,6 @@ public class DeviceRegistrationState
     @SuppressWarnings("unused")
     DeviceRegistrationState()
     {
-        /* SRS_DEVICE_REGISTRATION_STATE_21_030: [The DeviceRegistrationState shall provide an empty constructor to make GSON happy.] */
+        // Empty constructor for gson to use when deserializing
     }
 }
