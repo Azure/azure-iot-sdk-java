@@ -111,7 +111,7 @@ public class MultiplexingSample
             deviceManagers.put(deviceId, new DeviceClientManager(clientToMultiplex, multiplexingClientManager));
         }
 
-        System.out.println("Opening multiplexed connection");
+        System.out.println("Opening multiplexed connection for " + deviceManagers.size() + " devices.");
         // All previously registered device clients will be opened alongside this multiplexing client
         try
         {

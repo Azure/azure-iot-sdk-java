@@ -25,6 +25,7 @@ public class ProvisioningErrorParser
     private String message;
 
     private static final String INFO = "info";
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection") // "info" is populated by reflection during json deserialization
     @SerializedName(INFO)
     private Map<String, String> info;
 
