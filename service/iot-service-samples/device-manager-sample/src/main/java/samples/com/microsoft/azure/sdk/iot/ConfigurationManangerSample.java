@@ -102,8 +102,8 @@ public class ConfigurationManangerSample
         Configuration config = new Configuration(SampleUtils.configurationId);
         config.setContent(content);
         config.getMetrics().setQueries(new HashMap<String, String>(){{put("waterSettingsPending",
-                "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status=\'pending\'");}});
-        config.setTargetCondition("properties.reported.chillerProperties.model=\'4000x\'");
+                "SELECT deviceId FROM devices WHERE properties.reported.chillerWaterSettings.status='pending'");}});
+        config.setTargetCondition("properties.reported.chillerProperties.model='4000x'");
         config.setPriority(20);
 
         try
