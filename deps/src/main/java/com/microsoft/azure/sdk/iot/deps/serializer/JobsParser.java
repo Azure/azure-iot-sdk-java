@@ -17,6 +17,7 @@ import java.util.TimeZone;
 /**
  * Representation of a single Jobs collection with a Json serializer.
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class JobsParser
 {
     private transient static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";

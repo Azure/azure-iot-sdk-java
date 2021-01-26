@@ -18,6 +18,7 @@ public class DeviceRegistrationParser
     private String registrationId;
 
     private static final String TPM = "tpm";
+    @SuppressWarnings("FieldCanBeLocal")
     @SerializedName(TPM)
     private TpmAttestation tpmAttestation;
 
@@ -30,7 +31,9 @@ public class DeviceRegistrationParser
      */
     static class TpmAttestation
     {
+        @SuppressWarnings("FieldCanBeLocal")
         private final String endorsementKey;
+        @SuppressWarnings("FieldCanBeLocal")
         private final String storageRootKey;
 
         TpmAttestation(String endorsementKey, String storageRootKey)
