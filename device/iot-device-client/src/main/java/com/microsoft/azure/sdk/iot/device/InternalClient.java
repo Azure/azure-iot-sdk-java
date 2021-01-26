@@ -178,9 +178,10 @@ public class InternalClient
 
     public void close() throws IOException
     {
+        //noinspection StatementWithEmptyBody
         while (!this.deviceIO.isEmpty())
         {
-            // Don't do anything, can be infinite.
+            // Don't do anything until the transport layer underneath has indicated that it doesn't have any more pending messages to send.
         }
 
         this.deviceIO.close();

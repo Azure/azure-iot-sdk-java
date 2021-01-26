@@ -295,6 +295,8 @@ public class ExportImportDevice
         }
 
         this.authentication = new AuthenticationMechanism(AuthenticationType.valueOf(parser.getAuthenticationFinal().getType().toString()));
+
+        //noinspection StatementWithEmptyBody
         if (this.authentication.getAuthenticationType() == AuthenticationType.CERTIFICATE_AUTHORITY)
         {
             //do nothing
@@ -362,6 +364,8 @@ public class ExportImportDevice
             if (this.getAuthenticationFinal().getAuthenticationType() != null)
             {
                 parser.getAuthenticationFinal().setType(AuthenticationTypeParser.valueOf(this.authentication.getAuthenticationType().toString()));
+
+                //noinspection StatementWithEmptyBody
                 if (this.getAuthenticationFinal().getAuthenticationType() == AuthenticationType.CERTIFICATE_AUTHORITY)
                 {
                     //do nothing
