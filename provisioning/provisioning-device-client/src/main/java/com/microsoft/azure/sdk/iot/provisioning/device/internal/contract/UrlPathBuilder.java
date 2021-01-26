@@ -153,8 +153,6 @@ public class UrlPathBuilder
 
             case MQTT:
             case MQTT_WS:
-                return null;
-
             case AMQPS:
             case AMQPS_WS:
                 return null;
@@ -192,8 +190,6 @@ public class UrlPathBuilder
 
             case MQTT:
             case MQTT_WS:
-                return null;
-
             case AMQPS:
             case AMQPS_WS:
                 return null;

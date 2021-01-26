@@ -238,9 +238,6 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             switch (_lastType)
             {
                 case WEB_SOCKET_MESSAGE_TYPE_UNKNOWN:
-                    _wsInputBuffer.position(_wsInputBuffer.limit());
-                    _wsInputBuffer.limit(_wsInputBuffer.capacity());
-                    break;
                 case WEB_SOCKET_MESSAGE_TYPE_CHUNK:
                     _wsInputBuffer.position(_wsInputBuffer.limit());
                     _wsInputBuffer.limit(_wsInputBuffer.capacity());
