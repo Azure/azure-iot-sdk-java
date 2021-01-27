@@ -523,19 +523,16 @@ abstract public class Mqtt implements MqttCallback
                 switch (key)
                 {
                     case TO:
+                    case IOTHUB_ACK:
+                    case USER_ID:
+                    case ABSOLUTE_EXPIRY_TIME:
                         //do nothing
                         break;
                     case MESSAGE_ID:
                         message.setMessageId(value);
                         break;
-                    case IOTHUB_ACK:
-                        //do nothing
-                        break;
                     case CORRELATION_ID:
                         message.setCorrelationId(value);
-                        break;
-                    case USER_ID:
-                        //do nothing
                         break;
                     case OUTPUT_NAME:
                         message.setOutputName(value);
@@ -545,9 +542,6 @@ abstract public class Mqtt implements MqttCallback
                         break;
                     case CONTENT_TYPE:
                         message.setContentType(value);
-                        break;
-                    case ABSOLUTE_EXPIRY_TIME:
-                        //do nothing
                         break;
                     default:
                         message.setProperty(key, value);
