@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -40,6 +42,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     public static final String MODULE_PATH_FORMAT = "/devices/%s/modules/%s/messages/devicebound";
 
     private Object correlationId;
+    private Sender cloudToDeviceMessageSendingLink;
 
     private AmqpResponseVerification amqpResponse;
     private org.apache.qpid.proton.message.Message messageToBeSent;
@@ -90,6 +93,12 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         add(new Handshaker());
     }
 
+    AmqpSendHandler(String hostName, TokenCredential tokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
+        super(hostName, tokenProvider, authorizationType, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        add(new Handshaker());
+    }
+
     /**
      * Create Proton message from deviceId and content string
      * @param deviceId The device name string
@@ -113,11 +122,8 @@ public class AmqpSendHandler extends AmqpConnectionHandler
 
     private void populateProtonMessage(String targetPath, com.microsoft.azure.sdk.iot.service.Message message)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall create a new Message (Proton) object]
         org.apache.qpid.proton.message.Message protonMessage = Proton.message();
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_006: [The function shall set
-        // the standard properties on the Proton Message object]
         Properties properties = new Properties();
         properties.setMessageId(message.getMessageId());
         properties.setTo(targetPath);
@@ -129,8 +135,6 @@ public class AmqpSendHandler extends AmqpConnectionHandler
         }
         protonMessage.setProperties(properties);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_023: [The function shall set
-        // the application properties on the Proton Message object]
         if (message.getProperties() != null && message.getProperties().size() > 0)
         {
             Map<String, Object> applicationPropertiesMap = new HashMap<>(message.getProperties().size());
@@ -142,7 +146,6 @@ public class AmqpSendHandler extends AmqpConnectionHandler
             protonMessage.setApplicationProperties(applicationProperties);
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_007: [The function shall create a Binary (Proton) object from the content string]
         Binary binary;
         //Messages may have no payload, so check that the message has a payload before giving message.getBytes() as the payload
         if (message.getBytes() != null)
@@ -154,63 +157,9 @@ public class AmqpSendHandler extends AmqpConnectionHandler
             binary = new Binary(new byte[0]);
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_008: [The function shall create a data Section (Proton) object from the Binary]
         Section section = new Data(binary);
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_009: [The function shall set the Message body to the created data section]
         protonMessage.setBody(section);
         messageToBeSent = protonMessage;
-    }
-
-    /**
-     * Event handler for the connection init event
-     * @param event The proton event object
-     */
-    @Override
-    public void onConnectionInit(Event event)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_012: [The event handler shall set the host name on the connection]
-        Connection conn = event.getConnection();
-        conn.setHostname(hostName);
-
-        // Every session or link could have their own handler(s) if we
-        // wanted simply by adding the handler to the given session
-        // or link
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_013: [The event handler shall create a Session (Proton) object from the connection]
-        Session ssn = conn.session();
-
-        // If a link doesn't have an event handler, the events go to
-        // its parent session. If the session doesn't have a handler
-        // the events go to its parent connection. If the connection
-        // doesn't have a handler, the events go to the reactor.
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_014: [The event handler shall create a Sender (Proton) object and set the protocol tag on it to a predefined constant]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_15_023: [The Sender object shall have the properties set to service client version identifier.]
-        Map<Symbol, Object> properties = new HashMap<>();
-        properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
-        Sender snd = ssn.sender(SEND_TAG);
-        snd.setProperties(properties);
-
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_015: [The event handler shall open the Connection, the Session and the Sender object]
-        log.debug("Opening connection, session and link for amqp cloud to device message sender");
-        conn.open();
-        ssn.open();
-        snd.open();
-    }
-
-    /**
-     * Event handler for the link init event
-     * @param event The proton event object
-     */
-    @Override
-    public void onLinkInit(Event event)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_016: [The event handler shall create a new Target (Proton) object using the given endpoint address]
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_017: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
-        Link link = event.getLink();
-        Target t = new Target();
-        t.setAddress(ENDPOINT);
-        link.setTarget(t);
     }
 
     /**
@@ -329,6 +278,39 @@ public class AmqpSendHandler extends AmqpConnectionHandler
                 //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [ The event handler shall get the exception from the response and throw is it is not null]
                 throw amqpResponse.getException();
             }
+        }
+    }
+
+    @Override
+    public void onAuthenticationSucceeded(Session session)
+    {
+        // Only open the session and sending link if this authentication was for the first open. This callback
+        // will be executed again after every proactive renewal, but nothing needs to be done after a proactive renewal
+        if (this.cloudToDeviceMessageSendingLink == null)
+        {
+            // Every session or link could have their own handler(s) if we
+            // wanted simply by adding the handler to the given session
+            // or link
+
+            Session cloudToDeviceMessageSession = this.connection.session();
+
+            // If a link doesn't have an event handler, the events go to
+            // its parent session. If the session doesn't have a handler
+            // the events go to its parent connection. If the connection
+            // doesn't have a handler, the events go to the reactor.
+
+            Map<Symbol, Object> properties = new HashMap<>();
+            properties.put(Symbol.getSymbol(TransportUtils.versionIdentifierKey), TransportUtils.USER_AGENT_STRING);
+            cloudToDeviceMessageSession.open();
+
+            this.cloudToDeviceMessageSendingLink = cloudToDeviceMessageSession.sender(SEND_TAG);
+            this.cloudToDeviceMessageSendingLink.setProperties(properties);
+            Target t = new Target();
+            t.setAddress(ENDPOINT);
+            this.cloudToDeviceMessageSendingLink.setTarget(t);
+            this.cloudToDeviceMessageSendingLink.open();
+
+            log.debug("Opening sender link for amqp cloud to device messages");
         }
     }
 }

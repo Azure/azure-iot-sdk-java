@@ -5,10 +5,12 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
@@ -16,7 +18,11 @@ import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.reactor.Reactor;
 
@@ -24,7 +30,7 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 
 @Slf4j
-public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
+public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
 {
     public static final String WEBSOCKET_PATH = "/$iothub/websocket";
     public static final String WEBSOCKET_SUB_PROTOCOL = "AMQPWSB10";
@@ -37,11 +43,16 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     protected boolean linkOpenedRemotely;
 
     protected final String hostName;
-    protected final String userName;
-    protected final String sasToken;
+    protected String userName;
+    protected String sasToken;
+    protected TokenCredential authenticationTokenProvider;
+    protected CbsAuthorizationType authorizationType;
     protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected final ProxyOptions proxyOptions;
     protected final SSLContext sslContext;
+
+    protected Connection connection;
+    private CbsSessionHandler cbsSessionHandler;
 
     protected AmqpConnectionHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
@@ -49,10 +60,12 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
+
         if (Tools.isNullOrEmpty(userName))
         {
             throw new IllegalArgumentException("userName can not be null or empty");
         }
+
         if (Tools.isNullOrEmpty(sasToken))
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
@@ -76,12 +89,36 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
     }
 
+    protected AmqpConnectionHandler(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName can not be null or empty");
+        }
+
+        if (iotHubServiceClientProtocol == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+
+        this.savedException = null;
+        this.connectionOpenedRemotely = false;
+        this.sessionOpenedRemotely = false;
+        this.linkOpenedRemotely = false;
+
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.hostName = hostName;
+        this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.authorizationType = authorizationType;
+    }
+
     @Override
     public void onReactorInit(Event event)
     {
         Reactor reactor = event.getReactor();
 
-        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_033: [The event handler shall set the current handler to handle the connection events.]
         if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
         {
             if (proxyOptions != null)
@@ -116,18 +153,26 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
                 ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
-            Sasl sasl = transport.sasl();
-            sasl.plain(this.userName, this.sasToken);
+            transport.sasl().setMechanisms("ANONYMOUS");
 
             SslDomain domain = makeDomain();
             domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-            Ssl ssl = transport.ssl(domain);
+            transport.ssl(domain);
 
             if (this.proxyOptions != null)
             {
                 addProxyLayer(transport, this.hostName);
             }
         }
+    }
+
+    @Override
+    public void onConnectionInit(Event event)
+    {
+        Connection conn = event.getConnection();
+        conn.setHostname(hostName);
+        log.debug("Opening connection for amqp cloud to device message sender");
+        conn.open();
     }
 
     @Override
@@ -148,7 +193,11 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
     public void onConnectionRemoteOpen(Event event)
     {
         super.onConnectionRemoteOpen(event);
+        this.connection = event.getConnection();
         this.connectionOpenedRemotely = true;
+
+        Session cbsSession = event.getConnection().session();
+        cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.authenticationTokenProvider, this.authorizationType);
     }
 
     /**
@@ -212,5 +261,11 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
         final ProxyHandler proxyHandler = new ProxyHandlerImpl();
         proxy.configure(hostName + ":" + AmqpConnectionHandler.AMQPS_WS_PORT, null, proxyHandler, transport);
         ((TransportInternal) transport).addTransportLayer(proxy);
+    }
+
+    @Override
+    public void onAuthenticationFailed(Exception e)
+    {
+        this.savedException = new IOException("Failed to authenticate connection", e);
     }
 }

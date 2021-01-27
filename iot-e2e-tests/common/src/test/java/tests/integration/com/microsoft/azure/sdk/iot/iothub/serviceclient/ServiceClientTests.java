@@ -5,8 +5,23 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
+import com.azure.core.credential.AccessToken;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
+import com.microsoft.azure.sdk.iot.service.FileUploadNotificationReceiver;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
+import reactor.core.publisher.Mono;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -25,6 +41,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -107,14 +126,14 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, false);
+        cloudToDeviceTelemetry(false, true, false, false);
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithCustomSSLContext() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, true);
+        cloudToDeviceTelemetry(false, true, true, false);
     }
 
     @Test
@@ -127,7 +146,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, false);
+        cloudToDeviceTelemetry(true, true, false, false);
     }
 
     @Test
@@ -140,7 +159,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, true);
+        cloudToDeviceTelemetry(true, true, true, false);
     }
 
     @Test
@@ -148,10 +167,17 @@ public class ServiceClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void cloudToDeviceTelemetryWithNoPayload() throws Exception
     {
-        cloudToDeviceTelemetry(false, false, false);
+        cloudToDeviceTelemetry(false, false, false, false);
     }
 
-    public void cloudToDeviceTelemetry(boolean withProxy, boolean withPayload, boolean withCustomSSLContext) throws Exception
+    @Test
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
+    {
+        cloudToDeviceTelemetry(false, true, false, true);
+    }
+
+    public void cloudToDeviceTelemetry(boolean withProxy, boolean withPayload, boolean withCustomSSLContext, boolean withTokenCredential) throws Exception
     {
         // Arrange
 
@@ -180,11 +206,29 @@ public class ServiceClientTests extends IntegrationTest
         }
 
         ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).sslContext(sslContext).build();
+        ServiceClient serviceClient;
+        if (withTokenCredential)
+        {
+            IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString);
+            IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
 
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
+            TokenCredential authenticationTokenProvider = tokenRequestContext ->
+            {
+                // generates new token each time, probably optimize this later
+                OffsetDateTime sasTokenExpiryOffsetDateTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(iotHubServiceSasToken.getExpiryTimeMillis()), ZoneId.systemDefault());
+                AccessToken accessToken = new AccessToken(iotHubServiceSasToken.toString(), sasTokenExpiryOffsetDateTime);
+                return Mono.just(accessToken);
+            };
+
+            serviceClient = ServiceClient.createFromTokenCredential(iotHubConnectionStringObj.getHostName(), authenticationTokenProvider, CbsAuthorizationType.SHARED_ACCESS_SIGNATURE, testInstance.protocol, serviceClientOptions);
+        }
+        else
+        {
+            serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
+        }
+
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
-
 
         Message message;
         if (withPayload)

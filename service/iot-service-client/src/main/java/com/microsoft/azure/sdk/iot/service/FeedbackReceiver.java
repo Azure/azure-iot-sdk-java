@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
 import lombok.extern.slf4j.Slf4j;
 
@@ -124,6 +126,21 @@ public class FeedbackReceiver extends Receiver
 
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+    }
+
+    public FeedbackReceiver(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (iotHubServiceClientProtocol  == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+
+        this.amqpReceive = new AmqpReceive(hostName, authenticationTokenProvider, authorizationType, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
         
     /**

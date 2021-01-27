@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
@@ -23,8 +25,10 @@ import java.io.IOException;
 public class AmqpReceive implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;
-    private final String userName;
-    private final String sasToken;
+    private String userName;
+    private String sasToken;
+    private TokenCredential authenticationTokenProvider;
+    private CbsAuthorizationType authorizationType;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FeedbackBatch feedbackBatch;
@@ -76,19 +80,43 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         this.sslContext = sslContext;
     }
 
+    public AmqpReceive(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
+        this.hostName = hostName;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.authorizationType = authorizationType;
+    }
+
     /**
      * Create AmqpsReceiveHandler and store it in a member variable
      */
     public void open()
     {
-        amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
-                this.hostName,
-                this.userName,
-                this.sasToken,
-                this.iotHubServiceClientProtocol,
-                this,
-                this.proxyOptions,
-                this.sslContext);
+        if (authenticationTokenProvider != null)
+        {
+            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+                    this.hostName,
+                    this.authenticationTokenProvider,
+                    this.authorizationType,
+                    this.iotHubServiceClientProtocol,
+                    this,
+                    this.proxyOptions,
+                    this.sslContext);
+        }
+        else
+        {
+            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+                    this.hostName,
+                    this.userName,
+                    this.sasToken,
+                    this.iotHubServiceClientProtocol,
+                    this,
+                    this.proxyOptions,
+                    this.sslContext);
+        }
     }
 
     /**

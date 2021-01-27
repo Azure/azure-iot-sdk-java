@@ -5,7 +5,9 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
@@ -23,8 +25,10 @@ import java.io.IOException;
 public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;
-    private final String userName;
-    private final String sasToken;
+    private String userName;
+    private String sasToken;
+    private TokenCredential authenticationTokenProvider;
+    private CbsAuthorizationType authorizationType;
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private FileUploadNotification fileUploadNotification;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -76,16 +80,46 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         this.sslContext = sslContext;
     }
 
+    public AmqpFileUploadNotificationReceive(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    {
+        this.hostName = hostName;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.authorizationType = authorizationType;
+    }
+
     /**
      * Create AmqpsReceiveHandler and store it in a member variable
      * @throws IOException If underlying layers throws it for any reason
      */
     public synchronized void open() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_003: [The function shall create an AmqpsReceiveHandler object to handle reactor events]
         if (amqpReceiveHandler == null)
         {
-            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this, this.proxyOptions, this.sslContext);
+            if (this.authenticationTokenProvider != null)
+            {
+                amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+                        this.hostName,
+                        this.authenticationTokenProvider,
+                        this.authorizationType,
+                        this.iotHubServiceClientProtocol,
+                        this,
+                        this.proxyOptions,
+                        this.sslContext);
+            }
+            else
+            {
+                amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+                        this.hostName,
+                        this.userName,
+                        this.sasToken,
+                        this.iotHubServiceClientProtocol,
+                        this,
+                        this.proxyOptions,
+                        this.sslContext);
+            }
         }
     }
 
