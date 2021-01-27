@@ -214,7 +214,7 @@ public class ServiceClientTests extends IntegrationTest
 
             TokenCredential authenticationTokenProvider = tokenRequestContext ->
             {
-                // generates new token each time, probably optimize this later
+                // TODO generates new token each time, probably optimize this later
                 OffsetDateTime sasTokenExpiryOffsetDateTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(iotHubServiceSasToken.getExpiryTimeMillis()), ZoneId.systemDefault());
                 AccessToken accessToken = new AccessToken(iotHubServiceSasToken.toString(), sasTokenExpiryOffsetDateTime);
                 return Mono.just(accessToken);

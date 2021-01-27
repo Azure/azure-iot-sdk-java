@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.Symbol;

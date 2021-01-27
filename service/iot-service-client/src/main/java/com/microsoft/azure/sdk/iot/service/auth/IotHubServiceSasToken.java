@@ -68,6 +68,7 @@ public final class IotHubServiceSasToken
      */
     public final long getExpiryTimeMillis()
     {
+        // Multiply by 1000 to convert from seconds to milliseconds
         return (this.expiryTimeSeconds * 1000);
     }
 

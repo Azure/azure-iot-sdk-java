@@ -59,7 +59,7 @@ public class ServiceClient
      * Create ServiceClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
-     * @param options The connection options to use when connecting to the service. May be null if no custom options will be used.
+     * @param options The connection options to use when connecting to the service.
      * @return The created ServiceClient object
      * @throws IOException This exception is thrown if the object creation failed
      */
@@ -79,7 +79,7 @@ public class ServiceClient
 
         TokenCredential authenticationTokenProvider = tokenRequestContext ->
         {
-            // generates new token each time, probably optimize this later
+            // TODO generates new token each time, probably optimize this later
             IotHubServiceSasToken sasToken = new IotHubServiceSasToken(iotHubConnectionString);
             OffsetDateTime sasTokenExpiryOffsetDateTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(sasToken.getExpiryTimeMillis()), ZoneId.systemDefault());
             AccessToken accessToken = new AccessToken(sasToken.toString(), sasTokenExpiryOffsetDateTime);
@@ -89,12 +89,37 @@ public class ServiceClient
         return new ServiceClient(iotHubConnectionString.hostName, authenticationTokenProvider, CbsAuthorizationType.SHARED_ACCESS_SIGNATURE, iotHubServiceClientProtocol, options);
     }
 
-    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol) throws IOException
+    /**
+     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * of authentication tokens used in the underlying connection.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param authorizationType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @return The created {@link ServiceClient} instance.
+     */
+    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         return createFromTokenCredential(hostName, authenticationTokenProvider, authorizationType, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
     }
 
-    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options) throws IOException
+    /**
+     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * of authentication tokens used in the underlying connection.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param authorizationType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @param options The connection options to use when connecting to the service.
+     * @return The created {@link ServiceClient} instance.
+     */
+    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider);
         Objects.requireNonNull(authorizationType);
@@ -155,7 +180,7 @@ public class ServiceClient
         this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options.getProxyOptions(), options.getSslContext());
     }
 
-    ServiceClient(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
+    private ServiceClient(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
     {
         this.authenticationTokenProvider = authenticationTokenProvider;
         this.hostName = hostName;

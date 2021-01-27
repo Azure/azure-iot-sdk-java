@@ -3,7 +3,7 @@
  * Licensed under the MIT license. See LICENSE file in the project root for full license information.
  */
 
-package com.microsoft.azure.sdk.iot.service.transport.amqps;
+package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
 import lombok.Getter;
 import lombok.Setter;

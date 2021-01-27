@@ -104,6 +104,7 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
             IOException e = new IOException(status + " : " + description);
             log.error("CBS session failed to authenticate", e);
             this.cbsSessionStateCallback.onAuthenticationFailed(e);
+            this.session.close(); // should chain to close the connection from logic in ErrorLoggingBaseHandlerWithCleanup
         }
 
         // always acknowledge the received status message
