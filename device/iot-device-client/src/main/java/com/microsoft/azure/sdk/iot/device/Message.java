@@ -308,7 +308,6 @@ public class Message
     {
         this.messageId = UUID.randomUUID().toString();
         this.correlationId = UUID.randomUUID().toString();
-        FeedbackStatusCodeEnum ack = FeedbackStatusCodeEnum.none;
         this.properties = new ArrayList<>();
         this.isSecurityClient = false;
     }
