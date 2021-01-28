@@ -83,7 +83,7 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
 
     /**
      * Getter for Secondary key
-     * @return Returns Symmetric Key byte array
+     * @return Returns Secondary Key byte array
      */
     public byte[] getSecondaryKey()
     {

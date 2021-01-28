@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
+// FieldCanBeLocal suppression in this class is addressing warnings of fields used for serialization and in constructor.
 public class DeviceRegistrationParser
 {
     private static final String REGISTRATION_ID = "registrationId";
