@@ -5,7 +5,6 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
-import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
@@ -21,7 +20,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.IoTHubConnectionStringCredential;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,7 +28,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import reactor.core.publisher.Mono;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -41,9 +39,6 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
@@ -210,16 +205,7 @@ public class ServiceClientTests extends IntegrationTest
         if (withTokenCredential)
         {
             IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString);
-            IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-
-            TokenCredential authenticationTokenProvider = tokenRequestContext ->
-            {
-                // TODO generates new token each time, probably optimize this later
-                OffsetDateTime sasTokenExpiryOffsetDateTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(iotHubServiceSasToken.getExpiryTimeMillis()), ZoneId.systemDefault());
-                AccessToken accessToken = new AccessToken(iotHubServiceSasToken.toString(), sasTokenExpiryOffsetDateTime);
-                return Mono.just(accessToken);
-            };
-
+            TokenCredential authenticationTokenProvider = new IoTHubConnectionStringCredential(iotHubConnectionString);
             serviceClient = ServiceClient.createFromTokenCredential(iotHubConnectionStringObj.getHostName(), authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE, testInstance.protocol, serviceClientOptions);
         }
         else

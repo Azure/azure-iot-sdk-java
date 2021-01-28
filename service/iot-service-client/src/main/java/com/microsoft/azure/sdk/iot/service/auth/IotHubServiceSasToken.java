@@ -20,7 +20,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public final class IotHubServiceSasToken
 {
-    long TOKEN_VALID_SECS = 60 * 60; // 1 hour
+    private static long DEFAULT_TOKEN_LIFESPAN_SECONDS = 60 * 60; // 1 hour
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:
@@ -43,19 +43,39 @@ public final class IotHubServiceSasToken
     /* The SAS token that grants access. */
     protected final String token;
 
+    protected final long tokenLifespanSeconds;
+
     /**
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
-     * the specified amount of time. (1 year specified in TOKEN_VALID_SECS)
+     * the specified amount of time. (1 year specified in DEFAULT_TOKEN_LIFESPAN_SECONDS)
      *
      * @param iotHubConnectionString Connection string object containing the connection parameters
      */
     public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString)
+    {
+        this(iotHubConnectionString, DEFAULT_TOKEN_LIFESPAN_SECONDS);
+    }
+
+    /**
+     * Constructor. Generates a SAS token that grants access to an IoT Hub for
+     * the specified amount of time. (1 year specified in DEFAULT_TOKEN_LIFESPAN_SECONDS)
+     *
+     * @param iotHubConnectionString Connection string object containing the connection parameters.
+     * @param tokenLifespanSeconds The number of seconds that the created SAS token will be valid for.
+     */
+    public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString, long tokenLifespanSeconds)
     {
         if (iotHubConnectionString == null)
         {
             throw new IllegalArgumentException();
         }
 
+        if (tokenLifespanSeconds <= 0)
+        {
+            tokenLifespanSeconds = DEFAULT_TOKEN_LIFESPAN_SECONDS;
+        }
+
+        this.tokenLifespanSeconds = tokenLifespanSeconds;
         this.resourceUri = iotHubConnectionString.getHostName();
         this.keyValue = iotHubConnectionString.getSharedAccessKey();
         this.keyName = iotHubConnectionString.getSharedAccessKeyName();
@@ -114,8 +134,17 @@ public final class IotHubServiceSasToken
     private long buildExpiresOn()
     {
         long expiresOnDate = System.currentTimeMillis();
-        expiresOnDate += TOKEN_VALID_SECS * 1000;
+        expiresOnDate += this.tokenLifespanSeconds * 1000;
         return expiresOnDate / 1000;
+    }
+
+    /**
+     * @return The number of seconds that this token is valid for. Not to be confused with how many seconds the SAS token
+     * is still valid for at the time of calling this method.
+     */
+    public long getTokenLifespanSeconds()
+    {
+        return this.tokenLifespanSeconds;
     }
 
     /**

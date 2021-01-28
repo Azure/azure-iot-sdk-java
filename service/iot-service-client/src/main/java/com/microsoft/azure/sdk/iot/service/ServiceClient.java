@@ -5,19 +5,15 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.IoTHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -76,14 +72,7 @@ public class ServiceClient
 
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
-        TokenCredential authenticationTokenProvider = tokenRequestContext ->
-        {
-            // TODO generates new token each time, probably optimize this later
-            IotHubServiceSasToken sasToken = new IotHubServiceSasToken(iotHubConnectionString);
-            OffsetDateTime sasTokenExpiryOffsetDateTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(sasToken.getExpiryTimeMillis()), ZoneId.systemDefault());
-            AccessToken accessToken = new AccessToken(sasToken.toString(), sasTokenExpiryOffsetDateTime);
-            return Mono.just(accessToken);
-        };
+        TokenCredential authenticationTokenProvider = new IoTHubConnectionStringCredential(connectionString);
 
         return new ServiceClient(iotHubConnectionString.hostName, authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE, iotHubServiceClientProtocol, options);
     }
