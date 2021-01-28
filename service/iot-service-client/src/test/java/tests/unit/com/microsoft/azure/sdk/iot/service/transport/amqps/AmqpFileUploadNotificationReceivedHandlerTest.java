@@ -246,7 +246,6 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
             {
                 connection = event.getConnection();
                 transport = connection.getTransport();
-                sasl.plain(anyString, anyString);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
                 sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
@@ -288,7 +287,6 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
                 result = webSocket;
                 webSocket.configure(anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
-                sasl.plain(anyString, anyString);
                 Proton.sslDomain();
                 result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
@@ -312,7 +310,6 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
         final String hostName = "aaa";
         final String userName = "bbb";
         final String sasToken = "ccc";
-        final String receiver_tag = "filenotificationreceiver";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, mockedProxyOptions, mockedSslContext);
         // Assert
@@ -321,46 +318,11 @@ public class AmqpFileUploadNotificationReceivedHandlerTest
             {
                 connection = event.getConnection();
                 connection.setHostname(hostName);
-                session = connection.session();
-                receiver = session.receiver(receiver_tag);
                 connection.open();
-                session.open();
-                receiver.open();
-                receiver.setProperties((Map<Symbol, Object>) any);
             }
         };
         // Act
         Deencapsulation.invoke(amqpReceiveHandler, "onConnectionInit", event);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_015: [The event handler shall create a new Target (Proton) object using the given endpoint address]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_25_016: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
-    @Test
-    public void onLinkInitCallFlowAndInitOk()
-    {
-        // Arrange
-        final String hostName = "aaa";
-        final String userName = "bbb";
-        final String sasToken = "ccc";
-        final String hostAddr = hostName + ":5671";
-        final String endpoint = "/messages/serviceBound/filenotifications";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        Object amqpReceiveHandler = Deencapsulation.newInstance(AmqpFileUploadNotificationReceivedHandler.class, hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, mockedProxyOptions, mockedSslContext);
-
-        // Assert
-        new Expectations()
-        {
-            {
-                link = event.getLink();
-                link.getName();
-                result = Deencapsulation.getField(amqpReceiveHandler, "FILE_NOTIFICATION_RECEIVE_TAG");
-                source = new Source();
-                source.setAddress(endpoint);
-                link.setSource(source);
-            }
-        };
-        // Act
-        Deencapsulation.invoke(amqpReceiveHandler, "onLinkInit", event);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVEDHANDLER_34_022: [This function shall set the variable 'connectionWasOpened' to true]
