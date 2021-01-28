@@ -17,6 +17,7 @@ import java.util.TimeZone;
 /**
  * Representation of a single Jobs collection with a Json serializer.
  */
+// This suppression below is addressing warnings of fields used for serialization.
 @SuppressWarnings("FieldCanBeLocal")
 public class JobsParser
 {

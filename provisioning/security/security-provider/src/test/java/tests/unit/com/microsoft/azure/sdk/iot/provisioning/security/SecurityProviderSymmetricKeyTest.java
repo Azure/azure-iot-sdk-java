@@ -84,7 +84,7 @@ public class SecurityProviderSymmetricKeyTest
 
         //assert
         assertEquals(testPrimaryKey, new String(securityProviderSymmetricKey.getSymmetricKey()));
-        assertEquals(testSecondaryKey, new String((byte[]) Deencapsulation.getField(securityProviderSymmetricKey, "secondaryKey")));
+        assertEquals(testSecondaryKey, new String(securityProviderSymmetricKey.getSecondaryKey()));
         assertEquals(testRegId, securityProviderSymmetricKey.getRegistrationId());
     }
 

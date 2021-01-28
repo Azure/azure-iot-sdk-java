@@ -22,7 +22,6 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
 {
     private static final String HMAC_SHA_256 = "HmacSHA256";
     private final byte[] primaryKey;
-    @SuppressWarnings("FieldCanBeLocal")
     private byte[] secondaryKey;
     private final String registrationId;
     private static final String HMAC_SHA256 = "HmacSHA256";
@@ -80,6 +79,15 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
     public byte[] getSymmetricKey()
     {
         return primaryKey;
+    }
+
+    /**
+     * Getter for Secondary key
+     * @return Returns Symmetric Key byte array
+     */
+    public byte[] getSecondaryKey()
+    {
+        return secondaryKey;
     }
 
     /**
