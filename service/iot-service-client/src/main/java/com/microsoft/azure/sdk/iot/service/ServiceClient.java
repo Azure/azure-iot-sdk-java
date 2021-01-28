@@ -31,7 +31,6 @@ public class ServiceClient
     private final String hostName;
     private String userName;
     private String sasToken;
-    protected IotHubConnectionString iotHubConnectionString;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected TokenCredential authenticationTokenProvider;
     protected final TokenCredentialType authorizationType;
@@ -152,7 +151,6 @@ public class ServiceClient
 
         IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
 
-        this.iotHubConnectionString = iotHubConnectionString;
         this.hostName = iotHubConnectionString.getHostName();
         this.userName = iotHubConnectionString.getUserString();
         this.sasToken = iotHubServiceSasToken.toString();
