@@ -471,7 +471,7 @@ public class MethodParser
 
         if(key.contains("$") || key.contains(".") ||key.contains(" "))
         {
-            throw new IllegalArgumentException("Key cannot contain \'$\', \'.\', or space");
+            throw new IllegalArgumentException("Key cannot contain '$', '.', or space");
         }
     }
 
