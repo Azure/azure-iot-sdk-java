@@ -3,19 +3,25 @@
 
 package com.microsoft.azure.sdk.iot.service.jobs;
 
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
+import jdk.nashorn.internal.parser.Token;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -31,30 +37,41 @@ public class JobClient
 
     private final static byte[] EMPTY_JSON = "{}".getBytes();
 
-    private IotHubConnectionString iotHubConnectionString = null;
-
+    private TokenCredential tokenCredential;
+    private TokenCredentialType tokenCredentialType;
+    private String hostName;
+    private JobClientOptions options;
+    
     /**
      * Static constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
      * @return The instance of JobClient
-     * @throws IOException if the object creation failed
+     * @throws IOException This exception is never thrown.
      * @throws IllegalArgumentException if the provided connectionString is {@code null} or empty
      */
     public static JobClient createFromConnectionString(String connectionString) throws IOException, IllegalArgumentException
     {
-        if (connectionString == null || connectionString.length() == 0)
-        {
-            /* Codes_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
-            throw new IllegalArgumentException("Connection string cannot be null or empty");
-        }
+       IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+       return createFromTokenCredential(iotHubConnectionString.getHostName(), new IotHubConnectionStringCredential(connectionString), TokenCredentialType.SHARED_ACCESS_SIGNATURE);
+    }
 
-        /* Codes_SRS_JOBCLIENT_21_003: [The constructor shall create a new DeviceMethod instance and return it.] */
+    public static JobClient createFromTokenCredential(String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType)
+    {
+        return createFromTokenCredential(hostName, tokenCredential, tokenCredentialType, JobClientOptions.builder().build());
+    }
+
+    public static JobClient createFromTokenCredential(String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType, JobClientOptions jobClientOptions)
+    {
+        Objects.requireNonNull(tokenCredential);
+        Objects.requireNonNull(tokenCredentialType);
+        Objects.requireNonNull(jobClientOptions);
+
         JobClient jobClient = new JobClient();
-
-        /* Codes_SRS_JOBCLIENT_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
-        jobClient.iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-
+        jobClient.hostName = hostName;
+        jobClient.tokenCredential = tokenCredential;
+        jobClient.tokenCredentialType = tokenCredentialType;
+        jobClient.options = jobClientOptions;
         return jobClient;
     }
 
@@ -81,50 +98,50 @@ public class JobClient
     {
         URL url;
 
-        /* Codes_SRS_JOBCLIENT_21_005: [If the JobId is null, empty, or invalid, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
-        if((jobId == null) || jobId.isEmpty())
+        if (Tools.isNullOrEmpty(jobId))
         {
             throw new IllegalArgumentException("null jobId");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_006: [If the updateTwin is null, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
-        if(updateTwin == null)
+        if (updateTwin == null)
         {
             throw new IllegalArgumentException("null updateTwin");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_007: [If the startTimeUtc is null, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
-        if(startTimeUtc == null)
+        if (startTimeUtc == null)
         {
             throw new IllegalArgumentException("null startTimeUtc");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_008: [If the maxExecutionTimeInSeconds is negative, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
-        if(maxExecutionTimeInSeconds < 0)
+        if (maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
         JobsParser jobsParser = new JobsParser(jobId, getParserFromDevice(updateTwin), queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
         String json = jobsParser.toJson();
 
-        /* Codes_SRS_JOBCLIENT_21_009: [The scheduleUpdateTwin shall create a URL for Jobs using the iotHubConnectionString.] */
         try
         {
-            url = iotHubConnectionString.getUrlJobs(jobId);
+            url = IotHubConnectionString.getUrlJobs(this.hostName, jobId);
         }
         catch (MalformedURLException e)
         {
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_010: [The scheduleUpdateTwin shall send a PUT request to the iothub using the created uri and json.] */
-        /* Codes_SRS_JOBCLIENT_21_011: [If the scheduleUpdateTwin failed to send a PUT request, it shall throw IOException.] */
-        /* Codes_SRS_JOBCLIENT_21_012: [If the scheduleUpdateTwin failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), null, USE_DEFAULT_TIMEOUT);
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        HttpResponse response = DeviceOperations.request(
+                this.tokenCredential,
+                this.tokenCredentialType,
+                url,
+                HttpMethod.PUT,
+                json.getBytes(StandardCharsets.UTF_8),
+                null,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
 
-        /* Codes_SRS_JOBCLIENT_21_013: [The scheduleUpdateTwin shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
     }
 
@@ -154,51 +171,51 @@ public class JobClient
     {
         URL url;
 
-        /* Codes_SRS_JOBCLIENT_21_014: [If the JobId is null, empty, or invalid, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
-        if((jobId == null) || jobId.isEmpty())
+        if (Tools.isNullOrEmpty(jobId))
         {
             throw new IllegalArgumentException("null jobId");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_015: [If the methodName is null or empty, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
-        if((methodName == null) || methodName.isEmpty())
+        if ((methodName == null) || methodName.isEmpty())
         {
             throw new IllegalArgumentException("null updateTwin");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_016: [If the startTimeUtc is null, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
-        if(startTimeUtc == null)
+        if (startTimeUtc == null)
         {
             throw new IllegalArgumentException("null startTimeUtc");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_017: [If the maxExecutionTimeInSeconds is negative, the scheduleDeviceMethod shall throws IllegalArgumentException.] */
-        if(maxExecutionTimeInSeconds < 0)
+        if (maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_018: [The scheduleDeviceMethod shall create a json String that represent the invoke method job using the JobsParser class.] */
         MethodParser cloudToDeviceMethod = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
         JobsParser jobsParser = new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
         String json = jobsParser.toJson();
 
-        /* Codes_SRS_JOBCLIENT_21_019: [The scheduleDeviceMethod shall create a URL for Jobs using the iotHubConnectionString.] */
         try
         {
-            url = iotHubConnectionString.getUrlJobs(jobId);
+            url = IotHubConnectionString.getUrlJobs(this.hostName, jobId);
         }
         catch (MalformedURLException e)
         {
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_020: [The scheduleDeviceMethod shall send a PUT request to the iothub using the created url and json.] */
-        /* Codes_SRS_JOBCLIENT_21_021: [If the scheduleDeviceMethod failed to send a PUT request, it shall throw IOException.] */
-        /* Codes_SRS_JOBCLIENT_21_022: [If the scheduleDeviceMethod failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PUT, json.getBytes(StandardCharsets.UTF_8), null, USE_DEFAULT_TIMEOUT);
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        HttpResponse response = DeviceOperations.request(
+                this.tokenCredential,
+                this.tokenCredentialType,
+                url,
+                HttpMethod.PUT,
+                json.getBytes(StandardCharsets.UTF_8),
+                null,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
 
-        /* Codes_SRS_JOBCLIENT_21_023: [The scheduleDeviceMethod shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
     }
 
@@ -216,28 +233,32 @@ public class JobClient
     {
         URL url;
 
-        /* Codes_SRS_JOBCLIENT_21_024: [If the JobId is null, empty, or invalid, the getJob shall throws IllegalArgumentException.] */
-        if((jobId == null) || jobId.isEmpty())
+        if ((jobId == null) || jobId.isEmpty())
         {
             throw new IllegalArgumentException("null jobId");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_025: [The getJob shall create a URL for Jobs using the iotHubConnectionString.] */
         try
         {
-            url = iotHubConnectionString.getUrlJobs(jobId);
+            url = IotHubConnectionString.getUrlJobs(this.hostName, jobId);
         }
         catch (MalformedURLException e)
         {
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_026: [The getJob shall send a GET request to the iothub using the created url.] */
-        /* Codes_SRS_JOBCLIENT_21_027: [If the getJob failed to send a GET request, it shall throw IOException.] */
-        /* Codes_SRS_JOBCLIENT_21_028: [If the getJob failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[]{}, null, USE_DEFAULT_TIMEOUT);
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        HttpResponse response = DeviceOperations.request(
+                this.tokenCredential,
+                this.tokenCredentialType,
+                url,
+                HttpMethod.GET,
+                new byte[]{},
+                null,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
 
-        /* Codes_SRS_JOBCLIENT_21_029: [The getJob shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
     }
 
@@ -254,60 +275,64 @@ public class JobClient
             throws IllegalArgumentException, IOException, IotHubException
     {
         URL url;
-        /* Codes_SRS_JOBCLIENT_21_030: [If the JobId is null, empty, or invalid, the cancelJob shall throws IllegalArgumentException.] */
-        if((jobId == null) || jobId.isEmpty())
+        if ((jobId == null) || jobId.isEmpty())
         {
             throw new IllegalArgumentException("null jobId");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_031: [The cancelJob shall create a cancel URL for Jobs using the iotHubConnectionString.] */
         try
         {
-            url = iotHubConnectionString.getUrlJobsCancel(jobId);
+            url = IotHubConnectionString.getUrlJobsCancel(this.hostName, jobId);
         }
         catch (MalformedURLException e)
         {
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        /* Codes_SRS_JOBCLIENT_21_032: [The cancelJob shall send a POST request to the iothub using the created url.] */
-        /* Codes_SRS_JOBCLIENT_21_033: [If the cancelJob failed to send a POST request, it shall throw IOException.] */
-        /* Codes_SRS_JOBCLIENT_21_034: [If the cancelJob failed to verify the iothub response, it shall throw IotHubException.] */
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.POST, EMPTY_JSON, null, USE_DEFAULT_TIMEOUT);
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        HttpResponse response = DeviceOperations.request(
+                this.tokenCredential,
+                this.tokenCredentialType,
+                url,
+                HttpMethod.POST,
+                EMPTY_JSON,
+                null,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
 
-        /* Codes_SRS_JOBCLIENT_21_035: [The cancelJob shall parse the iothub response and return it as JobResult.] */
         return new JobResult(response.getBody());
     }
 
-    private TwinState getParserFromDevice(DeviceTwinDevice device) throws IOException
+    private TwinState getParserFromDevice(DeviceTwinDevice device)
     {
         TwinCollection tags = null;
         TwinCollection desired = null;
         TwinCollection reported = null;
 
-        if(device.getTags() != null)
+        if (device.getTags() != null)
         {
             tags = setToMap(device.getTags());
         }
 
-        if(device.getDesiredProperties() != null)
+        if (device.getDesiredProperties() != null)
         {
             desired = setToMap(device.getDesiredProperties());
         }
 
-        if(device.getReportedProperties() != null)
+        if (device.getReportedProperties() != null)
         {
             reported = setToMap(device.getReportedProperties());
         }
 
         TwinState twinState = new TwinState(tags, desired, reported);
 
-        if(device.getDeviceId() != null)
+        if (device.getDeviceId() != null)
         {
             twinState.setDeviceId(device.getDeviceId());
         }
 
-        if(device.getETag() == null)
+        if (device.getETag() == null)
         {
             twinState.setETag("*");
         }
@@ -345,21 +370,26 @@ public class JobClient
     {
         if (sqlQuery == null || sqlQuery.length() == 0)
         {
-            //CodesSRS_JOBCLIENT_25_036: [If the sqlQuery is null, the queryDeviceJob shall throw IllegalArgumentException.]
             throw new IllegalArgumentException("Query cannot be null or empty");
         }
 
         if (pageSize <= 0)
         {
-            //Codes_SRS_DEVICETWIN_25_048: [ The method shall throw IllegalArgumentException if the page size is zero or negative.]
             throw new IllegalArgumentException("pagesize cannot be negative or zero");
         }
 
-        //Codes_SRS_JOBCLIENT_25_039: [The queryDeviceJob shall create a query object for the type DEVICE_JOB.]
         Query deviceJobQuery = new Query(sqlQuery, pageSize, QueryType.DEVICE_JOB);
 
-        //Codes_SRS_JOBCLIENT_25_040: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP POST method and wait for the response by calling sendQueryRequest.]
-        deviceJobQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, MAX_TIMEOUT);
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        deviceJobQuery.sendQueryRequest(
+                this.tokenCredential,
+                this.tokenCredentialType,
+                IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                HttpMethod.POST,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
+
         return deviceJobQuery;
     }
 
@@ -372,7 +402,6 @@ public class JobClient
      */
     public synchronized Query queryDeviceJob(String sqlQuery) throws IotHubException, IOException
     {
-        //Codes_SRS_JOBCLIENT_25_038: [If the pageSize is not specified, default pageSize of 100 shall be used .]
         return queryDeviceJob(sqlQuery, DEFAULT_PAGE_SIZE);
     }
 
@@ -387,10 +416,9 @@ public class JobClient
     {
         if (query == null)
         {
-            //Codes_SRS_JOBCLIENT_25_046: [If the input query is null, the hasNextJob shall throw IllegalArgumentException.]
             throw new IllegalArgumentException("Query cannot be null");
         }
-        // Codes_SRS_JOBCLIENT_25_047: [hasNextJob shall return true if the next job exist, false other wise.]
+
         return query.hasNext();
     }
 
@@ -406,21 +434,17 @@ public class JobClient
     {
         if (query == null)
         {
-            //Codes_SRS_JOBCLIENT_25_048: [If the input query is null, the getNextJob shall throw IllegalArgumentException.]
             throw new IllegalArgumentException("Query cannot be null");
         }
-        //Codes_SRS_JOBCLIENT_25_049: [getNextJob shall return next Job Result if the exist, and throw NoSuchElementException other wise.]
         Object nextObject = query.next();
 
         if (nextObject instanceof String)
         {
-            //Codes_SRS_JOBCLIENT_25_051: [getNextJob method shall parse the next job element from the query response provide the response as JobResult object.]
             String deviceJobJson = (String) nextObject;
             return new JobResult(deviceJobJson.getBytes());
         }
         else
         {
-            //Codes_SRS_JOBCLIENT_25_050: [getNextJob shall throw IOException if next Job Result exist and is not a string.]
             throw new IOException("Received a response that could not be parsed");
         }
     }
@@ -438,17 +462,23 @@ public class JobClient
     {
         if (pageSize <= 0)
         {
-            //Codes_SRS_JOBCLIENT_25_042: [If the pageSize is null, zero or negative, the queryJobResponse shall throw IllegalArgumentException.]
             throw new IllegalArgumentException("pagesize cannot be negative or zero");
         }
 
-        //Codes_SRS_JOBCLIENT_25_043: [If the pageSize is not specified, default pageSize of 100 shall be used.] SRS_JOBCLIENT_25_044: [The queryDeviceJob shall create a query object for the type JOB_RESPONSE.]
         Query jobResponseQuery = new Query(pageSize, QueryType.JOB_RESPONSE);
 
-        //Codes_SRS_JOBCLIENT_25_045: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP GET method and wait for the response by calling sendQueryRequest.]
         String jobTypeString = (jobType == null) ? null : jobType.toString();
         String jobStatusString = (jobStatus == null) ? null : jobStatus.toString();
-        jobResponseQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlQuery(jobTypeString, jobStatusString), HttpMethod.GET, MAX_TIMEOUT);
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        jobResponseQuery.sendQueryRequest(
+                this.tokenCredential,
+                this.tokenCredentialType,
+                IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),
+                HttpMethod.GET,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
+
         return jobResponseQuery;
     }
     /**
@@ -461,7 +491,6 @@ public class JobClient
      */
     public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus) throws IotHubException, IOException
     {
-        //Codes_SRS_JOBCLIENT_25_043: [If the pageSize is not specified, default pageSize of 100 shall be used.]
         return queryJobResponse(jobType, jobStatus, DEFAULT_PAGE_SIZE);
     }
 

@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin.authentication;
 
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Base64;
 import lombok.Builder;
 import lombok.NonNull;
@@ -67,6 +68,12 @@ public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
         finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public TokenCredentialType getTokenCredentialType()
+    {
+        return TokenCredentialType.SHARED_ACCESS_SIGNATURE;
     }
 
     private String buildToken() throws IOException {

@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
+import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinUpdateHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
@@ -25,6 +27,10 @@ public class DigitalTwinClient {
         digitalTwinAsyncClient = DigitalTwinAsyncClient.createFromConnectionString(connectionString);
     }
 
+    DigitalTwinClient(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType) {
+        digitalTwinAsyncClient = DigitalTwinAsyncClient.createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType);
+    }
+
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoTHub connection string
@@ -33,6 +39,20 @@ public class DigitalTwinClient {
     public static DigitalTwinClient createFromConnectionString(String connectionString)
     {
         return new DigitalTwinClient(connectionString);
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @return DigitalTwinClient
+     */
+    public static DigitalTwinClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
+    {
+        return new DigitalTwinClient(hostName, authenticationTokenProvider, tokenCredentialType);
     }
 
     /**

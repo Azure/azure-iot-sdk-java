@@ -3,6 +3,9 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.azure.core.credential.TokenCredential;
+import com.azure.core.credential.TokenRequestContext;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -16,6 +19,7 @@ import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Set of common operations for Twin and Method.
@@ -230,6 +234,95 @@ public class DeviceOperations
     }
 
     /**
+     * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
+     *
+     * @param tokenCredential The authentication token provider that will be used to authorize the request
+     * @param tokenCredentialType The type of authentication tokens that the tokenCredential will provide
+     * @param url is the Twin URL for the device ID.
+     * @param method is the HTTP method (GET, POST, DELETE, PATCH, PUT).
+     * @param payload is the array of bytes that contains the payload.
+     * @param requestId is an unique number that identify the request.
+     * @param connectTimeout the http connect timeout to use, in milliseconds.
+     * @param readTimeout the http read timeout to use, in milliseconds.
+     * @param proxy the proxy to use, or null if no proxy will be used.
+     * @return the result of the request.
+     * @throws IotHubException This exception is thrown if the response verification failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
+     */
+    public static HttpResponse request(
+            TokenCredential tokenCredential,
+            TokenCredentialType tokenCredentialType,
+            URL url,
+            HttpMethod method,
+            byte[] payload,
+            String requestId,
+            int connectTimeout,
+            int readTimeout,
+            Proxy proxy)
+            throws IOException, IotHubException, IllegalArgumentException
+    {
+        Objects.requireNonNull(tokenCredential);
+        Objects.requireNonNull(tokenCredentialType);
+
+        if (url == null)
+        {
+            throw new IllegalArgumentException("Http requests must provide a non-null URL");
+        }
+
+        if (method == null)
+        {
+            throw new IllegalArgumentException("Http requests must provide a non-null http method");
+        }
+
+        HttpRequest request;
+        if (proxy != null)
+        {
+            request = new HttpRequest(url, method, payload, proxy);
+        }
+        else
+        {
+            request = new HttpRequest(url, method, payload);
+        }
+
+        request.setReadTimeoutMillis(readTimeout);
+        request.setConnectTimeoutMillis(connectTimeout);
+
+        if((requestId != null) && !requestId.isEmpty())
+        {
+            request.setHeaderField(REQUEST_ID, requestId);
+        }
+
+        String accessToken = tokenCredential.getToken(new TokenRequestContext()).block().getToken();
+        if (tokenCredentialType == TokenCredentialType.SHARED_ACCESS_SIGNATURE)
+        {
+            request.setHeaderField(AUTHORIZATION, accessToken);
+        }
+        // TODO when enabling RBAC support, need to prepend the authentication token with "Bearer "
+        //else
+        //{
+        //    request.setHeaderField(AUTHORIZATION, "Bearer " + accessToken);
+        //}
+
+        request.setHeaderField(USER_AGENT, TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
+        request.setHeaderField(ACCEPT, ACCEPT_VALUE);
+        request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
+
+        if (headers != null)
+        {
+            for(Map.Entry<String, String> header : headers.entrySet())
+            {
+                request.setHeaderField(header.getKey(), header.getValue());
+            }
+
+            headers = null;
+        }
+
+        HttpResponse response = request.send();
+        IotHubExceptionManager.httpResponseVerification(response);
+        return response;
+    }
+
+    /**
      * Sets headers to be used on next HTTP request.
      * @param httpHeaders non null and non empty custom headers.
      * @throws IllegalArgumentException This exception is thrown if headers were null or empty.
@@ -238,11 +331,9 @@ public class DeviceOperations
     {
         if (httpHeaders == null || httpHeaders.size() == 0)
         {
-            //SRS_DEVICE_OPERATIONS_25_021: [If the headers map is null or empty then this method shall throw IllegalArgumentException.]
             throw new IllegalArgumentException("Null or Empty headers can't be set");
         }
 
-        //SRS_DEVICE_OPERATIONS_25_020: [This method shall set the headers map to be used for next request only.]
         headers = httpHeaders;
     }
 }
