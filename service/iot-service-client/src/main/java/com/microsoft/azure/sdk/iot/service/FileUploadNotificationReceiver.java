@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,7 +69,7 @@ public class FileUploadNotificationReceiver extends Receiver
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    FileUploadNotificationReceiver(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    FileUploadNotificationReceiver(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {

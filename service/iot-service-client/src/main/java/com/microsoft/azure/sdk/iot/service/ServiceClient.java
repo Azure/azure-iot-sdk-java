@@ -7,7 +7,7 @@ package com.microsoft.azure.sdk.iot.service;
 
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
@@ -38,7 +38,7 @@ public class ServiceClient
     protected IotHubConnectionString iotHubConnectionString;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected TokenCredential authenticationTokenProvider;
-    protected final CbsAuthorizationType authorizationType;
+    protected final AuthenticationType authorizationType;
 
     private final ServiceClientOptions options;
 
@@ -85,7 +85,7 @@ public class ServiceClient
             return Mono.just(accessToken);
         };
 
-        return new ServiceClient(iotHubConnectionString.hostName, authenticationTokenProvider, CbsAuthorizationType.SHARED_ACCESS_SIGNATURE, iotHubServiceClientProtocol, options);
+        return new ServiceClient(iotHubConnectionString.hostName, authenticationTokenProvider, AuthenticationType.SHARED_ACCESS_SIGNATURE, iotHubServiceClientProtocol, options);
     }
 
     /**
@@ -100,7 +100,7 @@ public class ServiceClient
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      * @return The created {@link ServiceClient} instance.
      */
-    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         return createFromTokenCredential(hostName, authenticationTokenProvider, authorizationType, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
     }
@@ -118,7 +118,7 @@ public class ServiceClient
      * @param options The connection options to use when connecting to the service.
      * @return The created {@link ServiceClient} instance.
      */
-    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
+    public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider);
         Objects.requireNonNull(authorizationType);
@@ -168,7 +168,7 @@ public class ServiceClient
         this.userName = iotHubConnectionString.getUserString();
         this.sasToken = iotHubServiceSasToken.toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.authorizationType = CbsAuthorizationType.SHARED_ACCESS_SIGNATURE;
+        this.authorizationType = AuthenticationType.SHARED_ACCESS_SIGNATURE;
         this.options = options;
 
         if (this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
@@ -179,7 +179,7 @@ public class ServiceClient
         this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options.getProxyOptions(), options.getSslContext());
     }
 
-    private ServiceClient(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
+    private ServiceClient(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
     {
         this.authenticationTokenProvider = authenticationTokenProvider;
         this.hostName = hostName;

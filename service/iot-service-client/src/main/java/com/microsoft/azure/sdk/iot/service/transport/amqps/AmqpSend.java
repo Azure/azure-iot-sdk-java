@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
@@ -30,7 +30,7 @@ public class AmqpSend
     protected String userName;
     protected String sasToken;
     protected TokenCredential authenticationTokenProvider;
-    private CbsAuthorizationType authorizationType;
+    private AuthenticationType authorizationType;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private final ProxyOptions proxyOptions;
@@ -97,7 +97,7 @@ public class AmqpSend
         this.sslContext = sslContext;
     }
 
-    public AmqpSend(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpSend(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {

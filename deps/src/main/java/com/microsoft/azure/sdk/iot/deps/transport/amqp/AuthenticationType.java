@@ -4,9 +4,9 @@
 package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 
 /**
- * An enumeration of supported authorization methods for AMQP connections that use Claims Based Security links.
+ * An enumeration of supported authorization methods for service client connections.
  */
-public enum CbsAuthorizationType
+public enum AuthenticationType
 {
     /**
      * Authorize with CBS through a shared access signature.
@@ -15,7 +15,7 @@ public enum CbsAuthorizationType
 
     private final String scheme;
 
-    CbsAuthorizationType(String scheme) {
+    AuthenticationType(String scheme) {
         this.scheme = scheme;
     }
 

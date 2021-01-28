@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
@@ -28,7 +28,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     private String userName;
     private String sasToken;
     private TokenCredential authenticationTokenProvider;
-    private CbsAuthorizationType authorizationType;
+    private AuthenticationType authorizationType;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FeedbackBatch feedbackBatch;
@@ -80,7 +80,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         this.sslContext = sslContext;
     }
 
-    public AmqpReceive(String hostName, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpReceive(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
         this.hostName = hostName;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;

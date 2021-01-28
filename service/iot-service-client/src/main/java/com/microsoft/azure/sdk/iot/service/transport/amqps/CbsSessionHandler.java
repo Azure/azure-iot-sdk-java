@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.CbsAuthorizationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -30,11 +30,11 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
     private CbsReceiverLinkHandler cbsReceiverLinkHandler;
     private CbsSessionStateCallback cbsSessionStateCallback;
     private final TokenCredential authenticationTokenProvider;
-    private final CbsAuthorizationType authorizationType;
+    private final AuthenticationType authorizationType;
     private boolean senderLinkOpened = false;
     private boolean receiverLinkOpened = false;
 
-    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredential authenticationTokenProvider, CbsAuthorizationType authorizationType)
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType)
     {
         this.session = session;
 
