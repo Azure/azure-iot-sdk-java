@@ -83,6 +83,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
 
         Map<String, Object> userProperties = new HashMap<>(4);
 
+        //TODO need more context on this TokenRequestContext object, and what we are expected to give it
         this.currentAccessToken = authenticationTokenProvider.getToken(new TokenRequestContext()).block();
 
         userProperties.put(PUT_TOKEN_OPERATION, PUT_TOKEN_OPERATION_VALUE);
