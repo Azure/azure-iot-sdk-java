@@ -17,28 +17,28 @@ import java.time.ZoneId;
  * Implementation of {@link TokenCredential} that takes your IoT Hub's connection string and generates SAS tokens.
  * This implementation will cache previously generated SAS tokens and will only renew them once the previous SAS token
  */
-public class IoTHubConnectionStringCredential implements TokenCredential
+public class IotHubConnectionStringCredential implements TokenCredential
 {
     private IotHubConnectionString iotHubConnectionString;
     private IotHubServiceSasToken serviceSasToken;
     private Long tokenLifespanSeconds;
 
     /**
-     * Construct a new {@link IoTHubConnectionStringCredential}.
+     * Construct a new {@link IotHubConnectionStringCredential}.
      * @param iotHubConnectionString The connection string for your IoT Hub.
      */
-    public IoTHubConnectionStringCredential(String iotHubConnectionString)
+    public IotHubConnectionStringCredential(String iotHubConnectionString)
     {
         this(iotHubConnectionString, 0);
     }
 
     /**
-     * Construct a new {@link IoTHubConnectionStringCredential}.
+     * Construct a new {@link IotHubConnectionStringCredential}.
      * @param iotHubConnectionString The connection string for your IoT Hub.
      * @param tokenLifespanSeconds The number of seconds that the generated SAS tokens should be valid for. If less than
      *                             or equal to 0, the default time to live will be used.
      */
-    public IoTHubConnectionStringCredential(String iotHubConnectionString, long tokenLifespanSeconds)
+    public IotHubConnectionStringCredential(String iotHubConnectionString, long tokenLifespanSeconds)
     {
         this.iotHubConnectionString = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString);
         this.tokenLifespanSeconds = tokenLifespanSeconds;

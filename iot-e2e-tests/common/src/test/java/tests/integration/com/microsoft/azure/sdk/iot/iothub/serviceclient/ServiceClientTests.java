@@ -20,7 +20,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
-import com.microsoft.azure.sdk.iot.service.auth.IoTHubConnectionStringCredential;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -205,7 +205,7 @@ public class ServiceClientTests extends IntegrationTest
         if (withTokenCredential)
         {
             IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString);
-            TokenCredential authenticationTokenProvider = new IoTHubConnectionStringCredential(iotHubConnectionString);
+            TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString);
             serviceClient = ServiceClient.createFromTokenCredential(iotHubConnectionStringObj.getHostName(), authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE, testInstance.protocol, serviceClientOptions);
         }
         else

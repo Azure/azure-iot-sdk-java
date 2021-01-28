@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.service;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.auth.IoTHubConnectionStringCredential;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +72,7 @@ public class ServiceClient
 
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
 
-        TokenCredential authenticationTokenProvider = new IoTHubConnectionStringCredential(connectionString);
+        TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(connectionString);
 
         return new ServiceClient(iotHubConnectionString.hostName, authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE, iotHubServiceClientProtocol, options);
     }
