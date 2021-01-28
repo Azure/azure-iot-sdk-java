@@ -10,7 +10,7 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
@@ -46,7 +46,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     protected String userName;
     protected String sasToken;
     protected TokenCredential authenticationTokenProvider;
-    protected AuthenticationType authorizationType;
+    protected TokenCredentialType authorizationType;
     protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected final ProxyOptions proxyOptions;
     protected final SSLContext sslContext;
@@ -89,7 +89,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
     }
 
-    protected AmqpConnectionHandler(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    protected AmqpConnectionHandler(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {

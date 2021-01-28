@@ -8,7 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotificationReceiver;
@@ -220,7 +220,7 @@ public class ServiceClientTests extends IntegrationTest
                 return Mono.just(accessToken);
             };
 
-            serviceClient = ServiceClient.createFromTokenCredential(iotHubConnectionStringObj.getHostName(), authenticationTokenProvider, AuthenticationType.SHARED_ACCESS_SIGNATURE, testInstance.protocol, serviceClientOptions);
+            serviceClient = ServiceClient.createFromTokenCredential(iotHubConnectionStringObj.getHostName(), authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE, testInstance.protocol, serviceClientOptions);
         }
         else
         {

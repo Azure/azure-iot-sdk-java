@@ -6,7 +6,7 @@ package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 /**
  * An enumeration of supported authorization methods for service client connections.
  */
-public enum AuthenticationType
+public enum TokenCredentialType
 {
     /**
      * Authorize with CBS through a shared access signature.
@@ -15,7 +15,7 @@ public enum AuthenticationType
 
     private final String scheme;
 
-    AuthenticationType(String scheme) {
+    TokenCredentialType(String scheme) {
         this.scheme = scheme;
     }
 

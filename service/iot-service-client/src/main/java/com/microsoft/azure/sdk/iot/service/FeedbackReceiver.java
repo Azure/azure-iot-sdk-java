@@ -6,7 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.AuthenticationType;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
 import lombok.extern.slf4j.Slf4j;
 
@@ -138,7 +138,7 @@ public class FeedbackReceiver extends Receiver
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public FeedbackReceiver(String hostName, TokenCredential authenticationTokenProvider, AuthenticationType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public FeedbackReceiver(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
