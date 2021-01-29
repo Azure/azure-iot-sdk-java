@@ -9,7 +9,7 @@ package com.microsoft.azure.sdk.iot.deps.transport.amqp;
 public enum TokenCredentialType
 {
     /**
-     * Authorize with CBS through a shared access signature.
+     * Authorize with a shared access signature.
      */
     SHARED_ACCESS_SIGNATURE("azure-devices.net:sastoken");
 

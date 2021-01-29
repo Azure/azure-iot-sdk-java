@@ -7,6 +7,7 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
@@ -90,7 +91,7 @@ public class DeviceOperations
         }
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-         if ((sasTokenString == null) || sasTokenString.isEmpty())
+         if (Tools.isNullOrEmpty(sasTokenString))
         {
             throw new IOException("Illegal sasToken null or empty");
         }
@@ -99,7 +100,7 @@ public class DeviceOperations
         request.setReadTimeoutMillis((int)(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS));
         request.setHeaderField(AUTHORIZATION, sasTokenString);
 
-        if ((requestId != null) && !requestId.isEmpty())
+        if (Tools.isNullOrEmpty(requestId))
         {
             request.setHeaderField(REQUEST_ID, requestId);
         }
@@ -167,7 +168,7 @@ public class DeviceOperations
         }
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-        if ((sasTokenString == null) || sasTokenString.isEmpty())
+        if (Tools.isNullOrEmpty(sasTokenString))
         {
             throw new IOException("Illegal sasToken null or empty");
         }
@@ -185,7 +186,7 @@ public class DeviceOperations
         request.setReadTimeoutMillis(readTimeout);
         request.setConnectTimeoutMillis(connectTimeout);
 
-        if ((requestId != null) && !requestId.isEmpty())
+        if (Tools.isNullOrEmpty(requestId))
         {
             request.setHeaderField(REQUEST_ID, requestId);
         }
@@ -264,7 +265,7 @@ public class DeviceOperations
         request.setReadTimeoutMillis(readTimeout);
         request.setConnectTimeoutMillis(connectTimeout);
 
-        if ((requestId != null) && !requestId.isEmpty())
+        if (Tools.isNullOrEmpty(requestId))
         {
             request.setHeaderField(REQUEST_ID, requestId);
         }

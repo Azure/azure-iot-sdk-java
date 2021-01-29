@@ -104,7 +104,9 @@ public class RegistryManager
             throw new IllegalArgumentException("RegistryManagerOptions cannot be null for this constructor");
         }
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString =
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+
         TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(connectionString);
 
         return createFromTokenCredential(iotHubConnectionString.hostName, authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE);
@@ -125,7 +127,10 @@ public class RegistryManager
             TokenCredential authenticationTokenProvider,
             TokenCredentialType tokenCredentialType)
     {
-        return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, RegistryManagerOptions.builder().build());
+        return createFromTokenCredential(
+                hostName, authenticationTokenProvider,
+                tokenCredentialType,
+                RegistryManagerOptions.builder().build());
     }
 
     /**
@@ -344,6 +349,7 @@ public class RegistryManager
                 Device iotHubDevice = new Device(new DeviceParser(jsonObject.toString()));
                 deviceList.add(iotHubDevice);
             }
+
             return deviceList;
         }
     }
@@ -442,7 +448,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Device updateDevice(Device device, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
+    public Device updateDevice(Device device, Boolean forceUpdate)
+            throws IOException, IotHubException, JsonSyntaxException
     {
         if (device == null)
         {
@@ -454,7 +461,12 @@ public class RegistryManager
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
         String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, device.toDeviceParser().toJson().getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(
+                url,
+                HttpMethod.PUT,
+                device.toDeviceParser().toJson().getBytes(),
+                authenticationToken);
+
         request.setHeaderField("If-Match", "*");
 
         HttpResponse response = request.send();
@@ -962,8 +974,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public CompletableFuture<JobProperties> getJobAsync(
-            String jobId) throws IllegalArgumentException, IOException, IotHubException
+    public CompletableFuture<JobProperties> getJobAsync(String jobId)
+            throws IllegalArgumentException, IOException, IotHubException
     {
         final CompletableFuture<JobProperties> future = new CompletableFuture<>();
         executor.submit(() ->
@@ -1352,7 +1364,12 @@ public class RegistryManager
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
         String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configuration.toConfigurationParser().toJson().getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(
+                url,
+                HttpMethod.PUT,
+                configuration.toConfigurationParser().toJson().getBytes(),
+                authenticationToken);
+
         request.setHeaderField("If-Match", "*");
 
         HttpResponse response = request.send();
@@ -1445,7 +1462,12 @@ public class RegistryManager
 
         String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(
+                url,
+                HttpMethod.POST,
+                content.toConfigurationContentParser().toJson().getBytes(),
+                authenticationToken);
+
         HttpResponse response = request.send();
 
         IotHubExceptionManager.httpResponseVerification(response);

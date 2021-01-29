@@ -51,8 +51,13 @@ public class JobClient
     public static JobClient createFromConnectionString(String connectionString)
             throws IOException, IllegalArgumentException
     {
-       IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
-       return createFromTokenCredential(iotHubConnectionString.getHostName(), new IotHubConnectionStringCredential(connectionString), TokenCredentialType.SHARED_ACCESS_SIGNATURE);
+       IotHubConnectionString iotHubConnectionString =
+               IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+
+       return createFromTokenCredential(
+               iotHubConnectionString.getHostName(),
+               new IotHubConnectionStringCredential(connectionString),
+               TokenCredentialType.SHARED_ACCESS_SIGNATURE);
     }
 
     /**
@@ -70,7 +75,11 @@ public class JobClient
             TokenCredential authenticationTokenProvider,
             TokenCredentialType tokenCredentialType)
     {
-        return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, JobClientOptions.builder().build());
+        return createFromTokenCredential(
+                hostName,
+                authenticationTokenProvider,
+                tokenCredentialType,
+                JobClientOptions.builder().build());
     }
 
     /**
@@ -145,7 +154,14 @@ public class JobClient
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        JobsParser jobsParser = new JobsParser(jobId, getParserFromDevice(updateTwin), queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+        JobsParser jobsParser =
+                new JobsParser(
+                        jobId,
+                        getParserFromDevice(updateTwin),
+                        queryCondition,
+                        startTimeUtc,
+                        maxExecutionTimeInSeconds);
+
         String json = jobsParser.toJson();
 
         try
@@ -191,7 +207,10 @@ public class JobClient
     public synchronized JobResult scheduleDeviceMethod(
             String jobId,
             String queryCondition,
-            String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload,
+            String methodName,
+            Long responseTimeoutInSeconds,
+            Long connectTimeoutInSeconds,
+            Object payload,
             Date startTimeUtc,
             long maxExecutionTimeInSeconds)
             throws IllegalArgumentException, IOException, IotHubException
@@ -203,7 +222,7 @@ public class JobClient
             throw new IllegalArgumentException("null jobId");
         }
 
-        if ((methodName == null) || methodName.isEmpty())
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("null updateTwin");
         }
@@ -218,8 +237,21 @@ public class JobClient
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        MethodParser cloudToDeviceMethod = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
-        JobsParser jobsParser = new JobsParser(jobId, cloudToDeviceMethod, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
+        MethodParser cloudToDeviceMethod =
+                new MethodParser(
+                        methodName,
+                        responseTimeoutInSeconds,
+                        connectTimeoutInSeconds,
+                        payload);
+
+        JobsParser jobsParser =
+                new JobsParser(
+                        jobId,
+                        cloudToDeviceMethod,
+                        queryCondition,
+                        startTimeUtc,
+                        maxExecutionTimeInSeconds);
+
         String json = jobsParser.toJson();
 
         try

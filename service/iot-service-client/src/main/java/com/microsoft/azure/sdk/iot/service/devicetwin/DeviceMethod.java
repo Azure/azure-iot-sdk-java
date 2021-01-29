@@ -157,7 +157,7 @@ public class DeviceMethod
             throw new IllegalArgumentException("deviceId is empty or null.");
         }
 
-        if((methodName == null) || methodName.isEmpty())
+        if(Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
@@ -197,7 +197,7 @@ public class DeviceMethod
             throw new IllegalArgumentException("moduleId is empty or null.");
         }
 
-        if((methodName == null) || methodName.isEmpty())
+        if(Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
@@ -265,7 +265,7 @@ public class DeviceMethod
                                     Date startTimeUtc,
                                     long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
-        if((methodName == null) || methodName.isEmpty())
+        if(Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("null updateTwin");
         }

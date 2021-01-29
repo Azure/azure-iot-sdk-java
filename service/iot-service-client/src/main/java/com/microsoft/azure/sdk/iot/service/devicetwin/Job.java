@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
+import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
@@ -39,25 +40,7 @@ public class Job
         this.jobClient = JobClient.createFromConnectionString(connectionString);
     }
 
-    /**
-     * CONSTRUCTOR
-     * 
-     * @param jobId is the Job name.
-     * @param connectionString is the IoTHub connection string.
-     * @throws IOException This exception is thrown if the object creation failed
-     */
-    Job(String jobId, String connectionString) throws IOException
-    {
-        if ((connectionString == null) || connectionString.isEmpty())
-        {
-            throw new IllegalArgumentException("Connection string cannot be null or empty");
-        }
-
-        this.jobId = jobId;
-        this.jobClient = JobClient.createFromConnectionString(connectionString);
-    }
-
-    Job (String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
+    Job(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
     {
         this.jobId = "JOB-" + UUID.randomUUID();
         this.jobClient = JobClient.createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType);
@@ -73,9 +56,12 @@ public class Job
      * @throws IOException if the function contains invalid parameters
      * @throws IotHubException if the http request failed
      */
-    void scheduleUpdateTwin(String queryCondition,
-                            DeviceTwinDevice updateTwin,
-                            Date startTimeUtc, long maxExecutionTimeInSeconds) throws IOException, IotHubException
+    void scheduleUpdateTwin(
+            String queryCondition,
+            DeviceTwinDevice updateTwin,
+            Date startTimeUtc,
+            long maxExecutionTimeInSeconds)
+            throws IOException, IotHubException
     {
         if (updateTwin == null)
         {
@@ -113,11 +99,17 @@ public class Job
      * @throws IOException if the function contains invalid parameters
      * @throws IotHubException if the http request failed
      */
-    void scheduleDeviceMethod(String queryCondition,
-                              String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload,
-                              Date startTimeUtc, long maxExecutionTimeInSeconds) throws IOException, IotHubException
+    void scheduleDeviceMethod(
+            String queryCondition,
+            String methodName,
+            Long responseTimeoutInSeconds,
+            Long connectTimeoutInSeconds,
+            Object payload,
+            Date startTimeUtc,
+            long maxExecutionTimeInSeconds)
+            throws IOException, IotHubException
     {
-        if ((methodName == null) || methodName.isEmpty())
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("null updateTwin");
         }
@@ -133,9 +125,14 @@ public class Job
         }
 
         JobResult jobResult = this.jobClient.scheduleDeviceMethod(
-                jobId, queryCondition,
-                methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload,
-                startTimeUtc, maxExecutionTimeInSeconds);
+                jobId,
+                queryCondition,
+                methodName,
+                responseTimeoutInSeconds,
+                connectTimeoutInSeconds,
+                payload,
+                startTimeUtc,
+                maxExecutionTimeInSeconds);
 
         if (jobResult.getJobStatus() == JobStatus.failed)
         {
