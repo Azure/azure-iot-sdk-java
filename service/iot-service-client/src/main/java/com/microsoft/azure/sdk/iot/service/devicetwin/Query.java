@@ -168,10 +168,12 @@ public class Query
      * @deprecated use {@link #sendQueryRequest(IotHubConnectionString, URL, HttpMethod, int, int, Proxy)} instead.
      */
     @Deprecated
-    public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
-                                          URL url,
-                                          HttpMethod method,
-                                          Long timeoutInMs) throws IOException, IotHubException
+    public QueryResponse sendQueryRequest(
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod method,
+            Long timeoutInMs)
+            throws IOException, IotHubException
     {
         if (iotHubConnectionString == null || url == null || method == null)
         {
@@ -261,12 +263,14 @@ public class Query
      * @throws IOException If any of the input parameters are not valid.
      * @throws IotHubException If HTTP response other then status ok is received.
      */
-    public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
-                                          URL url,
-                                          HttpMethod method,
-                                          int httpConnectTimeout,
-                                          int httpReadTimeout,
-                                          Proxy proxy) throws IOException, IotHubException
+    public QueryResponse sendQueryRequest(
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod method,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
+            throws IOException, IotHubException
     {
         if (iotHubConnectionString == null || url == null || method == null)
         {
@@ -352,13 +356,15 @@ public class Query
      * @throws IOException If any of the input parameters are not valid.
      * @throws IotHubException If HTTP response other then status ok is received.
      */
-    public QueryResponse sendQueryRequest(TokenCredential authenticationTokenProvider,
-                                          TokenCredentialType tokenCredentialType,
-                                          URL url,
-                                          HttpMethod method,
-                                          int httpConnectTimeout,
-                                          int httpReadTimeout,
-                                          Proxy proxy) throws IOException, IotHubException
+    public QueryResponse sendQueryRequest(
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            URL url,
+            HttpMethod method,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
+            throws IOException, IotHubException
     {
         this.url = url;
         this.httpMethod = method;

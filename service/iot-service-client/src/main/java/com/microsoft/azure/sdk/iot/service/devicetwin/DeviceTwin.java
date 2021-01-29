@@ -63,7 +63,9 @@ public class DeviceTwin
      * @return The instance of DeviceTwin.
      * @throws IOException This exception is never thrown.
      */
-    public static DeviceTwin createFromConnectionString(String connectionString, DeviceTwinClientOptions options) throws IOException
+    public static DeviceTwin createFromConnectionString(
+            String connectionString,
+            DeviceTwinClientOptions options) throws IOException
     {
         if (connectionString == null || connectionString.length() == 0)
         {
@@ -84,7 +86,10 @@ public class DeviceTwin
      *                          implementation will always give.
      * @return the new DeviceTwin instance.
      */
-    public static DeviceTwin createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
+    public static DeviceTwin createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType)
     {
         return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, DeviceTwinClientOptions.builder().build());
     }
@@ -100,7 +105,11 @@ public class DeviceTwin
      * @param options The connection options to use when connecting to the service.
      * @return the new DeviceTwin instance.
      */
-    public static DeviceTwin createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, DeviceTwinClientOptions options)
+    public static DeviceTwin createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            DeviceTwinClientOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider, "TokenCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -418,7 +427,8 @@ public class DeviceTwin
      * @throws IotHubException If an IotHubException occurs when querying the service.
      * @throws IOException If an IotHubException occurs when querying the service or if the results of that query don't match expectations.
      */
-    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(
+            QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException
     {
         QueryOptions options = new QueryOptions();
         options.setPageSize(deviceTwinQueryCollection.getPageSize());
@@ -440,7 +450,9 @@ public class DeviceTwin
      * @throws IotHubException If an IotHubException occurs when querying the service.
      * @throws IOException If an IotHubException occurs when querying the service or if the results of that query don't match expectations.
      */
-    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection, QueryOptions options) throws IOException, IotHubException
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(
+            QueryCollection deviceTwinQueryCollection,
+            QueryOptions options) throws IOException, IotHubException
     {
         if (deviceTwinQueryCollection == null)
         {
@@ -475,10 +487,11 @@ public class DeviceTwin
      * @throws IOException if the function contains invalid parameters.
      * @throws IotHubException if the http request failed.
      */
-    public Job scheduleUpdateTwin(String queryCondition,
-                                  DeviceTwinDevice updateTwin,
-                                  Date startTimeUtc,
-                                  long maxExecutionTimeInSeconds) throws IOException, IotHubException
+    public Job scheduleUpdateTwin(
+            String queryCondition,
+            DeviceTwinDevice updateTwin,
+            Date startTimeUtc,
+            long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
         if (updateTwin == null)
         {

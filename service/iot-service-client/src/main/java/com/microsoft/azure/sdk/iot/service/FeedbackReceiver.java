@@ -117,7 +117,7 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("sasToken cannot be null or empty");
         }
 
-        if (iotHubServiceClientProtocol  == null)
+        if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
@@ -145,7 +145,7 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        if (iotHubServiceClientProtocol  == null)
+        if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }

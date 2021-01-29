@@ -63,74 +63,56 @@ public class DeviceOperations
             long timeoutInMs) 
             throws IOException, IotHubException, IllegalArgumentException
     {
-        /* Codes_SRS_DEVICE_OPERATIONS_21_001: [The request shall throw IllegalArgumentException if the provided `iotHubConnectionString` is null.] */
-        if(iotHubConnectionString == null)
+        if (iotHubConnectionString == null)
         {
             throw new IllegalArgumentException("Http requests must provide a non-null connection string");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_002: [The request shall throw IllegalArgumentException if the provided `url` is null.] */
-        if(url == null)
+        if (url == null)
         {
             throw new IllegalArgumentException("Http requests must provide a non-null URL");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_003: [The request shall throw IllegalArgumentException if the provided `method` is null.] */
-        if(method == null)
+        if (method == null)
         {
             throw new IllegalArgumentException("Http requests must provide a non-null http method");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_004: [The request shall throw IllegalArgumentException if the provided `payload` is null.] */
-        if(payload == null)
+        if (payload == null)
         {
             // This is an odd requirement, but since we won't use this API since its deprecation, it will stay.
             throw new IllegalArgumentException("Http requests must provide a non-null URL");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_99_018: [The request shall throw IllegalArgumentException if the provided `timeoutInMs` exceed Integer.MAX_VALUE.] */
-        if((timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS) > Integer.MAX_VALUE) 
+        if ((timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS) > Integer.MAX_VALUE)
         {
             throw new IllegalArgumentException("HTTP Request timeout shouldn't not exceed " + timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS + " milliseconds");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_006: [The request shall create a new SASToken with the ServiceConnect rights.] */
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-        /* Codes_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
-         if((sasTokenString == null) || sasTokenString.isEmpty())
+         if ((sasTokenString == null) || sasTokenString.isEmpty())
         {
             throw new IOException("Illegal sasToken null or empty");
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
         HttpRequest request = new HttpRequest(url, method, payload);
-
-        /* Codes_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
         request.setReadTimeoutMillis((int)(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS));
-        
-        /* Codes_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
         request.setHeaderField(AUTHORIZATION, sasTokenString);
 
-        //Codes_SRS_DEVICE_OPERATIONS_21_011: [If the requestId is not null or empty, the request shall add to the HTTP header a Request-Id key with a new unique string value for every request.]
-        if((requestId != null) && !requestId.isEmpty())
+        if ((requestId != null) && !requestId.isEmpty())
         {
-            /* Codes_SRS_DEVICE_OPERATIONS_21_011: [The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.] */
             request.setHeaderField(REQUEST_ID, requestId);
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_012: [The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.] */
         request.setHeaderField(USER_AGENT, TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_013: [The request shall add to the HTTP header a `Accept` key with `application/json`.] */
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_014: [The request shall add to the HTTP header a `Content-Type` key with `application/json; charset=utf-8`.] */
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
 
         if (headers != null)
         {
-            //SRS_DEVICE_OPERATIONS_25_019: [The request shall add to the HTTP header all the additional custom headers set for this request.]
-            for(Map.Entry<String, String> header : headers.entrySet())
+            for (Map.Entry<String, String> header : headers.entrySet())
             {
                 request.setHeaderField(header.getKey(), header.getValue());
             }
@@ -138,13 +120,8 @@ public class DeviceOperations
             headers = null;
         }
 
-        /* Codes_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
         HttpResponse response = request.send();
-
-        /* Codes_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
         IotHubExceptionManager.httpResponseVerification(response);
-        
-        /* Codes_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
         return response;
     }
 
@@ -174,23 +151,23 @@ public class DeviceOperations
             Proxy proxy)
             throws IOException, IotHubException, IllegalArgumentException
     {
-        if(iotHubConnectionString == null)
+        if (iotHubConnectionString == null)
         {
             throw new IllegalArgumentException("Http requests must provide a non-null connection string");
         }
 
-        if(url == null)
+        if (url == null)
         {
             throw new IllegalArgumentException("Http requests must provide a non-null URL");
         }
 
-        if(method == null)
+        if (method == null)
         {
             throw new IllegalArgumentException("Http requests must provide a non-null http method");
         }
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-        if((sasTokenString == null) || sasTokenString.isEmpty())
+        if ((sasTokenString == null) || sasTokenString.isEmpty())
         {
             throw new IOException("Illegal sasToken null or empty");
         }
@@ -208,7 +185,7 @@ public class DeviceOperations
         request.setReadTimeoutMillis(readTimeout);
         request.setConnectTimeoutMillis(connectTimeout);
 
-        if((requestId != null) && !requestId.isEmpty())
+        if ((requestId != null) && !requestId.isEmpty())
         {
             request.setHeaderField(REQUEST_ID, requestId);
         }
@@ -220,7 +197,7 @@ public class DeviceOperations
 
         if (headers != null)
         {
-            for(Map.Entry<String, String> header : headers.entrySet())
+            for (Map.Entry<String, String> header : headers.entrySet())
             {
                 request.setHeaderField(header.getKey(), header.getValue());
             }
@@ -287,7 +264,7 @@ public class DeviceOperations
         request.setReadTimeoutMillis(readTimeout);
         request.setConnectTimeoutMillis(connectTimeout);
 
-        if((requestId != null) && !requestId.isEmpty())
+        if ((requestId != null) && !requestId.isEmpty())
         {
             request.setHeaderField(REQUEST_ID, requestId);
         }
@@ -309,7 +286,7 @@ public class DeviceOperations
 
         if (headers != null)
         {
-            for(Map.Entry<String, String> header : headers.entrySet())
+            for (Map.Entry<String, String> header : headers.entrySet())
             {
                 request.setHeaderField(header.getKey(), header.getValue());
             }

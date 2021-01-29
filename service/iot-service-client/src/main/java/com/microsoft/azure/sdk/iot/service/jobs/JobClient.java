@@ -48,7 +48,8 @@ public class JobClient
      * @throws IOException This exception is never thrown.
      * @throws IllegalArgumentException if the provided connectionString is {@code null} or empty
      */
-    public static JobClient createFromConnectionString(String connectionString) throws IOException, IllegalArgumentException
+    public static JobClient createFromConnectionString(String connectionString)
+            throws IOException, IllegalArgumentException
     {
        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
        return createFromTokenCredential(iotHubConnectionString.getHostName(), new IotHubConnectionStringCredential(connectionString), TokenCredentialType.SHARED_ACCESS_SIGNATURE);
@@ -64,7 +65,10 @@ public class JobClient
      *                          implementation will always give.
      * @return The new JobClient instance.
      */
-    public static JobClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
+    public static JobClient createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType)
     {
         return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, JobClientOptions.builder().build());
     }
@@ -80,7 +84,11 @@ public class JobClient
      * @param options The connection options to use when connecting to the service.
      * @return The new JobClient instance.
      */
-    public static JobClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, JobClientOptions options)
+    public static JobClient createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            JobClientOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider);
         Objects.requireNonNull(tokenCredentialType);
@@ -477,7 +485,8 @@ public class JobClient
      * @throws IOException If any of the input parameters are incorrect
      * @throws IotHubException If IotHub failed to respond
      */
-    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize) throws IOException, IotHubException
+    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize)
+            throws IOException, IotHubException
     {
         if (pageSize <= 0)
         {
@@ -508,7 +517,8 @@ public class JobClient
      * @throws IOException If any of the input parameters are incorrect
      * @throws IotHubException If IotHub failed to respond
      */
-    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus) throws IotHubException, IOException
+    public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus)
+            throws IotHubException, IOException
     {
         return queryJobResponse(jobType, jobStatus, DEFAULT_PAGE_SIZE);
     }

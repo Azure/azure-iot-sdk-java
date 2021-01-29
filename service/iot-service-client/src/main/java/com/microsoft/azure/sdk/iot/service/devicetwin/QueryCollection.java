@@ -43,7 +43,6 @@ public class QueryCollection
     private final int httpConnectTimeout;
     private final int httpReadTimeout;
 
-    private final String hostName;
     private final TokenCredential authenticationTokenProvider;
     private final TokenCredentialType tokenCredentialType;
 
@@ -66,7 +65,14 @@ public class QueryCollection
      * @deprecated use {@link #QueryCollection(String, int, QueryType, IotHubConnectionString, URL, HttpMethod, int, int, Proxy)} instead.
      */
     @Deprecated
-    protected QueryCollection(String query, int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long timeout)
+    protected QueryCollection(
+            String query,
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            long timeout)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
@@ -75,7 +81,6 @@ public class QueryCollection
         this.pageSize = pageSize;
         this.query = query;
         this.requestQueryType = requestQueryType;
-        this.hostName = iotHubConnectionString.getHostName();
         this.responseContinuationToken = null;
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
@@ -102,7 +107,13 @@ public class QueryCollection
      * @deprecated use {@link #QueryCollection(int, QueryType, IotHubConnectionString, URL, HttpMethod, int, int, Proxy)} instead.
      */
     @Deprecated
-    protected QueryCollection(int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long timeout)
+    protected QueryCollection(
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            long timeout)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
@@ -111,7 +122,6 @@ public class QueryCollection
         this.query = null;
         this.responseQueryType = QueryType.UNKNOWN;
         this.responseContinuationToken = null;
-        this.hostName = iotHubConnectionString.getHostName();
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
         this.httpReadTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS;
@@ -138,7 +148,16 @@ public class QueryCollection
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
     @SuppressWarnings("SameParameterValue") // Generic method for executing queries, "requestQueryType" and "httpMethod" can have any service-allowed value.
-    protected QueryCollection(String query, int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
+    protected QueryCollection(
+            String query,
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
@@ -147,7 +166,6 @@ public class QueryCollection
         this.pageSize = pageSize;
         this.query = query;
         this.requestQueryType = requestQueryType;
-        this.hostName = iotHubConnectionString.getHostName();
         this.responseContinuationToken = null;
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
@@ -175,7 +193,15 @@ public class QueryCollection
      * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown,
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
-    protected QueryCollection(int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
+    protected QueryCollection(
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
@@ -184,7 +210,6 @@ public class QueryCollection
         this.query = null;
         this.responseQueryType = QueryType.UNKNOWN;
         this.responseContinuationToken = null;
-        this.hostName = iotHubConnectionString.getHostName();
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
         this.httpReadTimeout = httpReadTimeout;
@@ -196,14 +221,24 @@ public class QueryCollection
         this.tokenCredentialType = TokenCredentialType.SHARED_ACCESS_SIGNATURE;
     }
 
-    QueryCollection(String query, int pageSize, QueryType requestQueryType, String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
+    QueryCollection(
+            String query,
+            int pageSize,
+            QueryType requestQueryType,
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            URL url,
+            HttpMethod httpMethod,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
     {
         this.pageSize = pageSize;
         this.requestQueryType = requestQueryType;
         this.query = query;
         this.responseQueryType = QueryType.UNKNOWN;
         this.responseContinuationToken = null;
-        this.hostName = hostName;
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
         this.httpReadTimeout = httpReadTimeout;
@@ -307,7 +342,12 @@ public class QueryCollection
         return this.pageSize;
     }
 
-    private void validateQueryRequestArguments(IotHubConnectionString iotHubConnectionString, URL url, HttpMethod method, int pageSize, QueryType requestQueryType)
+    private void validateQueryRequestArguments(
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod method,
+            int pageSize,
+            QueryType requestQueryType)
     {
         if (iotHubConnectionString == null || url == null || method == null)
         {

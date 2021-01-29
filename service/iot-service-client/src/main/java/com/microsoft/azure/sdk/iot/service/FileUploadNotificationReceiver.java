@@ -48,7 +48,7 @@ public class FileUploadNotificationReceiver extends Receiver
         {
             throw new IllegalArgumentException("sasToken cannot be null or empty");
         }
-        if (iotHubServiceClientProtocol  == null)
+        if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
@@ -75,18 +75,19 @@ public class FileUploadNotificationReceiver extends Receiver
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
-        if (iotHubServiceClientProtocol  == null)
+        if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
-        this.amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(
-                hostName,
-                authenticationTokenProvider,
-                authorizationType,
-                iotHubServiceClientProtocol,
-                proxyOptions,
-                sslContext);
+        this.amqpFileUploadNotificationReceive =
+                new AmqpFileUploadNotificationReceive(
+                        hostName,
+                        authenticationTokenProvider,
+                        authorizationType,
+                        iotHubServiceClientProtocol,
+                        proxyOptions,
+                        sslContext);
     }
 
     /**

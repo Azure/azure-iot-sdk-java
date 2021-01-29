@@ -5,7 +5,6 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
 import com.google.gson.JsonSyntaxException;
@@ -15,13 +14,11 @@ import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import reactor.core.publisher.Mono;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -32,9 +29,6 @@ import java.io.StringReader;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -96,7 +90,9 @@ public class RegistryManager
      * @return The instance of RegistryManager
      * @throws IOException This exception is never thrown.
      */
-    public static RegistryManager createFromConnectionString(String connectionString, RegistryManagerOptions options) throws IOException
+    public static RegistryManager createFromConnectionString(
+            String connectionString,
+            RegistryManagerOptions options) throws IOException
     {
         if (Tools.isNullOrEmpty(connectionString))
         {
@@ -124,7 +120,10 @@ public class RegistryManager
      *                          implementation will always give.
      * @return The instance of RegistryManager
      */
-    public static RegistryManager createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
+    public static RegistryManager createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType)
     {
         return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, RegistryManagerOptions.builder().build());
     }
@@ -140,7 +139,11 @@ public class RegistryManager
      * @param options The connection options to use when connecting to the service.
      * @return The instance of RegistryManager
      */
-    public static RegistryManager createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, RegistryManagerOptions options)
+    public static RegistryManager createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            RegistryManagerOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider, "authenticationTokenProvider cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -931,7 +934,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public JobProperties getJob(String jobId) throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
+    public JobProperties getJob(String jobId)
+            throws IllegalArgumentException, IOException, IotHubException, JsonSyntaxException
     {
         if (jobId == null)
         {
@@ -1110,7 +1114,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Module updateModule(Module module, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
+    public Module updateModule(Module module, Boolean forceUpdate)
+            throws IOException, IotHubException, JsonSyntaxException
     {
         if (module == null)
         {
@@ -1174,7 +1179,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    private void removeModuleOperation(String deviceId, String moduleId, String etag) throws IOException, IotHubException
+    private void removeModuleOperation(String deviceId, String moduleId, String etag)
+            throws IOException, IotHubException
     {
         if (Tools.isNullOrEmpty(deviceId))
         {
@@ -1212,7 +1218,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Configuration addConfiguration(Configuration configuration) throws IOException, IotHubException, JsonSyntaxException
+    public Configuration addConfiguration(Configuration configuration)
+            throws IOException, IotHubException, JsonSyntaxException
     {
         if (configuration == null)
         {
@@ -1243,7 +1250,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Configuration getConfiguration(String configurationId) throws IOException, IotHubException, JsonSyntaxException
+    public Configuration getConfiguration(String configurationId)
+            throws IOException, IotHubException, JsonSyntaxException
     {
         if (Tools.isNullOrEmpty(configurationId))
         {
@@ -1272,7 +1280,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public List<Configuration> getConfigurations(Integer maxCount) throws IOException, IotHubException, JsonSyntaxException
+    public List<Configuration> getConfigurations(Integer maxCount)
+            throws IOException, IotHubException, JsonSyntaxException
     {
         if (maxCount < 1)
         {
@@ -1330,7 +1339,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
+    public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate)
+            throws IOException, IotHubException, JsonSyntaxException
     {
         if (configuration == null)
         {
@@ -1423,7 +1433,8 @@ public class RegistryManager
      * @throws IOException If the iot hub cannot be reached
      * @throws IotHubException If the response from the hub was an error code. This exception will contain that code
      */
-    public void applyConfigurationContentOnDevice(String deviceId, ConfigurationContent content) throws IOException, IotHubException
+    public void applyConfigurationContentOnDevice(String deviceId, ConfigurationContent content)
+            throws IOException, IotHubException
     {
         if (content == null)
         {
@@ -1464,7 +1475,8 @@ public class RegistryManager
         return new JobProperties(new JobPropertiesParser(bodyStr));
     }
 
-    private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String authenticationToken) throws IOException
+    private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String authenticationToken)
+            throws IOException
     {
         Proxy proxy = null;
         if (this.options.getProxyOptions() != null)

@@ -64,7 +64,9 @@ public class DeviceMethod
      * @return an instance of the DeviceMethod.
      * @throws IOException This exception is never thrown.
      */
-    public static DeviceMethod createFromConnectionString(String connectionString, DeviceMethodClientOptions options) throws IOException
+    public static DeviceMethod createFromConnectionString(
+            String connectionString,
+            DeviceMethodClientOptions options) throws IOException
     {
         if (connectionString == null || connectionString.length() == 0)
         {
@@ -91,7 +93,10 @@ public class DeviceMethod
      *                          implementation will always give.
      * @return the new DeviceMethod instance.
      */
-    public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
+    public static DeviceMethod createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType)
     {
         return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, DeviceMethodClientOptions.builder().build());
     }
@@ -107,7 +112,11 @@ public class DeviceMethod
      * @param options The connection options to use when connecting to the service.
      * @return the new DeviceMethod instance.
      */
-    public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, DeviceMethodClientOptions options)
+    public static DeviceMethod createFromTokenCredential(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            DeviceMethodClientOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider, "TokenCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -136,7 +145,12 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public synchronized MethodResult invoke(String deviceId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    public synchronized MethodResult invoke(
+            String deviceId,
+            String methodName,
+            Long responseTimeoutInSeconds,
+            Long connectTimeoutInSeconds,
+            Object payload) throws IotHubException, IOException
     {
         if((deviceId == null) || deviceId.isEmpty())
         {
@@ -165,7 +179,13 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    public synchronized MethodResult invoke(String deviceId, String moduleId, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    public synchronized MethodResult invoke(
+            String deviceId,
+            String moduleId,
+            String methodName,
+            Long responseTimeoutInSeconds,
+            Long connectTimeoutInSeconds,
+            Object payload) throws IotHubException, IOException
     {
         if((deviceId == null) || deviceId.isEmpty())
         {
@@ -199,7 +219,12 @@ public class DeviceMethod
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException This exception is thrown if the IO operation failed.
      */
-    private synchronized MethodResult invokeMethod(URL url, String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload) throws IotHubException, IOException
+    private synchronized MethodResult invokeMethod(
+            URL url,
+            String methodName,
+            Long responseTimeoutInSeconds,
+            Long connectTimeoutInSeconds,
+            Object payload) throws IotHubException, IOException
     {
         MethodParser methodParser = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
 
@@ -233,9 +258,12 @@ public class DeviceMethod
      * @throws IotHubException if the http request failed.
      */
     public Job scheduleDeviceMethod(String queryCondition,
-                                    String methodName, Long responseTimeoutInSeconds, Long connectTimeoutInSeconds, Object payload,
-                                    Date startTimeUtc, long maxExecutionTimeInSeconds)
-            throws IOException, IotHubException
+                                    String methodName,
+                                    Long responseTimeoutInSeconds,
+                                    Long connectTimeoutInSeconds,
+                                    Object payload,
+                                    Date startTimeUtc,
+                                    long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
         if((methodName == null) || methodName.isEmpty())
         {
