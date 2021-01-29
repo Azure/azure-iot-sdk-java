@@ -80,7 +80,11 @@ public class DeviceMethod
 
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
-        return createFromTokenCredential(iotHubConnectionString.getHostName(), new IotHubConnectionStringCredential(connectionString), TokenCredentialType.SHARED_ACCESS_SIGNATURE, options);
+        return createFromTokenCredential(
+                iotHubConnectionString.getHostName(),
+                new IotHubConnectionStringCredential(connectionString),
+                TokenCredentialType.SHARED_ACCESS_SIGNATURE,
+                options);
     }
 
     /**
@@ -98,7 +102,11 @@ public class DeviceMethod
             TokenCredential authenticationTokenProvider,
             TokenCredentialType tokenCredentialType)
     {
-        return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, DeviceMethodClientOptions.builder().build());
+        return createFromTokenCredential(
+                hostName,
+                authenticationTokenProvider,
+                tokenCredentialType,
+                DeviceMethodClientOptions.builder().build());
     }
 
     /**

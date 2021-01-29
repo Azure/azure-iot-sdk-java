@@ -367,38 +367,6 @@ public class DeviceOperationsTest
                 0);
     }
 
-    /* Tests_SRS_DEVICE_OPERATIONS_21_011: [The request shall add to the HTTP header a `Request-Id` key with a new unique string value for every request.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void invokeThrowOnRequestIDFailed(
-            @Mocked IotHubServiceSasToken iotHubServiceSasToken,
-            @Mocked HttpRequest httpRequest)
-            throws Exception
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                iotHubServiceSasToken.toString();
-                result = STANDARD_SASTOKEN_STRING;
-                httpRequest.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
-                result = httpRequest;
-                httpRequest.setHeaderField(AUTHORIZATION, STANDARD_SASTOKEN_STRING);
-                result = httpRequest;
-                httpRequest.setHeaderField(REQUEST_ID, STANDARD_REQUEST_ID);
-                result = new IllegalArgumentException();
-            }
-        };
-
-        //act
-        HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
-    }
-
     /* Tests_SRS_DEVICE_OPERATIONS_21_012: [The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.] */
     @Test (expected = IllegalArgumentException.class)
     public void invokeThrowOnUserAgentFailed(
@@ -651,7 +619,7 @@ public class DeviceOperationsTest
                 httpRequest.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
                 times = 1;
                 httpRequest.setHeaderField(anyString, anyString);
-                times = 5;
+                times = 4;
                 httpRequest.send();
                 times = 1;
                 IotHubExceptionManager.httpResponseVerification(sendResponse);
@@ -722,7 +690,7 @@ public class DeviceOperationsTest
                 httpRequest.setReadTimeoutMillis(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS);
                 times = 1;
                 httpRequest.setHeaderField(anyString, anyString);
-                times = 5;
+                times = 4;
                 httpRequest.send();
                 times = 1;
                 IotHubExceptionManager.httpResponseVerification(sendResponse);

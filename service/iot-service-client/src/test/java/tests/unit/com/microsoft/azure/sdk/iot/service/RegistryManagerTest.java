@@ -178,19 +178,10 @@ public class RegistryManagerTest
     public void constructor_good_case() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-
-        new NonStrictExpectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
-                result = iotHubConnectionString;
-            }
-        };
-
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         assertNotNull(registryManager);
-        assertNotNull(Deencapsulation.getField(registryManager, "iotHubConnectionString"));
         assertNotNull(Deencapsulation.getField(registryManager, "executor"));
     }
 
@@ -200,6 +191,7 @@ public class RegistryManagerTest
     public void addDevice_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.addDevice(null);
@@ -241,6 +233,7 @@ public class RegistryManagerTest
     public void addDeviceAsync_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.addDeviceAsync(null);
@@ -296,6 +289,7 @@ public class RegistryManagerTest
     public void getDevice_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getDevice(null);
@@ -327,6 +321,7 @@ public class RegistryManagerTest
     public void getDeviceAsync_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getDeviceAsync(null);
@@ -375,6 +370,7 @@ public class RegistryManagerTest
     public void getDevices_input_zero() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getDevices(0);
@@ -407,6 +403,7 @@ public class RegistryManagerTest
     {
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getDevicesAsync(0);
@@ -499,7 +496,7 @@ public class RegistryManagerTest
     public void getDeviceConnectionString_null_device_throw() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
         registryManager.getDeviceConnectionString(null);
     }
@@ -646,6 +643,16 @@ public class RegistryManagerTest
     public void updateDevice_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        new Expectations()
+        {
+            {
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+                result = iotHubConnectionString;
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+            }
+        };
+
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateDevice(null);
@@ -687,6 +694,7 @@ public class RegistryManagerTest
     public void updateDeviceForce_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateDevice(null, true);
@@ -737,6 +745,16 @@ public class RegistryManagerTest
     public void updateDeviceAsync_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        new Expectations()
+        {
+            {
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+                result = iotHubConnectionString;
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+            }
+        };
+
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateDeviceAsync(null);
@@ -800,6 +818,7 @@ public class RegistryManagerTest
     public void updateDeviceAsyncForce_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateDeviceAsync(null, true);
@@ -863,6 +882,7 @@ public class RegistryManagerTest
     public void removeDevice_input_null_Device() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         Device device = null;
@@ -875,6 +895,7 @@ public class RegistryManagerTest
     public void removeDevice_input_Device_null_etag() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         new NonStrictExpectations()
@@ -896,6 +917,7 @@ public class RegistryManagerTest
     public void removeDevice_input_Device_empty_etag() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         new NonStrictExpectations()
@@ -942,7 +964,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlDevice(deviceId);
+                IotHubConnectionString.getUrlDevice(anyString, deviceId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
@@ -959,6 +981,7 @@ public class RegistryManagerTest
     public void removeDevice_input_null_String() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         String deviceId = null;
@@ -971,6 +994,7 @@ public class RegistryManagerTest
     public void removeDevice_input_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeDevice("");
@@ -996,7 +1020,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlDevice(deviceId);
+                IotHubConnectionString.getUrlDevice(anyString, deviceId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
@@ -1013,6 +1037,7 @@ public class RegistryManagerTest
     public void removeDeviceAsync_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeDeviceAsync(null);
@@ -1024,6 +1049,7 @@ public class RegistryManagerTest
     public void removeDeviceAsync_input_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeDeviceAsync("");
@@ -1045,7 +1071,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlDevice(deviceId);
+                IotHubConnectionString.getUrlDevice(anyString, deviceId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
@@ -1095,7 +1121,7 @@ public class RegistryManagerTest
         new Expectations()
         {
             {
-                iotHubConnectionString.getUrlDeviceStatistics();
+                IotHubConnectionString.getUrlDeviceStatistics(anyString);
                 registryManagerOptions.getProxyOptions();
                 result = mockProxyOptions;
                 mockProxyOptions.getProxy();
@@ -1135,7 +1161,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlDeviceStatistics();
+                IotHubConnectionString.getUrlDeviceStatistics(anyString);
                 new HttpRequest(mockUrl, HttpMethod.GET, new byte[0], (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1177,9 +1203,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -1197,7 +1225,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1240,6 +1268,7 @@ public class RegistryManagerTest
     public void exportDevices_blob_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.exportDevices(null, true);
@@ -1250,6 +1279,7 @@ public class RegistryManagerTest
     public void exportDevices_exclude_keys_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.exportDevices("www.someurl.com", null);
@@ -1270,9 +1300,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -1288,7 +1320,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1319,6 +1351,7 @@ public class RegistryManagerTest
         };
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         CompletableFuture<JobProperties> completableFuture =  registryManager.exportDevicesAsync("blah", true);
@@ -1330,6 +1363,7 @@ public class RegistryManagerTest
     public void importDevices_blob_import_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.importDevices(null, "outputblob");
@@ -1340,6 +1374,7 @@ public class RegistryManagerTest
     public void importDevices_blob_output_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.importDevices("importblob", null);
@@ -1359,9 +1394,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -1377,7 +1414,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1422,9 +1459,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -1442,7 +1481,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlCreateExportImportJob();
+                IotHubConnectionString.getUrlCreateExportImportJob(anyString);
                 new HttpRequest(mockUrl, HttpMethod.POST, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1484,6 +1523,7 @@ public class RegistryManagerTest
     public void getJob_job_id_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getJob(null);
@@ -1504,9 +1544,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlImportExportJob(jobId);
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlImportExportJob(anyString, jobId);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -1522,7 +1564,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlImportExportJob(jobId);
+                IotHubConnectionString.getUrlImportExportJob(anyString, jobId);
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -1565,13 +1607,7 @@ public class RegistryManagerTest
     {
         //arrange
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        new NonStrictExpectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
-                result = iotHubConnectionString;
-            }
-        };
+        constructorExpectations(connectionString);
 
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
         Deencapsulation.setField(registryManager,"executor", mockExecutorService);
@@ -1593,6 +1629,16 @@ public class RegistryManagerTest
     public void addModule_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        new Expectations()
+        {
+            {
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+                result = iotHubConnectionString;
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+            }
+        };
+
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.addModule(null);
@@ -1637,6 +1683,7 @@ public class RegistryManagerTest
     public void getModule_deviceId_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getModule(null, "somemodule");
@@ -1648,6 +1695,7 @@ public class RegistryManagerTest
     public void getModule_deviceId_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getModule("", "somemodule");
@@ -1659,6 +1707,7 @@ public class RegistryManagerTest
     public void getModule_moduleId_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getModule("somedevice", null);
@@ -1670,9 +1719,23 @@ public class RegistryManagerTest
     public void getModule_moduleId_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getModule("somedevice","");
+    }
+
+    private void constructorExpectations(String connectionString)
+    {
+        new Expectations()
+        {
+            {
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+                result = iotHubConnectionString;
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+            }
+        };
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_011: [The function shall get the URL for the device]
@@ -1702,6 +1765,7 @@ public class RegistryManagerTest
     public void getModulesOnDevice_deviceId_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getModulesOnDevice(null);
@@ -1713,6 +1777,7 @@ public class RegistryManagerTest
     public void getModulesOnDevice_deviceId_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getModulesOnDevice("");
@@ -1745,6 +1810,7 @@ public class RegistryManagerTest
     public void updateModule_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateModule(null);
@@ -1789,6 +1855,7 @@ public class RegistryManagerTest
     public void updateModuleForce_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateModule(null, true);
@@ -1845,6 +1912,7 @@ public class RegistryManagerTest
     public void removeModule_input_null_Module() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         Module module = null;
@@ -1885,7 +1953,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlModule(deviceId, moduleId);
+                IotHubConnectionString.getUrlModule(anyString, deviceId, moduleId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
@@ -1902,6 +1970,7 @@ public class RegistryManagerTest
     public void removeModule_deviceId_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeModule(null, "somemodule");
@@ -1913,6 +1982,7 @@ public class RegistryManagerTest
     public void removeModule_deviceId_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeModule("", "somemodule");
@@ -1924,6 +1994,7 @@ public class RegistryManagerTest
     public void removeModule_moduleId_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeModule("somedevice", null);
@@ -1935,6 +2006,7 @@ public class RegistryManagerTest
     public void removeModule_moduleId_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeModule("somedevice", "");
@@ -1946,6 +2018,7 @@ public class RegistryManagerTest
     public void removeModule_Module_etag_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         new NonStrictExpectations()
@@ -1969,6 +2042,7 @@ public class RegistryManagerTest
     public void removeModule_Module_etag_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         new NonStrictExpectations()
@@ -2007,7 +2081,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlModule(deviceId, moduleId);
+                IotHubConnectionString.getUrlModule(anyString, deviceId, moduleId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
@@ -2024,6 +2098,7 @@ public class RegistryManagerTest
     public void addConfiguration_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.addConfiguration(null);
@@ -2065,6 +2140,7 @@ public class RegistryManagerTest
     public void getConfiguration_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getConfiguration(null);
@@ -2076,6 +2152,7 @@ public class RegistryManagerTest
     public void getConfiguration_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getConfiguration("");
@@ -2107,6 +2184,7 @@ public class RegistryManagerTest
     public void getConfigurations_input_zero() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.getConfigurations(0);
@@ -2139,6 +2217,7 @@ public class RegistryManagerTest
     public void updateConfiguration_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateConfiguration(null);
@@ -2180,6 +2259,7 @@ public class RegistryManagerTest
     public void updateConfigurationForce_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.updateConfiguration(null, true);
@@ -2229,6 +2309,7 @@ public class RegistryManagerTest
     public void removeConfiguration_input_Configuration_Null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         Configuration config = null;
@@ -2241,6 +2322,7 @@ public class RegistryManagerTest
     public void removeDevice_input_Configuration_null_etag() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         new NonStrictExpectations()
@@ -2262,6 +2344,7 @@ public class RegistryManagerTest
     public void removeDevice_input_Configuration_empty_etag() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         new NonStrictExpectations()
@@ -2283,6 +2366,7 @@ public class RegistryManagerTest
     public void removeConfiguration_input_null() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeConfiguration((String)null);
@@ -2294,6 +2378,7 @@ public class RegistryManagerTest
     public void removeConfiguration_input_empty() throws Exception
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
+        constructorExpectations(connectionString);
         RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
 
         registryManager.removeConfiguration("");
@@ -2330,7 +2415,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlConfiguration(configId);
+                IotHubConnectionString.getUrlConfiguration(anyString, configId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
@@ -2361,7 +2446,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlConfiguration(configId);
+                IotHubConnectionString.getUrlConfiguration(anyString, configId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.DELETE, new byte[0], (Proxy) any);
                 times = 1;
@@ -2423,13 +2508,10 @@ public class RegistryManagerTest
         new Verifications()
         {
             {
-                iotHubConnectionString.getUrlApplyConfigurationContent(expectedDeviceId);
+                IotHubConnectionString.getUrlApplyConfigurationContent(anyString, expectedDeviceId);
                 times = 1;
 
                 new HttpRequest(mockUrl, HttpMethod.POST, expectedJson.getBytes(), (Proxy) any);
-                times = 1;
-
-                new IotHubServiceSasToken(iotHubConnectionString);
                 times = 1;
 
                 mockHttpRequest.send();
@@ -2445,36 +2527,40 @@ public class RegistryManagerTest
     @Test
     public void getDevicesWithCustomHttpTimeouts(@Mocked final IotHubConnectionString mockIotHubConnectionString,
                                                     @Mocked final DeviceParser mockDeviceParser,
-                                                    @Mocked final Device mockDevice) throws IOException, IotHubException
+                                                    @Mocked final Device mockDevice,
+                                                    @Mocked final RegistryManagerOptions mockOptions)
+            throws IOException, IotHubException
     {
         // arrange
         final int expectedHttpConnectTimeout = 1234;
         final int expectedHttpReadTimeout = 5678;
         final String mockDeviceId = "someDeviceToGet";
 
-        RegistryManagerOptions options = RegistryManagerOptions.builder()
-                .httpConnectTimeout(expectedHttpConnectTimeout)
-                .httpReadTimeout(expectedHttpReadTimeout)
-                .build();
-
         String mockConnectionString = "someValidConnectionString";
 
         new Expectations()
         {
             {
-                mockIotHubConnectionString.getUrlDevice(mockDeviceId);
+                IotHubConnectionString.createIotHubConnectionString(mockConnectionString);
+                result = mockIotHubConnectionString;
+                IotHubConnectionString.getUrlDevice(anyString, mockDeviceId);
                 result = mockUrl;
+                mockIotHubConnectionString.getHostName();
+                result = "someHostname";
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 result = mockHttpRequest;
                 new DeviceParser(anyString);
                 result = mockDeviceParser;
                 Deencapsulation.newInstance(Device.class, mockDeviceParser);
                 result = mockDevice;
+                mockOptions.getHttpConnectTimeout();
+                result = expectedHttpConnectTimeout;
+                mockOptions.getHttpReadTimeout();
+                result = expectedHttpReadTimeout;
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(mockConnectionString, options);
-        Deencapsulation.setField(registryManager, "iotHubConnectionString", mockIotHubConnectionString);
+        RegistryManager registryManager = RegistryManager.createFromConnectionString(mockConnectionString, mockOptions);
 
         // act
         registryManager.getDevice(mockDeviceId);
@@ -2494,9 +2580,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlDevice(deviceId);
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlDevice(anyString, deviceId);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -2514,7 +2602,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlDevice(requestDeviceId);
+                IotHubConnectionString.getUrlDevice(anyString, requestDeviceId);
                 new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2534,9 +2622,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlDeviceList(numberOfDevices);
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlDeviceList(anyString, numberOfDevices);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -2552,7 +2642,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlDeviceList(numberOfDevices);
+                IotHubConnectionString.getUrlDeviceList(anyString, numberOfDevices);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 times = 1;
@@ -2573,9 +2663,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlModule(deviceId, moduleId);
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlModule(anyString, deviceId, moduleId);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -2593,7 +2685,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlModule(requestDeviceId, requestModuleId);
+                IotHubConnectionString.getUrlModule(anyString, requestDeviceId, requestModuleId);
                 new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2613,9 +2705,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlModulesOnDevice(deviceId);
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlModulesOnDevice(anyString, deviceId);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -2631,7 +2725,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlModulesOnDevice(deviceId);
+                IotHubConnectionString.getUrlModulesOnDevice(anyString, deviceId);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 times = 1;
@@ -2652,9 +2746,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlConfiguration(configId);
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlConfiguration(anyString, configId);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -2672,7 +2768,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlConfiguration(requestConfigId);
+                IotHubConnectionString.getUrlConfiguration(anyString, requestConfigId);
                 new HttpRequest(mockUrl, httpMethod, (byte[]) any, (Proxy) any);
                 mockHttpRequest.setReadTimeoutMillis(anyInt);
                 mockHttpRequest.setHeaderField("authorization", anyString);
@@ -2692,9 +2788,11 @@ public class RegistryManagerTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = iotHubConnectionString;
-                iotHubConnectionString.getUrlConfigurationsList(numOfConfigs);
+                iotHubConnectionString.getHostName();
+                result = "aaa.bbb.ccc";
+                IotHubConnectionString.getUrlConfigurationsList(anyString, numOfConfigs);
                 result = mockUrl;
                 mockHttpRequest.send();
                 result = mockHttpResponse;
@@ -2710,7 +2808,7 @@ public class RegistryManagerTest
         new VerificationsInOrder()
         {
             {
-                iotHubConnectionString.getUrlConfigurationsList(numOfConfigs);
+                IotHubConnectionString.getUrlConfigurationsList(anyString, numOfConfigs);
                 times = 1;
                 new HttpRequest(mockUrl, HttpMethod.GET, (byte[]) any, (Proxy) any);
                 times = 1;

@@ -78,21 +78,6 @@ public class JobTest
         Deencapsulation.newInstance(Job.class, new Class[]{String.class, String.class}, jobId, connectionString);
     }
 
-    /* Tests_SRS_JOB_21_002: [If a jobId is provided, the constructor shall use this jobId to identify the Job in the Iothub.] */
-    @Test
-    public void constructorReceiveUniqueJobId()
-    {
-        // arrange
-        final String jobId = "validJobId";
-        final String connectionString = "validConnectionString";
-
-        // act
-        Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class, String.class}, jobId, connectionString);
-
-        // assert
-        assertEquals(jobId, Deencapsulation.getField(job, "jobId"));
-    }
-
     /* Tests_SRS_JOB_21_003: [If no jobId is provided, the constructor shall generate a unique jobId to identify the Job in the Iothub.] */
     @Test
     public void constructorCreateUniqueJobId()
@@ -129,28 +114,6 @@ public class JobTest
         };
     }
 
-    /* Tests_SRS_JOB_21_004: [The constructor shall create a new instance of JobClient to manage the Job.] */
-    @Test
-    public void constructor2CreateJobClient() throws IOException
-    {
-        // arrange
-        final String jobId = "validJobId";
-        final String connectionString = "validConnectionString";
-
-        // act
-        Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class, String.class}, jobId, connectionString);
-
-        // assert
-        assertNotNull(Deencapsulation.getField(job, "jobClient"));
-        new Verifications()
-        {
-            {
-                JobClient.createFromConnectionString(connectionString);
-                times = 1;
-            }
-        };
-    }
-
     /* Tests_SRS_JOB_21_005: [The constructor shall throw IOException if it failed to create a new instance of the JobClient. Threw by the JobClient constructor.] */
     @Test (expected = IOException.class)
     public void constructor1ThrowOnJobClientCreation() throws IOException
@@ -169,27 +132,6 @@ public class JobTest
 
         // act
         Deencapsulation.newInstance(Job.class, new Class[]{String.class}, connectionString);
-    }
-
-    /* Tests_SRS_JOB_21_005: [The constructor shall throw IOException if it failed to create a new instance of the JobClient. Threw by the JobClient constructor.] */
-    @Test (expected = IOException.class)
-    public void constructor2ThrowOnJobClientCreation() throws IOException
-    {
-        // arrange
-        final String jobId = "validJobId";
-        final String connectionString = "validConnectionString";
-
-        new NonStrictExpectations()
-        {
-            {
-                JobClient.createFromConnectionString(connectionString);
-                result = new IOException();
-                times = 1;
-            }
-        };
-
-        // act
-        Deencapsulation.newInstance(Job.class, new Class[]{String.class, String.class}, jobId, connectionString);
     }
 
     /* Tests_SRS_JOB_21_006: [If the updateTwin is null, the scheduleUpdateTwin shall throws IllegalArgumentException.] */
@@ -623,21 +565,4 @@ public class JobTest
         // act
         job.cancel();
     }
-
-    /* Tests_SRS_JOB_21_022: [The getJobId shall return the store value of jobId.] */
-    @Test
-    public void getJobIdSucceed() throws IOException, IotHubException
-    {
-        // arrange
-        final String jobId = "validJobId";
-        final String connectionString = "validConnectionString";
-        Job job = Deencapsulation.newInstance(Job.class, new Class[]{String.class, String.class}, jobId, connectionString);
-
-        // act
-        String result = job.getJobId();
-
-        // assert
-        assertEquals(jobId, result);
-    }
-
 }

@@ -72,8 +72,14 @@ public class DeviceTwin
             throw new IllegalArgumentException("Connection string cannot be null or empty");
         }
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
-        return createFromTokenCredential(iotHubConnectionString.getHostName(), new IotHubConnectionStringCredential(connectionString), TokenCredentialType.SHARED_ACCESS_SIGNATURE, options);
+        IotHubConnectionString iotHubConnectionString =
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+
+        return createFromTokenCredential(
+                iotHubConnectionString.getHostName(),
+                new IotHubConnectionStringCredential(connectionString),
+                TokenCredentialType.SHARED_ACCESS_SIGNATURE,
+                options);
     }
 
     /**
@@ -91,7 +97,11 @@ public class DeviceTwin
             TokenCredential authenticationTokenProvider,
             TokenCredentialType tokenCredentialType)
     {
-        return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, DeviceTwinClientOptions.builder().build());
+        return createFromTokenCredential(
+                hostName,
+                authenticationTokenProvider,
+                tokenCredentialType,
+                DeviceTwinClientOptions.builder().build());
     }
 
     /**

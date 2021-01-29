@@ -5,8 +5,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.jobs;
 
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -25,6 +27,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
@@ -71,8 +74,18 @@ public class JobClientTest
     @Mocked
     HttpResponse mockedHttpResponse;
 
-    @Mocked
     URL mockedURL;
+
+    @Mocked
+    TokenCredentialType mockedTokenCredentialType;
+
+    @Mocked
+    TokenCredential mockedTokenCredential;
+
+    public JobClientTest() throws MalformedURLException
+    {
+        mockedURL = new URL("https://www.microsoft.com");
+    }
 
     @Before
     public void setUp() throws IOException
@@ -98,28 +111,6 @@ public class JobClientTest
 
     /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
     @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnNullCS() throws IOException
-    {
-        //arrange
-        final String connectionString = null;
-
-        //act
-        JobClient.createFromConnectionString(connectionString);
-    }
-
-    /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorThrowsOnEmptyCS() throws IOException
-    {
-        //arrange
-        final String connectionString = "";
-
-        //act
-        JobClient.createFromConnectionString(connectionString);
-    }
-
-    /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
-    @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnInvalidCS() throws IOException
     {
         //arrange
@@ -128,7 +119,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = new IllegalArgumentException();
             }
         };
@@ -158,7 +149,7 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 mockedDeviceTwinDevice.getTags();
@@ -185,11 +176,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -222,7 +210,7 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 mockedDeviceTwinDevice.getTags();
@@ -249,11 +237,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -290,7 +275,7 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 mockedDeviceTwinDevice.getTags();
@@ -317,11 +302,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -403,7 +385,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 mockedDeviceTwinDevice.getTags();
@@ -430,7 +412,7 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = new MalformedURLException();
             }
         };
@@ -543,7 +525,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 mockedDeviceTwinDevice.getTags();
@@ -570,11 +552,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -590,7 +569,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 times = 1;
             }
         };
@@ -616,7 +595,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 mockedDeviceTwinDevice.getTags();
@@ -643,11 +622,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -658,77 +634,6 @@ public class JobClientTest
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
-
-        //assert
-        new Verifications()
-        {
-            {
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_JOBCLIENT_21_011: [If the scheduleUpdateTwin failed to send a PUT request, it shall throw IOException.] */
-    /* Tests_SRS_JOBCLIENT_21_012: [If the scheduleUpdateTwin failed to verify the iothub response, it shall throw IotHubException.] */
-    @Test (expected = IOException.class)
-    public void scheduleUpdateTwinThrowsOnSendPUT() throws IOException, IotHubException
-    {
-        //arrange
-        final String connectionString = "testString";
-        final String jobId = "validJobId";
-        final String deviceId = "validDeviceId";
-        final String queryCondition = "validQueryCondition";
-        final DeviceTwinDevice updateTwin = mockedDeviceTwinDevice;
-        final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
-        final String json = "validJson";
-
-        Set<Pair> testTags = new HashSet<>();
-        testTags.add(new Pair("testTag", "tagObject"));
-
-        new NonStrictExpectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
-                result = mockedIotHubConnectionString;
-
-                mockedDeviceTwinDevice.getTags();
-                result = testTags;
-
-                mockedDeviceTwinDevice.getDesiredProperties();
-                result = null;
-
-                mockedDeviceTwinDevice.getReportedProperties();
-                result = null;
-
-                new TwinState((TwinCollection)any, null, null);
-                result = mockedTwinState;
-
-                mockedDeviceTwinDevice.getDeviceId();
-                result = deviceId;
-
-                mockedDeviceTwinDevice.getETag();
-                result = null;
-
-                new JobsParser(jobId, mockedTwinState, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
-                result = mockedJobsParser;
-
-                mockedJobsParser.toJson();
-                result = json;
-
-                mockedIotHubConnectionString.getUrlJobs(jobId);
-                result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = new IOException();
-            }
-        };
-
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
-
-        //act
-        testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
     }
 
     /* Tests_SRS_JOBCLIENT_21_013: [The scheduleUpdateTwin shall parse the iothub response and return it as JobResult.] */
@@ -751,7 +656,7 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 mockedDeviceTwinDevice.getTags();
@@ -778,11 +683,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -868,7 +770,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 new MethodParser(methodName, null, null, payload);
@@ -880,7 +782,7 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = new MalformedURLException();
             }
         };
@@ -1055,7 +957,7 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 new MethodParser(methodName, null, null, payload);
@@ -1067,11 +969,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -1101,7 +1000,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 new MethodParser(methodName, null, null, payload);
@@ -1113,11 +1012,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -1133,7 +1029,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 times = 1;
             }
         };
@@ -1156,7 +1052,7 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 new MethodParser(methodName, null, null, payload);
@@ -1168,67 +1064,11 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
-            }
-        };
-
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
-
-        //act
-        JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
-
-        //assert
-        new Verifications()
-        {
-            {
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_JOBCLIENT_21_021: [If the scheduleDeviceMethod failed to send a PUT request, it shall throw IOException.] */
-    /* Tests_SRS_JOBCLIENT_21_022: [If the scheduleDeviceMethod failed to verify the iothub response, it shall throw IotHubException.] */
-    @Test (expected = IOException.class)
-    public void scheduleDeviceMethodThrowsOnSendPUT() throws IOException, IotHubException
-    {
-        //arrange
-        final String connectionString = "testString";
-        final String jobId = "validJobId";
-        final String queryCondition = "validQueryCondition";
-        final String methodName = "validMethodName";
-        final Set<String> payload = new HashSet<>();
-        final Date startTimeUtc = new Date();
-        final long maxExecutionTimeInSeconds = 10;
-        final String json = "validJson";
-
-        new NonStrictExpectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
-                result = mockedIotHubConnectionString;
-
-                new MethodParser(methodName, null, null, payload);
-                result = mockedMethodParser;
-
-                new JobsParser(jobId, mockedMethodParser, queryCondition, startTimeUtc, maxExecutionTimeInSeconds);
-                result = mockedJobsParser;
-
-                mockedJobsParser.toJson();
-                result = json;
-
-                mockedIotHubConnectionString.getUrlJobs(jobId);
-                result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = new IOException();
             }
         };
 
@@ -1255,7 +1095,7 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
                 new MethodParser(methodName, null, null, payload);
@@ -1267,11 +1107,8 @@ public class JobClientTest
                 mockedJobsParser.toJson();
                 result = json;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.PUT, json.getBytes(), (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -1341,10 +1178,10 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = new MalformedURLException();
             }
         };
@@ -1372,14 +1209,11 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.GET, new byte[]{}, (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -1401,7 +1235,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 times = 1;
             }
         };
@@ -1418,61 +1252,14 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.GET, new byte[]{}, (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
-            }
-        };
-        try
-        {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
-        }
-        catch (IllegalArgumentException e)
-        {
-            assertTrue("Test did not run because createFromConnectionString failed to create new instance of the JobClient", true);
-        }
-
-        //act
-        testJobClient.getJob(jobId);
-
-        //assert
-        new Verifications()
-        {
-            {
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.GET, new byte[]{}, (String)any, 0);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_JOBCLIENT_21_027: [If the getJob failed to send a GET request, it shall throw IOException.] */
-    /* Tests_SRS_JOBCLIENT_21_028: [If the getJob failed to verify the iothub response, it shall throw IotHubException.] */
-    @Test (expected = IOException.class)
-    public void getJobThrowsOnSendGET() throws IOException, IotHubException
-    {
-        //arrange
-        final String connectionString = "testString";
-        final String jobId = "validJobId";
-        JobClient testJobClient = null;
-        new NonStrictExpectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
-                result = mockedIotHubConnectionString;
-
-                mockedIotHubConnectionString.getUrlJobs(jobId);
-                result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.GET, new byte[]{}, (String)any, 0);
-                result = new IOException();
             }
         };
         try
@@ -1499,14 +1286,11 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobs(jobId);
+                IotHubConnectionString.getUrlJobs(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.GET, new byte[]{}, (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -1581,10 +1365,10 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobsCancel(jobId);
+                IotHubConnectionString.getUrlJobsCancel(anyString, jobId);
                 result = new MalformedURLException();
             }
         };
@@ -1612,14 +1396,11 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobsCancel(jobId);
+                IotHubConnectionString.getUrlJobsCancel(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, new byte[]{}, (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -1641,7 +1422,7 @@ public class JobClientTest
         new Verifications()
         {
             {
-                mockedIotHubConnectionString.getUrlJobsCancel(jobId);
+                IotHubConnectionString.getUrlJobsCancel(anyString, jobId);
                 times = 1;
             }
         };
@@ -1658,61 +1439,14 @@ public class JobClientTest
         new NonStrictExpectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobsCancel(jobId);
+                IotHubConnectionString.getUrlJobsCancel(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, new byte[]{}, (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
-            }
-        };
-        try
-        {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
-        }
-        catch (IllegalArgumentException e)
-        {
-            assertTrue("Test did not run because createFromConnectionString failed to create new instance of the JobClient", true);
-        }
-
-        //act
-        testJobClient.cancelJob(jobId);
-
-        //assert
-        new Verifications()
-        {
-            {
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, (byte[])any, (String)any, 0);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_JOBCLIENT_21_033: [If the cancelJob failed to send a POST request, it shall throw IOException.] */
-    /* Tests_SRS_JOBCLIENT_21_034: [If the cancelJob failed to verify the iothub response, it shall throw IotHubException.] */
-    @Test (expected = IOException.class)
-    public void cancelJobThrowsOnSendPOST() throws IOException, IotHubException
-    {
-        //arrange
-        final String connectionString = "testString";
-        final String jobId = "validJobId";
-        JobClient testJobClient = null;
-        new NonStrictExpectations()
-        {
-            {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
-                result = mockedIotHubConnectionString;
-
-                mockedIotHubConnectionString.getUrlJobsCancel(jobId);
-                result = mockedURL;
-
-                DeviceOperations.request(mockedIotHubConnectionString, mockedURL, HttpMethod.POST, (byte[])any, (String)any, 0);
-                result = new IOException();
             }
         };
         try
@@ -1739,14 +1473,11 @@ public class JobClientTest
         new Expectations()
         {
             {
-                IotHubConnectionStringBuilder.createConnectionString(connectionString);
+                IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
                 result = mockedIotHubConnectionString;
 
-                mockedIotHubConnectionString.getUrlJobsCancel(jobId);
+                IotHubConnectionString.getUrlJobsCancel(anyString, jobId);
                 result = mockedURL;
-
-                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, (byte[]) any, (String)any, 0);
-                result = mockedHttpResponse;
 
                 Deencapsulation.newInstance(JobResult.class, new Class[] {byte[].class}, (byte[])any);
                 result = mockedJobResult;
@@ -1787,15 +1518,6 @@ public class JobClientTest
 
         //act
         testJobClient.queryDeviceJob(VALID_SQL_QUERY);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_JOBCLIENT_25_036: [If the sqlQuery is null, empty, or invalid, the queryDeviceJob shall throw IllegalArgumentException.]
@@ -1844,27 +1566,6 @@ public class JobClientTest
         testJobClient.queryDeviceJob(VALID_SQL_QUERY, 0);
     }
 
-    @Test (expected = IotHubException.class)
-    public void queryDeviceJobThrowsOnNewQueryThrows(@Mocked Query mockedQuery) throws IotHubException, IOException
-    {
-        //arrange
-        final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.DEVICE_JOB);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                result = new IotHubException();
-            }
-        };
-
-        //act
-        testJobClient.queryDeviceJob(VALID_SQL_QUERY);
-    }
-
     /*
     Tests_SRS_JOBCLIENT_25_043: [If the pageSize is not specified, default pageSize of 100 shall be used.] SRS_JOBCLIENT_25_044: [The queryDeviceJob shall create a query object for the type JOB_RESPONSE.]
     Tests_SRS_JOBCLIENT_25_045: [The queryDeviceJob shall send a query request on the query object using Query URL, HTTP GET method and wait for the response by calling sendQueryRequest.]
@@ -1886,15 +1587,6 @@ public class JobClientTest
 
         //act
         testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.GET, any);
-                times = 1;
-            }
-        };
     }
 
     @Test
@@ -1914,15 +1606,6 @@ public class JobClientTest
 
         //act
         testJobClient.queryJobResponse(null, null);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.GET, any);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_JOBCLIENT_25_042: [If the pageSize is null, zero or negative, the queryJobResponse shall throw IllegalArgumentException.]
@@ -1948,27 +1631,6 @@ public class JobClientTest
         testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT, 0);
     }
 
-    @Test (expected = IotHubException.class)
-    public void queryJobResponseThrowsOnNewQueryThrows(@Mocked Query mockedQuery) throws IotHubException, IOException
-    {
-        //arrange
-        final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {Integer.class, QueryType.class}, anyInt, QueryType.JOB_RESPONSE);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.GET, any);
-                result = new IotHubException();
-            }
-        };
-
-        //act
-        testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT);
-    }
-
     //Tests_SRS_JOBCLIENT_25_047: [hasNextJob shall return true if the next job exist, false other wise.]
     @Test
     public void hasNextSucceeds(@Mocked Query mockedQuery) throws IotHubException, IOException
@@ -1991,16 +1653,6 @@ public class JobClientTest
 
         //act
         boolean result = testJobClient.hasNextJob(testQuery);
-
-        //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
-
         assertTrue(result);
     }
 
@@ -2083,8 +1735,6 @@ public class JobClientTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
                 Deencapsulation.newInstance(JobResult.class, new Class [] {byte[].class}, expectedString.getBytes());
                 times = 1;
             }

@@ -109,7 +109,10 @@ public class RegistryManager
 
         TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(connectionString);
 
-        return createFromTokenCredential(iotHubConnectionString.hostName, authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE);
+        return createFromTokenCredential(
+                iotHubConnectionString.getHostName(),
+                authenticationTokenProvider,
+                TokenCredentialType.SHARED_ACCESS_SIGNATURE);
     }
 
     /**
