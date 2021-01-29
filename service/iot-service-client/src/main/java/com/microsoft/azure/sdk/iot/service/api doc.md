@@ -9,7 +9,9 @@
  * @return The created ServiceClient object
  * @throws IOException This exception is thrown if the object creation failed
  */
-public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol) throws IOException;
+public static ServiceClient createFromConnectionString(
+        String connectionString, 
+        IotHubServiceClientProtocol iotHubServiceClientProtocol) throws IOException;
 
 /**
  * Create ServiceClient from the specified connection string
@@ -19,7 +21,10 @@ public static ServiceClient createFromConnectionString(String connectionString, 
  * @return The created ServiceClient object
  * @throws IOException This exception is thrown if the object creation failed
  */
-public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options) throws IOException;
+public static ServiceClient createFromConnectionString(
+        String connectionString, 
+        IotHubServiceClientProtocol iotHubServiceClientProtocol, 
+        ServiceClientOptions options) throws IOException;
 
 /**
  * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
@@ -33,7 +38,11 @@ public static ServiceClient createFromConnectionString(String connectionString, 
  * @param iotHubServiceClientProtocol The protocol to open the connection with.
  * @return The created {@link ServiceClient} instance.
  */
-public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol);
+public static ServiceClient createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType authorizationType, 
+        IotHubServiceClientProtocol iotHubServiceClientProtocol);
 
 /**
  * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
@@ -48,7 +57,12 @@ public static ServiceClient createFromTokenCredential(String hostName, TokenCred
  * @param options The connection options to use when connecting to the service.
  * @return The created {@link ServiceClient} instance.
  */
-public static ServiceClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options);
+public static ServiceClient createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType authorizationType, 
+        IotHubServiceClientProtocol iotHubServiceClientProtocol, 
+        ServiceClientOptions options);
 ```
 </details>
 
@@ -73,7 +87,9 @@ public static RegistryManager createFromConnectionString(String connectionString
  * @return The instance of RegistryManager
  * @throws IOException This exception is never thrown.
  */
-public static RegistryManager createFromConnectionString(String connectionString, RegistryManagerOptions options) throws IOException;
+public static RegistryManager createFromConnectionString(
+        String connectionString, 
+        RegistryManagerOptions options) throws IOException;
 
 /**
  * Create a new RegistryManager instance.
@@ -85,7 +101,10 @@ public static RegistryManager createFromConnectionString(String connectionString
  *                          implementation will always give.
  * @return The instance of RegistryManager
  */
-public static RegistryManager createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType);
+public static RegistryManager createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType);
 
 /**
  * Create a new RegistryManager instance.
@@ -98,7 +117,11 @@ public static RegistryManager createFromTokenCredential(String hostName, TokenCr
  * @param options The connection options to use when connecting to the service.
  * @return The instance of RegistryManager
  */
-public static RegistryManager createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, RegistryManagerOptions options);
+public static RegistryManager createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType, 
+        RegistryManagerOptions options);
 ```
 </details>
 
@@ -123,7 +146,9 @@ public static DeviceMethod createFromConnectionString(String connectionString) t
  * @return an instance of the DeviceMethod.
  * @throws IOException This exception is never thrown.
  */
-public static DeviceMethod createFromConnectionString(String connectionString, DeviceMethodClientOptions options) throws IOException;
+public static DeviceMethod createFromConnectionString(
+        String connectionString, 
+        DeviceMethodClientOptions options) throws IOException;
 
 /**
  * Create a new DeviceMethod instance.
@@ -135,7 +160,10 @@ public static DeviceMethod createFromConnectionString(String connectionString, D
  *                          implementation will always give.
  * @return the new DeviceMethod instance.
  */
-public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType);
+public static DeviceMethod createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider,
+        TokenCredentialType tokenCredentialType);
 
 /**
  * Create a new DeviceMethod instance.
@@ -148,7 +176,11 @@ public static DeviceMethod createFromTokenCredential(String hostName, TokenCrede
  * @param options The connection options to use when connecting to the service.
  * @return the new DeviceMethod instance.
  */
-public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, DeviceMethodClientOptions options);
+public static DeviceMethod createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType, 
+        DeviceMethodClientOptions options);
 ```
 </details>
 
@@ -173,7 +205,9 @@ public static DeviceTwin createFromConnectionString(String connectionString) thr
  * @return The instance of DeviceTwin.
  * @throws IOException This exception is never thrown.
  */
-public static DeviceTwin createFromConnectionString(String connectionString, DeviceTwinClientOptions options) throws IOException;
+public static DeviceTwin createFromConnectionString(
+        String connectionString, 
+        DeviceTwinClientOptions options) throws IOException;
 
 /**
  * Create a new DeviceTwin instance.
@@ -185,7 +219,10 @@ public static DeviceTwin createFromConnectionString(String connectionString, Dev
  *                          implementation will always give.
  * @return the new DeviceTwin instance.
  */
-public static DeviceTwin createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType);
+public static DeviceTwin createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType);
 
 /**
  * Create a new DeviceTwin instance.
@@ -198,7 +235,11 @@ public static DeviceTwin createFromTokenCredential(String hostName, TokenCredent
  * @param options The connection options to use when connecting to the service.
  * @return the new DeviceTwin instance.
  */
-public static DeviceTwin createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, DeviceTwinClientOptions options);
+public static DeviceTwin createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType, 
+        DeviceTwinClientOptions options);
 ```
 </details>
 
@@ -226,7 +267,10 @@ public static JobClient createFromConnectionString(String connectionString) thro
  *                          implementation will always give.
  * @return The new JobClient instance.
  */
-public static JobClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType);
+public static JobClient createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType);
 
 /**
  * Create a new JobClient instance.
@@ -239,7 +283,11 @@ public static JobClient createFromTokenCredential(String hostName, TokenCredenti
  * @param options The connection options to use when connecting to the service.
  * @return The new JobClient instance.
  */
-public static JobClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, JobClientOptions options);
+public static JobClient createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType, 
+        JobClientOptions options);
 ```
 </details>
 
@@ -264,7 +312,10 @@ public static DigitalTwinClient createFromConnectionString(String connectionStri
  *                          implementation will always give.
  * @return The instantiated DigitalTwinClient.
  */
-public static DigitalTwinClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType);
+public static DigitalTwinClient createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType);
 ```
 </details>
 
@@ -290,7 +341,10 @@ public static DigitalTwinAsyncClient createFromConnectionString(String connectio
  *                          implementation will always give.
  * @return The instantiated DigitalTwinAsyncClient.
  */
-public static DigitalTwinAsyncClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType);
+public static DigitalTwinAsyncClient createFromTokenCredential(
+        String hostName, 
+        TokenCredential authenticationTokenProvider, 
+        TokenCredentialType tokenCredentialType);
 ```
 </details>
 
