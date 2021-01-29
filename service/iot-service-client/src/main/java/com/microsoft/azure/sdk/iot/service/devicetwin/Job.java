@@ -57,10 +57,10 @@ public class Job
         this.jobClient = JobClient.createFromConnectionString(connectionString);
     }
 
-    Job (String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType)
+    Job (String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
     {
         this.jobId = "JOB-" + UUID.randomUUID();
-        this.jobClient = JobClient.createFromTokenCredential(hostName, tokenCredential, tokenCredentialType);
+        this.jobClient = JobClient.createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType);
     }
 
     /**

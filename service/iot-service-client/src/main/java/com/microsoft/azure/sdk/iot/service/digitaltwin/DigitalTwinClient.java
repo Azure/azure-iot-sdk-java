@@ -33,8 +33,8 @@ public class DigitalTwinClient {
 
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
-     * @param connectionString The IoTHub connection string
-     * @return DigitalTwinClient
+     * @param connectionString The IoT Hub connection string
+     * @return The instantiated DigitalTwinClient.
      */
     public static DigitalTwinClient createFromConnectionString(String connectionString)
     {
@@ -43,12 +43,13 @@ public class DigitalTwinClient {
 
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
      * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
      *                          implementation will always give.
-     * @return DigitalTwinClient
+     * @return The instantiated DigitalTwinClient.
      */
     public static DigitalTwinClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
     {

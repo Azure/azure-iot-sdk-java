@@ -35,7 +35,7 @@ public class DeviceMethod
     private Integer requestId = 0;
 
     private DeviceMethodClientOptions options;
-    private TokenCredential tokenCredential;
+    private TokenCredential authenticationTokenProvider;
     private TokenCredentialType tokenCredentialType;
     private String hostName;
 
@@ -81,15 +81,35 @@ public class DeviceMethod
         return createFromTokenCredential(iotHubConnectionString.getHostName(), new IotHubConnectionStringCredential(connectionString), TokenCredentialType.SHARED_ACCESS_SIGNATURE, options);
     }
 
-    public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType)
+    /**
+     * Create a new DeviceMethod instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @return the new DeviceMethod instance.
+     */
+    public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
     {
-        return createFromTokenCredential(hostName, tokenCredential, tokenCredentialType, DeviceMethodClientOptions.builder().build());
+        return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, DeviceMethodClientOptions.builder().build());
     }
 
-
-    public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType, DeviceMethodClientOptions options)
+    /**
+     * Create a new DeviceMethod instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @param options The connection options to use when connecting to the service.
+     * @return the new DeviceMethod instance.
+     */
+    public static DeviceMethod createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, DeviceMethodClientOptions options)
     {
-        Objects.requireNonNull(tokenCredential, "TokenCredential cannot be null");
+        Objects.requireNonNull(authenticationTokenProvider, "TokenCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -98,7 +118,7 @@ public class DeviceMethod
 
         DeviceMethod deviceMethod = new DeviceMethod();
         deviceMethod.options = options;
-        deviceMethod.tokenCredential = tokenCredential;
+        deviceMethod.authenticationTokenProvider = authenticationTokenProvider;
         deviceMethod.tokenCredentialType = tokenCredentialType;
         deviceMethod.hostName = hostName;
         return deviceMethod;
@@ -190,7 +210,7 @@ public class DeviceMethod
         }
 
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
-        HttpResponse response = DeviceOperations.request(this.tokenCredential, this.tokenCredentialType, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
+        HttpResponse response = DeviceOperations.request(this.authenticationTokenProvider, this.tokenCredentialType, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
 
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));
@@ -232,7 +252,7 @@ public class DeviceMethod
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        Job job = new Job(this.tokenCredential.getToken(new TokenRequestContext()).block().getToken());
+        Job job = new Job(this.authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken());
 
         job.scheduleDeviceMethod(
                 queryCondition,

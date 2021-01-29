@@ -339,7 +339,7 @@ public class Query
     /**
      * Sends request for the query to the IotHub.
      *
-     * @param tokenCredential The custom {@link TokenCredential} that will provide authentication tokens to
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
      * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
      *                          implementation will always give.
@@ -352,7 +352,7 @@ public class Query
      * @throws IOException If any of the input parameters are not valid.
      * @throws IotHubException If HTTP response other then status ok is received.
      */
-    public QueryResponse sendQueryRequest(TokenCredential tokenCredential,
+    public QueryResponse sendQueryRequest(TokenCredential authenticationTokenProvider,
                                           TokenCredentialType tokenCredentialType,
                                           URL url,
                                           HttpMethod method,
@@ -389,7 +389,7 @@ public class Query
             payload = new byte[0];
         }
 
-        HttpResponse httpResponse = DeviceOperations.request(tokenCredential, tokenCredentialType, url, method, payload, null, httpConnectTimeout, httpReadTimeout, proxy);
+        HttpResponse httpResponse = DeviceOperations.request(authenticationTokenProvider, tokenCredentialType, url, method, payload, null, httpConnectTimeout, httpReadTimeout, proxy);
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();

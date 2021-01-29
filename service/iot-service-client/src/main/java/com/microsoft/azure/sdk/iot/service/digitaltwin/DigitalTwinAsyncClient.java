@@ -62,7 +62,7 @@ public class DigitalTwinAsyncClient {
         _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
     }
 
-    DigitalTwinAsyncClient(String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType) {
+    DigitalTwinAsyncClient(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType) {
         final SimpleModule stringModule = new SimpleModule("String Serializer");
         stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
         SasTokenProvider sasTokenProvider = new SasTokenProvider()
@@ -70,7 +70,7 @@ public class DigitalTwinAsyncClient {
             @Override
             public String getSasToken() throws IOException
             {
-                return tokenCredential.getToken(new TokenRequestContext()).block().getToken();
+                return authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken();
             }
 
             @Override
@@ -95,8 +95,9 @@ public class DigitalTwinAsyncClient {
 
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
      * @param connectionString The IoTHub connection string
-     * @return DigitalTwinAsyncClient
+     * @return The instantiated DigitalTwinAsyncClient.
      */
     public static DigitalTwinAsyncClient createFromConnectionString(String connectionString)
     {
@@ -104,13 +105,14 @@ public class DigitalTwinAsyncClient {
     }
 
     /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
      * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
      *                          implementation will always give.
-     * @return
+     * @return The instantiated DigitalTwinAsyncClient.
      */
     public static DigitalTwinAsyncClient createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
     {

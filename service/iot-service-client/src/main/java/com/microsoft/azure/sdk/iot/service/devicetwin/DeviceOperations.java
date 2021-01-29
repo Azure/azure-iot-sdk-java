@@ -236,7 +236,7 @@ public class DeviceOperations
     /**
      * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
      *
-     * @param tokenCredential The authentication token provider that will be used to authorize the request
+     * @param authenticationTokenProvider The authentication token provider that will be used to authorize the request
      * @param tokenCredentialType The type of authentication tokens that the tokenCredential will provide
      * @param url is the Twin URL for the device ID.
      * @param method is the HTTP method (GET, POST, DELETE, PATCH, PUT).
@@ -250,7 +250,7 @@ public class DeviceOperations
      * @throws IOException This exception is thrown if the IO operation failed.
      */
     public static HttpResponse request(
-            TokenCredential tokenCredential,
+            TokenCredential authenticationTokenProvider,
             TokenCredentialType tokenCredentialType,
             URL url,
             HttpMethod method,
@@ -261,7 +261,7 @@ public class DeviceOperations
             Proxy proxy)
             throws IOException, IotHubException, IllegalArgumentException
     {
-        Objects.requireNonNull(tokenCredential);
+        Objects.requireNonNull(authenticationTokenProvider);
         Objects.requireNonNull(tokenCredentialType);
 
         if (url == null)
@@ -292,7 +292,7 @@ public class DeviceOperations
             request.setHeaderField(REQUEST_ID, requestId);
         }
 
-        String accessToken = tokenCredential.getToken(new TokenRequestContext()).block().getToken();
+        String accessToken = authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken();
         if (tokenCredentialType == TokenCredentialType.SHARED_ACCESS_SIGNATURE)
         {
             request.setHeaderField(AUTHORIZATION, accessToken);

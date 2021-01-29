@@ -44,7 +44,7 @@ public class QueryCollection
     private final int httpReadTimeout;
 
     private final String hostName;
-    private final TokenCredential tokenCredential;
+    private final TokenCredential authenticationTokenProvider;
     private final TokenCredentialType tokenCredentialType;
 
     private Proxy proxy;
@@ -84,7 +84,7 @@ public class QueryCollection
         this.responseQueryType = QueryType.UNKNOWN;
         this.isSqlQuery = true;
         this.isInitialQuery = true;
-        this.tokenCredential = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
+        this.authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
         this.tokenCredentialType = TokenCredentialType.SHARED_ACCESS_SIGNATURE;
     }
 
@@ -118,7 +118,7 @@ public class QueryCollection
         this.url = url;
         this.isSqlQuery = false;
         this.isInitialQuery = true;
-        this.tokenCredential = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
+        this.authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
         this.tokenCredentialType = TokenCredentialType.SHARED_ACCESS_SIGNATURE;
     }
 
@@ -157,7 +157,7 @@ public class QueryCollection
         this.responseQueryType = QueryType.UNKNOWN;
         this.isSqlQuery = true;
         this.isInitialQuery = true;
-        this.tokenCredential = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
+        this.authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
         this.tokenCredentialType = TokenCredentialType.SHARED_ACCESS_SIGNATURE;
     }
 
@@ -192,11 +192,11 @@ public class QueryCollection
         this.url = url;
         this.isSqlQuery = false;
         this.isInitialQuery = true;
-        this.tokenCredential = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
+        this.authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString.toString());
         this.tokenCredentialType = TokenCredentialType.SHARED_ACCESS_SIGNATURE;
     }
 
-    QueryCollection(String query, int pageSize, QueryType requestQueryType, String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
+    QueryCollection(String query, int pageSize, QueryType requestQueryType, String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
     {
         this.pageSize = pageSize;
         this.requestQueryType = requestQueryType;
@@ -211,7 +211,7 @@ public class QueryCollection
         this.url = url;
         this.isSqlQuery = false;
         this.isInitialQuery = true;
-        this.tokenCredential = tokenCredential;
+        this.authenticationTokenProvider = authenticationTokenProvider;
         this.tokenCredentialType = tokenCredentialType;
     }
 
@@ -239,7 +239,7 @@ public class QueryCollection
             payload = new byte[0];
         }
 
-        HttpResponse httpResponse = DeviceOperations.request(this.tokenCredential, this.tokenCredentialType, this.url, this.httpMethod, payload, null, this.httpConnectTimeout, this.httpReadTimeout, this.proxy);
+        HttpResponse httpResponse = DeviceOperations.request(this.authenticationTokenProvider, this.tokenCredentialType, this.url, this.httpMethod, payload, null, this.httpConnectTimeout, this.httpReadTimeout, this.proxy);
         handleQueryResponse(httpResponse);
 
         this.isInitialQuery = false;

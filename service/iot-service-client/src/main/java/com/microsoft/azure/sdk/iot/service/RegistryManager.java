@@ -50,7 +50,7 @@ public class RegistryManager
     private static final int EXECUTOR_THREAD_POOL_SIZE = 10;
     private ExecutorService executor;
     private String hostName;
-    private TokenCredential tokenCredential;
+    private TokenCredential authenticationTokenProvider;
     private TokenCredentialType tokenCredentialType;
 
     private RegistryManagerOptions options;
@@ -92,7 +92,7 @@ public class RegistryManager
      * Static constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
-     * @param options The connection options to use when connecting to the service. May be null if no custom options will be used.
+     * @param options The connection options to use when connecting to the service.
      * @return The instance of RegistryManager
      * @throws IOException This exception is never thrown.
      */
@@ -114,14 +114,35 @@ public class RegistryManager
         return createFromTokenCredential(iotHubConnectionString.hostName, authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE);
     }
 
-    public static RegistryManager createFromTokenCredential(String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType)
+    /**
+     * Create a new RegistryManager instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @return The instance of RegistryManager
+     */
+    public static RegistryManager createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
     {
-        return createFromTokenCredential(hostName, tokenCredential, tokenCredentialType, RegistryManagerOptions.builder().build());
+        return createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType, RegistryManagerOptions.builder().build());
     }
 
-    public static RegistryManager createFromTokenCredential(String hostName, TokenCredential tokenCredential, TokenCredentialType tokenCredentialType, RegistryManagerOptions options)
+    /**
+     * Create a new RegistryManager instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @param options The connection options to use when connecting to the service.
+     * @return The instance of RegistryManager
+     */
+    public static RegistryManager createFromTokenCredential(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType, RegistryManagerOptions options)
     {
-        Objects.requireNonNull(tokenCredential, "TokenCredential cannot be null");
+        Objects.requireNonNull(authenticationTokenProvider, "authenticationTokenProvider cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -131,7 +152,7 @@ public class RegistryManager
         RegistryManager registryManager = new RegistryManager();
         registryManager.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
         registryManager.options = options;
-        registryManager.tokenCredential = tokenCredential;
+        registryManager.authenticationTokenProvider = authenticationTokenProvider;
         registryManager.tokenCredentialType = tokenCredentialType;
         registryManager.hostName = hostName;
         return registryManager;
@@ -555,7 +576,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, deviceId);
 
-        String accessToken = this.tokenCredential.getToken(new TokenRequestContext()).block().getToken();
+        String accessToken = this.authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken();
 
         HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], accessToken);
         request.setHeaderField("If-Match", etag);
@@ -1172,7 +1193,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, deviceId, moduleId);
 
-        String accessToken = this.tokenCredential.getToken(new TokenRequestContext()).block().getToken();
+        String accessToken = this.authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken();
 
         HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], accessToken);
         request.setHeaderField("If-Match", etag);
@@ -1385,7 +1406,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configurationId);
 
-        String accessToken = this.tokenCredential.getToken(new TokenRequestContext()).block().getToken();
+        String accessToken = this.authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken();
 
         HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], accessToken);
         request.setHeaderField("If-Match", etag);
@@ -1474,6 +1495,6 @@ public class RegistryManager
 
     private String getAuthenticationToken()
     {
-        return this.tokenCredential.getToken(new TokenRequestContext()).block().getToken();
+        return this.authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken();
     }
 }
