@@ -21,13 +21,6 @@ public class ServiceClientCredentialsProvider implements ServiceClientCredential
     public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
         Interceptor authenticationInterceptor = chain -> {
             String authorizationValue = sasTokenProvider.getSasToken();
-
-            // TODO when enabling RBAC support, need to prepend the authentication token with "Bearer "
-            //if (sasTokenProvider.getTokenCredentialType() == RBAC)
-            //{
-            //    authorizationValue = "Bearer " + authorizationValue;
-            //}
-
             Request authenticatedRequest = chain.request()
                                                 .newBuilder()
                                                 .header(AUTHORIZATION, authorizationValue)

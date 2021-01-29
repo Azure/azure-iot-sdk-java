@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package com.microsoft.azure.sdk.iot.deps.transport.amqp;
+package com.microsoft.azure.sdk.iot.deps.auth;
 
 /**
  * An enumeration of supported authorization methods for service client connections.

@@ -6,7 +6,6 @@ package com.microsoft.azure.sdk.iot.service.jobs;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -17,7 +16,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import jdk.nashorn.internal.parser.Token;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -36,7 +34,6 @@ public class JobClient
     private final static byte[] EMPTY_JSON = "{}".getBytes();
 
     private TokenCredential authenticationTokenProvider;
-    private TokenCredentialType tokenCredentialType;
     private String hostName;
     private JobClientOptions options;
     
@@ -47,17 +44,43 @@ public class JobClient
      * @return The instance of JobClient
      * @throws IOException This exception is never thrown.
      * @throws IllegalArgumentException if the provided connectionString is {@code null} or empty
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #JobClient(String)} instead
+     * since it does not declare this exception even though it constructs the same JobClient.
      */
+    @Deprecated
     public static JobClient createFromConnectionString(String connectionString)
             throws IOException, IllegalArgumentException
     {
-       IotHubConnectionString iotHubConnectionString =
-               IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+       return new JobClient(connectionString);
+    }
 
-       return createFromTokenCredential(
-               iotHubConnectionString.getHostName(),
-               new IotHubConnectionStringCredential(connectionString),
-               TokenCredentialType.SHARED_ACCESS_SIGNATURE);
+    /**
+     * Constructor to create instance from connection string
+     *
+     * @param connectionString The iot hub connection string
+     * @return The instance of JobClient
+     */
+    public JobClient(String connectionString)
+    {
+        this(connectionString, JobClientOptions.builder()
+                .httpConnectTimeout(JobClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .httpReadTimeout(JobClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .build());
+    }
+
+    /**
+     * Constructor to create instance from connection string
+     *
+     * @param connectionString The iot hub connection string
+     * @param options The connection options to use when connecting to the service.
+     * @return The instance of JobClient
+     */
+    public JobClient(String connectionString, JobClientOptions options)
+    {
+        this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
+        this.authenticationTokenProvider = new IotHubConnectionStringCredential(connectionString);
+        this.options = options;
     }
 
     /**
@@ -66,20 +89,11 @@ public class JobClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
-     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
      * @return The new JobClient instance.
      */
-    public static JobClient createFromTokenCredential(
-            String hostName,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType)
+    public JobClient(String hostName, TokenCredential authenticationTokenProvider)
     {
-        return createFromTokenCredential(
-                hostName,
-                authenticationTokenProvider,
-                tokenCredentialType,
-                JobClientOptions.builder().build());
+        this(hostName, authenticationTokenProvider, JobClientOptions.builder().build());
     }
 
     /**
@@ -88,27 +102,17 @@ public class JobClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
-     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
      * @param options The connection options to use when connecting to the service.
      * @return The new JobClient instance.
      */
-    public static JobClient createFromTokenCredential(
-            String hostName,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType,
-            JobClientOptions options)
+    public JobClient(String hostName, TokenCredential authenticationTokenProvider, JobClientOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider);
-        Objects.requireNonNull(tokenCredentialType);
         Objects.requireNonNull(options);
 
-        JobClient jobClient = new JobClient();
-        jobClient.hostName = hostName;
-        jobClient.authenticationTokenProvider = authenticationTokenProvider;
-        jobClient.tokenCredentialType = tokenCredentialType;
-        jobClient.options = options;
-        return jobClient;
+        this.hostName = hostName;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.options = options;
     }
 
     /**
@@ -176,7 +180,6 @@ public class JobClient
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
-                this.tokenCredentialType,
                 url,
                 HttpMethod.PUT,
                 json.getBytes(StandardCharsets.UTF_8),
@@ -266,7 +269,6 @@ public class JobClient
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
-                this.tokenCredentialType,
                 url,
                 HttpMethod.PUT,
                 json.getBytes(StandardCharsets.UTF_8),
@@ -309,7 +311,6 @@ public class JobClient
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
-                this.tokenCredentialType,
                 url,
                 HttpMethod.GET,
                 new byte[]{},
@@ -351,7 +352,6 @@ public class JobClient
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
-                this.tokenCredentialType,
                 url,
                 HttpMethod.POST,
                 EMPTY_JSON,
@@ -442,7 +442,6 @@ public class JobClient
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
         deviceJobQuery.sendQueryRequest(
                 this.authenticationTokenProvider,
-                this.tokenCredentialType,
                 IotHubConnectionString.getUrlTwinQuery(this.hostName),
                 HttpMethod.POST,
                 options.getHttpConnectTimeout(),
@@ -532,7 +531,6 @@ public class JobClient
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
         jobResponseQuery.sendQueryRequest(
                 this.authenticationTokenProvider,
-                this.tokenCredentialType,
                 IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),
                 HttpMethod.GET,
                 options.getHttpConnectTimeout(),

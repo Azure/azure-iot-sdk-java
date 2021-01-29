@@ -8,7 +8,7 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
+import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -345,8 +345,6 @@ public class Query
      *
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
-     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
      * @param url URL to Query on.
      * @param method HTTP Method for the requesting a query.
      * @param httpConnectTimeout the http connect timeout to use for this request.
@@ -358,7 +356,6 @@ public class Query
      */
     public QueryResponse sendQueryRequest(
             TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType,
             URL url,
             HttpMethod method,
             int httpConnectTimeout,
@@ -395,7 +392,7 @@ public class Query
             payload = new byte[0];
         }
 
-        HttpResponse httpResponse = DeviceOperations.request(authenticationTokenProvider, tokenCredentialType, url, method, payload, null, httpConnectTimeout, httpReadTimeout, proxy);
+        HttpResponse httpResponse = DeviceOperations.request(authenticationTokenProvider, url, method, payload, null, httpConnectTimeout, httpReadTimeout, proxy);
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();

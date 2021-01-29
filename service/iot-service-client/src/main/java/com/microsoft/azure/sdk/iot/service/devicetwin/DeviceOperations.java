@@ -5,7 +5,7 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
+import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -215,7 +215,6 @@ public class DeviceOperations
      * Send a http request to the IoTHub using the Twin/Method standard, and return its response.
      *
      * @param authenticationTokenProvider The authentication token provider that will be used to authorize the request
-     * @param tokenCredentialType The type of authentication tokens that the tokenCredential will provide
      * @param url is the Twin URL for the device ID.
      * @param method is the HTTP method (GET, POST, DELETE, PATCH, PUT).
      * @param payload is the array of bytes that contains the payload.
@@ -229,7 +228,6 @@ public class DeviceOperations
      */
     public static HttpResponse request(
             TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType,
             URL url,
             HttpMethod method,
             byte[] payload,
@@ -240,7 +238,6 @@ public class DeviceOperations
             throws IOException, IotHubException, IllegalArgumentException
     {
         Objects.requireNonNull(authenticationTokenProvider);
-        Objects.requireNonNull(tokenCredentialType);
 
         if (url == null)
         {
@@ -271,16 +268,7 @@ public class DeviceOperations
         }
 
         String accessToken = authenticationTokenProvider.getToken(new TokenRequestContext()).block().getToken();
-        if (tokenCredentialType == TokenCredentialType.SHARED_ACCESS_SIGNATURE)
-        {
-            request.setHeaderField(AUTHORIZATION, accessToken);
-        }
-        // TODO when enabling RBAC support, need to prepend the authentication token with "Bearer "
-        //else
-        //{
-        //    request.setHeaderField(AUTHORIZATION, "Bearer " + accessToken);
-        //}
-
+        request.setHeaderField(AUTHORIZATION, accessToken);
         request.setHeaderField(USER_AGENT, TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);

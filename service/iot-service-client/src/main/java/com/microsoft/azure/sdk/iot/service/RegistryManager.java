@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.RegistryStatisticsParser;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
@@ -45,7 +44,6 @@ public class RegistryManager
     private ExecutorService executor;
     private String hostName;
     private TokenCredential authenticationTokenProvider;
-    private TokenCredentialType tokenCredentialType;
 
     private RegistryManagerOptions options;
 
@@ -70,8 +68,12 @@ public class RegistryManager
      *
      * @param connectionString The iot hub connection string
      * @return The instance of RegistryManager
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #RegistryManager(String)} instead since it does not declare this exception even
+     * though it constructs the same RegistryManager.
      * @throws IOException This exception is never thrown.
      */
+    @Deprecated
     public static RegistryManager createFromConnectionString(String connectionString) throws IOException
     {
         RegistryManagerOptions options = RegistryManagerOptions.builder()
@@ -88,11 +90,42 @@ public class RegistryManager
      * @param connectionString The iot hub connection string
      * @param options The connection options to use when connecting to the service.
      * @return The instance of RegistryManager
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #RegistryManager(String, RegistryManagerOptions)} instead since it does not declare this exception even
+     * though it constructs the same RegistryManager.
      * @throws IOException This exception is never thrown.
      */
+    @Deprecated
     public static RegistryManager createFromConnectionString(
             String connectionString,
             RegistryManagerOptions options) throws IOException
+    {
+        return new RegistryManager(connectionString, options);
+    }
+
+    /**
+     * Constructor to create instance from connection string
+     *
+     * @param connectionString The iot hub connection string
+     * @return The instance of RegistryManager
+     */
+    public RegistryManager(String connectionString)
+    {
+        this(connectionString,
+             RegistryManagerOptions.builder()
+                     .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                     .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                     .build());
+    }
+
+    /**
+     * Constructor to create instance from connection string
+     *
+     * @param connectionString The iot hub connection string
+     * @param options The connection options to use when connecting to the service.
+     * @return The instance of RegistryManager
+     */
+    public RegistryManager(String connectionString, RegistryManagerOptions options)
     {
         if (Tools.isNullOrEmpty(connectionString))
         {
@@ -109,10 +142,10 @@ public class RegistryManager
 
         TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(connectionString);
 
-        return createFromTokenCredential(
-                iotHubConnectionString.getHostName(),
-                authenticationTokenProvider,
-                TokenCredentialType.SHARED_ACCESS_SIGNATURE);
+        this.hostName = iotHubConnectionString.getHostName();
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.options = options;
+        this.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
     }
 
     /**
@@ -121,19 +154,11 @@ public class RegistryManager
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
-     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
      * @return The instance of RegistryManager
      */
-    public static RegistryManager createFromTokenCredential(
-            String hostName,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType)
+    public RegistryManager(String hostName, TokenCredential authenticationTokenProvider)
     {
-        return createFromTokenCredential(
-                hostName, authenticationTokenProvider,
-                tokenCredentialType,
-                RegistryManagerOptions.builder().build());
+        this(hostName, authenticationTokenProvider, RegistryManagerOptions.builder().build());
     }
 
     /**
@@ -142,16 +167,10 @@ public class RegistryManager
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
-     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
      * @param options The connection options to use when connecting to the service.
      * @return The instance of RegistryManager
      */
-    public static RegistryManager createFromTokenCredential(
-            String hostName,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType,
-            RegistryManagerOptions options)
+    public RegistryManager(String hostName, TokenCredential authenticationTokenProvider, RegistryManagerOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider, "authenticationTokenProvider cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -160,13 +179,10 @@ public class RegistryManager
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        RegistryManager registryManager = new RegistryManager();
-        registryManager.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
-        registryManager.options = options;
-        registryManager.authenticationTokenProvider = authenticationTokenProvider;
-        registryManager.tokenCredentialType = tokenCredentialType;
-        registryManager.hostName = hostName;
-        return registryManager;
+        this.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
+        this.options = options;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.hostName = hostName;
     }
 
     /**
@@ -1513,16 +1529,7 @@ public class RegistryManager
         request.setReadTimeoutMillis(options.getHttpReadTimeout());
         request.setConnectTimeoutMillis(options.getHttpConnectTimeout());
 
-        if (tokenCredentialType == TokenCredentialType.SHARED_ACCESS_SIGNATURE)
-        {
-            request.setHeaderField("authorization", authenticationToken);
-        }
-        // TODO when enabling RBAC support, need to prepend the authentication token with "Bearer "
-        //else
-        //{
-        //    request.setHeaderField("authorization", "Bearer " + authenticationToken);
-        //}
-
+        request.setHeaderField("authorization", authenticationToken);
         request.setHeaderField("Request-Id", "1001");
         request.setHeaderField("Accept", "application/json");
         request.setHeaderField("Content-Type", "application/json");

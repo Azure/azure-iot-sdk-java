@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 /**

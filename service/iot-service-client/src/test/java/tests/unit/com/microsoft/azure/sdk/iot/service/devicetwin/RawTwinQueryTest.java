@@ -44,18 +44,6 @@ public class RawTwinQueryTest
     }
 
     //Tests_SRS_RAW_QUERY_25_001: [ The constructor shall throw IllegalArgumentException if the input string is null or empty ]
-    //Tests_SRS_RAW_QUERY_25_003: [ The constructor shall create a new RawTwinQuery instance and return it ]
-    @Test
-    public void constructorSucceeds() throws IOException
-    {
-        //act
-        RawTwinQuery rawTwinQuery = RawTwinQuery.createFromConnectionString(VALID_CONNECTION_STRING);
-
-        //assert
-        assertNotNull(Deencapsulation.getField(rawTwinQuery, "iotHubConnectionString"));
-    }
-
-    //Tests_SRS_RAW_QUERY_25_001: [ The constructor shall throw IllegalArgumentException if the input string is null or empty ]
     @Test (expected = IllegalArgumentException.class)
     public void constructorThrowsOnNullConnectionString() throws IOException
     {
@@ -92,13 +80,6 @@ public class RawTwinQueryTest
         rawTwinQuery.query(VALID_SQL_QUERY);
 
         //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_RAW_QUERY_25_004: [ The method shall throw IllegalArgumentException if the query is null or empty.]
@@ -143,26 +124,6 @@ public class RawTwinQueryTest
         rawTwinQuery.query(VALID_SQL_QUERY, 0);
     }
 
-    @Test (expected = IotHubException.class)
-    public void rawQueryThrowsOnNewQueryThrows() throws IotHubException, IOException
-    {
-        //arrange
-        RawTwinQuery rawTwinQuery = RawTwinQuery.createFromConnectionString(VALID_CONNECTION_STRING);
-
-        new NonStrictExpectations()
-        {
-            {
-                Deencapsulation.newInstance(Query.class, new Class[] {String.class, Integer.class, QueryType.class}, anyString, anyInt, QueryType.RAW);
-                result = mockedQuery;
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                result = new IotHubException();
-            }
-        };
-
-        //act
-        rawTwinQuery.query(VALID_SQL_QUERY);
-    }
-
     //Tests_SRS_RAW_QUERY_25_011: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
     //Tests_SRS_RAW_QUERY_25_012: [ If a queryResponse is available, this method shall return true as is to the user. ]
     @Test
@@ -187,14 +148,6 @@ public class RawTwinQueryTest
         boolean result = rawTwinQuery.hasNext(testQuery);
 
         //assert
-        new Verifications()
-        {
-            {
-                 Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
-
         assertTrue(result);
     }
 
@@ -267,13 +220,6 @@ public class RawTwinQueryTest
         String result = rawTwinQuery.next(testQuery);
 
         //assert
-        new Verifications()
-        {
-            {
-                Deencapsulation.invoke(mockedQuery, "sendQueryRequest", new Class[] {IotHubConnectionString.class, URL.class, HttpMethod.class, Long.class}, any, any, HttpMethod.POST, any);
-                times = 1;
-            }
-        };
         assertEquals(expectedString, result);
     }
 

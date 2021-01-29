@@ -33,7 +33,7 @@ public static ServiceClient createFromConnectionString(
  * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
  * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
  *                                    this library when they are needed.
- * @param authorizationType The type of authentication tokens that the provided {@link TokenCredential}
+ * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
  *                          implementation will always give.
  * @param iotHubServiceClientProtocol The protocol to open the connection with.
  * @return The created {@link ServiceClient} instance.
@@ -51,7 +51,7 @@ public static ServiceClient createFromTokenCredential(
  * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
  * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
  *                                    this library when they are needed.
- * @param authorizationType The type of authentication tokens that the provided {@link TokenCredential}
+ * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
  *                          implementation will always give.
  * @param iotHubServiceClientProtocol The protocol to open the connection with.
  * @param options The connection options to use when connecting to the service.

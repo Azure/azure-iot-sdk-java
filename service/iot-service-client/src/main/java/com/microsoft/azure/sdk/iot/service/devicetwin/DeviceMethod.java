@@ -5,19 +5,16 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
-import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import jdk.nashorn.internal.parser.Token;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -25,7 +22,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 
 /**
  * DeviceMethod enables service client to directly invoke methods on various devices from service client.
@@ -36,7 +32,6 @@ public class DeviceMethod
 
     private DeviceMethodClientOptions options;
     private TokenCredential authenticationTokenProvider;
-    private TokenCredentialType tokenCredentialType;
     private String hostName;
 
     /**
@@ -45,7 +40,11 @@ public class DeviceMethod
      * @param connectionString is the IoTHub connection string.
      * @return an instance of the DeviceMethod.
      * @throws IOException This exception is never thrown.
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #DeviceMethod(String)} instead
+     * since it does not declare this exception even though it constructs the same DeviceMethod.
      */
+    @Deprecated
     public static DeviceMethod createFromConnectionString(String connectionString) throws IOException
     {
         return createFromConnectionString(
@@ -63,7 +62,11 @@ public class DeviceMethod
      * @param options the configurable options for each operation on this client. May not be null.
      * @return an instance of the DeviceMethod.
      * @throws IOException This exception is never thrown.
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #DeviceMethod(String, DeviceMethodClientOptions)} instead
+     * since it does not declare this exception even though it constructs the same DeviceMethod.
      */
+    @Deprecated
     public static DeviceMethod createFromConnectionString(
             String connectionString,
             DeviceMethodClientOptions options) throws IOException
@@ -80,33 +83,49 @@ public class DeviceMethod
 
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
-        return createFromTokenCredential(
+        return new DeviceMethod(
                 iotHubConnectionString.getHostName(),
                 new IotHubConnectionStringCredential(connectionString),
-                TokenCredentialType.SHARED_ACCESS_SIGNATURE,
                 options);
     }
 
     /**
-     * Create a new DeviceMethod instance.
+     * Create a DeviceMethod instance from the information in the connection string.
      *
-     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
-     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
-     *                                    this library when they are needed.
-     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
-     * @return the new DeviceMethod instance.
+     * @param connectionString is the IoTHub connection string.
+     * @return an instance of the DeviceMethod.
      */
-    public static DeviceMethod createFromTokenCredential(
-            String hostName,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType)
+    public DeviceMethod(String connectionString)
     {
-        return createFromTokenCredential(
-                hostName,
-                authenticationTokenProvider,
-                tokenCredentialType,
-                DeviceMethodClientOptions.builder().build());
+        this(connectionString,
+             DeviceMethodClientOptions.builder()
+                     .httpConnectTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                     .httpReadTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                     .build());
+    }
+
+    /**
+     * Create a DeviceMethod instance from the information in the connection string.
+     *
+     * @param connectionString is the IoTHub connection string.
+     * @param options the configurable options for each operation on this client. May not be null.
+     * @return an instance of the DeviceMethod.
+     */
+    public DeviceMethod(String connectionString, DeviceMethodClientOptions options)
+    {
+        if (connectionString == null || connectionString.length() == 0)
+        {
+            throw new IllegalArgumentException("Connection string cannot be null or empty");
+        }
+
+        if (options == null)
+        {
+            throw new IllegalArgumentException("options may not be null");
+        }
+
+        this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
+        this.options = options;
+        this.authenticationTokenProvider = new IotHubConnectionStringCredential(connectionString);
     }
 
     /**
@@ -115,16 +134,23 @@ public class DeviceMethod
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
-     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
+     * @return the new DeviceMethod instance.
+     */
+    public DeviceMethod(String hostName, TokenCredential authenticationTokenProvider)
+    {
+        this(hostName, authenticationTokenProvider, DeviceMethodClientOptions.builder().build());
+    }
+
+    /**
+     * Create a new DeviceMethod instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
      * @param options The connection options to use when connecting to the service.
      * @return the new DeviceMethod instance.
      */
-    public static DeviceMethod createFromTokenCredential(
-            String hostName,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType tokenCredentialType,
-            DeviceMethodClientOptions options)
+    public DeviceMethod(String hostName, TokenCredential authenticationTokenProvider, DeviceMethodClientOptions options)
     {
         Objects.requireNonNull(authenticationTokenProvider, "TokenCredential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
@@ -133,12 +159,9 @@ public class DeviceMethod
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        DeviceMethod deviceMethod = new DeviceMethod();
-        deviceMethod.options = options;
-        deviceMethod.authenticationTokenProvider = authenticationTokenProvider;
-        deviceMethod.tokenCredentialType = tokenCredentialType;
-        deviceMethod.hostName = hostName;
-        return deviceMethod;
+        this.options = options;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.hostName = hostName;
     }
 
     /**
@@ -243,7 +266,15 @@ public class DeviceMethod
         }
 
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
-        HttpResponse response = DeviceOperations.request(this.authenticationTokenProvider, this.tokenCredentialType, url, HttpMethod.POST, json.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++), options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
+        HttpResponse response = DeviceOperations.request(
+                this.authenticationTokenProvider,
+                url,
+                HttpMethod.POST,
+                json.getBytes(StandardCharsets.UTF_8),
+                String.valueOf(requestId++),
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
 
         MethodParser methodParserResponse = new MethodParser();
         methodParserResponse.fromJson(new String(response.getBody(), StandardCharsets.UTF_8));

@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.transport.amqp.TokenCredentialType;
+import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
@@ -40,10 +40,10 @@ public class Job
         this.jobClient = JobClient.createFromConnectionString(connectionString);
     }
 
-    Job(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType tokenCredentialType)
+    Job(String hostName, TokenCredential authenticationTokenProvider)
     {
         this.jobId = "JOB-" + UUID.randomUUID();
-        this.jobClient = JobClient.createFromTokenCredential(hostName, authenticationTokenProvider, tokenCredentialType);
+        this.jobClient = new JobClient(hostName, authenticationTokenProvider);
     }
 
     /**
