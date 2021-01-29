@@ -169,9 +169,9 @@ public class Query
      */
     @Deprecated
     public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
-                                   URL url,
-                                   HttpMethod method,
-                                   Long timeoutInMs) throws IOException, IotHubException
+                                          URL url,
+                                          HttpMethod method,
+                                          Long timeoutInMs) throws IOException, IotHubException
     {
         if (iotHubConnectionString == null || url == null || method == null)
         {

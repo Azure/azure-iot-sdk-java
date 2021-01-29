@@ -295,6 +295,56 @@ public static DigitalTwinAsyncClient createFromTokenCredential(String hostName, 
 </details>
 
 <details>
+<summary>Query</summary>
+
+```
+/**
+ * Sends request for the query to the IotHub.
+ *
+ * @param iotHubConnectionString Hub Connection String.
+ * @param url URL to Query on.
+ * @param method HTTP Method for the requesting a query.
+ * @param httpConnectTimeout the http connect timeout to use for this request.
+ * @param httpReadTimeout the http read timeout to use for this request.
+ * @param proxy the proxy to use, or null if no proxy should be used.
+ * @return QueryResponse object which holds the response Iterator.
+ * @throws IOException If any of the input parameters are not valid.
+ * @throws IotHubException If HTTP response other then status ok is received.
+ */
+public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
+                                      URL url,
+                                      HttpMethod method,
+                                      int httpConnectTimeout,
+                                      int httpReadTimeout,
+                                      Proxy proxy) throws IOException, IotHubException
+
+/**
+ * Sends request for the query to the IotHub.
+ *
+ * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+ *                                    this library when they are needed.
+ * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+ *                          implementation will always give.
+ * @param url URL to Query on.
+ * @param method HTTP Method for the requesting a query.
+ * @param httpConnectTimeout the http connect timeout to use for this request.
+ * @param httpReadTimeout the http read timeout to use for this request.
+ * @param proxy the proxy to use, or null if no proxy should be used.
+ * @return QueryResponse object which holds the response Iterator.
+ * @throws IOException If any of the input parameters are not valid.
+ * @throws IotHubException If HTTP response other then status ok is received.
+ */
+public QueryResponse sendQueryRequest(TokenCredential authenticationTokenProvider,
+                                      TokenCredentialType tokenCredentialType,
+                                      URL url,
+                                      HttpMethod method,
+                                      int httpConnectTimeout,
+                                      int httpReadTimeout,
+                                      Proxy proxy) throws IOException, IotHubException
+```
+</details>
+
+<details>
 <summary>TokenCredential</summary>
 
 ```
