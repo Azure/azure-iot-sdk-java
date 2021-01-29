@@ -402,7 +402,7 @@ public class RegistryManager
             throw new IllegalArgumentException("device cannot be null");
         }
 
-        if(Tools.isNullOrEmpty(device.getDeviceId()) || (Tools.isNullOrEmpty(device.getPrimaryKey())) && Tools.isNullOrEmpty(device.getPrimaryThumbprint()))
+        if (Tools.isNullOrEmpty(device.getDeviceId()) || (Tools.isNullOrEmpty(device.getPrimaryKey())) && Tools.isNullOrEmpty(device.getPrimaryThumbprint()))
         {
             throw new IllegalArgumentException("device is not valid");
         }

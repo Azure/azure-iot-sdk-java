@@ -171,9 +171,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     {
         if (messageToBeSent != null)
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_018: [The event handler shall get the Sender (Proton) object from the link]
             Sender snd = (Sender)event.getLink();
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_019: [The event handler shall encode the message and copy to the byte buffer]
             if (snd.getCredit() > 0)
             {
                 this.correlationId = messageToBeSent.getCorrelationId();
@@ -186,12 +184,13 @@ public class AmqpSendHandler extends AmqpConnectionHandler
                     {
                         length = messageToBeSent.encode(msgData, 0, msgData.length);
                         break;
-                    } catch (BufferOverflowException e)
+                    }
+                    catch (BufferOverflowException e)
                     {
                         msgData = new byte[msgData.length * 2];
                     }
                 }
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_020: [The event handler shall set the delivery tag on the Sender (Proton) object]
+
                 byte[] tag = String.valueOf(nextTag).getBytes();
 
                 //want to avoid negative delivery tags since -1 is the designated failure value
@@ -205,7 +204,6 @@ public class AmqpSendHandler extends AmqpConnectionHandler
                 }
 
                 Delivery dlv = snd.delivery(tag);
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall send the encoded bytes]
                 snd.send(msgData, 0, length);
 
                 snd.advance();
@@ -218,29 +216,23 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     @Override
     public void onDelivery(Event event)
     {
-        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_023: [ The event handler shall get the Delivery from the event only if the event type is DELIVERY **]**
-        if(event.getType() == Event.Type.DELIVERY)
+        if (event.getType() == Event.Type.DELIVERY)
         {
             log.trace("Acknowledgement arrived for sent cloud to device message with correlation id {}", this.correlationId);
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_038: [If this link is the Sender link and the event type is DELIVERY, the event handler shall get the Delivery (Proton) object from the event.]
             Delivery d = event.getDelivery();
 
-            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_024: [ The event handler shall get the Delivery remote state from the delivery **]**
             DeliveryState remoteState = d.getRemoteState();
 
-            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_025: [ The event handler shall verify the Amqp response and add the response to a queue. **]**
             amqpResponse = new AmqpResponseVerification(remoteState);
 
-            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_026: [ The event handler shall settle the delivery. **]**
             d.settle();
 
-            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_027: [ The event handler shall get the Sender (Proton) object from the event **]**
             Sender snd = event.getSender();
 
             if (snd.getLocalState() == EndpointState.ACTIVE)
             {
-                //By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
+                // By closing the link locally, proton-j will fire an event onLinkLocalClose. Within ErrorLoggingBaseHandlerWithCleanup,
                 // onLinkLocalClose closes the session locally and eventually the connection and reactor
                 if (remoteState.getClass().equals(Accepted.class))
                 {
@@ -260,8 +252,6 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     public void onConnectionRemoteClose(Event event)
     {
         super.onConnectionRemoteClose(event);
-
-        // Code_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_34_032: [This function shall close the transport tail]
         event.getTransport().close_tail();
     }
 
@@ -269,13 +259,10 @@ public class AmqpSendHandler extends AmqpConnectionHandler
     {
         super.verifyConnectionWasOpened();
 
-        //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_029: [ The event handler shall check the status queue to get the response for the sent message]
         if (amqpResponse != null)
         {
-            //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_030: [ The event handler shall remove the response from the queue]
             if (amqpResponse.getException() != null)
             {
-                //Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_25_031: [ The event handler shall get the exception from the response and throw is it is not null]
                 throw amqpResponse.getException();
             }
         }

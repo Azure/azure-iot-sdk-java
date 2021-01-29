@@ -152,12 +152,12 @@ public class DeviceMethod
             Long connectTimeoutInSeconds,
             Object payload) throws IotHubException, IOException
     {
-        if((deviceId == null) || deviceId.isEmpty())
+        if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId is empty or null.");
         }
 
-        if(Tools.isNullOrEmpty(methodName))
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
@@ -187,17 +187,17 @@ public class DeviceMethod
             Long connectTimeoutInSeconds,
             Object payload) throws IotHubException, IOException
     {
-        if((deviceId == null) || deviceId.isEmpty())
+        if (Tools.isNullOrEmpty(deviceId))
         {
             throw new IllegalArgumentException("deviceId is empty or null.");
         }
 
-        if((moduleId == null) || moduleId.isEmpty())
+        if (Tools.isNullOrEmpty(moduleId))
         {
             throw new IllegalArgumentException("moduleId is empty or null.");
         }
 
-        if(Tools.isNullOrEmpty(methodName))
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("methodName is empty or null.");
         }
@@ -229,7 +229,7 @@ public class DeviceMethod
         MethodParser methodParser = new MethodParser(methodName, responseTimeoutInSeconds, connectTimeoutInSeconds, payload);
 
         String json = methodParser.toJson();
-        if(json == null)
+        if (json == null)
         {
             throw new IllegalArgumentException("MethodParser return null Json");
         }
@@ -265,17 +265,17 @@ public class DeviceMethod
                                     Date startTimeUtc,
                                     long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
-        if(Tools.isNullOrEmpty(methodName))
+        if (Tools.isNullOrEmpty(methodName))
         {
             throw new IllegalArgumentException("null updateTwin");
         }
 
-        if(startTimeUtc == null)
+        if (startTimeUtc == null)
         {
             throw new IllegalArgumentException("null startTimeUtc");
         }
 
-        if(maxExecutionTimeInSeconds < 0)
+        if (maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }

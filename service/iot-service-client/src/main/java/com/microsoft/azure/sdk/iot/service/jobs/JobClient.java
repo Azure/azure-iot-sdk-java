@@ -292,7 +292,7 @@ public class JobClient
     {
         URL url;
 
-        if ((jobId == null) || jobId.isEmpty())
+        if (Tools.isNullOrEmpty(jobId))
         {
             throw new IllegalArgumentException("null jobId");
         }
@@ -334,7 +334,7 @@ public class JobClient
             throws IllegalArgumentException, IOException, IotHubException
     {
         URL url;
-        if ((jobId == null) || jobId.isEmpty())
+        if (Tools.isNullOrEmpty(jobId))
         {
             throw new IllegalArgumentException("null jobId");
         }

@@ -285,7 +285,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         stringBuilder.append(URL_PATH_QUERY);
         stringBuilder.append(URL_SEPARATOR_1);
 
-        if(!Tools.isNullOrEmpty(jobType))
+        if (!Tools.isNullOrEmpty(jobType))
         {
             stringBuilder.append(URL_PATH_JOB_TYPE);
             stringBuilder.append(VALUE_PAIR_SEPARATOR);
@@ -293,7 +293,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
             stringBuilder.append(URL_SEPARATOR_2);
         }
 
-        if(!Tools.isNullOrEmpty(jobStatus))
+        if (!Tools.isNullOrEmpty(jobStatus))
         {
             stringBuilder.append(URL_PATH_JOB_STATUS);
             stringBuilder.append(VALUE_PAIR_SEPARATOR);
