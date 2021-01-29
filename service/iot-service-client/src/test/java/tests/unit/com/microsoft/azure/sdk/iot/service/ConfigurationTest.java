@@ -65,7 +65,7 @@ public class ConfigurationTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_MODULE_28_003: [The Configuration class shall have the following properties: id, schemaVersion,
     // labels, content, targetCondition, createdTimeUtc, lastUpdatedTimeUtc, priority, systemMetrics, metrics, etag
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void config_get_all_properties()
     {
         // Arrange

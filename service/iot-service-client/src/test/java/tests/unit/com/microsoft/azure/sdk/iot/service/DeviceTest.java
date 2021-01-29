@@ -35,7 +35,7 @@ public class DeviceTest
     // deviceId, Etag, Status, StatusReason, StatusUpdatedTime, ConnectionState, CloudToDeviceMessageCount
     // ConnectionStateUpdatedTime, LastActivityTime, symmetricKey, thumbprint, authentication]
     // Assert
-    @Test (expected = IllegalArgumentException.class)
+    @Test
     public void device_get_all_properties()
     {
         // Arrange

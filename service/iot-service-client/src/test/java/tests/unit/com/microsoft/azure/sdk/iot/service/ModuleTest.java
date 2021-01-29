@@ -25,7 +25,7 @@ public class ModuleTest
     // generationId, Etag, ConnectionState, ConnectionStateUpdatedTime, LastActivityTime, cloudToDeviceMessageCount,
     // authentication, managedBy.]
     // Assert
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void module_get_all_properties()
     {
         // Arrange
