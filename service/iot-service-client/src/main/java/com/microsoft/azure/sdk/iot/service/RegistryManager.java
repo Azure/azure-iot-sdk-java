@@ -419,7 +419,7 @@ public class RegistryManager
 
     /**
      * Update device with forceUpdate input parameter
-     * @deprecated Please use {@link #updateDevice(Device)}
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDevice(Device)}
      *
      * @param device The device object containing updated data
      * @param forceUpdate True if the update has to be forced regardless of the device state
@@ -493,7 +493,7 @@ public class RegistryManager
 
     /**
      * Async wrapper for forced updateDevice() operation
-     * @deprecated Please use {@link #updateDeviceAsync(Device)}
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDeviceAsync(Device)}
      *
      * @param device The device object containing updated data
      * @param forceUpdate True is the update has to be forced regardless if the device state
@@ -1193,7 +1193,7 @@ public class RegistryManager
 
     /**
      * Update module with forceUpdate input parameter
-     * @deprecated Please use {@link #updateModule(Module)}
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as @link #updateModule(Module)}
      *
      * @param module The module object containing updated data
      * @param forceUpdate True if the update has to be forced regardless of the module state
@@ -1457,7 +1457,7 @@ public class RegistryManager
 
     /**
      * Update configuration with forceUpdate input parameter
-     * @deprecated Please use {@link #updateConfiguration(Configuration)}
+     * @deprecated the forceUpdate argument does nothing so this method will always behave the same as @link #updateConfiguration(Configuration)}
      *
      * @param configuration The configuration object containing updated data
      * @param forceUpdate True if the update has to be forced regardless of the configuration state
