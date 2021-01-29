@@ -1200,7 +1200,6 @@ public class RegistryManager
      * @return The updated module object
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
-     *
      */
     @Deprecated
     public Module updateModule(Module module, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException

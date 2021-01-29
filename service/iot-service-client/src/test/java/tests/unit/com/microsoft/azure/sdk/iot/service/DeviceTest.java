@@ -76,9 +76,6 @@ public class DeviceTest
         cap.setIotEdge(true);
         device.setCapabilities(cap);
         assertEquals((Boolean)true, device.getCapabilities().isIotEdge());
-
-        device.setForceUpdate(true);
-        device.setForceUpdate(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_DEVICE_12_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
@@ -232,7 +229,6 @@ public class DeviceTest
         // arrange
         String expectedDeviceId = "deviceCA";
         DeviceStatus expectedDeviceStatus = DeviceStatus.Disabled;
-        boolean expectedForceUpdate = false;
         String expectedStatusReason = "no reason";
         String expectedStatusUpdatedTime = "2001-09-09T09:09:09";
         int expectedCloudToDeviceMessageCount = 23;
@@ -246,7 +242,6 @@ public class DeviceTest
 
         Device device = Device.createDevice(expectedDeviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
         device.setStatus(expectedDeviceStatus);
-        device.setForceUpdate(expectedForceUpdate);
         Deencapsulation.setField(device, "statusReason", expectedStatusReason);
         Deencapsulation.setField(device, "statusUpdatedTime", expectedStatusUpdatedTime);
         Deencapsulation.setField(device, "cloudToDeviceMessageCount", expectedCloudToDeviceMessageCount);

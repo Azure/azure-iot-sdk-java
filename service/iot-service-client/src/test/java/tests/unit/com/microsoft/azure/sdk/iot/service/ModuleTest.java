@@ -58,9 +58,6 @@ public class ModuleTest
         module.getConnectionStateUpdatedTime();
         module.getLastActivityTime();
         module.getCloudToDeviceMessageCount();
-
-        module.setForceUpdate(true);
-        module.setForceUpdate(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_MODULE_28_002: [The function shall throw IllegalArgumentException if the input string is empty or null]
@@ -288,7 +285,6 @@ public class ModuleTest
         // arrange
         String expectedDeviceId = "deviceCA";
         String expectedModuleId = "moduleCA";
-        boolean expectedForceUpdate = false;
         int expectedCloudToDeviceMessageCount = 23;
         DeviceConnectionState expectedConnectionState = DeviceConnectionState.Connected;
         String expectedConnectionStateUpdatedTime = "2001-09-09T09:09:09";
@@ -298,7 +294,6 @@ public class ModuleTest
         String expectedManagedBy = "jkik";
 
         Module module = Module.createModule(expectedDeviceId, expectedModuleId, AuthenticationType.SAS);
-        module.setForceUpdate(expectedForceUpdate);
         Deencapsulation.setField(module, "cloudToDeviceMessageCount", expectedCloudToDeviceMessageCount);
         Deencapsulation.setField(module, "connectionState", expectedConnectionState);
         Deencapsulation.setField(module, "connectionStateUpdatedTime", expectedConnectionStateUpdatedTime);

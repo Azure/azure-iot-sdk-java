@@ -355,7 +355,7 @@ public class BaseDevice
     }
 
     /*
-     * Specifies whether this device uses a key for dauthentication, an X509 certificate, or something else
+     * Specifies whether this device uses a key for authentication, an X509 certificate, or something else
      */
     AuthenticationMechanism authentication;
 

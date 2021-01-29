@@ -86,8 +86,6 @@ public class ConfigurationTest
         config.getMetrics();
         config.getEtag();
         config.getTargetCondition();
-        config.setForceUpdate(true);
-        config.setForceUpdate(null);
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_CONFIGURATION_28_004: [This method shall return a new instance of a ConfigurationParser
