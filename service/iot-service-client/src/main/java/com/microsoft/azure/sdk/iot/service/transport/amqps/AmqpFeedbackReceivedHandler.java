@@ -53,7 +53,12 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param iotHubServiceClientProtocol protocol to use
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      */
-    public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
+    public AmqpFeedbackReceivedHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, null);
     }
@@ -68,7 +73,13 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param amqpFeedbackReceivedEvent callback to delegate the received message to the user API
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions)
+    public AmqpFeedbackReceivedHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent, proxyOptions, null);
     }
@@ -85,7 +96,14 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public AmqpFeedbackReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpFeedbackReceivedHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
 
@@ -98,7 +116,14 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
         add(new FlowController());
     }
 
-    AmqpFeedbackReceivedHandler(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions, SSLContext sslContext)
+    AmqpFeedbackReceivedHandler(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType authorizationType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         super(hostName, authenticationTokenProvider, authorizationType, iotHubServiceClientProtocol, proxyOptions, sslContext);
 
@@ -160,7 +185,6 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
                 delivery.settle();
             }
 
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_009: [The event handler shall call the FeedbackReceived callback if it has been initialized]
             if (amqpFeedbackReceivedEvent != null)
             {
                 amqpFeedbackReceivedEvent.onFeedbackReceived(msg.getBody().toString());

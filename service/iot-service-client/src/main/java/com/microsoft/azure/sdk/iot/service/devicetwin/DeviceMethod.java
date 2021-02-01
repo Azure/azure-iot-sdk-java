@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
@@ -265,7 +266,8 @@ public class DeviceMethod
             throw new IllegalArgumentException("MethodParser return null Json");
         }
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
                 url,
@@ -296,13 +298,14 @@ public class DeviceMethod
      * @throws IOException if the function contains invalid parameters.
      * @throws IotHubException if the http request failed.
      */
-    public Job scheduleDeviceMethod(String queryCondition,
-                                    String methodName,
-                                    Long responseTimeoutInSeconds,
-                                    Long connectTimeoutInSeconds,
-                                    Object payload,
-                                    Date startTimeUtc,
-                                    long maxExecutionTimeInSeconds) throws IOException, IotHubException
+    public Job scheduleDeviceMethod(
+            String queryCondition,
+            String methodName,
+            Long responseTimeoutInSeconds,
+            Long connectTimeoutInSeconds,
+            Object payload,
+            Date startTimeUtc,
+            long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
         if (Tools.isNullOrEmpty(methodName))
         {

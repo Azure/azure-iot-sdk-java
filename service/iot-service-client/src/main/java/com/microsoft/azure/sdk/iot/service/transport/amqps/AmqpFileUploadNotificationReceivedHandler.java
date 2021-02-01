@@ -56,7 +56,14 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    AmqpFileUploadNotificationReceivedHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions, SSLContext sslContext)
+    AmqpFileUploadNotificationReceivedHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
 
@@ -69,7 +76,14 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
         add(new FlowController());
     }
 
-    AmqpFileUploadNotificationReceivedHandler(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent, ProxyOptions proxyOptions, SSLContext sslContext)
+    AmqpFileUploadNotificationReceivedHandler(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType authorizationType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         super(hostName, authenticationTokenProvider, authorizationType, iotHubServiceClientProtocol, proxyOptions, sslContext);
 

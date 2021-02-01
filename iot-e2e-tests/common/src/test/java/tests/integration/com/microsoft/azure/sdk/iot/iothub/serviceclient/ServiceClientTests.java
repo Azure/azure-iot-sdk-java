@@ -177,14 +177,17 @@ public class ServiceClientTests extends IntegrationTest
         // Arrange
 
         // We remove and recreate the device for a clean start
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        RegistryManager registryManager =
+                new RegistryManager(
+                        iotHubConnectionString,
+                        RegistryManagerOptions.builder()
+                                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                                .build());
 
         Device deviceAdded = Device.createFromId(testInstance.deviceId, null, null);
         Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         Device deviceGetBefore = registryManager.getDevice(testInstance.deviceId);
-
-        // Act
 
         // Create service client
         ProxyOptions proxyOptions = null;
@@ -200,17 +203,29 @@ public class ServiceClientTests extends IntegrationTest
             sslContext = new IotHubSSLContext().getSSLContext();
         }
 
-        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).sslContext(sslContext).build();
+        ServiceClientOptions serviceClientOptions =
+                ServiceClientOptions.builder()
+                        .proxyOptions(proxyOptions)
+                        .sslContext(sslContext)
+                        .build();
+
         ServiceClient serviceClient;
         if (withTokenCredential)
         {
-            IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString);
+            IotHubConnectionString iotHubConnectionStringObj =
+                    IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
             TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString);
-            serviceClient = ServiceClient.createFromTokenCredential(iotHubConnectionStringObj.getHostName(), authenticationTokenProvider, TokenCredentialType.SHARED_ACCESS_SIGNATURE, testInstance.protocol, serviceClientOptions);
+            serviceClient = new ServiceClient(
+                    iotHubConnectionStringObj.getHostName(),
+                    authenticationTokenProvider,
+                    TokenCredentialType.SHARED_ACCESS_SIGNATURE,
+                    testInstance.protocol,
+                    serviceClientOptions);
         }
         else
         {
-            serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
+            serviceClient = new ServiceClient(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
         }
 
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();

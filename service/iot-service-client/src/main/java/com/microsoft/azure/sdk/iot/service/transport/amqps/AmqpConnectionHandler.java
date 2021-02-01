@@ -52,9 +52,14 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     protected final SSLContext sslContext;
 
     protected Connection connection;
-    private CbsSessionHandler cbsSessionHandler;
 
-    protected AmqpConnectionHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    protected AmqpConnectionHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -89,7 +94,13 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
     }
 
-    protected AmqpConnectionHandler(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    protected AmqpConnectionHandler(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType authorizationType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -197,7 +208,11 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         this.connectionOpenedRemotely = true;
 
         Session cbsSession = event.getConnection().session();
-        cbsSessionHandler = new CbsSessionHandler(cbsSession, this, this.authenticationTokenProvider, this.authorizationType);
+        new CbsSessionHandler(
+                cbsSession,
+                this,
+                this.authenticationTokenProvider,
+                this.authorizationType);
     }
 
     /**

@@ -57,7 +57,11 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      */
-    public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public AmqpSendHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
     }
@@ -71,7 +75,12 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    public AmqpSendHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
@@ -87,13 +96,25 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public AmqpSendHandler(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpSendHandler(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
         add(new Handshaker());
     }
 
-    AmqpSendHandler(String hostName, TokenCredential tokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    AmqpSendHandler(
+            String hostName,
+            TokenCredential tokenProvider,
+            TokenCredentialType authorizationType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         super(hostName, tokenProvider, authorizationType, iotHubServiceClientProtocol, proxyOptions, sslContext);
         add(new Handshaker());
@@ -115,7 +136,10 @@ public class AmqpSendHandler extends AmqpConnectionHandler
      * @param moduleId The device name string
      * @param message The message to be sent
      */
-    public void createProtonMessage(String deviceId, String moduleId, com.microsoft.azure.sdk.iot.service.Message message)
+    public void createProtonMessage(
+            String deviceId,
+            String moduleId,
+            com.microsoft.azure.sdk.iot.service.Message message)
     {
         populateProtonMessage(String.format(MODULE_PATH_FORMAT, deviceId, moduleId), message);
     }

@@ -43,7 +43,11 @@ public class AmqpSend
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      */
-    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public AmqpSend(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
     }
@@ -56,7 +60,12 @@ public class AmqpSend
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    public AmqpSend(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
@@ -69,7 +78,13 @@ public class AmqpSend
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpSend(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -97,7 +112,13 @@ public class AmqpSend
         this.sslContext = sslContext;
     }
 
-    public AmqpSend(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpSend(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType authorizationType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {

@@ -42,7 +42,11 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      */
-    public AmqpFileUploadNotificationReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public AmqpFileUploadNotificationReceive(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
     }
@@ -55,7 +59,12 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpFileUploadNotificationReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    public AmqpFileUploadNotificationReceive(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
@@ -70,7 +79,13 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public AmqpFileUploadNotificationReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpFileUploadNotificationReceive(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         this.hostName = hostName;
         this.userName = userName;
@@ -80,7 +95,13 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         this.sslContext = sslContext;
     }
 
-    public AmqpFileUploadNotificationReceive(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpFileUploadNotificationReceive(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType authorizationType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         this.hostName = hostName;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
@@ -154,7 +175,6 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         }
         else
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_009: [The function shall throw IOException if the send handler object is not initialized]
             throw new IOException("receive handler is not initialized. call open before receive");
         }
 

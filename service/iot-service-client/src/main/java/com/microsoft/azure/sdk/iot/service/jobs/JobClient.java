@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
@@ -177,7 +178,8 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
                 url,
@@ -266,7 +268,8 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
                 url,
@@ -308,7 +311,8 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
                 url,
@@ -349,7 +353,8 @@ public class JobClient
             throw new IllegalArgumentException("Invalid JobId to create url");
         }
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
                 url,
@@ -439,7 +444,8 @@ public class JobClient
 
         Query deviceJobQuery = new Query(sqlQuery, pageSize, QueryType.DEVICE_JOB);
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         deviceJobQuery.sendQueryRequest(
                 this.authenticationTokenProvider,
                 IotHubConnectionString.getUrlTwinQuery(this.hostName),
@@ -528,7 +534,8 @@ public class JobClient
 
         String jobTypeString = (jobType == null) ? null : jobType.toString();
         String jobStatusString = (jobStatus == null) ? null : jobStatus.toString();
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         jobResponseQuery.sendQueryRequest(
                 this.authenticationTokenProvider,
                 IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),

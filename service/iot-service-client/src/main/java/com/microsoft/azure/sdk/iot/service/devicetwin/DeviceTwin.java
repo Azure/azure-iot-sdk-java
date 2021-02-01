@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -176,7 +177,8 @@ public class DeviceTwin
 
     private void getTwinOperation(URL url, DeviceTwinDevice device) throws IotHubException, IOException
     {
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         HttpResponse response = DeviceOperations.request(
                 this.authenticationTokenProvider,
                 url,
@@ -240,7 +242,8 @@ public class DeviceTwin
         TwinState twinState = new TwinState(device.getTagsMap(), device.getDesiredMap(), null);
         String twinJson = twinState.toJsonElement().toString();
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         DeviceOperations.request(
                 this.authenticationTokenProvider,
                 url,
@@ -315,7 +318,8 @@ public class DeviceTwin
 
         Query deviceTwinQuery = new Query(sqlQuery, pageSize, QueryType.TWIN);
 
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         deviceTwinQuery.sendQueryRequest(
                 this.authenticationTokenProvider,
                 IotHubConnectionString.getUrlTwinQuery(this.hostName),
@@ -364,7 +368,8 @@ public class DeviceTwin
      */
     public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws MalformedURLException
     {
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         return new QueryCollection(
                 sqlQuery,
                 pageSize,
