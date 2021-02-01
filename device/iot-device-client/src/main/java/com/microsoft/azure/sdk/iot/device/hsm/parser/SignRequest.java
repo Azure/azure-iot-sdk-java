@@ -13,6 +13,8 @@ import javax.crypto.Mac;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
+// This suppression below is addressing warnings of fields used for serialization.
+@SuppressWarnings("FieldCanBeLocal")
 public class SignRequest
 {
     private static final String KEY_ID_NAME = "keyId";

@@ -460,13 +460,15 @@ public class RegistryManager
 
     /**
      * Update device with forceUpdate input parameter
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDevice(Device)}
      *
      * @param device The device object containing updated data
-     * @param forceUpdate True if the update has to be forced regardless of the device state
+     * @param forceUpdate This value is not used
      * @return The updated device object
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @Deprecated
     public Device updateDevice(Device device, Boolean forceUpdate)
             throws IOException, IotHubException, JsonSyntaxException
     {
@@ -529,6 +531,7 @@ public class RegistryManager
 
     /**
      * Async wrapper for forced updateDevice() operation
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDeviceAsync(Device)}
      *
      * @param device The device object containing updated data
      * @param forceUpdate True is the update has to be forced regardless if the device state
@@ -536,6 +539,7 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @Deprecated
     public CompletableFuture<Device> updateDeviceAsync(Device device, Boolean forceUpdate) throws IOException, IotHubException
     {
         if (device == null)
@@ -1138,13 +1142,15 @@ public class RegistryManager
 
     /**
      * Update module with forceUpdate input parameter
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as @link #updateModule(Module)}
      *
      * @param module The module object containing updated data
-     * @param forceUpdate True if the update has to be forced regardless of the module state
+     * @param forceUpdate This value is not used
      * @return The updated module object
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @Deprecated
     public Module updateModule(Module module, Boolean forceUpdate)
             throws IOException, IotHubException, JsonSyntaxException
     {
@@ -1363,13 +1369,15 @@ public class RegistryManager
 
     /**
      * Update configuration with forceUpdate input parameter
+     * @deprecated the forceUpdate argument does nothing so this method will always behave the same as @link #updateConfiguration(Configuration)}
      *
      * @param configuration The configuration object containing updated data
-     * @param forceUpdate True if the update has to be forced regardless of the configuration state
+     * @param forceUpdate This value is not used
      * @return The updated configuration object
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @Deprecated
     public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate)
             throws IOException, IotHubException, JsonSyntaxException
     {

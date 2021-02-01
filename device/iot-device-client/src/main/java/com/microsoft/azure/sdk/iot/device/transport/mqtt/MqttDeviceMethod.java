@@ -22,19 +22,18 @@ public class MqttDeviceMethod extends Mqtt
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
 
-    private final String POUND = "#";
-    private final String BACKSLASH = "/";
-    private final String QUESTION = "?";
+    private static final String POUND = "#";
+    private static final String BACKSLASH = "/";
+    private static final String QUESTION = "?";
 
-    private final String METHOD = "$iothub/methods/";
-    private final String POST = METHOD + "POST";
-    private final String RES = METHOD + "res";
-    private final String REQ_ID = QUESTION + "$rid=";
+    private static final String METHOD = "$iothub/methods/";
+    private static final String POST = METHOD + "POST";
+    private static final String RES = METHOD + "res";
+    private static final String REQ_ID = QUESTION + "$rid=";
 
     //Placement for $iothub/methods/POST/{method name}/?$rid={request id}
-    private final int POST_TOKEN = 2;
-    private final int METHOD_TOKEN = 3;
-    private final int REQID_TOKEN = 4;
+    private static final int METHOD_TOKEN = 3;
+    private static final int REQID_TOKEN = 4;
 
     public MqttDeviceMethod(MqttConnection mqttConnection, String connectionId, Map<Integer, Message> unacknowledgedSentMessages, String deviceId) throws TransportException
     {
