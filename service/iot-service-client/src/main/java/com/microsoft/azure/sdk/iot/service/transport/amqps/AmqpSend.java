@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
@@ -25,8 +27,10 @@ import java.io.IOException;
 public class AmqpSend
 {
     protected final String hostName;
-    protected final String userName;
-    protected final String sasToken;
+    protected String userName;
+    protected String sasToken;
+    protected TokenCredential authenticationTokenProvider;
+    private TokenCredentialType authorizationType;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private final ProxyOptions proxyOptions;
@@ -39,7 +43,11 @@ public class AmqpSend
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      */
-    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public AmqpSend(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
     }
@@ -52,7 +60,12 @@ public class AmqpSend
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    public AmqpSend(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
@@ -65,7 +78,13 @@ public class AmqpSend
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpSend(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpSend(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -93,13 +112,37 @@ public class AmqpSend
         this.sslContext = sslContext;
     }
 
+    public AmqpSend(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType authorizationType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName can not be null or empty");
+        }
+
+        if (iotHubServiceClientProtocol == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+
+        this.hostName = hostName;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
+        this.authorizationType = authorizationType;
+    }
+
     /**
      * Create AmqpsSendHandler and store it in a member variable
      */
     public void open()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_004: [The function shall create an AmqpsSendHandler object to handle reactor events]
-        amqpSendHandler = new AmqpSendHandler(this.hostName, this.userName, this.sasToken, this.iotHubServiceClientProtocol, this.proxyOptions, this.sslContext);
     }
 
     /**
@@ -107,8 +150,6 @@ public class AmqpSend
      */
     public void close()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_005: [The function shall invalidate the member AmqpsSendHandler object]
-        amqpSendHandler = null;
     }
 
     /**
@@ -125,33 +166,45 @@ public class AmqpSend
     {
         synchronized(this)
         {
-            if  (amqpSendHandler != null)
+            if (this.authenticationTokenProvider != null)
             {
-                if (moduleId == null)
-                {
-                    // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_006: [The function shall create a binary message with the given content with deviceId only if moduleId is null]
-                    amqpSendHandler.createProtonMessage(deviceId, message);
-                    log.info("Sending cloud to device message");
-                }
-                else
-                {
-                    // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_001: [The function shall create a binary message with the given content with moduleId]
-                    amqpSendHandler.createProtonMessage(deviceId, moduleId, message);
-                    log.info("Sending cloud to device module message");
-                }
-
-                new ReactorRunner(amqpSendHandler, "AmqpSend").run();
-
-                log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");
-
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_004: [** The function shall call verifySendSucceeded to identify the status of sent message and throws exception if thrown by verifySendSucceeded **]**
-                amqpSendHandler.verifySendSucceeded();
+                amqpSendHandler =
+                        new AmqpSendHandler(
+                                this.hostName,
+                                this.authenticationTokenProvider,
+                                this.authorizationType,
+                                this.iotHubServiceClientProtocol,
+                                this.proxyOptions,
+                                this.sslContext);
             }
             else
             {
-                // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_005: [The function shall throw IOException if the send handler object is not initialized]
-                throw new IOException("send handler is not initialized. call open before send");
+                amqpSendHandler =
+                        new AmqpSendHandler(
+                                this.hostName,
+                                this.userName,
+                                this.sasToken,
+                                this.iotHubServiceClientProtocol,
+                                this.proxyOptions,
+                                this.sslContext);
             }
+
+            if (moduleId == null)
+            {
+                amqpSendHandler.createProtonMessage(deviceId, message);
+                log.info("Sending cloud to device message");
+            }
+            else
+            {
+                amqpSendHandler.createProtonMessage(deviceId, moduleId, message);
+                log.info("Sending cloud to device module message");
+            }
+
+            new ReactorRunner(amqpSendHandler, "AmqpSend").run();
+
+            log.trace("Amqp send reactor stopped, checking that the connection opened, and that the message was sent");
+
+            amqpSendHandler.verifySendSucceeded();
         }
     }
 }

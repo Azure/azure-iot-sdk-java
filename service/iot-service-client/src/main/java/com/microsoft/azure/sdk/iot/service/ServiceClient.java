@@ -5,12 +5,17 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,10 +30,11 @@ public class ServiceClient
 
     private final AmqpSend amqpMessageSender;
     private final String hostName;
-    private final String userName;
-    private final String sasToken;
-    protected IotHubConnectionString iotHubConnectionString;
+    private String userName;
+    private String sasToken;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    protected TokenCredential authenticationTokenProvider;
+    protected final TokenCredentialType tokenCredentialType;
 
     private final ServiceClientOptions options;
 
@@ -38,8 +44,15 @@ public class ServiceClient
      * @param connectionString The connection string for the IotHub
      * @return The created ServiceClient object
      * @throws IOException This exception is thrown if the object creation failed
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #ServiceClient(String, IotHubServiceClientProtocol)} instead
+     * since it does not declare this exception even though it constructs the same ServiceClient.
      */
-    public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol) throws IOException
+    @Deprecated
+    public static ServiceClient createFromConnectionString(
+            String connectionString,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
+            throws IOException
     {
         return createFromConnectionString(connectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
     }
@@ -48,13 +61,46 @@ public class ServiceClient
      * Create ServiceClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
-     * @param options The connection options to use when connecting to the service. May be null if no custom options will be used.
+     * @param options The connection options to use when connecting to the service.
      * @return The created ServiceClient object
      * @throws IOException This exception is thrown if the object creation failed
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #ServiceClient(String, IotHubServiceClientProtocol, ServiceClientOptions)} instead
+     * since it does not declare this exception even though it constructs the same ServiceClient.
      */
-    public static ServiceClient createFromConnectionString(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options) throws IOException
+    @Deprecated
+    public static ServiceClient createFromConnectionString(
+            String connectionString,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ServiceClientOptions options)
+            throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_001: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
+        return new ServiceClient(connectionString, iotHubServiceClientProtocol, options);
+    }
+
+    /**
+     * Create ServiceClient from the specified connection string
+     * @param iotHubServiceClientProtocol  protocol to use
+     * @param connectionString The connection string for the IotHub
+     * @return The created ServiceClient object
+     */
+    public ServiceClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    {
+        this(connectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
+    }
+
+    /**
+     * Create ServiceClient from the specified connection string
+     * @param iotHubServiceClientProtocol  protocol to use
+     * @param connectionString The connection string for the IotHub
+     * @param options The connection options to use when connecting to the service.
+     * @return The created ServiceClient object
+     */
+    public ServiceClient(
+            String connectionString,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ServiceClientOptions options)
+    {
         if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException(connectionString);
@@ -65,11 +111,143 @@ public class ServiceClient
             throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_002: [The constructor shall create IotHubConnectionString object using the IotHubConnectionStringBuilder]
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_003: [The constructor shall create a new instance of ServiceClient using the created IotHubConnectionString object and return with it]
-        return new ServiceClient(iotHubConnectionString, iotHubServiceClientProtocol, options);
+        TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(connectionString);
+
+        this.hostName = iotHubConnectionString.hostName;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.tokenCredentialType = TokenCredentialType.SHARED_ACCESS_SIGNATURE;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.options = options;
+        this.amqpMessageSender =
+                new AmqpSend(
+                        hostName,
+                        authenticationTokenProvider,
+                        TokenCredentialType.SHARED_ACCESS_SIGNATURE,
+                        iotHubServiceClientProtocol,
+                        options.getProxyOptions(),
+                        options.getSslContext());
+    }
+
+    /**
+     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * of authentication tokens used in the underlying connection.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @return The created {@link ServiceClient} instance.
+     */
+    public ServiceClient(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    {
+        this(hostName,
+             authenticationTokenProvider,
+             tokenCredentialType,
+             iotHubServiceClientProtocol,
+             ServiceClientOptions.builder().build());
+    }
+
+    /**
+     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
+     * of authentication tokens used in the underlying connection.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param tokenCredentialType The type of authentication tokens that the provided {@link TokenCredential}
+     *                          implementation will always give.
+     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @param options The connection options to use when connecting to the service.
+     * @return The created {@link ServiceClient} instance.
+     */
+    public ServiceClient(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            TokenCredentialType tokenCredentialType,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ServiceClientOptions options)
+    {
+        Objects.requireNonNull(authenticationTokenProvider);
+        Objects.requireNonNull(tokenCredentialType);
+
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("HostName cannot be null or empty");
+        }
+
+        if (options == null)
+        {
+            throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
+        }
+
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.hostName = hostName;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.options = options;
+        this.tokenCredentialType = tokenCredentialType;
+
+        if (this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
+        {
+            throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
+        }
+
+        this.amqpMessageSender =
+                new AmqpSend(
+                        hostName,
+                        authenticationTokenProvider,
+                        this.tokenCredentialType,
+                        this.iotHubServiceClientProtocol,
+                        options.getProxyOptions(),
+                        options.getSslContext());
+    }
+
+    /**
+     * Create a {@link ServiceClient} instance with an instance of {@link AzureSasCredential}.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @return The created {@link ServiceClient} instance.
+     */
+    public ServiceClient(
+            String hostName,
+            AzureSasCredential azureSasCredential,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    {
+        this(hostName,
+                azureSasCredential,
+                iotHubServiceClientProtocol,
+                ServiceClientOptions.builder().build());
+    }
+
+    /**
+     * Create a {@link ServiceClient} instance with an instance of {@link AzureSasCredential}.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @param iotHubServiceClientProtocol The protocol to open the connection with.
+     * @param options The connection options to use when connecting to the service.
+     * @return The created {@link ServiceClient} instance.
+     */
+    public ServiceClient(
+            String hostName,
+            AzureSasCredential azureSasCredential,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ServiceClientOptions options)
+    {
+        this(hostName,
+                new AzureSasTokenCredential(azureSasCredential),
+                TokenCredentialType.SHARED_ACCESS_SIGNATURE,
+                iotHubServiceClientProtocol,
+                options);
     }
 
     /**
@@ -90,23 +268,20 @@ public class ServiceClient
      * @param iotHubServiceClientProtocol protocol to use
      * @param options options for proxy
      */
-    protected ServiceClient(IotHubConnectionString iotHubConnectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol, ServiceClientOptions options)
+    protected ServiceClient(
+            IotHubConnectionString iotHubConnectionString,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ServiceClientOptions options)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_004: [The constructor shall throw IllegalArgumentException if the input object is null]
-        if (iotHubConnectionString == null)
-        {
-            throw new IllegalArgumentException();
-        }
+        Objects.requireNonNull(iotHubConnectionString);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_005: [The constructor shall create a SAS token object using the IotHubConnectionString]
         IotHubServiceSasToken iotHubServiceSasToken = new IotHubServiceSasToken(iotHubConnectionString);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_006: [The constructor shall store connection string, hostname, username and sasToken]
-        this.iotHubConnectionString = iotHubConnectionString;
         this.hostName = iotHubConnectionString.getHostName();
         this.userName = iotHubConnectionString.getUserString();
         this.sasToken = iotHubServiceSasToken.toString();
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.tokenCredentialType = TokenCredentialType.SHARED_ACCESS_SIGNATURE;
         this.options = options;
 
         if (this.options.getProxyOptions() != null && this.iotHubServiceClientProtocol != IotHubServiceClientProtocol.AMQPS_WS)
@@ -114,8 +289,13 @@ public class ServiceClient
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_007: [The constructor shall create a new instance of AmqpSend object]
-        this.amqpMessageSender = new AmqpSend(hostName, userName, sasToken, this.iotHubServiceClientProtocol, options.getProxyOptions(), options.getSslContext());
+        this.amqpMessageSender = new AmqpSend(
+                this.hostName,
+                this.userName,
+                this.sasToken,
+                this.iotHubServiceClientProtocol,
+                options.getProxyOptions(),
+                options.getSslContext());
     }
 
     /**
@@ -124,7 +304,6 @@ public class ServiceClient
      */
     public void open() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_008: [The function shall throw IOException if the member AMQP sender object has not been initialized]
         if (this.amqpMessageSender == null)
         {
             throw new IOException("AMQP sender is not initialized");
@@ -132,7 +311,6 @@ public class ServiceClient
 
         log.info("Opening service client...");
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_009: [The function shall call open() on the member AMQP sender object]
         this.amqpMessageSender.open();
         log.info("Service client opened successfully");
     }
@@ -143,14 +321,12 @@ public class ServiceClient
      */
     public void close() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_010: [The function shall throw IOException if the member AMQP sender object has not been initialized]
         if (this.amqpMessageSender == null)
         {
             throw new IOException("AMQP sender is not initialized");
         }
 
         log.info("Closing service client...");
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_011: [The function shall call close() on the member AMQP sender object]
         this.amqpMessageSender.close();
         log.info("Service client closed successfully");
     }
@@ -166,7 +342,6 @@ public class ServiceClient
      */
     public void send(String deviceId, Message message) throws IOException, IotHubException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_013: [The function shall call send() with the given parameters and null moduleId]
         this.send(deviceId, null, message);
     }
 
@@ -182,13 +357,11 @@ public class ServiceClient
      */
     public void send(String deviceId, String moduleId, Message message) throws IOException, IotHubException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_001: [The function shall throw IOException if the member AMQP sender object has not been initialized]
         if (this.amqpMessageSender == null)
         {
             throw new IOException("AMQP sender is not initialized");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_28_002: [The function shall call send() on the member AMQP sender object with the given parameters]
         this.amqpMessageSender.send(deviceId, moduleId, message);
     }
 
@@ -199,14 +372,14 @@ public class ServiceClient
      */
     public CompletableFuture<Void> openAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_014: [The function shall create an async wrapper around the open() function call]
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
             try
             {
                 open();
                 future.complete(null);
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 future.completeExceptionally(e);
             }
@@ -221,14 +394,14 @@ public class ServiceClient
      */
     public CompletableFuture<Void> closeAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_015: [The function shall create an async wrapper around the close() function call]
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
             try
             {
                 close();
                 future.complete(null);
-            } catch (IOException e)
+            }
+            catch (IOException e)
             {
                 future.completeExceptionally(e);
             }
@@ -245,17 +418,17 @@ public class ServiceClient
      */
     public CompletableFuture<Void> sendAsync(String deviceId, Message message)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_016: [The function shall create an async wrapper around the send() function call]
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
-        try
-        {
-            send(deviceId, message);
-            future.complete(null);
-        } catch (Exception e)
-        {
-            future.completeExceptionally(e);
-        }
+            try
+            {
+                send(deviceId, message);
+                future.complete(null);
+            }
+            catch (Exception e)
+            {
+                future.completeExceptionally(e);
+            }
         });
         return future;
     }
@@ -273,7 +446,6 @@ public class ServiceClient
             throw new UnsupportedOperationException("This deprecated API does not support proxies. Use the non-deprecated version of this API for proxy enabled feedback receiving");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_017: [The function shall create a FeedbackReceiver object and returns with it. This API is deprecated.]
         return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
     }
     
@@ -284,7 +456,24 @@ public class ServiceClient
      */
      public FeedbackReceiver getFeedbackReceiver()
      {
-        return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options.getProxyOptions(), options.getSslContext());
+         if (this.authenticationTokenProvider != null)
+         {
+             return new FeedbackReceiver(
+                     this.hostName,
+                     this.authenticationTokenProvider,
+                     this.tokenCredentialType,
+                     this.iotHubServiceClientProtocol,
+                     this.options.getProxyOptions(),
+                     this.options.getSslContext());
+         }
+
+        return new FeedbackReceiver(
+                this.hostName,
+                this.userName,
+                this.sasToken,
+                this.iotHubServiceClientProtocol,
+                this.options.getProxyOptions(),
+                this.options.getSslContext());
      }
 
     /**
@@ -294,7 +483,23 @@ public class ServiceClient
      */
     public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
     {
-        return new FileUploadNotificationReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, options.getProxyOptions(), options.getSslContext());
+        if (this.authenticationTokenProvider != null)
+        {
+            return new FileUploadNotificationReceiver(
+                    this.hostName,
+                    this.authenticationTokenProvider,
+                    this.tokenCredentialType,
+                    this.iotHubServiceClientProtocol,
+                    this.options.getProxyOptions(),
+                    this.options.getSslContext());
+        }
+
+        return new FileUploadNotificationReceiver(
+                this.hostName,
+                this.userName,
+                this.sasToken,
+                this.iotHubServiceClientProtocol,
+                this.options.getProxyOptions(),
+                this.options.getSslContext());
     }
-    
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device.transport.amqps;
+package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -14,31 +14,35 @@ import org.apache.qpid.proton.engine.Receiver;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Every SAS token based authentication over AMQP requires a CBS session with a sender and receiver link. This
+ * Every token based authentication over AMQP requires a CBS session with a sender and receiver link. This
  * class defines the receiver link which receives authentication status codes corresponding to each authentication attempt.
  */
 @Slf4j
-public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
+public final class CbsReceiverLinkHandler extends ReceiverLinkHandler
 {
-    private final static String APPLICATION_PROPERTY_STATUS_CODE = "status-code";
-    private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION = "status-description";
+    private final static String APPLICATION_PROPERTY_STATUS_CODE_TAG = "status-code";
+    private final static String APPLICATION_PROPERTY_STATUS_DESCRIPTION_TAG = "status-description";
 
     private static final String RECEIVER_LINK_ENDPOINT_PATH = "$cbs";
     private static final String RECEIVER_LINK_TAG_PREFIX = "cbs-receiver";
     private static final String LINK_TYPE = "cbs";
 
-    // When a CBS receiver link gets a message, it has a correlation id (UUID) that can be used to map it back to whatever
-    // handler is waiting on that authentication message.
-    private final Map<UUID, AuthenticationMessageCallback> correlationMap = new ConcurrentHashMap<>();
+    private UUID authenticationMessageCorrelationId;
+    private final AuthenticationMessageCallback authenticationMessageCallback;
 
-    AmqpsCbsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback)
+    CbsReceiverLinkHandler(Receiver receiver, AuthenticationMessageCallback authenticationMessageCallback, LinkStateCallback linkStateCallback)
     {
-        super(receiver, amqpsLinkStateCallback, UUID.randomUUID().toString());
+        super(receiver, UUID.randomUUID().toString(), linkStateCallback);
         this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX;
         this.receiverLinkAddress = RECEIVER_LINK_ENDPOINT_PATH;
+        this.authenticationMessageCallback = authenticationMessageCallback;
+    }
+
+    protected void setAuthenticationMessageCorrelationId(UUID authenticationMessageCorrelationId)
+    {
+        this.authenticationMessageCorrelationId = authenticationMessageCorrelationId;
     }
 
     static String getCbsTag()
@@ -55,17 +59,15 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
     @Override
     public void onDelivery(Event event)
     {
-        //Safe to cast as receiver as this callback will only ever be fired when messages are received on this receiver link
-        Receiver receiverLink = (Receiver) event.getLink();
         Delivery delivery = event.getDelivery();
         log.trace("Received a message on the CBS receiver link");
-        handleCBSResponseMessage(receiverLink);
+        handleCBSResponseMessage();
         delivery.free();
     }
 
-    private void handleCBSResponseMessage(Receiver receiver)
+    private void handleCBSResponseMessage()
     {
-        AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink(receiver);
+        AmqpsMessage amqpsMessage = super.getMessageFromReceiverLink();
         if (amqpsMessage != null)
         {
             if (amqpsMessage.getApplicationProperties() != null && amqpsMessage.getProperties() != null)
@@ -74,28 +76,27 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
                 UUID correlationId = (UUID) properties.getCorrelationId();
                 Map<String, Object> applicationProperties = amqpsMessage.getApplicationProperties().getValue();
 
-                if (!this.correlationMap.containsKey(correlationId))
+                if (!this.authenticationMessageCorrelationId.equals(correlationId))
                 {
-                    log.error("Received cbs authentication message with no correlation id. Ignoring it...");
+                    log.error("Received cbs authentication message with unexpected correlation id. Ignoring it...");
                     amqpsMessage.acknowledge(Released.getInstance());
                     return;
                 }
 
-                AuthenticationMessageCallback authenticationMessageCallback = this.correlationMap.remove(correlationId);
                 for (Map.Entry<String, Object> entry : applicationProperties.entrySet())
                 {
                     String propertyKey = entry.getKey();
-                    if (propertyKey.equals(APPLICATION_PROPERTY_STATUS_CODE) && entry.getValue() instanceof Integer)
+                    if (propertyKey.equals(APPLICATION_PROPERTY_STATUS_CODE_TAG) && entry.getValue() instanceof Integer)
                     {
                         int authenticationResponseCode = (int) entry.getValue();
 
                         String statusDescription = "";
-                        if (applicationProperties.containsKey(APPLICATION_PROPERTY_STATUS_DESCRIPTION))
+                        if (applicationProperties.containsKey(APPLICATION_PROPERTY_STATUS_DESCRIPTION_TAG))
                         {
-                            statusDescription = (String) applicationProperties.get(APPLICATION_PROPERTY_STATUS_DESCRIPTION);
+                            statusDescription = (String) applicationProperties.get(APPLICATION_PROPERTY_STATUS_DESCRIPTION_TAG);
                         }
 
-                        DeliveryState ackType = authenticationMessageCallback.handleAuthenticationResponseMessage(authenticationResponseCode, statusDescription, receiver.getSession().getConnection().getReactor());
+                        DeliveryState ackType = authenticationMessageCallback.handleAuthenticationResponseMessage(authenticationResponseCode, statusDescription);
                         amqpsMessage.acknowledge(ackType);
                         return;
                     }
@@ -103,8 +104,12 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
             }
             else
             {
-                log.warn("Could not handle authentication message because it had no application properties or had no system properties");
+                log.warn("Could not handle authentication message because it had no application properties or system properties");
             }
+        }
+        else
+        {
+            log.warn("Failed to read the message on the CBS receiver link");
         }
 
         // By default, we can't process the message
@@ -112,10 +117,5 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
         {
             amqpsMessage.acknowledge(Released.getInstance());
         }
-    }
-
-    void addAuthenticationMessageCorrelation(UUID correlationId, AuthenticationMessageCallback authenticationMessageCallback)
-    {
-        correlationMap.put(correlationId, authenticationMessageCallback);
     }
 }
