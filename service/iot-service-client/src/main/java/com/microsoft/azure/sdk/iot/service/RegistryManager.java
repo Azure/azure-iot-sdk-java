@@ -48,7 +48,7 @@ public class RegistryManager
      *
      * @deprecated As of release 1.22.0, replaced by {@link #createFromConnectionString(String)}
      */
-    // Suppressing warning since it is referenced by createFromConnectionString \
+    // Suppressing warning since it is referenced by createFromConnectionString
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public RegistryManager()
