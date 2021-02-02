@@ -14,7 +14,10 @@ import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
+import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
+import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,9 +80,11 @@ public class DeviceDeletionSample
         @Override
         public void run() {
             RegistryManager registryManager = null;
+            DeviceTwin deviceTwin = null;
             try
             {
                 registryManager = RegistryManager.createFromConnectionString(iotConnString);
+                deviceTwin = DeviceTwin.createFromConnectionString(iotConnString);
             }
             catch (IOException e)
             {
@@ -91,17 +96,26 @@ public class DeviceDeletionSample
             System.out.println("Querying ");
 
             List<String> deviceIdsToRemove = new ArrayList<>();
-            try
+            while (true)
             {
-                while (true)
+                try
                 {
-                    List<Device> devices = registryManager.getDevices(100);
+                    SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
+                    final Query twinQuery = deviceTwin.queryTwin(sqlQuery.getQuery(), 100);
 
-                    for (Device d: devices)
+                    while (deviceTwin.hasNextDeviceTwin(twinQuery))
                     {
+                        DeviceTwinDevice d = deviceTwin.getNextDeviceTwin(twinQuery);
+
                         if (!d.getDeviceId().toLowerCase().contains("longhaul"))
                         {
                             deviceIdsToRemove.add(d.getDeviceId());
+
+                            if (deviceIdsToRemove.size() > 100)
+                            {
+                                System.out.println("Queried 100 devices, now attempting to delete them");
+                                break;
+                            }
                         }
                     }
 
@@ -123,12 +137,12 @@ public class DeviceDeletionSample
 
                     deviceIdsToRemove.clear();
                 }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                System.out.println("Could not collect the full list of device ids to delete, exiting iot hub cleanup thread");
-                return;
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    System.out.println("Could not collect the full list of device ids to delete, exiting iot hub cleanup thread");
+                    return;
+                }
             }
         }
     }
