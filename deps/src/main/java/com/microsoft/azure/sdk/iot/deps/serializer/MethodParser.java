@@ -189,7 +189,7 @@ public class MethodParser
                     if (statusTagNode == null)
                     {
                         /*
-                          Codes_SRS_METHODPARSER_21_010: [If the json contains any payload without `methodName` or `status` identification, the fromJson shall parse only the payload, and set the operation as `payload`]
+                           If the json contains any payload without `methodName` or `status` identification, the fromJson shall parse only the payload, and set the operation as `payload`.
                            Ex:
                            {
                                "input1": "someInput",
@@ -202,7 +202,7 @@ public class MethodParser
                     else
                     {
                         /*
-                          Codes_SRS_METHODPARSER_21_011: [If the json contains the `status` identification, the fromJson shall parse both status and payload, and set the operation as `response`.]
+                           If the json contains the `status` identification, the fromJson shall parse both status and payload, and set the operation as `response`.
                            Ex:
                            {
                                "status": 201,
@@ -226,7 +226,7 @@ public class MethodParser
                     if (statusTagNode == null)
                     {
                         /*
-                          Codes_SRS_METHODPARSER_21_009: [If the json contains the `methodName` identification, the fromJson shall parse the full method, and set the operation as `invoke`.]
+                           If the json contains the `methodName` identification, the fromJson shall parse the full method, and set the operation as `invoke`.
                            Ex:
                            {
                                "methodName": "reboot",
@@ -388,7 +388,7 @@ public class MethodParser
         if (operation == Operation.invoke)
         {
             /*
-               Codes_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.]
+               If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.
                Ex:
                {
                    "methodName": "reboot",
@@ -420,7 +420,8 @@ public class MethodParser
         }
         else if (operation == Operation.response)
         {
-            /* Codes_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJsonElement shall parse both status and payload.]
+            /*
+               If the method operation is `response`, the toJsonElement shall parse both status and payload.
                Ex:
                {
                    "status": 201,
@@ -435,7 +436,7 @@ public class MethodParser
         else if (operation == Operation.payload)
         {
             /*
-              Codes_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJsonElement shall parse only the payload.]
+               If the method operation is `payload`, the toJsonElement shall parse only the payload.
                Ex:
                {
                    "input1": "someInput",
