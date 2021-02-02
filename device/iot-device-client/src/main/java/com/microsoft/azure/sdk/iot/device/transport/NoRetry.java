@@ -8,12 +8,17 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
   * Represents a retry policy that performs no retries.
   */
+@Slf4j
 public class NoRetry implements RetryPolicy
 {
+    public NoRetry() {
+        log.info("NOTE: A no-retry policy has been craeted, the client will not perform any retries on disconnect.");
+    }
     /**
      * Always says to not retry.
      *
