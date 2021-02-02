@@ -231,7 +231,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
 
             if (properties.getContentType() != null)
             {
-                iotHubTransportMessage.setContentType(properties.getContentType().toString());
+                iotHubTransportMessage.setContentTypeFinal(properties.getContentType().toString());
             }
         }
 
