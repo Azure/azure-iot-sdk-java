@@ -32,9 +32,9 @@ public class RetryDecision
 
         // When a retry policy specifies the descision we should log what the new timing was, this will help with backoff debugging
         if (!shouldRetry){
-            log.info("NOTE: A new instance of {} has been created with retry disabled, the client will not perform any retries.", RetryDecision.class.getName());
+            log.debug("NOTE: A new instance of RetryDecision has been created with retry disabled, the client will not perform any retries.");
         } else {
-            log.info("NOTE: A new instance of {} has been created with retry enabled, the client will perform retries every {} milliseconds.", RetryDecision.class.getName(), duration);
+            log.debug("NOTE: A new instance of RetryDecision has been created with retry enabled, the client will retry after {} milliseconds", duration);
         }
     }
 
