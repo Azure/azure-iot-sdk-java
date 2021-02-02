@@ -208,7 +208,7 @@ public final class HttpsSingleMessage implements HttpsMessage
 
         if (this.systemProperties.containsKey(CONTENT_TYPE_KEY))
         {
-            msg.setContentType(this.systemProperties.get(CONTENT_TYPE_KEY));
+            msg.setContentTypeFinal(this.systemProperties.get(CONTENT_TYPE_KEY));
         }
 
         if (this.systemProperties.containsKey(CONTENT_ENCODING_KEY))

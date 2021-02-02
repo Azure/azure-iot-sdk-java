@@ -45,7 +45,7 @@ public class MqttDeviceTwin extends Mqtt
     private static final int VERSION_TOKEN = 4;
 
     //Placement for $iothub/twin/PATCH/properties/desired/?$version={new version}
-    private final int PATCH_VERSION_TOKEN = 5;
+    private static final int PATCH_VERSION_TOKEN = 5;
 
     public MqttDeviceTwin(MqttConnection mqttConnection, String connectionId, Map<Integer, Message> unacknowledgedSentMessages, String deviceId) throws TransportException
     {
