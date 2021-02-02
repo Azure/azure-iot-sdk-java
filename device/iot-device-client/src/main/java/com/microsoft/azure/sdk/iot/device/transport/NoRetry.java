@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NoRetry implements RetryPolicy
 {
     public NoRetry() {
-        log.info("NOTE: A no-retry policy has been craeted, the client will not perform any retries on disconnect.");
+        log.info("NOTE: A new instance of {} has been created, the client will not perform any retries on disconnect.", NoRetry.class.getName());
     }
     /**
      * Always says to not retry.

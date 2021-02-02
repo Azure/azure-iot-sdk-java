@@ -95,6 +95,6 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
 
     private void logCreation()
     {
-        log.info("NOTE: An exponential backoff retry policy has been craeted with the following properties. Retry Count: {}, Min Backoff Interval: {}, Max Backoff Interval: {}, Max Time Between Retries: {}, Fast Retry Enabled: {}", this.retryCount, this.minBackoff, this.maxBackoff, this.deltaBackoff, this.firstFastRetry);
+        log.info("NOTE: A new instance of {} has been created with the following properties. Retry Count: {}, Min Backoff Interval: {}, Max Backoff Interval: {}, Max Time Between Retries: {}, Fast Retry Enabled: {}", ExponentialBackoffWithJitter.class.getName(), this.retryCount, this.minBackoff, this.maxBackoff, this.deltaBackoff, this.firstFastRetry);
     }
 }
