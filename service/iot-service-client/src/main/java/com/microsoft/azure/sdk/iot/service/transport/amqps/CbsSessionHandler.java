@@ -4,8 +4,8 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AccessToken;
+import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,20 +32,36 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
     private CbsReceiverLinkHandler cbsReceiverLinkHandler;
     private CbsSessionStateCallback cbsSessionStateCallback;
     private TokenCredential authenticationTokenProvider;
-    private TokenCredentialType authorizationType;
+    private String sasToken;
+    private AzureSasCredential sasTokenProvider;
     private boolean senderLinkOpened = false;
     private boolean receiverLinkOpened = false;
 
-    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType)
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredential authenticationTokenProvider)
     {
-        this.session = session;
-
-        //All events in this reactor that happened to this session will be handled in this instance (onSessionRemoteOpen, for instance)
-        BaseHandler.setHandler(this.session, this);
-
-        this.cbsSessionStateCallback = cbsSessionStateCallback;
+        this(session, cbsSessionStateCallback);
         this.authenticationTokenProvider = authenticationTokenProvider;
-        this.authorizationType = authorizationType;
+    }
+
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, AzureSasCredential sasTokenProvider)
+    {
+        this(session, cbsSessionStateCallback);
+        this.sasTokenProvider = sasTokenProvider;
+    }
+
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, String sasToken)
+    {
+        this(session, cbsSessionStateCallback);
+        this.sasToken = sasToken;
+    }
+
+    private CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback)
+    {
+        //All events in this reactor that happened to this session will be handled in this instance (onSessionRemoteOpen, for instance)
+        BaseHandler.setHandler(session, this);
+
+        this.session = session;
+        this.cbsSessionStateCallback = cbsSessionStateCallback;
         this.session.open();
     }
 
@@ -56,8 +72,18 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
 
         Sender cbsSender = this.session.sender(CbsSenderLinkHandler.getCbsTag());
 
-        this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.authenticationTokenProvider, this.authorizationType);
-        this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.authenticationTokenProvider, this.authorizationType);
+        if (this.authenticationTokenProvider != null)
+        {
+            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.authenticationTokenProvider);
+        }
+        else if (this.sasTokenProvider != null)
+        {
+            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.sasTokenProvider);
+        }
+        else
+        {
+            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.sasToken);
+        }
 
         Receiver cbsReceiver = this.session.receiver(CbsReceiverLinkHandler.getCbsTag());
         this.cbsReceiverLinkHandler = new CbsReceiverLinkHandler(cbsReceiver, this, this);
@@ -166,26 +192,30 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         // in this CBS session's case, only one message should ever be sent, so as long
         // as the delivery tag is not -1 (proton's failure case) then it is safe to ignore
 
-        // Each execution of onTimerTask is responsible for scheduling the next occurrence based on how long the previous token is valid for
-        OffsetDateTime currentOffsetDateTime = OffsetDateTime.now();
-        OffsetDateTime tokenExpiryOffsetDateTime = currentAccessToken.getExpiresAt();
-        Duration diff = Duration.between(tokenExpiryOffsetDateTime, currentOffsetDateTime).abs();
-        long millisecondsToTokenExpiry = diff.toMillis();
-
-        // Cast of double to int here is safe because this value does not need to be precisely 85% of the token renewal time
-        // so it is okay to truncate this double to its int value
-        double proactiveTokenRenewalMillis = (millisecondsToTokenExpiry * TOKEN_RENEWAL_PERCENT);
-
-        if (proactiveTokenRenewalMillis >= Integer.MAX_VALUE)
+        // Connection only proactively renews when a token provider is present
+        if (this.authenticationTokenProvider != null || this.sasTokenProvider != null)
         {
-            // To avoid overflow issues, don't try to schedule any further in the future than Integer.MAX_VALUE
-            scheduleProactiveRenewal(Integer.MAX_VALUE);
-        }
-        else
-        {
-            // Safe cast since we don't need to preserve the precision of the double, we just need to be at roughly 85% of
-            // the token's lifespan
-            scheduleProactiveRenewal((int) (proactiveTokenRenewalMillis));
+            // Each execution of onTimerTask is responsible for scheduling the next occurrence based on how long the previous token is valid for
+            OffsetDateTime currentOffsetDateTime = OffsetDateTime.now();
+            OffsetDateTime tokenExpiryOffsetDateTime = currentAccessToken.getExpiresAt();
+            Duration diff = Duration.between(tokenExpiryOffsetDateTime, currentOffsetDateTime).abs();
+            long millisecondsToTokenExpiry = diff.toMillis();
+
+            // Cast of double to int here is safe because this value does not need to be precisely 85% of the token renewal time
+            // so it is okay to truncate this double to its int value
+            double proactiveTokenRenewalMillis = (millisecondsToTokenExpiry * TOKEN_RENEWAL_PERCENT);
+
+            if (proactiveTokenRenewalMillis >= Integer.MAX_VALUE)
+            {
+                // To avoid overflow issues, don't try to schedule any further in the future than Integer.MAX_VALUE
+                scheduleProactiveRenewal(Integer.MAX_VALUE);
+            }
+            else
+            {
+                // Safe cast since we don't need to preserve the precision of the double, we just need to be at roughly 85% of
+                // the token's lifespan
+                scheduleProactiveRenewal((int) (proactiveTokenRenewalMillis));
+            }
         }
     }
 

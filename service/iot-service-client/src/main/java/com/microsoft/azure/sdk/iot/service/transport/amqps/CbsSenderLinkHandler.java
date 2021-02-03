@@ -4,9 +4,9 @@
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.azure.core.credential.AccessToken;
+import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
@@ -16,6 +16,9 @@ import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.engine.Sender;
 import org.apache.qpid.proton.message.impl.MessageImpl;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,22 +45,40 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
     private static final String PUT_TOKEN_OPERATION = "operation";
     private static final String PUT_TOKEN_OPERATION_VALUE = "put-token";
 
-    private final TokenCredential authenticationTokenProvider;
-    private final TokenCredentialType authorizationType;
+    private TokenCredential authenticationTokenProvider;
     private AccessToken currentAccessToken;
+    private String sasToken;
+    private AzureSasCredential sasTokenProvider;
 
-    CbsSenderLinkHandler(
-            Sender sender,
-            LinkStateCallback linkStateCallback,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType authorizationType)
+    private static final String JWT = "jwt";
+    private static final String SAS_TOKEN = "servicebus.windows.net:sastoken";
+    private static final String EXPIRY_KEY = "se=";
+
+    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, TokenCredential authenticationTokenProvider)
     {
         super(sender, UUID.randomUUID().toString(), linkStateCallback);
 
         this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
         this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
         this.authenticationTokenProvider = authenticationTokenProvider;
-        this.authorizationType = authorizationType;
+    }
+
+    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, AzureSasCredential sasTokenProvider)
+    {
+        super(sender, UUID.randomUUID().toString(), linkStateCallback);
+
+        this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
+        this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
+        this.sasTokenProvider = sasTokenProvider;
+    }
+
+    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, String sasToken)
+    {
+        super(sender, UUID.randomUUID().toString(), linkStateCallback);
+
+        this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
+        this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
+        this.sasToken = sasToken;
     }
 
     static String getCbsTag()
@@ -85,23 +106,94 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
         properties.setReplyTo(CBS_REPLY);
         outgoingMessage.setProperties(properties);
 
-        Map<String, Object> userProperties = new HashMap<>(4);
+        Map<String, Object> userProperties = new HashMap<>();
 
-        //TODO need more context on this TokenRequestContext object, and what we are expected to give it
-        this.currentAccessToken = authenticationTokenProvider.getToken(new TokenRequestContext()).block();
 
         userProperties.put(PUT_TOKEN_OPERATION, PUT_TOKEN_OPERATION_VALUE);
-        userProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
-        userProperties.put(PUT_TOKEN_TYPE, authorizationType.getTokenType());
+
+        if (authenticationTokenProvider != null)
+        {
+            //TODO need more context on this TokenRequestContext object, and what we are expected to give it
+            TokenRequestContext context = new TokenRequestContext();
+            this.currentAccessToken = authenticationTokenProvider.getToken(context).block();
+            userProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
+            userProperties.put(PUT_TOKEN_TYPE, JWT);
+            Section section = new AmqpValue(this.currentAccessToken.getToken());
+            outgoingMessage.setBody(section);
+        }
+        else if (this.sasTokenProvider != null)
+        {
+            String sasToken = this.sasTokenProvider.getSignature();
+            this.currentAccessToken = getAccessTokenFromSasToken(sasToken);
+            userProperties.put(PUT_TOKEN_TYPE, SAS_TOKEN);
+            Section section = new AmqpValue(sasToken);
+            outgoingMessage.setBody(section);
+        }
+        else
+        {
+            this.currentAccessToken = getAccessTokenFromSasToken(this.sasToken);
+            userProperties.put(PUT_TOKEN_TYPE, SAS_TOKEN);
+            Section section = new AmqpValue(this.sasToken);
+            outgoingMessage.setBody(section);
+        }
+
+
         userProperties.put(PUT_TOKEN_AUDIENCE, this.senderLink.getSession().getConnection().getHostname());
 
         ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
         outgoingMessage.setApplicationProperties(applicationProperties);
 
-        Section section = new AmqpValue(this.currentAccessToken.getToken());
-        outgoingMessage.setBody(section);
-
         return this.sendMessageAndGetDeliveryTag(outgoingMessage);
+    }
+
+    private AccessToken getAccessTokenFromSasToken(String sasToken)
+    {
+        // split "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s" into "SharedAccessSignature" "sr=%s&sig=%s&se=%s&skn=%s"
+        String[] signatureParts = sasToken.split(" ");
+
+        if (signatureParts.length != 2)
+        {
+            RuntimeException runtimeException = new RuntimeException("failed to parse shared access signature, unable to get the signature's time to live");
+            log.error("Failed to get token from AzureSasCredential", runtimeException);
+            throw runtimeException;
+        }
+
+        // split "sr=%s&sig=%s&se=%s&skn=%s" into "sr=%s" "sig=%s" "se=%s" "skn=%s"
+        String[] signatureKeyValuePairs = signatureParts[1].split("&");
+
+        int expiryTimeSeconds = -1;
+        for (String signatureKeyValuePair : signatureKeyValuePairs)
+        {
+            if (signatureKeyValuePair.startsWith(EXPIRY_KEY))
+            {
+                // substring "se=%s" into "%s"
+                String expiryTimeValue = signatureKeyValuePair.substring(EXPIRY_KEY.length());
+
+                try
+                {
+                    expiryTimeSeconds = Integer.valueOf(expiryTimeValue);
+                }
+                catch (NumberFormatException e)
+                {
+                    RuntimeException runtimeException = new RuntimeException("Failed to parse shared access signature, unable to parse the signature's time to live to an integer", e);
+                    log.error("Failed to get token from AzureSasCredential", runtimeException);
+                    throw runtimeException;
+                }
+            }
+        }
+
+        if (expiryTimeSeconds == -1)
+        {
+            RuntimeException runtimeException = new RuntimeException("Failed to parse shared access signature, signature does not include key value pair for expiry time");
+            log.error("Failed to get token from AzureSasCredential", runtimeException);
+            throw runtimeException;
+        }
+
+        OffsetDateTime sasTokenExpiryOffsetDateTime =
+                OffsetDateTime.ofInstant(
+                        Instant.ofEpochSecond(expiryTimeSeconds), ZoneId.systemDefault());
+
+        return new AccessToken(sasToken, sasTokenExpiryOffsetDateTime);
     }
 
     public AccessToken getCurrentAccessToken()

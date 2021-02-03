@@ -20,7 +20,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public final class IotHubServiceSasToken
 {
-    private static long DEFAULT_TOKEN_LIFESPAN_SECONDS = 60 * 60; // 1 hour
+    private static long DEFAULT_TOKEN_LIFESPAN_SECONDS = 365*24*60*60; // 1 year
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:

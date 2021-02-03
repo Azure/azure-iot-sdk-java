@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
@@ -28,7 +28,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private String userName;
     private String sasToken;
     private TokenCredential authenticationTokenProvider;
-    private TokenCredentialType authorizationType;
+    private AzureSasCredential sasTokenProvider;
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private FileUploadNotification fileUploadNotification;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -98,7 +98,6 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     public AmqpFileUploadNotificationReceive(
             String hostName,
             TokenCredential authenticationTokenProvider,
-            TokenCredentialType authorizationType,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -108,7 +107,20 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
         this.authenticationTokenProvider = authenticationTokenProvider;
-        this.authorizationType = authorizationType;
+    }
+
+    public AmqpFileUploadNotificationReceive(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        this.hostName = hostName;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
+        this.sasTokenProvider = sasTokenProvider;
     }
 
     /**
@@ -124,7 +136,16 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
                 amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
                         this.hostName,
                         this.authenticationTokenProvider,
-                        this.authorizationType,
+                        this.iotHubServiceClientProtocol,
+                        this,
+                        this.proxyOptions,
+                        this.sslContext);
+            }
+            else if (this.sasTokenProvider != null)
+            {
+                amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+                        this.hostName,
+                        this.sasTokenProvider,
                         this.iotHubServiceClientProtocol,
                         this,
                         this.proxyOptions,

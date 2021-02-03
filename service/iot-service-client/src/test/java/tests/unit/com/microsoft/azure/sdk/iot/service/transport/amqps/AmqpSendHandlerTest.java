@@ -102,12 +102,10 @@ public class AmqpSendHandlerTest
         // Act
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
         String _hostName = Deencapsulation.getField(amqpSendHandler, "hostName");
-        String _userName = Deencapsulation.getField(amqpSendHandler, "userName");
         String _sasToken = Deencapsulation.getField(amqpSendHandler, "sasToken");
         IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSendHandler, "iotHubServiceClientProtocol");
         // Assert
         assertEquals(hostName, _hostName);
-        assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(iotHubServiceClientProtocol, _ioIotHubServiceClientProtocol);
     }
@@ -134,34 +132,6 @@ public class AmqpSendHandlerTest
         // Arrange
         String hostName = "";
         String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_userName_null()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = null;
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_userName_empty()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "";
         String sasToken = "ccc";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         // Act

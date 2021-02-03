@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
@@ -110,13 +110,24 @@ public class AmqpFeedbackReceivedHandler extends AmqpConnectionHandler
     AmqpFeedbackReceivedHandler(
             String hostName,
             TokenCredential authenticationTokenProvider,
-            TokenCredentialType authorizationType,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, authenticationTokenProvider, authorizationType, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, authenticationTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
+    }
+
+    AmqpFeedbackReceivedHandler(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        super(hostName, sasTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 

@@ -90,12 +90,10 @@ public class AmqpFeedbackReceivedHandlerTest
         // Act
         AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
         final String _hostName = Deencapsulation.getField(amqpReceiveHandler, "hostName");
-        final String _userName = Deencapsulation.getField(amqpReceiveHandler, "userName");
         final String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
         AmqpFeedbackReceivedEvent _amqpFeedbackReceivedEvent = Deencapsulation.getField(amqpReceiveHandler, "amqpFeedbackReceivedEvent");
         // Assert
         assertEquals(hostName, _hostName);
-        assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(amqpFeedbackReceivedEvent, _amqpFeedbackReceivedEvent);
     }

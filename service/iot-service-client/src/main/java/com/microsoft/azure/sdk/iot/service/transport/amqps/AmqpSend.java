@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
@@ -29,8 +29,8 @@ public class AmqpSend
     protected final String hostName;
     protected String userName;
     protected String sasToken;
-    protected TokenCredential authenticationTokenProvider;
-    private TokenCredentialType authorizationType;
+    private TokenCredential authenticationTokenProvider;
+    private AzureSasCredential sasTokenProvider;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private final ProxyOptions proxyOptions;
@@ -90,10 +90,6 @@ public class AmqpSend
         {
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
-        if (Tools.isNullOrEmpty(userName))
-        {
-            throw new IllegalArgumentException("userName can not be null or empty");
-        }
         if (Tools.isNullOrEmpty(sasToken))
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
@@ -115,7 +111,6 @@ public class AmqpSend
     public AmqpSend(
             String hostName,
             TokenCredential authenticationTokenProvider,
-            TokenCredentialType authorizationType,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -135,7 +130,30 @@ public class AmqpSend
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
-        this.authorizationType = authorizationType;
+    }
+
+    public AmqpSend(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName can not be null or empty");
+        }
+
+        if (iotHubServiceClientProtocol == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+
+        this.hostName = hostName;
+        this.sasTokenProvider = sasTokenProvider;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
     }
 
     /**
@@ -172,7 +190,16 @@ public class AmqpSend
                         new AmqpSendHandler(
                                 this.hostName,
                                 this.authenticationTokenProvider,
-                                this.authorizationType,
+                                this.iotHubServiceClientProtocol,
+                                this.proxyOptions,
+                                this.sslContext);
+            }
+            else if (this.sasTokenProvider != null)
+            {
+                amqpSendHandler =
+                        new AmqpSendHandler(
+                                this.hostName,
+                                this.sasTokenProvider,
                                 this.iotHubServiceClientProtocol,
                                 this.proxyOptions,
                                 this.sslContext);

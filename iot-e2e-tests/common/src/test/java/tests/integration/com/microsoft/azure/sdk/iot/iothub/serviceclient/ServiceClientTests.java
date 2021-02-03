@@ -8,7 +8,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotificationReceiver;
@@ -21,10 +20,10 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringCredential;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -66,8 +65,6 @@ public class ServiceClientTests extends IntegrationTest
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8869;
 
-    private static final int TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS = 2 * 60 * 1000;
-
     public ServiceClientTests(IotHubServiceClientProtocol protocol)
     {
         this.testInstance = new ServiceClientITRunner(protocol);
@@ -82,21 +79,20 @@ public class ServiceClientTests extends IntegrationTest
         {
             this.protocol = protocol;
             this.deviceId = deviceIdPrefix.concat("-" + UUID.randomUUID().toString());
-
         }
     }
 
     private final ServiceClientITRunner testInstance;
 
     @Parameterized.Parameters(name = "{0}")
-    public static Collection inputs() throws IOException
+    public static Collection inputs()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         invalidCertificateServerConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         return Arrays.asList(
                 new Object[][]
@@ -170,6 +166,7 @@ public class ServiceClientTests extends IntegrationTest
     }
 
     @Test
+    @Ignore("Test isn't implemented yet due to no RBAC support on hub yet")
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
@@ -229,21 +226,13 @@ public class ServiceClientTests extends IntegrationTest
 
         if (withTokenCredential)
         {
-            TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString);
-            serviceClient = new ServiceClient(
-                    iotHubConnectionStringObj.getHostName(),
-                    authenticationTokenProvider,
-                    TokenCredentialType.SHARED_ACCESS_SIGNATURE,
-                    testInstance.protocol,
-                    serviceClientOptions);
+            throw new UnsupportedOperationException("This test case has not been written yet");
         }
         else if (withAzureSasCredential)
         {
-            serviceClient = new ServiceClient(
-                    iotHubConnectionStringObj.getHostName(),
-                    new AzureSasCredential(new IotHubServiceSasToken(iotHubConnectionStringObj).toString()),
-                    testInstance.protocol,
-                    serviceClientOptions);
+            IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+            AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+            serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
         }
         else
         {
@@ -282,9 +271,8 @@ public class ServiceClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void feedbackMessageReceiverTokenRenewal() throws Exception
+    public void feedbackMessageReceiverWithAzureSasCredential() throws Exception
     {
-        // We remove and recreate the device for a clean start
         RegistryManager registryManager =
                 RegistryManager.createFromConnectionString(
                         iotHubConnectionString,
@@ -292,50 +280,22 @@ public class ServiceClientTests extends IntegrationTest
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                                 .build());
 
-        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().build();
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
 
-        long tokenLifespanSeconds = 10;
-        long tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
-        TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString, tokenLifespanSeconds);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasTokenProvider = new AzureSasCredential(serviceSasToken.toString());
 
         ServiceClient serviceClient = new ServiceClient(
-                    iotHubConnectionStringObj.getHostName(),
-                    authenticationTokenProvider,
-                    TokenCredentialType.SHARED_ACCESS_SIGNATURE,
-                    testInstance.protocol,
-                    serviceClientOptions);
+                iotHubConnectionStringObj.getHostName(),
+                sasTokenProvider,
+                testInstance.protocol);
 
         FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
         feedbackReceiver.open();
 
-        boolean connectionStayedOpenLongerThanTokenExpiryTime = false;
-        long loopStartTimeMilliseconds = System.currentTimeMillis();
-        while (!connectionStayedOpenLongerThanTokenExpiryTime)
-        {
-            // Timing this call to feedbackReceiver.receive because it will end prematurely if a feedback message is
-            // received. This test needs to open a connection for longer than the initial token would be valid for
-            // in order to test that the AMQP layer is proactively renewing the connection. This loop will run until
-            // there is a point in time where there are no feedback messages to receive, so the connection will stay
-            // open.
-
-            long startTimeMilliseconds = System.currentTimeMillis();
-
-            // received feedback messages can be ignored since we no longer have any tests that need to consume them
-            feedbackReceiver.receive(tokenLifespanMilliseconds * 3);
-
-            long finishTimeMilliseconds = System.currentTimeMillis();
-
-            if (finishTimeMilliseconds - startTimeMilliseconds >= tokenLifespanMilliseconds)
-            {
-                connectionStayedOpenLongerThanTokenExpiryTime = true;
-            }
-
-            if (System.currentTimeMillis() - loopStartTimeMilliseconds >= TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for feedback receiver to open a connection that lasted longer than the token expiry time");
-            }
-        }
+        // received feedback message can be ignored since we no longer have any tests that need to consume them
+        // All this test cares about is that this API doesn't result in an unauthorized exception
+        feedbackReceiver.receive(2 * 1000);
 
         feedbackReceiver.close();
         serviceClient.close();
@@ -344,9 +304,8 @@ public class ServiceClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void fileUploadNotificationReceiverTokenRenewal() throws Exception
+    public void fileUploadNotificationReceiverWithAzureSasCredential() throws Exception
     {
-        // We remove and recreate the device for a clean start
         RegistryManager registryManager =
                 RegistryManager.createFromConnectionString(
                         iotHubConnectionString,
@@ -354,50 +313,22 @@ public class ServiceClientTests extends IntegrationTest
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                                 .build());
 
-        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().build();
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
 
-        long tokenLifespanSeconds = 10;
-        long tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
-        TokenCredential authenticationTokenProvider = new IotHubConnectionStringCredential(iotHubConnectionString, tokenLifespanSeconds);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasTokenProvider = new AzureSasCredential(serviceSasToken.toString());
 
         ServiceClient serviceClient = new ServiceClient(
                 iotHubConnectionStringObj.getHostName(),
-                authenticationTokenProvider,
-                TokenCredentialType.SHARED_ACCESS_SIGNATURE,
-                testInstance.protocol,
-                serviceClientOptions);
+                sasTokenProvider,
+                testInstance.protocol);
 
         FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
         fileUploadNotificationReceiver.open();
 
-        boolean connectionStayedOpenLongerThanTokenExpiryTime = false;
-        long loopStartTimeMilliseconds = System.currentTimeMillis();
-        while (!connectionStayedOpenLongerThanTokenExpiryTime)
-        {
-            // Timing this call to fileUploadNotificationReceiver.receive because it will end prematurely if a file
-            // upload notification message is received. This test needs to open a connection for longer than the initial
-            // token would be valid for in order to test that the AMQP layer is proactively renewing the connection.
-            // This loop will run until there is a point in time where there are no file upload notifications to receive
-            // so the connection will stay open.
-
-            long startTimeMilliseconds = System.currentTimeMillis();
-
-            // received file upload notifications can be ignored since we no longer have any tests that need to consume them
-            fileUploadNotificationReceiver.receive(tokenLifespanMilliseconds * 3);
-
-            long finishTimeMilliseconds = System.currentTimeMillis();
-
-            if (finishTimeMilliseconds - startTimeMilliseconds >= tokenLifespanMilliseconds)
-            {
-                connectionStayedOpenLongerThanTokenExpiryTime = true;
-            }
-
-            if (System.currentTimeMillis() - loopStartTimeMilliseconds >= TOKEN_RENEWAL_TEST_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for file upload notification receiver to open a connection that lasted longer than the token expiry time");
-            }
-        }
+        // received file upload notifications can be ignored since we no longer have any tests that need to consume them
+        // All this test cares about is that this API doesn't result in an unauthorized exception
+        fileUploadNotificationReceiver.receive(2 * 1000);
 
         fileUploadNotificationReceiver.close();
         serviceClient.close();

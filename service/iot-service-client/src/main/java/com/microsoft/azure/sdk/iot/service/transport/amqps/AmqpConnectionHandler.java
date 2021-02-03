@@ -11,7 +11,6 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
 import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
@@ -50,10 +49,10 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     protected String userName;
     protected String sasToken;
     private TokenCredential authenticationTokenProvider;
-    private TokenCredentialType authorizationType;
-    protected final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    protected final ProxyOptions proxyOptions;
-    protected final SSLContext sslContext;
+    private AzureSasCredential sasTokenProvider;
+    protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
+    protected ProxyOptions proxyOptions;
+    protected SSLContext sslContext;
 
     protected Connection connection;
 
@@ -70,11 +69,6 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        if (Tools.isNullOrEmpty(userName))
-        {
-            throw new IllegalArgumentException("userName can not be null or empty");
-        }
-
         if (Tools.isNullOrEmpty(sasToken))
         {
             throw new IllegalArgumentException("sasToken can not be null or empty");
@@ -85,20 +79,16 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.hostName = hostName;
-        this.userName = userName;
         this.sasToken = sasToken;
-        this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
 
-        commonConstructorSetup();
+        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
     protected AmqpConnectionHandler(
             String hostName,
-            TokenCredential authenticationTokenProvider,
-            TokenCredentialType authorizationType,
+            AzureSasCredential sasTokenProvider,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -113,18 +103,43 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
-        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
-        this.proxyOptions = proxyOptions;
         this.hostName = hostName;
-        this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
-        this.authenticationTokenProvider = authenticationTokenProvider;
-        this.authorizationType = authorizationType;
+        this.sasTokenProvider = sasTokenProvider;
 
-        commonConstructorSetup();
+        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    private void commonConstructorSetup()
+    protected AmqpConnectionHandler(
+            String hostName,
+            TokenCredential authenticationTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName can not be null or empty");
+        }
+
+        if (iotHubServiceClientProtocol == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+
+        this.hostName = hostName;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+
+        commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
+    }
+
+    private void commonConstructorSetup(
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext; // if null, a default SSLContext will be generated for the user
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.savedException = null;
         this.connectionOpenedRemotely = false;
         this.sessionOpenedRemotely = false;
@@ -227,11 +242,19 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         // Once the connection opens, get that connection and make it create a new session that will serve as the CBS
         // session where authentication will take place.
         Session cbsSession = event.getConnection().session();
-        new CbsSessionHandler(
-                cbsSession,
-                this,
-                this.authenticationTokenProvider,
-                this.authorizationType);
+
+        if (this.authenticationTokenProvider != null)
+        {
+            new CbsSessionHandler(cbsSession, this, this.authenticationTokenProvider);
+        }
+        else if (this.sasTokenProvider != null)
+        {
+            new CbsSessionHandler(cbsSession, this, this.sasTokenProvider);
+        }
+        else
+        {
+            new CbsSessionHandler(cbsSession, this, this.sasToken);
+        }
     }
 
     /**

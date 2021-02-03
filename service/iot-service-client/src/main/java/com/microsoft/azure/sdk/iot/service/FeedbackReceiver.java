@@ -5,8 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.microsoft.azure.sdk.iot.deps.auth.TokenCredentialType;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
 import lombok.extern.slf4j.Slf4j;
 
@@ -125,20 +125,7 @@ public class FeedbackReceiver extends Receiver
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    /**
-     * Construct a new FeedbackReciver.
-     *
-     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
-     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
-     *                                    this library when they are needed.
-     * @param authorizationType The type of authentication tokens that the provided {@link TokenCredential}
-     *                          implementation will always give.
-     * @param iotHubServiceClientProtocol The protocol to open the connection with.
-     * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
-     * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
-     *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
-     */
-    public FeedbackReceiver(String hostName, TokenCredential authenticationTokenProvider, TokenCredentialType authorizationType, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    FeedbackReceiver(String hostName, TokenCredential authenticationTokenProvider, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -154,7 +141,32 @@ public class FeedbackReceiver extends Receiver
                 new AmqpReceive(
                         hostName,
                         authenticationTokenProvider,
-                        authorizationType,
+                        iotHubServiceClientProtocol,
+                        proxyOptions,
+                        sslContext);
+    }
+
+    FeedbackReceiver(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        if (iotHubServiceClientProtocol == null)
+        {
+            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
+        }
+
+        this.amqpReceive =
+                new AmqpReceive(
+                        hostName,
+                        sasTokenProvider,
                         iotHubServiceClientProtocol,
                         proxyOptions,
                         sslContext);
