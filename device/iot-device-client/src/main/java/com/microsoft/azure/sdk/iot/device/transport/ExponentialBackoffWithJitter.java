@@ -8,12 +8,14 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.security.SecureRandom;
 
 /**
  * Represents a retry policy that performs exponential backoff with jitter retries.
  */
+@Slf4j
 public class ExponentialBackoffWithJitter implements RetryPolicy
 {
     // Codes_SRS_EXPONENTIALBACKOFF_28_006: [Constructor should have default values retryCount, minBackoff, maxBackoff, deltaBackoff and firstFastRetry]
@@ -30,7 +32,8 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
      */
     public ExponentialBackoffWithJitter()
     {
-
+        // Let us know when we've created a new exponential backoff
+        this.logCreation();
     }
 
     /**
@@ -56,6 +59,9 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
         this.maxBackoff = maxBackoff;
         this.deltaBackoff = deltaBackoff;
         this.firstFastRetry = firstFastRetry;
+
+        // Let us know when we've created a new exponential backoff
+        this.logCreation();
     }
 
     /**
@@ -85,5 +91,10 @@ public class ExponentialBackoffWithJitter implements RetryPolicy
         }
 
         return new RetryDecision(false, 0);
+    }
+
+    private void logCreation()
+    {
+        log.info("NOTE: A new instance of ExponentialBackoffWithJitter has been created with the following properties. Retry Count: {}, Min Backoff Interval: {}, Max Backoff Interval: {}, Max Time Between Retries: {}, Fast Retry Enabled: {}", this.retryCount, this.minBackoff, this.maxBackoff, this.deltaBackoff, this.firstFastRetry);
     }
 }
