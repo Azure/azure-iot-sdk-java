@@ -166,20 +166,6 @@ public class AmqpSendHandlerTest
         AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
     
-     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_protocol_null()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = null;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The function shall create a new Message (Proton) object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall set the “to” property on the Message object using the created device path]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_006: [The function shall create a Binary (Proton) object from the content string]
