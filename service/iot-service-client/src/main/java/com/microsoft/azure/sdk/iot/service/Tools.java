@@ -67,7 +67,7 @@ public class Tools
      * @param keyName The name of the key
      * @return The value of the given key if exists otherwise empty string
      */
-    public static String getValueStringByKey(Map map, String keyName)
+    public static String getValueStringByKey(Map<String, ?> map, String keyName)
     {
         String retVal;
         

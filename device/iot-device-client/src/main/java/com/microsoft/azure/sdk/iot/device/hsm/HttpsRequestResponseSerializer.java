@@ -147,7 +147,7 @@ public class HttpsRequestResponseSerializer
         try
         {
             String statusCodeString = statusLineParts[1];
-            statusCode = Integer.valueOf(statusCodeString);
+            statusCode = Integer.parseInt(statusCodeString);
         }
         catch (NumberFormatException e)
         {

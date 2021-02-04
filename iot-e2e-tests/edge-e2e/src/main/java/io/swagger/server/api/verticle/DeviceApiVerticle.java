@@ -24,7 +24,7 @@ public class DeviceApiVerticle extends AbstractVerticle {
 
     public DeviceApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.DeviceApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.DeviceApiImpl");
             service = (DeviceApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("DeviceApiVerticle constructor", e);

@@ -21,7 +21,7 @@ public class WrapperApiVerticle extends AbstractVerticle {
 
     public WrapperApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.WrapperApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.WrapperApiImpl");
             service = (WrapperApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("WrapperApiVerticle constructor", e);

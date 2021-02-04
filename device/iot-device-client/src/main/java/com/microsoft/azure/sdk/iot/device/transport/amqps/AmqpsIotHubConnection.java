@@ -1095,7 +1095,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private static class ReactorRunner implements Callable
+    private static class ReactorRunner implements Callable<Object>
     {
         private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final IotHubReactor iotHubReactor;

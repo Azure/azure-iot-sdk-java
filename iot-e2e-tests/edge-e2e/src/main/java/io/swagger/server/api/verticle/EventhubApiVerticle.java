@@ -22,7 +22,7 @@ public class EventhubApiVerticle extends AbstractVerticle {
 
     public EventhubApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.EventhubApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.EventhubApiImpl");
             service = (EventhubApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("EventhubApiVerticle constructor", e);

@@ -150,7 +150,14 @@ public class DeviceTwin
 
                     if (!reportPropertyCallback(property))
                     {
-                        reportDeviceTwinGenericPropertyCallback(property);
+                        if (reportDeviceTwinGenericPropertyCallback(property))
+                        {
+                            log.info("The user subscribed desired property callback was triggered.");
+                        }
+                        else
+                        {
+                            log.debug("The user has not subscribed to desired property callback, no action was taken.");
+                        }
                     }
                 }
             }
@@ -217,9 +224,9 @@ public class DeviceTwin
         }
     }
 
-    public DeviceTwin(DeviceIO client, DeviceClientConfig config,
+    public <Type1, Type2> DeviceTwin(DeviceIO client, DeviceClientConfig config,
                       IotHubEventCallback deviceTwinCallback, Object deviceTwinCallbackContext,
-                      PropertyCallBack genericPropertyCallback, Object genericPropertyCallbackContext)
+                      PropertyCallBack<Type1, Type2> genericPropertyCallback, Object genericPropertyCallbackContext)
     {
         deviceTwinInternal(client, config, deviceTwinCallback, deviceTwinCallbackContext, genericPropertyCallbackContext);
 
