@@ -338,7 +338,7 @@ public class MethodParser
         else if (payload instanceof Map)
         {
             JsonObject jsonObject = new JsonObject();
-            Set<Entry<String, Object>> entrySet = ((Map) payload).entrySet();
+            Set<Entry<String, Object>> entrySet = ((Map<String, Object>) payload).entrySet();
             for (Entry<String, Object> entry : entrySet)
             {
                 jsonObject.add(entry.getKey(), jsonizePayload(entry.getValue()));

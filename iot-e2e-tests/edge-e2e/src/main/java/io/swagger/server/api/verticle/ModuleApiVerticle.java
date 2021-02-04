@@ -35,7 +35,7 @@ public class ModuleApiVerticle extends AbstractVerticle {
 
     public ModuleApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.ModuleApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.ModuleApiImpl");
             service = (ModuleApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("ModuleApiVerticle constructor", e);

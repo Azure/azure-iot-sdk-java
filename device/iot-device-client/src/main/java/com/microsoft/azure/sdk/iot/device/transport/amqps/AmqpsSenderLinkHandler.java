@@ -71,7 +71,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         //Safe to cast here because this callback will only ever fire for acknowledgements received on this sender link
         Delivery delivery = event.getDelivery();
 
-        int deliveryTag = Integer.valueOf(new String(event.getDelivery().getTag()));
+        int deliveryTag = Integer.parseInt(new String(event.getDelivery().getTag()));
 
         Message acknowledgedIotHubMessage = this.inProgressMessages.remove(deliveryTag);
         if (acknowledgedIotHubMessage == null)
