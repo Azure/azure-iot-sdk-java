@@ -20,7 +20,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public final class IotHubServiceSasToken
 {
-    long TOKEN_VALID_SECS = 365*24*60*60;
+    private static long DEFAULT_TOKEN_LIFESPAN_SECONDS = 365*24*60*60; // 1 year
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:
@@ -37,35 +37,59 @@ public final class IotHubServiceSasToken
     /* The value of the SharedAccessKey */
     protected final String keyValue;
     /* The time, as a UNIX timestamp, before which the token is valid. */
-    protected final long expiryTime;
+    protected final long expiryTimeSeconds;
     /* The value of SharedAccessKeyName */
     protected final String keyName;
     /* The SAS token that grants access. */
     protected final String token;
 
+    protected final long tokenLifespanSeconds;
+
     /**
      * Constructor. Generates a SAS token that grants access to an IoT Hub for
-     * the specified amount of time. (1 year specified in TOKEN_VALID_SECS)
+     * the default amount of time of 1 hour.
      *
      * @param iotHubConnectionString Connection string object containing the connection parameters
      */
     public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_001: [The constructor shall throw IllegalArgumentException if the input object is null]
+        this(iotHubConnectionString, DEFAULT_TOKEN_LIFESPAN_SECONDS);
+    }
+
+    /**
+     * Constructor. Generates a SAS token that grants access to an IoT Hub for
+     * the specified amount of time.
+     *
+     * @param iotHubConnectionString Connection string object containing the connection parameters.
+     * @param tokenLifespanSeconds The number of seconds that the created SAS token will be valid for.
+     */
+    public IotHubServiceSasToken(IotHubConnectionString iotHubConnectionString, long tokenLifespanSeconds)
+    {
         if (iotHubConnectionString == null)
         {
             throw new IllegalArgumentException();
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_003: [The constructor shall create a string to sign by concatenating the target uri and the expiry time string (one year)]
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_004: [The constructor shall create a key from the shared access key signing with HmacSHA256]
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_005: [The constructor shall compute the final signature by url encoding the signed key]
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
+
+        if (tokenLifespanSeconds <= 0)
+        {
+            tokenLifespanSeconds = DEFAULT_TOKEN_LIFESPAN_SECONDS;
+        }
+
+        this.tokenLifespanSeconds = tokenLifespanSeconds;
         this.resourceUri = iotHubConnectionString.getHostName();
         this.keyValue = iotHubConnectionString.getSharedAccessKey();
         this.keyName = iotHubConnectionString.getSharedAccessKeyName();
-        this.expiryTime = buildExpiresOn();
+        this.expiryTimeSeconds = buildExpiresOn();
         this.token =  buildToken();
+    }
+
+    /**
+     * @return the number of milliseconds since the UNIX Epoch when this token will expire
+     */
+    public final long getExpiryTimeMillis()
+    {
+        // Multiply by 1000 to convert from seconds to milliseconds
+        return (this.expiryTimeSeconds * 1000);
     }
 
     /**
@@ -78,13 +102,9 @@ public final class IotHubServiceSasToken
         String targetUri;
         try
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_002: [The constructor shall create a target uri from the url encoded host name)]
             targetUri = URLEncoder.encode(this.resourceUri.toLowerCase(), StandardCharsets.UTF_8.name());
-            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_003: [The constructor shall create a string to sign by concatenating the target uri and the expiry time string (one year)]
-            String toSign = targetUri + "\n" + this.expiryTime;
+            String toSign = targetUri + "\n" + this.expiryTimeSeconds;
 
-            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_004: [The constructor shall create a key from the shared access key signing with HmacSHA256]
-            // Get an hmac_sha1 key from the raw key bytes
             byte[] keyBytes = decodeBase64(this.keyValue.getBytes(StandardCharsets.UTF_8));
             SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA256");
 
@@ -92,19 +112,16 @@ public final class IotHubServiceSasToken
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(signingKey);
 
-            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_005: [The constructor shall compute the final signature by url encoding the signed key]
             // Compute the hmac on input data bytes
             byte[] rawHmac = mac.doFinal(toSign.getBytes(StandardCharsets.UTF_8));
+
             // Convert raw bytes to Hex
             String signature = URLEncoder.encode(encodeBase64String(rawHmac), StandardCharsets.UTF_8.name());
 
-            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_006: [The constructor shall concatenate the target uri, the signature, the expiry time and the key name using the format: "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s"]
-
-            return String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTime, this.keyName);
+            return String.format(TOKEN_FORMAT, targetUri, signature, this.expiryTimeSeconds, this.keyName);
         }
         catch (Exception e)
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_007: [The constructor shall throw Exception if building the token failed]
             throw new RuntimeException(e);
         }
     }
@@ -117,8 +134,17 @@ public final class IotHubServiceSasToken
     private long buildExpiresOn()
     {
         long expiresOnDate = System.currentTimeMillis();
-        expiresOnDate += TOKEN_VALID_SECS * 1000;
+        expiresOnDate += this.tokenLifespanSeconds * 1000;
         return expiresOnDate / 1000;
+    }
+
+    /**
+     * @return The number of seconds that this token is valid for. Not to be confused with how many seconds the SAS token
+     * is still valid for at the time of calling this method.
+     */
+    public long getTokenLifespanSeconds()
+    {
+        return this.tokenLifespanSeconds;
     }
 
     /**
@@ -129,7 +155,6 @@ public final class IotHubServiceSasToken
     @Override
     public String toString()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBSERVICESASTOKEN_12_008: [The constructor shall return with the generated token]
         return this.token;
     }
 }

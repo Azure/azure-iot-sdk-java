@@ -5,10 +5,25 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
+import com.microsoft.azure.sdk.iot.service.FileUploadNotificationReceiver;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.Message;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -64,21 +79,20 @@ public class ServiceClientTests extends IntegrationTest
         {
             this.protocol = protocol;
             this.deviceId = deviceIdPrefix.concat("-" + UUID.randomUUID().toString());
-
         }
     }
 
     private final ServiceClientITRunner testInstance;
 
     @Parameterized.Parameters(name = "{0}")
-    public static Collection inputs() throws IOException
+    public static Collection inputs()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         invalidCertificateServerConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         return Arrays.asList(
                 new Object[][]
@@ -107,14 +121,14 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, false);
+        cloudToDeviceTelemetry(false, true, false, false, false);
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithCustomSSLContext() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, true);
+        cloudToDeviceTelemetry(false, true, true, false, false);
     }
 
     @Test
@@ -127,7 +141,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, false);
+        cloudToDeviceTelemetry(true, true, false, false, false);
     }
 
     @Test
@@ -140,7 +154,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, true);
+        cloudToDeviceTelemetry(true, true, true, false, false);
     }
 
     @Test
@@ -148,22 +162,43 @@ public class ServiceClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void cloudToDeviceTelemetryWithNoPayload() throws Exception
     {
-        cloudToDeviceTelemetry(false, false, false);
+        cloudToDeviceTelemetry(false, false, false, false, false);
     }
 
-    public void cloudToDeviceTelemetry(boolean withProxy, boolean withPayload, boolean withCustomSSLContext) throws Exception
+    @Test
+    @Ignore("Test isn't implemented yet due to no RBAC support on hub yet")
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
-        // Arrange
+        cloudToDeviceTelemetry(false, true, false, true, false);
+    }
 
+    @Test
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryWithAzureSasCredential() throws Exception
+    {
+        cloudToDeviceTelemetry(false, true, false, false, true);
+    }
+
+    public void cloudToDeviceTelemetry(
+            boolean withProxy,
+            boolean withPayload,
+            boolean withCustomSSLContext,
+            boolean withTokenCredential,
+            boolean withAzureSasCredential) throws Exception
+    {
         // We remove and recreate the device for a clean start
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        RegistryManager registryManager =
+                RegistryManager.createFromConnectionString(
+                        iotHubConnectionString,
+                        RegistryManagerOptions.builder()
+                                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                                .build());
 
         Device deviceAdded = Device.createFromId(testInstance.deviceId, null, null);
         Tools.addDeviceWithRetry(registryManager, deviceAdded);
 
         Device deviceGetBefore = registryManager.getDevice(testInstance.deviceId);
-
-        // Act
 
         // Create service client
         ProxyOptions proxyOptions = null;
@@ -179,12 +214,33 @@ public class ServiceClientTests extends IntegrationTest
             sslContext = new IotHubSSLContext().getSSLContext();
         }
 
-        ServiceClientOptions serviceClientOptions = ServiceClientOptions.builder().proxyOptions(proxyOptions).sslContext(sslContext).build();
+        ServiceClientOptions serviceClientOptions =
+                ServiceClientOptions.builder()
+                        .proxyOptions(proxyOptions)
+                        .sslContext(sslContext)
+                        .build();
 
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
+        ServiceClient serviceClient;
+        IotHubConnectionString iotHubConnectionStringObj =
+                IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        if (withTokenCredential)
+        {
+            throw new UnsupportedOperationException("This test case has not been written yet");
+        }
+        else if (withAzureSasCredential)
+        {
+            IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+            AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+            serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
+        }
+        else
+        {
+            serviceClient = new ServiceClient(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
+        }
+
         CompletableFuture<Void> futureOpen = serviceClient.openAsync();
         futureOpen.get();
-
 
         Message message;
         if (withPayload)
@@ -210,6 +266,72 @@ public class ServiceClientTests extends IntegrationTest
         assertEquals(buildExceptionMessage("", hostName), 0, deviceGetBefore.getCloudToDeviceMessageCount());
         assertEquals(buildExceptionMessage("", hostName), 1, deviceGetAfter.getCloudToDeviceMessageCount());
 
+        registryManager.close();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void feedbackMessageReceiverWithAzureSasCredential() throws Exception
+    {
+        RegistryManager registryManager =
+                RegistryManager.createFromConnectionString(
+                        iotHubConnectionString,
+                        RegistryManagerOptions.builder()
+                                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                                .build());
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasTokenProvider = new AzureSasCredential(serviceSasToken.toString());
+
+        ServiceClient serviceClient = new ServiceClient(
+                iotHubConnectionStringObj.getHostName(),
+                sasTokenProvider,
+                testInstance.protocol);
+
+        FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
+        feedbackReceiver.open();
+
+        // received feedback message can be ignored since we no longer have any tests that need to consume them
+        // All this test cares about is that this API doesn't result in an unauthorized exception
+        feedbackReceiver.receive(2 * 1000);
+
+        feedbackReceiver.close();
+        serviceClient.close();
+        registryManager.close();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void fileUploadNotificationReceiverWithAzureSasCredential() throws Exception
+    {
+        RegistryManager registryManager =
+                RegistryManager.createFromConnectionString(
+                        iotHubConnectionString,
+                        RegistryManagerOptions.builder()
+                                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                                .build());
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasTokenProvider = new AzureSasCredential(serviceSasToken.toString());
+
+        ServiceClient serviceClient = new ServiceClient(
+                iotHubConnectionStringObj.getHostName(),
+                sasTokenProvider,
+                testInstance.protocol);
+
+        FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
+        fileUploadNotificationReceiver.open();
+
+        // received file upload notifications can be ignored since we no longer have any tests that need to consume them
+        // All this test cares about is that this API doesn't result in an unauthorized exception
+        fileUploadNotificationReceiver.receive(2 * 1000);
+
+        fileUploadNotificationReceiver.close();
+        serviceClient.close();
         registryManager.close();
     }
 
