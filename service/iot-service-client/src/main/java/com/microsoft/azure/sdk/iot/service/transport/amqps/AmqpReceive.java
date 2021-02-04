@@ -27,7 +27,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     private final String hostName;
     private String userName;
     private String sasToken;
-    private TokenCredential authenticationTokenProvider;
+    private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -97,7 +97,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
 
     public AmqpReceive(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -106,7 +106,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.credential = credential;
     }
 
     public AmqpReceive(
@@ -128,11 +128,11 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      */
     public void open()
     {
-        if (authenticationTokenProvider != null)
+        if (credential != null)
         {
             amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
                     this.hostName,
-                    this.authenticationTokenProvider,
+                    this.credential,
                     this.iotHubServiceClientProtocol,
                     this,
                     this.proxyOptions,

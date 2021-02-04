@@ -101,7 +101,6 @@ public class IotHubConnectionStringBuilder
      *
      * @param connectionString The connection string to deserialize
      * @param iotHubConnectionString The target object for deserialization
-     * @throws IOException This exception is thrown if the parsing failed
      */
     protected static void parse(String connectionString, IotHubConnectionString iotHubConnectionString)
     {

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -102,16 +103,24 @@ public class FeedbackReceiver extends Receiver
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public FeedbackReceiver(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
+
         if (Tools.isNullOrEmpty(userName))
         {
             throw new IllegalArgumentException("userName cannot be null or empty");
         }
+
         if (Tools.isNullOrEmpty(sasToken))
         {
             throw new IllegalArgumentException("sasToken cannot be null or empty");
@@ -125,22 +134,25 @@ public class FeedbackReceiver extends Receiver
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
-    FeedbackReceiver(String hostName, TokenCredential authenticationTokenProvider, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    FeedbackReceiver(
+            String hostName,
+            TokenCredential credential,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(credential);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
 
         this.amqpReceive =
                 new AmqpReceive(
                         hostName,
-                        authenticationTokenProvider,
+                        credential,
                         iotHubServiceClientProtocol,
                         proxyOptions,
                         sslContext);
@@ -158,10 +170,8 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(sasTokenProvider);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
 
         this.amqpReceive =
                 new AmqpReceive(

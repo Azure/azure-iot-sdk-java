@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,7 +65,7 @@ public class FileUploadNotificationReceiver extends Receiver
 
     FileUploadNotificationReceiver(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -73,15 +74,14 @@ public class FileUploadNotificationReceiver extends Receiver
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+
+        Objects.requireNonNull(credential);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
 
         this.amqpFileUploadNotificationReceive =
                 new AmqpFileUploadNotificationReceive(
                         hostName,
-                        authenticationTokenProvider,
+                        credential,
                         iotHubServiceClientProtocol,
                         proxyOptions,
                         sslContext);
@@ -98,10 +98,9 @@ public class FileUploadNotificationReceiver extends Receiver
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+
+        Objects.requireNonNull(sasTokenProvider);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
 
         this.amqpFileUploadNotificationReceive =
                 new AmqpFileUploadNotificationReceive(

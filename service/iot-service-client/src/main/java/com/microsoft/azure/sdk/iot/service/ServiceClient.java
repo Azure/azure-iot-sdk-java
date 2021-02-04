@@ -31,7 +31,7 @@ public class ServiceClient
     private String userName;
     private String sasToken;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    private TokenCredential authenticationTokenProvider;
+    private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
 
     private final ServiceClientOptions options;
@@ -131,18 +131,18 @@ public class ServiceClient
      * of authentication tokens used in the underlying connection.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
-     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      * @return The created {@link ServiceClient} instance.
      */
     public ServiceClient(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         this(hostName,
-             authenticationTokenProvider,
+             credential,
              iotHubServiceClientProtocol,
              ServiceClientOptions.builder().build());
     }
@@ -152,7 +152,7 @@ public class ServiceClient
      * of authentication tokens used in the underlying connection.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
-     * @param authenticationTokenProvider The custom {@link TokenCredential} that will provide authentication tokens to
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      * @param options The connection options to use when connecting to the service.
@@ -160,11 +160,11 @@ public class ServiceClient
      */
     public ServiceClient(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ServiceClientOptions options)
     {
-        Objects.requireNonNull(authenticationTokenProvider);
+        Objects.requireNonNull(credential);
 
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -176,7 +176,7 @@ public class ServiceClient
             throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
         }
 
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.credential = credential;
         this.hostName = hostName;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
@@ -189,7 +189,7 @@ public class ServiceClient
         this.amqpMessageSender =
                 new AmqpSend(
                         hostName,
-                        authenticationTokenProvider,
+                        credential,
                         this.iotHubServiceClientProtocol,
                         options.getProxyOptions(),
                         options.getSslContext());
@@ -450,11 +450,11 @@ public class ServiceClient
      */
      public FeedbackReceiver getFeedbackReceiver()
      {
-         if (this.authenticationTokenProvider != null)
+         if (this.credential != null)
          {
              return new FeedbackReceiver(
                      this.hostName,
-                     this.authenticationTokenProvider,
+                     this.credential,
                      this.iotHubServiceClientProtocol,
                      this.options.getProxyOptions(),
                      this.options.getSslContext());
@@ -485,11 +485,11 @@ public class ServiceClient
      */
     public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
     {
-        if (this.authenticationTokenProvider != null)
+        if (this.credential != null)
         {
             return new FileUploadNotificationReceiver(
                     this.hostName,
-                    this.authenticationTokenProvider,
+                    this.credential,
                     this.iotHubServiceClientProtocol,
                     this.options.getProxyOptions(),
                     this.options.getSslContext());

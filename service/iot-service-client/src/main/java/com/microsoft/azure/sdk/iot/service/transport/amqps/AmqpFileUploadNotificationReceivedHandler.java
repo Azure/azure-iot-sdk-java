@@ -69,13 +69,13 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
 
     AmqpFileUploadNotificationReceivedHandler(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, authenticationTokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, credential, iotHubServiceClientProtocol, proxyOptions, sslContext);
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 

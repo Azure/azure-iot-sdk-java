@@ -31,16 +31,16 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
     private CbsSenderLinkHandler cbsSenderLinkHandler;
     private CbsReceiverLinkHandler cbsReceiverLinkHandler;
     private CbsSessionStateCallback cbsSessionStateCallback;
-    private TokenCredential authenticationTokenProvider;
+    private TokenCredential credential;
     private String sasToken;
     private AzureSasCredential sasTokenProvider;
     private boolean senderLinkOpened = false;
     private boolean receiverLinkOpened = false;
 
-    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredential authenticationTokenProvider)
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredential credential)
     {
         this(session, cbsSessionStateCallback);
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.credential = credential;
     }
 
     CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, AzureSasCredential sasTokenProvider)
@@ -72,9 +72,9 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
 
         Sender cbsSender = this.session.sender(CbsSenderLinkHandler.getCbsTag());
 
-        if (this.authenticationTokenProvider != null)
+        if (this.credential != null)
         {
-            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.authenticationTokenProvider);
+            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.credential);
         }
         else if (this.sasTokenProvider != null)
         {
@@ -193,7 +193,7 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         // as the delivery tag is not -1 (proton's failure case) then it is safe to ignore
 
         // Connection only proactively renews when a token provider is present
-        if (this.authenticationTokenProvider != null || this.sasTokenProvider != null)
+        if (this.credential != null || this.sasTokenProvider != null)
         {
             // Each execution of onTimerTask is responsible for scheduling the next occurrence based on how long the previous token is valid for
             OffsetDateTime currentOffsetDateTime = OffsetDateTime.now();

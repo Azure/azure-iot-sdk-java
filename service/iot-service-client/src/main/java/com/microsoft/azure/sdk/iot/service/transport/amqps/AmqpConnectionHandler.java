@@ -31,6 +31,7 @@ import org.apache.qpid.proton.reactor.Reactor;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Objects;
 
 @Slf4j
 public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup implements CbsSessionStateCallback
@@ -48,7 +49,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     protected final String hostName;
     protected String userName;
     protected String sasToken;
-    private TokenCredential authenticationTokenProvider;
+    private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected ProxyOptions proxyOptions;
@@ -74,10 +75,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
             throw new IllegalArgumentException("sasToken can not be null or empty");
         }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(iotHubServiceClientProtocol);
 
         this.proxyOptions = proxyOptions;
         this.hostName = hostName;
@@ -98,10 +96,8 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(sasTokenProvider);
 
         this.hostName = hostName;
         this.sasTokenProvider = sasTokenProvider;
@@ -111,7 +107,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
 
     protected AmqpConnectionHandler(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -121,13 +117,11 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(credential);
 
         this.hostName = hostName;
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.credential = credential;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -243,9 +237,9 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         // session where authentication will take place.
         Session cbsSession = event.getConnection().session();
 
-        if (this.authenticationTokenProvider != null)
+        if (this.credential != null)
         {
-            new CbsSessionHandler(cbsSession, this, this.authenticationTokenProvider);
+            new CbsSessionHandler(cbsSession, this, this.credential);
         }
         else if (this.sasTokenProvider != null)
         {

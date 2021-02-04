@@ -45,7 +45,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
     private static final String PUT_TOKEN_OPERATION = "operation";
     private static final String PUT_TOKEN_OPERATION_VALUE = "put-token";
 
-    private TokenCredential authenticationTokenProvider;
+    private TokenCredential credential;
     private AccessToken currentAccessToken;
     private String sasToken;
     private AzureSasCredential sasTokenProvider;
@@ -54,13 +54,13 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
     private static final String SAS_TOKEN = "servicebus.windows.net:sastoken";
     private static final String EXPIRY_KEY = "se=";
 
-    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, TokenCredential authenticationTokenProvider)
+    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, TokenCredential credential)
     {
         super(sender, UUID.randomUUID().toString(), linkStateCallback);
 
         this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
         this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.credential = credential;
     }
 
     CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, AzureSasCredential sasTokenProvider)
@@ -111,11 +111,11 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
 
         userProperties.put(PUT_TOKEN_OPERATION, PUT_TOKEN_OPERATION_VALUE);
 
-        if (authenticationTokenProvider != null)
+        if (credential != null)
         {
             //TODO need more context on this TokenRequestContext object, and what we are expected to give it
             TokenRequestContext context = new TokenRequestContext();
-            this.currentAccessToken = authenticationTokenProvider.getToken(context).block();
+            this.currentAccessToken = credential.getToken(context).block();
             userProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
             userProperties.put(PUT_TOKEN_TYPE, JWT);
             Section section = new AmqpValue(this.currentAccessToken.getToken());

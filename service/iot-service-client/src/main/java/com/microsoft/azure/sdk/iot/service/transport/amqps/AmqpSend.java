@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Instance of the QPID-Proton-J BaseHandler class
@@ -29,7 +30,7 @@ public class AmqpSend
     protected final String hostName;
     protected String userName;
     protected String sasToken;
-    private TokenCredential authenticationTokenProvider;
+    private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -110,7 +111,7 @@ public class AmqpSend
 
     public AmqpSend(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -120,13 +121,11 @@ public class AmqpSend
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(credential);
 
         this.hostName = hostName;
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.credential = credential;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
@@ -144,10 +143,8 @@ public class AmqpSend
             throw new IllegalArgumentException("hostName can not be null or empty");
         }
 
-        if (iotHubServiceClientProtocol == null)
-        {
-            throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
-        }
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+        Objects.requireNonNull(sasTokenProvider);
 
         this.hostName = hostName;
         this.sasTokenProvider = sasTokenProvider;
@@ -184,12 +181,12 @@ public class AmqpSend
     {
         synchronized(this)
         {
-            if (this.authenticationTokenProvider != null)
+            if (this.credential != null)
             {
                 amqpSendHandler =
                         new AmqpSendHandler(
                                 this.hostName,
-                                this.authenticationTokenProvider,
+                                this.credential,
                                 this.iotHubServiceClientProtocol,
                                 this.proxyOptions,
                                 this.sslContext);

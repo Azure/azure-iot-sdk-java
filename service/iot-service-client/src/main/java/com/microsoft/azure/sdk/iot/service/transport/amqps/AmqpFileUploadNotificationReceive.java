@@ -27,7 +27,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private final String hostName;
     private String userName;
     private String sasToken;
-    private TokenCredential authenticationTokenProvider;
+    private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private FileUploadNotification fileUploadNotification;
@@ -97,7 +97,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
 
     public AmqpFileUploadNotificationReceive(
             String hostName,
-            TokenCredential authenticationTokenProvider,
+            TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -106,7 +106,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
-        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.credential = credential;
     }
 
     public AmqpFileUploadNotificationReceive(
@@ -131,11 +131,11 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     {
         if (amqpReceiveHandler == null)
         {
-            if (this.authenticationTokenProvider != null)
+            if (this.credential != null)
             {
                 amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
                         this.hostName,
-                        this.authenticationTokenProvider,
+                        this.credential,
                         this.iotHubServiceClientProtocol,
                         this,
                         this.proxyOptions,
