@@ -2,7 +2,7 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 trigger: none
 pr: none
 schedules:
-  - cron: "30 7 * * *" # every night at 11:30 pm PST (7:30 am UTC)
+  - cron: "30 6 * * *" # every night at 10:30 pm PST (6:30 am UTC)
     displayName: Nightly cleanup
     branches:
       include:
@@ -10,7 +10,7 @@ schedules:
     always: true
 jobs:
 - job: Windows
-  timeoutInMinutes: 30
+  timeoutInMinutes: 90
   pool:
     name: Hosted VS2017
   displayName: Windows Cleanup
@@ -25,7 +25,7 @@ jobs:
     condition: always()
 
 - job: Linux
-  timeoutInMinutes: 30
+  timeoutInMinutes: 90
   pool:
     name: Hosted VS2017
   displayName: Linux Cleanup
@@ -40,7 +40,7 @@ jobs:
     condition: always()
 
 - job: Android
-  timeoutInMinutes: 30
+  timeoutInMinutes: 90
   pool:
     name: Hosted VS2017
   displayName: Android Cleanup
