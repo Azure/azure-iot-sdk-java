@@ -247,11 +247,11 @@ public class WebSocketUpgrade
     {
         String httpString = new String(responseBytes, StandardCharsets.UTF_8);
 
-        Boolean isStatusLineOk = false;
-        Boolean isUpgradeHeaderOk = false;
-        Boolean isConnectionHeaderOk = false;
-        Boolean isProtocolHeaderOk = false;
-        Boolean isAcceptHeaderOk = false;
+        boolean isStatusLineOk = false;
+        boolean isUpgradeHeaderOk = false;
+        boolean isConnectionHeaderOk = false;
+        boolean isProtocolHeaderOk = false;
+        boolean isAcceptHeaderOk = false;
 
         Scanner scanner = new Scanner(httpString);
 
