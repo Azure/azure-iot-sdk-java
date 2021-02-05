@@ -11,13 +11,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 /**
- * Implementatino of {@link ServiceClientCredentials} that provides RBAC based bearer tokens.
+ * Implementation of {@link ServiceClientCredentials} that provides RBAC based bearer tokens.
  */
 @AllArgsConstructor
 public class ServiceClientBearerTokenCredentialProvider implements ServiceClientCredentials {
 
     private static final String AUTHORIZATION = "Authorization";
-    
+
     @NonNull
     private final BearerTokenProvider tokenProvider;
 
