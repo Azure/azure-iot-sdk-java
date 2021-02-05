@@ -147,7 +147,7 @@ public class DeviceDeletionSample
                     if (deviceIdsToRemove.size() == 0)
                     {
                         System.out.print("No more devices to delete");
-                        System.exit(1);
+                        return;
                     }
 
                     for (String deviceIdToRemove : deviceIdsToRemove)
