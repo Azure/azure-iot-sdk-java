@@ -23,3 +23,33 @@ jobs:
       IOTHUB_CONNECTION_STRING: $(WINDOWS-IOTHUB-CONNECTION-STRING)
       IOT_DPS_CONNECTION_STRING: $(WINDOWS-IOT-DPS-CONNECTION-STRING)
     condition: always()
+
+- job: Linux
+  timeoutInMinutes: 90
+  pool:
+    name: Hosted VS2017
+  displayName: Linux Cleanup
+  condition: succeeded()
+  steps:
+  - powershell: ./vsts/cleanup.ps1
+    displayName: 'Run Cleanup script'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+      IOTHUB_CONNECTION_STRING: $(LINUX-IOTHUB-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(LINUX-IOT-DPS-CONNECTION-STRING)
+    condition: always()
+
+- job: Android
+  timeoutInMinutes: 90
+  pool:
+    name: Hosted VS2017
+  displayName: Android Cleanup
+  condition: succeeded()
+  steps:
+  - powershell: ./vsts/cleanup.ps1
+    displayName: 'Run Cleanup script'
+    env:
+      COMMIT_FROM: $(COMMIT_FROM)
+      IOTHUB_CONNECTION_STRING: $(ANDROID-IOTHUB-CONNECTION-STRING)
+      IOT_DPS_CONNECTION_STRING: $(ANDROID-IOT-DPS-CONNECTION-STRING)
+    condition: always()
