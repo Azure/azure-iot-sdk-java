@@ -262,9 +262,7 @@ public class RegistryManager
         String deviceJson = device.toDeviceParser().toJson();
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
-        String authenticationToken = this.getAuthenticationToken();
-
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, deviceJson.getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, deviceJson.getBytes());
 
         HttpResponse response = request.send();
 
@@ -322,9 +320,8 @@ public class RegistryManager
         }
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, deviceId);
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -386,9 +383,8 @@ public class RegistryManager
         }
 
         URL url = IotHubConnectionString.getUrlDeviceList(this.hostName, maxCount);
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -519,13 +515,7 @@ public class RegistryManager
         device.setForceUpdate(forceUpdate);
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, device.getDeviceId());
-        String authenticationToken = this.getAuthenticationToken();
-
-        HttpRequest request = CreateRequest(
-                url,
-                HttpMethod.PUT,
-                device.toDeviceParser().toJson().getBytes(),
-                authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, device.toDeviceParser().toJson().getBytes());
 
         request.setHeaderField("If-Match", "*");
 
@@ -653,7 +643,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlDevice(this.hostName, deviceId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], getAuthenticationToken());
+        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setHeaderField("If-Match", etag);
 
         HttpResponse response = request.send();
@@ -704,9 +694,7 @@ public class RegistryManager
     {
         URL url = IotHubConnectionString.getUrlDeviceStatistics(this.hostName);
 
-        String authenticationToken = this.getAuthenticationToken();
-
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -763,10 +751,8 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
-        String authenticationToken = this.getAuthenticationToken();
-
         String jobPropertiesJson = CreateExportJobPropertiesJson(exportBlobContainerUri, excludeKeys);
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
 
         HttpResponse response = request.send();
 
@@ -823,11 +809,9 @@ public class RegistryManager
     {
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
-        String authenticationToken = this.getAuthenticationToken();
-
         exportDevicesParameters.setType(JobProperties.JobType.EXPORT);
         String jobPropertiesJson = exportDevicesParameters.toJobPropertiesParser().toJson();
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
 
         HttpResponse response = request.send();
 
@@ -889,10 +873,8 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
-        String authenticationToken = this.getAuthenticationToken();
-
         String jobPropertiesJson = CreateImportJobPropertiesJson(importBlobContainerUri, outputBlobContainerUri);
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
 
         HttpResponse response = request.send();
 
@@ -950,11 +932,9 @@ public class RegistryManager
     {
         URL url = IotHubConnectionString.getUrlCreateExportImportJob(this.hostName);
 
-        String authenticationToken = this.getAuthenticationToken();
-
         importDevicesParameters.setType(JobProperties.JobType.IMPORT);
         String jobPropertiesJson = importDevicesParameters.toJobPropertiesParser().toJson();
-        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, jobPropertiesJson.getBytes());
 
         HttpResponse response = request.send();
 
@@ -1016,9 +996,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlImportExportJob(this.hostName, jobId);
 
-        String authenticationToken = this.getAuthenticationToken();
-
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -1072,9 +1050,8 @@ public class RegistryManager
         String moduleJson = module.toDeviceParser().toJson();
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, module.getDeviceId(), module.getId());
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, moduleJson.getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, moduleJson.getBytes());
 
         HttpResponse response = request.send();
 
@@ -1107,9 +1084,8 @@ public class RegistryManager
         }
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, deviceId, moduleId);
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -1136,9 +1112,8 @@ public class RegistryManager
         }
 
         URL url = IotHubConnectionString.getUrlModulesOnDevice(this.hostName, deviceId);
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -1200,9 +1175,8 @@ public class RegistryManager
         module.setForceUpdate(forceUpdate);
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, module.getDeviceId(), module.getId());
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, module.toDeviceParser().toJson().getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, module.toDeviceParser().toJson().getBytes());
         request.setHeaderField("If-Match", "*");
 
         HttpResponse response = request.send();
@@ -1274,7 +1248,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlModule(this.hostName, deviceId, moduleId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], getAuthenticationToken());
+        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setHeaderField("If-Match", etag);
 
         HttpResponse response = request.send();
@@ -1302,9 +1276,8 @@ public class RegistryManager
         String configurationJson = configuration.toConfigurationParser().toJson();
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configurationJson.getBytes(), authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configurationJson.getBytes());
 
         HttpResponse response = request.send();
 
@@ -1332,9 +1305,8 @@ public class RegistryManager
         }
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configurationId);
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -1362,9 +1334,8 @@ public class RegistryManager
         }
 
         URL url = IotHubConnectionString.getUrlConfigurationsList(this.hostName, maxCount);
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0], authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.GET, new byte[0]);
 
         HttpResponse response = request.send();
 
@@ -1426,13 +1397,8 @@ public class RegistryManager
         configuration.setForceUpdate(forceUpdate);
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configuration.getId());
-        String authenticationToken = this.getAuthenticationToken();
 
-        HttpRequest request = CreateRequest(
-                url,
-                HttpMethod.PUT,
-                configuration.toConfigurationParser().toJson().getBytes(),
-                authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.PUT, configuration.toConfigurationParser().toJson().getBytes());
 
         request.setHeaderField("If-Match", "*");
 
@@ -1497,7 +1463,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlConfiguration(this.hostName, configurationId);
 
-        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0], getAuthenticationToken());
+        HttpRequest request = CreateRequest(url, HttpMethod.DELETE, new byte[0]);
         request.setHeaderField("If-Match", etag);
 
         HttpResponse response = request.send();
@@ -1522,13 +1488,7 @@ public class RegistryManager
 
         URL url = IotHubConnectionString.getUrlApplyConfigurationContent(this.hostName, deviceId);
 
-        String authenticationToken = this.getAuthenticationToken();
-
-        HttpRequest request = CreateRequest(
-                url,
-                HttpMethod.POST,
-                content.toConfigurationContentParser().toJson().getBytes(),
-                authenticationToken);
+        HttpRequest request = CreateRequest(url, HttpMethod.POST, content.toConfigurationContentParser().toJson().getBytes());
 
         HttpResponse response = request.send();
 
@@ -1559,7 +1519,7 @@ public class RegistryManager
         return new JobProperties(new JobPropertiesParser(bodyStr));
     }
 
-    private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload, String authenticationToken)
+    private HttpRequest CreateRequest(URL url, HttpMethod method, byte[] payload)
             throws IOException
     {
         Proxy proxy = null;
@@ -1572,7 +1532,7 @@ public class RegistryManager
         request.setReadTimeoutMillis(options.getHttpReadTimeout());
         request.setConnectTimeoutMillis(options.getHttpConnectTimeout());
 
-        request.setHeaderField("authorization", authenticationToken);
+        request.setHeaderField("authorization", getAuthenticationToken());
         request.setHeaderField("Request-Id", "1001");
         request.setHeaderField("Accept", "application/json");
         request.setHeaderField("Content-Type", "application/json");
