@@ -30,28 +30,23 @@ import java.util.Collection;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
+@SuppressWarnings("unused")
 public class BulkEnrollmentOperationError
 {
     // the registration identifier
-    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
     private static final String REGISTRATION_ID_TAG = "registrationId";
-    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
     @Expose
     @SerializedName(REGISTRATION_ID_TAG)
     private String registrationId;
 
     // the error code
-    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
     private static final String ERROR_CODE_TAG = "errorCode";
-    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
     @Expose
     @SerializedName(ERROR_CODE_TAG)
     private Integer errorCode;
 
     // the error status
-    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
     private static final String ERROR_STATUS_TAG = "errorStatus";
-    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
     @Expose
     @SerializedName(ERROR_STATUS_TAG)
     private String errorStatus;
@@ -110,7 +105,6 @@ public class BulkEnrollmentOperationError
      *     Used only by the tools that will deserialize this class.
      * </p>
      */
-    @SuppressWarnings("unused")
     BulkEnrollmentOperationError()
     {
         /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */

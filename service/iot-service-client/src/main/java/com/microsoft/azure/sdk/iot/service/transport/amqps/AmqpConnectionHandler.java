@@ -121,6 +121,7 @@ public class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithCleanup
 
             SslDomain domain = makeDomain();
             domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+            transport.ssl(domain);
 
             if (this.proxyOptions != null)
             {
