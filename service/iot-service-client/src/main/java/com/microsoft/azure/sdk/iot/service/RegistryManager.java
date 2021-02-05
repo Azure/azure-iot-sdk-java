@@ -43,7 +43,7 @@ public class RegistryManager
 {
     private static final int EXECUTOR_THREAD_POOL_SIZE = 10;
     private ExecutorService executor;
-    private String hostName;
+    private final String hostName;
     private TokenCredential credential;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
@@ -66,6 +66,7 @@ public class RegistryManager
                 .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
                 .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
                 .build();
+        hostName = ""; // only so that hostName can be declared final
     }
 
     /**
