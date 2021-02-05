@@ -142,7 +142,7 @@ public class DeviceDeletionSample
                         {
                             deviceIdsToRemove.add(d.getDeviceId());
 
-                            if (deviceIdsToRemove.size() > 100)
+                            if (deviceIdsToRemove.size() >= 100)
                             {
                                 System.out.println("Queried 100 devices, now attempting to delete them");
                                 break;
