@@ -6,9 +6,11 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
+import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -71,20 +73,41 @@ public class RegistryManagerTests extends IntegrationTest
         public String deviceId;
         public String moduleId;
         public String configId;
-        private final RegistryManager registryManager;
+        private RegistryManager registryManager;
 
-        public RegistryManagerTestInstance() throws InterruptedException, IOException, IotHubException, URISyntaxException
+        public RegistryManagerTestInstance()
         {
             this(RegistryManagerOptions.builder().build());
         }
 
-        public RegistryManagerTestInstance(RegistryManagerOptions options) throws InterruptedException, IOException, IotHubException, URISyntaxException
+        public RegistryManagerTestInstance(RegistryManagerOptions options)
+        {
+            this(false, options);
+        }
+
+        public RegistryManagerTestInstance(boolean withAzureSasCredential)
+        {
+            this(withAzureSasCredential, RegistryManagerOptions.builder().build());
+        }
+
+        public RegistryManagerTestInstance(boolean withAzureSasCredential, RegistryManagerOptions options)
         {
             String uuid = UUID.randomUUID().toString();
             deviceId = deviceIdPrefix + uuid;
             moduleId = moduleIdPrefix + uuid;
             configId = configIdPrefix + uuid;
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, options);
+
+            if (withAzureSasCredential)
+            {
+                IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+                IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+                AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+                registryManager = new RegistryManager(iotHubConnectionStringObj.getHostName(), sasCredential, options);
+            }
+            else
+            {
+                registryManager = new RegistryManager(iotHubConnectionString, options);
+            }
         }
     }
 
@@ -103,10 +126,22 @@ public class RegistryManagerTests extends IntegrationTest
     }
 
     @Test
-    public void deviceLifecycle() throws Exception
+    public void deviceLifecycleWithConnectionString() throws Exception
+    {
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
+        deviceLifecycle(testInstance);
+    }
+
+    @Test
+    public void deviceLifecycleWithAzureSasCredential() throws Exception
+    {
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(true);
+        deviceLifecycle(testInstance);
+    }
+
+    public static void deviceLifecycle(RegistryManagerTestInstance testInstance) throws Exception
     {
         //-Create-//
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         Device deviceAdded = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
         Tools.addDeviceWithRetry(testInstance.registryManager, deviceAdded);
 
