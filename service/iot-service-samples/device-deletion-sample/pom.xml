@@ -19,6 +19,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <dependencies>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -52,7 +54,6 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <finalName>deviceDeletionSample</finalName>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>

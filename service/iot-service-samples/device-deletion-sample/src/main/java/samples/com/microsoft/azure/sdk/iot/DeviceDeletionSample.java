@@ -5,13 +5,16 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.IndividualEnrollment;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QueryResult;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
 import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
@@ -19,9 +22,16 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -150,29 +160,8 @@ public class DeviceDeletionSample
                         return;
                     }
 
-                    for (String deviceIdToRemove : deviceIdsToRemove)
-                    {
-                        try
-                        {
-                            registryManager.removeDevice(deviceIdToRemove);
-                            System.out.println("Removed device " + deviceIdToRemove);
-                        }
-                        catch (Exception e)
-                        {
-                            System.out.println("Could not remove device with id " +deviceIdToRemove);
-                            e.printStackTrace();
 
-                            if (e instanceof IotHubNotFoundException)
-                            {
-                                System.out.print("NotFound error hit, querying next set of devices...");
-                                break;
-                            }
-                            else
-                            {
-                                System.out.println("Moving onto deleting the remaining devices anyways...");
-                            }
-                        }
-                    }
+                    removeDevices(deviceIdsToRemove, iotConnString);
 
                     deviceIdsToRemove.clear();
                 }
@@ -184,6 +173,47 @@ public class DeviceDeletionSample
                 }
             }
         }
+    }
+
+    // This call mimics what should be a registry manager API for adding devices in bulk. Can be removed once we add support in our
+    // registry manager for this
+    private static final String DELETE_IMPORT_MODE = "delete";
+    public static void removeDevices(Iterable<String> deviceIds, String connectionString) throws IOException, IotHubException {
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        URL url = getBulkDeviceAddUrl(iotHubConnectionString);
+
+        List<ExportImportDeviceParser> parsers = new ArrayList<>();
+        for (String deviceId : deviceIds)
+        {
+            ExportImportDeviceParser exportImportDevice = new ExportImportDeviceParser();
+            exportImportDevice.setId(deviceId);
+            exportImportDevice.setImportMode(DELETE_IMPORT_MODE);
+            parsers.add(exportImportDevice);
+        }
+
+        ExportImportDevicesParser body = new ExportImportDevicesParser();
+        body.setExportImportDevices(parsers);
+
+        String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
+
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
+        request.setHeaderField("authorization", sasTokenString);
+        request.setHeaderField("Accept", "application/json");
+        request.setHeaderField("Content-Type", "application/json");
+        request.setHeaderField("charset", "utf-8");
+
+        HttpResponse response = request.send();
+
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
+    public static URL getBulkDeviceAddUrl(IotHubConnectionString iotHubConnectionString) throws MalformedURLException
+    {
+        String stringBuilder = "https://" +
+                iotHubConnectionString.getHostName() +
+                "/devices/?api-version=" +
+                TransportUtils.IOTHUB_API_VERSION;
+        return new URL(stringBuilder);
     }
 
     public static class DPSCleanupRunnable implements Runnable
