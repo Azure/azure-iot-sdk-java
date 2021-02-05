@@ -10,7 +10,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.BearerTokenProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.SasTokenProvider;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientBearerTokenCredentialProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientCredentialsProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionString;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionStringParser;
@@ -42,10 +44,6 @@ import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
 public class DigitalTwinAsyncClient {
     private final DigitalTwinsImpl _protocolLayer;
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    private TokenCredential credential;
-    private AzureSasCredential azureSasCredential;
-    private IotHubConnectionString iotHubConnectionString;
 
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
@@ -84,14 +82,13 @@ public class DigitalTwinAsyncClient {
     public DigitalTwinAsyncClient(String hostName, TokenCredential credential) {
         final SimpleModule stringModule = new SimpleModule("String Serializer");
         stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
-        this.credential = credential;
-        SasTokenProvider sasTokenProvider = () -> this.credential.getToken(new TokenRequestContext()).block().getToken();
+        BearerTokenProvider bearerTokenProvider = () -> credential.getToken(new TokenRequestContext()).block().getToken();
 
         JacksonAdapter adapter = new JacksonAdapter();
         adapter.serializer().registerModule(stringModule);
         RestClient simpleRestClient = new RestClient.Builder()
-                .withBaseUrl(hostName)
-                .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
+                .withBaseUrl("https://" + hostName) //hostname is only "my-iot-hub.azure-devices.net" so we need to add "https://"
+                .withCredentials(new ServiceClientBearerTokenCredentialProvider(bearerTokenProvider))
                 .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
                 .withSerializerAdapter(adapter)
                 .build();
@@ -110,7 +107,6 @@ public class DigitalTwinAsyncClient {
     public DigitalTwinAsyncClient(String hostName, AzureSasCredential azureSasCredential) {
         final SimpleModule stringModule = new SimpleModule("String Serializer");
         stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
-        this.azureSasCredential = azureSasCredential;
         SasTokenProvider sasTokenProvider = azureSasCredential::getSignature;
 
         JacksonAdapter adapter = new JacksonAdapter();
