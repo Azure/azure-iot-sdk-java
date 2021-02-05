@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 
 import java.io.IOException;
@@ -97,13 +98,36 @@ public class DeviceDeletionSample
             System.out.println("Querying ");
 
             List<String> deviceIdsToRemove = new ArrayList<>();
+            SqlQuery sqlQuery = null;
+            try
+            {
+                sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            final Query twinQuery;
+            try
+            {
+                twinQuery = deviceTwin.queryTwin(sqlQuery.getQuery(), 100);
+            }
+            catch (IotHubException e)
+            {
+                e.printStackTrace();
+                return;
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                return;
+            }
+
             while (true)
             {
                 try
                 {
-                    SqlQuery sqlQuery = SqlQuery.createSqlQuery("*", SqlQuery.FromType.DEVICES, null, null);
-                    final Query twinQuery = deviceTwin.queryTwin(sqlQuery.getQuery(), 100);
-
                     while (deviceTwin.hasNextDeviceTwin(twinQuery))
                     {
                         DeviceTwinDevice d = deviceTwin.getNextDeviceTwin(twinQuery);
@@ -118,6 +142,12 @@ public class DeviceDeletionSample
                                 break;
                             }
                         }
+                    }
+
+                    if (deviceIdsToRemove.size() == 0)
+                    {
+                        System.out.print("No more devices to delete");
+                        System.exit(1);
                     }
 
                     for (String deviceIdToRemove : deviceIdsToRemove)
