@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@SuppressWarnings("ALL")
 public class RegistryGlue
 {
     HashMap<String, DeviceTwin> _map = new HashMap<>();

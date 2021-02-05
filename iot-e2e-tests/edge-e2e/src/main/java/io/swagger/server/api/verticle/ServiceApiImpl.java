@@ -6,6 +6,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
 
+@SuppressWarnings("ALL")
 public class ServiceApiImpl implements ServiceApi
 {
     public static ServiceGlue _serviceGlue = new ServiceGlue();

@@ -5,6 +5,7 @@ import io.swagger.server.api.model.ConnectResponse;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
+@SuppressWarnings("ALL")
 public class RegistryApiImpl implements RegistryApi
 {
     public static RegistryGlue _registryGlue = new RegistryGlue();

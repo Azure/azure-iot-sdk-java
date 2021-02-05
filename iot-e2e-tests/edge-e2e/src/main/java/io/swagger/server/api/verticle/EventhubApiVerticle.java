@@ -9,6 +9,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 import io.swagger.server.api.MainApiException;
 
+@SuppressWarnings("ALL")
 public class EventhubApiVerticle extends AbstractVerticle {
     final static Logger LOGGER = LoggerFactory.getLogger(EventhubApiVerticle.class); 
     

@@ -23,6 +23,7 @@ import java.net.*;
 import java.util.*;
 
 
+@SuppressWarnings("ALL")
 public class ModuleGlue
 {
     private static final long OPEN_RETRY_TIMEOUT = 3 * 60 * 1000;
