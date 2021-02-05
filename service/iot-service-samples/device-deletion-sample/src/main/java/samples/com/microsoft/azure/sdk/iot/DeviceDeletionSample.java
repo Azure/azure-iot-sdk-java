@@ -11,19 +11,15 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.EnrollmentGroup;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.IndividualEnrollment;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QueryResult;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.QuerySpecification;
-import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
-import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
-import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -160,8 +156,15 @@ public class DeviceDeletionSample
                         return;
                     }
 
-
-                    removeDevices(deviceIdsToRemove, iotConnString);
+                    try
+                    {
+                        removeDevices(deviceIdsToRemove, iotConnString);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        System.out.print("Failed to bulk delete, moving on to next set of devices");
+                    }
 
                     deviceIdsToRemove.clear();
                 }
