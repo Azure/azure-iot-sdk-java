@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -131,7 +132,15 @@ public class DeviceDeletionSample
                             System.out.println("Could not remove device with id " +deviceIdToRemove);
                             e.printStackTrace();
 
-                            System.out.println("Moving onto deleting the remaining devices anyways...");
+                            if (e instanceof IotHubNotFoundException)
+                            {
+                                System.out.print("NotFound error hit, querying next set of devices...");
+                                break;
+                            }
+                            else
+                            {
+                                System.out.println("Moving onto deleting the remaining devices anyways...");
+                            }
                         }
                     }
 
