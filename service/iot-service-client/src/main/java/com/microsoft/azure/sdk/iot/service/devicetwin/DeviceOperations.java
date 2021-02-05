@@ -91,7 +91,7 @@ public class DeviceOperations
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
          if (Tools.isNullOrEmpty(sasTokenString))
         {
-            throw new IOException("Illegal sasToken null or empty");
+            throw new IllegalArgumentException("Illegal sasToken null or empty");
         }
 
         HttpRequest request = new HttpRequest(url, method, payload);
@@ -171,7 +171,7 @@ public class DeviceOperations
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
         if (Tools.isNullOrEmpty(sasTokenString))
         {
-            throw new IOException("Illegal sasToken null or empty");
+            throw new IllegalArgumentException("Illegal sasToken null or empty");
         }
 
         HttpRequest request;

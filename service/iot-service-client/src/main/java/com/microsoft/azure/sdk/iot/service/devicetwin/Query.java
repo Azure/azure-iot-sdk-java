@@ -212,7 +212,16 @@ public class Query
             payload = new byte[0];
         }
 
-        HttpResponse httpResponse = DeviceOperations.request(iotHubConnectionString, url, method, payload, null, this.httpConnectTimeout, this.httpReadTimeout, null);
+        HttpResponse httpResponse =
+                DeviceOperations.request(
+                        iotHubConnectionString,
+                        url,
+                        method,
+                        payload,
+                        null,
+                        this.httpConnectTimeout,
+                        this.httpReadTimeout,
+                        null);
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();
@@ -233,12 +242,12 @@ public class Query
 
         if (this.responseQueryType == null || this.responseQueryType == QueryType.UNKNOWN)
         {
-            throw new IOException("Query response type is not defined by IotHub");
+            throw new IotHubException("Query response type is not defined by IotHub");
         }
 
         if (this.requestQueryType != this.responseQueryType)
         {
-            throw new IOException("Query response does not match query request");
+            throw new IotHubException("Query response does not match query request");
         }
 
         this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
@@ -302,7 +311,16 @@ public class Query
             payload = new byte[0];
         }
 
-        HttpResponse httpResponse = DeviceOperations.request(iotHubConnectionString, url, method, payload, null, httpConnectTimeout, httpReadTimeout, proxy);
+        HttpResponse httpResponse =
+                DeviceOperations.request(
+                        iotHubConnectionString,
+                        url,
+                        method,
+                        payload,
+                        null,
+                        httpConnectTimeout,
+                        httpReadTimeout,
+                        proxy);
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();
@@ -323,12 +341,12 @@ public class Query
 
         if (this.responseQueryType == null || this.responseQueryType == QueryType.UNKNOWN)
         {
-            throw new IOException("Query response type is not defined by IotHub");
+            throw new IotHubException("Query response type is not defined by IotHub");
         }
 
         if (this.requestQueryType != this.responseQueryType)
         {
-            throw new IOException("Query response does not match query request");
+            throw new IotHubException("Query response does not match query request");
         }
 
         this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
@@ -387,7 +405,16 @@ public class Query
             payload = new byte[0];
         }
 
-        HttpResponse httpResponse = DeviceOperations.request(azureSasCredential.getSignature(), url, method, payload, null, httpConnectTimeout, httpReadTimeout, proxy);
+        HttpResponse httpResponse =
+                DeviceOperations.request(
+                        azureSasCredential.getSignature(),
+                        url,
+                        method,
+                        payload,
+                        null,
+                        httpConnectTimeout,
+                        httpReadTimeout,
+                        proxy);
 
         this.responseContinuationToken = null;
         Map<String, String> headers = httpResponse.getHeaderFields();
@@ -408,12 +435,12 @@ public class Query
 
         if (this.responseQueryType == null || this.responseQueryType == QueryType.UNKNOWN)
         {
-            throw new IOException("Query response type is not defined by IotHub");
+            throw new IotHubException("Query response type is not defined by IotHub");
         }
 
         if (this.requestQueryType != this.responseQueryType)
         {
-            throw new IOException("Query response does not match query request");
+            throw new IotHubException("Query response does not match query request");
         }
 
         this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
@@ -502,12 +529,12 @@ public class Query
 
         if (this.responseQueryType == null || this.responseQueryType == QueryType.UNKNOWN)
         {
-            throw new IOException("Query response type is not defined by IotHub");
+            throw new IotHubException("Query response type is not defined by IotHub");
         }
 
         if (this.requestQueryType != this.responseQueryType)
         {
-            throw new IOException("Query response does not match query request");
+            throw new IotHubException("Query response does not match query request");
         }
 
         this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
