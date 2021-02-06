@@ -11,6 +11,7 @@ import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.RoundtripMethodCallBody;
 
+@SuppressWarnings("ALL")
 public class DeviceApiVerticle extends AbstractVerticle {
     final static Logger LOGGER = LoggerFactory.getLogger(DeviceApiVerticle.class); 
     

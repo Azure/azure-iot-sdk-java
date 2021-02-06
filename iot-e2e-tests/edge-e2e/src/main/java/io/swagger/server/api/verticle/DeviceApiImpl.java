@@ -6,7 +6,7 @@ import io.swagger.server.api.model.RoundtripMethodCallBody;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
-@SuppressWarnings("EmptyMethod")
+@SuppressWarnings("ALL")
 public class DeviceApiImpl implements DeviceApi
 {
     // These implementations are empty on purpose for future expansion.

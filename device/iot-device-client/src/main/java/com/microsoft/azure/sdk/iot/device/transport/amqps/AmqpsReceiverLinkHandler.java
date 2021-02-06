@@ -40,7 +40,6 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
     // this initial credit doesn't run out.
     private final Map<Message, AmqpsMessage> receivedMessagesMap = new ConcurrentHashMap<>();
     Map<Symbol, Object> amqpProperties;
-    String receiverLinkTag;
     String linkCorrelationId;
     String receiverLinkAddress;
     Receiver receiverLink;

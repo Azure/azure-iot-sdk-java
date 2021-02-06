@@ -143,9 +143,6 @@ public class HttpsRequestResponseSerializer
             throw new IOException("Version is not valid " + statusLineParts[0] + ".");
         }
 
-        //don't care about version right now
-        String version = httpVersion[1];
-
         int statusCode;
         try
         {

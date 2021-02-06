@@ -7,6 +7,7 @@ import io.swagger.server.api.model.RoundtripMethodCallBody;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
+@SuppressWarnings("ALL")
 public interface DeviceApi  {
     //PUT_device_connect_transportType
     void deviceConnectTransportTypePut(String transportType, String connectionString, Certificate caCertificate, Handler<AsyncResult<ConnectResponse>> handler);
