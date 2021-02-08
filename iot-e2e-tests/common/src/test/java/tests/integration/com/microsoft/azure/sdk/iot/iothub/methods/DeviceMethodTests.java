@@ -6,12 +6,17 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
 
+import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
@@ -55,6 +60,24 @@ public class DeviceMethodTests extends DeviceMethodCommon
     @StandardTierHubOnlyTest
     public void invokeMethodSucceed() throws Exception
     {
+        super.openDeviceClientAndSubscribeToMethods();
+        super.invokeMethodSucceed();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodSucceedWithAzureSasCredential() throws Exception
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+
+        this.testInstance.methodServiceClient =
+            new DeviceMethod(
+                iotHubConnectionStringObj.getHostName(),
+                sasCredential,
+                DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+
         super.openDeviceClientAndSubscribeToMethods();
         super.invokeMethodSucceed();
     }
