@@ -630,7 +630,19 @@ public class DeviceTwin
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        Job job = new Job(this.hostName, this.credential);
+        Job job;
+        if (this.credential != null)
+        {
+            job = new Job(this.hostName, this.credential);
+        }
+        else if (this.azureSasCredential != null)
+        {
+            job = new Job(this.hostName, this.azureSasCredential);
+        }
+        else
+        {
+            job = new Job(this.iotHubConnectionString.toString());
+        }
 
         job.scheduleUpdateTwin(queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 
