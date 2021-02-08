@@ -110,14 +110,10 @@ public class DeviceMethod
      */
     public DeviceMethod(String connectionString, DeviceMethodClientOptions options)
     {
-        if (connectionString == null || connectionString.length() == 0)
+        Objects.requireNonNull(options);
+        if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("Connection string cannot be null or empty");
-        }
-
-        if (options == null)
-        {
-            throw new IllegalArgumentException("options may not be null");
         }
 
         this.hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString).getHostName();
@@ -371,12 +367,9 @@ public class DeviceMethod
         {
             return this.credential.getToken(new TokenRequestContext()).block().getToken();
         }
-        else
+        else if (this.azureSasCredential != null)
         {
-            if (this.azureSasCredential != null)
-            {
-                return this.azureSasCredential.getSignature();
-            }
+            return this.azureSasCredential.getSignature();
         }
 
         return new IotHubServiceSasToken(iotHubConnectionString).toString();
