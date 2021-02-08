@@ -201,7 +201,7 @@ public class DeviceMethod
      * @param payload is the the method parameter.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
-     * @throws IOException     This exception is thrown if the IO operation failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
      */
     public synchronized MethodResult invoke(
         String deviceId,
@@ -235,7 +235,7 @@ public class DeviceMethod
      * @param payload is the the method parameter.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
-     * @throws IOException     This exception is thrown if the IO operation failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
      */
     public synchronized MethodResult invoke(
         String deviceId,
@@ -275,7 +275,7 @@ public class DeviceMethod
      * @param payload is the the method parameter.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
-     * @throws IOException     This exception is thrown if the IO operation failed.
+     * @throws IOException This exception is thrown if the IO operation failed.
      */
     private synchronized MethodResult invokeMethod(
         URL url,
@@ -321,7 +321,7 @@ public class DeviceMethod
      * @param startTimeUtc Date time in Utc to start the job.
      * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run.
      * @return a Job class that represent this job on IotHub.
-     * @throws IOException     if the function contains invalid parameters.
+     * @throws IOException if the function contains invalid parameters.
      * @throws IotHubException if the http request failed.
      */
     public Job scheduleDeviceMethod(
