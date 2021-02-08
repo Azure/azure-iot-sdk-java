@@ -93,7 +93,7 @@ public class JobClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
-     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     * this library when they are needed. The provided tokens must be Json Web Tokens.
      * @return The new JobClient instance.
      */
     public JobClient(String hostName, TokenCredential credential)
@@ -106,7 +106,7 @@ public class JobClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
-     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     * this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param options The connection options to use when connecting to the service.
      * @return The new JobClient instance.
      */
@@ -458,6 +458,7 @@ public class JobClient
 
     /**
      * Query for device Job
+     *
      * @param sqlQuery sql style query over device.jobs
      * @param pageSize the value per which to limit the size of query response by.
      * @return Query object for this query
@@ -517,6 +518,7 @@ public class JobClient
 
     /**
      * Query for device Job limited by default page size of 100 for response
+     *
      * @param sqlQuery sql style query over device.jobs
      * @return Query object for this query
      * @throws IotHubException When IotHub fails to respond
@@ -529,6 +531,7 @@ public class JobClient
 
     /**
      * returns the availability of next job result in response. Query's further if page size has been met
+     *
      * @param query Query for which to look for next job response by
      * @return true if next job result is available , false otherwise
      * @throws IotHubException When IotHub fails to respond
@@ -546,6 +549,7 @@ public class JobClient
 
     /**
      * returns the next job result in response. Query's further if page size has been met and has next is not called
+     *
      * @param query Query for which to look for next job response by
      * @return next job result if available
      * @throws IotHubException When IotHub fails to respond
@@ -573,6 +577,7 @@ public class JobClient
 
     /**
      * Query the iot hub for a jobs response. Query response are limited by page size per attempt
+     *
      * @param jobType The type of job to query for
      * @param jobStatus The status of the job to query for
      * @param pageSize The value to which to limit the job response size by
@@ -628,8 +633,10 @@ public class JobClient
 
         return jobResponseQuery;
     }
+
     /**
      * Query the iot hub for a jobs response. Query response are limited by default page size per attempt
+     *
      * @param jobType The type of job to query for
      * @param jobStatus The status of the job to query for
      * @return A query object on which to look for responses by
