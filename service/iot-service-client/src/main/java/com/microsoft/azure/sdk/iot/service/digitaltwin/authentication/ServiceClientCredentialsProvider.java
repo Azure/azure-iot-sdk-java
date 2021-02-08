@@ -20,10 +20,9 @@ public class ServiceClientCredentialsProvider implements ServiceClientCredential
     @Override
     public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
         Interceptor authenticationInterceptor = chain -> {
-            String authorizationValue = sasTokenProvider.getSasToken();
             Request authenticatedRequest = chain.request()
                                                 .newBuilder()
-                                                .header(AUTHORIZATION, authorizationValue)
+                                                .header(AUTHORIZATION, sasTokenProvider.getSasToken())
                                                 .build();
             return chain.proceed(authenticatedRequest);
         };
