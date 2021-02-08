@@ -24,7 +24,7 @@ public class ServiceClientBearerTokenCredentialProvider implements ServiceClient
     @Override
     public void applyCredentialsFilter(OkHttpClient.Builder clientBuilder) {
         Interceptor authenticationInterceptor = chain -> {
-            String authorizationValue = tokenProvider.getAuthenticationToken();
+            String authorizationValue = tokenProvider.getBearerToken();
             Request authenticatedRequest = chain.request()
                                                 .newBuilder()
                                                 .header(AUTHORIZATION, authorizationValue)
