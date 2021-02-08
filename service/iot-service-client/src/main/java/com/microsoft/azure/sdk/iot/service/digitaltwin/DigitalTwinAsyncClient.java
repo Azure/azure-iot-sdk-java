@@ -3,10 +3,15 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
+import com.azure.core.credential.TokenRequestContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.BearerTokenProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.SasTokenProvider;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientBearerTokenCredentialProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientCredentialsProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionString;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionStringParser;
@@ -34,38 +39,96 @@ import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
  * <p>
  * The Digital Twins Service Client contains asynchronous methods to retrieve and update digital twin information, and invoke commands on a digital twin device.
  * </p>
- * */
+ */
 public class DigitalTwinAsyncClient {
     private final DigitalTwinsImpl _protocolLayer;
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String HTTPS_SCHEME= "https://";
 
-    DigitalTwinAsyncClient(String connectionString) {
-    ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
-    SasTokenProvider sasTokenProvider = serviceConnectionString.createSasTokenProvider();
-    String httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
-    final SimpleModule stringModule = new SimpleModule("String Serializer");
-    stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param connectionString The IoTHub connection string
+     * @return The instantiated DigitalTwinAsyncClient.
+     */
+    public DigitalTwinAsyncClient(String connectionString) {
+        ServiceConnectionString serviceConnectionString = ServiceConnectionStringParser.parseConnectionString(connectionString);
+        SasTokenProvider sasTokenProvider = serviceConnectionString.createSasTokenProvider();
+        String httpsEndpoint = serviceConnectionString.getHttpsEndpoint();
+        final SimpleModule stringModule = new SimpleModule("String Serializer");
+        stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
 
-    JacksonAdapter adapter = new JacksonAdapter();
-    adapter.serializer().registerModule(stringModule);
-    RestClient simpleRestClient = new RestClient.Builder()
-        .withBaseUrl(httpsEndpoint)
-        .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
-        .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
-        .withSerializerAdapter(adapter)
-        .build();
+        JacksonAdapter adapter = new JacksonAdapter();
+        adapter.serializer().registerModule(stringModule);
+        RestClient simpleRestClient = new RestClient.Builder()
+            .withBaseUrl(httpsEndpoint)
+            .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
+            .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
+            .withSerializerAdapter(adapter)
+            .build();
 
-    IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
-    _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
+        _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
     }
 
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
-     * @param connectionString The IoTHub connection string
-     * @return DigitalTwinAsyncClient
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     * this library when they are needed.
+     * @return The instantiated DigitalTwinAsyncClient.
      */
-    public static DigitalTwinAsyncClient createFromConnectionString(String connectionString)
-    {
+    public DigitalTwinAsyncClient(String hostName, TokenCredential credential) {
+        final SimpleModule stringModule = new SimpleModule("String Serializer");
+        stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
+        BearerTokenProvider bearerTokenProvider = () -> credential.getToken(new TokenRequestContext()).block().getToken();
+
+        JacksonAdapter adapter = new JacksonAdapter();
+        adapter.serializer().registerModule(stringModule);
+        RestClient simpleRestClient = new RestClient.Builder()
+            .withBaseUrl(HTTPS_SCHEME + hostName) //hostname is only "my-iot-hub.azure-devices.net" so we need to add "https://"
+            .withCredentials(new ServiceClientBearerTokenCredentialProvider(bearerTokenProvider))
+            .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
+            .withSerializerAdapter(adapter)
+            .build();
+
+        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
+        _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @return The instantiated DigitalTwinAsyncClient.
+     */
+    public DigitalTwinAsyncClient(String hostName, AzureSasCredential azureSasCredential) {
+        final SimpleModule stringModule = new SimpleModule("String Serializer");
+        stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
+        SasTokenProvider sasTokenProvider = azureSasCredential::getSignature;
+
+        JacksonAdapter adapter = new JacksonAdapter();
+        adapter.serializer().registerModule(stringModule);
+        RestClient simpleRestClient = new RestClient.Builder()
+            .withBaseUrl(HTTPS_SCHEME + hostName) //hostname is only "my-iot-hub.azure-devices.net" so we need to add "https://"
+            .withCredentials(new ServiceClientCredentialsProvider(sasTokenProvider))
+            .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
+            .withSerializerAdapter(adapter)
+            .build();
+
+        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
+        _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param connectionString The IoTHub connection string
+     * @return The instantiated DigitalTwinAsyncClient.
+     */
+    public static DigitalTwinAsyncClient createFromConnectionString(String connectionString) {
         return new DigitalTwinAsyncClient(connectionString);
     }
 
