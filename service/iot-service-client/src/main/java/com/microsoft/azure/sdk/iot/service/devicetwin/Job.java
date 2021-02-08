@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
@@ -17,8 +19,8 @@ import java.util.UUID;
  */
 public class Job
 {
-    private final String jobId;
-    private final JobClient jobClient;
+    private String jobId;
+    private JobClient jobClient;
 
     /**
      * CONSTRUCTOR
@@ -63,6 +65,16 @@ public class Job
         /* Codes_SRS_JOB_21_004: [The constructor shall create a new instance of JobClient to manage the Job.] */
         /* Codes_SRS_JOB_21_005: [The constructor shall throw IOException if it failed to create a new instance of the JobClient. Threw by the JobClient constructor.] */
         this.jobClient = JobClient.createFromConnectionString(connectionString);
+    }
+
+    Job(String hostName, TokenCredential tokenCredential)
+    {
+        //TODO empty implementation for now since this PR is for twin/query, not jobs
+    }
+
+    Job(String hostName, AzureSasCredential azureSasCredential)
+    {
+        //TODO empty implementation for now since this PR is for twin/query, not jobs
     }
 
     /**

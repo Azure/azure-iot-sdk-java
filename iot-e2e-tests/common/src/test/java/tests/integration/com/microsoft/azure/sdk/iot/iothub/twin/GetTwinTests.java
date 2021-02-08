@@ -5,10 +5,15 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -42,9 +47,26 @@ public class GetTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testGetDeviceTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         super.setUpNewDeviceAndModule();
+        super.testGetDeviceTwin();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void testGetDeviceTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    {
+        super.setUpNewDeviceAndModule();
+
+        IotHubConnectionString iotHubConnectionStringObj =
+                IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+
         super.testGetDeviceTwin();
     }
 

@@ -5,12 +5,17 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +75,26 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
+    public void testRawQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
+        testRawQueryTwin();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void testRawQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        IotHubConnectionString iotHubConnectionStringObj =
+                IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        testRawQueryTwin();
+    }
+
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES, false);
@@ -271,7 +296,27 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
+        testQueryTwin();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void testQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        IotHubConnectionString iotHubConnectionStringObj =
+                IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        testQueryTwin();
+    }
+
+    public void testQueryTwin() throws InterruptedException, ModuleClientException, IOException, GeneralSecurityException, IotHubException, URISyntaxException
     {
         addMultipleDevices(MAX_DEVICES, false);
 
@@ -402,7 +447,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     public void queryCollectionCanReturnEmptyQueryResults() throws IOException, IotHubException
     {
         String fullQuery = "select * from devices where deviceId='nonexistantdevice'";
-        DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        DeviceTwin twinClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         QueryCollection twinQuery = twinClient.queryTwinCollection(fullQuery);
         QueryOptions options = new QueryOptions();
         QueryCollectionResponse<DeviceTwinDevice> response = twinClient.next(twinQuery, options);
