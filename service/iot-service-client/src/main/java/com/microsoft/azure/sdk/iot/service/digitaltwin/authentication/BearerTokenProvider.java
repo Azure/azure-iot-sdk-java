@@ -9,7 +9,7 @@ package com.microsoft.azure.sdk.iot.service.digitaltwin.authentication;
 public interface BearerTokenProvider {
 
     /**
-     * Get a bearer token.
+     * Get a bearer token. The token is expected to be in the format "Bearer <token>"
      * @return a bearer token.
      */
     String getBearerToken();
