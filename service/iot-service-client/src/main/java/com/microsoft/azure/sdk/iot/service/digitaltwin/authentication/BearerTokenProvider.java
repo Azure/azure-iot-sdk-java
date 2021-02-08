@@ -4,7 +4,7 @@
 package com.microsoft.azure.sdk.iot.service.digitaltwin.authentication;
 
 /**
- * Interface for providing a Bearer authentication token for use in RBAC based authentication.
+ * Interface for providing a bearer authentication token for use in RBAC based authentication.
  */
 public interface BearerTokenProvider {
 
