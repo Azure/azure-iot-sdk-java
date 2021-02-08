@@ -61,7 +61,7 @@ public class DeviceMethod
      * Create a DeviceMethod instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
-     * @param options          the configurable options for each operation on this client. May not be null.
+     * @param options the configurable options for each operation on this client. May not be null.
      * @return an instance of the DeviceMethod.
      * @throws IOException This exception is never thrown.
      * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
@@ -105,7 +105,7 @@ public class DeviceMethod
      * Create a DeviceMethod instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
-     * @param options          the configurable options for each operation on this client. May not be null.
+     * @param options the configurable options for each operation on this client. May not be null.
      * @return an instance of the DeviceMethod.
      */
     public DeviceMethod(String connectionString, DeviceMethodClientOptions options)
@@ -128,9 +128,9 @@ public class DeviceMethod
     /**
      * Create a new DeviceMethod instance.
      *
-     * @param hostName   The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
-     *                   this library when they are needed. The provided tokens must be Json Web Tokens.
+     * this library when they are needed. The provided tokens must be Json Web Tokens.
      * @return the new DeviceMethod instance.
      */
     public DeviceMethod(String hostName, TokenCredential credential)
@@ -141,10 +141,10 @@ public class DeviceMethod
     /**
      * Create a new DeviceMethod instance.
      *
-     * @param hostName   The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
-     *                   this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param options    The connection options to use when connecting to the service.
+     * this library when they are needed. The provided tokens must be Json Web Tokens.
+     * @param options The connection options to use when connecting to the service.
      * @return the new DeviceMethod instance.
      */
     public DeviceMethod(String hostName, TokenCredential credential, DeviceMethodClientOptions options)
@@ -164,7 +164,7 @@ public class DeviceMethod
     /**
      * Create a new DeviceMethod instance.
      *
-     * @param hostName           The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @return the new DeviceMethod instance.
      */
@@ -176,9 +176,9 @@ public class DeviceMethod
     /**
      * Create a new DeviceMethod instance.
      *
-     * @param hostName           The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @param options            The connection options to use when connecting to the service.
+     * @param options The connection options to use when connecting to the service.
      * @return the new DeviceMethod instance.
      */
     public DeviceMethod(String hostName, AzureSasCredential azureSasCredential, DeviceMethodClientOptions options)
@@ -198,11 +198,11 @@ public class DeviceMethod
     /**
      * Directly invokes a method on the device and return its result.
      *
-     * @param deviceId                 is the device where the request is send to.
-     * @param methodName               is the name of the method that shall be invoked on the device.
+     * @param deviceId is the device where the request is send to.
+     * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
-     * @param connectTimeoutInSeconds  is the maximum waiting time for a response from the connection in seconds.
-     * @param payload                  is the the method parameter.
+     * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
+     * @param payload is the the method parameter.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException     This exception is thrown if the IO operation failed.
@@ -231,12 +231,12 @@ public class DeviceMethod
     /**
      * Directly invokes a method on the module and return its result.
      *
-     * @param deviceId                 is the device where the module is related to.
-     * @param moduleId                 is the module where the request is sent to.
-     * @param methodName               is the name of the method that shall be invoked on the device.
+     * @param deviceId is the device where the module is related to.
+     * @param moduleId is the module where the request is sent to.
+     * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
-     * @param connectTimeoutInSeconds  is the maximum waiting time for a response from the connection in seconds.
-     * @param payload                  is the the method parameter.
+     * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
+     * @param payload is the the method parameter.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException     This exception is thrown if the IO operation failed.
@@ -272,11 +272,11 @@ public class DeviceMethod
     /**
      * Directly invokes a method on the device and return its result.
      *
-     * @param url                      is the path where the request is send to.
-     * @param methodName               is the name of the method that shall be invoked on the device.
+     * @param url is the path where the request is send to.
+     * @param methodName is the name of the method that shall be invoked on the device.
      * @param responseTimeoutInSeconds is the maximum waiting time for a response from the device in seconds.
-     * @param connectTimeoutInSeconds  is the maximum waiting time for a response from the connection in seconds.
-     * @param payload                  is the the method parameter.
+     * @param connectTimeoutInSeconds is the maximum waiting time for a response from the connection in seconds.
+     * @param payload is the the method parameter.
      * @return the status and payload resulted from the method invoke.
      * @throws IotHubException This exception is thrown if the response verification failed.
      * @throws IOException     This exception is thrown if the IO operation failed.
@@ -317,12 +317,12 @@ public class DeviceMethod
     /**
      * Creates a new Job to invoke method on one or multiple devices.
      *
-     * @param queryCondition            Query condition to evaluate which devices to run the job on. It can be {@code null} or empty.
-     * @param methodName                Method name to be invoked.
-     * @param responseTimeoutInSeconds  Maximum interval of time, in seconds, that the Direct Method will wait for answer. It can be {@code null}.
-     * @param connectTimeoutInSeconds   Maximum interval of time, in seconds, that the Direct Method will wait for the connection. It can be {@code null}.
-     * @param payload                   Object that contains the payload defined by the user. It can be {@code null}.
-     * @param startTimeUtc              Date time in Utc to start the job.
+     * @param queryCondition Query condition to evaluate which devices to run the job on. It can be {@code null} or empty.
+     * @param methodName Method name to be invoked.
+     * @param responseTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for answer. It can be {@code null}.
+     * @param connectTimeoutInSeconds Maximum interval of time, in seconds, that the Direct Method will wait for the connection. It can be {@code null}.
+     * @param payload Object that contains the payload defined by the user. It can be {@code null}.
+     * @param startTimeUtc Date time in Utc to start the job.
      * @param maxExecutionTimeInSeconds Max execution time in seconds, i.e., ttl duration the job can run.
      * @return a Job class that represent this job on IotHub.
      * @throws IOException     if the function contains invalid parameters.
