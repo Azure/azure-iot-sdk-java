@@ -66,7 +66,9 @@ public class RegistryManager
                 .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
                 .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
                 .build();
-        hostName = ""; // only so that hostName can be declared final
+
+        // we don't use hostname in this constructor, so assign it an empty value to satisfy the field being marked final
+        hostName = "";
     }
 
     /**
