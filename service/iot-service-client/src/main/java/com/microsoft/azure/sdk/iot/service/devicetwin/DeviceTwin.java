@@ -358,36 +358,15 @@ public class DeviceTwin
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
-        if (this.credential != null)
-        {
-            deviceTwinQuery.sendQueryRequest(
-                    this.credential,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    options.getHttpConnectTimeout(),
-                    options.getHttpReadTimeout(),
-                    proxy);
-        }
-        else if (this.azureSasCredential != null)
-        {
-            deviceTwinQuery.sendQueryRequest(
-                    this.azureSasCredential,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    options.getHttpConnectTimeout(),
-                    options.getHttpReadTimeout(),
-                    proxy);
-        }
-        else
-        {
-            deviceTwinQuery.sendQueryRequest(
-                    this.iotHubConnectionString,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    options.getHttpConnectTimeout(),
-                    options.getHttpReadTimeout(),
-                    proxy);
-        }
+        deviceTwinQuery.sendQueryRequest(
+                this.credential,
+                this.azureSasCredential,
+                this.iotHubConnectionString,
+                IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                HttpMethod.POST,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
 
         return deviceTwinQuery;
     }

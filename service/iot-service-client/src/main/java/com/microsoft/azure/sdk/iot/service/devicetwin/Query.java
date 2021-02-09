@@ -11,6 +11,7 @@ import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -126,36 +127,15 @@ public class Query
     {
         this.requestContinuationToken = continuationToken;
 
-        if (this.credential != null)
-        {
             sendQueryRequest(
                     this.credential,
-                    this.url,
-                    this.httpMethod,
-                    this.httpConnectTimeout,
-                    this.httpReadTimeout,
-                    this.proxy);
-        }
-        else if (this.azureSasCredential != null)
-        {
-            sendQueryRequest(
                     this.azureSasCredential,
-                    this.url,
-                    this.httpMethod,
-                    this.httpConnectTimeout,
-                    this.httpReadTimeout,
-                    this.proxy);
-        }
-        else
-        {
-            sendQueryRequest(
                     this.iotHubConnectionString,
                     this.url,
                     this.httpMethod,
                     this.httpConnectTimeout,
                     this.httpReadTimeout,
                     this.proxy);
-        }
     }
 
     /**
@@ -356,101 +336,9 @@ public class Query
     /**
      * Sends request for the query to the IotHub.
      *
-     * @param azureSasCredential The SAS authorization token provider.
-     * @param url URL to Query on.
-     * @param method HTTP Method for the requesting a query.
-     * @param httpConnectTimeout the http connect timeout to use for this request.
-     * @param httpReadTimeout the http read timeout to use for this request.
-     * @param proxy the proxy to use, or null if no proxy should be used.
-     * @return QueryResponse object which holds the response Iterator.
-     * @throws IOException If any of the input parameters are not valid.
-     * @throws IotHubException If HTTP response other then status ok is received.
-     */
-    public QueryResponse sendQueryRequest(
-            AzureSasCredential azureSasCredential,
-            URL url,
-            HttpMethod method,
-            int httpConnectTimeout,
-            int httpReadTimeout,
-            Proxy proxy)
-            throws IOException, IotHubException
-    {
-        this.url = url;
-        this.httpMethod = method;
-        this.azureSasCredential = azureSasCredential;
-
-        this.httpConnectTimeout = httpConnectTimeout;
-        this.httpReadTimeout = httpReadTimeout;
-
-        this.proxy = proxy;
-
-        byte[] payload;
-        Map<String, String> queryHeaders = new HashMap<>();
-
-        if (this.requestContinuationToken != null)
-        {
-            queryHeaders.put(CONTINUATION_TOKEN_KEY, requestContinuationToken);
-        }
-        queryHeaders.put(PAGE_SIZE_KEY, String.valueOf(pageSize));
-
-        DeviceOperations.setHeaders(queryHeaders);
-
-        if (isSqlQuery)
-        {
-            QueryRequestParser requestParser = new QueryRequestParser(this.query);
-            payload = requestParser.toJson().getBytes();
-        }
-        else
-        {
-            payload = new byte[0];
-        }
-
-        HttpResponse httpResponse =
-                DeviceOperations.request(
-                        azureSasCredential.getSignature(),
-                        url,
-                        method,
-                        payload,
-                        null,
-                        httpConnectTimeout,
-                        httpReadTimeout,
-                        proxy);
-
-        this.responseContinuationToken = null;
-        Map<String, String> headers = httpResponse.getHeaderFields();
-        for (Map.Entry<String, String> header : headers.entrySet())
-        {
-            switch (header.getKey())
-            {
-                case CONTINUATION_TOKEN_KEY:
-                    this.responseContinuationToken = header.getValue();
-                    break;
-                case ITEM_TYPE_KEY:
-                    this.responseQueryType = QueryType.fromString(header.getValue());
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        if (this.responseQueryType == null || this.responseQueryType == QueryType.UNKNOWN)
-        {
-            throw new IotHubException("Query response type is not defined by IotHub");
-        }
-
-        if (this.requestQueryType != this.responseQueryType)
-        {
-            throw new IotHubException("Query response does not match query request");
-        }
-
-        this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
-        return this.queryResponse;
-    }
-
-    /**
-     * Sends request for the query to the IotHub.
-     *
-     * @param credential The authorization token provider.
+     * @param credential The RBAC authorization token provider. May be null if azureSasCredential or iotHubConnectionString is not.
+     * @param azureSasCredential The SAS authorization token provider. May be null if credential or iotHubConnectionString is not.
+     * @param iotHubConnectionString The iot hub connection string that SAS tokens will be derived from. May be null if azureSasCredential or credential is not.
      * @param url URL to Query on.
      * @param method HTTP Method for the requesting a query.
      * @param httpConnectTimeout the http connect timeout to use for this request.
@@ -462,6 +350,8 @@ public class Query
      */
     public QueryResponse sendQueryRequest(
             TokenCredential credential,
+            AzureSasCredential azureSasCredential,
+            IotHubConnectionString iotHubConnectionString,
             URL url,
             HttpMethod method,
             int httpConnectTimeout,
@@ -471,8 +361,10 @@ public class Query
     {
         this.url = url;
         this.httpMethod = method;
-
+        this.azureSasCredential = azureSasCredential;
         this.credential = credential;
+        this.iotHubConnectionString = iotHubConnectionString;
+
         this.httpConnectTimeout = httpConnectTimeout;
         this.httpReadTimeout = httpReadTimeout;
 
@@ -499,9 +391,23 @@ public class Query
             payload = new byte[0];
         }
 
+        String authorizationToken;
+        if (credential != null)
+        {
+            authorizationToken = credential.getToken(new TokenRequestContext()).block().getToken();
+        }
+        else if (azureSasCredential != null)
+        {
+            authorizationToken = azureSasCredential.getSignature();
+        }
+        else
+        {
+            authorizationToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
+        }
+
         HttpResponse httpResponse =
                 DeviceOperations.request(
-                        credential.getToken(new TokenRequestContext()).block().getToken(),
+                        authorizationToken,
                         url,
                         method,
                         payload,
@@ -540,7 +446,6 @@ public class Query
         this.queryResponse = new QueryResponse(new String(httpResponse.getBody()));
         return this.queryResponse;
     }
-
 
     /**
      * Getter for the continuation token received on response

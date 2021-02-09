@@ -504,36 +504,15 @@ public class JobClient
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
-        if (this.credential != null)
-        {
-            deviceJobQuery.sendQueryRequest(
-                this.credential,
-                IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                HttpMethod.POST,
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
-        }
-        else if (this.azureSasCredential != null)
-        {
-            deviceJobQuery.sendQueryRequest(
-                this.azureSasCredential,
-                IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                HttpMethod.POST,
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
-        }
-        else
-        {
-            deviceJobQuery.sendQueryRequest(
-                this.iotHubConnectionString,
-                IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                HttpMethod.POST,
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
-        }
+        deviceJobQuery.sendQueryRequest(
+            this.credential,
+            this.azureSasCredential,
+            this.iotHubConnectionString,
+            IotHubConnectionString.getUrlTwinQuery(this.hostName),
+            HttpMethod.POST,
+            options.getHttpConnectTimeout(),
+            options.getHttpReadTimeout(),
+            proxy);
 
         return deviceJobQuery;
     }
@@ -622,36 +601,15 @@ public class JobClient
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
-        if (this.credential != null)
-        {
-            jobResponseQuery.sendQueryRequest(
-                this.credential,
-                IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),
-                HttpMethod.GET,
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
-        }
-        else if (this.azureSasCredential != null)
-        {
-            jobResponseQuery.sendQueryRequest(
-                this.azureSasCredential,
-                IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),
-                HttpMethod.GET,
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
-        }
-        else
-        {
-            jobResponseQuery.sendQueryRequest(
-                this.iotHubConnectionString,
-                IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),
-                HttpMethod.GET,
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
-        }
+        jobResponseQuery.sendQueryRequest(
+            this.credential,
+            this.azureSasCredential,
+            this.iotHubConnectionString,
+            IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),
+            HttpMethod.GET,
+            options.getHttpConnectTimeout(),
+            options.getHttpReadTimeout(),
+            proxy);
 
         return jobResponseQuery;
     }
