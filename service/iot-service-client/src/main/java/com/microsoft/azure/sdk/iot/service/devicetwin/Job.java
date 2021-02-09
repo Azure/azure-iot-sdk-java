@@ -65,17 +65,17 @@ public class Job
     {
         if (updateTwin == null)
         {
-            throw new IllegalArgumentException("null updateTwin");
+            throw new IllegalArgumentException("updateTwin cannot be null");
         }
 
         if (startTimeUtc == null)
         {
-            throw new IllegalArgumentException("null startTimeUtc");
+            throw new IllegalArgumentException("startTimeUtc cannot be null");
         }
 
         if (maxExecutionTimeInSeconds < 0)
         {
-            throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
+            throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be negative");
         }
 
         JobResult jobResult = this.jobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -111,17 +111,17 @@ public class Job
     {
         if (Tools.isNullOrEmpty(methodName))
         {
-            throw new IllegalArgumentException("null updateTwin");
+            throw new IllegalArgumentException("method name cannot be null or empty");
         }
 
         if (startTimeUtc == null)
         {
-            throw new IllegalArgumentException("null startTimeUtc");
+            throw new IllegalArgumentException("startTimeUtc cannot be null");
         }
 
         if (maxExecutionTimeInSeconds < 0)
         {
-            throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
+            throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be negative");
         }
 
         JobResult jobResult = this.jobClient.scheduleDeviceMethod(

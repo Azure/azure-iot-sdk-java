@@ -83,6 +83,12 @@ public class JobClient
      */
     public JobClient(String connectionString, JobClientOptions options)
     {
+        Objects.requireNonNull(options);
+        if (Tools.isNullOrEmpty(connectionString))
+        {
+            throw new IllegalArgumentException("connection string cannot be null or empty");
+        }
+
         this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
         this.hostName = this.iotHubConnectionString.getHostName();
         this.options = options;
@@ -98,7 +104,10 @@ public class JobClient
      */
     public JobClient(String hostName, TokenCredential credential)
     {
-        this(hostName, credential, JobClientOptions.builder().build());
+        this(hostName, credential, JobClientOptions.builder()
+                .httpConnectTimeout(JobClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .httpReadTimeout(JobClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .build());
     }
 
     /**
@@ -115,6 +124,11 @@ public class JobClient
         Objects.requireNonNull(credential);
         Objects.requireNonNull(options);
 
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
         this.hostName = hostName;
         this.credential = credential;
         this.options = options;
@@ -129,7 +143,10 @@ public class JobClient
      */
     public JobClient(String hostName, AzureSasCredential azureSasCredential)
     {
-        this(hostName, azureSasCredential, JobClientOptions.builder().build());
+        this(hostName, azureSasCredential, JobClientOptions.builder()
+                .httpConnectTimeout(JobClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .httpReadTimeout(JobClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .build());
     }
 
     /**
@@ -144,6 +161,11 @@ public class JobClient
     {
         Objects.requireNonNull(azureSasCredential);
         Objects.requireNonNull(options);
+
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
 
         this.hostName = hostName;
         this.azureSasCredential = azureSasCredential;
@@ -175,22 +197,22 @@ public class JobClient
 
         if (Tools.isNullOrEmpty(jobId))
         {
-            throw new IllegalArgumentException("null jobId");
+            throw new IllegalArgumentException("jobId cannot be null or empty");
         }
 
         if (updateTwin == null)
         {
-            throw new IllegalArgumentException("null updateTwin");
+            throw new IllegalArgumentException("updateTwin cannot be null");
         }
 
         if (startTimeUtc == null)
         {
-            throw new IllegalArgumentException("null startTimeUtc");
+            throw new IllegalArgumentException("startTimeUtc cannot be null");
         }
 
         if (maxExecutionTimeInSeconds < 0)
         {
-            throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
+            throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be negative");
         }
 
         JobsParser jobsParser =
@@ -258,22 +280,22 @@ public class JobClient
 
         if (Tools.isNullOrEmpty(jobId))
         {
-            throw new IllegalArgumentException("null jobId");
+            throw new IllegalArgumentException("jobId cannot be null or empty");
         }
 
         if (Tools.isNullOrEmpty(methodName))
         {
-            throw new IllegalArgumentException("null updateTwin");
+            throw new IllegalArgumentException("method name cannot be null or empty");
         }
 
         if (startTimeUtc == null)
         {
-            throw new IllegalArgumentException("null startTimeUtc");
+            throw new IllegalArgumentException("startTimeUtc cannot be null");
         }
 
         if (maxExecutionTimeInSeconds < 0)
         {
-            throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
+            throw new IllegalArgumentException("maxExecutionTimeInSeconds cannot be less than 0");
         }
 
         MethodParser cloudToDeviceMethod =
@@ -333,7 +355,7 @@ public class JobClient
 
         if (Tools.isNullOrEmpty(jobId))
         {
-            throw new IllegalArgumentException("null jobId");
+            throw new IllegalArgumentException("jobId cannot be null or empty");
         }
 
         try
@@ -375,7 +397,7 @@ public class JobClient
         URL url;
         if (Tools.isNullOrEmpty(jobId))
         {
-            throw new IllegalArgumentException("null jobId");
+            throw new IllegalArgumentException("jobId cannot be null or empty");
         }
 
         try

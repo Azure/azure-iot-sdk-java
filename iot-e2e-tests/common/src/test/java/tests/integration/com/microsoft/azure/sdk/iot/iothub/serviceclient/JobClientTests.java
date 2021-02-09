@@ -140,7 +140,7 @@ public class JobClientTests extends IntegrationTest
                 (jobResult.getJobType() == jobType) &&
                 (jobResult.getJobStatus() == jobStatus))
             {
-                log.info("Iothub confirmed {} {} for ", jobId, jobStatus, jobType);
+                log.info("Iothub confirmed {} {} for type {}", jobId, jobStatus, jobType);
                 return jobResult;
             }
         }
@@ -583,7 +583,7 @@ public class JobClientTests extends IntegrationTest
                         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
                         jobResult = jobClient.getJob(jobId);
                     }
-                    log.info("Iothub confirmed {} {} for ", jobId, expectedJobStatus, JobType.scheduleDeviceMethod);
+                    log.info("Iothub confirmed {} {} for type {}", jobId, expectedJobStatus, JobType.scheduleDeviceMethod);
                 } catch (IotHubException | IOException | InterruptedException e)
                 {
                     jobExceptions.put(jobId, e);
