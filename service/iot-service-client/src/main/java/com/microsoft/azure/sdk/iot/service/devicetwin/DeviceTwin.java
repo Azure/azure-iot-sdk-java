@@ -358,36 +358,15 @@ public class DeviceTwin
         ProxyOptions proxyOptions = options.getProxyOptions();
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
-        if (this.credential != null)
-        {
-            deviceTwinQuery.sendQueryRequest(
-                    this.credential,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    options.getHttpConnectTimeout(),
-                    options.getHttpReadTimeout(),
-                    proxy);
-        }
-        else if (this.azureSasCredential != null)
-        {
-            deviceTwinQuery.sendQueryRequest(
-                    this.azureSasCredential,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    options.getHttpConnectTimeout(),
-                    options.getHttpReadTimeout(),
-                    proxy);
-        }
-        else
-        {
-            deviceTwinQuery.sendQueryRequest(
-                    this.iotHubConnectionString,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    options.getHttpConnectTimeout(),
-                    options.getHttpReadTimeout(),
-                    proxy);
-        }
+        deviceTwinQuery.sendQueryRequest(
+                this.credential,
+                this.azureSasCredential,
+                this.iotHubConnectionString,
+                IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                HttpMethod.POST,
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
 
         return deviceTwinQuery;
     }
@@ -630,7 +609,19 @@ public class DeviceTwin
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        Job job = new Job(this.hostName, this.credential);
+        Job job;
+        if (this.credential != null)
+        {
+            job = new Job(this.hostName, this.credential);
+        }
+        else if (this.azureSasCredential != null)
+        {
+            job = new Job(this.hostName, this.azureSasCredential);
+        }
+        else
+        {
+            job = new Job(this.iotHubConnectionString.toString());
+        }
 
         job.scheduleUpdateTwin(queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 

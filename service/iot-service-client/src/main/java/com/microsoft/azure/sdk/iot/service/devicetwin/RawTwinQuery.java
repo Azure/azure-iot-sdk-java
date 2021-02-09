@@ -131,36 +131,15 @@ public class RawTwinQuery
 
         Query rawQuery = new Query(sqlQuery, pageSize, QueryType.RAW);
 
-        if (this.credential != null)
-        {
-            rawQuery.sendQueryRequest(
-                    this.credential,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    DEFAULT_HTTP_CONNECT_TIMEOUT_MS,
-                    DEFAULT_HTTP_READ_TIMEOUT_MS,
-                    null);
-        }
-        else if (this.azureSasCredential != null)
-        {
-            rawQuery.sendQueryRequest(
-                    this.azureSasCredential,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    DEFAULT_HTTP_CONNECT_TIMEOUT_MS,
-                    DEFAULT_HTTP_READ_TIMEOUT_MS,
-                    null);
-        }
-        else
-        {
-            rawQuery.sendQueryRequest(
-                    this.iotHubConnectionString,
-                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
-                    HttpMethod.POST,
-                    DEFAULT_HTTP_CONNECT_TIMEOUT_MS,
-                    DEFAULT_HTTP_READ_TIMEOUT_MS,
-                    null);
-        }
+        rawQuery.sendQueryRequest(
+                this.credential,
+                this.azureSasCredential,
+                this.iotHubConnectionString,
+                IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                HttpMethod.POST,
+                DEFAULT_HTTP_CONNECT_TIMEOUT_MS,
+                DEFAULT_HTTP_READ_TIMEOUT_MS,
+                null);
 
         return rawQuery;
     }

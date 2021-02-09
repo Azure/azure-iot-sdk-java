@@ -6,19 +6,25 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
+import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.ServiceClient;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
@@ -34,6 +40,7 @@ import static org.junit.Assert.*;
 /**
  * Test class containing all tests to be run on JVM and android pertaining to method and twin jobs.
  */
+@Slf4j
 @IotHubTest
 public class JobClientTests extends IntegrationTest
 {
@@ -70,14 +77,17 @@ public class JobClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        jobClient = new JobClient(iotHubConnectionString);
+        registryManager = new RegistryManager(
+            iotHubConnectionString,
+            RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICES; i++)
         {
             testDevice = Tools.addDeviceWithRetry(registryManager, Device.createFromId(DEVICE_ID_NAME.concat("-" + i + "-" + uuid), DeviceStatus.Enabled, null));
             DeviceTestManager testManager = new DeviceTestManager(new DeviceClient(registryManager.getDeviceConnectionString(testDevice), IotHubClientProtocol.AMQPS));
+            testManager.client.open();
             testManager.subscribe(true, true);
             devices.add(testManager);
         }
@@ -87,14 +97,14 @@ public class JobClientTests extends IntegrationTest
     private JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         String queryContent = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS,
-                "devices.jobs.jobId = '" + jobId + "' and devices.jobs.jobType = '" + jobType.toString() + "'",
-                null).getQuery();
+            "devices.jobs.jobId = '" + jobId + "' and devices.jobs.jobType = '" + jobType.toString() + "'",
+            null).getQuery();
         Query query = jobClient.queryDeviceJob(queryContent);
         JobResult jobResult;
-        while(jobClient.hasNextJob(query))
+        while (jobClient.hasNextJob(query))
         {
             jobResult = jobClient.getNextJob(query);
-            if(jobResult.getJobId().equals(jobId))
+            if (jobResult.getJobId().equals(jobId))
             {
                 if (jobResult.getJobType() == jobType)
                 {
@@ -114,7 +124,7 @@ public class JobClientTests extends IntegrationTest
                 }
             }
         }
-        
+
         throw new AssertionError("queryDeviceJob did not find the job");
     }
 
@@ -123,14 +133,14 @@ public class JobClientTests extends IntegrationTest
     {
         Query query = jobClient.queryJobResponse(jobType, jobStatus);
         JobResult jobResult;
-        while(jobClient.hasNextJob(query))
+        while (jobClient.hasNextJob(query))
         {
             jobResult = jobClient.getNextJob(query);
-            if(jobResult.getJobId().equals(jobId) &&
-                    (jobResult.getJobType() == jobType) &&
-                    (jobResult.getJobStatus() == jobStatus))
+            if (jobResult.getJobId().equals(jobId) &&
+                (jobResult.getJobType() == jobType) &&
+                (jobResult.getJobStatus() == jobStatus))
             {
-                System.out.println("Iothub confirmed " + jobId + " " + jobStatus + " for " + jobType);
+                log.info("Iothub confirmed {} {} for type {}", jobId, jobStatus, jobType);
                 return jobResult;
             }
         }
@@ -140,12 +150,12 @@ public class JobClientTests extends IntegrationTest
     @Before
     public void cleanToStart() throws IOException, IotHubException
     {
-        for (DeviceTestManager device:devices)
+        for (DeviceTestManager device : devices)
         {
             device.clearStatistics();
         }
 
-        System.out.println("Waiting for all previously scheduled jobs to finish...");
+        log.info("Waiting for all previously scheduled jobs to finish...");
         long startTime = System.currentTimeMillis();
         Query activeJobsQuery = jobClient.queryDeviceJob("SELECT * FROM devices.jobs");
         while (activeJobsQuery.hasNext())
@@ -159,8 +169,7 @@ public class JobClientTests extends IntegrationTest
                 {
                     Thread.sleep(500);
                     jobStatus = jobClient.getJob(job.getJobId()).getJobStatus();
-                }
-                catch (InterruptedException e)
+                } catch (InterruptedException e)
                 {
                     fail("Unexpected interrupted exception occurred");
                 }
@@ -172,13 +181,13 @@ public class JobClientTests extends IntegrationTest
             }
         }
 
-        System.out.println("Done waiting for jobs to finish!");
+        log.info("Done waiting for jobs to finish!");
     }
 
     @AfterClass
     public static void tearDown() throws Exception
     {
-        for (DeviceTestManager device:devices)
+        for (DeviceTestManager device : devices)
         {
             device.tearDown();
         }
@@ -190,7 +199,7 @@ public class JobClientTests extends IntegrationTest
         }
     }
 
-    @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
     @Ignore
     public void scheduleUpdateTwinSucceed() throws IOException, IotHubException, InterruptedException
     {
@@ -209,7 +218,8 @@ public class JobClientTests extends IntegrationTest
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
             final int jobTemperature = (newTemperature++);
-            executor.submit(() -> {
+            executor.submit(() ->
+            {
                 String jobId = JOB_ID_NAME + UUID.randomUUID();
                 jobIdsPending.add(jobId);
                 try
@@ -221,20 +231,19 @@ public class JobClientTests extends IntegrationTest
                     twinExpectedTemperature.put(jobId, jobTemperature);
 
                     jobClient.scheduleUpdateTwin(
-                            jobId, queryCondition,
-                            deviceTwinDevice,
-                            new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                        jobId, queryCondition,
+                        deviceTwinDevice,
+                        new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
 
                     JobResult jobResult = jobClient.getJob(jobId);
-                    while(jobResult.getJobStatus() != JobStatus.completed)
+                    while (jobResult.getJobStatus() != JobStatus.completed)
                     {
                         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
                         jobResult = jobClient.getJob(jobId);
                     }
                     jobResult = queryJobResponseResult(jobId, JobType.scheduleUpdateTwin, JobStatus.completed);
                     jobResults.put(jobId, jobResult);
-                }
-                catch (IotHubException | IOException | InterruptedException e)
+                } catch (IotHubException | IOException | InterruptedException e)
                 {
                     jobExceptions.put(jobId, e);
                 }
@@ -253,16 +262,16 @@ public class JobClientTests extends IntegrationTest
         assertEquals(MAX_NUMBER_JOBS, receivedTemperatures.size());
 
         // asserts for the service side.
-        if(jobExceptions.size() != 0)
+        if (jobExceptions.size() != 0)
         {
-            for (Map.Entry<String, Exception> jobException: jobExceptions.entrySet())
+            for (Map.Entry<String, Exception> jobException : jobExceptions.entrySet())
             {
-                System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
+                log.error("{} threw", jobException.getKey(), jobException.getValue());
             }
             fail("Service throw an exception enqueuing jobs");
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
-        for (Map.Entry<String, JobResult> job: jobResults.entrySet())
+        for (Map.Entry<String, JobResult> job : jobResults.entrySet())
         {
             String jobId = job.getKey();
             JobResult jobResult = job.getValue();
@@ -273,7 +282,7 @@ public class JobClientTests extends IntegrationTest
         }
     }
 
-    @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
     @Ignore
     public void scheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
     {
@@ -292,23 +301,24 @@ public class JobClientTests extends IntegrationTest
         // Act
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
-            executor.submit(() -> {
+            executor.submit(() ->
+            {
                 String jobId = JOB_ID_NAME + UUID.randomUUID();
                 jobIdsPending.add(jobId);
                 try
                 {
                     jobClient.scheduleDeviceMethod(
-                            jobId, queryCondition,
-                            DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                            new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                        jobId, queryCondition,
+                        DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
+                        new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
 
                     JobResult jobResult = jobClient.getJob(jobId);
-                    while(jobResult.getJobStatus() != JobStatus.completed)
+                    while (jobResult.getJobStatus() != JobStatus.completed)
                     {
                         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
                         jobResult = jobClient.getJob(jobId);
                     }
-                    System.out.println("job finished with status " + jobResult.getJobStatus());
+                    log.info("job finished with status {}", jobResult.getJobStatus());
 
                     if (jobResult.getJobStatus().equals(JobStatus.completed))
                     {
@@ -319,11 +329,10 @@ public class JobClientTests extends IntegrationTest
                     {
                         jobExceptions.put(jobId, new Exception("Scheduled job did not finish with status 'completed' but with " + jobResult.getJobStatus()));
                     }
-                }
-                catch (IotHubException | IOException |InterruptedException e)
+                } catch (IotHubException | IOException | InterruptedException e)
                 {
                     jobExceptions.put(jobId, e);
-                    System.out.println("Adding to job exceptions...");
+                    log.warn("Adding {} to job exceptions...", jobId, e);
                 }
                 jobIdsPending.remove(jobId);
             });
@@ -333,21 +342,21 @@ public class JobClientTests extends IntegrationTest
 
         // Assert
         // asserts for the service side.
-        if(jobExceptions.size() != 0)
+        if (jobExceptions.size() != 0)
         {
-            for (Map.Entry<String, Exception> jobException: jobExceptions.entrySet())
+            for (Map.Entry<String, Exception> jobException : jobExceptions.entrySet())
             {
-                System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
+                log.error("{} threw", jobException.getKey(), jobException.getValue());
             }
             fail("Service throw an exception enqueuing jobs");
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
-        for (Map.Entry<String, JobResult> jobResult: jobResults.entrySet())
+        for (Map.Entry<String, JobResult> jobResult : jobResults.entrySet())
         {
             assertNotNull(jobResult.getValue());
             MethodResult methodResult = jobResult.getValue().getOutcomeResult();
             assertNotNull("Device method didn't return any outcome", methodResult);
-            assertEquals(200L, (long)methodResult.getStatus());
+            assertEquals(200L, (long) methodResult.getStatus());
             assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
         }
 
@@ -355,7 +364,61 @@ public class JobClientTests extends IntegrationTest
         assertEquals(0, deviceTestManger.getStatusError());
     }
 
-    @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
+    public void scheduleDeviceMethodWithAzureSasCredentialSucceed() throws InterruptedException, IOException, IotHubException
+    {
+        // Arrange
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        DeviceTestManager deviceTestManger = devices.get(0);
+        final String deviceId = testDevice.getDeviceId();
+        final String queryCondition = "DeviceId IN ['" + deviceId + "']";
+
+        // Act
+        String jobId = JOB_ID_NAME + UUID.randomUUID();
+        jobClientWithSasCredential.scheduleDeviceMethod(
+            jobId,
+            queryCondition,
+            DeviceEmulator.METHOD_LOOPBACK,
+            RESPONSE_TIMEOUT,
+            CONNECTION_TIMEOUT,
+            PAYLOAD_STRING,
+            new Date(),
+            MAX_EXECUTION_TIME_IN_SECONDS);
+
+        JobResult jobResult = jobClientWithSasCredential.getJob(jobId);
+        while (jobResult.getJobStatus() != JobStatus.completed)
+        {
+            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
+            jobResult = jobClientWithSasCredential.getJob(jobId);
+        }
+
+        log.info("job finished with status {}", jobResult.getJobStatus());
+
+        if (jobResult.getJobStatus().equals(JobStatus.completed))
+        {
+            jobResult = queryDeviceJobResult(jobId, JobType.scheduleDeviceMethod, JobStatus.completed);
+        }
+        else
+        {
+            fail("Failed to schedule a method invocation, job status " + jobResult.getJobStatus() + ":" + jobResult.getStatusMessage());
+        }
+
+        MethodResult methodResult = jobResult.getOutcomeResult();
+        assertNotNull("Device method didn't return any outcome", methodResult);
+        assertEquals(200L, (long) methodResult.getStatus());
+        assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
+
+        // asserts for the client side.
+        assertEquals(0, deviceTestManger.getStatusError());
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
     @ContinuousIntegrationTest
     @Ignore
     public void mixScheduleInFutureSucceed() throws IOException, IotHubException, InterruptedException
@@ -379,17 +442,18 @@ public class JobClientTests extends IntegrationTest
         {
             final int index = i;
             final int jobTemperature = (newTemperature++);
-            executor.submit(() -> {
+            executor.submit(() ->
+            {
                 String jobId = JOB_ID_NAME + UUID.randomUUID();
                 jobIdsPending.add(jobId);
                 try
                 {
-                    if(index % 2 == 0)
+                    if (index % 2 == 0)
                     {
                         jobClient.scheduleDeviceMethod(
-                                jobId, queryCondition,
-                                DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                                future, MAX_EXECUTION_TIME_IN_SECONDS);
+                            jobId, queryCondition,
+                            DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
+                            future, MAX_EXECUTION_TIME_IN_SECONDS);
                     }
                     else
                     {
@@ -400,22 +464,21 @@ public class JobClientTests extends IntegrationTest
                         twinExpectedTemperature.put(jobId, jobTemperature);
 
                         jobClient.scheduleUpdateTwin(
-                                jobId, queryCondition,
-                                deviceTwinDevice,
-                                new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                            jobId, queryCondition,
+                            deviceTwinDevice,
+                            new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
                     }
                     JobResult jobResult = jobClient.getJob(jobId);
-                    while(jobResult.getJobStatus() != JobStatus.completed)
+                    while (jobResult.getJobStatus() != JobStatus.completed)
                     {
                         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
                         jobResult = jobClient.getJob(jobId);
                     }
                     jobResult = queryDeviceJobResult(jobId,
-                            ((index % 2 == 0)?JobType.scheduleDeviceMethod:JobType.scheduleUpdateTwin),
-                            JobStatus.completed);
+                        ((index % 2 == 0) ? JobType.scheduleDeviceMethod : JobType.scheduleUpdateTwin),
+                        JobStatus.completed);
                     jobResults.put(jobId, jobResult);
-                }
-                catch (IotHubException | IOException |InterruptedException e)
+                } catch (IotHubException | IOException | InterruptedException e)
                 {
                     jobExceptions.put(jobId, e);
                 }
@@ -428,9 +491,9 @@ public class JobClientTests extends IntegrationTest
         // wait until identity receive the twin change
         ConcurrentMap<String, ConcurrentLinkedQueue<Object>> changes = deviceTestManger.getTwinChanges();
         int timeout = 0;
-        while(changes.size() == 0)
+        while (changes.size() == 0)
         {
-            if((timeout += MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS) >= TEST_TIMEOUT_MILLISECONDS)
+            if ((timeout += MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS) >= TEST_TIMEOUT_MILLISECONDS)
             {
                 fail("Device didn't receive the twin change");
             }
@@ -440,27 +503,27 @@ public class JobClientTests extends IntegrationTest
 
         // Assert
         // asserts for the service side.
-        if(jobExceptions.size() != 0)
+        if (jobExceptions.size() != 0)
         {
-            for (Map.Entry<String, Exception> jobException: jobExceptions.entrySet())
+            for (Map.Entry<String, Exception> jobException : jobExceptions.entrySet())
             {
-                System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
+                log.error("{} threw", jobException.getKey(), jobException.getValue());
             }
             fail("Service throw an exception enqueuing jobs");
         }
         assertEquals("Missing job result", MAX_NUMBER_JOBS, jobResults.size());
         ConcurrentLinkedQueue<Object> temperatures = changes.get(STANDARD_PROPERTY_HOMETEMP);
         assertNotNull("There is no " + STANDARD_PROPERTY_HOMETEMP + " in the device changes", temperatures);
-        for (Map.Entry<String, JobResult> job: jobResults.entrySet())
+        for (Map.Entry<String, JobResult> job : jobResults.entrySet())
         {
             JobResult jobResult = job.getValue();
             String jobId = jobResult.getJobId();
             assertNotNull(jobResult);
-            if(jobResult.getJobType() == JobType.scheduleDeviceMethod)
+            if (jobResult.getJobType() == JobType.scheduleDeviceMethod)
             {
                 MethodResult methodResult = jobResult.getOutcomeResult();
                 assertNotNull("Device method didn't return any outcome", methodResult);
-                assertEquals(200L, (long)methodResult.getStatus());
+                assertEquals(200L, (long) methodResult.getStatus());
                 assertEquals(DeviceEmulator.METHOD_LOOPBACK + ":" + PAYLOAD_STRING, methodResult.getPayload());
             }
             else
@@ -474,7 +537,7 @@ public class JobClientTests extends IntegrationTest
         assertEquals(0, deviceTestManger.getStatusError());
     }
 
-    @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
     @ContinuousIntegrationTest
     @Ignore
     public void cancelScheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
@@ -495,18 +558,19 @@ public class JobClientTests extends IntegrationTest
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
             final int index = i;
-            executor.submit(() -> {
+            executor.submit(() ->
+            {
                 String jobId = JOB_ID_NAME + UUID.randomUUID();
                 jobIdsPending.add(jobId);
                 try
                 {
                     jobClient.scheduleDeviceMethod(
-                            jobId, queryCondition,
-                            DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                            (index % 2 == 0)?future:new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                        jobId, queryCondition,
+                        DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
+                        (index % 2 == 0) ? future : new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
 
                     JobStatus expectedJobStatus = JobStatus.completed;
-                    if(index % 2 == 0)
+                    if (index % 2 == 0)
                     {
                         expectedJobStatus = JobStatus.cancelled;
                         Thread.sleep(1000); // wait 1 seconds and cancel.
@@ -519,9 +583,8 @@ public class JobClientTests extends IntegrationTest
                         Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
                         jobResult = jobClient.getJob(jobId);
                     }
-                    System.out.println("Iothub confirmed " + jobId + " " + expectedJobStatus + " for " + JobType.scheduleDeviceMethod);
-                }
-                catch (IotHubException | IOException |InterruptedException e)
+                    log.info("Iothub confirmed {} {} for type {}", jobId, expectedJobStatus, JobType.scheduleDeviceMethod);
+                } catch (IotHubException | IOException | InterruptedException e)
                 {
                     jobExceptions.put(jobId, e);
                 }
@@ -533,11 +596,11 @@ public class JobClientTests extends IntegrationTest
 
         // Assert
         // asserts for the service side.
-        if(jobExceptions.size() != 0)
+        if (jobExceptions.size() != 0)
         {
-            for (Map.Entry<String, Exception> jobException: jobExceptions.entrySet())
+            for (Map.Entry<String, Exception> jobException : jobExceptions.entrySet())
             {
-                System.out.println(jobException.getKey() + " throws " + jobException.getValue().getMessage());
+                log.error("{} threw", jobException.getKey(), jobException.getValue());
             }
             fail("Service throw an exception enqueuing jobs");
         }
