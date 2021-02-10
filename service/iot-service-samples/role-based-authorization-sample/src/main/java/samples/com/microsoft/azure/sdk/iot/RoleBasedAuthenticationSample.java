@@ -54,8 +54,6 @@ public class RoleBasedAuthenticationSample
                 .clientSecret(parsedArguments.getClientSecret())
                 .build();
 
-        //TODO also show a custom implementation of this TokenCredential interface, maybe using MSAL?
-
         // "my-azure-iot-hub.azure-devices.net" for example
         String iotHubHostName = parsedArguments.getIotHubHostName();
 
