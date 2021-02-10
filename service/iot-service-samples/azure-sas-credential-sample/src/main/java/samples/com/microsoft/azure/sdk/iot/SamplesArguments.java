@@ -24,13 +24,14 @@ public class SamplesArguments
     public SamplesArguments(String[] args)
     {
         Option hostName = new Option("h", IOTHUB_HOSTNAME, true, "IoT Hub host name (\"my-azure-iot-hub.azure-devices.net\" for example)");
-        Option sharedAccessSignature = new Option("s", IOTHUB_SHARED_ACCESS_SIGNATURE, true, "IoT Hub Shared Access Signature");
+        Option sharedAccessSignature = new Option("s", IOTHUB_SHARED_ACCESS_SIGNATURE, true, "IoT Hub Shared Access Signature. See this sample's source code for more details on how to create this.");
 
         hostName.setRequired(true);
         sharedAccessSignature.setRequired(true);
 
         Options options = new Options()
-            .addOption(hostName);
+            .addOption(hostName)
+            .addOption(sharedAccessSignature);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
