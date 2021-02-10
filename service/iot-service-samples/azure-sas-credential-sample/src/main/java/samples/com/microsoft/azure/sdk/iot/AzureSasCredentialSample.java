@@ -115,12 +115,14 @@ public class AzureSasCredentialSample
     public static String generateSharedAccessSignature(String resourceUri, String key)
         throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
     {
+        String sharedAccessSignatureFormat = "SharedAccessSignature sr=%s&sig=%s&se=%s";
         Charset utf8 = StandardCharsets.UTF_8;
+        String utf8Name = utf8.name();
 
         // Token will expire in one hour
         long expiry = Instant.now().getEpochSecond() + 3600;
 
-        String stringToSign = URLEncoder.encode(resourceUri, utf8.name()) + "\n" + expiry;
+        String stringToSign = URLEncoder.encode(resourceUri, utf8Name) + "\n" + expiry;
         byte[] decodedKey = Base64.getDecoder().decode(key);
 
         Mac sha256HMAC = Mac.getInstance("HmacSHA256");
@@ -128,11 +130,14 @@ public class AzureSasCredentialSample
         sha256HMAC.init(secretKey);
         Base64.Encoder encoder = Base64.getEncoder();
 
-        String signature = new String(encoder.encode(
-            sha256HMAC.doFinal(stringToSign.getBytes(utf8))), utf8);
+        String signature = new String(encoder.encode(sha256HMAC.doFinal(stringToSign.getBytes(utf8))), utf8);
 
-        String token = "SharedAccessSignature sr=" + URLEncoder.encode(resourceUri, utf8.name())
-            + "&sig=" + URLEncoder.encode(signature, utf8.name()) + "&se=" + expiry;
+        String token =
+            String.format(
+                sharedAccessSignatureFormat,
+                URLEncoder.encode(resourceUri, utf8Name),
+                URLEncoder.encode(signature, utf8Name),
+                expiry);
 
         return token;
     }
