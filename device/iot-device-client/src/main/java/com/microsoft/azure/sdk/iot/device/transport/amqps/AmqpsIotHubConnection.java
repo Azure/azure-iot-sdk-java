@@ -384,6 +384,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
+    // The warning is for how sessionHandlers.peek() may return null, but for x509 cases, this code only executes
+    // if one session handler is present in the list, so it is a false positive
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void onConnectionLocalOpen(Event event)
     {
@@ -563,7 +566,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         if (this.deviceSessionsOpenedLatches.containsKey(deviceId))
         {
-            log.trace("Device session for device {} opened, counting down the device sessions opening latch");
+            log.trace("Device session for device {} opened, counting down the device sessions opening latch", deviceId);
             this.deviceSessionsOpenedLatches.get(deviceId).countDown();
             this.listener.onMultiplexedDeviceSessionEstablished(this.connectionId, deviceId);
         }
@@ -586,7 +589,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 // AMQPS_WS has an issue where the remote host kills the connection if 31+ multiplexed devices are all
                 // authenticated at once. To work around this, the authentications will be done at most 30 at a time.
                 // Once a given device's authentication finishes, it will trigger the next authentication
-                List<AmqpsSasTokenRenewalHandler> handlers = new ArrayList(sasTokenRenewalHandlers);
+                List<AmqpsSasTokenRenewalHandler> handlers = new ArrayList<>(sasTokenRenewalHandlers);
                 int maxInFlightAuthenticationMessages = 30;
                 for (int i = 0; i < handlers.size() - maxInFlightAuthenticationMessages; i++)
                 {
@@ -725,7 +728,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void onSessionClosedAsExpected(String deviceId)
     {
         // don't want to signal Client_Close to transport layer if this is in the middle of a disconnected_retrying event
-        if (this.reconnectionsScheduled.get(deviceId) == null || this.reconnectionsScheduled.get(deviceId) == false)
+        if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
         {
             log.trace("onSessionClosedAsExpected callback executed, notifying transport layer");
             this.listener.onMultiplexedDeviceSessionLost(null, this.connectionId, deviceId);
@@ -841,7 +844,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private void scheduleDeviceSessionReconnection(Throwable throwable, String deviceId)
     {
-        if (this.reconnectionsScheduled.get(deviceId) == null || this.reconnectionsScheduled.get(deviceId) == false)
+        if (this.reconnectionsScheduled.get(deviceId) == null || !this.reconnectionsScheduled.get(deviceId))
         {
             this.reconnectionsScheduled.put(deviceId, true);
             log.warn("Amqp session for device {} was closed, creating a thread to notify transport layer", deviceId, throwable);
@@ -1092,7 +1095,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private class ReactorRunner implements Callable
+    private static class ReactorRunner implements Callable<Object>
     {
         private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final IotHubReactor iotHubReactor;

@@ -339,24 +339,21 @@ public class BaseDevice
     }
 
     /**
-     * Flip-flop helper for sending a forced update
-     */
-    private Boolean forceUpdate;
-
-    /**
      * Setter for force update boolean
+     * @deprecated  This method currently only validates forceUpdate parameter
      *
      * @param forceUpdate - Boolean controlling if the update should be forced or not
      * @throws IllegalArgumentException if the provided argument is null
      */
+    // Supressing this warning since this method is used by public APIs in Registry Manager
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public void setForceUpdate(Boolean forceUpdate) throws IllegalArgumentException
     {
         if (forceUpdate == null)
         {
             throw new IllegalArgumentException();
         }
-
-        this.forceUpdate = forceUpdate;
     }
 
     /*
@@ -397,6 +394,7 @@ public class BaseDevice
         deviceParser.setAuthenticationParser(new AuthenticationParser());
         deviceParser.getAuthenticationParser().setType(AuthenticationTypeParser.valueOf(this.authentication.getAuthenticationType().toString()));
 
+        //noinspection StatementWithEmptyBody
         if (this.authentication.getAuthenticationType() == AuthenticationType.CERTIFICATE_AUTHORITY)
         {
             // do nothing
@@ -475,6 +473,8 @@ public class BaseDevice
         }
 
         this.authentication = new AuthenticationMechanism(authenticationType);
+
+        //noinspection StatementWithEmptyBody
         if (authenticationType == AuthenticationType.CERTIFICATE_AUTHORITY)
         {
             //do nothing

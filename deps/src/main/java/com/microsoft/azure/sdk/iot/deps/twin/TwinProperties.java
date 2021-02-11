@@ -80,13 +80,13 @@ public class TwinProperties
 {
     // the twin desired properties
     private static final String DESIRED_PROPERTIES_TAG = "desired";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DESIRED_PROPERTIES_TAG)
     private TwinCollection desired;
 
     // the twin reported properties
     private static final String REPORTED_PROPERTIES_TAG = "reported";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(REPORTED_PROPERTIES_TAG)
     private TwinCollection reported;
 

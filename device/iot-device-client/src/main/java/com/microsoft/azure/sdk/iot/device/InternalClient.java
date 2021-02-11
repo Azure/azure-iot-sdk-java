@@ -163,23 +163,25 @@ public class InternalClient
         this.deviceIO = null;
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     public void open() throws IOException
     {
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
-            //Codes_SRS_INTERNALCLIENT_34_044: [If the SAS token has expired before this call, throw a Security Exception]
             throw new SecurityException("Your SasToken is expired");
         }
 
-        //Codes_SRS_INTERNALCLIENT_21_006: [The open shall open the deviceIO connection.]
         this.deviceIO.open();
     }
 
     public void close() throws IOException
     {
+        //noinspection StatementWithEmptyBody
         while (!this.deviceIO.isEmpty())
         {
-            // Don't do anything, can be infinite.
+            // Don't do anything until the transport layer underneath has indicated that it doesn't have any more pending messages to send.
         }
 
         this.deviceIO.close();
@@ -496,6 +498,9 @@ public class InternalClient
      * @param value an object of the appropriate type for the option's value
      * @throws IllegalArgumentException if the provided optionName is null
      */
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     public void setOption(String optionName, Object value)
     {
         if (optionName == null)
@@ -609,14 +614,16 @@ public class InternalClient
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
      * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
+     * @param <Type2> The type of the desired property value.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
-    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                                 PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+    <Type1, Type2> void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+                                 PropertyCallBack<Type1, Type2> genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
 
     {
@@ -970,6 +977,9 @@ public class InternalClient
         }
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     void setOption_SetSASTokenExpiryTime(Object value)
     {
         if (this.config.getAuthenticationType() != DeviceClientConfig.AuthType.SAS_TOKEN)

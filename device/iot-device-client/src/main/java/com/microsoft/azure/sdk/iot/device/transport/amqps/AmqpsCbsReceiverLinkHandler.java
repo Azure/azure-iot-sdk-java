@@ -36,7 +36,6 @@ public final class AmqpsCbsReceiverLinkHandler extends AmqpsReceiverLinkHandler
     AmqpsCbsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback)
     {
         super(receiver, amqpsLinkStateCallback, UUID.randomUUID().toString());
-        this.receiverLinkTag = RECEIVER_LINK_TAG_PREFIX;
         this.receiverLinkAddress = RECEIVER_LINK_ENDPOINT_PATH;
     }
 

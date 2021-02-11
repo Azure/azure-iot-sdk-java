@@ -13,64 +13,64 @@ import java.util.HashMap;
 public class ConfigurationParser
 {
     private static final String CONFIGURATION_ID_NAME = "id";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONFIGURATION_ID_NAME)
     private String id;
 
     private static final String SCHEMA_VERSION_NAME = "schemaVersion";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SCHEMA_VERSION_NAME)
     private String schemaVersion;
 
     private static final String LABELS_NAME = "labels";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(LABELS_NAME)
     private HashMap<String, String> labels;
 
     private static final String CONTENT_NAME = "content";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(CONTENT_NAME)
     private ConfigurationContentParser content;
 
     private static final String CONTENT_TYPE_NAME = "contentType";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CONTENT_TYPE_NAME)
     private String contentType;
 
     private static final String TARGET_CONDITION_NAME = "targetCondition";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(TARGET_CONDITION_NAME)
     private String targetCondition;
 
     private static final String CREATED_TIME_UTC_NAME = "createdTimeUtc";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(CREATED_TIME_UTC_NAME)
     private String createdTimeUtcString;
     private transient Date createdTimeUtc;
 
     private static final String LAST_UPDATED_TIME_UTC_NAME = "lastUpdatedTimeUtc";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(LAST_UPDATED_TIME_UTC_NAME)
     private String lastUpdatedTimeUtcString;
     private transient Date lastUpdatedTimeUtc;
 
     private static final String PRIORITY_NAME = "priority";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(PRIORITY_NAME)
     private Integer priority;
 
     private static final String SYSTEM_METRICS_NAME = "systemMetrics";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SYSTEM_METRICS_NAME)
     private ConfigurationMetricsParser systemMetrics;
 
     private static final String METRICS_NAME = "metrics";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(METRICS_NAME)
     private ConfigurationMetricsParser metrics;
 
     private static final String E_TAG_NAME = "etag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(E_TAG_NAME)
     private String eTag;
 

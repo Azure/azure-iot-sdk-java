@@ -60,9 +60,6 @@ public class BaseDeviceTest
         device.getConnectionStateUpdatedTime();
         device.getLastActivityTime();
         device.getCloudToDeviceMessageCount();
-
-        device.setForceUpdate(true);
-        device.setForceUpdate(null);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_BASEDEVICE_12_004: [The constructor shall throw IllegalArgumentException if the input string is empty or null]
@@ -169,7 +166,6 @@ public class BaseDeviceTest
         String expectedLastActivityTime = "2001-09-09T09:09:09";
 
         BaseDevice device = Deencapsulation.newInstance(BaseDevice.class, expectedDeviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
-        device.setForceUpdate(expectedForceUpdate);
         Deencapsulation.setField(device, "cloudToDeviceMessageCount", expectedCloudToDeviceMessageCount);
         Deencapsulation.setField(device, "connectionState", expectedConnectionState);
         Deencapsulation.setField(device, "connectionStateUpdatedTime", expectedConnectionStateUpdatedTime);

@@ -95,80 +95,82 @@ public class EnrollmentGroup extends Serializable
 {
     // the enrollment group identifier
     private static final String ENROLLMENT_GROUP_ID_TAG = "enrollmentGroupId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ENROLLMENT_GROUP_ID_TAG)
     private String enrollmentGroupId;
 
     // the attestation
     private static final String ATTESTATION_TAG = "attestation";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ATTESTATION_TAG)
     private AttestationMechanism attestation;
 
     // the iothub host name
     private static final String IOTHUB_HOST_NAME_TAG = "iotHubHostName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IOTHUB_HOST_NAME_TAG)
     private String iotHubHostName;
 
     // the initial Twin state identifier (Twin is a special case and will be manually serialized).
     private static final String INITIAL_TWIN_STATE_TAG = "initialTwin";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(INITIAL_TWIN_STATE_TAG)
     private TwinState initialTwin;
 
     // the provisioning status
     private static final String PROVISIONING_STATUS_TAG = "provisioningStatus";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(PROVISIONING_STATUS_TAG)
     private ProvisioningStatus provisioningStatus;
 
     // the datetime this resource was created
     private static final String CREATED_DATETIME_UTC_TAG = "createdDateTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CREATED_DATETIME_UTC_TAG)
-    private final String createdDateTimeUtc = null;
+    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
+    private String createdDateTimeUtc;
     private transient Date createdDateTimeUtcDate;
 
     // the datetime this resource was last updated
     private static final String LAST_UPDATED_DATETIME_UTC_TAG = "lastUpdatedDateTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(LAST_UPDATED_DATETIME_UTC_TAG)
-    private final String lastUpdatedDateTimeUtc = null;
+    @SuppressWarnings("unused") // used by reflection during json serialization/deserialization
+    private String lastUpdatedDateTimeUtc;
     private transient Date lastUpdatedDateTimeUtcDate;
 
     // the eTag
     private static final String ETAG_TAG = "etag";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ETAG_TAG)
     private String etag;
 
     // the reprovisioning policy
     private static final String REPROVISION_POLICY_TAG = "reprovisionPolicy";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(REPROVISION_POLICY_TAG)
     private ReprovisionPolicy reprovisionPolicy;
 
     // the custom allocation definition
     private static final String CUSTOM_ALLOCATION_DEFINITION_TAG = "customAllocationDefinition";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CUSTOM_ALLOCATION_DEFINITION_TAG)
     private CustomAllocationDefinition customAllocationDefinition;
 
     // the allocation policy of the resource. overrides the tenant level allocation policy
     private static final String ALLOCATION_POLICY_TAG = "allocationPolicy";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ALLOCATION_POLICY_TAG)
     private AllocationPolicy allocationPolicy;
 
     // the list of names of IoT hubs the device in this resource can be allocated to. Must be a subset of tenant level list of IoT hubs
     private static final String IOT_HUBS_TAG = "iotHubs";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IOT_HUBS_TAG)
     private Collection<String> iotHubs;
 
     private static final String DEVICE_CAPABILITIES_TAG = "capabilities";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DEVICE_CAPABILITIES_TAG)
     private DeviceCapabilities capabilities;
 
@@ -203,7 +205,6 @@ public class EnrollmentGroup extends Serializable
             String enrollmentGroupId,
             Attestation attestation)
     {
-        /* SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
         this.setEnrollmentGroupId(enrollmentGroupId);
         this.setAttestation(attestation);
     }
@@ -251,27 +252,22 @@ public class EnrollmentGroup extends Serializable
      */
     public EnrollmentGroup(String json)
     {
-        /* SRS_ENROLLMENT_GROUP_21_002: [The constructor shall throw IllegalArgumentException if the JSON is null or empty.] */
-        if(Tools.isNullOrEmpty(json))
+        if (Tools.isNullOrEmpty(json))
         {
             throw new IllegalArgumentException("JSON with result is null or empty");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_003: [The constructor shall throw JsonSyntaxException if the JSON is invalid.] */
-        /* SRS_ENROLLMENT_GROUP_21_004: [The constructor shall deserialize the provided JSON for the enrollmentGroup class and subclasses.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         EnrollmentGroup result = gson.fromJson(json, EnrollmentGroup.class);
 
-        /* SRS_ENROLLMENT_GROUP_21_005: [The constructor shall judge and store the provided mandatory parameters `enrollmentGroupId` and `attestation` using the EnrollmentGroup setters.] */
         this.setEnrollmentGroupId(result.enrollmentGroupId);
         this.setAttestation(result.attestation);
 
-        /* SRS_ENROLLMENT_GROUP_21_006: [If the `iotHubHostName`, `initialTwin`, or `provisioningStatus` is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
-        if(result.iotHubHostName != null)
+        if (result.iotHubHostName != null)
         {
             this.setIotHubHostNameFinal(result.iotHubHostName);
         }
-        if(result.provisioningStatus != null)
+        if (result.provisioningStatus != null)
         {
             this.setProvisioningStatusFinal(result.provisioningStatus);
         }
@@ -280,34 +276,24 @@ public class EnrollmentGroup extends Serializable
             this.setInitialTwinFinal(result.initialTwin);
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_007: [If the createdDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
-        if(result.createdDateTimeUtc != null)
+        if (result.createdDateTimeUtc != null)
         {
             this.setCreatedDateTimeUtc(result.createdDateTimeUtc);
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_008: [If the lastUpdatedDateTimeUtc is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
         if (result.lastUpdatedDateTimeUtc != null)
         {
             this.setLastUpdatedDateTimeUtc(result.lastUpdatedDateTimeUtc);
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_009: [If the etag is not null, the constructor shall judge and store it using the EnrollmentGroup setter.] */
-        if(result.etag != null)
+        if (result.etag != null)
         {
             this.setEtagFinal(result.etag);
         }
 
-        /* SRS_ENROLLMENT_GROUP_34_043: [This function shall set the iothubs list to the value from the json.] */
         this.setIotHubs(result.getIotHubs());
-
-        /* SRS_ENROLLMENT_GROUP_34_044: [This function shall set the allocation policy to the value from the json.] */
         this.setAllocationPolicy(result.getAllocationPolicy());
-
-        /* SRS_ENROLLMENT_GROUP_34_045: [This function shall set the custom allocation definition to the value from the json.] */
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
-
-        /* SRS_ENROLLMENT_GROUP_34_046: [This function shall set the reprovision policy to the value from the json.] */
         this.setReprovisionPolicy(result.getReprovisionPolicy());
     }
 
@@ -326,12 +312,10 @@ public class EnrollmentGroup extends Serializable
      */
     public JsonElement toJsonElement()
     {
-        /* SRS_ENROLLMENT_GROUP_21_011: [The toJsonElement shall return a JsonElement with the information in this class in a JSON format.] */
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
         JsonObject enrollmentGroupJson = gson.toJsonTree(this).getAsJsonObject();
 
-        /* SRS_ENROLLMENT_GROUP_21_012: [If the initialTwin is not null, the toJsonElement shall include its content in the final JSON.] */
-        if(initialTwin != null)
+        if (initialTwin != null)
         {
             enrollmentGroupJson.add(INITIAL_TWIN_STATE_TAG, initialTwin.toJsonElement());
         }
@@ -346,7 +330,6 @@ public class EnrollmentGroup extends Serializable
      */
     public String getEnrollmentGroupId()
     {
-        /* SRS_ENROLLMENT_GROUP_21_014: [The getEnrollmentGroupId shall return a String with the stored enrollmentGroupId.] */
         return this.enrollmentGroupId;
     }
 
@@ -365,7 +348,6 @@ public class EnrollmentGroup extends Serializable
      */
     protected final void setEnrollmentGroupId(String enrollmentGroupId)
     {
-        /* SRS_ENROLLMENT_GROUP_21_016: [The setEnrollmentGroupId shall store the provided enrollmentGroupId.] */
         this.enrollmentGroupId = enrollmentGroupId;
     }
 
@@ -377,7 +359,6 @@ public class EnrollmentGroup extends Serializable
      */
     public Attestation getAttestation() throws ProvisioningServiceClientException
     {
-        /* SRS_ENROLLMENT_GROUP_21_017: [The getAttestation shall return a Attestation with the stored attestation.] */
         return this.attestation.getAttestation();
     }
 
@@ -396,14 +377,11 @@ public class EnrollmentGroup extends Serializable
      */
     protected final void setAttestation(AttestationMechanism attestationMechanism)
     {
-        /* SRS_ENROLLMENT_GROUP_21_018: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
-        if(attestationMechanism == null)
+        if (attestationMechanism == null)
         {
             throw new IllegalArgumentException("attestationMechanism cannot be null");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_042: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or Symmetric Keys.] */
-        /* SRS_ENROLLMENT_GROUP_21_019: [The setAttestation shall store the provided attestation.] */
         try
         {
             this.setAttestation(attestationMechanism.getAttestation());
@@ -434,26 +412,23 @@ public class EnrollmentGroup extends Serializable
      */
     public void setAttestation(Attestation attestation)
     {
-        /* SRS_ENROLLMENT_GROUP_21_039: [The setAttestation shall throw IllegalArgumentException if the attestation is null.] */
-        if(attestation == null)
+        if (attestation == null)
         {
             throw new IllegalArgumentException("attestation cannot be null");
         }
-        /* SRS_ENROLLMENT_GROUP_21_040: [The setAttestation shall throw IllegalArgumentException if the attestation is not X509 signingCertificate or SymmetricKeyAttestation] */
-        else if(!(attestation instanceof X509Attestation) && !(attestation instanceof SymmetricKeyAttestation))
+        else if (!(attestation instanceof X509Attestation) && !(attestation instanceof SymmetricKeyAttestation))
         {
             throw new IllegalArgumentException("attestation for EnrollmentGroup shall be X509 or SymmetricKey");
         }
 
-        if(attestation instanceof X509Attestation)
+        if (attestation instanceof X509Attestation)
         {
-            if(((X509Attestation)attestation).getRootCertificatesFinal() == null)
+            if (((X509Attestation)attestation).getRootCertificatesFinal() == null)
             {
                 throw new IllegalArgumentException("X509 attestation for EnrollmentGroup does not contains a valid certificate.");
             }
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_041: [The setAttestation shall store the provided attestation using the AttestationMechanism object.] */
         this.attestation = new AttestationMechanism(attestation);
     }
 
@@ -464,7 +439,6 @@ public class EnrollmentGroup extends Serializable
      */
     public String getIotHubHostName()
     {
-        /* SRS_ENROLLMENT_GROUP_21_020: [The getIotHubHostName shall return a String with the stored iotHubHostName.] */
         return this.iotHubHostName;
     }
 
@@ -485,7 +459,6 @@ public class EnrollmentGroup extends Serializable
     @Deprecated
     public void setIotHubHostName(String iotHubHostName)
     {
-        /* SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
 
@@ -505,7 +478,6 @@ public class EnrollmentGroup extends Serializable
      */
     public final void setIotHubHostNameFinal(String iotHubHostName)
     {
-        /* SRS_ENROLLMENT_GROUP_21_022: [The setIotHubHostName shall store the provided iotHubHostName.] */
         this.iotHubHostName = iotHubHostName;
     }
 
@@ -516,7 +488,6 @@ public class EnrollmentGroup extends Serializable
      */
     public TwinState getInitialTwin()
     {
-        /* SRS_ENROLLMENT_GROUP_21_023: [The getInitialTwin shall return a TwinState with the stored initialTwin.] */
         return this.initialTwin;
     }
 
@@ -533,13 +504,11 @@ public class EnrollmentGroup extends Serializable
     @Deprecated
     public void setInitialTwin(TwinState initialTwin)
     {
-        /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
-        if(initialTwin == null)
+        if (initialTwin == null)
         {
             throw new IllegalArgumentException("initialTwin cannot be null");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
         this.initialTwin = initialTwin;
     }
 
@@ -555,13 +524,11 @@ public class EnrollmentGroup extends Serializable
      */
     public final void setInitialTwinFinal(TwinState initialTwin)
     {
-        /* SRS_ENROLLMENT_GROUP_21_024: [The setInitialTwin shall throw IllegalArgumentException if the initialTwin is null.] */
-        if(initialTwin == null)
+        if (initialTwin == null)
         {
             throw new IllegalArgumentException("initialTwin cannot be null");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_025: [The setInitialTwin shall store the provided initialTwin.] */
         this.initialTwin = initialTwin;
     }
 
@@ -572,7 +539,6 @@ public class EnrollmentGroup extends Serializable
      */
     public ProvisioningStatus getProvisioningStatus()
     {
-        /* SRS_ENROLLMENT_GROUP_21_026: [The getProvisioningStatus shall return a TwinState with the stored provisioningStatus.] */
         return this.provisioningStatus;
     }
 
@@ -591,13 +557,11 @@ public class EnrollmentGroup extends Serializable
     @Deprecated
     public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
     {
-        /* SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
-        if(provisioningStatus == null)
+        if (provisioningStatus == null)
         {
             throw new IllegalArgumentException("provisioningStatus cannot be null");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_028: [The setProvisioningStatus shall store the provided provisioningStatus.] */
         this.provisioningStatus = provisioningStatus;
     }
 
@@ -614,13 +578,11 @@ public class EnrollmentGroup extends Serializable
      */
     public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
     {
-        /* SRS_ENROLLMENT_GROUP_21_027: [The setProvisioningStatus shall throw IllegalArgumentException if the provisioningStatus is null.] */
-        if(provisioningStatus == null)
+        if (provisioningStatus == null)
         {
             throw new IllegalArgumentException("provisioningStatus cannot be null");
         }
 
-        /* SRS_ENROLLMENT_GROUP_21_028: [The setProvisioningStatus shall store the provided provisioningStatus.] */
         this.provisioningStatus = provisioningStatus;
     }
 
@@ -631,7 +593,6 @@ public class EnrollmentGroup extends Serializable
      */
     public Date getCreatedDateTimeUtc()
     {
-        /* SRS_ENROLLMENT_GROUP_21_029: [The getCreatedDateTimeUtc shall return a Date with the stored createdDateTimeUtcDate.] */
         return this.createdDateTimeUtcDate;
     }
 
@@ -650,8 +611,6 @@ public class EnrollmentGroup extends Serializable
      */
     protected final void setCreatedDateTimeUtc(String createdDateTimeUtc)
     {
-        /* SRS_ENROLLMENT_GROUP_21_030: [The setCreatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_ENROLLMENT_GROUP_21_031: [The setCreatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided createdDateTimeUtc] */
         this.createdDateTimeUtcDate = ParserUtility.getDateTimeUtc(createdDateTimeUtc);
     }
 
@@ -662,7 +621,6 @@ public class EnrollmentGroup extends Serializable
      */
     public Date getLastUpdatedDateTimeUtc()
     {
-        /* SRS_ENROLLMENT_GROUP_21_032: [The getLastUpdatedDateTimeUtc shall return a Date with the stored lastUpdatedDateTimeUtcDate.] */
         return this.lastUpdatedDateTimeUtcDate;
     }
 
@@ -681,8 +639,6 @@ public class EnrollmentGroup extends Serializable
      */
     protected final void setLastUpdatedDateTimeUtc(String lastUpdatedDateTimeUtc)
     {
-        /* SRS_ENROLLMENT_GROUP_21_033: [The setLastUpdatedDateTimeUtc shall parse the provided String as a Data and Time UTC.] */
-        /* SRS_ENROLLMENT_GROUP_21_034: [The setLastUpdatedDateTimeUtc shall throw IllegalArgumentException if it cannot parse the provided lastUpdatedDateTimeUtc] */
         this.lastUpdatedDateTimeUtcDate = ParserUtility.getDateTimeUtc(lastUpdatedDateTimeUtc);
     }
 
@@ -693,7 +649,6 @@ public class EnrollmentGroup extends Serializable
      */
     public String getEtag()
     {
-        /* SRS_ENROLLMENT_GROUP_21_035: [The getEtag shall return a String with the stored etag.] */
         return this.etag;
     }
 
@@ -708,7 +663,6 @@ public class EnrollmentGroup extends Serializable
     @Deprecated
     public void setEtag(String etag)
     {
-        /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
 
@@ -720,13 +674,11 @@ public class EnrollmentGroup extends Serializable
      */
     public final void setEtagFinal(String etag)
     {
-        /* SRS_ENROLLMENT_GROUP_21_037: [The setEtag shall store the provided etag.] */
         this.etag = etag;
     }
 
     public DeviceCapabilities getCapabilities()
     {
-        /* SRS_ENROLLMENT_GROUP_34_074: [This function shall return the saved capabilities.] */
         return this.capabilities;
     }
 
@@ -735,7 +687,6 @@ public class EnrollmentGroup extends Serializable
      */
     public final void setCapabilities(DeviceCapabilities capabilities)
     {
-        /* SRS_ENROLLMENT_GROUP_34_073: [This function shall save the provided capabilities.] */
         this.capabilities = capabilities;
     }
 
@@ -747,7 +698,6 @@ public class EnrollmentGroup extends Serializable
      */
     public ReprovisionPolicy getReprovisionPolicy()
     {
-        /* SRS_ENROLLMENT_GROUP_34_047: [This function shall get the reprovision policy.] */
         return this.reprovisionPolicy;
     }
 
@@ -758,7 +708,6 @@ public class EnrollmentGroup extends Serializable
      */
     public void setReprovisionPolicy(ReprovisionPolicy reprovisionPolicy)
     {
-        /* SRS_ENROLLMENT_GROUP_34_048: [This function shall set the reprovision policy.] */
         this.reprovisionPolicy = reprovisionPolicy;
     }
 
@@ -769,7 +718,6 @@ public class EnrollmentGroup extends Serializable
      */
     public AllocationPolicy getAllocationPolicy()
     {
-        /* SRS_ENROLLMENT_GROUP_34_049: [This function shall get the allocation policy.] */
         return this.allocationPolicy;
     }
 
@@ -780,7 +728,6 @@ public class EnrollmentGroup extends Serializable
      */
     public void setAllocationPolicy(AllocationPolicy allocationPolicy)
     {
-        /* SRS_ENROLLMENT_GROUP_34_050: [This function shall set the allocation policy.] */
         this.allocationPolicy = allocationPolicy;
     }
 
@@ -791,7 +738,6 @@ public class EnrollmentGroup extends Serializable
      */
     public Collection<String> getIotHubs()
     {
-        /* SRS_ENROLLMENT_GROUP_34_051: [This function shall get the iothubs list.] */
         return this.iotHubs;
     }
 
@@ -802,7 +748,6 @@ public class EnrollmentGroup extends Serializable
      */
     public void setIotHubs(Collection<String> iotHubs)
     {
-        /* SRS_ENROLLMENT_GROUP_34_052: [This function shall set the iothubs list.] */
         this.iotHubs = iotHubs;
     }
 
@@ -813,7 +758,6 @@ public class EnrollmentGroup extends Serializable
      */
     public CustomAllocationDefinition getCustomAllocationDefinition()
     {
-        /* SRS_ENROLLMENT_GROUP_34_053: [This function shall get the custom allocation definition.] */
         return this.customAllocationDefinition;
     }
 
@@ -824,7 +768,6 @@ public class EnrollmentGroup extends Serializable
      */
     public void setCustomAllocationDefinition(CustomAllocationDefinition customAllocationDefinition)
     {
-        /* SRS_ENROLLMENT_GROUP_34_054: [This function shall set the custom allocation definition.] */
         this.customAllocationDefinition = customAllocationDefinition;
     }
 
@@ -838,6 +781,6 @@ public class EnrollmentGroup extends Serializable
     @SuppressWarnings("unused")
     EnrollmentGroup()
     {
-        /* SRS_ENROLLMENT_GROUP_21_038: [The EnrollmentGroup shall provide an empty constructor to make GSON happy.] */
+        // Empty constructor for gson to use when deserializing
     }
 }

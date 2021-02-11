@@ -61,7 +61,7 @@ public class EnrollmentGroupTest
     private static final Date VALID_DATE = new Date(System.currentTimeMillis()/1000 * 1000);
     private static final String VALID_DATE_AS_STRING = ParserUtility.dateTimeUtcToString(VALID_DATE);
 
-    private final class MockEnrollmentGroup extends EnrollmentGroup
+    private static final class MockEnrollmentGroup extends EnrollmentGroup
     {
         String mockedEnrollmentGroupId;
         AttestationMechanism mockedAttestationMechanism;
@@ -74,6 +74,7 @@ public class EnrollmentGroupTest
         String mockedEtag;
         JsonObject mockedJsonElement;
 
+        @SuppressWarnings("SameParameterValue") // Since this is a constructor "enrollmentGroupId" can be passed any value.
         MockEnrollmentGroup(
                 String enrollmentGroupId,
                 Attestation attestation)
@@ -158,6 +159,31 @@ public class EnrollmentGroupTest
         return new MockEnrollmentGroup(
                 VALID_ENROLLMENT_GROUP_ID,
                 new SymmetricKeyAttestation(VALID_PRIMARY_KEY, VALID_SECONDARY_KEY));
+    }
+
+    private void setAllocationPolicyWorks(AllocationPolicy expectedAllocationPolicy, SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+
+        //act
+        enrollmentGroup.setAllocationPolicy(expectedAllocationPolicy);
+
+        //assert
+        assertEquals(expectedAllocationPolicy, enrollmentGroup.getAllocationPolicy());
+    }
+
+    private void getAllocationPolicyWorks(AllocationPolicy expectedAllocationPolicy, SymmetricKeyAttestation mockedAttestation)
+    {
+        //arrange
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
+        Deencapsulation.setField(enrollmentGroup, "allocationPolicy", expectedAllocationPolicy);
+
+        //act
+        AllocationPolicy actualAllocationPolicy = enrollmentGroup.getAllocationPolicy();
+
+        //assert
+        assertEquals(expectedAllocationPolicy, actualAllocationPolicy);
     }
 
     /* Tests_SRS_ENROLLMENT_GROUP_21_001: [The constructor shall judge and store the provided parameters using the EnrollmentGroup setters.] */
@@ -1502,33 +1528,44 @@ public class EnrollmentGroupTest
 
     /* Tests_SRS_ENROLLMENT_GROUP_34_050: [This function shall set the allocation policy.] */
     @Test
-    public void setAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    public void setCustomAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
-        //arrange
-        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.CUSTOM;
-        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
-
-        //act
-        enrollmentGroup.setAllocationPolicy(expectedAllocationPolicy);
-
-        //assert
-        assertEquals(expectedAllocationPolicy, enrollmentGroup.getAllocationPolicy());
+        setAllocationPolicyWorks(AllocationPolicy.CUSTOM, mockedAttestation);
     }
 
     /* Tests_SRS_ENROLLMENT_GROUP_34_049: [This function shall get the allocation policy.] */
     @Test
-    public void getAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    public void getCustomAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
     {
-        //arrange
-        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.CUSTOM;
-        EnrollmentGroup enrollmentGroup = new EnrollmentGroup("1234", mockedAttestation);
-        Deencapsulation.setField(enrollmentGroup, "allocationPolicy", expectedAllocationPolicy);
+        getAllocationPolicyWorks(AllocationPolicy.CUSTOM, mockedAttestation);
+    }
 
-        //act
-        AllocationPolicy actualAllocationPolicy = enrollmentGroup.getAllocationPolicy();
+    /* Tests_SRS_ENROLLMENT_GROUP_34_050: [This function shall set the allocation policy.] */
+    @Test
+    public void setStaticAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        setAllocationPolicyWorks(AllocationPolicy.STATIC, mockedAttestation);
+    }
 
-        //assert
-        assertEquals(expectedAllocationPolicy, actualAllocationPolicy);
+    /* Tests_SRS_ENROLLMENT_GROUP_34_049: [This function shall get the allocation policy.] */
+    @Test
+    public void getHashedAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        getAllocationPolicyWorks(AllocationPolicy.HASHED, mockedAttestation);
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_050: [This function shall set the allocation policy.] */
+    @Test
+    public void setHashedAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        setAllocationPolicyWorks(AllocationPolicy.HASHED, mockedAttestation);
+    }
+
+    /* Tests_SRS_ENROLLMENT_GROUP_34_049: [This function shall get the allocation policy.] */
+    @Test
+    public void getStaticAllocationPolicyWorks(final @Mocked SymmetricKeyAttestation mockedAttestation)
+    {
+        getAllocationPolicyWorks(AllocationPolicy.STATIC, mockedAttestation);
     }
 
     /* Tests_SRS_ENROLLMENT_GROUP_34_054: [This function shall set the custom allocation definition.] */

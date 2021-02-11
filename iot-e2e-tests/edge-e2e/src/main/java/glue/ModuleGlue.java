@@ -23,6 +23,7 @@ import java.net.*;
 import java.util.*;
 
 
+@SuppressWarnings("ALL")
 public class ModuleGlue
 {
     private static final long OPEN_RETRY_TIMEOUT = 3 * 60 * 1000;
@@ -63,22 +64,17 @@ public class ModuleGlue
         System.out.printf("ConnectFromEnvironment called with transport %s%n", transportType);
 
         //This is the default URL stream handler factory
-        URLStreamHandlerFactory fac = new URLStreamHandlerFactory()
-        {
-            @Override
-            public URLStreamHandler createURLStreamHandler(String protocol)
+        URLStreamHandlerFactory fac = protocol -> {
+            if (protocol.equals("http"))
             {
-                if (protocol.equals("http"))
-                {
-                    return new sun.net.www.protocol.http.Handler();
-                }
-                else if(protocol.equals("https"))
-                {
-                    return new sun.net.www.protocol.https.Handler();
-                }
-
-                return null;
+                return new sun.net.www.protocol.http.Handler();
             }
+            else if(protocol.equals("https"))
+            {
+                return new sun.net.www.protocol.https.Handler();
+            }
+
+            return null;
         };
 
         try
@@ -600,7 +596,7 @@ public class ModuleGlue
     {
         // Our JSON encoder doesn't like the way the MethodClass implements getPayload and getPayloadObject.  It
         // produces JSON that had both fields and the we want to return payloadObject, but we want to return it
-        // in the field called "payload".  The easiest workaroudn is to make an empty JsonObject and copy the
+        // in the field called "payload".  The easiest workaround is to make an empty JsonObject and copy the
         // values over manually.  I'm sure there's a better way, but this is test code.
         JsonObject fixedObject = new JsonObject();
         fixedObject.put("status", result.getStatus());

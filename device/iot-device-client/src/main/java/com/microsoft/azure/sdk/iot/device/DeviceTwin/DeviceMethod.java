@@ -49,82 +49,78 @@ public final class DeviceMethod
 
                 IotHubTransportMessage methodMessage = (IotHubTransportMessage) message;
 
-                switch (methodMessage.getDeviceOperationType())
+                if (methodMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST)
                 {
-                    case DEVICE_OPERATION_METHOD_RECEIVE_REQUEST:
-
-                        if (deviceMethodCallback != null)
+                    if (deviceMethodCallback != null)
+                    {
+                        if (!isSubscribed)
                         {
-                            if (!isSubscribed)
-                            {
-                                isSubscribed = true;
-                            }
-                            try
+                            isSubscribed = true;
+                        }
+                        try
+                        {
+                            /*
+                             **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
+                             */
+                            log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
+                            DeviceMethodData responseData = deviceMethodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
+                            log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
+
+                            /*
+                             **Codes_SRS_DEVICEMETHOD_25_010: [**User is expected to provide response message and status upon invoking the device method callback.**]**
+                             */
+                            if (responseData != null)
                             {
                                 /*
-                                **Codes_SRS_DEVICEMETHOD_25_008: [**If the message is of type DeviceMethod and DEVICE_OPERATION_METHOD_RECEIVE_REQUEST then user registered device method callback gets invoked providing the user with method name and payload along with the user context. **]**
+                                 **Codes_SRS_DEVICEMETHOD_25_011: [**If the user callback is successful and user has successfully provided the response message and status, then this method shall build a device method message of type DEVICE_OPERATION_METHOD_SEND_RESPONSE, serilize the user data by invoking MethodParser from serializer and save the user data as payload in the message before sending it to IotHub via sendeventAsync before marking the result as complete**]**
+                                 **Codes_SRS_DEVICEMETHOD_25_015: [**User can provide null response message upon invoking the device method callback which will be serialized as is, before sending it to IotHub.**]**
                                  */
-                                log.trace("Executing method invocation callback for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
-                                DeviceMethodData responseData = deviceMethodCallback.call(methodMessage.getMethodName(), methodMessage.getBytes(), deviceMethodCallbackContext);
-                                log.trace("Method invocation callback returned for method name {} for message {}", methodMessage.getMethodName(), methodMessage);
+                                MethodParser methodParserObject = new MethodParser(responseData.getResponseMessage());
+                                IotHubTransportMessage responseMessage = new IotHubTransportMessage(methodParserObject.toJson().getBytes(), MessageType.DEVICE_METHODS);
+                                /*
+                                 **Codes_SRS_DEVICEMETHOD_25_012: [**The device method message sent to IotHub shall have same the request id as the invoking message.**]**
+                                 */
+                                responseMessage.setRequestId(methodMessage.getRequestId());
+
+                                // Codes_SRS_DEVICEMETHOD_34_016: [The device method message sent to IotHub shall have the sending device's id set as the connection device id.]
+                                responseMessage.setConnectionDeviceId(this.nestedConfig.getDeviceId());
 
                                 /*
-                                **Codes_SRS_DEVICEMETHOD_25_010: [**User is expected to provide response message and status upon invoking the device method callback.**]**
+                                 **Codes_SRS_DEVICEMETHOD_25_013: [**The device method message sent to IotHub shall have the status provided by the user as the message status.**]**
                                  */
-                                if (responseData != null)
-                                {
-                                    /*
-                                    **Codes_SRS_DEVICEMETHOD_25_011: [**If the user callback is successful and user has successfully provided the response message and status, then this method shall build a device method message of type DEVICE_OPERATION_METHOD_SEND_RESPONSE, serilize the user data by invoking MethodParser from serializer and save the user data as payload in the message before sending it to IotHub via sendeventAsync before marking the result as complete**]**
-                                    **Codes_SRS_DEVICEMETHOD_25_015: [**User can provide null response message upon invoking the device method callback which will be serialized as is, before sending it to IotHub.**]**
-                                     */
-                                    MethodParser methodParserObject = new MethodParser(responseData.getResponseMessage());
-                                    IotHubTransportMessage responseMessage = new IotHubTransportMessage(methodParserObject.toJson().getBytes(), MessageType.DEVICE_METHODS);
-                                    /*
-                                    **Codes_SRS_DEVICEMETHOD_25_012: [**The device method message sent to IotHub shall have same the request id as the invoking message.**]**
-                                     */
-                                    responseMessage.setRequestId(methodMessage.getRequestId());
+                                responseMessage.setStatus(String.valueOf(responseData.getStatus()));
+                                responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
 
-                                    // Codes_SRS_DEVICEMETHOD_34_016: [The device method message sent to IotHub shall have the sending device's id set as the connection device id.]
-                                    responseMessage.setConnectionDeviceId(this.nestedConfig.getDeviceId());
-
-                                    /*
-                                    **Codes_SRS_DEVICEMETHOD_25_013: [**The device method message sent to IotHub shall have the status provided by the user as the message status.**]**
-                                     */
-                                    responseMessage.setStatus(String.valueOf(responseData.getStatus()));
-                                    responseMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE);
-
-                                    deviceIO.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null, nestedConfig.getDeviceId());
-                                    result = IotHubMessageResult.COMPLETE;
-                                }
-                                else
-                                {
-                                    log.info("User callback did not send any data for response");
-                                    result = IotHubMessageResult.REJECT;
-                                    /*
-                                    **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
-                                     */
-                                    deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
-                                }
+                                deviceIO.sendEventAsync(responseMessage, new deviceMethodRequestMessageCallback(), null, nestedConfig.getDeviceId());
+                                result = IotHubMessageResult.COMPLETE;
                             }
-                            catch (Exception e)
+                            else
                             {
-                                log.info("User callback did not succeed");
+                                log.info("User callback did not send any data for response");
                                 result = IotHubMessageResult.REJECT;
                                 /*
-                                **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
+                                 **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
                                  */
                                 deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
                             }
-                        }
-                        else
+                        } catch (Exception e)
                         {
-                            log.warn("Received device method request, but device has not setup device method");
+                            log.info("User callback did not succeed");
+                            result = IotHubMessageResult.REJECT;
+                            /*
+                             **Codes_SRS_DEVICEMETHOD_25_014: [**If the user invoked callback failed for any reason then the user shall be notified on the status callback registered by the user as ERROR before marking the status of the sent message as Rejected.**]**
+                             */
+                            deviceMethodStatusCallback.execute(iotHubStatus, deviceMethodStatusCallbackContext);
                         }
-                        break;
-
-                    default:
-                        log.warn("Received unknown type message for device methods");
-                        break;
+                    }
+                    else
+                    {
+                        log.warn("Received device method request, but device has not setup device method");
+                    }
+                }
+                else
+                {
+                    log.warn("Received unknown type message for device methods");
                 }
 
                 return result;
@@ -137,11 +133,7 @@ public final class DeviceMethod
         @Override
         public void execute(IotHubStatusCode responseStatus, Object callbackContext)
         {
-            if (deviceMethodStatusCallback != null)
-            {
-                deviceMethodStatusCallback.execute(responseStatus, deviceMethodStatusCallbackContext);
-            }
-
+            deviceMethodStatusCallback.execute(responseStatus, deviceMethodStatusCallbackContext);
         }
     }
 
@@ -153,16 +145,11 @@ public final class DeviceMethod
      * @param deviceIO  Device client  object for this connection instance for the device. Cannot be {@code null}
      * @param config  Device client  configuration Cannot be {@code null}
      * @throws  IllegalArgumentException This exception is thrown if either deviceIO or config or deviceMethodStatusCallback are null
-     *
      */
     public DeviceMethod(DeviceIO deviceIO, DeviceClientConfig config, IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext) throws IllegalArgumentException
     {
-
         if (deviceIO == null || config == null)
         {
-            /*
-            **Codes_SRS_DEVICEMETHOD_25_001: [**The constructor shall throw IllegalArgument Exception if any of the parameters i.e deviceIO, config, deviceMethodStatusCallback are null. **]**
-             */
             throw new IllegalArgumentException("Client or config cannot be null");
         }
 
@@ -171,17 +158,10 @@ public final class DeviceMethod
             throw new IllegalArgumentException("Status call back cannot be null");
         }
 
-        /*
-        **Codes_SRS_DEVICEMETHOD_25_003: [**The constructor shall save all the parameters specified i.e deviceIO, config, deviceMethodStatusCallback, deviceMethodStatusCallbackContext.**]**
-         */
         this.deviceIO = deviceIO;
         this.config = config;
         this.deviceMethodStatusCallback = deviceMethodStatusCallback;
         this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
-
-        /*
-        **Codes_SRS_DEVICEMETHOD_25_002: [**The constructor shall save the device method messages callback callback, by calling setDeviceMethodsMessageCallback, where any further messages for device method shall be delivered.**]**
-         */
         this.config.setDeviceMethodsMessageCallback(new deviceMethodResponseCallback(), null);
     }
 
@@ -197,9 +177,6 @@ public final class DeviceMethod
     {
         if (deviceMethodCallback == null)
         {
-            /*
-            **Codes_SRS_DEVICEMETHOD_25_004: [**If deviceMethodCallback parameter is null then this method shall throw IllegalArgumentException**]**
-             */
             throw new IllegalArgumentException("Callback cannot be null");
         }
 
@@ -208,15 +185,10 @@ public final class DeviceMethod
 
         if (!isSubscribed)
         {
-            /*
-            **Codes_SRS_DEVICEMETHOD_25_005: [**If not already subscribed then this method shall create a device method message with empty payload and set its type as DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST, and set it's connection id to the sending device's id.**]**
-            **Codes_SRS_DEVICEMETHOD_25_006: [**If not already subscribed then this method shall send the message using sendEventAsync.**]**
-             */
             IotHubTransportMessage subscribeMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
             subscribeMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
             subscribeMessage.setConnectionDeviceId(this.config.getDeviceId());
             this.deviceIO.sendEventAsync(subscribeMessage, new deviceMethodRequestMessageCallback(), null, this.config.getDeviceId());
         }
-
     }
 }

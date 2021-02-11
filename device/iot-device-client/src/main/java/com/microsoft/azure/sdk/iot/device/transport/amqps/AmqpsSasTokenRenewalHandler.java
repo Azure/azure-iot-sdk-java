@@ -2,7 +2,6 @@ package com.microsoft.azure.sdk.iot.device.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
@@ -100,6 +99,9 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
         this.isClosed = true;
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but this code only executes when our config
+    // uses SAS_TOKEN auth, and that is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     private void scheduleRenewal(Reactor reactor)
     {
         int sasTokenRenewalPeriod = this.amqpsSessionHandler.getDeviceClientConfig().getSasTokenAuthentication().getMillisecondsBeforeProactiveRenewal();

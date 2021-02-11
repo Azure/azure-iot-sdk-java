@@ -17,6 +17,8 @@ import java.util.Map;
  * Twin tags representation
  * @deprecated As of release 0.4.0, replaced by {@link com.microsoft.azure.sdk.iot.deps.twin.TwinCollection}
  */
+// Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
+@SuppressWarnings("unchecked")
 @Deprecated
 public class TwinTags
 {
@@ -33,7 +35,7 @@ public class TwinTags
     protected synchronized JsonElement update(Map<String, Object> tagsMap) throws IllegalArgumentException
     {
         JsonElement innerDiff = updateFromMap(tagsMap, tags);
-        if((innerDiff == null) || (innerDiff.toString().equals("{}")))
+        if(innerDiff.toString().equals("{}"))
         {
             return null;
         }
@@ -80,7 +82,7 @@ public class TwinTags
                             oldMap.put(key, new HashMap<String, Object>());
                         }
                         JsonElement innerDiff = updateFromMap((Map<String, Object>)newValue, (Map<String, Object>)oldMap.get(key));
-                        if((innerDiff != null) && (!innerDiff.toString().equals("{}")))
+                        if(!innerDiff.toString().equals("{}"))
                         {
                             diffJson.add(key, innerDiff);
                         }

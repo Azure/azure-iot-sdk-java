@@ -22,7 +22,7 @@ public final class IotHubSasToken
     /** Components of the SAS token. */
     private String signature = null;
     /** The time, as a UNIX timestamp, before which the token is valid. */
-    private long expiryTime;
+    private final long expiryTime;
     /**
      * The URI for a connection from a device to an IoT Hub. Does not include a
      * protocol.
@@ -168,7 +168,7 @@ public final class IotHubSasToken
         }
         else
         {
-            return null;
+            throw new IllegalArgumentException("SasToken hasn't been initialized");
         }
     }
 
@@ -208,7 +208,7 @@ public final class IotHubSasToken
     public static boolean isExpired(String sasToken)
     {
         //expiry time is measured in seconds since Unix Epoch
-        Long currentTime = System.currentTimeMillis() / 1000;
+        long currentTime = System.currentTimeMillis() / 1000;
         Long expiryTime = getExpiryTimeFromToken(sasToken);
         return (currentTime >= expiryTime);
     }

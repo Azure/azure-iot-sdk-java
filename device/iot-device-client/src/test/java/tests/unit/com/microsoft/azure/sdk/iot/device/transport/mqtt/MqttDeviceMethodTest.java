@@ -30,9 +30,7 @@ import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEV
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SEND_RESPONSE;
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST;
 import static com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceOperations.DEVICE_OPERATION_UNKNOWN;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /* Unit tests for MqttDeviceMethod
  * Code coverage: 100% methods, 97% lines
@@ -80,8 +78,8 @@ public class MqttDeviceMethodTest
 
         assertNotNull(testSubscribeTopic);
         assertNotNull(testResTopic);
-        assertTrue(testSubscribeTopic.equals(actualSubscribeTopic));
-        assertTrue(testResTopic.equals(actualResTopic));
+        assertEquals(testSubscribeTopic, actualSubscribeTopic);
+        assertEquals(testResTopic, actualResTopic);
 
     }
 
@@ -321,10 +319,10 @@ public class MqttDeviceMethodTest
 
         //assert
         assertNotNull(testMessage);
-        assertTrue(testMessage.getMessageType().equals(MessageType.DEVICE_METHODS));
-        assertTrue(testDMMessage.getRequestId().equals(String.valueOf(10)));
-        assertTrue(testDMMessage.getMethodName().equals("testMethod"));
-        assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));
+        assertEquals(testMessage.getMessageType(), MessageType.DEVICE_METHODS);
+        assertEquals(testDMMessage.getRequestId(), String.valueOf(10));
+        assertEquals("testMethod", testDMMessage.getMethodName());
+        assertEquals(testDMMessage.getDeviceOperationType(), DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
     }
 
     // Tests_SRS_MQTTDEVICEMETHOD_25_026: [**This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.**]**
@@ -412,10 +410,10 @@ public class MqttDeviceMethodTest
 
         //assert
         assertNotNull(testMessage);
-        assertTrue(testMessage.getBytes().length == 0);
-        assertTrue(testMessage.getMessageType().equals(MessageType.DEVICE_METHODS));
-        assertTrue(testDMMessage.getRequestId().equals(String.valueOf(10)));
-        assertTrue(testDMMessage.getMethodName().equals("testMethod"));
-        assertTrue(testDMMessage.getDeviceOperationType().equals(DEVICE_OPERATION_METHOD_RECEIVE_REQUEST));
+        assertEquals(0, testMessage.getBytes().length);
+        assertEquals(testMessage.getMessageType(), MessageType.DEVICE_METHODS);
+        assertEquals(testDMMessage.getRequestId(), String.valueOf(10));
+        assertEquals("testMethod", testDMMessage.getMethodName());
+        assertEquals(testDMMessage.getDeviceOperationType(), DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
     }
 }

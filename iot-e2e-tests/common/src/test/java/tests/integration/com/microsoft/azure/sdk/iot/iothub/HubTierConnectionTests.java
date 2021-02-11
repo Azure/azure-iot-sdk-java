@@ -34,7 +34,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class HubTierConnectionTests extends IntegrationTest
 {
-    protected static final long WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long WAIT_FOR_DISCONNECT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     // How much to wait until a message makes it to the server, in milliseconds
     protected static final Integer SEND_TIMEOUT_MILLISECONDS = 180000;
@@ -147,7 +147,7 @@ public class HubTierConnectionTests extends IntegrationTest
         }
     }
 
-    public class HubTierConnectionTestInstance
+    public static class HubTierConnectionTestInstance
     {
         public DeviceClient client;
         public IotHubClientProtocol protocol;
@@ -199,14 +199,7 @@ public class HubTierConnectionTests extends IntegrationTest
     {
         //arrange
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.client.registerConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallback()
-        {
-            @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
-            {
-                connectionStatusUpdates.add(new Pair<>(status, throwable));
-            }
-        }, null);
+        testInstance.client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
 
         testInstance.client.open();
 
@@ -235,9 +228,9 @@ public class HubTierConnectionTests extends IntegrationTest
 
     public static boolean actualStatusUpdatesContainsStatus(List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates, IotHubConnectionStatus status)
     {
-        for (int i = 0; i < actualStatusUpdates.size(); i++)
+        for (Pair<IotHubConnectionStatus, Throwable> actualStatusUpdate : actualStatusUpdates)
         {
-            if (actualStatusUpdates.get(i).getKey() == status)
+            if (actualStatusUpdate.getKey() == status)
             {
                 return true;
             }

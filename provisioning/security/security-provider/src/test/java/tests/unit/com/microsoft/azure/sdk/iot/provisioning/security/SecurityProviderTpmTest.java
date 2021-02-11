@@ -61,9 +61,11 @@ public class SecurityProviderTpmTest
     @Mocked
     UUID mockedUUID;
 
-    class SecurityProviderTPMTestImpl extends SecurityProviderTpm
+    static class SecurityProviderTPMTestImpl extends SecurityProviderTpm
     {
         byte[] ek;
+
+        @SuppressWarnings("SameParameterValue") // Since this is a constructor "ek" can be passed any value.
         SecurityProviderTPMTestImpl(byte[] ek)
         {
             this.ek = ek;

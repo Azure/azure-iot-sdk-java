@@ -6,8 +6,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.microsoft.azure.sdk.iot</groupId>
-	<artifactId>iot-edge-e2e-wrapper</artifactId>
+    <artifactId>iot-edge-e2e-wrapper</artifactId>
     <version>1.0.0</version>
     <name>IoT SDK Edge E2E wrappers</name>
 

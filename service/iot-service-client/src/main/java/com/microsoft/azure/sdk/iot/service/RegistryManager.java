@@ -48,6 +48,8 @@ public class RegistryManager
      *
      * @deprecated As of release 1.22.0, replaced by {@link #createFromConnectionString(String)}
      */
+    // Suppressing warning since it is referenced by createFromConnectionString
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public RegistryManager()
     {
@@ -419,6 +421,7 @@ public class RegistryManager
 
     /**
      * Update device with forceUpdate input parameter
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDevice(Device)}
      *
      * @param device The device object containing updated data
      * @param forceUpdate True if the update has to be forced regardless of the device state
@@ -426,6 +429,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     public Device updateDevice(Device device, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_034: [The function shall throw IllegalArgumentException if the input device is null]
@@ -434,7 +439,6 @@ public class RegistryManager
             throw new IllegalArgumentException("device cannot be null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_035: [The function shall set forceUpdate on the device]
         device.setForceUpdate(forceUpdate);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_036: [The function shall get the URL for the device]
@@ -492,6 +496,7 @@ public class RegistryManager
 
     /**
      * Async wrapper for forced updateDevice() operation
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as {@link #updateDeviceAsync(Device)}
      *
      * @param device The device object containing updated data
      * @param forceUpdate True is the update has to be forced regardless if the device state
@@ -499,6 +504,7 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @Deprecated
     public CompletableFuture<Device> updateDeviceAsync(Device device, Boolean forceUpdate) throws IOException, IotHubException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_044: [The function shall throw IllegalArgumentException if the input device is null]
@@ -1190,6 +1196,7 @@ public class RegistryManager
 
     /**
      * Update module with forceUpdate input parameter
+     * @deprecated The forceUpdate argument does nothing so this method will always behave the same as @link #updateModule(Module)}
      *
      * @param module The module object containing updated data
      * @param forceUpdate True if the update has to be forced regardless of the module state
@@ -1197,6 +1204,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")   
+    @Deprecated
     public Module updateModule(Module module, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_026: [The function shall throw IllegalArgumentException if the input module is null]
@@ -1205,7 +1214,6 @@ public class RegistryManager
             throw new IllegalArgumentException("module cannot be null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_027: [The function shall set forceUpdate on the module]
         module.setForceUpdate(forceUpdate);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_028: [The function shall get the URL for the module]
@@ -1453,6 +1461,7 @@ public class RegistryManager
 
     /**
      * Update configuration with forceUpdate input parameter
+     * @deprecated the forceUpdate argument does nothing so this method will always behave the same as @link #updateConfiguration(Configuration)}
      *
      * @param configuration The configuration object containing updated data
      * @param forceUpdate True if the update has to be forced regardless of the configuration state
@@ -1460,6 +1469,8 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")   
+    @Deprecated
     public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
     {
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_065: [The function shall throw IllegalArgumentException if the input configuration is null]
@@ -1468,7 +1479,6 @@ public class RegistryManager
             throw new IllegalArgumentException("configuration cannot be null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_066: [The function shall set forceUpdate on the configuration]
         configuration.setForceUpdate(forceUpdate);
 
         // Codes_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_28_067: [The function shall get the URL for the configuration]

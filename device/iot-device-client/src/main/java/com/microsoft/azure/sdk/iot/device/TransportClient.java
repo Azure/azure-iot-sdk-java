@@ -24,6 +24,7 @@ import static com.microsoft.azure.sdk.iot.device.MultiplexingClient.DEFAULT_REGI
  * or removing devices once the connection has been established. {@link MultiplexingClient} allows for adding and removing
  * of devices from multiplexed connections before or after opening the connection.
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 @Slf4j
 @Deprecated
 public class TransportClient
@@ -146,9 +147,9 @@ public class TransportClient
     public void closeNow() throws IOException
     {
         // Codes_SRS_TRANSPORTCLIENT_12_015: [If the registered device list is not empty the function shall call closeFileUpload on all devices.]
-        for (int i = 0; i < this.deviceClientList.size(); i++)
+        for (DeviceClient deviceClient : this.deviceClientList)
         {
-            deviceClientList.get(i).closeFileUpload();
+            deviceClient.closeFileUpload();
         }
 
         // Codes_SRS_TRANSPORTCLIENT_12_014: [If the deviceIO not null the function shall call closeWithoutWrappingException on the deviceIO and set the deviceIO to null.]
@@ -203,10 +204,10 @@ public class TransportClient
             throw new UnsupportedOperationException("TransportClient.setRetryPolicy only works when there is at least one registered device client.");
         }
 
-        for (int i = 0; i < this.deviceClientList.size(); i++)
+        for (DeviceClient deviceClient : this.deviceClientList)
         {
             // Codes_SRS_TRANSPORTCLIENT_28_002: [The function shall set the retry policies to all registered device clients.]
-            deviceClientList.get(i).getConfig().setRetryPolicy(retryPolicy);
+            deviceClient.getConfig().setRetryPolicy(retryPolicy);
         }
 
         log.debug("Retry policy updated successfully in the transport client");

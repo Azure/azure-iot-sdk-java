@@ -19,13 +19,13 @@ public class SymmetricKeyAttestation extends Attestation
 {
     // the primary key for attestation [mandatory]
     private static final String PRIMARY_KEY_TAG = "primaryKey";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(PRIMARY_KEY_TAG)
     private String primaryKey;
 
     // the secondary key for attestation [mandatory]
     private static final String SECONDARY_KEY_TAG = "secondaryKey";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SECONDARY_KEY_TAG)
     private String secondaryKey;
 

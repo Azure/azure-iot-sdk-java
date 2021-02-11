@@ -38,12 +38,11 @@ public class ProvisioningConnectionString extends ProvisioningConnectionStringBu
     public String getUserString()
     {
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_21_001: [The getUserString shall serialize the object properties to a string using the following format: SharedAccessKeyName@SAS.root.deviceProvisioningServiceName] */
-        String stringBuilder = this.sharedAccessKeyName +
+        return this.sharedAccessKeyName +
                 USER_SEPARATOR +
                 USER_SAS +
                 USER_ROOT +
                 this.deviceProvisioningServiceName;
-        return stringBuilder;
     }
 
     /**
@@ -56,7 +55,7 @@ public class ProvisioningConnectionString extends ProvisioningConnectionStringBu
     {
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_21_002: [The toString shall serialize the object to a string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=] */
 
-        String stringBuilder = HOST_NAME_PROPERTY_NAME +
+        return HOST_NAME_PROPERTY_NAME +
                 VALUE_PAIR_SEPARATOR +
                 this.hostName +
                 VALUE_PAIR_DELIMITER +
@@ -71,7 +70,6 @@ public class ProvisioningConnectionString extends ProvisioningConnectionStringBu
                 SHARED_ACCESS_SIGNATURE_PROPERTY_NAME +
                 VALUE_PAIR_SEPARATOR +
                 this.sharedAccessSignature;
-        return stringBuilder;
     }
 
     /**

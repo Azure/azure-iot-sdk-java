@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * certificate in the body of a message
  **/
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@SuppressWarnings("ALL")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Certificate   {
   
   private String cert = null;
@@ -50,10 +51,9 @@ public class Certificate   {
   @Override
   public String toString() {
 
-    String sb = "class Certificate {\n" +
-            "    cert: " + toIndentedString(cert) + "\n" +
-            "}";
-    return sb;
+      return "class Certificate {\n" +
+              "    cert: " + toIndentedString(cert) + "\n" +
+              "}";
   }
 
   /**

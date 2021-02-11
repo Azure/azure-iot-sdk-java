@@ -159,7 +159,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         }
     }
 
-    protected class DeviceTwinStatusCallBack implements IotHubEventCallback
+    protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
     {
         public void execute(IotHubStatusCode status, Object context)
         {
@@ -184,7 +184,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         this.testInstance = new DeviceTwinWithVersionTestInstance(protocol);
     }
 
-    public class DeviceTwinWithVersionTestInstance
+    public static class DeviceTwinWithVersionTestInstance
     {
         public IotHubClientProtocol protocol;
         private com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;

@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * result of a connection to a service, device, or module client
  **/
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@SuppressWarnings("ALL")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectResponse   {
   
   private String connectionId = null;
@@ -50,10 +51,9 @@ public class ConnectResponse   {
   @Override
   public String toString() {
 
-    String sb = "class ConnectResponse {\n" +
-            "    connectionId: " + toIndentedString(connectionId) + "\n" +
-            "}";
-    return sb;
+      return "class ConnectResponse {\n" +
+              "    connectionId: " + toIndentedString(connectionId) + "\n" +
+              "}";
   }
 
   /**

@@ -122,7 +122,7 @@ public class Socks5SocketFactory extends SocketFactory
         public void connect(final SocketAddress sa, final int a) throws IOException
         {
             mTarget = (InetSocketAddress) sa;
-            if (isLocal()) // ignore crazy timeout
+            if (isLocal()) // ignore timeout
             {
                 super.connect(new InetSocketAddress(getDirectInetAddress(), mTarget.getPort()), 1000);
             }
@@ -194,6 +194,7 @@ public class Socks5SocketFactory extends SocketFactory
                     mLocalIP = InetAddress.getByName(mLocalHost);
                 } catch (UnknownHostException e)
                 {
+                    // Return a null IP address for an unknown host
                 }
             }
             return mLocalIP;

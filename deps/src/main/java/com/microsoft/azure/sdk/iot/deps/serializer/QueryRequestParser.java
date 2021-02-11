@@ -13,7 +13,9 @@ import com.google.gson.annotations.SerializedName;
 public class QueryRequestParser
 {
     private static final String QUERY_TAG = "query";
-    @Expose(serialize = true, deserialize = false)
+    // This suppression below is addressing warnings of field used for serialization.
+    @SuppressWarnings("FieldCanBeLocal")
+    @Expose(deserialize = false)
     @SerializedName(QUERY_TAG)
     private String query = null;
 

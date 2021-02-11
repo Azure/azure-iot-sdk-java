@@ -84,6 +84,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * The number of milliseconds the transport will wait between
      * sending out messages.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long SEND_PERIOD_MILLIS = 10L;
 
@@ -94,10 +95,13 @@ public final class DeviceClient extends InternalClient implements Closeable
      * The number of milliseconds the transport will wait between
      * polling for messages.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
@@ -636,14 +640,16 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
      * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
+     * @param <Type2> The type of the desired property value.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
-    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                                        PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+    public <Type1, Type2> void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                                        PropertyCallBack<Type1, Type2> genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);
@@ -917,6 +923,9 @@ public final class DeviceClient extends InternalClient implements Closeable
         super.setOption(optionName, value);
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
+    // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     @Override
     void setOption_SetSASTokenExpiryTime(Object value) throws IllegalArgumentException
     {

@@ -23,7 +23,7 @@ import java.util.Scanner;
 public class TransportClientSample
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private static final List failedMessageListOnClose = new ArrayList(); // List of messages that failed on closeNow
+    private static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on closeNow
 
     private static final int METHOD_SUCCESS = 200;
     private static final int METHOD_HUNG = 300;
@@ -164,19 +164,15 @@ public class TransportClientSample
         public DeviceMethodData call(String methodName, Object methodData, Object context)
         {
             DeviceMethodData deviceMethodData ;
-            switch (methodName)
+            if ("command".equals(methodName))
             {
-                case "command" :
-                {
-                    int status = method_command(methodData);
-                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
-                    break;
-                }
-                default:
-                {
-                    int status = method_default(methodData);
-                    deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
-                }
+                int status = method_command(methodData);
+                deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
+            }
+            else
+            {
+                int status = method_default(methodData);
+                deviceMethodData = new DeviceMethodData(status, "executed " + methodName);
             }
 
             return deviceMethodData;
@@ -191,10 +187,10 @@ public class TransportClientSample
         }
     }
 
-    protected static class onHomeTempChange implements PropertyCallBack
+    protected static class onHomeTempChange implements PropertyCallBack<String, Object>
     {
         @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        public void PropertyCall(String propertyKey, Object propertyValue, Object context)
         {
             if (propertyValue.equals(80))
             {
@@ -204,10 +200,10 @@ public class TransportClientSample
 
     }
 
-    protected static class onCameraActivity implements PropertyCallBack
+    protected static class onCameraActivity implements PropertyCallBack<String, Object>
     {
         @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        public void PropertyCall(String propertyKey, Object propertyValue, Object context)
         {
             System.out.println(propertyKey + " changed to " + propertyValue);
             if (propertyValue.equals(CAMERA.DETECTED_BURGLAR))
@@ -254,10 +250,6 @@ public class TransportClientSample
             protocol = IotHubClientProtocol.AMQPS_WS;
         }
 
-        String pathToCertificate1 = null;
-        String pathToCertificate2 = null;
-        String pathToCertificate3 = null;
-
         int numRequests = 3;
 
         System.out.println("Successfully read input parameters.");
@@ -265,10 +257,6 @@ public class TransportClientSample
         TransportClient transportClient = new TransportClient(protocol);
 
         DeviceClient client1 = new DeviceClient(connString1, transportClient);
-        if (pathToCertificate1 != null)
-        {
-            client1.setOption("SetCertificatePath", pathToCertificate1);
-        }
         System.out.println("Successfully created an IoT Hub Client 1.");
 
         long time1 = 2400;
@@ -282,10 +270,6 @@ public class TransportClientSample
 
 
         DeviceClient client2 = new DeviceClient(connString2, transportClient);
-        if (pathToCertificate2 != null)
-        {
-            client2.setOption("SetCertificatePath", pathToCertificate2);
-        }
         System.out.println("Successfully created an IoT Hub Client 2.");
 
         long time2 = 2400;
@@ -298,10 +282,6 @@ public class TransportClientSample
         System.out.println("Successfully set message callback for Client 2.");
 
         DeviceClient client3 = new DeviceClient(connString3, transportClient);
-        if (pathToCertificate3 != null)
-        {
-            client3.setOption("SetCertificatePath", pathToCertificate3);
-        }
         System.out.println("Successfully created an IoT Hub client3.");
 
         long time3 = 2400;

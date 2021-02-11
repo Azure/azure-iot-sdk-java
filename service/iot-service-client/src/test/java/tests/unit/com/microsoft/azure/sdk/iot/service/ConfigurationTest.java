@@ -65,7 +65,7 @@ public class ConfigurationTest
 
     // Tests_SRS_SERVICE_SDK_JAVA_MODULE_28_003: [The Configuration class shall have the following properties: id, schemaVersion,
     // labels, content, targetCondition, createdTimeUtc, lastUpdatedTimeUtc, priority, systemMetrics, metrics, etag
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void config_get_all_properties()
     {
         // Arrange
@@ -86,8 +86,6 @@ public class ConfigurationTest
         config.getMetrics();
         config.getEtag();
         config.getTargetCondition();
-        config.setForceUpdate(true);
-        config.setForceUpdate(null);
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_CONFIGURATION_28_004: [This method shall return a new instance of a ConfigurationParser
@@ -158,7 +156,7 @@ public class ConfigurationTest
         }});
         parserMetric.setResults(new HashMap<String, Long>()
         {{
-            put("resultKey", new Long(100));
+            put("resultKey", 100L);
         }});
         parserCA.setMetrics(parserMetric);
         ConfigurationMetricsParser parserSystemMetric = new ConfigurationMetricsParser();
@@ -168,7 +166,7 @@ public class ConfigurationTest
         }});
         parserSystemMetric.setResults(new HashMap<String, Long>()
         {{
-            put("sresultKey", new Long(101));
+            put("sresultKey", 101L);
         }});
         parserCA.setSystemMetrics(parserSystemMetric);
 

@@ -16,6 +16,8 @@ import java.util.Map;
  * This class is part of the TwinParser. It is necessary to generate the properties json.
  * @deprecated As of release 0.4.0, replaced by {@link com.microsoft.azure.sdk.iot.deps.twin.TwinProperties}
  */
+// Unchecked casts of Maps to Map<String, Object> are safe as long as service is returning valid twin json payloads. Since all json keys are Strings, all maps must be Map<String, Object>
+@SuppressWarnings("unchecked")
 @Deprecated
 public class TwinProperties
 {

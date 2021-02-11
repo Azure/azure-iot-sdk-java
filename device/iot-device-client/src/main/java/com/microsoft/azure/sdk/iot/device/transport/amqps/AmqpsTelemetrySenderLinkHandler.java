@@ -30,7 +30,6 @@ final class AmqpsTelemetrySenderLinkHandler extends AmqpsSenderLinkHandler
     {
         super(sender, amqpsLinkStateCallback, linkCorrelationId);
 
-        this.senderLinkTag = getTag(deviceClientConfig, linkCorrelationId);
         this.senderLinkAddress = getAddress(deviceClientConfig);
 
         this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());

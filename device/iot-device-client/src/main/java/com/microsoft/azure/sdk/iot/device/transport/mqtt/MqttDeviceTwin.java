@@ -23,32 +23,29 @@ public class MqttDeviceTwin extends Mqtt
     private final Map<String, DeviceOperations> requestMap = new HashMap<>();
     private boolean isStarted = false;
 
-    private final String BACKSLASH = "/";
-    private final String AND = "&";
-    private final String QUESTION = "?";
-    private final String POUND = "#";
+    private static final String BACKSLASH = "/";
+    private static final String AND = "&";
+    private static final String QUESTION = "?";
+    private static final String POUND = "#";
 
-    private final String TWIN = "$iothub/twin";
-    private final String GET = TWIN + BACKSLASH + "GET";
-    private final String RES = TWIN + BACKSLASH + "res";
-    private final String PATCH = TWIN + BACKSLASH + "PATCH";
-    private final String PROPERTIES = "properties";
-    private final String DESIRED = "desired";
-    private final String REPORTED = "reported";
-    private final String REQ_ID = QUESTION + "$rid=";
-    private final String VERSION = "$version=";
+    private static final String TWIN = "$iothub/twin";
+    private static final String GET = TWIN + BACKSLASH + "GET";
+    private static final String RES = TWIN + BACKSLASH + "res";
+    private static final String PATCH = TWIN + BACKSLASH + "PATCH";
+    private static final String PROPERTIES = "properties";
+    private static final String DESIRED = "desired";
+    private static final String REPORTED = "reported";
+    private static final String REQ_ID = QUESTION + "$rid=";
+    private static final String VERSION = "$version=";
 
     //Placement in $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
-    private final int RES_TOKEN = 2;
-    private final int STATUS_TOKEN = 3;
-    private final int REQID_TOKEN = 4;
-    private final int VERSION_TOKEN = 4;
+    private static final int RES_TOKEN = 2;
+    private static final int STATUS_TOKEN = 3;
+    private static final int REQID_TOKEN = 4;
+    private static final int VERSION_TOKEN = 4;
 
     //Placement for $iothub/twin/PATCH/properties/desired/?$version={new version}
-    private final int PATCH_TOKEN = 2;
-    private final int PROPERTIES_TOKEN = 3;
-    private final int DESIRED_TOKEN = 4;
-    private final int PATCH_VERSION_TOKEN = 5;
+    private static final int PATCH_VERSION_TOKEN = 5;
 
     public MqttDeviceTwin(MqttConnection mqttConnection, String connectionId, Map<Integer, Message> unacknowledgedSentMessages, String deviceId) throws TransportException
     {
@@ -303,16 +300,15 @@ public class MqttDeviceTwin extends Mqtt
                             {
                                 //Codes_SRS_MQTTDEVICETWIN_25_044: [If the topic is of type response then this method shall set data and operation type as DEVICE_OPERATION_TWIN_GET_RESPONSE if data is not null]
                                 message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
                             }
                             else
                             {
                                 // Case for $iothub/twin/res/{status}/?$rid={request id}
                                 //Codes_SRS_MQTTDEVICETWIN_25_045: [If the topic is of type response then this method shall set empty data and operation type as DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_RESPONSE if data is null or empty]
                                 message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN); // empty body
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             }
+                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
 
                             // Case for $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
                             if (topicTokens.length > STATUS_TOKEN)

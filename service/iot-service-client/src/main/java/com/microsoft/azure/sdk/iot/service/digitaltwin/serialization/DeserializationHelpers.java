@@ -21,6 +21,7 @@ public class DeserializationHelpers {
      * @return T The generic type response.
      * @throws JsonProcessingException Json parsing exception.
      */
+    @SuppressWarnings("unchecked")
     public static <T> T castObject(ObjectMapper mapper, Object payload, Class<T> clazz) throws JsonProcessingException {
         if (clazz.isAssignableFrom(String.class)){
             return (T)mapper.writeValueAsString(payload);

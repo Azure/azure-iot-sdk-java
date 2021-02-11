@@ -171,6 +171,7 @@ public class FileUploadTaskTest
         };
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private void failedNotificationExpectations(final String correlationId, final String notificationJson) throws IOException
     {
         new NonStrictExpectations()
@@ -188,6 +189,7 @@ public class FileUploadTaskTest
         };
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private void expectSuccess(
             final String blobName, final String correlationId, final String hostName, final String containerName, final String sasToken,
             final String requestJson, final String responseJson, final String notificationJson)

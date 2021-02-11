@@ -203,10 +203,7 @@ public class FileUploadNotificationReceiver extends Receiver
             {
                 FileUploadNotification responseFileUploadNotification = receive(timeoutMs);
                 future.complete(responseFileUploadNotification);
-            } catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            } catch (InterruptedException e)
+            } catch (IOException | InterruptedException e)
             {
                 future.completeExceptionally(e);
             }

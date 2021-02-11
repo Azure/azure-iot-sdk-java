@@ -54,7 +54,6 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
      */
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext)
     {
-        return;
     }
 
     public void close()

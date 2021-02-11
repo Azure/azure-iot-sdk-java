@@ -12,12 +12,12 @@ import com.google.gson.annotations.SerializedName;
 public class MethodResult
 {
     private static final String STATUS_KEY_NAME = "status";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(STATUS_KEY_NAME)
     private int status;
 
     private static final String PAYLOAD_KEY_NAME = "payload";
-    @Expose(serialize = false, deserialize = true)
+    @Expose(serialize = false)
     @SerializedName(PAYLOAD_KEY_NAME)
     private Object payload;
 

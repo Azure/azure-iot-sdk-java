@@ -7,7 +7,6 @@ import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Binary;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.apache.qpid.proton.message.impl.MessageImpl;
-import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.amqp.messaging.Data;
 
 import java.io.IOException;

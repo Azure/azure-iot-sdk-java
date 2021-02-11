@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName;
 public class FileUploadSasUriRequest
 {
     private static final String BLOB_NAME_TAG = "blobName";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(BLOB_NAME_TAG)
     private String blobName;
 

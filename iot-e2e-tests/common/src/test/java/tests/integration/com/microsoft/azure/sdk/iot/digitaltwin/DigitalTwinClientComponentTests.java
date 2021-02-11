@@ -56,7 +56,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     @Rule
     public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
 
-    @Parameterized.Parameter(0)
+    @Parameterized.Parameter()
     public IotHubClientProtocol protocol;
 
     @Parameterized.Parameters(name = "{index}: Digital Twin Test: protocol={0}")

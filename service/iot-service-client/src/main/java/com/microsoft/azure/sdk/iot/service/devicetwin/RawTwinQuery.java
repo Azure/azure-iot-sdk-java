@@ -16,8 +16,8 @@ import java.util.NoSuchElementException;
 public class RawTwinQuery
 {
     private IotHubConnectionString iotHubConnectionString = null;
-    private final long USE_DEFAULT_TIMEOUT = 0;
-    private final int DEFAULT_PAGE_SIZE = 100;
+    private static final long USE_DEFAULT_TIMEOUT = 0;
+    private static final int DEFAULT_PAGE_SIZE = 100;
 
     private RawTwinQuery()
     {

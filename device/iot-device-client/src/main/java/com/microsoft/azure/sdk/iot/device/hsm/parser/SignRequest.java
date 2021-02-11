@@ -13,22 +13,24 @@ import javax.crypto.Mac;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
+// This suppression below is addressing warnings of fields used for serialization.
+@SuppressWarnings("FieldCanBeLocal")
 public class SignRequest
 {
     private static final String KEY_ID_NAME = "keyId";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(KEY_ID_NAME)
     private String keyId;
 
     private transient Mac algo;
 
     private static final String ALGO_NAME = "algo";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(ALGO_NAME)
     private String algoString;
 
     private static final String DATA_NAME = "data";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(DATA_NAME)
     private String data;
 

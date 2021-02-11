@@ -24,7 +24,6 @@ public class FeedbackReceiver extends Receiver
     private final long DEFAULT_TIMEOUT_MS = 60000;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    private String deviceId;
     private final AmqpReceive amqpReceive;
 
     /**
@@ -35,7 +34,7 @@ public class FeedbackReceiver extends Receiver
      * @param userName The iot hub user name
      * @param sasToken The iot hub SAS token for the given device
      * @param iotHubServiceClientProtocol The iot hub protocol name
-     * @param deviceId The device id
+     * @param deviceId The device id (not used)
      */
     public @Deprecated FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
     {
@@ -57,8 +56,6 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
         
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_002: [The constructor shall store deviceId]
-        this.deviceId = deviceId;
         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
@@ -282,10 +279,7 @@ public class FeedbackReceiver extends Receiver
         {
             FeedbackBatch responseFeedbackBatch = receive(timeoutMs);
             future.complete(responseFeedbackBatch);
-        } catch (IOException e)
-        {
-            future.completeExceptionally(e);
-        } catch (InterruptedException e)
+        } catch (IOException | InterruptedException e)
         {
             future.completeExceptionally(e);
         }

@@ -145,6 +145,7 @@ public enum ErrorCodeDescription
             case(409301):
                 return ModuleAlreadyExistsOnDevice;
             case(412001):
+            case (412):
                 return PreconditionFailed;
             case(412002):
                 return DeviceMessageLockLost;
@@ -155,6 +156,7 @@ public enum ErrorCodeDescription
             case(413003):
                 return TooManyModulesOnDevice;
             case(429001):
+            case (429):
                 return ThrottlingException;
             case(429002):
                 return ThrottleBacklogLimitExceeded;
@@ -165,6 +167,7 @@ public enum ErrorCodeDescription
             case(500002):
                 return JobCancelled;
             case(503001):
+            case (503):
                 return ServiceUnavailable;
             case (400):
                 return BadFormat;
@@ -176,16 +179,10 @@ public enum ErrorCodeDescription
                 return NotFound;
             case (409):
                 return Conflict;
-            case (412):
-                return PreconditionFailed;
             case (413):
                 return RequestEntityTooLarge;
-            case (429):
-                return ThrottlingException;
             case (500):
                 return InternalServerError;
-            case (503):
-                return ServiceUnavailable;
             default:
                 return UnclassifiedErrorCode;
         }
