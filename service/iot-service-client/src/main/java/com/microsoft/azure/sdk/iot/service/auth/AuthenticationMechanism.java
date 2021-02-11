@@ -58,6 +58,7 @@ public class AuthenticationMechanism
 
         this.type = authenticationType;
 
+        //noinspection StatementWithEmptyBody
         if (this.type == AuthenticationType.CERTIFICATE_AUTHORITY)
         {
             //Codes_SRS_AUTHENTICATION_MECHANISM_34_022: [If the provided authentication type is certificate authority signed, no thumbprint or symmetric key will be generated.]

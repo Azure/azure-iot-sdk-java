@@ -17,7 +17,7 @@ All the artifacts that you need to execute this sample are ready to be built and
 
 Note that the samples for Windows and Linux use Maven.
 
-1. <a name="buildclient"></a>Clone the java SDK repo (https://github.com/Azure/azure-iot-sdk-java.git).
+1. Clone the java SDK repo (https://github.com/Azure/azure-iot-sdk-java.git).
 2. Compile the SDK. This step is only necessary if you don't want to use a precompiled Maven package.
     1. Change to the root **azure-iot-sdk-java** directory.
     2. Run `mvn install`. It will download all needed packages, compile and test the SDK.
@@ -83,7 +83,7 @@ Note that the samples for Windows and Linux use Maven.
 
 If you prefer to create and populate your own java app, this section will guide you step by step. 
 
-1. If you don't want to use the precompiled Service SDK, follow the steps [1 and 2](#buildclient) above to produce it 
+1. If you don't want to use the precompiled Service SDK, follow the steps [1 and 2](#how-to-run-the-samples-on-linux-or-windows) above to produce it 
     locally on your machine.
 2. On your development machine, create a empty folder called `provisioning-getstarted`. That will be the base 
     directory for all provisioning samples that you want to create.

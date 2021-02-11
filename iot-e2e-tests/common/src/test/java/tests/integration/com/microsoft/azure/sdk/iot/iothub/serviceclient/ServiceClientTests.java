@@ -27,7 +27,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -56,7 +55,7 @@ public class ServiceClientTests extends IntegrationTest
         this.testInstance = new ServiceClientITRunner(protocol);
     }
 
-    private class ServiceClientITRunner
+    private static class ServiceClientITRunner
     {
         private final IotHubServiceClientProtocol protocol;
         private final String deviceId;

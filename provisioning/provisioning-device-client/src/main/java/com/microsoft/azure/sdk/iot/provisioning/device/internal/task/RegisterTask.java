@@ -35,20 +35,20 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 @Slf4j
-public class RegisterTask implements Callable
+public class RegisterTask implements Callable<RegistrationOperationStatusParser>
 {
     private static final int MAX_WAIT_FOR_REGISTRATION_RESPONSE = 90*1000; // 90 seconds
     private static final int SLEEP_INTERVAL_WHEN_WAITING_FOR_RESPONSE = 4*1000; //4 seconds
     private static final int DEFAULT_EXPIRY_TIME_IN_SECS = 3600; // 1 Hour
     private static final String SASTOKEN_FORMAT = "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=";
     private static final String THREAD_NAME = "azure-iot-sdk-RegisterTask";
-    private ResponseCallback responseCallback;
-    private ProvisioningDeviceClientContract provisioningDeviceClientContract;
-    private Authorization authorization;
-    private SecurityProvider securityProvider;
-    private ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
+    private final ResponseCallback responseCallback;
+    private final ProvisioningDeviceClientContract provisioningDeviceClientContract;
+    private final Authorization authorization;
+    private final SecurityProvider securityProvider;
+    private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
 
-    private class ResponseCallbackImpl implements ResponseCallback
+    private static class ResponseCallbackImpl implements ResponseCallback
     {
         @Override
         public void run(ResponseData responseData, Object context) throws ProvisioningDeviceClientException

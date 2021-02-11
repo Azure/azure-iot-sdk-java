@@ -82,6 +82,15 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
     }
 
     /**
+     * Getter for Secondary key
+     * @return Returns Secondary Key byte array
+     */
+    public byte[] getSecondaryKey()
+    {
+        return secondaryKey;
+    }
+
+    /**
      * Unique id required for registration
      *
      * @return Returns the registration Id used needed for the service

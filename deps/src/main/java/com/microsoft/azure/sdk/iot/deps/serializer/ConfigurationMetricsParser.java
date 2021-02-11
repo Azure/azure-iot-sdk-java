@@ -10,12 +10,12 @@ import java.util.Map;
 public class ConfigurationMetricsParser
 {
     private static final String RESULTS_NAME = "results";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(RESULTS_NAME)
     private Map<String, Long> results;
 
     private static final String QUERIES_NAME = "queries";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(QUERIES_NAME)
     private Map<String, String> queries;
 

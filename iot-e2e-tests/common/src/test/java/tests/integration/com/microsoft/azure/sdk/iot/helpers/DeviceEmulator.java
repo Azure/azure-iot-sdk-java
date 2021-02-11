@@ -39,11 +39,6 @@ public class DeviceEmulator
     private final DeviceStatus deviceStatus = new DeviceStatus();
     private final ConcurrentMap<String, ConcurrentLinkedQueue<Object>> twinChanges = new ConcurrentHashMap<>();
 
-    private DeviceMethodCallback deviceMethodCallback;
-    private Object deviceMethodCallbackContext;
-    private IotHubEventCallback deviceMethodStatusCallback;
-    private Object deviceMethodStatusCallbackContext;
-
     /**
      * CONSTRUCTOR
      * Creates a new instance of the device emulator, and connect it to the IoTHub using the provided connectionString
@@ -97,6 +92,7 @@ public class DeviceEmulator
      *                                    deviceMethodStatusCallback is not null.
      * @throws IOException if the client failed to subscribe on the device method.
      */
+    @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDeviceMethod(
             DeviceMethodCallback deviceMethodCallback, Object deviceMethodCallbackContext,
             IotHubEventCallback deviceMethodStatusCallback, Object deviceMethodStatusCallbackContext)
@@ -104,37 +100,27 @@ public class DeviceEmulator
     {
         if(deviceMethodCallback == null)
         {
-            this.deviceMethodCallback = new MethodInvokeCallback();
-            this.deviceMethodCallbackContext = null;
-        }
-        else
-        {
-            this.deviceMethodCallback = deviceMethodCallback;
-            this.deviceMethodCallbackContext = deviceMethodCallbackContext;
+            deviceMethodCallback = new MethodInvokeCallback();
+            deviceMethodCallbackContext = null;
         }
 
         if(deviceMethodStatusCallback == null)
         {
-            this.deviceMethodStatusCallback = new DeviceStatusCallback();
-            this.deviceMethodStatusCallbackContext = deviceStatus;
-        }
-        else
-        {
-            this.deviceMethodStatusCallback = deviceMethodStatusCallback;
-            this.deviceMethodStatusCallbackContext = deviceMethodStatusCallbackContext;
+            deviceMethodStatusCallback = new DeviceStatusCallback();
+            deviceMethodStatusCallbackContext = deviceStatus;
         }
 
         if (client instanceof DeviceClient)
         {
             ((DeviceClient)client).subscribeToDeviceMethod(
-                    this.deviceMethodCallback, this.deviceMethodCallbackContext,
-                    this.deviceMethodStatusCallback, this.deviceMethodStatusCallbackContext);
+                    deviceMethodCallback, deviceMethodCallbackContext,
+                    deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
         }
         else if (client instanceof ModuleClient)
         {
             ((ModuleClient)client).subscribeToMethod(
-                    this.deviceMethodCallback, this.deviceMethodCallbackContext,
-                    this.deviceMethodStatusCallback, this.deviceMethodStatusCallbackContext);
+                    deviceMethodCallback, deviceMethodCallbackContext,
+                    deviceMethodStatusCallback, deviceMethodStatusCallbackContext);
         }
 
         long startTime = System.currentTimeMillis();
@@ -178,6 +164,7 @@ public class DeviceEmulator
      * @param mustSubscribeToDesiredProperties is a boolean to define if it should or not subscribe to the desired properties.
      * @throws IOException if failed to start the Device twin.
      */
+    @SuppressWarnings("SameParameterValue") // DeviceEmulator will subscribe to default callback in case the supplied callback is null
     void subscribeToDeviceTwin(IotHubEventCallback deviceTwinStatusCallBack, Object deviceTwinStatusCallbackContext,
                                Device deviceTwin, Object propertyCallBackContext, boolean mustSubscribeToDesiredProperties) throws IOException
     {
@@ -246,7 +233,7 @@ public class DeviceEmulator
 
     InternalClient getClient() {return client;}
 
-    private class DeviceStatus
+    private static class DeviceStatus
     {
         int statusOk;
         int statusError;
@@ -271,7 +258,7 @@ public class DeviceEmulator
         }
     }
 
-    protected class DeviceTwinProperty extends Device
+    protected static class DeviceTwinProperty extends Device
     {
         @Override
         public synchronized void PropertyCall(String propertyKey, Object propertyValue, Object context)

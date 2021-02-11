@@ -280,24 +280,19 @@ public class Configuration
     }
 
     /**
-     * Flip-flop helper for sending a forced update
-     */
-    private Boolean forceUpdate;
-
-    /**
      * Setter for force update boolean
+     * @deprecated  This method currently only validates forceUpdate parameter
      *
      * @param forceUpdate - Boolean controlling if the update should be forced or not
      * @throws IllegalArgumentException if the provided argument is null
      */
+    @Deprecated
     public void setForceUpdate(Boolean forceUpdate) throws IllegalArgumentException
     {
         if (forceUpdate == null)
         {
             throw new IllegalArgumentException("forceUpdate cannot be null");
         }
-
-        this.forceUpdate = forceUpdate;
     }
 
     /**

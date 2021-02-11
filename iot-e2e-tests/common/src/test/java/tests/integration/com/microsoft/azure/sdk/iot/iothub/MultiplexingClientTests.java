@@ -136,7 +136,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
     public MultiplexingClientTestInstance testInstance;
 
-    public class MultiplexingClientTestInstance
+    public static class MultiplexingClientTestInstance
     {
         public IotHubClientProtocol protocol;
         public List<Device> deviceIdentityArray;
@@ -610,7 +610,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assertTrue("Message callback fired, but unexpected message was received", messageCallback.expectedMessageReceived);
     }
 
-    private class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    private static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public boolean messageCallbackFired = false;
         public boolean expectedMessageReceived = false;
@@ -707,7 +707,7 @@ public class MultiplexingClientTests extends IntegrationTest
         Thread.sleep(1000);
 
         // Invoke method on the multiplexed device
-        deviceMethodServiceClient.invoke(deviceId, expectedMethodName, 200l, 200l, null);
+        deviceMethodServiceClient.invoke(deviceId, expectedMethodName, 200L, 200L, null);
 
         // No need to wait for the device to receive the method invocation since the service client call does that already
         assertTrue("Device method callback never fired on device", deviceMethodCallback.deviceMethodCallbackFired);
@@ -717,13 +717,10 @@ public class MultiplexingClientTests extends IntegrationTest
     private static void subscribeToDeviceMethod(DeviceClient deviceClient, DeviceMethodCallback deviceMethodCallback) throws InterruptedException, IOException
     {
         Success methodsSubscribedSuccess = new Success();
-        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, null, new IotHubEventCallback() {
-            @Override
-            public void execute(IotHubStatusCode responseStatus, Object callbackContext) {
-                ((Success) callbackContext).setCallbackStatusCode(responseStatus);
-                ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
-                ((Success) callbackContext).callbackWasFired();
-            }
+        deviceClient.subscribeToDeviceMethod(deviceMethodCallback, null, (responseStatus, callbackContext) -> {
+            ((Success) callbackContext).setCallbackStatusCode(responseStatus);
+            ((Success) callbackContext).setResult(responseStatus == IotHubStatusCode.OK_EMPTY);
+            ((Success) callbackContext).callbackWasFired();
         }, methodsSubscribedSuccess);
 
         // Wait for methods subscription to be acknowledged by hub
@@ -739,7 +736,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    private class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
+    private static class DeviceMethodCallback implements com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback
     {
         public boolean deviceMethodCallbackFired = false;
         public boolean expectedMethodReceived = false;
@@ -769,7 +766,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
-    class TwinPropertyCallBackImpl implements TwinPropertyCallBack
+    static class TwinPropertyCallBackImpl implements TwinPropertyCallBack
     {
         String expectedKey;
         String expectedValue;
@@ -963,7 +960,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assertEquals(expectedReportedPropertyValue, actualReportedPropertyValue);
     }
 
-    class ConnectionStatusChangeTracker implements IotHubConnectionStatusChangeCallback
+    static class ConnectionStatusChangeTracker implements IotHubConnectionStatusChangeCallback
     {
         public boolean isOpen = false;
 
@@ -1541,6 +1538,7 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private static void assertDeviceSessionClosesGracefully(ConnectionStatusChangeTracker connectionStatusChangeTracker, int timeoutMillis) throws InterruptedException {
         long startTime = System.currentTimeMillis();
         while (connectionStatusChangeTracker.isOpen)

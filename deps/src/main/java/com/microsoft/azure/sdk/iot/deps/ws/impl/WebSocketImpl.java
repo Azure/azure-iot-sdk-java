@@ -21,7 +21,6 @@ import static org.apache.qpid.proton.engine.impl.ByteBufferUtils.pourAll;
 
 public class WebSocketImpl implements WebSocket, TransportLayer
 {
-    private final int _maxFrameSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
     private boolean _tail_closed = false;
     private final ByteBuffer _inputBuffer;
     private boolean _head_closed = false;
@@ -52,6 +51,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
     public WebSocketImpl()
     {
+        int _maxFrameSize = (4 * 1024) + (16 * WebSocketHeader.MED_HEADER_LENGTH_MASKED);
         _inputBuffer = newWriteableBuffer(_maxFrameSize);
         _outputBuffer = newWriteableBuffer(_maxFrameSize);
         _pingBuffer = newWriteableBuffer(_maxFrameSize);
@@ -182,7 +182,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
             for (Map.Entry<String, String> entry : _additionalHeaders.entrySet())
             {
-                builder.append(entry.getKey() + ":" + entry.getValue()).append(", ");
+                builder.append(entry.getKey()).append(":").append(entry.getValue()).append(", ");
             }
 
             int lastIndex = builder.lastIndexOf(", ");
@@ -238,9 +238,6 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             switch (_lastType)
             {
                 case WEB_SOCKET_MESSAGE_TYPE_UNKNOWN:
-                    _wsInputBuffer.position(_wsInputBuffer.limit());
-                    _wsInputBuffer.limit(_wsInputBuffer.capacity());
-                    break;
                 case WEB_SOCKET_MESSAGE_TYPE_CHUNK:
                     _wsInputBuffer.position(_wsInputBuffer.limit());
                     _wsInputBuffer.limit(_wsInputBuffer.capacity());
@@ -481,12 +478,8 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             if (_isWebSocketEnabled)
             {
                 _head_closed = true;
-                _underlyingInput.close_tail();
             }
-            else
-            {
-                _underlyingInput.close_tail();
-            }
+            _underlyingInput.close_tail();
         }
 
         @Override

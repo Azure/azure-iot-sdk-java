@@ -106,7 +106,7 @@ Upload the certificate from above to verify.
 
 [povisioning-x509-sample]: https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-samples/provisioning-x509-sample
 [povisioning-service-client]: https://github.com/Azure/azure-iot-sdk-java/tree/master/provisioning/provisioning-service-client
-[azure-portal]: www.portal.azure.com
+[azure-portal]: https://www.portal.azure.com
 [dice-documentation]:https://www.microsoft.com/en-us/research/publication/device-identity-dice-riot-keys-certificates/
 
 

@@ -51,13 +51,13 @@ public class BulkEnrollmentOperationResult
 {
     // the is bulk operation success
     private static final String IS_SUCCESSFUL_TAG = "isSuccessful";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(IS_SUCCESSFUL_TAG)
     private Boolean isSuccessful;
 
     // the list of errors
     private static final String ERRORS_TAG = "errors";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ERRORS_TAG)
     private BulkEnrollmentOperationError[] errors;
 

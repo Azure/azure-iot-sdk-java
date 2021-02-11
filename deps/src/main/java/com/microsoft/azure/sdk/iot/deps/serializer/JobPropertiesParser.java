@@ -15,59 +15,59 @@ public class JobPropertiesParser
     private final transient static Gson gson = new Gson();
 
     private static final String JOB_ID_NAME = "jobId";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(JOB_ID_NAME)
     private String jobId;
 
     private static final String START_TIME_UTC_NAME = "startTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(START_TIME_UTC_NAME)
     private String startTimeUtcString;
     private transient Date startTimeUtc;
 
     private static final String END_TIME_UTC_NAME = "endTimeUtc";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(END_TIME_UTC_NAME)
     private String endTimeUtcString;
     private transient Date endTimeUtc;
 
     private static final String TYPE_NAME = "type";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(TYPE_NAME)
     private String type;
 
     private static final String STATUS_NAME = "status";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STATUS_NAME)
     private String status;
 
     private static final String PROGRESS_NAME = "progress";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(PROGRESS_NAME)
     private int progress;
 
     private static final String INPUT_BLOB_CONTAINER_URI_NAME = "inputBlobContainerUri";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(INPUT_BLOB_CONTAINER_URI_NAME)
     private String inputBlobContainerUri;
 
     private static final String OUTPUT_BLOB_CONTAINER_URI_NAME = "outputBlobContainerUri";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(OUTPUT_BLOB_CONTAINER_URI_NAME)
     private String outputBlobContainerUri;
 
     private static final String EXCLUDE_KEYS_IN_EXPORT_NAME = "excludeKeysInExport";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(EXCLUDE_KEYS_IN_EXPORT_NAME)
     private boolean excludeKeysInExport;
 
     private static final String FAILURE_REASON_NAME = "failureReason";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(FAILURE_REASON_NAME)
     private String failureReason;
 
     private static final String STORAGE_AUTHENTICATION_TYPE = "storageAuthenticationType";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(STORAGE_AUTHENTICATION_TYPE)
     private StorageAuthenticationType storageAuthenticationType;
 

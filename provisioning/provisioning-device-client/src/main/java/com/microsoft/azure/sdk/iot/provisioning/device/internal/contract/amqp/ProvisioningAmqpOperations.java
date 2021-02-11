@@ -28,8 +28,8 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
     private static final String CLIENT_VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
 
-    private static final int MAX_WAIT_TO_SEND_MSG = 1*60*1000; // 1 minute timeout
-    private static final long MAX_WAIT_TO_OPEN_AMQP_CONNECTION = 1*60*1000; //1 minute timeout
+    private static final int MAX_WAIT_TO_SEND_MSG = 60 * 1000; // 1 minute timeout
+    private static final long MAX_WAIT_TO_OPEN_AMQP_CONNECTION = 60 * 1000; //1 minute timeout
 
     private AmqpsConnection amqpConnection;
     private final Queue<AmqpMessage> receivedMessages = new LinkedBlockingQueue<>();

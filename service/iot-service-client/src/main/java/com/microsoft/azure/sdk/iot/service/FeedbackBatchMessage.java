@@ -5,10 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.json.*;
 import java.io.StringReader;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -46,10 +43,10 @@ public class FeedbackBatchMessage
                     ArrayList<FeedbackRecord> records = new ArrayList<>();
 
                     // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_005: [The function shall parse all the Json record to the FeedbackBatch]
-                    for (int i = 0; i < jsonArray.size(); i++)
+                    for (JsonValue aJsonArray : jsonArray)
                     {
                         // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKBATCHMESSAGE_12_004: [The function shall throw a JsonParsingException if the parsing failed]
-                        JsonObject jsonObject = (JsonObject) jsonArray.get(i);
+                        JsonObject jsonObject = (JsonObject) aJsonArray;
 
                         FeedbackRecord feedbackRecord = new FeedbackRecord();
 
@@ -61,17 +58,20 @@ public class FeedbackBatchMessage
 
                         String description = Tools.getValueFromJsonObject(jsonObject, "description");
                         feedbackRecord.setDescription(description);
-						String statusCode = Tools.getValueFromJsonObject(jsonObject, "statusCode");
-                        if (statusCode.toLowerCase().equals("success"))
+                        String statusCode = Tools.getValueFromJsonObject(jsonObject, "statusCode");
+                        if (statusCode.equalsIgnoreCase("success"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.success);
-                        } else if (statusCode.toLowerCase().equals("expired"))
+                        }
+                        else if (statusCode.equalsIgnoreCase("expired"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.expired);
-                        } else if (statusCode.toLowerCase().equals("deliverycountexceeded"))
+                        }
+                        else if (statusCode.equalsIgnoreCase("deliverycountexceeded"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.deliveryCountExceeded);
-                        } else if (statusCode.toLowerCase().equals("rejected"))
+                        }
+                        else if (statusCode.equalsIgnoreCase("rejected"))
                         {
                             feedbackRecord.setStatusCode(FeedbackStatusCode.rejected);
                         }

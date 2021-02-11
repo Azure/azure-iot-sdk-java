@@ -12,25 +12,27 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Json parser for a method request. Used to invoke methods on other devices/modules
  */
+// This suppression below is addressing warnings of fields used for serialization.
+@SuppressWarnings("FieldCanBeLocal")
 public class MethodRequest
 {
     private static final String METHOD_NAME_KEY_NAME = "methodName";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(METHOD_NAME_KEY_NAME)
     private String methodName;
 
     private static final String RESPONSE_TIMEOUT_KEY_NAME = "responseTimeoutInSeconds";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(RESPONSE_TIMEOUT_KEY_NAME)
     private Integer responseTimeoutInSeconds; //Integer, not int because Integer is nullable, so json won't include this field if it is left as the default value
 
     private static final String CONNECT_TIMEOUT_KEY_NAME = "connectTimeoutInSeconds";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(CONNECT_TIMEOUT_KEY_NAME)
     private Integer connectionTimeoutInSeconds; //Integer, not int because Integer is nullable, so json won't include this field if it is left as the default value
 
     private static final String PAYLOAD_KEY_NAME = "payload";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(PAYLOAD_KEY_NAME)
     private String payload;
 

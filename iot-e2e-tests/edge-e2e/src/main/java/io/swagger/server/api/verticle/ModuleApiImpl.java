@@ -8,6 +8,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
 
+@SuppressWarnings("ALL")
 public class ModuleApiImpl implements ModuleApi
 {
     public static ModuleGlue _moduleGlue = new ModuleGlue();

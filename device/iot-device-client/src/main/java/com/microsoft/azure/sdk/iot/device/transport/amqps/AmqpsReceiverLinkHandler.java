@@ -40,7 +40,6 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
     // this initial credit doesn't run out.
     private final Map<Message, AmqpsMessage> receivedMessagesMap = new ConcurrentHashMap<>();
     Map<Symbol, Object> amqpProperties;
-    String receiverLinkTag;
     String linkCorrelationId;
     String receiverLinkAddress;
     Receiver receiverLink;
@@ -231,7 +230,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
 
             if (properties.getContentType() != null)
             {
-                iotHubTransportMessage.setContentType(properties.getContentType().toString());
+                iotHubTransportMessage.setContentTypeFinal(properties.getContentType().toString());
             }
         }
 

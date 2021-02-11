@@ -7,7 +7,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 
 public class TopicParser
 {
-    private String[] topicTokens;
+    private final String[] topicTokens;
 
     private final String QUESTION = "?";
 
@@ -28,7 +28,7 @@ public class TopicParser
 
     protected String getStatus(int tokenIndexStatus) throws TransportException
     {
-        String status = null;
+        String status;
 
         if (tokenIndexStatus <= 0 || tokenIndexStatus >= topicTokens.length)
         {
@@ -118,7 +118,7 @@ public class TopicParser
     @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexMethod"
     String getMethodName(int tokenIndexMethod) throws TransportException
     {
-        String methodName = null;
+        String methodName;
 
         if (tokenIndexMethod <= 0 || tokenIndexMethod >= topicTokens.length)
         {

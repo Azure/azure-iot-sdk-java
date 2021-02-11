@@ -1,7 +1,6 @@
 package io.swagger.server.api;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.phiz71.vertx.swagger.router.OperationIdServiceIdResolver;
@@ -19,7 +18,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 
 
 @SuppressWarnings("CommentedOutCode") // According to the comment we need to leave the snippet
@@ -41,12 +39,7 @@ public class MainApiVerticle extends AbstractVerticle {
         vertxFileSystem.readFile("swagger.json", readFile -> {
             if (readFile.succeeded()) {
                 Swagger swagger = new SwaggerParser().parse(readFile.result().toString(StandardCharsets.UTF_8));
-                Router swaggerRouter = SwaggerRouter.swaggerRouter(router, swagger, vertx.eventBus(), new OperationIdServiceIdResolver(), new Function<RoutingContext, DeliveryOptions>() {
-                    @Override
-                    public DeliveryOptions apply(RoutingContext t) {
-                        return new DeliveryOptions().setSendTimeout(90000);
-                    }
-                });
+                Router swaggerRouter = SwaggerRouter.swaggerRouter(router, swagger, vertx.eventBus(), new OperationIdServiceIdResolver(), t -> new DeliveryOptions().setSendTimeout(90000));
                 deployVerticles(startFuture);
 
                 vertx.createHttpServer()

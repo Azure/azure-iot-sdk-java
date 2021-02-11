@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * result of waiting on a method call
  **/
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@SuppressWarnings("ALL")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MethodRequestResponse   {
   
   private Object requestPayload = null;
@@ -62,11 +63,10 @@ public class MethodRequestResponse   {
   @Override
   public String toString() {
 
-    String sb = "class MethodRequestResponse {\n" +
-            "    requestPayload: " + toIndentedString(requestPayload) + "\n" +
-            "    responseId: " + toIndentedString(responseId) + "\n" +
-            "}";
-    return sb;
+      return "class MethodRequestResponse {\n" +
+              "    requestPayload: " + toIndentedString(requestPayload) + "\n" +
+              "    responseId: " + toIndentedString(responseId) + "\n" +
+              "}";
   }
 
   /**

@@ -92,13 +92,13 @@ public class X509Certificates
 {
     // the primary X509 certificate [mandatory]
     private static final String PRIMARY_TAG = "primary";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(PRIMARY_TAG)
     private X509CertificateWithInfo primary;
 
     // the secondary X509 certificate
     private static final String SECONDARY_TAG = "secondary";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SECONDARY_TAG)
     private X509CertificateWithInfo secondary;
 

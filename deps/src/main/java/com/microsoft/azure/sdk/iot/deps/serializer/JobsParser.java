@@ -17,6 +17,8 @@ import java.util.TimeZone;
 /**
  * Representation of a single Jobs collection with a Json serializer.
  */
+// This suppression below is addressing warnings of fields used for serialization.
+@SuppressWarnings("FieldCanBeLocal")
 public class JobsParser
 {
     private transient static final String DATEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -26,14 +28,14 @@ public class JobsParser
 
     // Job identifier
     private static final String JOBID_TAG = "jobId";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(JOBID_TAG)
     private String jobId;
 
     // Required.
     // The type of job to execute.
     private static final String TYPE_TAG = "type";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(TYPE_TAG)
     private String jobType;
 
@@ -41,7 +43,7 @@ public class JobsParser
     // The method type and parameters.
     // Ignored by the json serializer if null.
     private static final String CLOUDTODEVICEMETHOD_TAG = "cloudToDeviceMethod";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(CLOUDTODEVICEMETHOD_TAG)
     private JsonElement cloudToDeviceMethod = null;
 
@@ -49,26 +51,26 @@ public class JobsParser
     // The Update Twin tags and desired properties.
     // Ignored by the json serializer if null.
     private static final String UPDATETWIN_TAG = "updateTwin";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(UPDATETWIN_TAG)
     private JsonElement updateTwin = null;
 
     // Required if jobType is updateTwin or cloudToDeviceMethod.
     // Condition for device query to get devices to execute the job on
     private static final String QUERYCONDITION_TAG = "queryCondition";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(QUERYCONDITION_TAG)
     private String queryCondition;
 
     // ISO 8601 date time to start the job
     private static final String STARTTIME_TAG = "startTime";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(STARTTIME_TAG)
     private String startTime;
 
     // Max execution time in seconds (ttl duration)
     private static final String MAXEXECUTIONTIMEINSECONDS_TAG = "maxExecutionTimeInSeconds";
-    @Expose(serialize = true, deserialize = false)
+    @Expose(deserialize = false)
     @SerializedName(MAXEXECUTIONTIMEINSECONDS_TAG)
     private long maxExecutionTimeInSeconds;
 

@@ -47,19 +47,19 @@ public class X509Attestation extends Attestation
 {
     // the client certificates for X509
     private static final String CLIENT_CERTIFICATES_TAG = "clientCertificates";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CLIENT_CERTIFICATES_TAG)
     private X509Certificates clientCertificates;
 
     // the signed certificates for X509
     private static final String SIGNED_CERTIFICATES_TAG = "signingCertificates";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SIGNED_CERTIFICATES_TAG)
     private X509Certificates rootCertificates;
 
     // the CA references.
     private static final String CA_REFERENCES_TAG = "caReferences";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(CA_REFERENCES_TAG)
     private X509CAReferences caReferences;
 

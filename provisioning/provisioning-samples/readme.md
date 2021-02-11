@@ -19,8 +19,10 @@ Prepare your platform following the instructions [here][lnk-devbox-setup] to ins
 
 #### Provisioning Device Client
 
-* [Provisioning Sample for X509](provisioning-x509-sample): Shows how to register a device using X509 certificates.
-* [Provisioning Sample for TPM](provisioning-tpm-sample): Shows how to register a device using TPM with endorsement key.
+* [Provisioning Sample for X509](./provisioning-X509-sample): Shows how to register a device using X509 certificates.
+* [Provisioning Sample for TPM](./provisioning-tpm-sample): Shows how to register a device using TPM with endorsement key.
+* [Provisioning Sample for Symmetric Key Enrollment Group](./provisioning-symmetrickey-group-sample): Shows how to register a device in an enrollment group using Symmetric key authentication
+* [Provisioning Sample for Symmetric Key Individual Enrollment](./provisioning-symmetrickey-group-sample): Shows how to register a device in an individual enrollment using Symmetric key authentication
 
 #### Provisioning Service Client
 

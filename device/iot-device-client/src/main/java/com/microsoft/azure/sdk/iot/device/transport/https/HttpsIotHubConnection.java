@@ -19,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * An HTTPS connection between a device and an IoT Hub. Contains functionality
@@ -484,6 +483,9 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         }
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, the fact that this method is only called
+    // when using SAS based authentication is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     private String getSasToken() throws TransportException
     {
         try

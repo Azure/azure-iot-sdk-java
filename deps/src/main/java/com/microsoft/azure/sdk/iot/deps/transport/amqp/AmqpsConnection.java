@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 @Slf4j
 public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
 {
-    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 1*60*1000; // 1 minute timeout
+    private static final int MAX_WAIT_TO_OPEN_CLOSE_CONNECTION = 60 * 1000; // 1 minute timeout
     private static final int MAX_WAIT_TO_TERMINATE_EXECUTOR = 30;
 
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
@@ -518,7 +518,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     /**
      * Class which runs the reactor.
      */
-    private class ReactorRunner implements Callable
+    private static class ReactorRunner implements Callable<Object>
     {
         private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final AmqpReactor amqpReactor;
@@ -532,7 +532,7 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
         public Object call()
         {
             Thread.currentThread().setName(THREAD_NAME);
-            log.trace("Amqp reactor thread {} has finished", THREAD_NAME);
+            log.trace("Amqp reactor thread {} has started", THREAD_NAME);
 
             try
             {

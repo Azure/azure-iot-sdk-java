@@ -20,6 +20,7 @@ public class FileUploadSasUriRequestTest
     private static final String VALID_BLOB_NAME = "test-device1/image.jpg";
     private static final String INVALID_BLOB_NAME = "\u1234 test-device1/image.jpg";
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the expected assertion param can be passed any value.
     private static void assertFileUploadRequest(FileUploadSasUriRequest fileUploadSasUriRequest, String expectedBlobName)
     {
         assertNotNull(fileUploadSasUriRequest);

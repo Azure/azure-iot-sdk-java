@@ -48,7 +48,6 @@ public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
     {
         super(sender, amqpsLinkStateCallback, UUID.randomUUID().toString());
 
-        this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
         this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
     }
 
@@ -76,6 +75,9 @@ public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
         return correlationId;
     }
 
+    // The warning is for how getSasTokenAuthentication() may return null, but this code only executes when our config
+    // uses SAS_TOKEN auth, and that is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
+    @SuppressWarnings("ConstantConditions")
     private MessageImpl createCBSAuthenticationMessage(DeviceClientConfig deviceClientConfig, UUID correlationId) throws TransportException
     {
         MessageImpl outgoingMessage = (MessageImpl) Proton.message();

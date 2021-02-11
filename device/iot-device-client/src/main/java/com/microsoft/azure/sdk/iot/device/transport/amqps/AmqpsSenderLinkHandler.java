@@ -29,7 +29,6 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
     final Map<Integer, Message> inProgressMessages = new ConcurrentHashMap<>();
     Map<Symbol, Object> amqpProperties;
-    String senderLinkTag;
     String linkCorrelationId;
     String senderLinkAddress;
     Sender senderLink;
@@ -72,7 +71,7 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
         //Safe to cast here because this callback will only ever fire for acknowledgements received on this sender link
         Delivery delivery = event.getDelivery();
 
-        int deliveryTag = Integer.valueOf(new String(event.getDelivery().getTag()));
+        int deliveryTag = Integer.parseInt(new String(event.getDelivery().getTag()));
 
         Message acknowledgedIotHubMessage = this.inProgressMessages.remove(deliveryTag);
         if (acknowledgedIotHubMessage == null)

@@ -14,7 +14,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
-import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
@@ -166,7 +165,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected DeviceState[] devicesUnderTest;
 
     protected DeviceTwinTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     //How many milliseconds between retry
     protected static final Integer RETRY_MILLISECONDS = 100;
@@ -202,7 +201,7 @@ public class DeviceTwinCommon extends IntegrationTest
         public IotHubStatusCode deviceTwinStatus;
     }
 
-    public class PropertyState
+    public static class PropertyState
     {
         public boolean callBackTriggered;
         public Property property;
@@ -295,6 +294,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method "numberOfDevices" can be passed any value.
     protected void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(numberOfDevices, true);
@@ -432,7 +432,7 @@ public class DeviceTwinCommon extends IntegrationTest
         this.testInstance = new DeviceTwinTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    public class DeviceTwinTestInstance
+    public static class DeviceTwinTestInstance
     {
         public IotHubClientProtocol protocol;
         public AuthenticationType authenticationType;
@@ -512,7 +512,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void readReportedPropertiesAndVerify(DeviceState deviceState, String startsWithKey, String startsWithValue, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
+    protected void readReportedPropertiesAndVerify(DeviceState deviceState, String startsWithValue, int expectedReportedPropCount) throws IOException, IotHubException, InterruptedException
     {
         int actualCount = 0;
 
@@ -535,7 +535,7 @@ public class DeviceTwinCommon extends IntegrationTest
             for (Pair p : repProperties)
             {
                 String val = (String) p.getValue();
-                if (p.getKey().startsWith(startsWithKey) && val.startsWith(startsWithValue))
+                if (p.getKey().startsWith(DeviceTwinCommon.PROPERTY_KEY) && val.startsWith(startsWithValue))
                 {
                     actualCount++;
                 }
@@ -604,9 +604,10 @@ public class DeviceTwinCommon extends IntegrationTest
         // Assert
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_KEY, PROPERTY_VALUE, numOfProp);
+        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE, numOfProp);
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method "numOfProp" can be passed any value.
     protected void sendReportedArrayPropertiesAndVerify(int numOfProp) throws IOException, IotHubException, InterruptedException
     {
         // Act
@@ -705,14 +706,7 @@ public class DeviceTwinCommon extends IntegrationTest
 
     protected void setConnectionStatusCallBack(final List<com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
-        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = new IotHubConnectionStatusChangeCallback()
-        {
-            @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
-            {
-                actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(status, throwable));
-            }
-        };
+        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<>(status, throwable));
 
         this.internalClient.registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }

@@ -19,7 +19,6 @@ import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -216,46 +215,6 @@ public class MqttIotHubConnectionTest
         new MqttIotHubConnection(mockConfig);
     }
 
-    // Tests_SRS_MQTTIOTHUBCONNECTION_15_003: [The constructor shall throw a new IllegalArgumentException
-    // if any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfSasTokenIsEmpty() throws TransportException
-    {
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = iotHubHostName;
-                mockConfig.getIotHubName();
-                result = "";
-                mockConfig.getDeviceId();
-                result = deviceId;
-            }
-        };
-
-        new MqttIotHubConnection(mockConfig);
-    }
-
-    // Tests_SRS_MQTTIOTHUBCONNECTION_15_003: [The constructor shall throw a new IllegalArgumentException
-    // if any of the parameters of the configuration is null or empty.]
-    @Test(expected = IllegalArgumentException.class)
-    public void constructorThrowsIllegalArgumentExceptionIfSasTokenIsNull() throws TransportException
-    {
-        new NonStrictExpectations()
-        {
-            {
-                mockConfig.getIotHubHostname();
-                result = iotHubHostName;
-                mockConfig.getIotHubName();
-                result = null;
-                mockConfig.getDeviceId();
-                result = deviceId;
-            }
-        };
-
-        new MqttIotHubConnection(mockConfig);
-    }
-
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_004: [The function shall establish an MQTT connection with an IoT Hub
     // using the provided host name, user name, device ID, and sas token.]
     // Tests_SRS_MQTTIOTHUBCONNECTION_25_019: [The function shall establish an MQTT connection with a server uri as ssl://<hostName>:8883 if websocket was not enabled.]
@@ -281,15 +240,6 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
-
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION));
-
-        final char[] actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
-
-        assertEquals(expectedSasToken, actualUserPassword);
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -328,15 +278,6 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
-
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        String clientIdentifier = "DeviceClientType=" + URLEncoder.encode(TransportUtils.USER_AGENT_STRING, "UTF-8").replaceAll("\\+", "%20");
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&model-id=" + modelId));
-
-        final char[] actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
-
-        assertEquals(expectedSasToken, actualUserPassword);
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -381,14 +322,6 @@ public class MqttIotHubConnectionTest
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
 
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&"));
-
-        char[] actualUserPassword = Deencapsulation.getField(connection, "iotHubUserPassword");
-
-        assertEquals(expectedToken, actualUserPassword);
-
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
         assertEquals(expectedState, actualState);
@@ -427,10 +360,6 @@ public class MqttIotHubConnectionTest
         MqttIotHubConnection connection = new MqttIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "listener", mockedIotHubListener);
         connection.open();
-
-        final String actualIotHubUserName = Deencapsulation.getField(connection, "iotHubUserName");
-
-        assertTrue(actualIotHubUserName.contains(iotHubHostName + "/" + deviceId + "/" + API_VERSION + "&"));
 
         IotHubConnectionStatus expectedState = IotHubConnectionStatus.CONNECTED;
         IotHubConnectionStatus actualState =  Deencapsulation.getField(connection, "state");
@@ -1167,8 +1096,6 @@ public class MqttIotHubConnectionTest
                 result = expectedModuleId;
                 mockConfig.getIotHubHostname();
                 result = "hostname.com";
-                mockConfig.getIotHubName();
-                result = "hostname";
                 mockConfig.getProductInfo();
                 result = mockedProductInfo;
                 mockedProductInfo.getUserAgentString();

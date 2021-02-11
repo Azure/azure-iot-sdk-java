@@ -31,7 +31,6 @@
         <developerConnection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</developerConnection>
         <url>https://github.com/Azure/azure-iot-sdk-java.git</url>
     </scm>
-    <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>${iot-deps-artifact-id}</artifactId>
     <version>${iot-deps-version}</version>
     <packaging>jar</packaging>

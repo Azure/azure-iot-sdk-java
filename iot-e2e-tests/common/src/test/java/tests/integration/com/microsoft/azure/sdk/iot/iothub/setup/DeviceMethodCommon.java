@@ -67,7 +67,7 @@ public class DeviceMethodCommon extends IntegrationTest
     protected static final Integer RETRY_MILLISECONDS = 100;
 
     protected DeviceMethodTestInstance testInstance;
-    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 1 * 60 * 1000; // 1 minute
+    protected static final long ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
 
     protected static Collection inputsCommon() throws IOException
     {
@@ -122,7 +122,7 @@ public class DeviceMethodCommon extends IntegrationTest
         this.testInstance = new DeviceMethodTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
     }
 
-    public class DeviceMethodTestInstance
+    public static class DeviceMethodTestInstance
     {
         public DeviceTestManager deviceTestManager;
         public IotHubClientProtocol protocol;
@@ -333,14 +333,7 @@ public class DeviceMethodCommon extends IntegrationTest
     protected void setConnectionStatusCallBack(final List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates)
     {
 
-        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = new IotHubConnectionStatusChangeCallback()
-        {
-            @Override
-            public void execute(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason statusChangeReason, Throwable throwable, Object callbackContext)
-            {
-                actualStatusUpdates.add(new Pair<>(status, throwable));
-            }
-        };
+        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (status, statusChangeReason, throwable, callbackContext) -> actualStatusUpdates.add(new Pair<>(status, throwable));
 
         this.testInstance.deviceTestManager.client.registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }

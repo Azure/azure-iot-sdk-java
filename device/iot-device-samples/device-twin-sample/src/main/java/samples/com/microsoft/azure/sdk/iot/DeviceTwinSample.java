@@ -29,14 +29,7 @@ public class DeviceTwinSample
         @Override
         public void execute(IotHubStatusCode status, Object context)
         {
-            if((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY))
-            {
-                Succeed.set(true);
-            }
-            else
-            {
-                Succeed.set(false);
-            }
+            Succeed.set((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY));
             System.out.println("IoT Hub responded to device twin operation with status " + status.name());
         }
     }
@@ -99,18 +92,18 @@ public class DeviceTwinSample
 
             if (status == IotHubConnectionStatus.DISCONNECTED)
             {
-                //connection was lost, and is not being re-established. Look at provided exception for
-                // how to resolve this issue. Cannot send messages until this issue is resolved, and you manually
-                // re-open the device client
+                System.out.println("The connection was lost, and is not being re-established." +
+                        " Look at provided exception for how to resolve this issue." +
+                        " Cannot send messages until this issue is resolved, and you manually re-open the device client");
             }
             else if (status == IotHubConnectionStatus.DISCONNECTED_RETRYING)
             {
-                //connection was lost, but is being re-established. Can still send messages, but they won't
-                // be sent until the connection is re-established
+                System.out.println("The connection was lost, but is being re-established." +
+                        " Can still send messages, but they won't be sent until the connection is re-established");
             }
             else if (status == IotHubConnectionStatus.CONNECTED)
             {
-                //Connection was successfully re-established. Can send messages.
+                System.out.println("The connection was successfully established. Can send messages.");
             }
         }
     }

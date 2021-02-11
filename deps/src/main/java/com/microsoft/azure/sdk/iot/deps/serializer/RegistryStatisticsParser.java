@@ -13,17 +13,17 @@ public class RegistryStatisticsParser
     private final transient static Gson gson = new Gson();
 
     private static final String TOTAL_DEVICE_COUNT_NAME = "totalDeviceCount";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(TOTAL_DEVICE_COUNT_NAME)
     private long totalDeviceCount;
 
     private static final String ENABLED_DEVICE_COUNT_NAME = "enableDeviceCount";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(ENABLED_DEVICE_COUNT_NAME)
     private long enabledDeviceCount;
 
     private static final String DISABLED_DEVICE_COUNT_NAME = "disabledDeviceCount";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(DISABLED_DEVICE_COUNT_NAME)
     private long disabledDeviceCount;
 

@@ -77,12 +77,11 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
     {
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_001: [The function shall serialize the object
         // properties to a string using the following format: SharedAccessKeyName@SAS.root.IotHubName]
-        String stringBuilder = this.sharedAccessKeyName +
+        return this.sharedAccessKeyName +
                 USER_SEPARATOR +
                 USER_SAS +
                 USER_ROOT +
                 this.iotHubName;
-        return stringBuilder;
     }
 
     /**
@@ -653,7 +652,7 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRING_12_007: [The function shall serialize the object to a
         // string using the following format: HostName=HOSTNAME.b.c.d;SharedAccessKeyName=ACCESSKEYNAME;SharedAccessKey=1234567890abcdefghijklmnopqrstvwxyz=;SharedAccessSignature=]
 
-        String stringBuilder = HOST_NAME_PROPERTY_NAME +
+        return HOST_NAME_PROPERTY_NAME +
                 VALUE_PAIR_SEPARATOR +
                 this.hostName +
                 VALUE_PAIR_DELIMITER +
@@ -668,7 +667,6 @@ public class IotHubConnectionString extends IotHubConnectionStringBuilder
                 SHARED_ACCESS_SIGNATURE_PROPERTY_NAME +
                 VALUE_PAIR_SEPARATOR +
                 this.sharedAccessSignature;
-        return stringBuilder;
     }
 
     /**

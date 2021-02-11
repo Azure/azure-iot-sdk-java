@@ -1,7 +1,7 @@
 **The Azure IoT SDKs team wants to hear from you!**
 
 - [Ask a question](#ask-a-question)
-- [File a bug](#file-a-bug)
+- [File a bug](#file-a-bug-code-or-documentation)
 - [Contribute documentation](#contribute-documentation)
 - [Contribute code](#contribute-code)
 - [Need support?](#need-support)

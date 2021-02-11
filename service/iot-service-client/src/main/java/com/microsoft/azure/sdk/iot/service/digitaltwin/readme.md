@@ -27,7 +27,7 @@ Model classes useful for use with the Digital Twin client operations.
 Serialization helpers provided to help serialize/deserialize commonly used types when working with digital twins.
 
 ## Protocol layer generation:
-- Go in folder ./swagger and run the powershell script [generateCode.ps1](https://github.com/Azure/azure-iot-sdk-java/blob/master/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/generate.ps1). It will pick up the [autorest config](./swagger/autorest.md) and output the results into [generated](./generated) folder. It will also make a few automated changes to the generated protocol layer, that are required for this client library.
+- Go in folder ./swagger and run the powershell script [generateCode.ps1](https://github.com/Azure/azure-iot-sdk-java/blob/master/service/iot-service-client/src/main/java/com/microsoft/azure/sdk/iot/service/digitaltwin/swagger/generate.ps1). It will pick up the [autorest config](./swagger/readme.md) and output the results into [generated](./generated) folder. It will also make a few automated changes to the generated protocol layer, that are required for this client library.
 
 ## Troubleshooting
 

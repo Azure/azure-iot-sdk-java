@@ -126,7 +126,7 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         request.setHeaderField(USER_AGENT, USER_AGENT_VALUE);
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
-        request.setHeaderField(CONTENT_LENGTH, payload != null ? String.valueOf(payload.length) : "0");
+        request.setHeaderField(CONTENT_LENGTH, String.valueOf(payload.length));
         if (headersMap != null)
         {
             for (Map.Entry<String, String> header : headersMap.entrySet())

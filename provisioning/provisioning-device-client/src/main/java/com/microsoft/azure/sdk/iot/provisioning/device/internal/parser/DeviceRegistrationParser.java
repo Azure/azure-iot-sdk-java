@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
+// FieldCanBeLocal suppression in this class is addressing warnings of fields used for serialization and in constructor.
 public class DeviceRegistrationParser
 {
     private static final String REGISTRATION_ID = "registrationId";
@@ -18,6 +19,7 @@ public class DeviceRegistrationParser
     private String registrationId;
 
     private static final String TPM = "tpm";
+    @SuppressWarnings("FieldCanBeLocal")
     @SerializedName(TPM)
     private TpmAttestation tpmAttestation;
 
@@ -28,9 +30,11 @@ public class DeviceRegistrationParser
     /**
      * Inner class describing TPM Attestation i.e it holds EndorsementKey and StorageRootKey
      */
-    class TpmAttestation
+    static class TpmAttestation
     {
+        @SuppressWarnings("FieldCanBeLocal")
         private final String endorsementKey;
+        @SuppressWarnings("FieldCanBeLocal")
         private final String storageRootKey;
 
         TpmAttestation(String endorsementKey, String storageRootKey)

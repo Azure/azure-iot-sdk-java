@@ -6,7 +6,6 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.hsm.parser;
 
 import com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest;
-import junit.framework.TestCase;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -14,10 +13,7 @@ import org.junit.Test;
 
 import javax.crypto.Mac;
 
-import java.util.Arrays;
-
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertArrayEquals;
 

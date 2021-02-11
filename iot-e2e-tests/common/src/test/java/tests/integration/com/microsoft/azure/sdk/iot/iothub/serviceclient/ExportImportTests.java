@@ -49,7 +49,6 @@ public class ExportImportTests extends IntegrationTest
     protected static String storageAccountConnectionString = "";
     private static String deviceId = "java-crud-e2e-test";
 
-    private static CloudBlobClient blobClient;
     private static CloudBlobContainer importContainer;
     private static CloudBlobContainer exportContainer;
 
@@ -68,7 +67,7 @@ public class ExportImportTests extends IntegrationTest
         deviceId = deviceId.concat("-" + uuid);
 
         CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageAccountConnectionString);
-        blobClient = storageAccount.createCloudBlobClient();
+        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
 
         // Creating the export storage container and getting its URI
         String exportContainerName = "exportcontainersample-" + uuid;
@@ -231,13 +230,12 @@ public class ExportImportTests extends IntegrationTest
                 {
                     JobProperties exportJobProperties = JobProperties.createForExportJob(containerSasUri, excludeKeys, storageAuthenticationType.get());
                     exportJob = registryManager.exportDevices(exportJobProperties);
-                    exportJobScheduled = true;
                 }
                 else
                 {
                     exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
-                    exportJobScheduled = true;
                 }
+                exportJobScheduled = true;
 
             }
             catch (IotHubTooManyDevicesException e)
@@ -338,13 +336,12 @@ public class ExportImportTests extends IntegrationTest
                     // For a given StorageAuthenticationType, create JobProperties and pass it
                     JobProperties importJobProperties = JobProperties.createForImportJob(getContainerSasUri(importContainer), getContainerSasUri(importContainer), storageAuthenticationType.get());
                     importJob = registryManager.importDevices(importJobProperties);
-                    importJobScheduled = true;
                 }
                 else
                 {
                     importJob = registryManager.importDevices(getContainerSasUri(importContainer), getContainerSasUri(importContainer));
-                    importJobScheduled = true;
                 }
+                importJobScheduled = true;
             }
             catch (IotHubTooManyDevicesException e)
             {

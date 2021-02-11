@@ -77,13 +77,9 @@ public class DeviceManagerX509Sample
                 System.out.println("Device secondary thumbprint: " + device.getSecondaryThumbprint());
             }
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();
@@ -107,13 +103,9 @@ public class DeviceManagerX509Sample
                 System.out.println("Device secondary thumbprint: " + returnDevice.getSecondaryThumbprint());
             }
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();
@@ -147,13 +139,9 @@ public class DeviceManagerX509Sample
                 System.out.println("Device secondary thumbprint: " + device.getSecondaryThumbprint());
             }
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();
@@ -169,13 +157,9 @@ public class DeviceManagerX509Sample
 
             System.out.println("Device removed: " + SampleUtils.deviceId);
         }
-        catch (IotHubException iote)
+        catch (IotHubException | IOException iote)
         {
             iote.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
         registryManager.close();

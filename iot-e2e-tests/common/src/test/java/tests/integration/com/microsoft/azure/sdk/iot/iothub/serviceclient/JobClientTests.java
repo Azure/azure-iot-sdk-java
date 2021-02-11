@@ -83,6 +83,7 @@ public class JobClientTests extends IntegrationTest
         }
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         String queryContent = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS,
@@ -117,6 +118,7 @@ public class JobClientTests extends IntegrationTest
         throw new AssertionError("queryDeviceJob did not find the job");
     }
 
+    @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
     private JobResult queryJobResponseResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         Query query = jobClient.queryJobResponse(jobType, jobStatus);
@@ -207,41 +209,36 @@ public class JobClientTests extends IntegrationTest
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
             final int jobTemperature = (newTemperature++);
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
+            executor.submit(() -> {
+                String jobId = JOB_ID_NAME + UUID.randomUUID();
+                jobIdsPending.add(jobId);
+                try
                 {
-                    String jobId = JOB_ID_NAME + UUID.randomUUID();
-                    jobIdsPending.add(jobId);
-                    try
-                    {
-                        DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
-                        Set<Pair> testDesProp = new HashSet<>();
-                        testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                        deviceTwinDevice.setDesiredProperties(testDesProp);
-                        twinExpectedTemperature.put(jobId, jobTemperature);
+                    DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
+                    Set<Pair> testDesProp = new HashSet<>();
+                    testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
+                    deviceTwinDevice.setDesiredProperties(testDesProp);
+                    twinExpectedTemperature.put(jobId, jobTemperature);
 
-                        jobClient.scheduleUpdateTwin(
-                                jobId, queryCondition,
-                                deviceTwinDevice,
-                                new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                    jobClient.scheduleUpdateTwin(
+                            jobId, queryCondition,
+                            deviceTwinDevice,
+                            new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
 
-                        JobResult jobResult = jobClient.getJob(jobId);
-                        while(jobResult.getJobStatus() != JobStatus.completed)
-                        {
-                            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
-                            jobResult = jobClient.getJob(jobId);
-                        }
-                        jobResult = queryJobResponseResult(jobId, JobType.scheduleUpdateTwin, JobStatus.completed);
-                        jobResults.put(jobId, jobResult);
-                    }
-                    catch (IotHubException | IOException | InterruptedException e)
+                    JobResult jobResult = jobClient.getJob(jobId);
+                    while(jobResult.getJobStatus() != JobStatus.completed)
                     {
-                        jobExceptions.put(jobId, e);
+                        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
+                        jobResult = jobClient.getJob(jobId);
                     }
-                    jobIdsPending.remove(jobId);
+                    jobResult = queryJobResponseResult(jobId, JobType.scheduleUpdateTwin, JobStatus.completed);
+                    jobResults.put(jobId, jobResult);
                 }
+                catch (IotHubException | IOException | InterruptedException e)
+                {
+                    jobExceptions.put(jobId, e);
+                }
+                jobIdsPending.remove(jobId);
             });
         }
 
@@ -295,45 +292,40 @@ public class JobClientTests extends IntegrationTest
         // Act
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
+            executor.submit(() -> {
+                String jobId = JOB_ID_NAME + UUID.randomUUID();
+                jobIdsPending.add(jobId);
+                try
                 {
-                    String jobId = JOB_ID_NAME + UUID.randomUUID();
-                    jobIdsPending.add(jobId);
-                    try
-                    {
-                        jobClient.scheduleDeviceMethod(
-                                jobId, queryCondition,
-                                DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                                new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                    jobClient.scheduleDeviceMethod(
+                            jobId, queryCondition,
+                            DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
+                            new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
 
-                        JobResult jobResult = jobClient.getJob(jobId);
-                        while(jobResult.getJobStatus() != JobStatus.completed)
-                        {
-                            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
-                            jobResult = jobClient.getJob(jobId);
-                        }
-                        System.out.println("job finished with status " + jobResult.getJobStatus());
-
-                        if (jobResult.getJobStatus().equals(JobStatus.completed))
-                        {
-                            jobResult = queryDeviceJobResult(jobId, JobType.scheduleDeviceMethod, JobStatus.completed);
-                            jobResults.put(jobId, jobResult);
-                        }
-                        else
-                        {
-                            jobExceptions.put(jobId, new Exception("Scheduled job did not finish with status 'completed' but with " + jobResult.getJobStatus()));
-                        }
-                    }
-                    catch (IotHubException | IOException |InterruptedException e)
+                    JobResult jobResult = jobClient.getJob(jobId);
+                    while(jobResult.getJobStatus() != JobStatus.completed)
                     {
-                        jobExceptions.put(jobId, e);
-                        System.out.println("Adding to job exceptions...");
+                        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
+                        jobResult = jobClient.getJob(jobId);
                     }
-                    jobIdsPending.remove(jobId);
+                    System.out.println("job finished with status " + jobResult.getJobStatus());
+
+                    if (jobResult.getJobStatus().equals(JobStatus.completed))
+                    {
+                        jobResult = queryDeviceJobResult(jobId, JobType.scheduleDeviceMethod, JobStatus.completed);
+                        jobResults.put(jobId, jobResult);
+                    }
+                    else
+                    {
+                        jobExceptions.put(jobId, new Exception("Scheduled job did not finish with status 'completed' but with " + jobResult.getJobStatus()));
+                    }
                 }
+                catch (IotHubException | IOException |InterruptedException e)
+                {
+                    jobExceptions.put(jobId, e);
+                    System.out.println("Adding to job exceptions...");
+                }
+                jobIdsPending.remove(jobId);
             });
         }
 
@@ -387,52 +379,47 @@ public class JobClientTests extends IntegrationTest
         {
             final int index = i;
             final int jobTemperature = (newTemperature++);
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
+            executor.submit(() -> {
+                String jobId = JOB_ID_NAME + UUID.randomUUID();
+                jobIdsPending.add(jobId);
+                try
                 {
-                    String jobId = JOB_ID_NAME + UUID.randomUUID();
-                    jobIdsPending.add(jobId);
-                    try
+                    if(index % 2 == 0)
                     {
-                        if(index % 2 == 0)
-                        {
-                            jobClient.scheduleDeviceMethod(
-                                    jobId, queryCondition,
-                                    DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                                    future, MAX_EXECUTION_TIME_IN_SECONDS);
-                        }
-                        else
-                        {
-                            DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
-                            Set<Pair> testDesProp = new HashSet<>();
-                            testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
-                            deviceTwinDevice.setDesiredProperties(testDesProp);
-                            twinExpectedTemperature.put(jobId, jobTemperature);
+                        jobClient.scheduleDeviceMethod(
+                                jobId, queryCondition,
+                                DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
+                                future, MAX_EXECUTION_TIME_IN_SECONDS);
+                    }
+                    else
+                    {
+                        DeviceTwinDevice deviceTwinDevice = new DeviceTwinDevice(deviceId);
+                        Set<Pair> testDesProp = new HashSet<>();
+                        testDesProp.add(new Pair(STANDARD_PROPERTY_HOMETEMP, jobTemperature));
+                        deviceTwinDevice.setDesiredProperties(testDesProp);
+                        twinExpectedTemperature.put(jobId, jobTemperature);
 
-                            jobClient.scheduleUpdateTwin(
-                                    jobId, queryCondition,
-                                    deviceTwinDevice,
-                                    new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
-                        }
-                        JobResult jobResult = jobClient.getJob(jobId);
-                        while(jobResult.getJobStatus() != JobStatus.completed)
-                        {
-                            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
-                            jobResult = jobClient.getJob(jobId);
-                        }
-                        jobResult = queryDeviceJobResult(jobId,
-                                ((index % 2 == 0)?JobType.scheduleDeviceMethod:JobType.scheduleUpdateTwin),
-                                JobStatus.completed);
-                        jobResults.put(jobId, jobResult);
+                        jobClient.scheduleUpdateTwin(
+                                jobId, queryCondition,
+                                deviceTwinDevice,
+                                new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
                     }
-                    catch (IotHubException | IOException |InterruptedException e)
+                    JobResult jobResult = jobClient.getJob(jobId);
+                    while(jobResult.getJobStatus() != JobStatus.completed)
                     {
-                        jobExceptions.put(jobId, e);
+                        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
+                        jobResult = jobClient.getJob(jobId);
                     }
-                    jobIdsPending.remove(jobId);
+                    jobResult = queryDeviceJobResult(jobId,
+                            ((index % 2 == 0)?JobType.scheduleDeviceMethod:JobType.scheduleUpdateTwin),
+                            JobStatus.completed);
+                    jobResults.put(jobId, jobResult);
                 }
+                catch (IotHubException | IOException |InterruptedException e)
+                {
+                    jobExceptions.put(jobId, e);
+                }
+                jobIdsPending.remove(jobId);
             });
         }
 
@@ -508,42 +495,37 @@ public class JobClientTests extends IntegrationTest
         for (int i = 0; i < MAX_NUMBER_JOBS; i++)
         {
             final int index = i;
-            executor.submit(new Runnable()
-            {
-                @Override
-                public void run()
+            executor.submit(() -> {
+                String jobId = JOB_ID_NAME + UUID.randomUUID();
+                jobIdsPending.add(jobId);
+                try
                 {
-                    String jobId = JOB_ID_NAME + UUID.randomUUID();
-                    jobIdsPending.add(jobId);
-                    try
-                    {
-                        jobClient.scheduleDeviceMethod(
-                                jobId, queryCondition,
-                                DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
-                                (index % 2 == 0)?future:new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
+                    jobClient.scheduleDeviceMethod(
+                            jobId, queryCondition,
+                            DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING,
+                            (index % 2 == 0)?future:new Date(), MAX_EXECUTION_TIME_IN_SECONDS);
 
-                        JobStatus expectedJobStatus = JobStatus.completed;
-                        if(index % 2 == 0)
-                        {
-                            expectedJobStatus = JobStatus.cancelled;
-                            Thread.sleep(1000); // wait 1 seconds and cancel.
-                            jobClient.cancelJob(jobId);
-                        }
-
-                        JobResult jobResult = jobClient.getJob(jobId);
-                        while (jobResult.getJobStatus() != expectedJobStatus)
-                        {
-                            Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
-                            jobResult = jobClient.getJob(jobId);
-                        }
-                        System.out.println("Iothub confirmed " + jobId + " " + expectedJobStatus + " for " + JobType.scheduleDeviceMethod);
-                    }
-                    catch (IotHubException | IOException |InterruptedException e)
+                    JobStatus expectedJobStatus = JobStatus.completed;
+                    if(index % 2 == 0)
                     {
-                        jobExceptions.put(jobId, e);
+                        expectedJobStatus = JobStatus.cancelled;
+                        Thread.sleep(1000); // wait 1 seconds and cancel.
+                        jobClient.cancelJob(jobId);
                     }
-                    jobIdsPending.remove(jobId);
+
+                    JobResult jobResult = jobClient.getJob(jobId);
+                    while (jobResult.getJobStatus() != expectedJobStatus)
+                    {
+                        Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
+                        jobResult = jobClient.getJob(jobId);
+                    }
+                    System.out.println("Iothub confirmed " + jobId + " " + expectedJobStatus + " for " + JobType.scheduleDeviceMethod);
                 }
+                catch (IotHubException | IOException |InterruptedException e)
+                {
+                    jobExceptions.put(jobId, e);
+                }
+                jobIdsPending.remove(jobId);
             });
         }
 
@@ -580,7 +562,7 @@ public class JobClientTests extends IntegrationTest
         StringBuilder pendingJobIds = new StringBuilder();
         for (String jobId : jobIdsPending)
         {
-            pendingJobIds.append(jobId + " ");
+            pendingJobIds.append(jobId).append(" ");
         }
         return pendingJobIds.toString();
     }

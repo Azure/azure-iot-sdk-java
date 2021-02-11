@@ -32,13 +32,13 @@ public class X509CAReferences
 {
     // the primary X509 CA reference [mandatory]
     private static final String PRIMARY_TAG = "primary";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(PRIMARY_TAG)
     private String primary;
 
     // the secondary X509 CA reference
     private static final String SECONDARY_TAG = "secondary";
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     @SerializedName(SECONDARY_TAG)
     private String secondary;
 

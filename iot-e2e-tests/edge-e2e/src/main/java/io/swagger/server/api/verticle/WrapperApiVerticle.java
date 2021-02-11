@@ -8,6 +8,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 import io.swagger.server.api.MainApiException;
 
+@SuppressWarnings("ALL")
 public class WrapperApiVerticle extends AbstractVerticle {
     final static Logger LOGGER = LoggerFactory.getLogger(WrapperApiVerticle.class); 
     
@@ -20,7 +21,7 @@ public class WrapperApiVerticle extends AbstractVerticle {
 
     public WrapperApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.WrapperApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.WrapperApiImpl");
             service = (WrapperApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("WrapperApiVerticle constructor", e);

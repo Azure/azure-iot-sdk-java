@@ -31,8 +31,8 @@ public class ConfigurationMetricsTest
         // Arrange
         HashMap<String, Long> results = new HashMap<String, Long>() {
             {
-                put("abc", new Long(3));
-                put("def", new Long(5));
+                put("abc", 3L);
+                put("def", 5L);
             }
         };
 

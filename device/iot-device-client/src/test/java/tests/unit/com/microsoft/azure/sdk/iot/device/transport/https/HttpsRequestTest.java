@@ -21,9 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /** Unit tests for HttpsRequest. */
 @SuppressWarnings("EmptyMethod")
@@ -554,7 +552,7 @@ public class HttpsRequestTest
         //assert
         assertEquals(url, Deencapsulation.getField(request, "url"));
         assertEquals(method, Deencapsulation.getField(request, "method"));
-        assertTrue(Arrays.equals(body, (byte[]) Deencapsulation.getField(request, "body")));
+        assertArrayEquals(body, (byte[]) Deencapsulation.getField(request, "body"));
         assertEquals(userAgentString, ((Map<String, List<String>>)Deencapsulation.getField(request, "headers")).get("User-Agent").get(0));
     }
 }

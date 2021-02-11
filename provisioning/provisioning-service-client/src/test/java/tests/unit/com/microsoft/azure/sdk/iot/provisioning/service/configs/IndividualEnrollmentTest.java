@@ -39,7 +39,7 @@ public class IndividualEnrollmentTest
     private static final Date VALID_DATE = new Date();
     private static final String VALID_DATE_AS_STRING = ParserUtility.dateTimeUtcToString(VALID_DATE);
 
-    private final class MockIndividualEnrollment extends IndividualEnrollment
+    private static final class MockIndividualEnrollment extends IndividualEnrollment
     {
         String mockedRegistrationId;
         String mockedDeviceId;
@@ -54,6 +54,7 @@ public class IndividualEnrollmentTest
         String mockedEtag;
         JsonObject mockedJsonElement;
 
+        @SuppressWarnings("SameParameterValue") // Since this is a constructor "registrationId" can be passed any value.
         MockIndividualEnrollment(
                 String registrationId,
                 Attestation attestation)
