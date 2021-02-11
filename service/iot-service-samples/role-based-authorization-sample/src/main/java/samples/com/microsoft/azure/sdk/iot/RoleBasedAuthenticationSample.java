@@ -37,9 +37,16 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.UUID;
 
+/**
+ * This sample demonstrates how to use the constructors in the various service clients that take an instance of
+ * {@link TokenCredential} in order to authenticate with role based access credentials.
+ */
 @Slf4j
 public class RoleBasedAuthenticationSample
 {
+    private static final int FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS = 5 * 1000; // 5 seconds
+    private static final int FEEDBACK_MESSAGE_LISTEN_SECONDS = 5 * 1000; // 5 seconds
+
     public static void main(String[] args)
     {
         SamplesArguments parsedArguments = new SamplesArguments(args);
@@ -160,7 +167,7 @@ public class RoleBasedAuthenticationSample
 
             log.info("Opening feedback receiver to listen for feedback messages");
             feedbackReceiver.open();
-            FeedbackBatch feedbackBatch = feedbackReceiver.receive(5 * 1000);
+            FeedbackBatch feedbackBatch = feedbackReceiver.receive(FEEDBACK_MESSAGE_LISTEN_SECONDS);
 
             if (feedbackBatch != null)
             {
@@ -190,7 +197,7 @@ public class RoleBasedAuthenticationSample
 
             log.info("Opening file upload notification receiver and listening for file upload notifications");
             fileUploadNotificationReceiver.open();
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(5 * 1000);
+            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS);
 
             if (fileUploadNotification != null)
             {

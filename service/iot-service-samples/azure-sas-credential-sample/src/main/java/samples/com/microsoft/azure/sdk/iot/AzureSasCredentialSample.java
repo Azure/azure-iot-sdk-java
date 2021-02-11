@@ -54,6 +54,9 @@ import java.util.UUID;
 @Slf4j
 public class AzureSasCredentialSample
 {
+    private static final int FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS = 5 * 1000; // 5 seconds
+    private static final int FEEDBACK_MESSAGE_LISTEN_SECONDS = 5 * 1000; // 5 seconds
+
     public static void main(String[] args)
     {
         SamplesArguments parsedArguments = new SamplesArguments(args);
@@ -234,7 +237,7 @@ public class AzureSasCredentialSample
 
             log.info("Opening feedback receiver to listen for feedback messages");
             feedbackReceiver.open();
-            FeedbackBatch feedbackBatch = feedbackReceiver.receive(5 * 1000);
+            FeedbackBatch feedbackBatch = feedbackReceiver.receive(FEEDBACK_MESSAGE_LISTEN_SECONDS);
 
             if (feedbackBatch != null)
             {
@@ -264,7 +267,7 @@ public class AzureSasCredentialSample
 
             log.info("Opening file upload notification receiver and listening for file upload notifications");
             fileUploadNotificationReceiver.open();
-            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(5 * 1000);
+            FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS);
 
             if (fileUploadNotification != null)
             {
