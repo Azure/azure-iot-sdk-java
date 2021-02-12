@@ -8,7 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Configurable options for all digital twin client operations. This includes both {@link DigitalTwinClient} and {@link DigitalTwinAsyncClient}
+ * Configurable options for all digital twin client operations. This options bundle is used by both
+ * {@link DigitalTwinClient} and {@link DigitalTwinAsyncClient}.
  */
 @Builder
 public class DigitalTwinClientOptions
