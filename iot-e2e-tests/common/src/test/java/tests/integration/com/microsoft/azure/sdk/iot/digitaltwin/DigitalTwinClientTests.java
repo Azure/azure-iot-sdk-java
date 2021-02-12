@@ -9,10 +9,13 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
@@ -24,6 +27,8 @@ import org.junit.*;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -31,6 +36,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.Digital
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
@@ -54,6 +61,9 @@ public class DigitalTwinClientTests extends IntegrationTest
     private DeviceClient deviceClient;
     private DigitalTwinClient digitalTwinClient = null;
     private static final String DEVICE_ID_PREFIX = "DigitalTwinServiceClientTests_";
+    protected static HttpProxyServer proxyServer;
+    protected static String testProxyHostname = "127.0.0.1";
+    protected static int testProxyPort = 8769;
 
     @Rule
     public Timeout globalTimeout = Timeout.seconds(5 * 60); // 5 minutes max per method tested
@@ -70,15 +80,25 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     @BeforeClass
-    public static void setUpBeforeClass() throws IOException {
-        registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+    public static void setUpBeforeClass() {
+        registryManager =
+            new RegistryManager(
+                IOTHUB_CONNECTION_STRING,
+                RegistryManagerOptions.builder()
+                    .httpReadTimeout(0)
+                    .build());
     }
 
     @Before
     public void setUp() throws URISyntaxException, IOException, IotHubException {
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open();
-        digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+        digitalTwinClient =
+            new DigitalTwinClient(
+                IOTHUB_CONNECTION_STRING,
+                DigitalTwinClientOptions.builder()
+                    .httpReadTimeout(0)
+                    .build());
     }
 
     @After
@@ -108,16 +128,79 @@ public class DigitalTwinClientTests extends IntegrationTest
         registryManager.close();
     }
 
+    @BeforeClass
+    public static void startProxy()
+    {
+        proxyServer = DefaultHttpProxyServer.bootstrap()
+            .withPort(testProxyPort)
+            .start();
+    }
+
+    @AfterClass
+    public static void stopProxy()
+    {
+        proxyServer.stop();
+    }
+
     @Test
     @StandardTierHubOnlyTest
     public void getDigitalTwin() {
         // act
         BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
+            digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
 
         // assert
         assertEquals(response.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
         assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void getDigitalTwinWithProxy() {
+        // arrange
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+        ProxyOptions proxyOptions = new ProxyOptions(proxy);
+        DigitalTwinClientOptions clientOptions =
+            DigitalTwinClientOptions.builder()
+                .proxyOptions(proxyOptions)
+                .httpReadTimeout(0)
+                .build();
+
+        digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
+
+        // act
+        BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
+            digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
+
+        // assert
+        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    @StandardTierHubOnlyTest
+    public void digitalTwinConstructorThrowsForNegativeConnectTimeout() {
+        // arrange
+        DigitalTwinClientOptions clientOptions =
+            DigitalTwinClientOptions.builder()
+                .httpConnectTimeout(-1)
+                .build();
+
+        digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    @StandardTierHubOnlyTest
+    public void digitalTwinConstructorThrowsForNegativeReadTimeout() {
+        // arrange
+        DigitalTwinClientOptions clientOptions =
+            DigitalTwinClientOptions.builder()
+                .httpReadTimeout(-1)
+                .build();
+
+        digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
     }
 
     @Test
@@ -134,7 +217,8 @@ public class DigitalTwinClientTests extends IntegrationTest
 
         // act
         BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
+            digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
 
         // assert
         assertEquals(response.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
@@ -174,7 +258,8 @@ public class DigitalTwinClientTests extends IntegrationTest
         optionsWithoutEtag.setIfMatch("*");
 
         // get digital twin and Etag before update
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
+        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
+            digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
         DigitalTwinUpdateRequestOptions optionsWithEtag = new DigitalTwinUpdateRequestOptions();
         optionsWithEtag.setIfMatch(responseWithHeaders.headers().eTag());
 
