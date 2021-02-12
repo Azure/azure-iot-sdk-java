@@ -179,6 +179,30 @@ public class DigitalTwinClientTests extends IntegrationTest
         assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    @StandardTierHubOnlyTest
+    public void digitalTwinConstructorThrowsForNegativeConnectTimeout() {
+        // arrange
+        DigitalTwinClientOptions clientOptions =
+            DigitalTwinClientOptions.builder()
+                .httpConnectTimeout(-1)
+                .build();
+
+        digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    @StandardTierHubOnlyTest
+    public void digitalTwinConstructorThrowsForNegativeReadTimeout() {
+        // arrange
+        DigitalTwinClientOptions clientOptions =
+            DigitalTwinClientOptions.builder()
+                .httpReadTimeout(-1)
+                .build();
+
+        digitalTwinClient = new DigitalTwinClient(IOTHUB_CONNECTION_STRING, clientOptions);
+    }
+
     @Test
     @StandardTierHubOnlyTest
     public void getDigitalTwinWithAzureSasCredential() {
