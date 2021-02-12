@@ -15,6 +15,9 @@ import com.microsoft.rest.*;
 import java.io.IOException;
 import java.util.List;
 
+import static com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+import static com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS;
+
 /**
  * <p>
  * The Digital Twins Service Client contains methods to retrieve and update digital twin information, and invoke commands on a digital twin device.
@@ -29,7 +32,21 @@ public class DigitalTwinClient {
      * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String connectionString) {
-        digitalTwinAsyncClient = DigitalTwinAsyncClient.createFromConnectionString(connectionString);
+        this(connectionString,
+            DigitalTwinClientOptions.builder()
+                .httpReadTimeout(DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .httpConnectTimeout(DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .build());
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     * @param connectionString The IoT Hub connection string
+     * @param options The optional settings for this client. May not be null.
+     * @return The instantiated DigitalTwinClient.
+     */
+    public DigitalTwinClient(String connectionString, DigitalTwinClientOptions options) {
+        digitalTwinAsyncClient = new DigitalTwinAsyncClient(connectionString, options);
     }
 
     /**
@@ -41,7 +58,25 @@ public class DigitalTwinClient {
      * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String hostName, TokenCredential credential) {
-        digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, credential);
+        this(hostName,
+            credential,
+            DigitalTwinClientOptions.builder()
+                .httpReadTimeout(DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .httpConnectTimeout(DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .build());
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     * @param options The optional settings for this client. May not be null.
+     * @return The instantiated DigitalTwinClient.
+     */
+    public DigitalTwinClient(String hostName, TokenCredential credential, DigitalTwinClientOptions options) {
+        digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, credential, options);
     }
 
     /**
@@ -52,7 +87,24 @@ public class DigitalTwinClient {
      * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String hostName, AzureSasCredential azureSasCredential) {
-        digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, azureSasCredential);
+        this(hostName,
+            azureSasCredential,
+            DigitalTwinClientOptions.builder()
+                .httpReadTimeout(DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .httpConnectTimeout(DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .build());
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @param options The optional settings for this client. May not be null.
+     * @return The instantiated DigitalTwinClient.
+     */
+    public DigitalTwinClient(String hostName, AzureSasCredential azureSasCredential, DigitalTwinClientOptions options) {
+        digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, azureSasCredential, options);
     }
 
     /**
