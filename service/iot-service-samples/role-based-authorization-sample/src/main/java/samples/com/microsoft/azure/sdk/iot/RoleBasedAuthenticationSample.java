@@ -53,7 +53,7 @@ public class RoleBasedAuthenticationSample
 
         // Credentials can be built from types from the Azure Identity library like ClientSecretCredential.
         // The Azure Identity library also defines other implementations of the TokenCredential interface such as
-        // ManagedIdentityCredential
+        // DefaultAzureCredential, InteractiveBrowserCredential, and many others.
         TokenCredential credential =
             new ClientSecretCredentialBuilder()
                 .tenantId(parsedArguments.getTenantId())

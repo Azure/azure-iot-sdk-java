@@ -33,17 +33,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -94,55 +84,6 @@ public class AzureSasCredentialSample
         runJobClientSample(iotHubHostName, credential);
 
         runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
-    }
-
-    /**
-     * Create a shared access signature for a given resource and key. This method isn't used by the sample,
-     * but it is a good reference for how to create shared access signatures in Java.
-     *
-     * @param resourceUri The resource that the shared access token should grant access to. For cases where the token
-     * will be used for more than one function (i.e. used by registryManager to create a device and used by serviceClient
-     * to send cloud to device messages), this value should be the hostName of your IoT Hub
-     * ("my-azure-iot-hub.azure-devices.net" for example). Shared access signatures do support scoping of the resource
-     * authorization by making this resourceUri more specific. For example, a resourceUri of "my-azure-iot-hub.azure-devices.net/devices"
-     * will make this token only usable when creating/updating/deleting device identities.
-     * For more examples, see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#use-security-tokens-from-service-components">Using security tokens from service components</a>
-     * @param key The shared access key for your IoT Hub.
-     * @return The shared access signature. This value can be used as is to build a {@link AzureSasCredential} instance
-     * @throws UnsupportedEncodingException If UTF_8 is not a supported encoding on your device.
-     * @throws NoSuchAlgorithmException If HmacSHA256 algorithm isn't found.
-     * @throws InvalidKeyException If initializing the HmacSHA256 SHA fails.
-     * @see <a href="docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security">Control access to IoT Hub</a>
-     */
-    @SuppressWarnings("unused")
-    public static String generateSharedAccessSignature(String resourceUri, String key)
-        throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
-    {
-        String sharedAccessSignatureFormat = "SharedAccessSignature sr=%s&sig=%s&se=%s";
-        Charset utf8 = StandardCharsets.UTF_8;
-        String utf8Name = utf8.name();
-
-        // Token will expire in one hour
-        long expiry = Instant.now().getEpochSecond() + 3600;
-
-        String stringToSign = URLEncoder.encode(resourceUri, utf8Name) + "\n" + expiry;
-        byte[] decodedKey = Base64.getDecoder().decode(key);
-
-        Mac sha256HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKey = new SecretKeySpec(decodedKey, "HmacSHA256");
-        sha256HMAC.init(secretKey);
-        Base64.Encoder encoder = Base64.getEncoder();
-
-        String signature = new String(encoder.encode(sha256HMAC.doFinal(stringToSign.getBytes(utf8))), utf8);
-
-        String token =
-            String.format(
-                sharedAccessSignatureFormat,
-                URLEncoder.encode(resourceUri, utf8Name),
-                URLEncoder.encode(signature, utf8Name),
-                expiry);
-
-        return token;
     }
 
     private static String runRegistryManagerSample(String iotHubHostName, AzureSasCredential credential)
