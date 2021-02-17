@@ -14,6 +14,8 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -39,6 +41,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 /**
  * Test class containing all tests to be run on JVM and android pertaining to identity CRUD.
  */
+@Slf4j
 @IotHubTest
 public class RegistryManagerTests extends IntegrationTest
 {
@@ -74,6 +77,7 @@ public class RegistryManagerTests extends IntegrationTest
         public String moduleId;
         public String configId;
         private RegistryManager registryManager;
+        private AzureSasCredential azureSasCredential;
 
         public RegistryManagerTestInstance()
         {
@@ -101,12 +105,12 @@ public class RegistryManagerTests extends IntegrationTest
             {
                 IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
                 IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-                AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-                registryManager = new RegistryManager(iotHubConnectionStringObj.getHostName(), sasCredential, options);
+                this.azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
+                this.registryManager = new RegistryManager(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
             }
             else
             {
-                registryManager = new RegistryManager(iotHubConnectionString, options);
+                this.registryManager = new RegistryManager(iotHubConnectionString, options);
             }
         }
     }
@@ -137,6 +141,37 @@ public class RegistryManagerTests extends IntegrationTest
     {
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(true);
         deviceLifecycle(testInstance);
+    }
+
+    @Test
+    public void azureSasCredentialTokenRenewal() throws Exception
+    {
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(true);
+
+        Device device1 = Device.createDevice(testInstance.deviceId + "-1", AuthenticationType.SAS);
+        Device device2 = Device.createDevice(testInstance.deviceId + "-2", AuthenticationType.SAS);
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
+        int tokenLifespanSeconds = 5;
+        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+
+        testInstance.azureSasCredential.update(serviceSasToken.toString());
+
+        // add first device just to make sure that the first credential update worked
+        testInstance.registryManager.addDevice(device1);
+
+        // wait so that the previous shared access signature expires
+        Thread.sleep(2 * tokenLifespanMilliseconds);
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        testInstance.azureSasCredential.update(serviceSasToken.toString());
+
+        // adding the second device should succeed since the shared access signature has been renewed
+        testInstance.registryManager.addDevice(device2);
     }
 
     public static void deviceLifecycle(RegistryManagerTestInstance testInstance) throws Exception

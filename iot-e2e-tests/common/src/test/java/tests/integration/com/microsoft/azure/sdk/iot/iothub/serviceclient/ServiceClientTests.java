@@ -21,6 +21,9 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -51,6 +54,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 /**
  * Test class containing all tests to be run on JVM and android pertaining to C2D communication using the service client.
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class ServiceClientTests extends IntegrationTest
@@ -266,6 +270,48 @@ public class ServiceClientTests extends IntegrationTest
         assertEquals(buildExceptionMessage("", hostName), 0, deviceGetBefore.getCloudToDeviceMessageCount());
         assertEquals(buildExceptionMessage("", hostName), 1, deviceGetAfter.getCloudToDeviceMessageCount());
 
+        registryManager.close();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void cloudToDeviceTelemetryAzureSasCredentialTokenRenewal() throws Exception
+    {
+        RegistryManager registryManager = new RegistryManager(
+            iotHubConnectionString,
+            RegistryManagerOptions.builder()
+                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                .build());
+
+        Device device = Device.createFromId(testInstance.deviceId, null, null);
+        Tools.addDeviceWithRetry(registryManager, device);
+
+        ServiceClient serviceClient;
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
+        int tokenLifespanSeconds = 5;
+        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
+        serviceClient.open();
+
+        Message message = new Message(content.getBytes());
+        serviceClient.send(device.getDeviceId(), message);
+
+        // wait so that the previous shared access signature expires
+        Thread.sleep(2 * tokenLifespanMilliseconds);
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // The final c2d send should succeed since the shared access signature has been renewed
+        serviceClient.send(device.getDeviceId(), message);
+
+        serviceClient.close();
         registryManager.close();
     }
 

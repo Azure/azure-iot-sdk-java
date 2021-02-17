@@ -226,6 +226,36 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     @Test
+    public void azureSasCredentialTokenRenewal() throws Exception
+    {
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(IOTHUB_CONNECTION_STRING);
+
+        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
+        int tokenLifespanSeconds = 5;
+        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        digitalTwinClient = new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        // get a digital twin before the first shared access signature expires
+        // don't care about the return value, just checking that the request isn't unauthorized
+        digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
+
+        // wait so that the previous shared access signature expires
+        Thread.sleep(2 * tokenLifespanMilliseconds);
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // get a digital twin using the renewed shared access signature
+        // don't care about the return value, just checking that the request isn't unauthorized
+        digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
+    }
+
+    @Test
     @StandardTierHubOnlyTest
     public void updateDigitalTwin() throws IOException {
         // arrange

@@ -20,8 +20,11 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +50,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to Device methods.
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class DeviceMethodTests extends DeviceMethodCommon
@@ -79,6 +83,47 @@ public class DeviceMethodTests extends DeviceMethodCommon
                 DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         super.openDeviceClientAndSubscribeToMethods();
+        super.invokeMethodSucceed();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
+    {
+        if (testInstance.protocol != IotHubClientProtocol.AMQPS || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        {
+            // This test is for the service client, so no need to rerun it for all the different client types or device protocols
+            return;
+        }
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
+        int tokenLifespanSeconds = 5;
+        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+
+        this.testInstance.methodServiceClient =
+            new DeviceMethod(
+                iotHubConnectionStringObj.getHostName(),
+                sasCredential,
+                DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+
+        super.openDeviceClientAndSubscribeToMethods();
+
+        // add first device just to make sure that the first credential update worked
+        super.invokeMethodSucceed();
+
+        // wait so that the previous shared access signature expires
+        Thread.sleep(2 * tokenLifespanMilliseconds);
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // adding third device should succeed since the shared access signature has been renewed
         super.invokeMethodSucceed();
     }
 

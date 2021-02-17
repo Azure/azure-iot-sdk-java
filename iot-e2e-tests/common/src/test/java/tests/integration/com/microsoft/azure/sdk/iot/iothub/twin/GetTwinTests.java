@@ -72,6 +72,47 @@ public class GetTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
+    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
+    {
+        if (testInstance.protocol != IotHubClientProtocol.AMQPS || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        {
+            // This test is for the service client, so no need to rerun it for all the different client types or device protocols
+            return;
+        }
+
+        super.setUpNewDeviceAndModule();
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
+        int tokenLifespanSeconds = 5;
+        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+
+        this.testInstance.twinServiceClient =
+            new DeviceTwin(
+                iotHubConnectionStringObj.getHostName(),
+                sasCredential,
+                DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+
+        // add first device just to make sure that the first credential update worked
+        super.testGetDeviceTwin();
+
+        // wait so that the previous shared access signature expires
+        Thread.sleep(2 * tokenLifespanMilliseconds);
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // adding third device should succeed since the shared access signature has been renewed
+        super.testGetDeviceTwin();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
     public void testGetDeviceTwinWithProxy() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.clientType != ClientType.DEVICE_CLIENT)

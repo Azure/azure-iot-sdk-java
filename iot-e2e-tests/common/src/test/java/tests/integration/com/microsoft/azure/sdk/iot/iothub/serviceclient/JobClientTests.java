@@ -25,6 +25,7 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import lombok.extern.slf4j.Slf4j;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
@@ -42,6 +43,7 @@ import static org.junit.Assert.*;
  */
 @Slf4j
 @IotHubTest
+@NotThreadSafe // these tests will be run in serial because of this annotation. IoT Hub has a limit on number of concurrent jobs
 public class JobClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
@@ -94,7 +96,7 @@ public class JobClientTests extends IntegrationTest
     }
 
     @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
-    private JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
+    private static JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         String queryContent = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS,
             "devices.jobs.jobId = '" + jobId + "' and devices.jobs.jobType = '" + jobType.toString() + "'",
@@ -375,13 +377,46 @@ public class JobClientTests extends IntegrationTest
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
         JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
 
+        scheduleDeviceMethod(jobClientWithSasCredential);
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
+    public void jobClientAzureSasCredentialTokenRenewal() throws InterruptedException, IOException, IotHubException
+    {
+        // Arrange
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
+        int tokenLifespanSeconds = 5;
+        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        // JobClient usage should succeed since the shared access signature hasn't expired yet
+        scheduleDeviceMethod(jobClientWithSasCredential);
+
+        Thread.sleep(2 * tokenLifespanMilliseconds);
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // JobClient usage should succeed since the shared access signature has been renewed
+        scheduleDeviceMethod(jobClientWithSasCredential);
+    }
+
+    private static void scheduleDeviceMethod(JobClient jobClient) throws IOException, IotHubException, InterruptedException
+    {
         DeviceTestManager deviceTestManger = devices.get(0);
         final String deviceId = testDevice.getDeviceId();
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         // Act
         String jobId = JOB_ID_NAME + UUID.randomUUID();
-        jobClientWithSasCredential.scheduleDeviceMethod(
+        jobClient.scheduleDeviceMethod(
             jobId,
             queryCondition,
             DeviceEmulator.METHOD_LOOPBACK,
@@ -391,11 +426,11 @@ public class JobClientTests extends IntegrationTest
             new Date(),
             MAX_EXECUTION_TIME_IN_SECONDS);
 
-        JobResult jobResult = jobClientWithSasCredential.getJob(jobId);
+        JobResult jobResult = jobClient.getJob(jobId);
         while (jobResult.getJobStatus() != JobStatus.completed)
         {
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
-            jobResult = jobClientWithSasCredential.getJob(jobId);
+            jobResult = jobClient.getJob(jobId);
         }
 
         log.info("job finished with status {}", jobResult.getJobStatus());

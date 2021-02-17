@@ -95,6 +95,35 @@ public class QueryTwinTests extends DeviceTwinCommon
         testRawQueryTwin();
     }
 
+    @Test
+    @StandardTierHubOnlyTest
+    public void rawQueryWithAzureSasCredentialTokenRenewal() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    {
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
+        int tokenLifespanSeconds = 5;
+        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        // test that the service client can query before the shared access signature expires
+        testRawQueryTwin();
+
+        // wait so that the previous shared access signature expires
+        Thread.sleep(2 * tokenLifespanMilliseconds);
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // test that the service client can query after renewing the shared access signature expires
+        testRawQueryTwin();
+    }
+
     public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         addMultipleDevices(MAX_DEVICES, false);
