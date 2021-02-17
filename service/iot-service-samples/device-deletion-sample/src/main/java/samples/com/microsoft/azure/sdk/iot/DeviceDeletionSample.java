@@ -33,6 +33,8 @@ import java.util.List;
 
 public class DeviceDeletionSample
 {
+    private static final int SLEEP_INTERVAL_MILLISECONDS = 3000;
+
     /**
      * A simple sample for deleting all devices from an iothub
      */
@@ -87,11 +89,9 @@ public class DeviceDeletionSample
 
         @Override
         public void run() {
-            RegistryManager registryManager = null;
-            DeviceTwin deviceTwin = null;
+            DeviceTwin deviceTwin;
             try
             {
-                registryManager = RegistryManager.createFromConnectionString(iotConnString);
                 deviceTwin = DeviceTwin.createFromConnectionString(iotConnString);
             }
             catch (IOException e)
@@ -173,6 +173,18 @@ public class DeviceDeletionSample
                     e.printStackTrace();
                     System.out.println("Could not collect the full list of device ids to delete, exiting iot hub cleanup thread");
                     return;
+                }
+
+                try
+                {
+                    // Currently, IoT Hub doesn't have a good mechanism for throttling bulk operation requests, so this
+                    // delay will help to space out the requests
+                    System.out.println("Sleeping for " + SLEEP_INTERVAL_MILLISECONDS + " milliseconds before next bulk deletion");
+                    Thread.sleep(SLEEP_INTERVAL_MILLISECONDS);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
                 }
             }
         }
