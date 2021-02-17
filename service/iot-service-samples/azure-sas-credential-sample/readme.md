@@ -1,6 +1,6 @@
 # Azure SAS Credential Sample
 
-This sample demonstrates how to use the Azure.Core AzureSasCredential type to create service client instances that 
+This sample demonstrates how to use the Azure.Core [AzureSasCredential][azure-sas-credential] type to create service client instances that 
 use symmetric key based authentication.
 
 ## Summary
@@ -11,7 +11,7 @@ your service client instance so that it uses shared access signature tokens. For
 shared access signatures are, see [this article][sas-overview].
 
 Service clients such as RegistryManager have constructors that take in connection strings for your IoT Hub, and the SDK
-will derive shared access signatures for you from these connection strings. Many users may prefer generate their own 
+will derive shared access signatures for you from these connection strings. Many users may prefer to generate their own 
 shared access signatures, though, so there are constructors for the same service clients that take in the AzureSasCredential
 type to enable this. The AzureSasCredential type allows for users to create the shared access signature to be used
 for authentication, and to choose when to update that shared access signature. It also allows users to not provide the 
@@ -111,3 +111,4 @@ this scoping can be seen [here][scoping-overview].
 
 [sas-overview]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-token-structure
 [scoping-overview]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#use-security-tokens-from-service-components
+[azure-sas-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/core/azure-core/src/main/java/com/azure/core/credential/AzureSasCredential.java
