@@ -57,8 +57,7 @@ public class AzureSasCredentialSample
         // that take in your IoT Hub's connection string. This sample will demonstrate how to construct service clients
         // without giving them the connection string by giving them shared access signatures instead.
 
-        // This sample includes a helper function that shows how to build shared access signatures below.
-        // Search for "generateSharedAccessSignature"
+        // This sample's readme includes a helper function that shows how to build shared access signatures below.
         //
         // More details on how to build this shared access signature can be found here:
         // https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#security-token-structure
