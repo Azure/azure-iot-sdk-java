@@ -40,16 +40,22 @@ run this sample with.
  * will make this token only usable when creating/updating/deleting device identities.
  * For more examples, see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security#use-security-tokens-from-service-components">Using security tokens from service components</a>
  * @param key The shared access key for your IoT Hub.
+ * @param policyName (optional) The name of the policy. For instance, "iothubowner", "registryRead", "registryReadWrite"
  * @return The shared access signature. This value can be used as is to build a {@link AzureSasCredential} instance
  * @throws UnsupportedEncodingException If UTF_8 is not a supported encoding on your device.
  * @throws NoSuchAlgorithmException If HmacSHA256 algorithm isn't found.
  * @throws InvalidKeyException If initializing the HmacSHA256 SHA fails.
  * @see <a href="docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security">Control access to IoT Hub</a>
  */
-public static String generateSharedAccessSignature(String resourceUri, String key)
+public static String generateSharedAccessSignature(String resourceUri, String key, String policyName)
     throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException
 {
-    String sharedAccessSignatureFormat = "SharedAccessSignature sr=%s&sig=%s&se=%s";
+    String sharedAccessSignatureFormat = 
+        "SharedAccessSignature sr=%s&sig=%s&se=%s";
+    
+    String sharedAccessSignatureFormatWithPolicyName = 
+        "SharedAccessSignature sr=%s&sig=%s&se=%s&skn=%s";
+    
     Charset utf8 = StandardCharsets.UTF_8;
     String utf8Name = utf8.name();
 
@@ -72,6 +78,18 @@ public static String generateSharedAccessSignature(String resourceUri, String ke
             URLEncoder.encode(resourceUri, utf8Name),
             URLEncoder.encode(signature, utf8Name),
             expiry);
+
+    if (policyName != null && !policyName.isEmpty())
+    {
+        token =
+        String.format(
+            sharedAccessSignatureFormatWithPolicyName,
+            URLEncoder.encode(resourceUri, utf8Name),
+            URLEncoder.encode(signature, utf8Name),
+            expiry,
+            policyName);
+        
+    }
 
     return token;
 }
