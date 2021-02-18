@@ -14,12 +14,15 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.SymmetricKey;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
@@ -33,12 +36,14 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to identity CRUD.
  */
+@Slf4j
 @IotHubTest
 public class RegistryManagerTests extends IntegrationTest
 {
@@ -74,6 +79,7 @@ public class RegistryManagerTests extends IntegrationTest
         public String moduleId;
         public String configId;
         private RegistryManager registryManager;
+        private AzureSasCredential azureSasCredential;
 
         public RegistryManagerTestInstance()
         {
@@ -101,12 +107,12 @@ public class RegistryManagerTests extends IntegrationTest
             {
                 IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
                 IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-                AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-                registryManager = new RegistryManager(iotHubConnectionStringObj.getHostName(), sasCredential, options);
+                this.azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
+                this.registryManager = new RegistryManager(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
             }
             else
             {
-                registryManager = new RegistryManager(iotHubConnectionString, options);
+                this.registryManager = new RegistryManager(iotHubConnectionString, options);
             }
         }
     }
@@ -137,6 +143,46 @@ public class RegistryManagerTests extends IntegrationTest
     {
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(true);
         deviceLifecycle(testInstance);
+    }
+
+    @Test
+    public void registryManagerTokenRenewalWithAzureSasCredential() throws Exception
+    {
+        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(true);
+
+        Device device1 = Device.createDevice(testInstance.deviceId + "-1", AuthenticationType.SAS);
+        Device device2 = Device.createDevice(testInstance.deviceId + "-2", AuthenticationType.SAS);
+        Device device3 = Device.createDevice(testInstance.deviceId + "-3", AuthenticationType.SAS);
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+
+        testInstance.azureSasCredential.update(serviceSasToken.toString());
+
+        // add first device just to make sure that the first credential update worked
+        testInstance.registryManager.addDevice(device1);
+
+        // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared
+        // access signature that is set here.
+        testInstance.azureSasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            testInstance.registryManager.addDevice(device2);
+            fail("Expected adding a device to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        testInstance.azureSasCredential.update(serviceSasToken.toString());
+
+        // adding the final device should succeed since the shared access signature has been renewed
+        testInstance.registryManager.addDevice(device3);
     }
 
     public static void deviceLifecycle(RegistryManagerTestInstance testInstance) throws Exception

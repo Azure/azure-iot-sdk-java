@@ -20,11 +20,13 @@ import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import lombok.extern.slf4j.Slf4j;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
@@ -35,6 +37,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
 /**
@@ -42,6 +45,7 @@ import static org.junit.Assert.*;
  */
 @Slf4j
 @IotHubTest
+@NotThreadSafe // these tests will be run in serial because of this annotation. IoT Hub has a limit on number of concurrent jobs
 public class JobClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
@@ -94,7 +98,7 @@ public class JobClientTests extends IntegrationTest
     }
 
     @SuppressWarnings("SameParameterValue") // Since this is a helper method, the params can be passed any value.
-    private JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
+    private static JobResult queryDeviceJobResult(String jobId, JobType jobType, JobStatus jobStatus) throws IOException, IotHubException
     {
         String queryContent = SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS,
             "devices.jobs.jobId = '" + jobId + "' and devices.jobs.jobType = '" + jobType.toString() + "'",
@@ -375,13 +379,55 @@ public class JobClientTests extends IntegrationTest
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
         JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
 
+        scheduleDeviceMethod(jobClientWithSasCredential);
+    }
+
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
+    public void jobClientTokenRenewalWithAzureSasCredential() throws InterruptedException, IOException, IotHubException
+    {
+        // Arrange
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
+
+        // JobClient usage should succeed since the shared access signature hasn't expired yet
+        scheduleDeviceMethod(jobClientWithSasCredential);
+
+        // deliberately expire the SAS token to provoke a 401 to ensure that the job client is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            scheduleDeviceMethod(jobClientWithSasCredential);
+            fail("Expected scheduling a job to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // JobClient usage should succeed since the shared access signature has been renewed
+        scheduleDeviceMethod(jobClientWithSasCredential);
+    }
+
+    private static void scheduleDeviceMethod(JobClient jobClient) throws IOException, IotHubException, InterruptedException
+    {
         DeviceTestManager deviceTestManger = devices.get(0);
         final String deviceId = testDevice.getDeviceId();
         final String queryCondition = "DeviceId IN ['" + deviceId + "']";
 
         // Act
         String jobId = JOB_ID_NAME + UUID.randomUUID();
-        jobClientWithSasCredential.scheduleDeviceMethod(
+        jobClient.scheduleDeviceMethod(
             jobId,
             queryCondition,
             DeviceEmulator.METHOD_LOOPBACK,
@@ -391,11 +437,11 @@ public class JobClientTests extends IntegrationTest
             new Date(),
             MAX_EXECUTION_TIME_IN_SECONDS);
 
-        JobResult jobResult = jobClientWithSasCredential.getJob(jobId);
+        JobResult jobResult = jobClient.getJob(jobId);
         while (jobResult.getJobStatus() != JobStatus.completed)
         {
             Thread.sleep(MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_MILLISECONDS);
-            jobResult = jobClientWithSasCredential.getJob(jobId);
+            jobResult = jobClient.getJob(jobId);
         }
 
         log.info("job finished with status {}", jobResult.getJobStatus());

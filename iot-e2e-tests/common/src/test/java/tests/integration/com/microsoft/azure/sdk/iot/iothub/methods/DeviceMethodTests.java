@@ -20,8 +20,11 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,12 +44,14 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to Device methods.
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class DeviceMethodTests extends DeviceMethodCommon
@@ -79,6 +84,55 @@ public class DeviceMethodTests extends DeviceMethodCommon
                 DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         super.openDeviceClientAndSubscribeToMethods();
+        super.invokeMethodSucceed();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
+    {
+        if (testInstance.protocol != IotHubClientProtocol.AMQPS
+            || testInstance.clientType != ClientType.DEVICE_CLIENT
+            || testInstance.authenticationType != AuthenticationType.SAS)
+        {
+            // This test is for the service client, so no need to rerun it for all the different client types or device protocols
+            return;
+        }
+
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+
+        this.testInstance.methodServiceClient =
+            new DeviceMethod(
+                iotHubConnectionStringObj.getHostName(),
+                sasCredential,
+                DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+
+        super.openDeviceClientAndSubscribeToMethods();
+
+        // add first device just to make sure that the first credential update worked
+        super.invokeMethodSucceed();
+
+        // deliberately expire the SAS token to provoke a 401 to ensure that the method client is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            super.invokeMethodSucceed();
+            fail("Expected invoke method call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // final method invocation should succeed since the shared access signature has been renewed
         super.invokeMethodSucceed();
     }
 

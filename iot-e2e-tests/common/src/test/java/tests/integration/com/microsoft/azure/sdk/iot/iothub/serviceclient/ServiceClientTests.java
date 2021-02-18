@@ -21,6 +21,9 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -30,6 +33,7 @@ import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
@@ -45,12 +49,14 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
  * Test class containing all tests to be run on JVM and android pertaining to C2D communication using the service client.
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class ServiceClientTests extends IntegrationTest
@@ -266,6 +272,64 @@ public class ServiceClientTests extends IntegrationTest
         assertEquals(buildExceptionMessage("", hostName), 0, deviceGetBefore.getCloudToDeviceMessageCount());
         assertEquals(buildExceptionMessage("", hostName), 1, deviceGetAfter.getCloudToDeviceMessageCount());
 
+        registryManager.close();
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
+    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
+    {
+        RegistryManager registryManager = new RegistryManager(
+            iotHubConnectionString,
+            RegistryManagerOptions.builder()
+                .httpReadTimeout(HTTP_READ_TIMEOUT)
+                .build());
+
+        Device device = Device.createFromId(testInstance.deviceId, null, null);
+        Tools.addDeviceWithRetry(registryManager, device);
+
+        ServiceClient serviceClient;
+        IotHubConnectionString iotHubConnectionStringObj =
+            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
+        serviceClient.open();
+
+        Message message = new Message(content.getBytes());
+        serviceClient.send(device.getDeviceId(), message);
+
+        // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            serviceClient.send(device.getDeviceId(), message);
+            fail("Expected sending cloud to device message to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IOException e)
+        {
+            // For service client, the unauthorized exception is wrapped by an IOException, so we need to unwrap it here
+            if (e.getCause() instanceof IotHubUnathorizedException)
+            {
+                log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+            }
+            else
+            {
+                throw e;
+            }
+        }
+
+        // Renew the expired shared access signature
+        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        sasCredential.update(serviceSasToken.toString());
+
+        // The final c2d send should succeed since the shared access signature has been renewed
+        serviceClient.send(device.getDeviceId(), message);
+
+        serviceClient.close();
         registryManager.close();
     }
 
