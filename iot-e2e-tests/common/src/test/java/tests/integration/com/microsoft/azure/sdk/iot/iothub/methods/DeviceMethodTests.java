@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
@@ -90,19 +91,16 @@ public class DeviceMethodTests extends DeviceMethodCommon
     @StandardTierHubOnlyTest
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
-        if (testInstance.protocol != IotHubClientProtocol.AMQPS || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        if (testInstance.protocol != IotHubClientProtocol.AMQPS
+            || testInstance.clientType != ClientType.DEVICE_CLIENT
+            || testInstance.authenticationType != AuthenticationType.SAS)
         {
             // This test is for the service client, so no need to rerun it for all the different client types or device protocols
             return;
         }
 
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-
-        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
-        int tokenLifespanSeconds = 5;
-        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
-
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
 
         this.testInstance.methodServiceClient =
@@ -116,14 +114,25 @@ public class DeviceMethodTests extends DeviceMethodCommon
         // add first device just to make sure that the first credential update worked
         super.invokeMethodSucceed();
 
-        // wait so that the previous shared access signature expires
-        Thread.sleep(2 * tokenLifespanMilliseconds);
+        // deliberately expire the SAS token to provoke a 401 to ensure that the method client is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            super.invokeMethodSucceed();
+            fail("Expected invoke method call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
 
         // Renew the expired shared access signature
         serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         sasCredential.update(serviceSasToken.toString());
 
-        // adding third device should succeed since the shared access signature has been renewed
+        // final method invocation should succeed since the shared access signature has been renewed
         super.invokeMethodSucceed();
     }
 

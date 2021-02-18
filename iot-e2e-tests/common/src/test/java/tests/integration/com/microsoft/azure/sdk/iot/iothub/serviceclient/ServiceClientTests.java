@@ -33,6 +33,7 @@ import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
@@ -48,6 +49,7 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
@@ -275,7 +277,7 @@ public class ServiceClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void cloudToDeviceTelemetryAzureSasCredentialTokenRenewal() throws Exception
+    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
         RegistryManager registryManager = new RegistryManager(
             iotHubConnectionString,
@@ -290,10 +292,7 @@ public class ServiceClientTests extends IntegrationTest
         IotHubConnectionString iotHubConnectionStringObj =
             IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
 
-        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
-        int tokenLifespanSeconds = 5;
-        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
         serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
         serviceClient.open();
@@ -301,8 +300,27 @@ public class ServiceClientTests extends IntegrationTest
         Message message = new Message(content.getBytes());
         serviceClient.send(device.getDeviceId(), message);
 
-        // wait so that the previous shared access signature expires
-        Thread.sleep(2 * tokenLifespanMilliseconds);
+        // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            serviceClient.send(device.getDeviceId(), message);
+            fail("Expected sending cloud to device message to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IOException e)
+        {
+            // For service client, the unauthorized exception is wrapped by an IOException, so we need to unwrap it here
+            if (e.getCause() instanceof IotHubUnathorizedException)
+            {
+                log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+            }
+            else
+            {
+                throw e;
+            }
+        }
 
         // Renew the expired shared access signature
         serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);

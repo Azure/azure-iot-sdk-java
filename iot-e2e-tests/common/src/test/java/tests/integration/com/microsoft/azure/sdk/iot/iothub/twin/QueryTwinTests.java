@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
 /**
@@ -97,15 +99,12 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void rawQueryWithAzureSasCredentialTokenRenewal() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void rawQueryTokenRenewalWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
     {
         IotHubConnectionString iotHubConnectionStringObj =
             IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
 
-        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
-        int tokenLifespanSeconds = 5;
-        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
 
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
         testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
@@ -113,8 +112,19 @@ public class QueryTwinTests extends DeviceTwinCommon
         // test that the service client can query before the shared access signature expires
         testRawQueryTwin();
 
-        // wait so that the previous shared access signature expires
-        Thread.sleep(2 * tokenLifespanMilliseconds);
+        // deliberately expire the SAS token to provoke a 401 to ensure that the registry manager is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            testRawQueryTwin();
+            fail("Expected query call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
 
         // Renew the expired shared access signature
         serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);

@@ -20,6 +20,7 @@ import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
@@ -36,6 +37,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 
 /**
@@ -381,16 +383,13 @@ public class JobClientTests extends IntegrationTest
     }
 
     @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
-    public void jobClientAzureSasCredentialTokenRenewal() throws InterruptedException, IOException, IotHubException
+    public void jobClientTokenRenewalWithAzureSasCredential() throws InterruptedException, IOException, IotHubException
     {
         // Arrange
         IotHubConnectionString iotHubConnectionStringObj =
             IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
 
-        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
-        int tokenLifespanSeconds = 5;
-        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
 
         AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
         JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
@@ -398,7 +397,19 @@ public class JobClientTests extends IntegrationTest
         // JobClient usage should succeed since the shared access signature hasn't expired yet
         scheduleDeviceMethod(jobClientWithSasCredential);
 
-        Thread.sleep(2 * tokenLifespanMilliseconds);
+        // deliberately expire the SAS token to provoke a 401 to ensure that the job client is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
+
+        try
+        {
+            scheduleDeviceMethod(jobClientWithSasCredential);
+            fail("Expected scheduling a job to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
 
         // Renew the expired shared access signature
         serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);

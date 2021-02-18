@@ -11,18 +11,20 @@ import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DeviceTwinCommon;
@@ -33,9 +35,12 @@ import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 
+import static junit.framework.TestCase.fail;
+
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to getDeviceTwin/getTwin.
  */
+@Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
 public class GetTwinTests extends DeviceTwinCommon
@@ -74,7 +79,9 @@ public class GetTwinTests extends DeviceTwinCommon
     @StandardTierHubOnlyTest
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
-        if (testInstance.protocol != IotHubClientProtocol.AMQPS || testInstance.clientType != ClientType.DEVICE_CLIENT)
+        if (testInstance.protocol != IotHubClientProtocol.AMQPS
+            || testInstance.clientType != ClientType.DEVICE_CLIENT
+            || testInstance.authenticationType != AuthenticationType.SAS)
         {
             // This test is for the service client, so no need to rerun it for all the different client types or device protocols
             return;
@@ -83,13 +90,10 @@ public class GetTwinTests extends DeviceTwinCommon
         super.setUpNewDeviceAndModule();
 
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        String sasToken = serviceSasToken.toString();
 
-        // create a shared access signature that only lives for 5 seconds so that we can test renewing it
-        int tokenLifespanSeconds = 5;
-        int tokenLifespanMilliseconds = tokenLifespanSeconds * 1000;
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj, tokenLifespanSeconds);
-
-        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        AzureSasCredential sasCredential = new AzureSasCredential(sasToken);
 
         this.testInstance.twinServiceClient =
             new DeviceTwin(
@@ -100,8 +104,19 @@ public class GetTwinTests extends DeviceTwinCommon
         // add first device just to make sure that the first credential update worked
         super.testGetDeviceTwin();
 
-        // wait so that the previous shared access signature expires
-        Thread.sleep(2 * tokenLifespanMilliseconds);
+        // deliberately expire the SAS token to provoke a 401 to ensure that the twin client is using the shared
+        // access signature that is set here.
+        sasCredential.update(SasTokenTools.makeSasTokenExpired(sasToken));
+
+        try
+        {
+            super.testGetDeviceTwin();
+            fail("Expected get twin call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
+        }
+        catch (IotHubUnathorizedException e)
+        {
+            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
+        }
 
         // Renew the expired shared access signature
         serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
