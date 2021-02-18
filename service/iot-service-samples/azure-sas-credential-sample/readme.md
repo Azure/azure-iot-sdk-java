@@ -82,12 +82,12 @@ public static String generateSharedAccessSignature(String resourceUri, String ke
     if (policyName != null && !policyName.isEmpty())
     {
         token =
-        String.format(
-            sharedAccessSignatureFormatWithPolicyName,
-            URLEncoder.encode(resourceUri, utf8Name),
-            URLEncoder.encode(signature, utf8Name),
-            expiry,
-            policyName);
+            String.format(
+                sharedAccessSignatureFormatWithPolicyName,
+                URLEncoder.encode(resourceUri, utf8Name),
+                URLEncoder.encode(signature, utf8Name),
+                expiry,
+                policyName);
         
     }
 
