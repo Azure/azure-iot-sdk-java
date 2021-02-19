@@ -276,7 +276,7 @@ public class MqttDeviceTwin extends Mqtt
                         byte[] data = messagePair.getValue();
 
                         //remove this message from the queue as this is the correct handler
-                        receivedMessages.poll();
+                        this.receivedMessages.poll();
 
                         if (topic.length() > RES.length() && topic.startsWith(RES))
                         {

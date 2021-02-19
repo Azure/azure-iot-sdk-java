@@ -101,13 +101,13 @@ public class MqttTest
         if (withParameters)
         {
             MqttMessaging mqttMessaging = new MqttMessaging(mockedMqttConnection, CLIENT_ID, mockedMessageListener, "", false, mockMqttConnectionOptions);
-            mqttMessaging.setListener(listener);
+            Deencapsulation.invoke(mqttMessaging, "setListener", listener);
             return mqttMessaging;
         }
         else
         {
             MqttDeviceTwin mqttDeviceTwin = new MqttDeviceTwin(mockedMqttConnection, null, mockMqttConnectionOptions);
-            mqttDeviceTwin.setListener(listener);
+            Deencapsulation.invoke(mqttDeviceTwin, "setListener", listener);
             return mqttDeviceTwin;
         }
     }

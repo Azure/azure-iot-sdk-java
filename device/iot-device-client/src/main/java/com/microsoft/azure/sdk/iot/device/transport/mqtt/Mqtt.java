@@ -531,12 +531,12 @@ abstract public class Mqtt implements MqttCallback
         }
     }
 
-    public void setListener(IotHubListener listener)
+    protected void setListener(IotHubListener listener)
     {
         this.listener = listener;
     }
 
-    public void setConnectionId(String connectionId)
+    protected void setConnectionId(String connectionId)
     {
         this.connectionId = connectionId;
     }

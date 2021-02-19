@@ -153,7 +153,7 @@ public class MqttDeviceMethod extends Mqtt
                         if (topic.length() > POST.length() && topic.startsWith(POST))
                         {
                             //remove this message from the queue as this is the correct handler
-                            receivedMessages.poll();
+                            this.receivedMessages.poll();
 
                             // Case for $iothub/methods/POST/{method name}/?$rid={request id}
                             TopicParser topicParser = new TopicParser(topic);

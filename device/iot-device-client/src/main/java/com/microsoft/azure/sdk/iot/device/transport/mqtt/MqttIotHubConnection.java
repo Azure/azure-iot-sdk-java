@@ -365,18 +365,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     @Override
     public IotHubStatusCode sendMessage(Message message) throws TransportException
     {
-        if (message == null || message.getBytes() == null)
+        if (message == null || message.getBytes() == null ||
+            ((message.getMessageType() != DEVICE_TWIN
+                    && message.getMessageType() != DEVICE_METHODS)
+                    && message.getBytes().length == 0))
         {
             return IotHubStatusCode.BAD_FORMAT;
         }
-
-        if (message.getMessageType() != DEVICE_TWIN
-            && message.getMessageType() != DEVICE_METHODS
-            && message.getBytes().length == 0)
-        {
-            return IotHubStatusCode.BAD_FORMAT;
-        }
-
+        
         if (this.state == IotHubConnectionStatus.DISCONNECTED)
         {
             throw new IllegalStateException("Cannot send event using a closed MQTT connection");
