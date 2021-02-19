@@ -7,6 +7,8 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -21,9 +23,15 @@ public class MqttMessaging extends Mqtt
     private final String publishTopic;
     private final boolean isEdgeHub;
 
-    public MqttMessaging(MqttConnection mqttConnection, String deviceId, IotHubListener listener, MqttMessageListener messageListener, String connectionId, String moduleId, boolean isEdgeHub, Map<Integer, Message> unacknowledgedSentMessages) throws TransportException
+    public MqttMessaging(
+        MqttAsyncClient mqttAsyncClient,
+        String deviceId,
+        MqttMessageListener messageListener,
+        String moduleId,
+        boolean isEdgeHub,
+        MqttConnectOptions connectOptions)
     {
-        super(mqttConnection, listener, messageListener, connectionId, unacknowledgedSentMessages, deviceId);
+        super(mqttAsyncClient, messageListener, deviceId, connectOptions);
 
         if (deviceId == null || deviceId.isEmpty())
         {
