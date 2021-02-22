@@ -66,8 +66,6 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
     {
         //SRS_SecurityProviderTPMEmulator_25_001: [ The constructor shall start the local TPM Simulator, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
         tpm = TpmFactory.localTpmSimulator();
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
         //SRS_SecurityProviderTPMEmulator_25_002: [ The constructor shall set the registration Id to null if none was provided. ]
@@ -96,8 +94,6 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         //SRS_SecurityProviderTPMEmulator_25_005: [ The constructor shall save the registration Id if it was provided. ]
         this.registrationId = registrationId;
         tpm = TpmFactory.localTpmSimulator();
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
     }
@@ -125,8 +121,6 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 
         this.registrationId = registrationId;
         tpm = localTpmSimulatorWithRetry(tpmConnectRetryAttempts);
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
     }
@@ -204,8 +198,6 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         //SRS_SecurityProviderTPMEmulator_25_005: [ The constructor shall save the registration Id if it was provided. ]
         this.registrationId = registrationId;
         tpm = TpmFactory.remoteTpm(inetAddress.getHostName(), TPM_PORT);
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
     }

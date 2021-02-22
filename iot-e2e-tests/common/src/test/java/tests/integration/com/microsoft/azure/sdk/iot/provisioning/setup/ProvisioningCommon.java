@@ -239,7 +239,6 @@ public class ProvisioningCommon extends IntegrationTest
 
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
-            testInstance.provisioningServiceClient = null;
             try
             {
                 //TPM security provider MUST be shutdown between tests

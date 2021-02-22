@@ -59,8 +59,6 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     {
         //SRS_SecurityProviderTPMHsm_25_001: [ The constructor shall start the tpm, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
         tpm = TpmFactory.platformTpm();
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
         //SRS_SecurityProviderTPMHsm_25_002: [ The constructor shall set the registration Id to null if none was provided. ]
@@ -89,8 +87,6 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         //SRS_SecurityProviderTPMHsm_25_005: [ The constructor shall save the registration Id if it was provided. ]
         this.registrationId = registrationId;
         tpm = TpmFactory.platformTpm();
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
     }
