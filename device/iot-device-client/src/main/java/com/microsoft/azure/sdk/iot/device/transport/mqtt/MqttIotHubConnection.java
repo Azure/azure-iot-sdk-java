@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -21,8 +22,10 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
@@ -217,25 +220,33 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.connectOptions.setPassword(password);
         }
 
+        Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
+        Queue<Pair<String, byte[]>> receivedMessages = new ConcurrentLinkedQueue<>();
         this.deviceMessaging = new MqttMessaging(
             mqttAsyncClient,
             deviceId,
             this,
             moduleId,
             this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(),
-            this.connectOptions);
+            this.connectOptions,
+            unacknowledgedSentMessages,
+            receivedMessages);
 
         mqttAsyncClient.setCallback(this.deviceMessaging);
 
         this.deviceMethod = new MqttDeviceMethod(
             mqttAsyncClient,
             deviceId,
-            this.connectOptions);
+            this.connectOptions,
+            unacknowledgedSentMessages,
+            receivedMessages);
 
         this.deviceTwin = new MqttDeviceTwin(
             mqttAsyncClient,
             deviceId,
-            this.connectOptions);
+            this.connectOptions,
+            unacknowledgedSentMessages,
+            receivedMessages);
     }
 
     /**

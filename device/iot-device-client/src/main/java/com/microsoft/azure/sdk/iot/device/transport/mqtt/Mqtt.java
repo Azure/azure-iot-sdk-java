@@ -89,7 +89,9 @@ abstract public class Mqtt implements MqttCallback
         MqttAsyncClient mqttAsyncClient,
         MqttMessageListener messageListener,
         String deviceId,
-        MqttConnectOptions connectOptions)
+        MqttConnectOptions connectOptions,
+        Map<Integer, Message> unacknowledgedSentMessages,
+        Queue<Pair<String, byte[]>> receivedMessages)
     {
         if (mqttAsyncClient == null)
         {
@@ -98,13 +100,13 @@ abstract public class Mqtt implements MqttCallback
 
         this.deviceId = deviceId;
         this.mqttAsyncClient = mqttAsyncClient;
-        this.receivedMessages = new ConcurrentLinkedQueue<>();
+        this.receivedMessages = receivedMessages;
         this.stateLock = new Object();
         this.receivedMessagesLock = new Object();
         this.unacknowledgedSentMessagesLock = new Object();
         this.messageListener = messageListener;
         this.connectOptions = connectOptions;
-        this.unacknowledgedSentMessages = new ConcurrentHashMap<>();
+        this.unacknowledgedSentMessages = unacknowledgedSentMessages;
     }
 
     /**
