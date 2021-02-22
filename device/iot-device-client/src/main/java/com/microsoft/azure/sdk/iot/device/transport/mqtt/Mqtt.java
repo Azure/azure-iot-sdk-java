@@ -37,7 +37,7 @@ abstract public class Mqtt implements MqttCallback
     // paho mqtt only supports 10 messages in flight at the same time
     private static final int MAX_IN_FLIGHT_COUNT = 10;
 
-    private final MqttAsyncClient mqttAsyncClient;
+    private MqttAsyncClient mqttAsyncClient;
     private final MqttConnectOptions connectOptions;
     private final MqttMessageListener messageListener;
     private final Map<Integer, Message> unacknowledgedSentMessages;
@@ -539,5 +539,12 @@ abstract public class Mqtt implements MqttCallback
     protected void setConnectionId(String connectionId)
     {
         this.connectionId = connectionId;
+    }
+
+    protected void setMqttAsyncClient(MqttAsyncClient mqttAsyncClient)
+    {
+        // should never be set to null
+        // mqttAsyncClients are single use, so this setter is used when the MqttIotHubConnection layer needs to open a new connection
+        this.mqttAsyncClient = mqttAsyncClient;
     }
 }

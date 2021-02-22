@@ -950,9 +950,7 @@ public class IotHubTransport implements IotHubListener
      */
     private void openConnection() throws TransportException
     {
-        // MqttIotHubConnection is single use, so each new connection should instantiate a new MqttIotHubConnection.
-        // This is because the mqtt client we use is single use.
-        if (this.iotHubTransportConnection == null || this.protocol == IotHubClientProtocol.MQTT || this.protocol == IotHubClientProtocol.MQTT_WS)
+        if (this.iotHubTransportConnection == null)
         {
             switch (this.protocol) {
                 case HTTPS:

@@ -51,6 +51,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private final DeviceClientConfig config;
     private IotHubConnectionStatus state = IotHubConnectionStatus.DISCONNECTED;
     private IotHubListener listener;
+    private final MqttConnectOptions connectOptions;
+    private final String clientId;
+    private final String serverUri;
 
     //Messaging clients, never null
     private final MqttMessaging deviceMessaging;
@@ -128,12 +131,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         {
             throw new TransportException("Failed to get URLEncode the user agent string", e);
         }
-        String clientId = this.config.getDeviceId();
 
+        String deviceId = this.config.getDeviceId();
         String moduleId = this.config.getModuleId();
         if (moduleId != null && !moduleId.isEmpty())
         {
-            clientId += "/" + moduleId;
+            this.clientId = deviceId + "/" + moduleId;
+        }
+        else
+        {
+            this.clientId = deviceId;
         }
 
         String serviceParams;
@@ -155,39 +162,28 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             host = this.config.getIotHubHostname();
         }
 
-        final String serverUri;
         if (this.config.isUseWebsocket())
         {
             if (this.webSocketQueryString == null)
             {
-                serverUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH;
+                this.serverUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH;
             }
             else
             {
-                serverUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + this.webSocketQueryString;
+                this.serverUri = WS_SSL_PREFIX + host + WEBSOCKET_RAW_PATH + this.webSocketQueryString;
             }
         }
         else
         {
-            serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
+            this.serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
         }
 
-        MqttAsyncClient mqttAsyncClient;
-        try
-        {
-            mqttAsyncClient = new MqttAsyncClient(serverUri, clientId, new MemoryPersistence());
-        }
-        catch (MqttException e)
-        {
-            throw PahoExceptionTranslator.convertToMqttException(e, "Failed to create mqtt client");
-        }
-
-        mqttAsyncClient.setManualAcks(true);
-        MqttConnectOptions connectionOptions = new MqttConnectOptions();
-        connectionOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
-        connectionOptions.setCleanSession(SET_CLEAN_SESSION);
-        connectionOptions.setMqttVersion(MQTT_VERSION);
-        connectionOptions.setUserName(iotHubUserName);
+        MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, clientId);
+        this.connectOptions = new MqttConnectOptions();
+        this.connectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
+        this.connectOptions.setCleanSession(SET_CLEAN_SESSION);
+        this.connectOptions.setMqttVersion(MQTT_VERSION);
+        this.connectOptions.setUserName(iotHubUserName);
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {
@@ -195,7 +191,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             {
                 try
                 {
-                    connectionOptions.setSocketFactory(new Socks5SocketFactory(proxySettings.getHostname(), proxySettings.getPort()));
+                    this.connectOptions.setSocketFactory(new Socks5SocketFactory(proxySettings.getHostname(), proxySettings.getPort()));
                 }
                 catch (UnknownHostException e)
                 {
@@ -204,7 +200,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
             else if (proxySettings.getProxy().type() == Proxy.Type.HTTP)
             {
-                connectionOptions.setSocketFactory(new HttpProxySocketFactory(sslContext.getSocketFactory(), proxySettings));
+                this.connectOptions.setSocketFactory(new HttpProxySocketFactory(sslContext.getSocketFactory(), proxySettings));
             }
             else
             {
@@ -213,34 +209,33 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         else
         {
-            connectionOptions.setSocketFactory(sslContext.getSocketFactory());
+            this.connectOptions.setSocketFactory(sslContext.getSocketFactory());
         }
 
         if (password != null && password.length > 0)
         {
-            connectionOptions.setPassword(password);
+            this.connectOptions.setPassword(password);
         }
 
-        String deviceId = this.config.getDeviceId();
         this.deviceMessaging = new MqttMessaging(
             mqttAsyncClient,
             deviceId,
             this,
-            this.config.getModuleId(),
+            moduleId,
             this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(),
-            connectionOptions);
+            this.connectOptions);
 
         mqttAsyncClient.setCallback(this.deviceMessaging);
 
         this.deviceMethod = new MqttDeviceMethod(
             mqttAsyncClient,
             deviceId,
-            connectionOptions);
+            this.connectOptions);
 
         this.deviceTwin = new MqttDeviceTwin(
             mqttAsyncClient,
             deviceId,
-            connectionOptions);
+            this.connectOptions);
     }
 
     /**
@@ -290,21 +285,20 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             log.debug("Closing MQTT connection");
 
-            try
-            {
-                this.deviceMethod.stop();
-                this.deviceTwin.stop();
-                this.deviceMessaging.stop();
+            this.deviceMethod.stop();
+            this.deviceTwin.stop();
+            this.deviceMessaging.stop();
 
-                this.state = IotHubConnectionStatus.DISCONNECTED;
-                log.debug("Successfully closed MQTT connection");
-            }
-            catch (TransportException e)
-            {
-                this.state = IotHubConnectionStatus.DISCONNECTED;
-                log.error("Exception encountered while closing MQTT connection, connection state is unknown", e);
-                throw e;
-            }
+            this.state = IotHubConnectionStatus.DISCONNECTED;
+            log.debug("Successfully closed MQTT connection");
+
+            // MqttAsyncClient's are unusable after they have been closed. This logic creates a new client
+            // so that if this MqttIotHubConnection layer is opened again, it will have a usable mqttAsyncClient
+            MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, this.clientId);
+            this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
+            mqttAsyncClient.setCallback(this.deviceMessaging);
+            this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
+            this.deviceMethod.setMqttAsyncClient(mqttAsyncClient);
         }
     }
 
@@ -508,5 +502,21 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             this.listener.onMessageReceived(transportMessage, null);
         }
+    }
+
+    private MqttAsyncClient buildMqttAsyncClient(String serverUri, String clientId) throws TransportException
+    {
+        MqttAsyncClient mqttAsyncClient;
+        try
+        {
+            mqttAsyncClient = new MqttAsyncClient(serverUri, clientId, new MemoryPersistence());
+        }
+        catch (MqttException e)
+        {
+            throw PahoExceptionTranslator.convertToMqttException(e, "Failed to create mqtt client");
+        }
+
+        mqttAsyncClient.setManualAcks(true);
+        return mqttAsyncClient;
     }
 }
