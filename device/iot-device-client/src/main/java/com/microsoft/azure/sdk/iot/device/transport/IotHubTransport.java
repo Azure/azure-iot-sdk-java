@@ -963,7 +963,7 @@ public class IotHubTransport implements IotHubListener
                     this.iotHubTransportConnection = new MqttIotHubConnection(this.getDefaultConfig());
                     break;
                 case AMQPS:
-                case AMQPS_WS:asdf
+                case AMQPS_WS:
                     if (this.getDefaultConfig() == null)
                     {
                         // The default config is only null when someone creates a multiplexing client and opens it before
