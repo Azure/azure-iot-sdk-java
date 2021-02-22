@@ -414,19 +414,16 @@ abstract public class Mqtt implements MqttCallback
     }
 
     /**
-     * Attempts to send ack for the provided message. If the message does not have a saved messageId in this layer,
-     * this function shall return false.
+     * Send ack for the provided message.
      * @param messageId The message id to send the ack for
-     * @return true if the ack is sent successfully or false if the message isn't tied to this mqtt client
-     * @throws TransportException if an exception occurs when sending the ack
+     * @throws TransportException If the ack fails to be sent
      */
-    boolean sendMessageAcknowledgement(int messageId) throws TransportException
+    void sendMessageAcknowledgement(int messageId) throws TransportException
     {
         log.trace("Sending mqtt ack for received message with mqtt message id {}", messageId);
         try
         {
             this.mqttAsyncClient.messageArrivedComplete(messageId, QOS);
-            return true;
         }
         catch (MqttException e)
         {
