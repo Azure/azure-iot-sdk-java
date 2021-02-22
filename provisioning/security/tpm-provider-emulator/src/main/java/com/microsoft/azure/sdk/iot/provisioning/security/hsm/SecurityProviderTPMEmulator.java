@@ -9,6 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
+import lombok.extern.slf4j.Slf4j;
 import tss.*;
 import tss.tpm.*;
 
@@ -18,6 +19,7 @@ import java.net.UnknownHostException;
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 
+@Slf4j
 public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 {
     private static final int TPM_PORT = 2321;
@@ -253,6 +255,7 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
 
         if (rc == TPM_RC.SUCCESS)
         {
+            log.info("Successfully read {} from TPM without creating a new one", primaryRole);
             // TODO: Check if the public area of the existing key matches the requested one
             return rpResp.outPublic;
         }
@@ -260,6 +263,8 @@ public class SecurityProviderTPMEmulator extends SecurityProviderTpm
         {
             throw new SecurityProviderException("Unexpected failure {" +  rc.name() + "} of TPM2_ReadPublic for {" + primaryRole + "}");
         }
+
+        log.info("Creating {} since the TPM didn't have one already", primaryRole);
 
         TPMS_SENSITIVE_CREATE sens = new TPMS_SENSITIVE_CREATE(new byte[0], new byte[0]);
         CreatePrimaryResponse cpResp = tpm.CreatePrimary(TPM_HANDLE.from(hierarchy), sens, inPub,
