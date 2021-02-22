@@ -42,8 +42,8 @@ abstract public class Mqtt implements MqttCallback
     private final MqttMessageListener messageListener;
     private final Map<Integer, Message> unacknowledgedSentMessages;
 
-    protected final Object receivedMessagesLock; // lock for making operations on the receivedMessagesQueue atomic
-    protected final Queue<Pair<String, byte[]>> receivedMessages;
+    final Object receivedMessagesLock; // lock for making operations on the receivedMessagesQueue atomic
+    final Queue<Pair<String, byte[]>> receivedMessages;
 
     /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
     final static char MESSAGE_PROPERTY_SEPARATOR = '&';
@@ -55,17 +55,17 @@ abstract public class Mqtt implements MqttCallback
 
     /* The system property keys expected in a message */
     private final static String ABSOLUTE_EXPIRY_TIME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".exp";
-    protected final static String CORRELATION_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cid";
-    protected final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
-    protected final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
-    protected final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
-    protected final static String OUTPUT_NAME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".on";
-    protected final static String CONNECTION_DEVICE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cdid";
-    protected final static String CONNECTION_MODULE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cmid";
-    protected final static String CONTENT_TYPE = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ct";
-    protected final static String CONTENT_ENCODING = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ce";
-    protected final static String CREATION_TIME_UTC = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ctime";
-    protected final static String MQTT_SECURITY_INTERFACE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ifid";
+    final static String CORRELATION_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cid";
+    final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
+    final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
+    final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
+    final static String OUTPUT_NAME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".on";
+    final static String CONNECTION_DEVICE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cdid";
+    final static String CONNECTION_MODULE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cmid";
+    final static String CONTENT_TYPE = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ct";
+    final static String CONTENT_ENCODING = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ce";
+    final static String CREATION_TIME_UTC = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ctime";
+    final static String MQTT_SECURITY_INTERFACE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ifid";
 
     private final static String IOTHUB_ACK = "iothub-ack";
 
@@ -85,7 +85,7 @@ abstract public class Mqtt implements MqttCallback
      * @param messageListener the listener to be called back upon a message arriving
      * @param deviceId the Id of the device this connection belongs to
      */
-    public Mqtt(
+    Mqtt(
         MqttAsyncClient mqttAsyncClient,
         MqttMessageListener messageListener,
         String deviceId,
@@ -112,7 +112,7 @@ abstract public class Mqtt implements MqttCallback
      *
      * @throws TransportException if failed to establish the mqtt connection.
      */
-    protected void connect() throws TransportException
+    void connect() throws TransportException
     {
         synchronized (this.stateLock)
         {
@@ -141,7 +141,7 @@ abstract public class Mqtt implements MqttCallback
      *
      * @throws TransportException if failed to ends the mqtt connection.
      */
-    protected void disconnect() throws TransportException
+    void disconnect() throws TransportException
     {
         try
         {
@@ -175,7 +175,7 @@ abstract public class Mqtt implements MqttCallback
      * @throws TransportException if sas token has expired, if connection hasn't been established yet, or if Paho throws
      * for any other reason
      */
-    protected void publish(String publishTopic, Message message) throws TransportException
+    void publish(String publishTopic, Message message) throws TransportException
     {
         try
         {
@@ -235,7 +235,7 @@ abstract public class Mqtt implements MqttCallback
      * @throws TransportException if failed to subscribe the mqtt topic.
      * @throws IllegalArgumentException if topic is null
      */
-    protected void subscribe(String topic) throws TransportException
+    void subscribe(String topic) throws TransportException
     {
         synchronized (this.stateLock)
         {
@@ -420,7 +420,7 @@ abstract public class Mqtt implements MqttCallback
      * @return true if the ack is sent successfully or false if the message isn't tied to this mqtt client
      * @throws TransportException if an exception occurs when sending the ack
      */
-    protected boolean sendMessageAcknowledgement(int messageId) throws TransportException
+    boolean sendMessageAcknowledgement(int messageId) throws TransportException
     {
         log.trace("Sending mqtt ack for received message with mqtt message id {}", messageId);
         try
@@ -531,17 +531,17 @@ abstract public class Mqtt implements MqttCallback
         }
     }
 
-    protected void setListener(IotHubListener listener)
+    void setListener(IotHubListener listener)
     {
         this.listener = listener;
     }
 
-    protected void setConnectionId(String connectionId)
+    void setConnectionId(String connectionId)
     {
         this.connectionId = connectionId;
     }
 
-    protected void setMqttAsyncClient(MqttAsyncClient mqttAsyncClient)
+    void setMqttAsyncClient(MqttAsyncClient mqttAsyncClient)
     {
         // should never be set to null
         // mqttAsyncClients are single use, so this setter is used when the MqttIotHubConnection layer needs to open a new connection

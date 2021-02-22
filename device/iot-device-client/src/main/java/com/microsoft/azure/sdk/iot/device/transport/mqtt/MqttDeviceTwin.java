@@ -40,7 +40,6 @@ public class MqttDeviceTwin extends Mqtt
     private static final String VERSION = "$version=";
 
     //Placement in $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
-    private static final int RES_TOKEN = 2;
     private static final int STATUS_TOKEN = 3;
     private static final int REQID_TOKEN = 4;
     private static final int VERSION_TOKEN = 4;
@@ -77,7 +76,7 @@ public class MqttDeviceTwin extends Mqtt
         }
     }
 
-    private String buildTopic(final IotHubTransportMessage message) throws TransportException
+    private String buildTopic(final IotHubTransportMessage message)
     {
         StringBuilder topic = new StringBuilder();
         switch (message.getDeviceOperationType())
