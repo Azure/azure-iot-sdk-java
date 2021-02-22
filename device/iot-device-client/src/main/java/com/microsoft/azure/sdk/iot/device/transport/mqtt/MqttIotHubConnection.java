@@ -220,8 +220,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.connectOptions.setPassword(password);
         }
 
+        // these variables are shared between the messaging, twin and method subclients
         Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
         Queue<Pair<String, byte[]>> receivedMessages = new ConcurrentLinkedQueue<>();
+
         this.deviceMessaging = new MqttMessaging(
             mqttAsyncClient,
             deviceId,
