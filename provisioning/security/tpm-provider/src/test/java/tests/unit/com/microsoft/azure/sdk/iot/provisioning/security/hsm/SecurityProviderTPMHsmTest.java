@@ -128,8 +128,6 @@ public class SecurityProviderTPMHsmTest
     @Test
     public void constructorSucceeds() throws Exception
     {
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
 
@@ -173,8 +171,6 @@ public class SecurityProviderTPMHsmTest
     public void constructorThrowsOnReadPublicResponseNull() throws Exception
     {
         //arrange
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         new StrictExpectations()
         {
             {
@@ -192,8 +188,6 @@ public class SecurityProviderTPMHsmTest
     public void constructorThrowsOnResponseCodeNotSuccessNotHandle() throws Exception
     {
         //arrange
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         new StrictExpectations()
         {
             {
@@ -233,8 +227,6 @@ public class SecurityProviderTPMHsmTest
     public void constructorThrowsOnCreatePrimaryResponseNull() throws Exception
     {
         //arrange
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         new StrictExpectations()
         {
             {
@@ -259,8 +251,6 @@ public class SecurityProviderTPMHsmTest
     {
         for (String regId : VALID_REGISTRATION_IDS)
         {
-            clearPersistentExpectations();
-            clearPersistentExpectations();
             createPersistentPrimaryExpectations();
             createPersistentPrimaryExpectations();
 
@@ -309,8 +299,6 @@ public class SecurityProviderTPMHsmTest
     public void getterReturnsRegistrationIdIfFound() throws Exception
     {
         //arrange
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm(VALID_REGISTRATION_IDS[0]);
@@ -326,8 +314,6 @@ public class SecurityProviderTPMHsmTest
     public void getterCallsSuperRegistrationIdIfNotFound() throws Exception
     {
         //arrange
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -354,8 +340,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -424,8 +408,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -447,8 +429,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -476,8 +456,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -511,8 +489,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -550,8 +526,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -591,8 +565,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -650,8 +622,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -712,8 +682,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -792,8 +760,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] testKey = "testKey".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -864,8 +830,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] deviceIdData = "deviceIdData".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -903,8 +867,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] deviceIdData = "deviceIdData".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -925,8 +887,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] deviceIdData = null;
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -944,8 +904,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] deviceIdData = "less<10".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -981,8 +939,6 @@ public class SecurityProviderTPMHsmTest
     {
         //arrange
         final byte[] deviceIdData = "deviceIdData".getBytes();
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -1015,8 +971,6 @@ public class SecurityProviderTPMHsmTest
     public void getEndorsementKeySucceeds() throws Exception
     {
         //arrange
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
@@ -1030,8 +984,6 @@ public class SecurityProviderTPMHsmTest
     public void getStorageRootSucceeds() throws Exception
     {
         //arrange
-        clearPersistentExpectations();
-        clearPersistentExpectations();
         createPersistentPrimaryExpectations();
         createPersistentPrimaryExpectations();
         SecurityProviderTPMHsm securityProviderTPMEmulator = new SecurityProviderTPMHsm();
