@@ -136,7 +136,6 @@ public class SendMessagesCommon extends IntegrationTest
     protected List<MessageAndResult> NORMAL_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> LARGE_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> MULTIPLE_SMALL_MESSAGES_TO_SEND = new ArrayList<>();
-    protected List<MessageAndResult> LARGE_MESSAGES_TO_SEND_AMQPS_WS = new ArrayList<>();
     protected List<MessageAndResult> TCP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> AMQP_CONNECTION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
     protected List<MessageAndResult> AMQP_SESSION_DROP_MESSAGES_TO_SEND = new ArrayList<>();
@@ -469,7 +468,6 @@ public class SendMessagesCommon extends IntegrationTest
         AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND = new ArrayList<>();
         MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND = new ArrayList<>();
         LARGE_MESSAGES_TO_SEND = new ArrayList<>();
-        LARGE_MESSAGES_TO_SEND_AMQPS_WS = new ArrayList<>();
         MULTIPLE_SMALL_MESSAGES_TO_SEND = new ArrayList<>();
 
         MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), IotHubStatusCode.OK_EMPTY);
@@ -537,7 +535,6 @@ public class SendMessagesCommon extends IntegrationTest
 
             NORMAL_MESSAGES_TO_SEND.add(new MessageAndResult(new Message("test message" + UUID.randomUUID() ), IotHubStatusCode.OK_EMPTY));
             LARGE_MESSAGES_TO_SEND.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]), IotHubStatusCode.OK_EMPTY));
-            LARGE_MESSAGES_TO_SEND_AMQPS_WS.add(new MessageAndResult(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE_AMQPS_WS]), IotHubStatusCode.OK_EMPTY));
         }
 
         for (int i = 0 ; i < NUM_SMALL_MESSAGES; i++){
