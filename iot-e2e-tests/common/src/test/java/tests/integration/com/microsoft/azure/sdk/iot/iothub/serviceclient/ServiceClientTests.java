@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
@@ -67,6 +68,11 @@ public class ServiceClientTests extends IntegrationTest
     private static final String content = "abcdefghijklmnopqrstuvwxyz1234567890";
     private static String hostName;
 
+    // AAD auth environment variables
+    private static String tenantId;
+    private static String clientId;
+    private static String clientSecret;
+
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8869;
@@ -97,7 +103,9 @@ public class ServiceClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         invalidCertificateServerConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-
+        tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
+        clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
+        clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         return Arrays.asList(
@@ -172,7 +180,7 @@ public class ServiceClientTests extends IntegrationTest
     }
 
     @Test
-    @Ignore("Test isn't implemented yet due to no RBAC support on hub yet")
+    @Ignore("RBAC authentication isn't supported on hub yet")
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
@@ -227,18 +235,13 @@ public class ServiceClientTests extends IntegrationTest
                         .build();
 
         ServiceClient serviceClient;
-        IotHubConnectionString iotHubConnectionStringObj =
-                IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-
         if (withTokenCredential)
         {
-            throw new UnsupportedOperationException("This test case has not been written yet");
+            serviceClient = buildServiceClientWithTokenCredential(testInstance.protocol, serviceClientOptions);
         }
         else if (withAzureSasCredential)
         {
-            IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-            AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-            serviceClient = new ServiceClient(iotHubConnectionStringObj.getHostName(), sasCredential, testInstance.protocol);
+            serviceClient = buildServiceClientWithAzureSasCredential(testInstance.protocol, serviceClientOptions);
         }
         else
         {
@@ -476,5 +479,26 @@ public class ServiceClientTests extends IntegrationTest
         }
 
         assertTrue(buildExceptionMessage("Expected an exception due to service presenting invalid certificate", hostName), expectedExceptionWasCaught);
+    }
+
+    private static ServiceClient buildServiceClientWithAzureSasCredential(IotHubServiceClientProtocol protocol, ServiceClientOptions options)
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
+        return new ServiceClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, protocol, options);
+    }
+
+    private static ServiceClient buildServiceClientWithTokenCredential(IotHubServiceClientProtocol protocol, ServiceClientOptions options)
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        TokenCredential tokenCredential =
+            new ClientSecretCredentialBuilder()
+                .clientSecret(clientSecret)
+                .clientId(clientId)
+                .tenantId(tenantId)
+                .build();
+
+        return new ServiceClient(iotHubConnectionStringObj.getHostName(), tokenCredential, protocol, options);
     }
 }

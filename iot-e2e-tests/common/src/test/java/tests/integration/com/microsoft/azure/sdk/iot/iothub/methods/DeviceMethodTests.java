@@ -14,24 +14,26 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -73,16 +75,17 @@ public class DeviceMethodTests extends DeviceMethodCommon
     @StandardTierHubOnlyTest
     public void invokeMethodSucceedWithAzureSasCredential() throws Exception
     {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
+        this.testInstance.methodServiceClient = buildDeviceMethodClientWithAzureSasCredential();
+        super.openDeviceClientAndSubscribeToMethods();
+        super.invokeMethodSucceed();
+    }
 
-        this.testInstance.methodServiceClient =
-            new DeviceMethod(
-                iotHubConnectionStringObj.getHostName(),
-                sasCredential,
-                DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-
+    @Ignore("RBAC authentication isn't supported on hub yet")
+    @Test
+    @StandardTierHubOnlyTest
+    public void invokeMethodSucceedWithTokenCredential() throws Exception
+    {
+        this.testInstance.methodServiceClient = buildDeviceMethodClientWithTokenCredential();
         super.openDeviceClientAndSubscribeToMethods();
         super.invokeMethodSucceed();
     }

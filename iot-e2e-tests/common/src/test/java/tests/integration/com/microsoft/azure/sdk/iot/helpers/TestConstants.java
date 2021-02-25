@@ -12,4 +12,7 @@ public class TestConstants
     public static String UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME = "IOTHUB_CONN_STRING_INVALIDCERT";
     public static String IS_BASIC_TIER_HUB_ENV_VAR_NAME = "IS_BASIC_TIER_HUB";
     public static String IS_PULL_REQUEST = "IS_PULL_REQUEST";
+    public static String IOTHUB_TENANT_ID_ENV_VAR_NAME = "IOTHUB_TENANT_ID";
+    public static String IOTHUB_CLIENT_ID_ENV_VAR_NAME = "IOTHUB_CLIENT_ID";
+    public static String IOTHUB_CLIENT_SECRET_ENV_VAR_NAME = "IOTHUB_CLIENT_SECRET";
 }

@@ -6,11 +6,24 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
+import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.BaseDevice;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.Module;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
@@ -18,8 +31,15 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionString;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -50,10 +70,18 @@ public class DeviceMethodCommon extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
+        tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
+        clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
+        clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
         return inputsCommon();
     }
 
     protected static String iotHubConnectionString = "";
+
+    // AAD auth environment variables
+    private static String tenantId;
+    private static String clientId;
+    private static String clientSecret;
 
     protected static final Long RESPONSE_TIMEOUT = TimeUnit.SECONDS.toSeconds(200);
     protected static final Long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toSeconds(5);
@@ -366,5 +394,29 @@ public class DeviceMethodCommon extends IntegrationTest
     protected String getModuleConnectionString(Module module) throws IotHubException, IOException
     {
         return DeviceConnectionString.get(iotHubConnectionString, testInstance.registryManager.getDevice(module.getDeviceId()), module);
+    }
+
+    protected static DeviceMethod buildDeviceMethodClientWithAzureSasCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
+        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        return new DeviceMethod(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
+    }
+
+    protected static DeviceMethod buildDeviceMethodClientWithTokenCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        TokenCredential tokenCredential =
+            new ClientSecretCredentialBuilder()
+                .clientSecret(clientSecret)
+                .clientId(clientId)
+                .tenantId(tenantId)
+                .build();
+
+        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+
+        return new DeviceMethod(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 }
