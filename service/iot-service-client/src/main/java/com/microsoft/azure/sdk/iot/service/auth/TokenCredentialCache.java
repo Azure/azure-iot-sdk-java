@@ -33,17 +33,14 @@ public class TokenCredentialCache
     }
 
     /**
-     * Get a valid AAD authentication token. This may be the same as a previously returned token if it is not near expiration time yet.
+     * Get a valid AAD authentication token. This may be the same as a previously returned token if it is not near
+     * expiration time yet. If a token is less than or equal to 9 minutes away from expiring or is expired already, the
+     * token will be renewed. Otherwise, a cached token will be returned.
      * @return a valid AAD authentication token.
      */
     public AccessToken getAccessToken()
     {
-        if (this.accessToken == null)
-        {
-            this.accessToken = tokenCredential.getToken(new TokenRequestContext()).block();
-        }
-
-        if (isAccessTokenCloseToExpiry(this.accessToken))
+        if (this.accessToken == null || isAccessTokenCloseToExpiry(this.accessToken))
         {
             this.accessToken = tokenCredential.getToken(new TokenRequestContext()).block();
         }
@@ -62,11 +59,6 @@ public class TokenCredentialCache
     private static boolean isAccessTokenCloseToExpiry(AccessToken accessToken)
     {
         Duration remainingTimeToLive = Duration.between(Instant.now(), accessToken.getExpiresAt().toInstant());
-        if (remainingTimeToLive.toMinutes() <= MINUTES_BEFORE_PROACTIVE_RENEWAL)
-        {
-            return true;
-        }
-
-        return false;
+        return remainingTimeToLive.toMinutes() <= MINUTES_BEFORE_PROACTIVE_RENEWAL;
     }
 }

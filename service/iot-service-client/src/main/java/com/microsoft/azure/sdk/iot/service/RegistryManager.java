@@ -178,7 +178,7 @@ public class RegistryManager
      */
     public RegistryManager(String hostName, TokenCredential credential, RegistryManagerOptions options)
     {
-        Objects.requireNonNull(credential, "credentialCache cannot be null");
+        Objects.requireNonNull(credential, "credential cannot be null");
         Objects.requireNonNull(options, "options cannot be null");
         if (Tools.isNullOrEmpty(hostName))
         {
