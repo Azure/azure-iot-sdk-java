@@ -233,52 +233,6 @@ public class DeviceOperationsTest
                 0);
     }
 
-    /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
-    @Test (expected = IOException.class)
-    public void invokeThrowOnSasTokenNullFailed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                iotHubServiceSasToken.toString();
-                result = null;
-            }
-        };
-
-        //act
-        HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
-    }
-
-    /* Tests_SRS_DEVICE_OPERATIONS_21_007: [If the SASToken is null or empty, the request shall throw IOException.] */
-    @Test (expected = IOException.class)
-    public void invokeThrowOnSasTokenEmptyFailed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                iotHubServiceSasToken.toString();
-                result = "";
-            }
-        };
-
-        //act
-        HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
-    }
-
     /* Tests_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
     @Test (expected = IOException.class)
     public void invokeThrowOnHttpRequestFailed(@Mocked IotHubServiceSasToken iotHubServiceSasToken) throws Exception
@@ -619,7 +573,7 @@ public class DeviceOperationsTest
                 httpRequest.setReadTimeoutMillis(DEFAULT_HTTP_TIMEOUT_MS);
                 times = 1;
                 httpRequest.setHeaderField(anyString, anyString);
-                times = 4;
+                times = 6;
                 httpRequest.send();
                 times = 1;
                 IotHubExceptionManager.httpResponseVerification(sendResponse);
@@ -690,7 +644,7 @@ public class DeviceOperationsTest
                 httpRequest.setReadTimeoutMillis(timeoutInMs + DEFAULT_HTTP_TIMEOUT_MS);
                 times = 1;
                 httpRequest.setHeaderField(anyString, anyString);
-                times = 4;
+                times = 6;
                 httpRequest.send();
                 times = 1;
                 IotHubExceptionManager.httpResponseVerification(sendResponse);
