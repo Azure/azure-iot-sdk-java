@@ -62,7 +62,7 @@ public class TokenCredentialCache
     private static boolean isAccessTokenCloseToExpiry(AccessToken accessToken)
     {
         Duration remainingTimeToLive = Duration.between(Instant.now(), accessToken.getExpiresAt().toInstant());
-        if (remainingTimeToLive.toMinutes() < MINUTES_BEFORE_PROACTIVE_RENEWAL)
+        if (remainingTimeToLive.toMinutes() <= MINUTES_BEFORE_PROACTIVE_RENEWAL)
         {
             return true;
         }
