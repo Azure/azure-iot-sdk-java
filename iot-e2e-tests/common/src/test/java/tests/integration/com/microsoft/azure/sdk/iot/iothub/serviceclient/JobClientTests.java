@@ -8,7 +8,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -80,11 +79,6 @@ public class JobClientTests extends IntegrationTest
     private static JobClient jobClient;
     private static RegistryManager registryManager;
 
-    // AAD auth environment variables
-    private static String tenantId;
-    private static String clientId;
-    private static String clientSecret;
-
     private static final String STANDARD_PROPERTY_HOMETEMP = "HomeTemp(F)";
 
     private static final int MAX_DEVICES = 1;
@@ -112,10 +106,6 @@ public class JobClientTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-
-        tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
-        clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
-        clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
 
         jobClient = new JobClient(iotHubConnectionString);
         registryManager = new RegistryManager(
@@ -725,13 +715,7 @@ public class JobClientTests extends IntegrationTest
     private static JobClient buildJobClientWithTokenCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential =
-            new ClientSecretCredentialBuilder()
-                .clientSecret(clientSecret)
-                .clientId(clientId)
-                .tenantId(tenantId)
-                .build();
-
+        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
         JobClientOptions options = JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new JobClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }

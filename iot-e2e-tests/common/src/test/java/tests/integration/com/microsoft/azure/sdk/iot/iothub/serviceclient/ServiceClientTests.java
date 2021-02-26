@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FeedbackReceiver;
@@ -22,7 +21,6 @@ import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
@@ -51,7 +49,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static junit.framework.TestCase.fail;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
 /**
@@ -67,11 +66,6 @@ public class ServiceClientTests extends IntegrationTest
     private static final String deviceIdPrefix = "java-service-client-e2e-test";
     private static final String content = "abcdefghijklmnopqrstuvwxyz1234567890";
     private static String hostName;
-
-    // AAD auth environment variables
-    private static String tenantId;
-    private static String clientId;
-    private static String clientSecret;
 
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
@@ -103,9 +97,6 @@ public class ServiceClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         invalidCertificateServerConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.UNTRUSTWORTHY_IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
-        clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
-        clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         return Arrays.asList(
@@ -492,13 +483,7 @@ public class ServiceClientTests extends IntegrationTest
     private static ServiceClient buildServiceClientWithTokenCredential(IotHubServiceClientProtocol protocol, ServiceClientOptions options)
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential =
-            new ClientSecretCredentialBuilder()
-                .clientSecret(clientSecret)
-                .clientId(clientId)
-                .tenantId(tenantId)
-                .build();
-
+        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
         return new ServiceClient(iotHubConnectionStringObj.getHostName(), tokenCredential, protocol, options);
     }
 }

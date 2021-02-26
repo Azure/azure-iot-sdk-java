@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.identity.ClientSecretCredentialBuilder;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -79,10 +78,6 @@ public class DeviceTwinCommon extends IntegrationTest
         IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
-        clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
-        clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
-
         X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
         String publicKeyCert = certificateGenerator.getPublicCertificate();
         String privateKey = certificateGenerator.getPrivateKey();
@@ -148,11 +143,6 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static final Integer PAGE_SIZE = 2;
 
     protected static String iotHubConnectionString = "";
-
-    // AAD auth environment variables
-    private static String tenantId;
-    private static String clientId;
-    private static String clientSecret;
 
     // Constants used in for Testing
     protected static final String PROPERTY_KEY = "Key";
@@ -784,12 +774,7 @@ public class DeviceTwinCommon extends IntegrationTest
     protected static DeviceTwin buildDeviceTwinClientWithTokenCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential =
-            new ClientSecretCredentialBuilder()
-                .clientSecret(clientSecret)
-                .clientId(clientId)
-                .tenantId(tenantId)
-                .build();
+        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
         DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new DeviceTwin(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }

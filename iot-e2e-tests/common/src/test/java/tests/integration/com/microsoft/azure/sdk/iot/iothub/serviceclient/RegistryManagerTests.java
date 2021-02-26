@@ -8,7 +8,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.Configuration;
 import com.microsoft.azure.sdk.iot.service.ConfigurationContent;
@@ -61,11 +60,6 @@ public class RegistryManagerTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
 
-    // AAD auth environment variables
-    private static String tenantId;
-    private static String clientId;
-    private static String clientSecret;
-
     private static final String deviceIdPrefix = "java-crud-e2e-test-";
     private static final String moduleIdPrefix = "java-crud-module-e2e-test-";
     private static final String configIdPrefix = "java-crud-adm-e2e-test-";
@@ -83,9 +77,7 @@ public class RegistryManagerTests extends IntegrationTest
     public static void setUp() throws IOException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
-        tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
-        clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
-        clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
+
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
@@ -687,15 +679,8 @@ public class RegistryManagerTests extends IntegrationTest
     private static RegistryManager buildRegistryManagerWithTokenCredential()
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential =
-            new ClientSecretCredentialBuilder()
-                .clientSecret(clientSecret)
-                .clientId(clientId)
-                .tenantId(tenantId)
-                .build();
-
+        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
         RegistryManagerOptions options = RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-
         return new RegistryManager(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 }
