@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
@@ -47,7 +48,7 @@ public class QueryCollection
 
     private IotHubConnectionString iotHubConnectionString;
     private AzureSasCredential azureSasCredential;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
 
     private Proxy proxy;
 
@@ -224,7 +225,7 @@ public class QueryCollection
             String query,
             int pageSize,
             QueryType requestQueryType,
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             URL url,
             HttpMethod httpMethod,
             int httpConnectTimeout,
@@ -243,7 +244,7 @@ public class QueryCollection
         this.url = url;
         this.isSqlQuery = false;
         this.isInitialQuery = true;
-        this.credential = credential;
+        this.credentialCache = credentialCache;
     }
 
     QueryCollection(
@@ -297,9 +298,9 @@ public class QueryCollection
         }
 
         String authorizationToken;
-        if (this.credential != null)
+        if (this.credentialCache != null)
         {
-            authorizationToken = this.credential.getToken(new TokenRequestContext()).block().getToken();
+            authorizationToken = this.credentialCache.getAccessToken().getToken();
         }
         else if (this.azureSasCredential != null)
         {

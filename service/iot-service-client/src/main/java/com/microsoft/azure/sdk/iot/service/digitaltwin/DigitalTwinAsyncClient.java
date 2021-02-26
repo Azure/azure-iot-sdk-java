@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.BearerTokenProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.SasTokenProvider;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceClientBearerTokenCredentialProvider;
@@ -134,7 +135,8 @@ public class DigitalTwinAsyncClient {
         Objects.requireNonNull(options);
         final SimpleModule stringModule = new SimpleModule("String Serializer");
         stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
-        BearerTokenProvider bearerTokenProvider = () -> credential.getToken(new TokenRequestContext()).block().getToken();
+        TokenCredentialCache tokenCredentialCache = new TokenCredentialCache(credential);
+        BearerTokenProvider bearerTokenProvider = () -> tokenCredentialCache.getAccessToken().getToken();
 
         JacksonAdapter adapter = new JacksonAdapter();
         adapter.serializer().registerModule(stringModule);

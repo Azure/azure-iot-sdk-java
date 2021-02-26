@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -46,7 +47,7 @@ public class Query
 
     private IotHubConnectionString iotHubConnectionString;
     private AzureSasCredential azureSasCredential;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private URL url;
     private HttpMethod httpMethod;
 
@@ -128,7 +129,7 @@ public class Query
         this.requestContinuationToken = continuationToken;
 
             sendQueryRequest(
-                    this.credential,
+                    this.credentialCache,
                     this.azureSasCredential,
                     this.iotHubConnectionString,
                     this.url,
@@ -336,7 +337,7 @@ public class Query
     /**
      * Sends request for the query to the IotHub.
      *
-     * @param credential The RBAC authorization token provider. May be null if azureSasCredential or iotHubConnectionString is not.
+     * @param credentialCache The RBAC authorization token provider. May be null if azureSasCredential or iotHubConnectionString is not.
      * @param azureSasCredential The SAS authorization token provider. May be null if credential or iotHubConnectionString is not.
      * @param iotHubConnectionString The iot hub connection string that SAS tokens will be derived from. May be null if azureSasCredential or credential is not.
      * @param url URL to Query on.
@@ -349,7 +350,7 @@ public class Query
      * @throws IotHubException If HTTP response other then status ok is received.
      */
     public QueryResponse sendQueryRequest(
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             AzureSasCredential azureSasCredential,
             IotHubConnectionString iotHubConnectionString,
             URL url,
@@ -362,7 +363,7 @@ public class Query
         this.url = url;
         this.httpMethod = method;
         this.azureSasCredential = azureSasCredential;
-        this.credential = credential;
+        this.credentialCache = credentialCache;
         this.iotHubConnectionString = iotHubConnectionString;
 
         this.httpConnectTimeout = httpConnectTimeout;
@@ -392,9 +393,9 @@ public class Query
         }
 
         String authorizationToken;
-        if (credential != null)
+        if (credentialCache != null)
         {
-            authorizationToken = credential.getToken(new TokenRequestContext()).block().getToken();
+            authorizationToken = credentialCache.getAccessToken().getToken();
         }
         else if (azureSasCredential != null)
         {
