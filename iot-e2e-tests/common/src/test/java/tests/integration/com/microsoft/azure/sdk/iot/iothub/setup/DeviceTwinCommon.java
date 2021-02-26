@@ -5,6 +5,8 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.google.gson.JsonParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -19,9 +21,12 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
@@ -755,5 +760,22 @@ public class DeviceTwinCommon extends IntegrationTest
         assertEquals(TwinConnectionState.CONNECTED.toString(), deviceUnderTest.sCDeviceForTwin.getConnectionState());
         waitAndVerifyTwinStatusBecomesSuccess();
         waitAndVerifyDesiredPropertyCallback(PROPERTY_VALUE_UPDATE, true);
+    }
+
+    protected static DeviceTwin buildDeviceTwinClientWithAzureSasCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
+        DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        return new DeviceTwin(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
+    }
+
+    protected static DeviceTwin buildDeviceTwinClientWithTokenCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
+        DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        return new DeviceTwin(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 }

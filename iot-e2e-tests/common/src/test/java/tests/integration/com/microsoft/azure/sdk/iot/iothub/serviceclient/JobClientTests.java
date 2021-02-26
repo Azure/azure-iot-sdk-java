@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
@@ -16,26 +17,51 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
-import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
-import com.microsoft.azure.sdk.iot.service.devicetwin.*;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
+import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
+import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import lombok.extern.slf4j.Slf4j;
 import net.jcip.annotations.NotThreadSafe;
-import org.junit.*;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
@@ -372,14 +398,15 @@ public class JobClientTests extends IntegrationTest
     public void scheduleDeviceMethodWithAzureSasCredentialSucceed() throws InterruptedException, IOException, IotHubException
     {
         // Arrange
-        IotHubConnectionString iotHubConnectionStringObj =
-            IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        scheduleDeviceMethod(buildJobClientWithAzureSasCredential());
+    }
 
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-        JobClient jobClientWithSasCredential = new JobClient(iotHubConnectionStringObj.getHostName(), sasCredential);
-
-        scheduleDeviceMethod(jobClientWithSasCredential);
+    @Ignore("RBAC authentication isn't supported on hub yet")
+    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
+    public void scheduleDeviceMethodWithTokenCredentialSucceed() throws InterruptedException, IOException, IotHubException
+    {
+        // Arrange
+        scheduleDeviceMethod(buildJobClientWithTokenCredential());
     }
 
     @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
@@ -674,5 +701,22 @@ public class JobClientTests extends IntegrationTest
             pendingJobIds.append(jobId).append(" ");
         }
         return pendingJobIds.toString();
+    }
+
+    private static JobClient buildJobClientWithAzureSasCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
+        AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
+        JobClientOptions options = JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        return new JobClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
+    }
+
+    private static JobClient buildJobClientWithTokenCredential()
+    {
+        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
+        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
+        JobClientOptions options = JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+        return new JobClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 }

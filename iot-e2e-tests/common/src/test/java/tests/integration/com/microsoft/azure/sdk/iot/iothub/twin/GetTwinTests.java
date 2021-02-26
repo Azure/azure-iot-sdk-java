@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -58,20 +59,22 @@ public class GetTwinTests extends DeviceTwinCommon
         super.testGetDeviceTwin();
     }
 
+    @Ignore("RBAC authentication isn't supported on hub yet")
     @Test
     @StandardTierHubOnlyTest
     public void testGetDeviceTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         super.setUpNewDeviceAndModule();
+        testInstance.twinServiceClient = buildDeviceTwinClientWithAzureSasCredential();
+        super.testGetDeviceTwin();
+    }
 
-        IotHubConnectionString iotHubConnectionStringObj =
-                IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-
-        testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionStringObj.getHostName(), sasCredential);
-
+    @Test
+    @StandardTierHubOnlyTest
+    public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    {
+        super.setUpNewDeviceAndModule();
+        testInstance.twinServiceClient = buildDeviceTwinClientWithTokenCredential();
         super.testGetDeviceTwin();
     }
 

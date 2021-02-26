@@ -5,6 +5,8 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
+import com.azure.core.credential.TokenCredential;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.SymmetricKeyParser;
@@ -351,5 +353,18 @@ public class Tools
     public static String getStackTraceFromThrowable(Throwable throwable)
     {
         return ExceptionUtils.getStackTrace(throwable);
+    }
+
+    public static TokenCredential buildTokenCredentialFromEnvironment()
+    {
+        String tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
+        String clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
+        String clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
+
+        return new ClientSecretCredentialBuilder()
+            .clientSecret(clientSecret)
+            .clientId(clientId)
+            .tenantId(tenantId)
+            .build();
     }
 }
