@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -37,7 +38,7 @@ public class JobClient
     private final static byte[] EMPTY_JSON = "{}".getBytes();
 
     private String hostName;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
     private JobClientOptions options;
@@ -130,7 +131,7 @@ public class JobClient
         }
 
         this.hostName = hostName;
-        this.credential = credential;
+        this.credentialCache = new TokenCredentialCache(credential);
         this.options = options;
     }
 
@@ -505,7 +506,7 @@ public class JobClient
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
         deviceJobQuery.sendQueryRequest(
-            this.credential,
+            this.credentialCache,
             this.azureSasCredential,
             this.iotHubConnectionString,
             IotHubConnectionString.getUrlTwinQuery(this.hostName),
@@ -602,7 +603,7 @@ public class JobClient
         Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
 
         jobResponseQuery.sendQueryRequest(
-            this.credential,
+            this.credentialCache,
             this.azureSasCredential,
             this.iotHubConnectionString,
             IotHubConnectionString.getUrlQuery(this.hostName, jobTypeString, jobStatusString),
@@ -639,9 +640,9 @@ public class JobClient
         // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
         // an AzureSasCredential instance, or just the connection string. The sas token can be retrieved from the non-null
         // one of the three options.
-        if (this.credential != null)
+        if (this.credentialCache != null)
         {
-            return this.credential.getToken(new TokenRequestContext()).block().getToken();
+            return this.credentialCache.getAccessToken().getToken();
         }
         else if (this.azureSasCredential != null)
         {

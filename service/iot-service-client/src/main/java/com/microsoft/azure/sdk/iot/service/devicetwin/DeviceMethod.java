@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -32,7 +33,7 @@ public class DeviceMethod
 
     private DeviceMethodClientOptions options;
     private String hostName;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
 
@@ -153,7 +154,7 @@ public class DeviceMethod
         }
 
         this.options = options;
-        this.credential = credential;
+        this.credentialCache = new TokenCredentialCache(credential);
         this.hostName = hostName;
     }
 
@@ -349,9 +350,9 @@ public class DeviceMethod
         }
 
         Job job;
-        if (this.credential != null)
+        if (this.credentialCache != null)
         {
-            job = new Job(this.hostName, this.credential);
+            job = new Job(this.hostName, this.credentialCache.getTokenCredential());
         }
         else if (this.azureSasCredential != null)
         {
@@ -375,9 +376,9 @@ public class DeviceMethod
         // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
         // an AzureSasCredential instance, or just the connection string. The sas token can be retrieved from the non-null
         // one of the three options.
-        if (this.credential != null)
+        if (this.credentialCache != null)
         {
-            return this.credential.getToken(new TokenRequestContext()).block().getToken();
+            return this.credentialCache.getAccessToken().getToken();
         }
         else if (this.azureSasCredential != null)
         {

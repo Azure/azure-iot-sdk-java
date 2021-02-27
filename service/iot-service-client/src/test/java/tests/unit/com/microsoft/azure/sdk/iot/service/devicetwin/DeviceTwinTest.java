@@ -200,7 +200,7 @@ public class DeviceTwinTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 4;
+                times = 6;
                 mockedHttpRequest.send();
                 times = 1;
                 TwinState.createFromTwinJson((String)any);
@@ -265,7 +265,7 @@ public class DeviceTwinTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 4;
+                times = 6;
                 mockedHttpRequest.send();
                 times = 1;
                 TwinState.createFromTwinJson((String)any);
@@ -557,7 +557,7 @@ public class DeviceTwinTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 4;
+                times = 6;
                 mockedHttpRequest.send();
                 times = 1;
             }
@@ -677,7 +677,7 @@ public class DeviceTwinTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 4;
+                times = 6;
                 mockedHttpRequest.send();
                 times = 1;
             }
@@ -722,7 +722,7 @@ public class DeviceTwinTest
                 mockedHttpRequest.setReadTimeoutMillis(anyInt);
                 times = 1;
                 mockedHttpRequest.setHeaderField(anyString, anyString);
-                times = 4;
+                times = 6;
                 mockedHttpRequest.send();
                 times = 1;
             }
@@ -1214,7 +1214,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.toString();
                 result = connectionString;
-                Deencapsulation.newInstance(Job.class, new Class[]{String.class, TokenCredential.class}, anyString, any);
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = mockedJob;
                 times = 1;
             }
@@ -1244,7 +1244,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.toString();
                 result = connectionString;
-                Deencapsulation.newInstance(Job.class, new Class[]{String.class, TokenCredential.class}, anyString, any);
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = new IOException();
             }
         };
@@ -1270,7 +1270,7 @@ public class DeviceTwinTest
             {
                 mockedConnectionString.toString();
                 result = connectionString;
-                Deencapsulation.newInstance(Job.class, new Class[]{String.class, TokenCredential.class}, anyString, any);
+                Deencapsulation.newInstance(Job.class, new Class[]{String.class}, anyString);
                 result = mockedJob;
             }
         };

@@ -8,6 +8,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -57,6 +58,9 @@ public class QueryCollectionTest
 
     @Mocked
     DeviceOperations mockDeviceOperations;
+
+    @Mocked
+    IotHubServiceSasToken mockIotHubServiceSasToken;
 
     private static final String expectedRequestContinuationToken = "someContinuationToken";
     private static final String expectedResponseContinuationToken = "someNewContinuationToken";
