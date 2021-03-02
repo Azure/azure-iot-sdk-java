@@ -31,4 +31,9 @@ public class IotHubReactor
         this.reactor.process();
         this.reactor.free();
     }
+
+    public void free()
+    {
+        this.reactor.free();
+    }
 }
