@@ -273,16 +273,14 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (InterruptedException e)
             {
-                this.executorServicesCleanup();
                 throw new TransportException("Interrupted while closing proton reactor", e);
             }
-
-            this.executorServicesCleanup();
 
             log.trace("Amqp connection closed successfully");
         }
         finally
         {
+            this.executorServicesCleanup();
             this.reactor.free();
             this.state = IotHubConnectionStatus.DISCONNECTED;
         }
