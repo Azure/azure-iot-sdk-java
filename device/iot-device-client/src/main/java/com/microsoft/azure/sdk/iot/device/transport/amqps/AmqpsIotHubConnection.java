@@ -262,23 +262,30 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void close() throws TransportException
     {
         log.debug("Shutting down amqp layer...");
-        closeAsync();
-
         try
         {
-            log.trace("Waiting for reactor to close...");
-            closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
-        }
-        catch (InterruptedException e)
-        {
+            closeAsync();
+
+            try
+            {
+                log.trace("Waiting for reactor to close...");
+                closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
+            }
+            catch (InterruptedException e)
+            {
+                this.executorServicesCleanup();
+                throw new TransportException("Interrupted while closing proton reactor", e);
+            }
+
             this.executorServicesCleanup();
-            throw new TransportException("Interrupted while closing proton reactor", e);
+
+            log.trace("Amqp connection closed successfully");
         }
-
-        this.executorServicesCleanup();
-
-        log.trace("Amqp connection closed successfully");
-        this.state = IotHubConnectionStatus.DISCONNECTED;
+        finally
+        {
+            this.reactor.free();
+            this.state = IotHubConnectionStatus.DISCONNECTED;
+        }
     }
 
     @Override
