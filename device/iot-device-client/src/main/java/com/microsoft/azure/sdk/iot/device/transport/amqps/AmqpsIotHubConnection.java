@@ -280,6 +280,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
         finally
         {
+            // always clean up the executor service, free the reactor and set the state as DISCONNECTED even when the close
+            // isn't successful. Failing to free the reactor in particular leaks network resources
             this.executorServicesCleanup();
             this.reactor.free();
             this.state = IotHubConnectionStatus.DISCONNECTED;
