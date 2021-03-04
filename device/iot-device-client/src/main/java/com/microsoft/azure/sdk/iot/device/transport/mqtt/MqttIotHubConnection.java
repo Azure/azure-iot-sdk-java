@@ -54,7 +54,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private final DeviceClientConfig config;
     private IotHubConnectionStatus state = IotHubConnectionStatus.DISCONNECTED;
     private IotHubListener listener;
-    private final MqttConnectOptions connectOptions;
     private final String clientId;
     private final String serverUri;
 
@@ -182,11 +181,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
 
         MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, clientId);
-        this.connectOptions = new MqttConnectOptions();
-        this.connectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
-        this.connectOptions.setCleanSession(SET_CLEAN_SESSION);
-        this.connectOptions.setMqttVersion(MQTT_VERSION);
-        this.connectOptions.setUserName(iotHubUserName);
+        MqttConnectOptions connectOptions = new MqttConnectOptions();
+        connectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
+        connectOptions.setCleanSession(SET_CLEAN_SESSION);
+        connectOptions.setMqttVersion(MQTT_VERSION);
+        connectOptions.setUserName(iotHubUserName);
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {
@@ -194,7 +193,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             {
                 try
                 {
-                    this.connectOptions.setSocketFactory(new Socks5SocketFactory(proxySettings.getHostname(), proxySettings.getPort()));
+                    connectOptions.setSocketFactory(new Socks5SocketFactory(proxySettings.getHostname(), proxySettings.getPort()));
                 }
                 catch (UnknownHostException e)
                 {
@@ -203,7 +202,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
             else if (proxySettings.getProxy().type() == Proxy.Type.HTTP)
             {
-                this.connectOptions.setSocketFactory(new HttpProxySocketFactory(sslContext.getSocketFactory(), proxySettings));
+                connectOptions.setSocketFactory(new HttpProxySocketFactory(sslContext.getSocketFactory(), proxySettings));
             }
             else
             {
@@ -212,12 +211,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         else
         {
-            this.connectOptions.setSocketFactory(sslContext.getSocketFactory());
+            connectOptions.setSocketFactory(sslContext.getSocketFactory());
         }
 
         if (password != null && password.length > 0)
         {
-            this.connectOptions.setPassword(password);
+            connectOptions.setPassword(password);
         }
 
         // these variables are shared between the messaging, twin and method subclients
@@ -230,7 +229,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this,
             moduleId,
             this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(),
-            this.connectOptions,
+                connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
 
@@ -239,14 +238,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         this.deviceMethod = new MqttDeviceMethod(
             mqttAsyncClient,
             deviceId,
-            this.connectOptions,
+                connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
 
         this.deviceTwin = new MqttDeviceTwin(
             mqttAsyncClient,
             deviceId,
-            this.connectOptions,
+                connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
     }
