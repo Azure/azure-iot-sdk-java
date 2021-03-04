@@ -329,7 +329,7 @@ public class MethodParser
     {
         if (payload == null)
         {
-            return new JsonNull();
+            return JsonNull.INSTANCE;
         }
         else if (payload instanceof JsonElement)
         {

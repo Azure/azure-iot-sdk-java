@@ -59,6 +59,7 @@ public class RegisterManager
     private static final String VERSION_TAG = "version";
     @Expose
     @SerializedName(VERSION_TAG)
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected Integer version = null;
 
     /**
@@ -95,6 +96,7 @@ public class RegisterManager
     private static final String CONNECTION_STATE_TAG = "connectionState";
     @Expose
     @SerializedName(CONNECTION_STATE_TAG)
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected TwinConnectionState connectionState = null;
 
     /**
