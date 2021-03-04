@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache.IOTHUB_PUBLIC_SCOPE;
+
 /**
  * Every token based authentication over AMQP requires a CBS session with a sender and receiver link. This
  * class defines the sender link which proactively sends renewed sas tokens to keep the device sessions authenticated.
@@ -113,8 +115,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
 
         if (credential != null)
         {
-            //TODO need more context on this TokenRequestContext object, and what we are expected to give it
-            TokenRequestContext context = new TokenRequestContext();
+            TokenRequestContext context = new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE);
             this.currentAccessToken = credential.getToken(context).block();
             userProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
             userProperties.put(PUT_TOKEN_TYPE, JWT);
