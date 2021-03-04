@@ -395,7 +395,7 @@ public class Query
         String authorizationToken;
         if (credentialCache != null)
         {
-            authorizationToken = credentialCache.getAccessToken().getToken();
+            authorizationToken = this.credentialCache.getTokenString();
         }
         else if (azureSasCredential != null)
         {

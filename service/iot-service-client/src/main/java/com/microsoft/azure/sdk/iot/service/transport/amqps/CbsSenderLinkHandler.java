@@ -108,41 +108,38 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
         properties.setReplyTo(CBS_REPLY);
         outgoingMessage.setProperties(properties);
 
-        Map<String, Object> userProperties = new HashMap<>();
-
-
-        userProperties.put(PUT_TOKEN_OPERATION, PUT_TOKEN_OPERATION_VALUE);
+        Map<String, Object> applicationProperties = new HashMap<>();
+        applicationProperties.put(PUT_TOKEN_OPERATION, PUT_TOKEN_OPERATION_VALUE);
 
         if (credential != null)
         {
             TokenRequestContext context = new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE);
             this.currentAccessToken = credential.getToken(context).block();
-            userProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
-            userProperties.put(PUT_TOKEN_TYPE, JWT);
-            Section section = new AmqpValue(this.currentAccessToken.getToken());
+            applicationProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
+            applicationProperties.put(PUT_TOKEN_TYPE, JWT);
+            Section section = new AmqpValue("Bearer " + this.currentAccessToken.getToken());
             outgoingMessage.setBody(section);
         }
         else if (this.sasTokenProvider != null)
         {
             String sasToken = this.sasTokenProvider.getSignature();
             this.currentAccessToken = getAccessTokenFromSasToken(sasToken);
-            userProperties.put(PUT_TOKEN_TYPE, SAS_TOKEN);
+            applicationProperties.put(PUT_TOKEN_TYPE, SAS_TOKEN);
             Section section = new AmqpValue(sasToken);
             outgoingMessage.setBody(section);
         }
         else
         {
             this.currentAccessToken = getAccessTokenFromSasToken(this.sasToken);
-            userProperties.put(PUT_TOKEN_TYPE, SAS_TOKEN);
+            applicationProperties.put(PUT_TOKEN_TYPE, SAS_TOKEN);
             Section section = new AmqpValue(this.sasToken);
             outgoingMessage.setBody(section);
         }
 
 
-        userProperties.put(PUT_TOKEN_AUDIENCE, this.senderLink.getSession().getConnection().getHostname());
+        applicationProperties.put(PUT_TOKEN_AUDIENCE, this.senderLink.getSession().getConnection().getHostname());
 
-        ApplicationProperties applicationProperties = new ApplicationProperties(userProperties);
-        outgoingMessage.setApplicationProperties(applicationProperties);
+        outgoingMessage.setApplicationProperties(new ApplicationProperties(applicationProperties));
 
         return this.sendMessageAndGetDeliveryTag(outgoingMessage);
     }

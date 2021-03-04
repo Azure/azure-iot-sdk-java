@@ -136,7 +136,7 @@ public class DigitalTwinAsyncClient {
         final SimpleModule stringModule = new SimpleModule("String Serializer");
         stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
         TokenCredentialCache tokenCredentialCache = new TokenCredentialCache(credential);
-        BearerTokenProvider bearerTokenProvider = () -> tokenCredentialCache.getAccessToken().getToken();
+        BearerTokenProvider bearerTokenProvider = () -> tokenCredentialCache.getTokenString();
 
         JacksonAdapter adapter = new JacksonAdapter();
         adapter.serializer().registerModule(stringModule);

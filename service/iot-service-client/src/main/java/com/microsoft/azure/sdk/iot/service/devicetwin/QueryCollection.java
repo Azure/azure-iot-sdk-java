@@ -300,7 +300,7 @@ public class QueryCollection
         String authorizationToken;
         if (this.credentialCache != null)
         {
-            authorizationToken = this.credentialCache.getAccessToken().getToken();
+            authorizationToken = this.credentialCache.getTokenString();
         }
         else if (this.azureSasCredential != null)
         {
