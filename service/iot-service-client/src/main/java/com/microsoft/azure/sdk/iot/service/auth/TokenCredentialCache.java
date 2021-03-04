@@ -21,6 +21,8 @@ public class TokenCredentialCache
     private final TokenCredential tokenCredential;
     private AccessToken accessToken;
 
+    public static final String[] IOTHUB_PUBLIC_SCOPE = new String[]{"https://iothubs.azure.net/.default"};
+
     /**
      * Construct a new TokenCredentialCache instance.
      * @param tokenCredential The tokenCredential instance that this cache will use to generate new tokens.
@@ -42,7 +44,7 @@ public class TokenCredentialCache
     {
         if (this.accessToken == null || isAccessTokenCloseToExpiry(this.accessToken))
         {
-            this.accessToken = tokenCredential.getToken(new TokenRequestContext()).block();
+            this.accessToken = tokenCredential.getToken(new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE)).block();
         }
 
         return this.accessToken;
