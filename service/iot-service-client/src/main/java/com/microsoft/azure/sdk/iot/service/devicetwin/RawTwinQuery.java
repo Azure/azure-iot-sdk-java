@@ -201,21 +201,4 @@ public class RawTwinQuery
             throw new IOException("Received a response that could not be parsed");
         }
     }
-
-    private String getAuthenticationToken()
-    {
-        // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
-        // an AzureSasCredential instance, or just the connection string. The sas token can be retrieved from the non-null
-        // one of the three options.
-        if (this.credentialCache != null)
-        {
-            return this.credentialCache.getAccessToken().getToken();
-        }
-        else if (this.azureSasCredential != null)
-        {
-            return this.azureSasCredential.getSignature();
-        }
-
-        return new IotHubServiceSasToken(iotHubConnectionString).toString();
-    }
 }

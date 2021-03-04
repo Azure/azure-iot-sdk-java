@@ -378,7 +378,7 @@ public class DeviceMethod
         // one of the three options.
         if (this.credentialCache != null)
         {
-            return this.credentialCache.getAccessToken().getToken();
+            return this.credentialCache.getTokenString();
         }
         else if (this.azureSasCredential != null)
         {

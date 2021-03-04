@@ -22,6 +22,7 @@ public class TokenCredentialCache
     private AccessToken accessToken;
 
     public static final String[] IOTHUB_PUBLIC_SCOPE = new String[]{"https://iothubs.azure.net/.default"};
+    public static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     /**
      * Construct a new TokenCredentialCache instance.
@@ -48,6 +49,15 @@ public class TokenCredentialCache
         }
 
         return this.accessToken;
+    }
+
+    /**
+     * Get the access token string, including the Bearer prefix.
+     * @return the access token string, including the Bearer prefix.
+     */
+    public String getTokenString()
+    {
+        return BEARER_TOKEN_PREFIX + getAccessToken().getToken();
     }
 
     /**
