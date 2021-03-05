@@ -229,7 +229,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this,
             moduleId,
             this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(),
-                connectOptions,
+            connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
 
@@ -238,14 +238,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         this.deviceMethod = new MqttDeviceMethod(
             mqttAsyncClient,
             deviceId,
-                connectOptions,
+            connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
 
         this.deviceTwin = new MqttDeviceTwin(
             mqttAsyncClient,
             deviceId,
-                connectOptions,
+            connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
     }
