@@ -28,10 +28,10 @@ public abstract class AmqpsSenderLinkHandler extends BaseHandler
     static final String VERSION_IDENTIFIER_KEY = "com.microsoft:client-version";
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
     final Map<Integer, Message> inProgressMessages = new ConcurrentHashMap<>();
-    Map<Symbol, Object> amqpProperties;
-    String linkCorrelationId;
+    final Map<Symbol, Object> amqpProperties;
+    final String linkCorrelationId;
     String senderLinkAddress;
-    Sender senderLink;
+    final Sender senderLink;
     private long nextTag = 0;
     private final AmqpsLinkStateCallback amqpsLinkStateCallback;
 
