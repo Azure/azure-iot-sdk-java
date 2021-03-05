@@ -9,10 +9,10 @@ public class TopicParser
 {
     private final String[] topicTokens;
 
-    private final String QUESTION = "?";
+    private static final String QUESTION = "?";
 
-    private final String REQ_ID = "$rid=";
-    private final String VERSION = "$version=";
+    private static final String REQ_ID = "$rid=";
+    private static final String VERSION = "$version=";
 
     public TopicParser(String topic) throws TransportException
     {
