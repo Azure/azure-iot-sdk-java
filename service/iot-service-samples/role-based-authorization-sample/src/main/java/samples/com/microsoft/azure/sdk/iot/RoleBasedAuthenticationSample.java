@@ -28,6 +28,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
@@ -59,6 +60,7 @@ public class RoleBasedAuthenticationSample
                 .tenantId(parsedArguments.getTenantId())
                 .clientId(parsedArguments.getClientId())
                 .clientSecret(parsedArguments.getClientSecret())
+                .authorityHost("https://login.windows-ppe.net")
                 .build();
 
         // "my-azure-iot-hub.azure-devices.net" for example
@@ -66,13 +68,13 @@ public class RoleBasedAuthenticationSample
 
         String newDeviceId = runRegistryManagerSample(iotHubHostName, credential);
 
-        runTwinClientSample(iotHubHostName, credential, newDeviceId);
+        //runTwinClientSample(iotHubHostName, credential, newDeviceId);
 
-        runServiceClientSample(iotHubHostName, credential, newDeviceId);
+        //runServiceClientSample(iotHubHostName, credential, newDeviceId);
 
         runJobClientSample(iotHubHostName, credential);
 
-        runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
+        //runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
     }
 
     private static String runRegistryManagerSample(String iotHubHostName, TokenCredential credential)
@@ -230,6 +232,19 @@ public class RoleBasedAuthenticationSample
         try
         {
             log.info("Querying all active jobs for your IoT Hub");
+
+            try
+            {
+                DigitalTwinClient client = new DigitalTwinClient(iotHubHostName, credential);
+                client.getDigitalTwin("asdf", DigitalTwinClient.class);
+
+            }
+            catch (Exception e)
+            {
+                log.error("faile d to joobb", e);
+                System.exit(-1);
+            }
+
             Query deviceJobQuery = jobClient.queryDeviceJob(SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery());
             int queriedJobCount = 0;
             while (jobClient.hasNextJob(deviceJobQuery))
