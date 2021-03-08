@@ -353,28 +353,39 @@ public class IotHubServicesCommon
         sendMessageAndWaitForResponse(client, messageAndResult, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, protocol);
     }
 
-    public static void sendMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)
+    public static void sendMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long retryMilliseconds, long sendTimeoutMilliseconds, IotHubClientProtocol protocol)
     {
         try
         {
             Success messageSent = new Success();
             EventCallback callback = new EventCallback(messageAndResult.statusCode);
-            client.sendEventAsync(messageAndResult.message, callback, messageSent);
 
-            long startTime = System.currentTimeMillis();
-            while (!messageSent.wasCallbackFired())
+            boolean messageSentSuccessfully = false;
+            while (!messageSentSuccessfully)
             {
-                Thread.sleep(RETRY_MILLISECONDS);
-                if (System.currentTimeMillis() - startTime > SEND_TIMEOUT_MILLISECONDS)
+                client.sendEventAsync(messageAndResult.message, callback, messageSent);
+
+                long startTime = System.currentTimeMillis();
+                while (!messageSent.wasCallbackFired())
                 {
-                    Assert.fail(buildExceptionMessage("Timed out waiting for a message callback", client));
-                    break;
+                    Thread.sleep(retryMilliseconds);
+                    if (System.currentTimeMillis() - startTime > sendTimeoutMilliseconds)
+                    {
+                        Assert.fail(buildExceptionMessage("Timed out waiting for a message callback", client));
+                    }
                 }
-            }
 
-            if (messageAndResult.statusCode != null && messageSent.getCallbackStatusCode() != messageAndResult.statusCode)
-            {
-                Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected " + messageAndResult.statusCode + " but received " + messageSent.getCallbackStatusCode(), client));
+                if (messageAndResult.statusCode != null && messageSent.getCallbackStatusCode() != messageAndResult.statusCode)
+                {
+                    Assert.fail(buildExceptionMessage("Sending message over " + protocol + " protocol failed: expected " + messageAndResult.statusCode + " but received " + messageSent.getCallbackStatusCode(), client));
+                }
+
+                if (messageSent.getCallbackStatusCode() != IotHubStatusCode.MESSAGE_EXPIRED)
+                {
+                    // when combined with the above check on the status code matching if specified, we know that the message
+                    // was sent successfully
+                    messageSentSuccessfully = true;
+                }
             }
         }
         catch (Exception e)
