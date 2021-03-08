@@ -1143,8 +1143,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (HandlerException e)
             {
-                iotHubReactor.free();
-                
                 TransportException transportException = new TransportException(e);
 
                 // unclassified exceptions are treated as retryable in ProtonJExceptionParser, so they should be treated
@@ -1152,6 +1150,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 transportException.setRetryable(true);
 
                 this.listener.onConnectionLost(transportException, connectionId);
+            }
+            finally
+            {
+                iotHubReactor.free();
             }
 
             return null;
