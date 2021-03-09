@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 /**
  * A utility to create the JSON patch payload required for update operations such as update digital twin
  */
+@SuppressWarnings("UnusedReturnValue") // Public class
 public final class UpdateOperationUtility {
     private static final String ADD = "add";
     private static final String REPLACE = "replace";

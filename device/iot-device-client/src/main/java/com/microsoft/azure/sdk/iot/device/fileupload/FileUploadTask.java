@@ -186,6 +186,7 @@ public final class FileUploadTask implements Runnable
         return new FileUploadSasUriResponse(new String(responseMessage.getBytes(), DEFAULT_IOTHUB_MESSAGE_CHARSET));
     }
 
+    @SuppressWarnings("UnusedReturnValue") // Public method
     public IotHubStatusCode sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IOException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());
