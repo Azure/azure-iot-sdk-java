@@ -244,9 +244,20 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     closeConnectionWithException("Timed out waiting for worker links to open", true);
                 }
             }
+            catch (TransportException e)
+            {
+                // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
+                // will create a new reactor and a new executor service
+                this.reactor.free();
+                this.executorServicesCleanup();
+                throw e;
+            }
             catch (InterruptedException e)
             {
-                this.close();
+                // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
+                // will create a new reactor and a new executor service
+                this.reactor.free();
+                this.executorServicesCleanup();
                 TransportException interruptedTransportException = new TransportException("Interrupted while waiting for links to open for AMQP connection", e);
                 interruptedTransportException.setRetryable(true);
                 throw interruptedTransportException;
@@ -1132,8 +1143,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             catch (HandlerException e)
             {
-                iotHubReactor.free();
-                
                 TransportException transportException = new TransportException(e);
 
                 // unclassified exceptions are treated as retryable in ProtonJExceptionParser, so they should be treated
@@ -1141,6 +1150,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 transportException.setRetryable(true);
 
                 this.listener.onConnectionLost(transportException, connectionId);
+            }
+            finally
+            {
+                iotHubReactor.free();
             }
 
             return null;
