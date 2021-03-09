@@ -232,7 +232,7 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             ByteBufferUtils.pour(_inputBuffer, _temp);
         }
 
-        private boolean sendToUnderlyingInput()
+        private void sendToUnderlyingInput()
         {
             boolean _readComplete =  false;
             switch (_lastType)
@@ -277,7 +277,6 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             }
             _wsInputBuffer.position(_wsInputBuffer.limit());
             _wsInputBuffer.limit(_wsInputBuffer.capacity());
-            return _readComplete;
         }
 
         private void processInput() throws TransportException

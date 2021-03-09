@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines headers for UpdateDigitalTwin operation.
  */
+@SuppressWarnings("UnusedReturnValue") // Public method
 public class DigitalTwinUpdateHeaders {
     /**
      * Weak Etag of the modified resource.
