@@ -173,6 +173,7 @@ public class TwinParser
      * @throws IllegalArgumentException This exception is thrown if the properties or tags in the maps do not fits the requirements.
      * @throws IOException This exception is thrown if tags the is not enabled.
      */
+    @SuppressWarnings("UnusedReturnValue") // Public method
     public String updateTwin(Map<String, Object> desiredPropertyMap,
                              Map<String, Object> reportedPropertyMap,
                              Map<String, Object> tagsMap)

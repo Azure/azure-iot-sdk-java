@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Defines headers for GetDigitalTwin operation.
  */
+@SuppressWarnings("UnusedReturnValue") // Public class
 public class DigitalTwinGetHeaders {
     /**
      * Weak Etag.
@@ -30,6 +31,7 @@ public class DigitalTwinGetHeaders {
      * @param eTag the eTag value to set
      * @return the DigitalTwinGetHeaders object itself.
      */
+
     public DigitalTwinGetHeaders withETag(String eTag) {
         this.eTag = eTag;
         return this;

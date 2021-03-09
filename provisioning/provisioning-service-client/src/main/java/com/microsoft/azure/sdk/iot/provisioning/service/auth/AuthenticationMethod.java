@@ -10,6 +10,7 @@ package com.microsoft.azure.sdk.iot.provisioning.service.auth;
  * authentication methods used to use Provisioning SDK.
  * 
  */
+@SuppressWarnings("UnusedReturnValue") // Public class
 public abstract class AuthenticationMethod
 {
     /**
