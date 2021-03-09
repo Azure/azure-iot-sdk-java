@@ -20,7 +20,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64String;
  */
 public final class IotHubServiceSasToken
 {
-    long TOKEN_VALID_SECS = 365*24*60*60;
+    final long TOKEN_VALID_SECS = 365*24*60*60;
 
     /**
      * The SAS token format. The parameters to be interpolated are, in order:

@@ -19,8 +19,8 @@ import java.net.URISyntaxException;
  */
 public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithRefreshAuthenticationProvider
 {
-    SignatureProvider signatureProvider;
-    String generationId;
+    final SignatureProvider signatureProvider;
+    final String generationId;
 
     /**
      * Constructor for a IotHubSasTokenHsmAuthenticationProvider instance

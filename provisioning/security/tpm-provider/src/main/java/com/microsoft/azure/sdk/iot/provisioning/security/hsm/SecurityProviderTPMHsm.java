@@ -150,6 +150,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         return cpResp.outPublic;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void clearPersistent(Tpm tpm, TPM_HANDLE hPersistent, String keyRole) throws SecurityProviderException
     {
         tpm._allowErrors().ReadPublic(hPersistent);

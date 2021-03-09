@@ -14,6 +14,7 @@ import com.google.gson.annotations.SerializedName;
  * This class is part of the Twin. It contains the Device identity management.
  * @deprecated As of release 0.4.0, replaced by {@link com.microsoft.azure.sdk.iot.deps.twin.RegisterManager}
  */
+@SuppressWarnings("CanBeFinal")
 @Deprecated
 public class RegisterManagerParser
 {

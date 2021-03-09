@@ -24,7 +24,7 @@ public final class DeviceMethod
 
     private final class deviceMethodResponseCallback implements MessageCallback
     {
-        DeviceClientConfig nestedConfig = config;
+        final DeviceClientConfig nestedConfig = config;
 
         /*
         **Codes_SRS_DEVICEMETHOD_25_007: [**On receiving a message from IOTHub with for method invoke, the callback DeviceMethodResponseMessageCallback is triggered.**]**

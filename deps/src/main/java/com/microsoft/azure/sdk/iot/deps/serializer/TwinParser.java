@@ -31,6 +31,7 @@ public class TwinParser
     private static final int MAX_MAP_LEVEL = 5;
 
     protected TwinTags tags = null;
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected TwinProperties properties = new TwinProperties();
     protected RegisterManagerParser manager = new RegisterManagerParser();
 
