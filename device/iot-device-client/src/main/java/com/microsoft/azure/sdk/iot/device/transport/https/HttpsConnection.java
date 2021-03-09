@@ -108,6 +108,7 @@ public class HttpsConnection
             // only ever be to localhost. The Edge team is currently working to remove this requirement. Eventually,
             // the edge runtime will just make this client use unix domain sockets instead.
             // Once that happens, we can remove support for HTTP requests entirely.
+            // https://msazure.visualstudio.com/One/_workitems/edit/8863048
             throw new IllegalArgumentException("Cannot do HTTP requests to any host other than localhost");
         }
 
