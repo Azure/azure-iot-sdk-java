@@ -106,8 +106,8 @@ public class HttpsConnection
         {
             // Currently, IoT Edge runtime can dictate that this client library sends an HTTP request, but it will
             // only ever be to localhost. The Edge team is currently working to remove this requirement. Eventually,
-            // they will just use unix domain sockets instead, and once that happens, we can remove support for HTTP
-            // requests entirely.
+            // the edge runtime will just make this client use unix domain sockets instead.
+            // Once that happens, we can remove support for HTTP requests entirely.
             throw new IllegalArgumentException("Cannot do HTTP requests to any host other than localhost");
         }
 
