@@ -75,6 +75,7 @@ public class WebSocketHandlerImpl implements WebSocketHandler
         return retVal;
     }
 
+    @SuppressWarnings("ShiftOutOfRange")
     @Override
     public void wrapBuffer(ByteBuffer srcBuffer, ByteBuffer dstBuffer)
     {
