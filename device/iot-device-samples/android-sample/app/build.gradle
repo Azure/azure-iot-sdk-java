@@ -13,8 +13,12 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -44,7 +48,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // Remote binary dependency
-    api ('com.microsoft.azure.sdk.iot:iot-device-client:1.29.1') {
+    api ('com.microsoft.azure.sdk.iot:iot-device-client:1.29.3') {
         exclude module: 'slf4j-api'
         exclude module:'azure-storage'
     }

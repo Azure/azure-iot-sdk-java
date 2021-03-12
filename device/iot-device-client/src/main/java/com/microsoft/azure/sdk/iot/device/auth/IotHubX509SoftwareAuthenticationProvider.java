@@ -17,6 +17,7 @@ import java.security.cert.CertificateException;
 
 public class IotHubX509SoftwareAuthenticationProvider extends IotHubAuthenticationProvider
 {
+    @SuppressWarnings("CanBeFinal") // Class can be inherited
     protected IotHubX509 iotHubX509;
 
     /**

@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class AmqpMessage
 {
-    MessageImpl messageImpl;
+    final MessageImpl messageImpl;
 
     public AmqpMessage()
     {

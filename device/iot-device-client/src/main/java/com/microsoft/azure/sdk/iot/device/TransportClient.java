@@ -35,7 +35,9 @@ public class TransportClient
         OPENED
     }
 
+    @SuppressWarnings("CanBeFinal") // Public member can be changed
     public static long SEND_PERIOD_MILLIS = 10L;
+    @SuppressWarnings("CanBeFinal") // Public member can be changed
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
 
     private final IotHubClientProtocol iotHubClientProtocol;

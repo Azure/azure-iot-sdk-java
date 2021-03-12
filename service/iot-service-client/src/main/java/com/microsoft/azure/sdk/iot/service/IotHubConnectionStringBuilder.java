@@ -157,7 +157,7 @@ public class IotHubConnectionStringBuilder
      */
     protected static String parseIotHubName(IotHubConnectionString iotHubConnectionString)
     {
-        Integer index = iotHubConnectionString.hostName.indexOf(IotHubConnectionString.HOST_NAME_SEPARATOR);
+        int index = iotHubConnectionString.hostName.indexOf(IotHubConnectionString.HOST_NAME_SEPARATOR);
         if (index >= 0)
         {
             return iotHubConnectionString.hostName.substring(0, index);

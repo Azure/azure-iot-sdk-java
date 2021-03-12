@@ -9,6 +9,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 import io.swagger.server.api.MainApiException;
 
+@SuppressWarnings("ALL")
 public class RegistryApiVerticle extends AbstractVerticle {
     final static Logger LOGGER = LoggerFactory.getLogger(RegistryApiVerticle.class); 
     
@@ -21,7 +22,7 @@ public class RegistryApiVerticle extends AbstractVerticle {
 
     public RegistryApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.RegistryApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.RegistryApiImpl");
             service = (RegistryApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("RegistryApiVerticle constructor", e);

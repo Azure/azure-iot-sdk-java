@@ -38,7 +38,6 @@ public final class AmqpsTelemetryReceiverLinkHandler extends AmqpsReceiverLinkHa
 
         this.deviceClientConfig = deviceClientConfig;
 
-        this.receiverLinkTag = getTag(deviceClientConfig, linkCorrelationId);
         this.receiverLinkAddress = getAddress(deviceClientConfig);
 
         this.amqpProperties.put(Symbol.getSymbol(VERSION_IDENTIFIER_KEY), deviceClientConfig.getProductInfo().getUserAgentString());

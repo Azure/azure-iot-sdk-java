@@ -22,7 +22,7 @@ public class DeviceClientManagerSample {
     private static final int NUM_REQUESTS = 20;
     private static final int SLEEP_DURATION_IN_SECS = 60;
 
-    static List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
+    final static List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
     private static DeviceClientManager deviceClientManager;
 
     /**

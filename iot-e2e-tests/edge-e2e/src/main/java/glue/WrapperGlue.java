@@ -8,6 +8,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
+@SuppressWarnings("ALL")
 public class WrapperGlue
 {
     public void Cleanup(Handler<AsyncResult<Void>> handler)

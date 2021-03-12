@@ -54,7 +54,6 @@ final class AmqpsTwinReceiverLinkHandler extends AmqpsReceiverLinkHandler
 
         this.deviceClientConfig = deviceClientConfig;
 
-        this.receiverLinkTag = getTag(deviceClientConfig, linkCorrelationId);
         this.receiverLinkAddress = getAddress(deviceClientConfig);
 
         //Note that this correlation id value must be equivalent to the correlation id in the twin sender link that it is paired with

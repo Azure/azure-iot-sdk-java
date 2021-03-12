@@ -100,7 +100,7 @@ public class SasTokenProviderWithSharedAccessKey implements SasTokenProvider {
     }
 
     private long getTokenExpiryTimeInMilliSecs() {
-        return System.currentTimeMillis() + timeToLiveInSecs * 1000;
+        return System.currentTimeMillis() + timeToLiveInSecs * 1000L;
     }
 
     private boolean isTokenExpired() {
