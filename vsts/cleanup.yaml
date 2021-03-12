@@ -9,7 +9,7 @@ schedules:
         - hubCleanupSample
     always: true
 jobs:
-- job: Hub and DPS cleanup
+- job: hub_and_dps_cleanup
   timeoutInMinutes: 90
   pool:
     name: Hosted VS2017
