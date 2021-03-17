@@ -346,35 +346,32 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             return IotHubStatusCode.BAD_FORMAT;
         }
 
-        synchronized (this.mqttConnectionStateLock) // cannot simultaneously open/close the connection and send a message
+        if (this.state == IotHubConnectionStatus.DISCONNECTED)
         {
-            if (this.state == IotHubConnectionStatus.DISCONNECTED)
-            {
-                throw new IllegalStateException("Cannot send event using a closed MQTT connection");
-            }
-
-            IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
-
-            if (message.getMessageType() == DEVICE_METHODS)
-            {
-                this.deviceMethod.start();
-                log.trace("Sending MQTT device method message ({})", message);
-                this.deviceMethod.send((IotHubTransportMessage) message);
-            }
-            else if (message.getMessageType() == DEVICE_TWIN)
-            {
-                this.deviceTwin.start();
-                log.trace("Sending MQTT device twin message ({})", message);
-                this.deviceTwin.send((IotHubTransportMessage) message);
-            }
-            else
-            {
-                log.trace("Sending MQTT device telemetry message ({})", message);
-                this.deviceMessaging.send(message);
-            }
-
-            return result;
+            throw new IllegalStateException("Cannot send event using a closed MQTT connection");
         }
+
+        IotHubStatusCode result = IotHubStatusCode.OK_EMPTY;
+
+        if (message.getMessageType() == DEVICE_METHODS)
+        {
+            this.deviceMethod.start();
+            log.trace("Sending MQTT device method message ({})", message);
+            this.deviceMethod.send((IotHubTransportMessage) message);
+        }
+        else if (message.getMessageType() == DEVICE_TWIN)
+        {
+            this.deviceTwin.start();
+            log.trace("Sending MQTT device twin message ({})", message);
+            this.deviceTwin.send((IotHubTransportMessage) message);
+        }
+        else
+        {
+            log.trace("Sending MQTT device telemetry message ({})", message);
+            this.deviceMessaging.send(message);
+        }
+
+        return result;
     }
 
     /**
@@ -405,27 +402,24 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw e;
         }
 
-        synchronized (this.mqttConnectionStateLock) // cannot simultaneously open/close the connection and acknowledge a message
+        log.trace("Sending MQTT ACK for a received message ({})", message);
+        if (message.getMessageType() == DEVICE_METHODS)
         {
-            log.trace("Sending MQTT ACK for a received message ({})", message);
-            if (message.getMessageType() == DEVICE_METHODS)
-            {
-                this.deviceMethod.start();
-                this.deviceMethod.sendMessageAcknowledgement(messageId);
-            }
-            else if (message.getMessageType() == DEVICE_TWIN)
-            {
-                this.deviceTwin.start();
-                this.deviceTwin.sendMessageAcknowledgement(messageId);
-            }
-            else
-            {
-                this.deviceMessaging.sendMessageAcknowledgement(messageId);
-            }
-
-            log.trace("MQTT ACK was sent for a received message so it has been removed from the messages to acknowledge list ({})", message);
-            this.receivedMessagesToAcknowledge.remove(message);
+            this.deviceMethod.start();
+            this.deviceMethod.sendMessageAcknowledgement(messageId);
         }
+        else if (message.getMessageType() == DEVICE_TWIN)
+        {
+            this.deviceTwin.start();
+            this.deviceTwin.sendMessageAcknowledgement(messageId);
+        }
+        else
+        {
+            this.deviceMessaging.sendMessageAcknowledgement(messageId);
+        }
+
+        log.trace("MQTT ACK was sent for a received message so it has been removed from the messages to acknowledge list ({})", message);
+        this.receivedMessagesToAcknowledge.remove(message);
 
         return true;
     }
@@ -439,72 +433,69 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     @Override
     public void onMessageArrived(int messageId)
     {
-        synchronized (this.mqttConnectionStateLock) // cannot simultaneously open/close the connection and receive a message
+        IotHubTransportMessage transportMessage = null;
+        try
         {
-            IotHubTransportMessage transportMessage = null;
-            try
+            transportMessage = this.deviceMethod.receive();
+            if (transportMessage != null)
             {
-                transportMessage = this.deviceMethod.receive();
-                if (transportMessage != null)
-                {
-                    log.trace("Received MQTT device method message ({})", transportMessage);
-                }
-                else
-                {
-                    transportMessage = deviceTwin.receive();
-                    if (transportMessage != null)
-                    {
-                        log.trace("Received MQTT device twin message ({})", transportMessage);
-                    }
-                    else
-                    {
-                        transportMessage = deviceMessaging.receive();
-                        if (transportMessage != null)
-                        {
-                            log.trace("Received MQTT device messaging message ({})", transportMessage);
-                        }
-                    }
-                }
-            }
-            catch (TransportException e)
-            {
-                this.listener.onMessageReceived(null, new TransportException("Failed to receive message from service", e));
-                log.error("Encountered exception while receiving message over MQTT", e);
-            }
-
-            if (transportMessage == null)
-            {
-                //Ack is not sent to service for this message because we cannot interpret the message. Service will likely re-send
-                this.listener.onMessageReceived(null, new TransportException("Message sent from service could not be parsed"));
-                log.warn("Received message that could not be parsed. That message has been ignored.");
+                log.trace("Received MQTT device method message ({})", transportMessage);
             }
             else
             {
-                log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
-                this.receivedMessagesToAcknowledge.put(transportMessage, messageId);
-
-                switch (transportMessage.getMessageType())
+                transportMessage = deviceTwin.receive();
+                if (transportMessage != null)
                 {
-                    case DEVICE_TWIN:
-                        transportMessage.setMessageCallback(this.config.getDeviceTwinMessageCallback());
-                        transportMessage.setMessageCallbackContext(this.config.getDeviceTwinMessageContext());
-                        break;
-                    case DEVICE_METHODS:
-                        transportMessage.setMessageCallback(this.config.getDeviceMethodsMessageCallback());
-                        transportMessage.setMessageCallbackContext(this.config.getDeviceMethodsMessageContext());
-                        break;
-                    case DEVICE_TELEMETRY:
-                        transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(transportMessage.getInputName()));
-                        transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(transportMessage.getInputName()));
-                        break;
-                    case UNKNOWN:
-                    case CBS_AUTHENTICATION:
-                    default:
-                        //do nothing
+                    log.trace("Received MQTT device twin message ({})", transportMessage);
                 }
-
-                this.listener.onMessageReceived(transportMessage, null);
+                else
+                {
+                    transportMessage = deviceMessaging.receive();
+                    if (transportMessage != null)
+                    {
+                        log.trace("Received MQTT device messaging message ({})", transportMessage);
+                    }
+                }
             }
+        }
+        catch (TransportException e)
+        {
+            this.listener.onMessageReceived(null, new TransportException("Failed to receive message from service", e));
+            log.error("Encountered exception while receiving message over MQTT", e);
+        }
+
+        if (transportMessage == null)
+        {
+            //Ack is not sent to service for this message because we cannot interpret the message. Service will likely re-send
+            this.listener.onMessageReceived(null, new TransportException("Message sent from service could not be parsed"));
+            log.warn("Received message that could not be parsed. That message has been ignored.");
+        }
+        else
+        {
+            log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", transportMessage);
+            this.receivedMessagesToAcknowledge.put(transportMessage, messageId);
+
+            switch (transportMessage.getMessageType())
+            {
+                case DEVICE_TWIN:
+                    transportMessage.setMessageCallback(this.config.getDeviceTwinMessageCallback());
+                    transportMessage.setMessageCallbackContext(this.config.getDeviceTwinMessageContext());
+                    break;
+                case DEVICE_METHODS:
+                    transportMessage.setMessageCallback(this.config.getDeviceMethodsMessageCallback());
+                    transportMessage.setMessageCallbackContext(this.config.getDeviceMethodsMessageContext());
+                    break;
+                case DEVICE_TELEMETRY:
+                    transportMessage.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(transportMessage.getInputName()));
+                    transportMessage.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(transportMessage.getInputName()));
+                    break;
+                case UNKNOWN:
+                case CBS_AUTHENTICATION:
+                default:
+                    //do nothing
+            }
+
+            this.listener.onMessageReceived(transportMessage, null);
         }
     }
 
