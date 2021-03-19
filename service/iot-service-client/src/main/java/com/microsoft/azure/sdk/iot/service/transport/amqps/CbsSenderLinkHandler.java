@@ -52,7 +52,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
     private String sasToken;
     private AzureSasCredential sasTokenProvider;
 
-    private static final String JWT = "jwt";
+    private static final String BEARER = "Bearer";
     private static final String SAS_TOKEN = "servicebus.windows.net:sastoken";
     private static final String EXPIRY_KEY = "se=";
 
@@ -116,7 +116,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
             TokenRequestContext context = new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE);
             this.currentAccessToken = credential.getToken(context).block();
             applicationProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
-            applicationProperties.put(PUT_TOKEN_TYPE, JWT);
+            applicationProperties.put(PUT_TOKEN_TYPE, BEARER);
             Section section = new AmqpValue("Bearer " + this.currentAccessToken.getToken());
             outgoingMessage.setBody(section);
         }
