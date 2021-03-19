@@ -48,6 +48,9 @@ jobs:
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
+          IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
+          IOTHUB_TENANT_ID: $(IOTHUB-TENANT-ID)
         condition: always()
 
       - task: CopyFiles@2
@@ -115,6 +118,9 @@ jobs:
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
+          IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
+          IOTHUB_TENANT_ID: $(IOTHUB-TENANT-ID)
         condition: always()
 
       - task: CopyFiles@2
@@ -172,6 +178,9 @@ jobs:
           CUSTOM_ALLOCATION_POLICY_WEBHOOK: $(CUSTOM-ALLOCATION-POLICY-WEBHOOK)
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
+          IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
+          IOTHUB_TENANT_ID: $(IOTHUB-TENANT-ID)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
         condition: always()
 
