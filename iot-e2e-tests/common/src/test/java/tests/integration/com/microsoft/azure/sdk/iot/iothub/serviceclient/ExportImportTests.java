@@ -13,6 +13,7 @@ import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.sas.BlobContainerSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.blob.specialized.BlobInputStream;
+import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
@@ -344,7 +345,7 @@ public class ExportImportTests extends IntegrationTest
         // Creating the Azure storage blob and uploading the serialized string of devices
         InputStream stream = new ByteArrayInputStream(blobToImport);
         String importBlobName = "devices.txt";
-        BlobClient importBlob = importContainer.getBlobClient(importBlobName);
+        BlockBlobClient importBlob = importContainer.getBlobClient(importBlobName).getBlockBlobClient();
         importBlob.delete();
         importBlob.upload(stream, blobToImport.length);
 
