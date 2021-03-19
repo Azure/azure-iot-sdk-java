@@ -3,12 +3,13 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -86,10 +87,12 @@ public class FileUploadSimpleSample
 
             try (FileInputStream fileInputStream = new FileInputStream(file))
             {
-                // Note that other versions of the Azure Storage SDK can be used here instead. The latest can be found here:
-                // https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/storage#azure-storage-sdk-client-library-for-java
-                CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
-                blob.upload(fileInputStream, file.length());
+                BlobClient blobClient =
+                    new BlobClientBuilder()
+                        .endpoint(sasUriResponse.getBlobUri().toString())
+                        .buildClient();
+
+                blobClient.upload(fileInputStream, file.length());
             }
             catch (Exception e)
             {

@@ -1,5 +1,7 @@
 package tests.unit.com.microsoft.azure.sdk.iot.device.fileupload;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
@@ -10,9 +12,6 @@ import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.StorageExtendedErrorInformation;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -62,7 +61,10 @@ public class FileUploadTaskTest
     private ResponseMessage mockResponseMessage;
 
     @Mocked
-    private CloudBlockBlob mockCloudBlockBlob;
+    private BlobClient mockCloudBlockBlob;
+
+    @Mocked
+    private BlobClientBuilder mockCloudBlockBlobBuilder;
 
     private static final String VALID_BLOB_NAME = "test-device1/image.jpg";
     private static final String VALID_BLOB_NAME_URI = "test-device1%2Fimage.jpg";
@@ -143,12 +145,15 @@ public class FileUploadTaskTest
         };
     }
 
-    private void cloudExpectations() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    private void blobClientBuilderExpectations() throws IOException, IllegalArgumentException, URISyntaxException
     {
         new NonStrictExpectations()
         {
             {
-                new CloudBlockBlob((URI) any);
+                new BlobClientBuilder();
+                result = mockCloudBlockBlobBuilder;
+
+                mockCloudBlockBlobBuilder.buildClient();
                 result = mockCloudBlockBlob;
             }
         };
@@ -193,12 +198,12 @@ public class FileUploadTaskTest
     private void expectSuccess(
             final String blobName, final String correlationId, final String hostName, final String containerName, final String sasToken,
             final String requestJson, final String responseJson, final String notificationJson)
-            throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+            throws IOException, IllegalArgumentException, URISyntaxException
     {
         requestExpectations(blobName, requestJson);
         responseExpectations(responseJson);
         responseParserExpectations(blobName, correlationId, hostName, containerName, sasToken);
-        cloudExpectations();
+        blobClientBuilderExpectations();
         notificationExpectations(correlationId, notificationJson);
     }
 
@@ -299,7 +304,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_007: [The run shall create a FileUpload request message, by using the FileUploadSasUriRequest.] */
     @Test
-    public void runCreateRequest() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runCreateRequest() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -314,7 +319,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_008: [The run shall set the message method as `POST`.] */
     @Test
-    public void runSetPOSTForRequest() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runSetPOSTForRequest() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -339,7 +344,7 @@ public class FileUploadTaskTest
     /* Tests_SRS_FILEUPLOADTASK_21_010: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
     /* Tests_SRS_FILEUPLOADTASK_21_026: [The run shall open the connection with the iothub, using the httpsTransportManager.] */
     @Test
-    public void runOpenConnectionToIothubForRequestAndNotification() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runOpenConnectionToIothubForRequestAndNotification() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -363,7 +368,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_011: [The run shall send the blob request message to the iothub, using the httpsTransportManager.] */
     @Test
-    public void runSendRequestToIothub() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runSendRequestToIothub() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -388,7 +393,7 @@ public class FileUploadTaskTest
     /* Tests_SRS_FILEUPLOADTASK_21_012: [The run shall close the connection with the iothub, using the httpsTransportManager.] */
     /* Tests_SRS_FILEUPLOADTASK_21_028: [The run shall close the connection with the iothub, using the httpsTransportManager.] */
     @Test
-    public void runCloseConnectionToIothubForRequestAndNotification() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runCloseConnectionToIothubForRequestAndNotification() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -412,7 +417,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_019: [The run shall create a `CloudBlockBlob` using the `blobUri`.] */
     @Test
-    public void runCreateCloudBlockBlob() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runCreateCloudBlockBlob() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -427,7 +432,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_020: [The run shall upload the `inputStream` with the `streamLength` to the created `CloudBlockBlob`.] */
     @Test
-    public void runUploadStreamToCloudBlockBlob() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runUploadStreamToCloudBlockBlob() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -451,7 +456,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_021: [If the upload to blob succeed, the run shall create a notification the IoT Hub with `isSuccess` equals true, `statusCode` equals 0.] */
     @Test
-    public void runCreateNotificationSucceed() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runCreateNotificationSucceed() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -466,7 +471,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_023: [The run shall create a FileUpload status notification message, by using the FileUploadStatusParser.] */
     @Test
-    public void runCreateNotification() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runCreateNotification() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -481,7 +486,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_024: [The run shall set the message method as `POST`.] */
     @Test
-    public void runSetPOSTForNotification() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runSetPOSTForNotification() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -505,7 +510,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_027: [The run shall send the blob request message to the iothub, using the httpsTransportManager.] */
     @Test
-    public void runSendNotificationToIothub() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runSendNotificationToIothub() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         expectSuccess(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN,
@@ -529,7 +534,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */
     @Test
-    public void runFileUploadRequestParserThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runFileUploadRequestParserThrows() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         new NonStrictExpectations()
@@ -559,7 +564,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */
     @Test
-    public void runCreateRequestMessageThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runCreateRequestMessageThrows() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         new NonStrictExpectations()
@@ -593,7 +598,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */
     @Test
-    public void runSendRequestThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runSendRequestThrows() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         new NonStrictExpectations()
@@ -631,7 +636,7 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_016: [If the `responseMessage` is null, empty, do not contains a valid json, or if the information in json is not correct, the run shall call the `userCallback` reporting the error, and abort the upload.] */
     @Test
-    public void runFileUploadResponseParserThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runFileUploadResponseParserThrows() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
@@ -655,89 +660,15 @@ public class FileUploadTaskTest
         Deencapsulation.invoke(fileUploadTask, "run");
     }
 
-    /* Tests_SRS_FILEUPLOADTASK_21_022: [If the upload to blob failed, the run shall create a notification the IoT Hub with `isSuccess` equals false, `statusCode` equals -1.] */
-    /* Tests_SRS_FILEUPLOADTASK_21_030: [If the upload to blob failed, the run shall call the `userCallback` reporting an error status `ERROR`.] */
-    @Test
-    public void runCloudBlockBlobThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        responseExpectations(VALID_RESPONSE_JSON);
-        responseParserExpectations(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN);
-        new NonStrictExpectations()
-        {
-            {
-                new CloudBlockBlob((URI) any);
-                result = new StorageException("", "", 0, new StorageExtendedErrorInformation(), new Exception());
-            }
-        };
-        failedNotificationExpectations(VALID_CORRELATION_ID, VALID_NOTIFICATION_JSON);
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
-    /* Tests_SRS_FILEUPLOADTASK_21_022: [If the upload to blob failed, the run shall create a notification the IoT Hub with `isSuccess` equals false, `statusCode` equals -1.] */
-    /* Tests_SRS_FILEUPLOADTASK_21_030: [If the upload to blob failed, the run shall call the `userCallback` reporting an error status `ERROR`.] */
-    @Test
-    public void runCloudBlockBlobUploadThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
-    {
-        // arrange
-        requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
-        responseExpectations(VALID_RESPONSE_JSON);
-        responseParserExpectations(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN);
-        new NonStrictExpectations()
-        {
-            {
-                new CloudBlockBlob((URI) any);
-                result = mockCloudBlockBlob;
-                mockCloudBlockBlob.upload(mockInputStream, VALID_STREAM_LENGTH);
-                result = new StorageException("", "", 0, new StorageExtendedErrorInformation(), new Exception());
-            }
-        };
-        failedNotificationExpectations(VALID_CORRELATION_ID, VALID_NOTIFICATION_JSON);
-
-        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
-                new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
-                VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
-
-        // act
-        Deencapsulation.invoke(fileUploadTask, "run");
-
-        // assert
-        new Verifications()
-        {
-            {
-                mockCloudBlockBlob.upload(mockInputStream, VALID_STREAM_LENGTH);
-                times = 1;
-                mockIotHubEventCallback.execute(IotHubStatusCode.ERROR, VALID_CALLBACK_CONTEXT);
-                times = 1;
-            }
-        };
-    }
-
     /* Tests_SRS_FILEUPLOADTASK_21_033: [If run failed to send the notification, it shall call the userCallback with the stratus `ERROR`, and abort the upload.] */
     @Test
-    public void runFileUploadStatusParserThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runFileUploadStatusParserThrows() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
         responseExpectations(VALID_RESPONSE_JSON);
         responseParserExpectations(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN);
-        cloudExpectations();
+        blobClientBuilderExpectations();
         new NonStrictExpectations()
         {
             {
@@ -765,13 +696,13 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_033: [If run failed to send the notification, it shall call the userCallback with the stratus `ERROR`, and abort the upload.] */
     @Test
-    public void runCreateNotificationMessageThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runCreateNotificationMessageThrows() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
         responseExpectations(VALID_RESPONSE_JSON);
         responseParserExpectations(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN);
-        cloudExpectations();
+        blobClientBuilderExpectations();
         new NonStrictExpectations()
         {
             {
@@ -794,13 +725,13 @@ public class FileUploadTaskTest
 
     /* Tests_SRS_FILEUPLOADTASK_21_031: [If run failed to send the request, it shall call the userCallback with the status `ERROR`, and abort the upload.] */
     @Test
-    public void runSendNotificationThrows() throws IOException, IllegalArgumentException, URISyntaxException, StorageException
+    public void runSendNotificationThrows() throws IOException, IllegalArgumentException, URISyntaxException
     {
         // arrange
         requestExpectations(VALID_BLOB_NAME, VALID_REQUEST_JSON);
         responseExpectations(VALID_RESPONSE_JSON);
         responseParserExpectations(VALID_BLOB_NAME, VALID_CORRELATION_ID, VALID_HOST_NAME, VALID_CONTAINER_NAME, VALID_SAS_TOKEN);
-        cloudExpectations();
+        blobClientBuilderExpectations();
         new NonStrictExpectations()
         {
             {
