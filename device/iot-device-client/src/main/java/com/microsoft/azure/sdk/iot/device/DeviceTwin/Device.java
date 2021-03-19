@@ -6,6 +6,7 @@ package com.microsoft.azure.sdk.iot.device.DeviceTwin;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 abstract public class Device implements PropertyCallBack<String, Object>
 {
@@ -64,13 +65,13 @@ abstract public class Device implements PropertyCallBack<String, Object>
 
     public void clean()
     {
-        for (Iterator repProperty = reportedProp.iterator(); repProperty.hasNext();)
+        for (Iterator<Property> repProperty = reportedProp.iterator(); repProperty.hasNext();)
         {
             repProperty.next();
             repProperty.remove();
         }
 
-        for (Iterator desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext();)
+        for (Iterator<Map.Entry<Property, Pair<PropertyCallBack<String, Object>, Object>>> desiredProperty = desiredProp.entrySet().iterator(); desiredProperty.hasNext();)
         {
             desiredProperty.next();
             desiredProperty.remove();

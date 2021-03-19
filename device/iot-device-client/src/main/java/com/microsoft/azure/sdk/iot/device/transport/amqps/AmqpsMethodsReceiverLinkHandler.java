@@ -36,7 +36,6 @@ public final class AmqpsMethodsReceiverLinkHandler extends AmqpsReceiverLinkHand
 
         this.deviceClientConfig = deviceClientConfig;
 
-        this.receiverLinkTag = getTag(deviceClientConfig, linkCorrelationId);
         this.receiverLinkAddress = getAddress(deviceClientConfig);
 
         //Note that this correlation id value must be equivalent to the correlation id in the method sender link that it is paired with

@@ -3,6 +3,8 @@
 
 package com.microsoft.azure.sdk.iot.device.fileupload;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
@@ -12,8 +14,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ResponseMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -138,11 +138,15 @@ public final class FileUploadTask implements Runnable
 
         try
         {
-            CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
-            blob.upload(inputStream, streamLength);
+            BlobClient blobClient =
+                new BlobClientBuilder()
+                    .endpoint(sasUriResponse.getBlobUri().toString())
+                    .buildClient();
+
+            blobClient.upload(inputStream, streamLength);
             fileUploadCompletionNotification = new FileUploadCompletionNotification(sasUriResponse.getCorrelationId(), true, 0, "Succeed to upload to storage.");
         }
-        catch (StorageException | IOException | IllegalArgumentException | URISyntaxException e)
+        catch (Exception e)
         {
             log.error("File upload failed to upload the stream to the blob", e);
         }
@@ -186,6 +190,7 @@ public final class FileUploadTask implements Runnable
         return new FileUploadSasUriResponse(new String(responseMessage.getBytes(), DEFAULT_IOTHUB_MESSAGE_CHARSET));
     }
 
+    @SuppressWarnings("UnusedReturnValue") // Public method
     public IotHubStatusCode sendNotification(FileUploadCompletionNotification fileUploadStatusParser) throws IOException
     {
         IotHubTransportMessage message = new IotHubTransportMessage(fileUploadStatusParser.toJson());

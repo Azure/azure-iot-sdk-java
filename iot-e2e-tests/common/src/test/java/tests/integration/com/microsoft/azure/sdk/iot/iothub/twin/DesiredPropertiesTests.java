@@ -71,6 +71,82 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
+    public void testReplaceTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    {
+        // arrange
+        if (testInstance.protocol != IotHubClientProtocol.AMQPS || testInstance.authenticationType != AuthenticationType.SAS)
+        {
+            //Test is for service client operations, so no need to parameterize on device client protocols or authentication types
+            return;
+        }
+
+        super.setUpNewDeviceAndModule(false);
+
+        String propertyKey = "someKey";
+        String propertyValue = "someValue";
+        String propertyUpdateKey = "someUpdatedKey";
+        String propertyUpdateValue = "someUpdatedValue";
+        String tagKey = "someKey";
+        String tagValue = "someValue";
+        String tagUpdateKey = "someUpdatedKey";
+        String tagUpdateValue = "someUpdatedValue";
+
+        testInstance.twinServiceClient.getTwin(deviceUnderTest.sCDeviceForTwin);
+
+        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> desiredProperties = new HashSet<>();
+        Set<com.microsoft.azure.sdk.iot.service.devicetwin.Pair> tags = new HashSet<>();
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(propertyKey, propertyValue));
+        tags.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(tagKey, tagValue));
+        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+        deviceUnderTest.sCDeviceForTwin.setTags(tags);
+        deviceUnderTest.sCDeviceForTwin = testInstance.twinServiceClient.replaceTwin(deviceUnderTest.sCDeviceForTwin);
+
+        // Check that the twin has the expected desired properties and tags
+        testInstance.twinServiceClient.getTwin(deviceUnderTest.sCDeviceForTwin);
+        assertEquals(1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
+        com.microsoft.azure.sdk.iot.service.devicetwin.Pair actualDesiredProperty =
+            deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
+
+        assertEquals(propertyKey, actualDesiredProperty.getKey());
+        assertEquals(propertyValue, actualDesiredProperty.getValue());
+
+        assertEquals(1, deviceUnderTest.sCDeviceForTwin.getTags().size());
+        com.microsoft.azure.sdk.iot.service.devicetwin.Pair actualTags =
+            deviceUnderTest.sCDeviceForTwin.getTags().iterator().next();
+
+        assertEquals(tagKey, actualTags.getKey());
+        assertEquals(tagValue, actualTags.getValue());
+
+        // Test replacing the old desired properties and tags with a new set of desired properties and tags
+        desiredProperties.clear();
+        tags.clear();
+
+        desiredProperties.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(propertyUpdateKey, propertyUpdateValue));
+        tags.add(new com.microsoft.azure.sdk.iot.service.devicetwin.Pair(tagUpdateKey, tagUpdateValue));
+        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(desiredProperties);
+        deviceUnderTest.sCDeviceForTwin.setTags(tags);
+        deviceUnderTest.sCDeviceForTwin = testInstance.twinServiceClient.replaceTwin(deviceUnderTest.sCDeviceForTwin);
+
+        // Check that the twin's desired properties consist only of the updated values. If replace works as expected, then the old values
+        // should be gone entirely
+        testInstance.twinServiceClient.getTwin(deviceUnderTest.sCDeviceForTwin);
+        assertEquals(1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
+        actualDesiredProperty = deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
+
+        assertEquals(propertyUpdateKey, actualDesiredProperty.getKey());
+        assertEquals(propertyUpdateValue, actualDesiredProperty.getValue());
+
+        // Check that the twin's tags consist only of the updated values. If replace works as expected, then the old values
+        // should be gone entirely
+        assertEquals(1, deviceUnderTest.sCDeviceForTwin.getTags().size());
+        actualTags = deviceUnderTest.sCDeviceForTwin.getTags().iterator().next();
+
+        assertEquals(tagUpdateKey, actualTags.getKey());
+        assertEquals(tagUpdateValue, actualTags.getValue());
+    }
+
+    @Test
+    @StandardTierHubOnlyTest
     public void testSubscribeToDesiredArrayProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
     {
         super.setUpNewDeviceAndModule();

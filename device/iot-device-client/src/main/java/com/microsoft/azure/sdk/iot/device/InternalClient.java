@@ -614,14 +614,16 @@ public class InternalClient
      * @param twinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param twinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
      * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
+     * @param <Type2> The type of the desired property value.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
-    void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
-                                 PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+    <Type1, Type2> void startTwinInternal(IotHubEventCallback twinStatusCallback, Object twinStatusCallbackContext,
+                                 PropertyCallBack<Type1, Type2> genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
 
     {

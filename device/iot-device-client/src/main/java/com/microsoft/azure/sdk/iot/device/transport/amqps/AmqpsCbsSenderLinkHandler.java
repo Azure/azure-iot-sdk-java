@@ -48,7 +48,6 @@ public final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
     {
         super(sender, amqpsLinkStateCallback, UUID.randomUUID().toString());
 
-        this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
         this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
     }
 

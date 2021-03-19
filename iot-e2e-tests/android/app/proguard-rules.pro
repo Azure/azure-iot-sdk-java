@@ -15,3 +15,17 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# JSON parser classes don't mix well with minification because JSON parser classes use reflection
+# based on the name of the field to create the JSON, and minification changes those names. As a result
+# all the message payload serializing and deserializing breaks. These lines explicitly exclude
+# the packages where we keep our JSON parsing classes from minification to avoid this issue
+-keep class com.microsoft.azure.sdk.iot.provisioning.device.internal.parser.* { *; }
+-keep class com.microsoft.azure.sdk.iot.deps.serializer.* { *; }
+-keep class com.microsoft.azure.sdk.iot.provisioning.service.configs.* { *; }
+-keep class com.microsoft.azure.sdk.iot.deps.twin.* { *; }
+-keep class com.microsoft.azure.sdk.iot.service.ImportMode { *; }
+-keep class com.microsoft.azure.sdk.iot.service.AuthenticationMechanism { *; }
+-keep class com.microsoft.azure.sdk.iot.device.edge.MethodRequest { *; }
+-keep class com.microsoft.azure.sdk.iot.device.hsm.parser.ErrorResponse { *; }
+-keep class com.microsoft.azure.sdk.iot.device.hsm.parser.SignRequest { *; }

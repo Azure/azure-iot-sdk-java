@@ -104,15 +104,7 @@ public class SendMessagesTests extends SendMessagesCommon
     {
         this.testInstance.setup();
 
-        if (this.testInstance.protocol == AMQPS_WS)
-        {
-            // AMQPS_WS still has a bug that limits message size to 16 kb. All other protocols can do 256 kb
-            IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, LARGE_MESSAGES_TO_SEND_AMQPS_WS, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
-        }
-        else
-        {
-            IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, LARGE_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
-        }
+        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, LARGE_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test

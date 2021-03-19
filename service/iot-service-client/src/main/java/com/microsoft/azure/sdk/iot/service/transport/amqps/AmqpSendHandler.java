@@ -233,9 +233,8 @@ public class AmqpSendHandler extends AmqpConnectionHandler
                     this.nextTag++;
                 }
 
-                Delivery dlv = snd.delivery(tag);
+                snd.delivery(tag);
                 snd.send(msgData, 0, length);
-
                 snd.advance();
 
                 this.messageToBeSent = null;
