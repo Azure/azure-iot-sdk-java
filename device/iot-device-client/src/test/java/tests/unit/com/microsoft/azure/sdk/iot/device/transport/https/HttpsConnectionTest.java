@@ -77,6 +77,8 @@ public class HttpsConnectionTest
                 result = "http";
                 mockUrl.openConnection();
                 result = mockUrlConn;
+                mockUrl.getHost();
+                result = "localhost";
             }
         };
 

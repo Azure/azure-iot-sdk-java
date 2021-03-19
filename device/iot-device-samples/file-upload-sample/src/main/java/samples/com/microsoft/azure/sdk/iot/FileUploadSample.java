@@ -3,14 +3,18 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -142,11 +146,14 @@ public class FileUploadSample
 
             try
             {
-                // Note that other versions of the Azure Storage SDK can be used here instead. The latest can be found here:
-                // https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/storage#azure-storage-sdk-client-library-for-java
                 System.out.println("Uploading file " + fileNameList.get(index) + " with the retrieved SAS URI...");
-                CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
-                blob.upload(inputStream, streamLength);
+
+                BlobClient blobClient =
+                    new BlobClientBuilder()
+                        .endpoint(sasUriResponse.getBlobUri().toString())
+                        .buildClient();
+
+                blobClient.upload(inputStream, streamLength);
             }
             catch (Exception e)
             {

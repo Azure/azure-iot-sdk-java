@@ -101,6 +101,17 @@ public class HttpsConnection
             throw new IllegalArgumentException(errMsg);
         }
 
+        String host = url.getHost();
+        if (!isHttps && !host.equalsIgnoreCase("localhost"))
+        {
+            // Currently, IoT Edge runtime can dictate that this client library sends an HTTP request, but it will
+            // only ever be to localhost. The Edge team is currently working to remove this requirement. Eventually,
+            // the edge runtime will just make this client use unix domain sockets instead.
+            // Once that happens, we can remove support for HTTP requests entirely.
+            // https://msazure.visualstudio.com/One/_workitems/edit/8863048
+            throw new IllegalArgumentException("Cannot do HTTP requests to any host other than localhost");
+        }
+
         this.body = new byte[0];
 
         try
