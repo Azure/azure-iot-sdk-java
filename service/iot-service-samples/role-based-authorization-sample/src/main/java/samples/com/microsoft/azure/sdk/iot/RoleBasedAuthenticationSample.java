@@ -32,7 +32,6 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
 import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -41,7 +40,6 @@ import java.util.UUID;
  * This sample demonstrates how to use the constructors in the various service clients that take an instance of
  * {@link TokenCredential} in order to authenticate with role based access credentials.
  */
-@Slf4j
 public class RoleBasedAuthenticationSample
 {
     private static final int FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS = 5 * 1000; // 5 seconds
@@ -90,12 +88,14 @@ public class RoleBasedAuthenticationSample
 
         try
         {
-            log.info("Creating device {}", deviceId);
+            System.out.println("Creating device " + deviceId);
             registryManager.addDevice(newDevice);
+            System.out.println("Successfully created device " + deviceId);
         }
         catch (IOException | IotHubException e)
         {
-            log.error("Failed to register new device", e);
+            System.err.println("Failed to register new device");
+            e.printStackTrace();
             System.exit(-1);
         }
 
@@ -116,18 +116,19 @@ public class RoleBasedAuthenticationSample
 
         try
         {
-            log.info("Getting twin for device {}", deviceId);
+            System.out.println("Getting twin for device " + deviceId);
             twinClient.getTwin(newDeviceTwin);
         }
         catch (IotHubException | IOException e)
         {
-            log.error("Failed to get the twin of the new device", e);
+            System.err.println("Failed to get twin for device " + deviceId);
+            e.printStackTrace();
             System.exit(-1);
         }
 
-        log.info("Successfully got the twin for the new device");
-        log.info("Device Id: {}", newDeviceTwin.getDeviceId());
-        log.info("ETag: {}", newDeviceTwin.getETag());
+        System.out.println("Successfully got the twin for the new device");
+        System.out.println("Device Id: " + newDeviceTwin.getDeviceId());
+        System.out.println("ETag: " + newDeviceTwin.getETag());
     }
 
     private static void runServiceClientSample(String iotHubHostName, TokenCredential credential, String deviceId)
@@ -149,13 +150,14 @@ public class RoleBasedAuthenticationSample
         Message cloudToDeviceMessage = new Message(cloudToDeviceMessagePayload.getBytes());
         try
         {
-            log.info("Sending cloud to device message to the new device");
+            System.out.println("Sending cloud to device message to the new device");
             serviceClient.send(deviceId, cloudToDeviceMessage);
-            log.info("Successfully sent cloud to device message to the new device");
+            System.out.println("Successfully sent cloud to device message to the new device");
         }
         catch (IOException | IotHubException e)
         {
-            log.error("Failed to send a cloud to device message to the new device", e);
+            System.err.println("Failed to send a cloud to device message to the new device");
+            e.printStackTrace();
             System.exit(-1);
         }
 
@@ -165,7 +167,7 @@ public class RoleBasedAuthenticationSample
             // so the below APIs are also RBAC authenticated.
             FeedbackReceiver feedbackReceiver = serviceClient.getFeedbackReceiver();
 
-            log.info("Opening feedback receiver to listen for feedback messages");
+            System.out.println("Opening feedback receiver to listen for feedback messages");
             feedbackReceiver.open();
             FeedbackBatch feedbackBatch = feedbackReceiver.receive(FEEDBACK_MESSAGE_LISTEN_SECONDS);
 
@@ -173,19 +175,20 @@ public class RoleBasedAuthenticationSample
             {
                 for (FeedbackRecord feedbackRecord : feedbackBatch.getRecords())
                 {
-                    log.info("Feedback record received for device {} with status {}", feedbackRecord.getDeviceId(), feedbackRecord.getStatusCode());
+                    System.out.println(String.format("Feedback record received for device %s with status %s", feedbackRecord.getDeviceId(), feedbackRecord.getStatusCode()));
                 }
             }
             else
             {
-                log.info("No feedback records were received");
+                System.out.println("No feedback records were received");
             }
 
             feedbackReceiver.close();
         }
         catch (IOException | InterruptedException e)
         {
-            log.error("Failed to listen for feedback messages", e);
+            System.err.println("Failed to listen for feedback messages");
+            e.printStackTrace();
             System.exit(-1);
         }
 
@@ -195,24 +198,25 @@ public class RoleBasedAuthenticationSample
             // so the below APIs are also RBAC authenticated.
             FileUploadNotificationReceiver fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
 
-            log.info("Opening file upload notification receiver and listening for file upload notifications");
+            System.out.println("Opening file upload notification receiver and listening for file upload notifications");
             fileUploadNotificationReceiver.open();
             FileUploadNotification fileUploadNotification = fileUploadNotificationReceiver.receive(FILE_UPLOAD_NOTIFICATION_LISTEN_SECONDS);
 
             if (fileUploadNotification != null)
             {
-                log.info("File upload notification received for device {}\n", fileUploadNotification.getDeviceId());
+                System.out.println("File upload notification received for device " + fileUploadNotification.getDeviceId());
             }
             else
             {
-                log.info("No feedback records were received");
+                System.out.println("No feedback records were received");
             }
 
             fileUploadNotificationReceiver.close();
         }
         catch (IOException | InterruptedException e)
         {
-            log.error("Failed to listen for file upload notification messages", e);
+            System.err.println("Failed to listen for file upload notification messages");
+            e.printStackTrace();
             System.exit(-1);
         }
     }
@@ -229,24 +233,26 @@ public class RoleBasedAuthenticationSample
 
         try
         {
-            log.info("Querying all active jobs for your IoT Hub");
+            System.out.println("Querying all active jobs for your IoT Hub");
+
             Query deviceJobQuery = jobClient.queryDeviceJob(SqlQuery.createSqlQuery("*", SqlQuery.FromType.JOBS, null, null).getQuery());
             int queriedJobCount = 0;
             while (jobClient.hasNextJob(deviceJobQuery))
             {
                 queriedJobCount++;
                 JobResult job = jobClient.getNextJob(deviceJobQuery);
-                log.info("Job {} of type {} has status {}", job.getJobId(), job.getJobType(), job.getJobStatus());
+                System.out.println(String.format("Job %s of type %s has status %s", job.getJobId(), job.getJobType(), job.getJobStatus()));
             }
 
             if (queriedJobCount == 0)
             {
-                log.info("No active jobs found for your IoT Hub");
+                System.out.println("No active jobs found for your IoT Hub");
             }
         }
         catch (IotHubException | IOException e)
         {
-            log.error("Failed to query the jobs for your IoT Hub", e);
+            System.err.println("Failed to query the jobs for your IoT Hub");
+            e.printStackTrace();
             System.exit(-1);
         }
     }
@@ -263,7 +269,7 @@ public class RoleBasedAuthenticationSample
 
         try
         {
-            log.info("Invoking method on device if it is online");
+            System.out.println("Invoking method on device if it is online");
             deviceMethod.invoke(
                 deviceId,
                 "someMethodName",
@@ -275,17 +281,19 @@ public class RoleBasedAuthenticationSample
         {
             if (e.getErrorCodeDescription() == ErrorCodeDescription.DeviceNotOnline)
             {
-                log.info("Device was not online, so the method invocation failed.");
+                System.out.println("Device was not online, so the method invocation failed.");
             }
             else
             {
-                log.error("Failed to invoke a method on your device", e);
+                System.err.println("Failed to invoke a method on your device");
+                e.printStackTrace();
                 System.exit(-1);
             }
         }
         catch (IOException e)
         {
-            log.error("Failed to invoke a method on your device", e);
+            System.err.println("Failed to invoke a method on your device");
+            e.printStackTrace();
             System.exit(-1);
         }
     }
