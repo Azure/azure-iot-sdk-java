@@ -35,6 +35,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants.*;
 
 @Slf4j
 public class Tools
@@ -357,9 +360,13 @@ public class Tools
 
     public static TokenCredential buildTokenCredentialFromEnvironment()
     {
-        String tenantId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_TENANT_ID_ENV_VAR_NAME);
-        String clientId = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_ID_ENV_VAR_NAME);
-        String clientSecret = Tools.retrieveEnvironmentVariableValue(TestConstants.IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
+        String tenantId = Tools.retrieveEnvironmentVariableValue(MSFT_TENANT_ID_ENV_VAR_NAME);
+        String clientId = Tools.retrieveEnvironmentVariableValue(IOTHUB_CLIENT_ID_ENV_VAR_NAME);
+        String clientSecret = Tools.retrieveEnvironmentVariableValue(IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
+
+        Objects.requireNonNull(tenantId, MSFT_TENANT_ID_ENV_VAR_NAME + " not found in environment variables");
+        Objects.requireNonNull(clientId, IOTHUB_CLIENT_ID_ENV_VAR_NAME + " not found in environment variables");
+        Objects.requireNonNull(clientSecret, IOTHUB_CLIENT_SECRET_ENV_VAR_NAME + " not found in environment variables");
 
         return new ClientSecretCredentialBuilder()
             .clientSecret(clientSecret)

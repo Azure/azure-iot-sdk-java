@@ -14,7 +14,7 @@ def IS_BASIC_TIER_HUB = project.hasProperty('IS_BASIC_TIER_HUB') ? '"'+project.p
 def IS_PULL_REQUEST = project.hasProperty('IS_PULL_REQUEST') ? '"'+project.property('IS_PULL_REQUEST')+'"' : '"false"'
 def IOTHUB_CLIENT_ID = project.hasProperty('IOTHUB_CLIENT_ID') ? '"'+project.property('IOTHUB_CLIENT_ID')+'"' : '""'
 def IOTHUB_CLIENT_SECRET = project.hasProperty('IOTHUB_CLIENT_SECRET') ? '"'+project.property('IOTHUB_CLIENT_SECRET')+'"' : '""'
-def IOTHUB_TENANT_ID = project.hasProperty('IOTHUB_TENANT_ID') ? '"'+project.property('IOTHUB_TENANT_ID')+'"' : '""'
+def MSFT_TENANT_ID = project.hasProperty('MSFT_TENANT_ID') ? '"'+project.property('MSFT_TENANT_ID')+'"' : '""'
 
 def STRING='String'
 //***********************************************************************************************//
@@ -47,7 +47,7 @@ android {
             buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
             buildConfigField STRING, 'IOTHUB_CLIENT_ID', IOTHUB_CLIENT_ID
             buildConfigField STRING, 'IOTHUB_CLIENT_SECRET', IOTHUB_CLIENT_SECRET
-            buildConfigField STRING, 'IOTHUB_TENANT_ID', IOTHUB_TENANT_ID
+            buildConfigField STRING, 'MSFT_TENANT_ID', MSFT_TENANT_ID
         }
     }
     buildTypes {

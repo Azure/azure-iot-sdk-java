@@ -59,7 +59,6 @@ public class GetTwinTests extends DeviceTwinCommon
         super.testGetDeviceTwin();
     }
 
-    @Ignore("RBAC authentication isn't supported on hub yet")
     @Test
     @StandardTierHubOnlyTest
     public void testGetDeviceTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException

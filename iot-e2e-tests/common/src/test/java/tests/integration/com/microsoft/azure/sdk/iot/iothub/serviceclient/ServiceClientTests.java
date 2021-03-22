@@ -171,7 +171,6 @@ public class ServiceClientTests extends IntegrationTest
     }
 
     @Test
-    @Ignore("RBAC authentication isn't supported on hub yet")
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
     {
