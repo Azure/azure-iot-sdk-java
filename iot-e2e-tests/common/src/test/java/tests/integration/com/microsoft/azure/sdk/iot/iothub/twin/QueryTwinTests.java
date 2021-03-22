@@ -368,7 +368,6 @@ public class QueryTwinTests extends DeviceTwinCommon
         testQueryTwin();
     }
 
-    @Ignore("RBAC authentication isn't supported on hub yet")
     @Test
     @StandardTierHubOnlyTest
     public void testQueryTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException

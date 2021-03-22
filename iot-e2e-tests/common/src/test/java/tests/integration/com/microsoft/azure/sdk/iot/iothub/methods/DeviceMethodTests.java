@@ -80,7 +80,6 @@ public class DeviceMethodTests extends DeviceMethodCommon
         super.invokeMethodSucceed();
     }
 
-    @Ignore("RBAC authentication isn't supported on hub yet")
     @Test
     @StandardTierHubOnlyTest
     public void invokeMethodSucceedWithTokenCredential() throws Exception

@@ -145,7 +145,6 @@ public class RegistryManagerTests extends IntegrationTest
         deviceLifecycle(testInstance);
     }
 
-    @Ignore("RBAC authentication isn't supported on hub yet")
     @Test
     public void deviceLifecycleWithTokenCredential() throws Exception
     {

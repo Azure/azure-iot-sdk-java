@@ -50,7 +50,7 @@ jobs:
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
           IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
-          IOTHUB_TENANT_ID: $(IOTHUB-TENANT-ID)
+          MSFT_TENANT_ID: $(MSFT-TENANT-ID)
         condition: always()
 
       - task: CopyFiles@2
@@ -120,7 +120,7 @@ jobs:
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
           IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
-          IOTHUB_TENANT_ID: $(IOTHUB-TENANT-ID)
+          MSFT_TENANT_ID: $(MSFT-TENANT-ID)
         condition: always()
 
       - task: CopyFiles@2
@@ -180,7 +180,7 @@ jobs:
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
-          IOTHUB_TENANT_ID: $(IOTHUB-TENANT-ID)
+          MSFT_TENANT_ID: $(MSFT-TENANT-ID)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
         condition: always()
 
