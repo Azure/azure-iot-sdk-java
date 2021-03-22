@@ -109,6 +109,64 @@ public class DigitalTwinAsyncClient {
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     * this library when they are needed.
+     * @return The instantiated DigitalTwinAsyncClient.
+     */
+    public DigitalTwinAsyncClient(String hostName, TokenCredential credential) {
+        this(hostName,
+            credential,
+            DigitalTwinClientOptions.builder()
+                .httpReadTimeout(DEFAULT_HTTP_READ_TIMEOUT_MS)
+                .httpConnectTimeout(DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                .build());
+    }
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     * this library when they are needed.
+     * @param options The optional settings for this client. May not be null.
+     * @return The instantiated DigitalTwinAsyncClient.
+     */
+    public DigitalTwinAsyncClient(String hostName, TokenCredential credential, DigitalTwinClientOptions options) {
+        Objects.requireNonNull(options);
+        final SimpleModule stringModule = new SimpleModule("String Serializer");
+        stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
+        TokenCredentialCache tokenCredentialCache = new TokenCredentialCache(credential);
+        BearerTokenProvider bearerTokenProvider = () -> tokenCredentialCache.getTokenString();
+
+        JacksonAdapter adapter = new JacksonAdapter();
+        adapter.serializer().registerModule(stringModule);
+
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = null;
+        if (proxyOptions != null)
+        {
+            proxy = proxyOptions.getProxy();
+        }
+
+        RestClient simpleRestClient = new RestClient.Builder()
+            .withBaseUrl(HTTPS_SCHEME + hostName) //hostname is only "my-iot-hub.azure-devices.net" so we need to add "https://"
+            .withConnectionTimeout(options.getHttpConnectTimeout(), TimeUnit.MILLISECONDS)
+            .withReadTimeout(options.getHttpReadTimeout(), TimeUnit.MILLISECONDS)
+            .withProxy(proxy) // assigning a null proxy here just means no proxy will be used
+            .withCredentials(new ServiceClientBearerTokenCredentialProvider(bearerTokenProvider))
+            .withResponseBuilderFactory(new ServiceResponseBuilder.Factory())
+            .withSerializerAdapter(adapter)
+            .build();
+
+        IotHubGatewayServiceAPIsImpl protocolLayerClient = new IotHubGatewayServiceAPIsImpl(simpleRestClient);
+        _protocolLayer = new DigitalTwinsImpl(simpleRestClient.retrofit(), protocolLayerClient);
+    }
+
+
+    /**
+     * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @return The instantiated DigitalTwinAsyncClient.
      */
