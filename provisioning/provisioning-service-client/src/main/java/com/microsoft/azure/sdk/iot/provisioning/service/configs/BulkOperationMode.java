@@ -10,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
+@SuppressWarnings("unused") // used by reflection during json serialization/deserialization
 public enum BulkOperationMode
 {
     @SerializedName("create")

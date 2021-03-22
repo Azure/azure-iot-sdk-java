@@ -194,6 +194,7 @@ public class Socks5SocketFactory extends SocketFactory
                     mLocalIP = InetAddress.getByName(mLocalHost);
                 } catch (UnknownHostException e)
                 {
+                    // Return a null IP address for an unknown host
                 }
             }
             return mLocalIP;

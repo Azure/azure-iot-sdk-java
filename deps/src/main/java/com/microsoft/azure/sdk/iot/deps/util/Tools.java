@@ -18,7 +18,7 @@ public class Tools
      */
     public static Boolean isNullOrEmpty(String value)
     {
-        Boolean retVal;
+        boolean retVal;
 
         if (value == null)
             // Codes_SRS_SDK_JAVA_TOOLS_12_001: [The function shall return true if the input is null]

@@ -20,8 +20,8 @@ public class AmqpsSasTokenRenewalHandler extends BaseHandler implements Authenti
     //If the sas token renewal cannot be sent, try again in this many milliseconds
     private static final int RETRY_INTERVAL_MILLISECONDS = 5000;
 
-    AmqpsCbsSessionHandler amqpsCbsSessionHandler;
-    AmqpsSessionHandler amqpsSessionHandler;
+    final AmqpsCbsSessionHandler amqpsCbsSessionHandler;
+    final AmqpsSessionHandler amqpsSessionHandler;
     private boolean isClosed;
     private AmqpsSasTokenRenewalHandler nextToAuthenticate;
 

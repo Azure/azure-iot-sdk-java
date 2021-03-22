@@ -208,7 +208,7 @@ public final class IotHubSasToken
     public static boolean isExpired(String sasToken)
     {
         //expiry time is measured in seconds since Unix Epoch
-        Long currentTime = System.currentTimeMillis() / 1000;
+        long currentTime = System.currentTimeMillis() / 1000;
         Long expiryTime = getExpiryTimeFromToken(sasToken);
         return (currentTime >= expiryTime);
     }

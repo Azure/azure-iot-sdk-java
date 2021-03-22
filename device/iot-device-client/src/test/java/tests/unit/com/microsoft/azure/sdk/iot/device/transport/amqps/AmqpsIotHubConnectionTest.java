@@ -561,6 +561,8 @@ public class AmqpsIotHubConnectionTest {
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
         Deencapsulation.setField(connection, "connection", mockConnection);
+        Deencapsulation.setField(connection, "reactor", mockReactor);
+
         this.setLatches(connection);
 
         new NonStrictExpectations()
@@ -592,6 +594,7 @@ public class AmqpsIotHubConnectionTest {
 
         final AmqpsIotHubConnection connection = new AmqpsIotHubConnection(mockConfig);
 
+        Deencapsulation.setField(connection, "reactor", mockReactor);
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "executorService", mockExecutorService);
         Deencapsulation.setField(connection, "connection", mockConnection);
@@ -632,6 +635,7 @@ public class AmqpsIotHubConnectionTest {
         Deencapsulation.setField(connection, "state", IotHubConnectionStatus.CONNECTED);
         Deencapsulation.setField(connection, "executorService", mockExecutorService);
         Deencapsulation.setField(connection, "connection", mockConnection);
+        Deencapsulation.setField(connection, "reactor", mockReactor);
         setLatches(connection);
 
         connection.close();
@@ -651,6 +655,8 @@ public class AmqpsIotHubConnectionTest {
                 mockExecutorService.shutdownNow();
                 times = 1;
                 mockScheduledExecutorService.shutdownNow();
+                times = 1;
+                mockReactor.free();
                 times = 1;
             }
         };

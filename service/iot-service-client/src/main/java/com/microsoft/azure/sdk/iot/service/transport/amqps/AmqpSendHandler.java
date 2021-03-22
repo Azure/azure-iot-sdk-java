@@ -255,7 +255,8 @@ public class AmqpSendHandler extends AmqpConnectionHandler
                     this.nextTag++;
                 }
 
-                Delivery dlv = snd.delivery(tag);
+                snd.delivery(tag);
+
                 // Codes_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_021: [The event handler shall send the encoded bytes]
                 snd.send(msgData, 0, length);
 

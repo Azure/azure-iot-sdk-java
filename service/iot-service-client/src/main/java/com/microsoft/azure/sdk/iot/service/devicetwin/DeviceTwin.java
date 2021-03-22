@@ -133,6 +133,7 @@ public class DeviceTwin
         /*
         **Codes_SRS_DEVICETWIN_25_012: [** The function shall set eTag, tags, desired property map, reported property map on the user device **]**
          */
+        device.setVersion(twinState.getVersion());
         device.setModelId(twinState.getModelId());
         device.setETag(twinState.getETag());
         device.setTags(twinState.getTags());
@@ -216,7 +217,7 @@ public class DeviceTwin
         **Codes_SRS_DEVICETWIN_25_020: [** The function shall verify the response status and throw proper Exception **]**
          */
         Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++),options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
+        DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.PATCH, twinJson.getBytes(StandardCharsets.UTF_8), String.valueOf(requestId++),options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
     }
 
     /**
@@ -257,6 +258,72 @@ public class DeviceTwin
     {
         // Currently this is not supported by service
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Replace the full device twin for a given device with the provided device twin.
+     * @param device The device twin object to replace the current device twin object.
+     * @throws IotHubException If any an IoT Hub level exception is thrown. For instance,
+     * if the request is unauthorized, a exception that extends IotHubException will be thrown.
+     * @throws IOException If the request failed to send to IoT Hub.
+     * @return The Twin object's current state returned from the service after the replace operation.
+     */
+    public DeviceTwinDevice replaceTwin(DeviceTwinDevice device) throws IotHubException, IOException
+    {
+        if (device == null || device.getDeviceId() == null || device.getDeviceId().length() == 0)
+        {
+            throw new IllegalArgumentException("Instantiate a device and set device id to be used");
+        }
+
+        URL url;
+        if ((device.getModuleId() == null) || device.getModuleId().length() ==0)
+        {
+            url = this.iotHubConnectionString.getUrlTwin(device.getDeviceId());
+        }
+        else
+        {
+            url = this.iotHubConnectionString.getUrlModuleTwin(device.getDeviceId(), device.getModuleId());
+        }
+
+        TwinState twinState = new TwinState(device.getTagsMap(), device.getDesiredMap(), null);
+        String twinJson = twinState.toJsonElement().toString();
+
+        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
+
+        HttpResponse httpResponse = DeviceOperations.request(
+            this.iotHubConnectionString,
+            url,
+            HttpMethod.PUT,
+            twinJson.getBytes(StandardCharsets.UTF_8),
+            String.valueOf(requestId++),
+            options.getHttpConnectTimeout(),
+            options.getHttpReadTimeout(),
+            proxy);
+
+        String responseTwinJson = new String(httpResponse.getBody(), StandardCharsets.UTF_8);
+
+        twinState = TwinState.createFromTwinJson(responseTwinJson);
+
+        DeviceTwinDevice responseTwin;
+        if (twinState.getModuleId() == null)
+        {
+            responseTwin = new DeviceTwinDevice(twinState.getDeviceId());
+        }
+        else
+        {
+            responseTwin = new DeviceTwinDevice(twinState.getDeviceId(), twinState.getModuleId());
+        }
+
+        responseTwin.setVersion(twinState.getVersion());
+        responseTwin.setModelId(twinState.getModelId());
+        responseTwin.setETag(twinState.getETag());
+        responseTwin.setTags(twinState.getTags());
+        responseTwin.setDesiredProperties(twinState.getDesiredProperty());
+        responseTwin.setReportedProperties(twinState.getReportedProperty());
+        responseTwin.setCapabilities(twinState.getCapabilities());
+        responseTwin.setConfigurations(twinState.getConfigurations());
+        responseTwin.setConnectionState(twinState.getConnectionState());
+        return responseTwin;
     }
 
     /**

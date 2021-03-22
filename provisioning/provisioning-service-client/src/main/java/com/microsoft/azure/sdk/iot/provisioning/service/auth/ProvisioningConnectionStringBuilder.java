@@ -136,7 +136,7 @@ public class ProvisioningConnectionStringBuilder
     private static String parseDeviceProvisioningServiceName(ProvisioningConnectionString provisioningConnectionString)
     {
         /* Codes_SRS_PROVISIONINGCONNECTIONSTRING_BUILDER_21_013: [The function shall return the substring of the host name until the first `.` character.] */
-        Integer index = provisioningConnectionString.hostName.indexOf(ProvisioningConnectionString.HOST_NAME_SEPARATOR);
+        int index = provisioningConnectionString.hostName.indexOf(ProvisioningConnectionString.HOST_NAME_SEPARATOR);
         if (index >= 0)
         {
             return provisioningConnectionString.hostName.substring(0, index);

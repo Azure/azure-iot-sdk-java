@@ -12,6 +12,7 @@ import java.io.IOException;
 
 public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
+    @SuppressWarnings("CanBeFinal") // Class can be inherited
     protected String deviceKey;
 
     /**

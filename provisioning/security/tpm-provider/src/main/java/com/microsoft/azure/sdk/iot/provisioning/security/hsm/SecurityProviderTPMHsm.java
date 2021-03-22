@@ -9,11 +9,13 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
+import lombok.extern.slf4j.Slf4j;
 import tss.*;
 import tss.tpm.*;
 
 import java.util.Arrays;
 
+@Slf4j
 public class SecurityProviderTPMHsm extends SecurityProviderTpm
 {
     private static final String REGEX_FOR_VALID_REGISTRATION_ID = "^[a-z0-9-]{1,128}$";
@@ -59,8 +61,6 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
     {
         //SRS_SecurityProviderTPMHsm_25_001: [ The constructor shall start the tpm, clear persistent for EK and SRK if it exist, create persistent primary for EK and SRK. ]
         tpm = TpmFactory.platformTpm();
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
         //SRS_SecurityProviderTPMHsm_25_002: [ The constructor shall set the registration Id to null if none was provided. ]
@@ -89,8 +89,6 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         //SRS_SecurityProviderTPMHsm_25_005: [ The constructor shall save the registration Id if it was provided. ]
         this.registrationId = registrationId;
         tpm = TpmFactory.platformTpm();
-        clearPersistent(tpm, EK_PERSISTENT_HANDLE, "EK");
-        clearPersistent(tpm, SRK_PERSISTENT_HANDLE, "SRK");
         ekPublic = createPersistentPrimary(tpm, EK_PERSISTENT_HANDLE, TPM_RH.OWNER, EK_TEMPLATE, "EK");
         srkPublic = createPersistentPrimary(tpm, SRK_PERSISTENT_HANDLE, TPM_RH.OWNER, SRK_TEMPLATE, "SRK");
     }
@@ -127,6 +125,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
 
         if (rc == TPM_RC.SUCCESS)
         {
+            log.info("Successfully read {} from TPM without creating a new one", primaryRole);
             // TODO: Check if the public area of the existing key matches the requested one
             return rpResp.outPublic;
         }
@@ -134,6 +133,8 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         {
             throw new SecurityProviderException("Unexpected failure {" +  rc.name() + "} of TPM2_ReadPublic for {" + primaryRole + "}");
         }
+
+        log.info("Creating {} since the TPM didn't have one already", primaryRole);
 
         TPMS_SENSITIVE_CREATE sens = new TPMS_SENSITIVE_CREATE(new byte[0], new byte[0]);
         CreatePrimaryResponse cpResp = tpm.CreatePrimary(TPM_HANDLE.from(hierarchy), sens, inPub,
@@ -149,6 +150,7 @@ public class SecurityProviderTPMHsm extends SecurityProviderTpm
         return cpResp.outPublic;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void clearPersistent(Tpm tpm, TPM_HANDLE hPersistent, String keyRole) throws SecurityProviderException
     {
         tpm._allowErrors().ReadPublic(hPersistent);
