@@ -1597,6 +1597,7 @@ public class IotHubTransport implements IotHubListener
 
     private DeviceClientConfig getDefaultConfig()
     {
+        //noinspection LoopStatementThatDoesntLoop
         for (DeviceClientConfig config : this.deviceClientConfigs.values())
         {
             // just return the first entry in the list.

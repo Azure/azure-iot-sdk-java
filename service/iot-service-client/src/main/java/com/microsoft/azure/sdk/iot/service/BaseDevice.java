@@ -521,6 +521,5 @@ public class BaseDevice
         this.connectionStateUpdatedTime = UTC_TIME_DEFAULT;
         this.lastActivityTime = OFFSET_TIME_DEFAULT;
         this.cloudToDeviceMessageCount = 0;
-        this.setForceUpdate(false);
     }
 }
