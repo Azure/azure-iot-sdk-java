@@ -102,7 +102,9 @@ public class TokenRenewalTests extends IntegrationTest
      * @throws Exception if the test fails in any way
      */
     @Test
-    @ContinuousIntegrationTest
+    // While this test is long enough to be considered a continuous integration test, it is the only test that truly validates
+    // that the device client's token renewal logic works. Because of that, it needs to be run at the gate.
+    //@ContinuousIntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
         List<InternalClient> clients = createClientsToTest();

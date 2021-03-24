@@ -25,7 +25,6 @@ public class MqttMessaging extends Mqtt
     private final boolean isEdgeHub;
 
     public MqttMessaging(
-        MqttAsyncClient mqttAsyncClient,
         String deviceId,
         MqttMessageListener messageListener,
         String moduleId,
@@ -34,7 +33,7 @@ public class MqttMessaging extends Mqtt
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        super(mqttAsyncClient, messageListener, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
+        super(messageListener, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
         if (deviceId == null || deviceId.isEmpty())
         {
