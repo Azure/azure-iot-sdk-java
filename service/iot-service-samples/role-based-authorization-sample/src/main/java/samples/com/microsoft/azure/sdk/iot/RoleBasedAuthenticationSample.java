@@ -58,7 +58,6 @@ public class RoleBasedAuthenticationSample
                 .tenantId(parsedArguments.getTenantId())
                 .clientId(parsedArguments.getClientId())
                 .clientSecret(parsedArguments.getClientSecret())
-                .authorityHost("https://login.windows-ppe.net")
                 .build();
 
         // "my-azure-iot-hub.azure-devices.net" for example
@@ -66,13 +65,13 @@ public class RoleBasedAuthenticationSample
 
         String newDeviceId = runRegistryManagerSample(iotHubHostName, credential);
 
-        //runTwinClientSample(iotHubHostName, credential, newDeviceId);
+        runTwinClientSample(iotHubHostName, credential, newDeviceId);
 
-        //runServiceClientSample(iotHubHostName, credential, newDeviceId);
+        runServiceClientSample(iotHubHostName, credential, newDeviceId);
 
         runJobClientSample(iotHubHostName, credential);
 
-        //runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
+        runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
     }
 
     private static String runRegistryManagerSample(String iotHubHostName, TokenCredential credential)
