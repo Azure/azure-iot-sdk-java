@@ -33,7 +33,7 @@ import java.util.List;
 
 public class DeviceDeletionSample
 {
-    private static final int SLEEP_INTERVAL_MILLISECONDS = 3000;
+    private static final int SLEEP_INTERVAL_MILLISECONDS = 30 * 1000;
 
     /**
      * A simple sample for deleting all devices from an iothub
