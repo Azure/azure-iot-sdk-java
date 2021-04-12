@@ -1643,6 +1643,7 @@ public class RegistryManager
         request.setHeaderField("Request-Id", "1001");
         request.setHeaderField("Accept", "application/json");
         request.setHeaderField("Content-Type", "application/json");
+        request.setHeaderField("Content-Length", payload != null ? String.valueOf(payload.length) : "0");
         request.setHeaderField("charset", "utf-8");
         return request;
     }
