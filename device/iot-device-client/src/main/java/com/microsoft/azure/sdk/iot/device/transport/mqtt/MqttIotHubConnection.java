@@ -110,8 +110,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             log.trace("MQTT connection will use X509 certificate based auth");
         }
 
-        //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
-        // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding
+        // URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
+        // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding.
         String userAgentString = this.config.getProductInfo().getUserAgentString();
         String clientUserAgentIdentifier;
         try
@@ -120,7 +120,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new TransportException("Failed to get URLEncode the user agent string", e);
+            throw new TransportException("Failed to URLEncode the user agent string", e);
         }
 
         String deviceId = this.config.getDeviceId();
@@ -142,7 +142,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         else
         {
-            serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + MODEL_ID + "=" + modelId;
+            try
+            {
+                // URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
+                // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding.
+                serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + MODEL_ID + "=" + URLEncoder.encode(modelId, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                throw new TransportException("Failed to URLEncode the modelId string", e);
+            }
         }
 
         String iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
