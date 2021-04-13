@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
@@ -306,30 +307,30 @@ public class DeviceTwinCommon extends IntegrationTest
                 testInstance.devicesUnderTest[i].sCModuleForRegistryManager = ((TestModuleIdentity) testInstance.testIdentity).getModule();
             }
 
-            setUpTwin(testInstance.devicesUnderTest[i], openDeviceClients);
+            setUpTwin(testInstance.devicesUnderTest[i], openDeviceClients, testInstance.testIdentities[i].getClient());
         }
     }
 
-    protected void setUpTwin(DeviceState deviceState, boolean openDeviceClient) throws IOException, IotHubException, InterruptedException
+    protected void setUpTwin(DeviceState deviceState, boolean openDeviceClient, InternalClient client) throws IOException, IotHubException, InterruptedException
     {
         // set up twin on DeviceClient
         deviceState.dCDeviceForTwin = new DeviceExtension();
 
         if ((this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS) && this.testInstance.authenticationType == SAS)
         {
-            testInstance.testIdentity.getClient().setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
-            testInstance.testIdentity.getClient().setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
+            client.setOption("SetAmqpOpenAuthenticationSessionTimeout", AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS);
+            client.setOption("SetAmqpOpenDeviceSessionsTimeout", AMQP_DEVICE_SESSION_TIMEOUT_SECONDS);
         }
         if (openDeviceClient)
         {
-            testInstance.testIdentity.getClient().open();
-            if (testInstance.testIdentity.getClient() instanceof DeviceClient)
+            client.open();
+            if (client instanceof DeviceClient)
             {
-                ((DeviceClient) testInstance.testIdentity.getClient()).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+                ((DeviceClient) client).startDeviceTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             }
             else
             {
-                ((ModuleClient) testInstance.testIdentity.getClient()).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
+                ((ModuleClient) client).startTwin(new DeviceTwinStatusCallBack(), deviceState, deviceState.dCDeviceForTwin, deviceState);
             }
         }
 
@@ -409,7 +410,7 @@ public class DeviceTwinCommon extends IntegrationTest
             testInstance.deviceUnderTest.sCModuleForRegistryManager = ((TestModuleIdentity) testInstance.testIdentity).getModule();
         }
 
-        setUpTwin(testInstance.deviceUnderTest, openDeviceClient);
+        setUpTwin(testInstance.deviceUnderTest, openDeviceClient, testInstance.testIdentity.getClient());
     }
 
     @After
