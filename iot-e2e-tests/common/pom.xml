@@ -139,6 +139,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
                     <includes>
                         <!--By default, only test files that end in ___Test.java are recognized as tests. This statement extends that to ___Tests.java files-->
                         <include>*Tests.java</include>
