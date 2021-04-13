@@ -23,10 +23,11 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.SendMessagesCommon;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,9 +44,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenGene
 @RunWith(Parameterized.class)
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean withProxy) throws Exception
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint, withProxy);
+        super(protocol, authenticationType, clientType, withProxy);
     }
 
     //TODO this test doesn't seem to check anything that the basic sendMessages test already checks. It just has a different payload. Needs
@@ -56,7 +57,7 @@ public class SendMessagesTests extends SendMessagesCommon
     {
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendSecurityMessages(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, null);
+        IotHubServicesCommon.sendSecurityMessages(testInstance.identity.getClient(), testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, null);
     }
 
     @Test
@@ -64,7 +65,7 @@ public class SendMessagesTests extends SendMessagesCommon
     {
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test
@@ -72,7 +73,7 @@ public class SendMessagesTests extends SendMessagesCommon
     {
         this.testInstance.setup(true);
 
-        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test
@@ -80,7 +81,7 @@ public class SendMessagesTests extends SendMessagesCommon
     {
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendBulkMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        IotHubServicesCommon.sendBulkMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test
@@ -95,7 +96,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendBulkMessages(testInstance.client, testInstance.protocol, MULTIPLE_SMALL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        IotHubServicesCommon.sendBulkMessages(testInstance.identity.getClient(), testInstance.protocol, MULTIPLE_SMALL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test
@@ -104,7 +105,7 @@ public class SendMessagesTests extends SendMessagesCommon
     {
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, LARGE_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, LARGE_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 
     @Test
@@ -112,19 +113,19 @@ public class SendMessagesTests extends SendMessagesCommon
     public void sendMessagesWithUnusualApplicationProperties() throws Exception
     {
         this.testInstance.setup();
-        this.testInstance.client.open();
+        this.testInstance.identity.getClient().open();
         Message msg = new Message("asdf");
 
         //All of these characters should be allowed within application properties
         msg.setProperty("TestKey1234!#$%&'*+-^_`|~", "TestValue1234!#$%&'*+-^_`|~()<>@,;:\\\"[]?={} \t");
         // ()<>@,;:\"[]?={}
-        IotHubServicesCommon.sendMessageAndWaitForResponse(this.testInstance.client, new MessageAndResult(msg, IotHubStatusCode.OK_EMPTY), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.protocol);
-        this.testInstance.client.closeNow();
+        IotHubServicesCommon.sendMessageAndWaitForResponse(this.testInstance.identity.getClient(), new MessageAndResult(msg, IotHubStatusCode.OK_EMPTY), RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.protocol);
+        this.testInstance.identity.getClient().closeNow();
     }
 
     @Test
     @ContinuousIntegrationTest
-    public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, IOException, IotHubException
+    public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, IOException, IotHubException, GeneralSecurityException, URISyntaxException
     {
         if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS && testInstance.clientType.equals(ClientType.DEVICE_CLIENT)))
         {
@@ -134,14 +135,13 @@ public class SendMessagesTests extends SendMessagesCommon
 
         AtomicBoolean succeed = new AtomicBoolean();
         Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
+        TestDeviceIdentity[] testDeviceIdentities = new TestDeviceIdentity[MAX_DEVICE_PARALLEL];
         Collection<String> deviceIds = new ArrayList<>();
-        String uuid = UUID.randomUUID().toString();
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
         {
-            String deviceIdAmqps = "java-device-client-e2e-test-amqps".concat(i + "-" + uuid);
-            deviceIds.add(deviceIdAmqps);
-            deviceListAmqps[i] = Device.createFromId(deviceIdAmqps, null, null);
-            Tools.addDeviceWithRetry(registryManager, deviceListAmqps[i]);
+            testDeviceIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
+            deviceListAmqps[i] = testDeviceIdentities[i].getDevice();
+            deviceIds.add(deviceListAmqps[i].getDeviceId());
         }
 
         List<Thread> threads = new ArrayList<>(deviceListAmqps.length);
@@ -167,10 +167,10 @@ public class SendMessagesTests extends SendMessagesCommon
 
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
         {
-            registryManager.removeDevice(deviceListAmqps[i].getDeviceId());
+            Tools.disposeTestIdentity(testDeviceIdentities[i], iotHubConnectionString);
         }
 
-        if(!succeed.get())
+        if (!succeed.get())
         {
             fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Sending message over AMQP protocol in parallel failed", deviceIds, "amqp", hostName, new ArrayList<>()));
         }
@@ -192,7 +192,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         this.testInstance.setup();
 
-        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, testInstance.identity.getDeviceId(), testInstance.identity.getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
+        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, testInstance.identity.getDeviceId(), ((TestDeviceIdentity)testInstance.identity).getDevice().getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
         DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, testInstance.protocol);
         client.open();
 
@@ -214,7 +214,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.client, testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
+        IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.identity.getClient(), testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
     }
 
     @Test
@@ -228,6 +228,6 @@ public class SendMessagesTests extends SendMessagesCommon
 
         this.testInstance.setup(SSLContextBuilder.buildSSLContext());
 
-        IotHubServicesCommon.sendMessages(testInstance.client, testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
     }
 }

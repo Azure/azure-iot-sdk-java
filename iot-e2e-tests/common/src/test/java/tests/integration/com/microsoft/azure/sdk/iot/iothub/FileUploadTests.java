@@ -16,7 +16,6 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
-import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -33,16 +32,13 @@ import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.BasicProxyAuthenticator;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
-import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +50,6 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -117,11 +112,6 @@ public class FileUploadTests extends IntegrationTest
 
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
-
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        publicKeyCertificate = certificateGenerator.getPublicCertificate();
-        privateKeyCertificate = certificateGenerator.getPrivateKey();
-        x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
         return Arrays.asList(
                 new Object[][]
@@ -270,30 +260,8 @@ public class FileUploadTests extends IntegrationTest
 
     private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException, GeneralSecurityException
     {
-        DeviceClient deviceClient;
-        if (testInstance.authenticationType == AuthenticationType.SAS)
-        {
-            String deviceId = "java-file-upload-e2e-test-".concat(UUID.randomUUID().toString());
-            Device scDevice = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
-            scDevice = Tools.addDeviceWithRetry(registryManager, scDevice);
-
-            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevice), protocol);
-
-        }
-        else if (testInstance.authenticationType == AuthenticationType.SELF_SIGNED)
-        {
-            String deviceIdX509 = "java-file-upload-e2e-test-x509-".concat(UUID.randomUUID().toString());
-            Device scDevicex509 = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdX509, AuthenticationType.SELF_SIGNED);
-            scDevicex509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-            scDevicex509 = Tools.addDeviceWithRetry(registryManager, scDevicex509);
-
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificate, privateKeyCertificate);
-            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevicex509), protocol, sslContext);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Test code has not been written for this authentication type yet");
-        }
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, testInstance.authenticationType);
+        DeviceClient deviceClient = testDeviceIdentity.getDeviceClient();
 
         if (testInstance.withProxy)
         {

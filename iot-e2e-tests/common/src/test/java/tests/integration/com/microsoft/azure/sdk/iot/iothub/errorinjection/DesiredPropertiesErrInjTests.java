@@ -39,9 +39,9 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
 {
     private final JsonParser jsonParser;
 
-    public DesiredPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
+    public DesiredPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
         jsonParser = new JsonParser();
     }
 
@@ -547,23 +547,23 @@ public class DesiredPropertiesErrInjTests extends DeviceTwinCommon
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK_EMPTY);
         IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(
-            internalClient,
+            testInstance.testIdentity.getClient(),
             errorInjectionMsgAndRet,
             RETRY_MILLISECONDS,
             SEND_TIMEOUT_MILLISECONDS,
             this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient);
-        deviceUnderTest.dCDeviceForTwin.propertyStateList[0].callBackTriggered = false;
-        Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected desired properties to be size 1, but was size " + deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size(), internalClient), 1, deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, testInstance.testIdentity.getClient());
+        testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[0].callBackTriggered = false;
+        Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected desired properties to be size 1, but was size " + testInstance.deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size(), testInstance.testIdentity.getClient()), 1, testInstance.deviceUnderTest.sCDeviceForTwin.getDesiredProperties().size());
         Set<Pair> dp = new HashSet<>();
-        Pair p = deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
+        Pair p = testInstance.deviceUnderTest.sCDeviceForTwin.getDesiredProperties().iterator().next();
         p.setValue(updatePropertyValue2);
         dp.add(p);
-        deviceUnderTest.sCDeviceForTwin.setDesiredProperties(dp);
+        testInstance.deviceUnderTest.sCDeviceForTwin.setDesiredProperties(dp);
 
-        testInstance.twinServiceClient.updateTwin(deviceUnderTest.sCDeviceForTwin);
+        testInstance.twinServiceClient.updateTwin(testInstance.deviceUnderTest.sCDeviceForTwin);
 
         waitAndVerifyTwinStatusBecomesSuccess();
         waitAndVerifyDesiredPropertyCallback(update2Prefix, false);

@@ -36,9 +36,9 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 @RunWith(Parameterized.class)
 public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
 {
-    public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
+    public ReportedPropertiesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
@@ -221,20 +221,20 @@ public class ReportedPropertiesErrInjTests extends DeviceTwinCommon
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK_EMPTY);
-        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(internalClient,
+        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(testInstance.testIdentity.getClient(),
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient);
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, testInstance.testIdentity.getClient());
         // add one new reported property
-        deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-        internalClient.sendReportedProperties(deviceUnderTest.dCDeviceForTwin.getReportedProp());
+        testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
+        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
 
         waitAndVerifyTwinStatusBecomesSuccess();
         // verify if they are received by SC
-        readReportedPropertiesAndVerify(deviceUnderTest, PROPERTY_VALUE, 2);
+        readReportedPropertiesAndVerify(testInstance.deviceUnderTest, PROPERTY_VALUE, 2);
     }
 }
