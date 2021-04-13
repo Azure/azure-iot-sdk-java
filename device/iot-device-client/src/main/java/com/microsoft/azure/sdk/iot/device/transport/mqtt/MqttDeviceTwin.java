@@ -50,13 +50,12 @@ public class MqttDeviceTwin extends Mqtt
     private static final int PATCH_VERSION_TOKEN = 5;
 
     public MqttDeviceTwin(
-        MqttAsyncClient mqttAsyncClient,
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        super(mqttAsyncClient, null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
+        super(null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
         this.subscribeTopic = RES + BACKSLASH + POUND;
     }

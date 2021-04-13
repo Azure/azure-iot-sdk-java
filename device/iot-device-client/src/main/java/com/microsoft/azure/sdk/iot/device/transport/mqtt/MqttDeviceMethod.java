@@ -39,13 +39,12 @@ public class MqttDeviceMethod extends Mqtt
     private static final int REQID_TOKEN = 4;
 
     public MqttDeviceMethod(
-        MqttAsyncClient mqttAsyncClient,
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        super(mqttAsyncClient, null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
+        super(null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
         this.subscribeTopic = POST + BACKSLASH + POUND;
         this.responseTopic = RES;
