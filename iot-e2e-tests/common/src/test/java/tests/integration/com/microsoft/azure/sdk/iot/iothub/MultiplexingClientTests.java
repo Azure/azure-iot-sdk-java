@@ -286,7 +286,6 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
-    @Ignore // disabling this test since it requires too many device registration operations to setup
     @ContinuousIntegrationTest
     @Test
     public void sendMessagesMaxDevicesAllowed() throws Exception
@@ -465,7 +464,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
         testInstance.multiplexingClient.open();
 
-        testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray.subList(1, testInstance.deviceClientArray.size()));
+        testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
 
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
 
