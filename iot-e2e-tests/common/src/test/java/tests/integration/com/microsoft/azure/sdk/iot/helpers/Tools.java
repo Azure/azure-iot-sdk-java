@@ -142,7 +142,7 @@ public class Tools
         RegistryManager registryManager = getRegistyManager(iotHubConnectionString);
         if (authenticationType == SAS)
         {
-            String deviceId = "java-file-upload-e2e-test-".concat(UUID.randomUUID().toString());
+            String deviceId = "java-test-device-".concat(UUID.randomUUID().toString());
             Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
             device = Tools.addDeviceWithRetry(registryManager, device);
 
@@ -151,7 +151,7 @@ public class Tools
         }
         else if (authenticationType == SELF_SIGNED)
         {
-            String deviceId = "java-file-upload-e2e-test-x509-".concat(UUID.randomUUID().toString());
+            String deviceId = "java-test-x509-device-".concat(UUID.randomUUID().toString());
             Device device = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceId, SELF_SIGNED);
             String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
             device.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
@@ -177,12 +177,12 @@ public class Tools
         if (authenticationType == SAS)
         {
             //sas device to house the sas module under test
-            String deviceId = "java-method-e2e-test-device".concat("-" + UUID.randomUUID().toString());
+            String deviceId = "java-test-device-".concat(UUID.randomUUID().toString());
             Device device = Device.createFromId(deviceId, null, null);
             device = Tools.addDeviceWithRetry(getRegistyManager(iotHubConnectionString), device);
 
             //sas module client under test
-            String moduleId = "java-method-e2e-test-module".concat("-" + UUID.randomUUID().toString());
+            String moduleId = "java-test-module-".concat(UUID.randomUUID().toString());
             Module module = Module.createFromId(deviceId, moduleId, null);
             module = Tools.addModuleWithRetry(getRegistyManager(iotHubConnectionString), module);
             ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
@@ -198,13 +198,13 @@ public class Tools
                     IntegrationTest.x509CertificateGenerator.getPrivateKey());
 
             //x509 device to house the x509 module under test
-            String deviceId = "java-method-e2e-test-device-x509".concat("-" + UUID.randomUUID().toString());
+            String deviceId = "java-test-x509-device-".concat(UUID.randomUUID().toString());
             Device device = Device.createDevice(deviceId, SELF_SIGNED);
             device.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(getRegistyManager(iotHubConnectionString), device);
 
             //x509 module client under test
-            String moduleId = "java-method-e2e-test-module-x509".concat("-" + UUID.randomUUID().toString());
+            String moduleId = "java-test-x509-module-".concat(UUID.randomUUID().toString());
             Module module = Module.createModule(deviceId, moduleId, SELF_SIGNED);
             module.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
             module = Tools.addModuleWithRetry(getRegistyManager(iotHubConnectionString), module);
