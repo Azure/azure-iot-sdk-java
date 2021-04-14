@@ -60,6 +60,12 @@ public class SendMessagesTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithCustomSasTokenProvider() throws Exception
     {
+        if (testInstance.authenticationType != SAS)
+        {
+            // SAS token provider can't be used for x509 auth
+            return;
+        }
+        
         this.testInstance.setup(true);
 
         IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
