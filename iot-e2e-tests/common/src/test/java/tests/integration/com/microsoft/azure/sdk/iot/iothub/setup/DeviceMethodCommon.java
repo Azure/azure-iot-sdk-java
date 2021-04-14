@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.runners.Parameterized;
@@ -40,6 +41,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
  * Utility functions, setup and teardown for all device method integration tests. This class should not contain any tests,
  * but any children class should.
  */
+@Slf4j
 public class DeviceMethodCommon extends IntegrationTest
 {
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
@@ -164,13 +166,13 @@ public class DeviceMethodCommon extends IntegrationTest
             try
             {
                 this.deviceTestManager.tearDown();
-                Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                //not a big deal if dispose fails. This test suite is not testing the functions in this cleanup.
-                // If identities are left registered, they will be deleted my nightly cleanup job anyways
+                log.error("Failed to close clients during cleanup", e);
             }
+
+            Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
         }
     }
 

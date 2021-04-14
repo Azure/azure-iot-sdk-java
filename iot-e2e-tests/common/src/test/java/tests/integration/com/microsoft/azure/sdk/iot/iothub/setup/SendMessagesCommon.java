@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -58,6 +59,7 @@ import static junit.framework.TestCase.fail;
  * Utility functions, setup and teardown for all D2C telemetry integration tests. This class should not contain any tests,
  * but any child class should.
  */
+@Slf4j
 public class SendMessagesCommon extends IntegrationTest
 {
     @Parameterized.Parameters(name = "{0}_{1}_{2}_{3}")
@@ -277,12 +279,14 @@ public class SendMessagesCommon extends IntegrationTest
         {
             try
             {
-                this.identity.getClient().closeNow();
+                if (this.identity != null && this.identity.getClient() != null)
+                {
+                    this.identity.getClient().closeNow();
+                }
             }
             catch (IOException e)
             {
-                //not a big deal if dispose fails. This test suite is not testing the functions in this cleanup.
-                // If identities are left registered, they will be deleted a nightly cleanup job anyways
+                log.error("Failed to close client during tear down", e);
             }
 
             Tools.disposeTestIdentity(this.identity, iotHubConnectionString);

@@ -154,12 +154,15 @@ public class ReceiveMessagesCommon extends IntegrationTest
         {
             try
             {
-                this.identity.getClient().closeNow();
+                if (this.identity != null && this.identity.getClient() != null)
+                {
+                    this.identity.getClient().closeNow();
+                }
+
                 this.serviceClient.close();
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                // not a big deal if closing the clients fails.
                 log.error("Failed to close clients during cleanup", e);
             }
 
