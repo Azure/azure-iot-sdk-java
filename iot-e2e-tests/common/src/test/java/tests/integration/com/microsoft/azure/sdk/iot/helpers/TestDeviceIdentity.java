@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.InternalClient;
 import com.microsoft.azure.sdk.iot.service.Device;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * A collection of all the relevant identity and client objects that should be necessary to run a device side test involving a device.
@@ -16,6 +17,7 @@ import lombok.Getter;
 public class TestDeviceIdentity extends TestIdentity
 {
     @Getter
+    @Setter
     DeviceClient deviceClient;
 
     @Getter

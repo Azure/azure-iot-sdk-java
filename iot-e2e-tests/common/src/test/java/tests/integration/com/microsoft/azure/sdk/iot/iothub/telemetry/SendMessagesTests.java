@@ -49,17 +49,6 @@ public class SendMessagesTests extends SendMessagesCommon
         super(protocol, authenticationType, clientType, withProxy);
     }
 
-    //TODO this test doesn't seem to check anything that the basic sendMessages test already checks. It just has a different payload. Needs
-    // to check that something actually happened downstream because it was a security message
-    @Ignore
-    @Test
-    public void sendSecurityMessages() throws Exception
-    {
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendSecurityMessages(testInstance.identity.getClient(), testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, null);
-    }
-
     @Test
     public void sendMessages() throws Exception
     {

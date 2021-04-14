@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
+import com.microsoft.azure.sdk.iot.device.SasTokenProvider;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -32,8 +33,10 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.EventCallback;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.MessageAndResult;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenProviderImpl;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 
@@ -242,8 +245,7 @@ public class SendMessagesCommon extends IntegrationTest
         }
 
         public void setup(boolean useCustomSasTokenProvider) throws Exception {
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
-            setup(sslContext, useCustomSasTokenProvider);
+            setup(null, useCustomSasTokenProvider);
         }
 
         public void setup(SSLContext customSSLContext, boolean useCustomSasTokenProvider) throws Exception
@@ -251,6 +253,18 @@ public class SendMessagesCommon extends IntegrationTest
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType);
+
+                if (customSSLContext != null)
+                {
+                    DeviceClient clientWithCustomSSLContext = new DeviceClient(registryManager.getDeviceConnectionString(testInstance.identity.getDevice()), protocol, customSSLContext);
+                    ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
+                }
+                else if (useCustomSasTokenProvider)
+                {
+                    SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(registryManager.getDeviceConnectionString(this.identity.getDevice()));
+                    DeviceClient clientWithCustomSasTokenProvider = new DeviceClient(hostName, testInstance.identity.getDeviceId(), sasTokenProvider, protocol, null);
+                    ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSasTokenProvider);
+                }
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
@@ -269,8 +283,6 @@ public class SendMessagesCommon extends IntegrationTest
                 ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
                 this.identity.getClient().setProxySettings(proxySettings);
             }
-
-            Thread.sleep(2000);
 
             buildMessageLists();
         }
