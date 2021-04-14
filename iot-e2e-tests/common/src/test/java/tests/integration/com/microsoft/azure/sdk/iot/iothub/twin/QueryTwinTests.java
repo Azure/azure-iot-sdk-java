@@ -294,8 +294,8 @@ public class QueryTwinTests extends DeviceTwinCommon
 
                 for (Pair dp : d.getDesiredProperties())
                 {
-                    Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected desired property key, expected " + queryProperty + " but was " + dp.getKey(), testInstance.testIdentity.getClient()), queryProperty, dp.getKey());
-                    Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected desired property value, expected " + queryPropertyValue + " but was " + dp.getValue(), testInstance.testIdentity.getClient()), queryPropertyValue, dp.getValue());
+                    Assert.assertEquals("Unexpected desired property key, expected " + queryProperty + " but was " + dp.getKey(), queryProperty, dp.getKey());
+                    Assert.assertEquals("Unexpected desired property value, expected " + queryPropertyValue + " but was " + dp.getValue(), queryPropertyValue, dp.getValue());
                 }
             }
         }
