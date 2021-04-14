@@ -222,7 +222,10 @@ public class Tools
     {
         try
         {
-            getRegistyManager(iotHubConnectionString).removeDevice(testIdentity.getDeviceId());
+            if (testIdentity != null && !com.microsoft.azure.sdk.iot.service.Tools.isNullOrEmpty(testIdentity.getDeviceId()))
+            {
+                getRegistyManager(iotHubConnectionString).removeDevice(testIdentity.getDeviceId());
+            }
         }
         catch (IOException | IotHubException e)
         {
