@@ -102,8 +102,6 @@ public class HubTierConnectionTests extends IntegrationTest
                         }
         ));
 
-        Thread.sleep(2000);
-
         return inputs;
     }
 
