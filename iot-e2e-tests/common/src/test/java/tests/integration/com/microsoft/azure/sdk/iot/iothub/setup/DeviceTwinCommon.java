@@ -298,13 +298,13 @@ public class DeviceTwinCommon extends IntegrationTest
             if (testInstance.clientType == ClientType.DEVICE_CLIENT)
             {
                 testInstance.testIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
-                testInstance.devicesUnderTest[i].sCDeviceForRegistryManager = testInstance.testIdentity.getDevice();
+                testInstance.devicesUnderTest[i].sCDeviceForRegistryManager = testInstance.testIdentities[i].getDevice();
             }
             else
             {
                 testInstance.testIdentities[i] = Tools.getTestModule(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
-                testInstance.devicesUnderTest[i].sCDeviceForRegistryManager = testInstance.testIdentity.getDevice();
-                testInstance.devicesUnderTest[i].sCModuleForRegistryManager = ((TestModuleIdentity) testInstance.testIdentity).getModule();
+                testInstance.devicesUnderTest[i].sCDeviceForRegistryManager = testInstance.testIdentities[i].getDevice();
+                testInstance.devicesUnderTest[i].sCModuleForRegistryManager = ((TestModuleIdentity) testInstance.testIdentities[i]).getModule();
             }
 
             setUpTwin(testInstance.devicesUnderTest[i], openDeviceClients, testInstance.testIdentities[i].getClient());
@@ -435,7 +435,10 @@ public class DeviceTwinCommon extends IntegrationTest
                 {
                     try
                     {
-                        testIdentity.getClient().closeNow();
+                        if (testIdentity != null && testIdentity.getClient() != null)
+                        {
+                            testIdentity.getClient().closeNow();
+                        }
                     }
                     catch (IOException e)
                     {
