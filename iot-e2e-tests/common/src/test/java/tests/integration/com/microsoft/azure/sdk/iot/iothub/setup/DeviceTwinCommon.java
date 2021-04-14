@@ -420,7 +420,10 @@ public class DeviceTwinCommon extends IntegrationTest
         {
             try
             {
-                testInstance.testIdentity.getClient().closeNow();
+                if (testInstance.testIdentity != null && testInstance.testIdentity.getClient() != null)
+                {
+                    testInstance.testIdentity.getClient().closeNow();
+                }
             }
             catch (IOException e)
             {
