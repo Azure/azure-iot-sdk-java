@@ -165,7 +165,10 @@ public class DeviceMethodCommon extends IntegrationTest
         {
             try
             {
-                this.deviceTestManager.tearDown();
+                if (this.deviceTestManager != null)
+                {
+                    this.deviceTestManager.tearDown();
+                }
             }
             catch (IOException e)
             {
