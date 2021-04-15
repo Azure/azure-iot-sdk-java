@@ -172,7 +172,16 @@ public class Tools
     private static final int PROACTIVE_TEST_DEVICE_REGISRATION_COUNT = 100;
 
     /**
-     * Return a device identity and client that can be used for a test.
+     * Return a device identity and client that can be used for a test. If a recycled identity is available to use, this method will prioritize using
+     * that instead of creating a new identity. When creating a new identity, this method will create a batch of identities. One from the batch will
+     * be returned, and the rest will be cached and available to the next caller of this method. This method will also prioritize
+     * returning cached identities with twin changes over cached identities with no twin changes, but needCleanTwin can be used
+     * to never return a cached identity with twin changes.
+     *
+     * For instance, a test method that just wants to send telemetry from a device identity should set needCleanTwin to false
+     * so that it can use any available device identity. Conversely, a test method that involves setting reported or desired properties
+     * should set needCleanTwin to true to avoid previous twin state interfering with the upcoming test.
+     *
      * @param iotHubConnectionString The connection string for the IoT Hub where the identity will be registered to.
      * @param protocol The device side protocol for the client to use.
      * @param authenticationType The device side authentication type for the client to use.
@@ -289,7 +298,16 @@ public class Tools
     }
 
     /**
-     * Return a module identity and client that can be used for a test.
+     * Return a module identity and client that can be used for a test. If a recycled identity is available to use, this method will prioritize using
+     * that instead of creating a new identity. When creating a new identity, this method will not create a batch of identities
+     * since there is no bulk add service API for just modules. This method will also prioritize
+     * returning cached identities with twin changes over cached identities with no twin changes, but needCleanTwin can be used
+     * to never return a cached identity with twin changes.
+     *
+     * For instance, a test method that just wants to send telemetry from a module identity should set needCleanTwin to false
+     * so that it can use any available module. Conversely, a test method that involves setting reported or desired properties
+     * should set needCleanTwin to true to avoid previous twin state interfering with the upcoming test.
+     *
      * @param iotHubConnectionString The connection string for the IoT Hub where the identity will be registered to.
      * @param protocol The device side protocol for the client to use.
      * @param authenticationType The device side authentication type for the client to use.
