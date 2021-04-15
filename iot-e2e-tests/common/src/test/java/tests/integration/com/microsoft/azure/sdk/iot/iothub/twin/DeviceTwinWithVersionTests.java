@@ -203,7 +203,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         }
     }
 
-    private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException, InterruptedException
+    private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException
     {
         testInstance.deviceTwinWithVersionTestDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, testInstance.deviceForRegistryManager), protocol);
         testInstance.deviceTwinWithVersionTestDevice.deviceClient.open();

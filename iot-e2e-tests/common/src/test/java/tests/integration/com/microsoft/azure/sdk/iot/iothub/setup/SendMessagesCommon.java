@@ -178,7 +178,7 @@ public class SendMessagesCommon extends IntegrationTest
     protected static final String testProxyUser = "proxyUsername";
     protected static final char[] testProxyPass = "1234".toCharArray();
 
-    public SendMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
+    public SendMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy)
     {
         this.testInstance = new SendMessagesTestInstance(protocol, authenticationType, clientType, withProxy);
     }
@@ -358,7 +358,7 @@ public class SendMessagesCommon extends IntegrationTest
             messageString = "Java client " + deviceAmqps.getDeviceId() + " test e2e message over AMQP protocol";
         }
 
-        public void openConnection() throws IOException, URISyntaxException, InterruptedException
+        public void openConnection() throws IOException, URISyntaxException
         {
             client = new DeviceClient(connString, protocol);
             client.open();

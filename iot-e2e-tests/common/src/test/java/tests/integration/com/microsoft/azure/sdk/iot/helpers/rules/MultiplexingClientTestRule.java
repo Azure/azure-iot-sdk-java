@@ -2,12 +2,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.helpers.rules;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 @Slf4j
 public class MultiplexingClientTestRule implements TestRule

@@ -137,7 +137,7 @@ public class FileUploadTests extends IntegrationTest
         private MessageState[] messageStates;
         private final boolean withProxy;
 
-        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException
+        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -205,7 +205,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Before
-    public void setUpFileUploadState() throws Exception
+    public void setUpFileUploadState()
     {
         testInstance.fileUploadState = new FileUploadState[MAX_FILES_TO_UPLOAD];
         testInstance.messageStates = new MessageState[MAX_FILES_TO_UPLOAD];
@@ -361,7 +361,7 @@ public class FileUploadTests extends IntegrationTest
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     @ContinuousIntegrationTest
-    public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException, IotHubException, GeneralSecurityException
+    public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
     {
         if (testInstance.withProxy)
         {

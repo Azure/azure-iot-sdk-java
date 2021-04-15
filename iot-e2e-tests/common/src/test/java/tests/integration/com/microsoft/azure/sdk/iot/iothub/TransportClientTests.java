@@ -425,7 +425,7 @@ public class TransportClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
+    public void testTwin() throws IOException, InterruptedException, IotHubException
     {
         testInstance.transportClient = setUpTwin();
 

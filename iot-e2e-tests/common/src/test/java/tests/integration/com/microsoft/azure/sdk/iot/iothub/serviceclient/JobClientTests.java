@@ -192,7 +192,7 @@ public class JobClientTests extends IntegrationTest
 
     @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
     @Ignore
-    public void scheduleUpdateTwinSucceed() throws IOException, IotHubException, InterruptedException
+    public void scheduleUpdateTwinSucceed() throws InterruptedException
     {
         // Arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);
@@ -275,7 +275,7 @@ public class JobClientTests extends IntegrationTest
 
     @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
     @Ignore
-    public void scheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
+    public void scheduleDeviceMethodSucceed() throws InterruptedException
     {
         // Arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);
@@ -358,7 +358,7 @@ public class JobClientTests extends IntegrationTest
     @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
     @ContinuousIntegrationTest
     @Ignore
-    public void mixScheduleInFutureSucceed() throws IOException, IotHubException, InterruptedException
+    public void mixScheduleInFutureSucceed() throws InterruptedException
     {
         // Arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);
@@ -477,7 +477,7 @@ public class JobClientTests extends IntegrationTest
     @Test (timeout= TEST_TIMEOUT_MILLISECONDS)
     @ContinuousIntegrationTest
     @Ignore
-    public void cancelScheduleDeviceMethodSucceed() throws IOException, IotHubException, InterruptedException
+    public void cancelScheduleDeviceMethodSucceed() throws InterruptedException
     {
         // Arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_NUMBER_JOBS);

@@ -180,7 +180,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
                 PROPERTY_VALUE_UPDATE);
     }
 
-    public void testSubscribeToDesiredPropertiesWithVersionFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testSubscribeToDesiredPropertiesWithVersionFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException
     {
         // arrange
         testInstance.deviceUnderTest.sCDeviceForTwin.clearTwin();
@@ -231,7 +231,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         testSubscribeToDesiredPropertiesMultiThreadedFlow(jsonParser.parse(PROPERTY_VALUE_ARRAY), jsonParser.parse(PROPERTY_VALUE_UPDATE_ARRAY), PROPERTY_VALUE_UPDATE_ARRAY_PREFIX);
     }
 
-    public void testSubscribeToDesiredPropertiesMultiThreadedFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException
+    public void testSubscribeToDesiredPropertiesMultiThreadedFlow(Object propertyValue, Object updatePropertyValue, String updatePropertyPrefix) throws IOException, InterruptedException
     {
         // arrange
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
@@ -312,7 +312,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     public void testSubscribeToDesiredPropertiesSequentiallyFlow(
             Object propertyValue,
             Object updatePropertyValue,
-            String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+            String updatePropertyPrefix) throws IOException, InterruptedException, IotHubException
     {
         // arrange
         testInstance.deviceUnderTest.sCDeviceForTwin.clearTwin();
