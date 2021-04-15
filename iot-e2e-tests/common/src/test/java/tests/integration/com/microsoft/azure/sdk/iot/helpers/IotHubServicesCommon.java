@@ -132,7 +132,7 @@ public class IotHubServicesCommon
                                             IotHubClientProtocol protocol,
                                             final long RETRY_MILLISECONDS,
                                             final long SEND_TIMEOUT_MILLISECONDS,
-                                            List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException, InterruptedException
+                                            List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates) throws IOException
     {
         try
         {

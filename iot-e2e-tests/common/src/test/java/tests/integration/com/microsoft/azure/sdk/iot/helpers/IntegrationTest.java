@@ -59,6 +59,9 @@ public abstract class IntegrationTest
     @Rule
     public ThrottleResistantTestRule throttleResistantTestRule = new ThrottleResistantTestRule();
 
+    @Rule
+    public MultiplexingClientTestRule multiplexingClientTestRule = new MultiplexingClientTestRule();
+
     int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
 
     // Each test must finish in under 5 minutes. Only the token renewal test should last longer,
@@ -80,4 +83,6 @@ public abstract class IntegrationTest
     // Amqp specific timeout values for waiting on authentication/device sessions to open
     public static int AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS = 4 * 60;
     public static int AMQP_DEVICE_SESSION_TIMEOUT_SECONDS = 4 * 60;
+
+    public static X509CertificateGenerator x509CertificateGenerator = new X509CertificateGenerator();
 }

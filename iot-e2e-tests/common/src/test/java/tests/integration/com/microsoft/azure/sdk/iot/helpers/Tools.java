@@ -5,34 +5,34 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
-import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
-import com.microsoft.azure.sdk.iot.deps.serializer.SymmetricKeyParser;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.Device;
-import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
-import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest.HTTP_READ_TIMEOUT;
 
 @Slf4j
 public class Tools
@@ -124,6 +124,115 @@ public class Tools
         return possibleExceptionCause.isInstance(exceptionToSearch) || (exceptionToSearch != null && isCause(possibleExceptionCause, exceptionToSearch.getCause()));
     }
 
+    private static RegistryManager registryManager;
+
+    public static RegistryManager getRegistyManager(String iotHubConnectionString) throws IOException
+    {
+        if (registryManager == null)
+        {
+            RegistryManagerOptions options = RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
+            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, options);
+        }
+
+        return registryManager;
+    }
+
+    public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException, InterruptedException
+    {
+        RegistryManager registryManager = getRegistyManager(iotHubConnectionString);
+        if (authenticationType == SAS)
+        {
+            String deviceId = "java-test-device-".concat(UUID.randomUUID().toString());
+            Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
+            device = Tools.addDeviceWithRetry(registryManager, device);
+
+            DeviceClient deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol);
+            return new TestDeviceIdentity(deviceClient, device);
+        }
+        else if (authenticationType == SELF_SIGNED)
+        {
+            String deviceId = "java-test-x509-device-".concat(UUID.randomUUID().toString());
+            Device device = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceId, SELF_SIGNED);
+            String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
+            device.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            device = Tools.addDeviceWithRetry(registryManager, device);
+
+            SSLContext sslContext =
+                SSLContextBuilder.buildSSLContext(
+                    IntegrationTest.x509CertificateGenerator.getPublicCertificate(),
+                    IntegrationTest.x509CertificateGenerator.getPrivateKey());
+
+            DeviceClient deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol, sslContext);
+
+            return new TestDeviceIdentity(deviceClient, device);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Test code has not been written for this authentication type yet");
+        }
+    }
+
+    public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
+    {
+        if (authenticationType == SAS)
+        {
+            //sas device to house the sas module under test
+            String deviceId = "java-test-device-".concat(UUID.randomUUID().toString());
+            Device device = Device.createFromId(deviceId, null, null);
+            device = Tools.addDeviceWithRetry(getRegistyManager(iotHubConnectionString), device);
+
+            //sas module client under test
+            String moduleId = "java-test-module-".concat(UUID.randomUUID().toString());
+            Module module = Module.createFromId(deviceId, moduleId, null);
+            module = Tools.addModuleWithRetry(getRegistyManager(iotHubConnectionString), module);
+            ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
+
+            return new TestModuleIdentity(moduleClient, device, module);
+        }
+        else if (authenticationType == SELF_SIGNED)
+        {
+            String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
+            SSLContext sslContext =
+                SSLContextBuilder.buildSSLContext(
+                    IntegrationTest.x509CertificateGenerator.getPublicCertificate(),
+                    IntegrationTest.x509CertificateGenerator.getPrivateKey());
+
+            //x509 device to house the x509 module under test
+            String deviceId = "java-test-x509-device-".concat(UUID.randomUUID().toString());
+            Device device = Device.createDevice(deviceId, SELF_SIGNED);
+            device.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            device = Tools.addDeviceWithRetry(getRegistyManager(iotHubConnectionString), device);
+
+            //x509 module client under test
+            String moduleId = "java-test-x509-module-".concat(UUID.randomUUID().toString());
+            Module module = Module.createModule(deviceId, moduleId, SELF_SIGNED);
+            module.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            module = Tools.addModuleWithRetry(getRegistyManager(iotHubConnectionString), module);
+            ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol, sslContext);
+
+            return new TestModuleIdentity(moduleClient, device, module);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Test code has not been written for this path yet");
+        }
+    }
+
+    public static void disposeTestIdentity(TestIdentity testIdentity, String iotHubConnectionString)
+    {
+        try
+        {
+            if (testIdentity != null && !com.microsoft.azure.sdk.iot.service.Tools.isNullOrEmpty(testIdentity.getDeviceId()))
+            {
+                getRegistyManager(iotHubConnectionString).removeDevice(testIdentity.getDeviceId());
+            }
+        }
+        catch (IOException | IotHubException e)
+        {
+            log.error("Failed to clean up device identity {}", testIdentity.getDeviceId(), e);
+        }
+    }
+
     public static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
@@ -151,99 +260,6 @@ public class Tools
         }
 
         return ret;
-    }
-
-    public static void addDevicesWithRetry(List<Device> devices, String connectionString) throws IotHubException, IOException, InterruptedException
-    {
-        // IoT hub only allows for bulk adding of devices at up to 100 per request, so take the provided devices iterable
-        // and break it into 100 devices or smaller chunks
-        List<Device> subIterable = new ArrayList<>();
-        //create a clone of the source list so elements can be removed from it instead
-        List<Device> devicesClone = new ArrayList<>(devices);
-        while (devicesClone.size() > 0)
-        {
-            Device device = devicesClone.remove(0);
-            subIterable.add(device);
-
-            // wait until sub list has the Iot Hub limit of 100 devices to add, or until there will be no more devices to add
-            if (subIterable.size() > 99 || devicesClone.size() <= 0)
-            {
-                long startTime = System.currentTimeMillis();
-                while (System.currentTimeMillis() - startTime < RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
-                {
-                    try
-                    {
-                        log.debug("Registering a batch of {} devices from total of {} remaining devices", subIterable.size(), devicesClone.size() + subIterable.size());
-                        addDevices(subIterable, connectionString);
-                        break;
-                    }
-                    catch (UnknownHostException | SocketException | SocketTimeoutException e)
-                    {
-                        log.warn("Failed to add devices");
-                        e.printStackTrace();
-                        Thread.sleep(WAIT_FOR_RETRY);
-                        if (System.currentTimeMillis() - startTime >= RETRY_TIMEOUT_ON_NETWORK_FAILURE_MILLISECONDS)
-                        {
-                            throw e;
-                        }
-                    }
-
-                }
-
-                // clear the sub list so it can be filled back up again with the next devices to add
-                subIterable.clear();
-            }
-        }
-    }
-
-    // This call mimics what should be a registry manager API for adding devices in bulk. Can be removed once we add support in our
-    // registry manager for this
-    private static final String IMPORT_MODE = "create";
-    public static void addDevices(Iterable<Device> devices, String connectionString) throws IOException, IotHubException {
-        if (devices == null)
-        {
-            throw new IllegalArgumentException("devices cannot be null");
-        }
-
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
-        URL url = getBulkDeviceAddUrl(iotHubConnectionString);
-
-        List<ExportImportDeviceParser> parsers = new ArrayList<>();
-        for (Device device : devices)
-        {
-            ExportImportDeviceParser exportImportDevice = new ExportImportDeviceParser();
-            exportImportDevice.setId(device.getDeviceId());
-            AuthenticationParser authenticationParser = new AuthenticationParser();
-            authenticationParser.setSymmetricKey(new SymmetricKeyParser(device.getSymmetricKey().getPrimaryKey(), device.getSymmetricKey().getSecondaryKey()));
-            exportImportDevice.setAuthentication(authenticationParser);
-            exportImportDevice.setImportMode(IMPORT_MODE);
-            parsers.add(exportImportDevice);
-        }
-
-        ExportImportDevicesParser body = new ExportImportDevicesParser();
-        body.setExportImportDevices(parsers);
-
-        String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
-        request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
-        request.setHeaderField("authorization", sasTokenString);
-        request.setHeaderField("Accept", "application/json");
-        request.setHeaderField("Content-Type", "application/json");
-        request.setHeaderField("charset", "utf-8");
-
-        HttpResponse response = request.send();
-
-        IotHubExceptionManager.httpResponseVerification(response);
-    }
-
-    public static URL getBulkDeviceAddUrl(IotHubConnectionString iotHubConnectionString) throws MalformedURLException
-    {
-        String stringBuilder = "https://" +
-                iotHubConnectionString.getHostName() +
-                "/devices/?api-version=" +
-                TransportUtils.IOTHUB_API_VERSION;
-        return new URL(stringBuilder);
     }
 
     public static Module addModuleWithRetry(RegistryManager registryManager, Module module) throws IotHubException, IOException, InterruptedException

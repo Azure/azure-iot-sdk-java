@@ -72,7 +72,10 @@ public class DeviceTestManager
 
     public void tearDown() throws IOException
     {
-        deviceEmulator.tearDown();
+        if (deviceEmulator != null)
+        {
+            deviceEmulator.tearDown();
+        }
     }
 
     public void restartDevice(String connectionString, IotHubClientProtocol protocol, String publicCert, String privateKey) throws InterruptedException, IOException, URISyntaxException, ModuleClientException, GeneralSecurityException

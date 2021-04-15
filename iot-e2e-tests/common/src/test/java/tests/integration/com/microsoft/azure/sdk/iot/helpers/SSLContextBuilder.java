@@ -91,7 +91,7 @@ public class SSLContextBuilder
         return sslContext;
     }
 
-    public static RSAPrivateKey parsePrivateKeyString(String privateKeyPEM) throws IOException, GeneralSecurityException
+    public static RSAPrivateKey parsePrivateKeyString(String privateKeyPEM) throws GeneralSecurityException
     {
         if (privateKeyPEM == null || privateKeyPEM.isEmpty())
         {

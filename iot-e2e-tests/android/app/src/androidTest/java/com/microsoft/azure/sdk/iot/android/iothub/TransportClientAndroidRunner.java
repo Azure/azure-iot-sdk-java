@@ -21,8 +21,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.TransportClientTests
 @RunWith(Parameterized.class)
 public class TransportClientAndroidRunner extends TransportClientTests
 {
-    public TransportClientAndroidRunner(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
-    {
+    public TransportClientAndroidRunner(IotHubClientProtocol protocol) {
         super(protocol);
     }
 }

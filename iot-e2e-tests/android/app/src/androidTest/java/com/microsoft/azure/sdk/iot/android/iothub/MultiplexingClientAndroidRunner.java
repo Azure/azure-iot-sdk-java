@@ -27,32 +27,28 @@ public class MultiplexingClientAndroidRunner extends MultiplexingClientTests
     // This test is a bit too heavy for android to reliably pass, even for nightly builds
     @Ignore
     @Override
-    public void sendMessagesMaxDevicesAllowed() throws Exception
-    {
+    public void sendMessagesMaxDevicesAllowed() {
 
     }
 
     // This test is a bit too heavy for android to reliably pass, but it can still be run during nightly builds
     @FlakeyTest
     @Override
-    public void multiplexedConnectionRecoversFromDeviceSessionDropsParallel() throws Exception
-    {
+    public void multiplexedConnectionRecoversFromDeviceSessionDropsParallel() {
 
     }
 
     // This test is a bit too heavy for android to reliably pass, but it can still be run during nightly builds
     @FlakeyTest
     @Override
-    public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() throws Exception
-    {
+    public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() {
 
     }
 
     // This test is a bit too heavy for android to reliably pass, but it can still be run during nightly builds
     @FlakeyTest
     @Override
-    public void multiplexedConnectionRecoversFromTcpConnectionDrop() throws Exception
-    {
+    public void multiplexedConnectionRecoversFromTcpConnectionDrop() {
 
     }
 }

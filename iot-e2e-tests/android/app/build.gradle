@@ -46,11 +46,11 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -88,8 +88,8 @@ dependencies {
     // This jar contains the dependencies of the test code. DeviceClient, for instance. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
     implementation files('../../common/target/iot-e2e-common-0.26.0-with-deps.jar')
 
-    implementation ('com.microsoft.azure.android:azure-storage-android:2.0.0@aar')
     implementation ('org.apache.commons:commons-lang3:3.6')
+    implementation ('javax.xml.stream:stax-api:1.0-2')
 
     androidTestImplementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

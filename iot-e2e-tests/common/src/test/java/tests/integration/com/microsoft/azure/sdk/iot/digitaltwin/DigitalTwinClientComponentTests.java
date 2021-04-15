@@ -120,7 +120,8 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void updateDigitalTwin() throws IOException {
+    public void updateDigitalTwin()
+    {
         // arrange
         String newProperty = "currentTemperature";
         Integer newPropertyValue = 35;

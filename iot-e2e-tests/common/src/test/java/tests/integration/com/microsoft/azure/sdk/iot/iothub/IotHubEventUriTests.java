@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 public class IotHubEventUriTests extends IntegrationTest
 {
     @Test
-    public void eventUriIsCorrect() throws URISyntaxException
+    public void eventUriIsCorrect()
     {
         String iotHubName = "test.iothub";
         String deviceId = "test-deviceid";
