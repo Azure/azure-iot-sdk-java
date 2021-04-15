@@ -154,19 +154,19 @@ public class Tools
         return registryManager;
     }
 
-    private static Queue<TestDeviceIdentity> testSasDeviceQueue = new ConcurrentLinkedQueue<>();
-    private static Queue<TestDeviceIdentity> testX509DeviceQueue = new ConcurrentLinkedQueue<>();
+    private static Queue<TestDeviceIdentity> testSasDeviceQueue = new ConcurrentLinkedQueue<>();  // queue contains SAS device identities that are ready to be re-used, and that have no twin modifications yet
+    private static Queue<TestDeviceIdentity> testX509DeviceQueue = new ConcurrentLinkedQueue<>(); // queue contains x509 device identities that are ready to be re-used, and that have no twin modifications yet
+    private static Queue<TestDeviceIdentity> testSasDeviceWithTwinQueue = new ConcurrentLinkedQueue<>(); // queue contains SAS device identities that are ready to be re-used, and that have some twin modifications to them already
+    private static Queue<TestDeviceIdentity> testX509DeviceWithTwinQueue = new ConcurrentLinkedQueue<>(); // queue contains x509 device identities that are ready to be re-used, and that have some twin modifications to them already
     private final static Object testSasDeviceQueueLock = new Object();
     private final static Object testX509DeviceQueueLock = new Object();
-    private static Queue<TestDeviceIdentity> testSasDeviceWithTwinQueue = new ConcurrentLinkedQueue<>();
-    private static Queue<TestDeviceIdentity> testX509DeviceWithTwinQueue = new ConcurrentLinkedQueue<>();
 
-    private static Queue<TestModuleIdentity> testSasModuleQueue = new ConcurrentLinkedQueue<>();
-    private static Queue<TestModuleIdentity> testX509ModuleQueue = new ConcurrentLinkedQueue<>();
+    private static Queue<TestModuleIdentity> testSasModuleQueue = new ConcurrentLinkedQueue<>(); // queue contains SAS module identities that are ready to be re-used, and that have no twin modifications yet
+    private static Queue<TestModuleIdentity> testX509ModuleQueue = new ConcurrentLinkedQueue<>(); // queue contains x509 module identities that are ready to be re-used, and that have no twin modifications yet
+    private static Queue<TestModuleIdentity> testSasModuleWithTwinQueue = new ConcurrentLinkedQueue<>(); // queue contains SAS module identities that are ready to be re-used, and that have some twin modifications to them already
+    private static Queue<TestModuleIdentity> testX509ModuleWithTwinQueue = new ConcurrentLinkedQueue<>();  // queue contains x509 module identities that are ready to be re-used, and that have some twin modifications to them already
     private final static Object testSasModuleQueueLock = new Object();
     private final static Object testX509ModuleQueueLock = new Object();
-    private static Queue<TestModuleIdentity> testSasModuleWithTwinQueue = new ConcurrentLinkedQueue<>();
-    private static Queue<TestModuleIdentity> testX509ModuleWithTwinQueue = new ConcurrentLinkedQueue<>();
 
     // number of devices to add in bulk when proactively adding devices to the queue of available test devices
     private static final int PROACTIVE_TEST_DEVICE_REGISRATION_COUNT = 100;
@@ -194,11 +194,14 @@ public class Tools
      */
     public static TestDeviceIdentity getTestDevice(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
+        RegistryManager registryManager = getRegistyManager(iotHubConnectionString);
         if (authenticationType == AuthenticationType.SAS)
         {
+            // Don't want multiple methods calling this simultaneously and each thinking that they need to create
+            // 100 devices. Forcing them to enter this block one at a time means that the first caller creates the 100 devices,
+            // and the subsequent callers just used one of those devices
             synchronized (testSasDeviceQueueLock)
             {
-                RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
                 TestDeviceIdentity testDeviceIdentity;
                 if (!needCleanTwin && testSasDeviceWithTwinQueue.size() > 0)
@@ -246,9 +249,11 @@ public class Tools
         }
         else
         {
+            // Don't want multiple methods calling this simultaneously and each thinking that they need to create
+            // 100 devices. Forcing them to enter this block one at a time means that the first caller creates the 100 devices,
+            // and the subsequent callers just used one of those devices
             synchronized (testX509DeviceQueueLock)
             {
-                RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
                 TestDeviceIdentity testDeviceIdentity;
                 if (!needCleanTwin && testX509DeviceWithTwinQueue.size() > 0)
                 {
@@ -320,10 +325,11 @@ public class Tools
      */
     public static TestModuleIdentity getTestModule(String iotHubConnectionString, IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean needCleanTwin) throws URISyntaxException, IOException, IotHubException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
-
+        RegistryManager registryManager = getRegistyManager(iotHubConnectionString);
         if (authenticationType == AuthenticationType.SAS)
         {
+            // Want to make sure that no thread checks the size of a queue and then has the size change before it can
+            // remove an identity from the queue.
             synchronized (testSasModuleQueueLock)
             {
                 TestModuleIdentity testModuleIdentity;
@@ -353,6 +359,8 @@ public class Tools
         }
         else
         {
+            // Want to make sure that no thread checks the size of a queue and then has the size change before it can
+            // remove an identity from the queue.
             synchronized (testX509ModuleQueueLock)
             {
                 TestModuleIdentity testModuleIdentity;
