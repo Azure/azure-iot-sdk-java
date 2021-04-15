@@ -804,6 +804,7 @@ public class IotHubTransport implements IotHubListener
             {
                 while (deviceConnectionStates.get(newlyUnregisteredConfig.getDeviceId()) != IotHubConnectionStatus.DISCONNECTED)
                 {
+                    //noinspection BusyWait
                     Thread.sleep(100);
 
                     boolean operationHasTimedOut = System.currentTimeMillis() >= timeoutTime;
