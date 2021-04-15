@@ -89,6 +89,7 @@ dependencies {
     implementation files('../../common/target/iot-e2e-common-0.26.0-with-deps.jar')
 
     implementation ('org.apache.commons:commons-lang3:3.6')
+    implementation ('javax.xml.stream:stax-api:1.0-2')
 
     androidTestImplementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
