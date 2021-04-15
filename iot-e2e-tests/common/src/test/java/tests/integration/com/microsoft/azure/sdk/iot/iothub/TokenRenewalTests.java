@@ -360,9 +360,9 @@ public class TokenRenewalTests extends IntegrationTest
         return moduleClient;
     }
 
-    private InternalClient createDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, IOException, IotHubException, InterruptedException, GeneralSecurityException
+    private InternalClient createDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
     {
-        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS);
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false);
         com.microsoft.azure.sdk.iot.service.Device device = testDeviceIdentity.getDevice();
         testIdentities.add(testDeviceIdentity);
         return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol);

@@ -252,7 +252,7 @@ public class SendMessagesCommon extends IntegrationTest
         {
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType);
+                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
 
                 if (customSSLContext != null)
                 {
@@ -268,7 +268,7 @@ public class SendMessagesCommon extends IntegrationTest
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType);
+                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false);
             }
 
             if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)

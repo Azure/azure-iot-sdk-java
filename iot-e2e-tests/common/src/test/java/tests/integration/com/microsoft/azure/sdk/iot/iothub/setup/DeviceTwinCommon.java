@@ -297,12 +297,12 @@ public class DeviceTwinCommon extends IntegrationTest
 
             if (testInstance.clientType == ClientType.DEVICE_CLIENT)
             {
-                testInstance.testIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
+                testInstance.testIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, true);
                 testInstance.devicesUnderTest[i].sCDeviceForRegistryManager = testInstance.testIdentities[i].getDevice();
             }
             else
             {
-                testInstance.testIdentities[i] = Tools.getTestModule(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
+                testInstance.testIdentities[i] = Tools.getTestModule(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, true);
                 testInstance.devicesUnderTest[i].sCDeviceForRegistryManager = testInstance.testIdentities[i].getDevice();
                 testInstance.devicesUnderTest[i].sCModuleForRegistryManager = ((TestModuleIdentity) testInstance.testIdentities[i]).getModule();
             }
@@ -400,12 +400,12 @@ public class DeviceTwinCommon extends IntegrationTest
 
         if (testInstance.clientType == ClientType.DEVICE_CLIENT)
         {
-            testInstance.testIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
+            testInstance.testIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, true);
             testInstance.deviceUnderTest.sCDeviceForRegistryManager = testInstance.testIdentity.getDevice();
         }
         else
         {
-            testInstance.testIdentity = Tools.getTestModule(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
+            testInstance.testIdentity = Tools.getTestModule(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, true);
             testInstance.deviceUnderTest.sCDeviceForRegistryManager = testInstance.testIdentity.getDevice();
             testInstance.deviceUnderTest.sCModuleForRegistryManager = ((TestModuleIdentity) testInstance.testIdentity).getModule();
         }

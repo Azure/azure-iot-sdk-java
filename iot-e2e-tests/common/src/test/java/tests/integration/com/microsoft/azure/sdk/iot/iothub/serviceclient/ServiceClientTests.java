@@ -156,7 +156,8 @@ public class ServiceClientTests extends IntegrationTest
         // We remove and recreate the device for a clean start
         RegistryManager registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
-        Device device = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS).getDevice();
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, false);
+        Device device = testDeviceIdentity.getDevice();
 
         Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
 
@@ -197,7 +198,7 @@ public class ServiceClientTests extends IntegrationTest
         Device deviceGetAfter = registryManager.getDevice(device.getDeviceId());
         serviceClient.close();
 
-        Tools.disposeTestIdentity(new TestDeviceIdentity(null, device), iotHubConnectionString);
+        Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());

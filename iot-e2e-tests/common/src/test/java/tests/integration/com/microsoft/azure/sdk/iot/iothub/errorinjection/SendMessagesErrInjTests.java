@@ -296,32 +296,16 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
     {
         // Arrange
-        Device targetDevice = null;
-        InternalClient client = null;
-
-        if (testInstance.clientType == ClientType.DEVICE_CLIENT)
-        {
-            TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
-            targetDevice = testDeviceIdentity.getDevice();
-            client = testDeviceIdentity.getDeviceClient();
-        }
-        else if (testInstance.clientType == ClientType.MODULE_CLIENT)
-        {
-            TestModuleIdentity testModuleIdentity = Tools.getTestModule(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
-            targetDevice = testModuleIdentity.getDevice();
-            client = testModuleIdentity.getModuleClient();
-        }
-
         if (noRetry)
         {
-            client.setRetryPolicy(new NoRetry());
+            testInstance.identity.getClient().setRetryPolicy(new NoRetry());
         }
-        client.open();
+        testInstance.identity.getClient().open();
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,IotHubStatusCode.OK_EMPTY);
         IotHubServicesCommon.sendMessageAndWaitForResponse(
-                client,
+                testInstance.identity.getClient(),
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
@@ -332,15 +316,15 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
         MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), expectedStatus);
         IotHubServicesCommon.sendMessageAndWaitForResponse(
-                client,
+                testInstance.identity.getClient(),
                 normalMessageAndExpectedResult,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
 
-        client.closeNow();
+        testInstance.identity.getClient().closeNow();
 
         //cleanup
-        Tools.disposeTestIdentity(new TestDeviceIdentity(null, targetDevice), iotHubConnectionString);
+        Tools.disposeTestIdentity(testInstance.identity, iotHubConnectionString);
     }
 }

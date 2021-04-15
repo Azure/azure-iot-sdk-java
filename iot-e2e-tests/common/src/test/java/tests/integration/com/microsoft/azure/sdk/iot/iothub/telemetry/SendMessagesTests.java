@@ -133,7 +133,7 @@ public class SendMessagesTests extends SendMessagesCommon
         Collection<String> deviceIds = new ArrayList<>();
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
         {
-            testDeviceIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
+            testDeviceIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, false);
             deviceListAmqps[i] = testDeviceIdentities[i].getDevice();
             deviceIds.add(deviceListAmqps[i].getDeviceId());
         }
