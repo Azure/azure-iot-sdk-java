@@ -40,9 +40,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
