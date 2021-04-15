@@ -91,10 +91,6 @@ public class FileUploadTests extends IntegrationTest
     private static RegistryManager registryManager;
     private static ServiceClient serviceClient;
 
-    private static String publicKeyCertificate;
-    private static String privateKeyCertificate;
-    private static String x509Thumbprint;
-
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8897;
