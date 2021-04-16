@@ -323,8 +323,5 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 this.testInstance.protocol);
 
         testInstance.identity.getClient().closeNow();
-
-        //cleanup
-        Tools.disposeTestIdentity(testInstance.identity, iotHubConnectionString);
     }
 }

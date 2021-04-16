@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -159,10 +160,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         cdl.await(1, TimeUnit.MINUTES);
 
-        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
-        {
-            Tools.disposeTestIdentity(testDeviceIdentities[i], iotHubConnectionString);
-        }
+        Tools.disposeTestIdentities(Arrays.asList(testDeviceIdentities), iotHubConnectionString);
 
         if (!succeed.get())
         {

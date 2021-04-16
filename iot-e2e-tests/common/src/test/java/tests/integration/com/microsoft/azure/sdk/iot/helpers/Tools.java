@@ -416,6 +416,31 @@ public class Tools
         }
     }
 
+    /**
+     * If the environment variable RECYCLE_TEST_IDENTITIES is set to true, then the identities will be recycled. Otherwise they
+     * will be removed from the IoT Hub's registry.
+     * @param testIdentities The test identities to dispose/recycle.
+     */
+    public static void disposeTestIdentities(Iterable<? extends TestIdentity> testIdentities, String iotHubConnectionString)
+    {
+        if (!IntegrationTest.recycleIdentities)
+        {
+            for (TestIdentity testIdentity : testIdentities)
+            {
+                disposeTestIdentity(testIdentity, iotHubConnectionString);
+            }
+        }
+        else
+        {
+            List<Device> devicesToDelete = new ArrayList<>();
+            for (TestIdentity testIdentity : testIdentities)
+            {
+                devicesToDelete.add(testIdentity.getDevice());
+            }
+
+            disposeTestDevices(devicesToDelete, iotHubConnectionString);
+        }
+    }
 
     /**
      * If the environment variable RECYCLE_TEST_IDENTITIES is set to true, then the identity will be recycled. Otherwise it
@@ -503,6 +528,43 @@ public class Tools
         }
     }
 
+    private static void disposeTestDevices(Iterable<Device> devices, String iotHubConnectionString)
+    {
+        List<Device> subList = new ArrayList<>();
+        for (Device device : devices)
+        {
+            // Bulk device removal is limited to, at most, 100 devices per request. Create a list of 100 devices,
+            // delete them, and then create another list of 100 devices until all devices have been deleted
+            subList.add(device);
+
+            if (subList.size() > 99)
+            {
+                try
+                {
+                    removeDevices(subList, iotHubConnectionString);
+                }
+                catch (IOException | IotHubException e)
+                {
+                    log.error("Failed to delete a batch of devices from the registry", e);
+                }
+
+                subList.clear();
+            }
+        }
+
+        if (subList.size() > 0)
+        {
+            try
+            {
+                removeDevices(subList, iotHubConnectionString);
+            }
+            catch (IOException | IotHubException e)
+            {
+                log.error("Failed to delete a batch of devices from the registry", e);
+            }
+        }
+    }
+
     public static Device addDeviceWithRetry(RegistryManager registryManager, Device device) throws IotHubException, IOException, InterruptedException
     {
         long startTime = System.currentTimeMillis();
@@ -535,7 +597,7 @@ public class Tools
     // This call mimics what should be a registry manager API for adding devices in bulk. Can be removed once we add support in our
     // registry manager for this
     private static final String IMPORT_MODE_CREATE = "create";
-    public static void addDevices(Iterable<Device> devices, String connectionString) throws IOException, IotHubException {
+    private static void addDevices(Iterable<Device> devices, String connectionString) throws IOException, IotHubException {
         if (devices == null)
         {
             throw new IllegalArgumentException("devices cannot be null");
@@ -563,6 +625,44 @@ public class Tools
 
             exportImportDevice.setAuthentication(authenticationParser);
             exportImportDevice.setImportMode(IMPORT_MODE_CREATE);
+            parsers.add(exportImportDevice);
+        }
+
+        ExportImportDevicesParser body = new ExportImportDevicesParser();
+        body.setExportImportDevices(parsers);
+
+        String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
+
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
+        request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
+        request.setHeaderField("authorization", sasTokenString);
+        request.setHeaderField("Accept", "application/json");
+        request.setHeaderField("Content-Type", "application/json");
+        request.setHeaderField("charset", "utf-8");
+
+        HttpResponse response = request.send();
+
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
+    // This call mimics what should be a registry manager API for removing devices in bulk. Can be removed once we add support in our
+    // registry manager for this
+    private static final String IMPORT_MODE_DELETE = "delete";
+    private static void removeDevices(Iterable<Device> devices, String connectionString) throws IOException, IotHubException {
+        if (devices == null)
+        {
+            throw new IllegalArgumentException("devices cannot be null");
+        }
+
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        URL url = getBulkDeviceAddUrl(iotHubConnectionString);
+
+        List<ExportImportDeviceParser> parsers = new ArrayList<>();
+        for (Device device : devices)
+        {
+            ExportImportDeviceParser exportImportDevice = new ExportImportDeviceParser();
+            exportImportDevice.setId(device.getDeviceId());
+            exportImportDevice.setImportMode(IMPORT_MODE_DELETE);
             parsers.add(exportImportDevice);
         }
 

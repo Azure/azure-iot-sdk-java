@@ -447,12 +447,10 @@ public class DeviceTwinCommon extends IntegrationTest
                     {
                         log.error("Failed to close test identity for device {}", testIdentity.getDeviceId(), e);
                     }
-
-                    Tools.disposeTestIdentity(testIdentity, iotHubConnectionString);
                 }
+
+                Tools.disposeTestIdentities(Arrays.asList(testInstance.testIdentities), iotHubConnectionString);
             }
-
-
         }
     }
 

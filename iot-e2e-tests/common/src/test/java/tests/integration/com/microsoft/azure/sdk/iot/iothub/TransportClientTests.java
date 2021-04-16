@@ -189,10 +189,7 @@ public class TransportClientTests extends IntegrationTest
 
         public void dispose()
         {
-            for (TestDeviceIdentity testDeviceIdentity : testDeviceIdentities)
-            {
-                Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
-            }
+            Tools.disposeTestIdentities(Arrays.asList(testDeviceIdentities), iotHubConnectionString);
         }
     }
 

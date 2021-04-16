@@ -183,10 +183,7 @@ public class MultiplexingClientTests extends IntegrationTest
         {
             if (this.testDevicesArrayIdentity != null)
             {
-                for (TestDeviceIdentity testDeviceIdentity : this.testDevicesArrayIdentity)
-                {
-                    Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
-                }
+                Tools.disposeTestIdentities(this.testDevicesArrayIdentity, iotHubConnectionString);
             }
         }
     }
