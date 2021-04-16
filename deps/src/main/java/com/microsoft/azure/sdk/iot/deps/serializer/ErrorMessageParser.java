@@ -116,6 +116,7 @@ public class ErrorMessageParser
         return getDefaultErrorCode();
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static int getDefaultErrorCode()
     {
         return 0;

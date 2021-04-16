@@ -297,6 +297,7 @@ public class EnrollmentGroupManager
         return PATH_ENROLLMENT_GROUPS + PATH_SEPARATOR + enrollmentGroupId + PATH_SEPARATOR + ATTESTATION_MECHANISM;
     }
 
+    @SuppressWarnings("SameReturnValue")
     private static String getEnrollmentGroupsPath()
     {
         return PATH_ENROLLMENT_GROUPS;
