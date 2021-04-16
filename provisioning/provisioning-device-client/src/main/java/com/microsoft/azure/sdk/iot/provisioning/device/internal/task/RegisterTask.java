@@ -353,6 +353,7 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
         while (responseData.getContractState() != DPS_REGISTRATION_RECEIVED
                 && millisecondsElapsed < MAX_WAIT_FOR_REGISTRATION_RESPONSE)
         {
+            //noinspection BusyWait
             Thread.sleep(SLEEP_INTERVAL_WHEN_WAITING_FOR_RESPONSE);
             millisecondsElapsed = System.currentTimeMillis() - waitTimeStart;
         }

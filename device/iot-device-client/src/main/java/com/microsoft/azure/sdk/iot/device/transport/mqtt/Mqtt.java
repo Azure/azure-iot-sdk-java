@@ -191,6 +191,7 @@ abstract public class Mqtt implements MqttCallback
 
             while (this.mqttAsyncClient.getPendingDeliveryTokens().length >= MAX_IN_FLIGHT_COUNT)
             {
+                //noinspection BusyWait
                 Thread.sleep(10);
 
                 if (!this.mqttAsyncClient.isConnected())
