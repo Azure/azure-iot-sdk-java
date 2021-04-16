@@ -264,6 +264,7 @@ public class ProvisioningAmqpOperations extends AmqpDeviceOperations implements 
         {
             while (!this.amqpConnection.isConnected() && millisecondsElapsed < MAX_WAIT_TO_OPEN_AMQP_CONNECTION)
             {
+                //noinspection BusyWait
                 Thread.sleep(1000);
                 millisecondsElapsed = System.currentTimeMillis() - waitStartTime;
             }
