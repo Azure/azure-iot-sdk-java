@@ -227,30 +227,28 @@ public class Tools
                 log.debug("Acquiring test device from testSasDeviceWithTwinQueue");
                 testDeviceIdentity = testSasDeviceWithTwinQueue.remove();
             }
-            else if (testSasDeviceQueue.size() > 0)
-            {
-                log.debug("Acquiring test device from testSasDeviceQueue");
-                testDeviceIdentity = testSasDeviceQueue.remove();
-            }
             else
             {
-                // No cached devices to return, so create a new set of devices to cache, and return one of the newly created devices
-                log.debug("Proactively adding another {} devices to the SAS test device queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
-                List<Device> devicesToAdd = new ArrayList<>();
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                if (testSasDeviceQueue.size() < 1)
                 {
-                    Device deviceToAdd = Device.createDevice("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SAS);
-                    deviceToAdd.setSymmetricKey(new SymmetricKey());
-                    devicesToAdd.add(deviceToAdd);
+                    // No cached devices to return, so create a new set of devices to cache, and return one of the newly created devices
+                    log.debug("Proactively adding another {} devices to the SAS test device queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
+                    List<Device> devicesToAdd = new ArrayList<>();
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        Device deviceToAdd = Device.createDevice("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SAS);
+                        deviceToAdd.setSymmetricKey(new SymmetricKey());
+                        devicesToAdd.add(deviceToAdd);
+                    }
+
+                    addDevices(devicesToAdd, iotHubConnectionString);
+
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        testSasDeviceQueue.add(new TestDeviceIdentity(null, devicesToAdd.get(i)));
+                    }
                 }
-
-                addDevices(devicesToAdd, iotHubConnectionString);
-
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
-                {
-                    testSasDeviceQueue.add(new TestDeviceIdentity(null, devicesToAdd.get(i)));
-                }
-
+                log.debug("Acquiring test device from testSasDeviceQueue");
                 testDeviceIdentity = testSasDeviceQueue.remove();
             }
 
@@ -272,30 +270,29 @@ public class Tools
                 log.debug("Acquiring test device from testX509DeviceWithTwinQueue");
                 testDeviceIdentity = testX509DeviceWithTwinQueue.remove();
             }
-            else if (testX509DeviceQueue.size() > 0)
-            {
-                log.debug("Acquiring test device from testX509DeviceQueue");
-                testDeviceIdentity = testX509DeviceQueue.remove();
-            }
             else
             {
-                // No cached devices to return, so create a new set of devices to cache, and return one of the newly created devices
-                log.debug("Proactively adding another {} devices to the X509 test device queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
-                List<Device> devicesToAdd = new ArrayList<>();
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                if (testX509DeviceQueue.size() < 1)
                 {
-                    Device deviceToAdd = Device.createDevice("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
-                    String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
-                    deviceToAdd.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-                    devicesToAdd.add(deviceToAdd);
+                    // No cached devices to return, so create a new set of devices to cache, and return one of the newly created devices
+                    log.debug("Proactively adding another {} devices to the X509 test device queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
+                    List<Device> devicesToAdd = new ArrayList<>();
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        Device deviceToAdd = Device.createDevice("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
+                        String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
+                        deviceToAdd.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+                        devicesToAdd.add(deviceToAdd);
+                    }
+
+                    addDevices(devicesToAdd, iotHubConnectionString);
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        testX509DeviceQueue.add(new TestDeviceIdentity(null, devicesToAdd.get(i)));
+                    }
                 }
 
-                addDevices(devicesToAdd, iotHubConnectionString);
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
-                {
-                    testX509DeviceQueue.add(new TestDeviceIdentity(null, devicesToAdd.get(i)));
-                }
-
+                log.debug("Acquiring test device from testX509DeviceQueue");
                 testDeviceIdentity = testX509DeviceQueue.remove();
             }
 
@@ -361,31 +358,30 @@ public class Tools
                 log.debug("Acquiring test module from testSasModuleWithTwinQueue");
                 testModuleIdentity = testSasModuleWithTwinQueue.remove();
             }
-            else if (testSasModuleQueue.size() > 0)
-            {
-                log.debug("Acquiring test module from testSasModuleQueue");
-                testModuleIdentity = testSasModuleQueue.remove();
-            }
             else
             {
-                // No cached modules to return, so create a new set of modules to cache, and return one of the newly created modules
-                log.debug("Proactively adding another {} modules to the SAS test module queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
-                List<Device> devices = new ArrayList<>();
-                List<Module> modulesToAdd = new ArrayList<>();
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                if (testSasModuleQueue.size() < 1)
                 {
-                    TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, needCleanTwin);
-                    devices.add(testDeviceIdentity.device);
-                    modulesToAdd.add(Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SAS));
+                    // No cached modules to return, so create a new set of modules to cache, and return one of the newly created modules
+                    log.debug("Proactively adding another {} modules to the SAS test module queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
+                    List<Device> devices = new ArrayList<>();
+                    List<Module> modulesToAdd = new ArrayList<>();
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, needCleanTwin);
+                        devices.add(testDeviceIdentity.device);
+                        modulesToAdd.add(Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SAS));
+                    }
+
+                    addModules(modulesToAdd, iotHubConnectionString);
+
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        testSasModuleQueue.add(new TestModuleIdentity(null, devices.get(i), modulesToAdd.get(i)));
+                    }
                 }
 
-                addModules(modulesToAdd, iotHubConnectionString);
-
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
-                {
-                    testSasModuleQueue.add(new TestModuleIdentity(null, devices.get(i), modulesToAdd.get(i)));
-                }
-
+                log.debug("Acquiring test module from testSasModuleQueue");
                 testModuleIdentity = testSasModuleQueue.remove();
             }
 
@@ -407,34 +403,33 @@ public class Tools
                 log.debug("Acquiring test module from testX509ModuleWithTwinQueue");
                 testModuleIdentity = testX509ModuleWithTwinQueue.remove();
             }
-            else if (testX509ModuleQueue.size() > 0)
-            {
-                log.debug("Acquiring test module from testX509ModuleQueue");
-                testModuleIdentity = testX509ModuleQueue.remove();
-            }
             else
             {
-                // No cached modules to return, so create a new set of modules to cache, and return one of the newly created modules
-                log.debug("Proactively adding another {} modules to the SAS test module queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
-                List<Device> devices = new ArrayList<>();
-                List<Module> modulesToAdd = new ArrayList<>();
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                if (testX509ModuleQueue.size() < 1)
                 {
-                    TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SELF_SIGNED, needCleanTwin);
-                    devices.add(testDeviceIdentity.device);
-                    Module module = Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
-                    String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
-                    module.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-                    modulesToAdd.add(module);
+                    // No cached modules to return, so create a new set of modules to cache, and return one of the newly created modules
+                    log.debug("Proactively adding another {} modules to the SAS test module queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
+                    List<Device> devices = new ArrayList<>();
+                    List<Module> modulesToAdd = new ArrayList<>();
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SELF_SIGNED, needCleanTwin);
+                        devices.add(testDeviceIdentity.device);
+                        Module module = Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
+                        String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
+                        module.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+                        modulesToAdd.add(module);
+                    }
+
+                    addModules(modulesToAdd, iotHubConnectionString);
+
+                    for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                    {
+                        testX509ModuleQueue.add(new TestModuleIdentity(null, devices.get(i), modulesToAdd.get(i)));
+                    }
                 }
 
-                addModules(modulesToAdd, iotHubConnectionString);
-
-                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
-                {
-                    testX509ModuleQueue.add(new TestModuleIdentity(null, devices.get(i), modulesToAdd.get(i)));
-                }
-
+                log.debug("Acquiring test module from testX509ModuleQueue");
                 testModuleIdentity = testX509ModuleQueue.remove();
             }
 
