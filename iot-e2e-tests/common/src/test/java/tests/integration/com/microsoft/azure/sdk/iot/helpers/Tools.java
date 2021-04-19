@@ -368,11 +368,25 @@ public class Tools
             }
             else
             {
-                log.debug("Acquiring test module by creating new one");
-                TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, needCleanTwin);
-                Module module = Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SAS);
-                module = addModuleWithRetry(getRegistyManager(iotHubConnectionString), module);
-                testModuleIdentity = new TestModuleIdentity(null, testDeviceIdentity.device, module);
+                // No cached modules to return, so create a new set of modules to cache, and return one of the newly created modules
+                log.debug("Proactively adding another {} modules to the SAS test module queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
+                List<Device> devices = new ArrayList<>();
+                List<Module> modulesToAdd = new ArrayList<>();
+                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                {
+                    TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, needCleanTwin);
+                    devices.add(testDeviceIdentity.device);
+                    modulesToAdd.add(Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SAS));
+                }
+
+                addModules(modulesToAdd, iotHubConnectionString);
+
+                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                {
+                    testSasModuleQueue.add(new TestModuleIdentity(null, devices.get(i), modulesToAdd.get(i)));
+                }
+
+                testModuleIdentity = testSasModuleQueue.remove();
             }
 
             ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, testModuleIdentity.device, testModuleIdentity.module), protocol);
@@ -400,13 +414,28 @@ public class Tools
             }
             else
             {
-                log.debug("Acquiring test module by creating new one");
-                TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SELF_SIGNED, needCleanTwin);
-                Module module = Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
-                String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
-                module.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-                module = addModuleWithRetry(getRegistyManager(iotHubConnectionString), module);
-                testModuleIdentity = new TestModuleIdentity(null, testDeviceIdentity.device, module);
+                // No cached modules to return, so create a new set of modules to cache, and return one of the newly created modules
+                log.debug("Proactively adding another {} modules to the SAS test module queue", PROACTIVE_TEST_DEVICE_REGISRATION_COUNT);
+                List<Device> devices = new ArrayList<>();
+                List<Module> modulesToAdd = new ArrayList<>();
+                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                {
+                    TestDeviceIdentity testDeviceIdentity = getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SELF_SIGNED, needCleanTwin);
+                    devices.add(testDeviceIdentity.device);
+                    Module module = Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
+                    String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
+                    module.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+                    modulesToAdd.add(module);
+                }
+
+                addModules(modulesToAdd, iotHubConnectionString);
+
+                for (int i = 0; i < PROACTIVE_TEST_DEVICE_REGISRATION_COUNT; i++)
+                {
+                    testX509ModuleQueue.add(new TestModuleIdentity(null, devices.get(i), modulesToAdd.get(i)));
+                }
+
+                testModuleIdentity = testX509ModuleQueue.remove();
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
@@ -438,6 +467,8 @@ public class Tools
                 devicesToDelete.add(testIdentity.getDevice());
             }
 
+            // No need to dispose of modules in particular.
+            // Deleting a device that has a module will delete both the device and module.
             disposeTestDevices(devicesToDelete, iotHubConnectionString);
         }
     }
@@ -621,6 +652,55 @@ public class Tools
             {
                 authenticationParser.setType(AuthenticationTypeParser.SELF_SIGNED);
                 authenticationParser.setThumbprint(new X509ThumbprintParser(device.getPrimaryThumbprint(), device.getSecondaryThumbprint()));
+            }
+
+            exportImportDevice.setAuthentication(authenticationParser);
+            exportImportDevice.setImportMode(IMPORT_MODE_CREATE);
+            parsers.add(exportImportDevice);
+        }
+
+        ExportImportDevicesParser body = new ExportImportDevicesParser();
+        body.setExportImportDevices(parsers);
+
+        String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
+
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
+        request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
+        request.setHeaderField("authorization", sasTokenString);
+        request.setHeaderField("Accept", "application/json");
+        request.setHeaderField("Content-Type", "application/json");
+        request.setHeaderField("charset", "utf-8");
+
+        HttpResponse response = request.send();
+
+        IotHubExceptionManager.httpResponseVerification(response);
+    }
+
+    private static void addModules(Iterable<Module> modules, String connectionString) throws IOException, IotHubException {
+        if (modules == null)
+        {
+            throw new IllegalArgumentException("modules cannot be null");
+        }
+
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        URL url = getBulkDeviceAddUrl(iotHubConnectionString);
+
+        List<ExportImportDeviceParser> parsers = new ArrayList<>();
+        for (Module module : modules)
+        {
+            ExportImportDeviceParser exportImportDevice = new ExportImportDeviceParser();
+            exportImportDevice.setId(module.getDeviceId());
+            exportImportDevice.setModuleId(module.getId());
+            AuthenticationParser authenticationParser = new AuthenticationParser();
+            if (module.getAuthenticationType() == AuthenticationType.SAS)
+            {
+                authenticationParser.setType(AuthenticationTypeParser.SAS);
+                authenticationParser.setSymmetricKey(new SymmetricKeyParser(module.getSymmetricKey().getPrimaryKey(), module.getSymmetricKey().getSecondaryKey()));
+            }
+            else
+            {
+                authenticationParser.setType(AuthenticationTypeParser.SELF_SIGNED);
+                authenticationParser.setThumbprint(new X509ThumbprintParser(module.getPrimaryThumbprint(), module.getSecondaryThumbprint()));
             }
 
             exportImportDevice.setAuthentication(authenticationParser);
