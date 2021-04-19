@@ -253,7 +253,6 @@ public class DigitalTwinClientTests extends IntegrationTest
         assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
     }
 
-    @Ignore("RBAC authentication isn't supported on hub yet")
     @Test
     @StandardTierHubOnlyTest
     public void getDigitalTwinWithTokenCredential() {
