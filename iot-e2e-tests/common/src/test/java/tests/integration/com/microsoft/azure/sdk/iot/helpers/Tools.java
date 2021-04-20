@@ -449,6 +449,8 @@ public class Tools
     {
         if (IntegrationTest.recycleIdentities)
         {
+            // When recycling identities, there is no need to do anything in bulk. Just call the overload of this function
+            // that takes a single identity.
             for (TestIdentity testIdentity : testIdentities)
             {
                 disposeTestIdentity(testIdentity, iotHubConnectionString);
@@ -456,6 +458,7 @@ public class Tools
         }
         else
         {
+            // when not recycling identities, it is faster to delete them in bulk rather than one at a time.
             List<Device> devicesToDelete = new ArrayList<>();
             for (TestIdentity testIdentity : testIdentities)
             {
