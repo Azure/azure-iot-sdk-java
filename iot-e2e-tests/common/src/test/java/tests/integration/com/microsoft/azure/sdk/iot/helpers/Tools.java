@@ -447,7 +447,7 @@ public class Tools
      */
     public static void disposeTestIdentities(Iterable<? extends TestIdentity> testIdentities, String iotHubConnectionString)
     {
-        if (!IntegrationTest.recycleIdentities)
+        if (IntegrationTest.recycleIdentities)
         {
             for (TestIdentity testIdentity : testIdentities)
             {
@@ -559,8 +559,8 @@ public class Tools
         List<Device> subList = new ArrayList<>();
         for (Device device : devices)
         {
-            // Bulk device removal is limited to, at most, 100 devices per request. Create a list of 100 devices,
-            // delete them, and then create another list of 100 devices until all devices have been deleted
+            // Bulk device removal is limited to, at most, 100 devices per request. Create a batch of 100 devices,
+            // delete those 100 devices, and then create another batch.
             subList.add(device);
 
             if (subList.size() > 99)
@@ -657,18 +657,7 @@ public class Tools
         ExportImportDevicesParser body = new ExportImportDevicesParser();
         body.setExportImportDevices(parsers);
 
-        String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
-        request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
-        request.setHeaderField("authorization", sasTokenString);
-        request.setHeaderField("Accept", "application/json");
-        request.setHeaderField("Content-Type", "application/json");
-        request.setHeaderField("charset", "utf-8");
-
-        HttpResponse response = request.send();
-
-        IotHubExceptionManager.httpResponseVerification(response);
+        bulkRegistryOperation(body.toJson(), url, connectionString);
     }
 
     private static void addModules(Iterable<Module> modules, String connectionString) throws IOException, IotHubException {
@@ -706,18 +695,7 @@ public class Tools
         ExportImportDevicesParser body = new ExportImportDevicesParser();
         body.setExportImportDevices(parsers);
 
-        String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
-
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
-        request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
-        request.setHeaderField("authorization", sasTokenString);
-        request.setHeaderField("Accept", "application/json");
-        request.setHeaderField("Content-Type", "application/json");
-        request.setHeaderField("charset", "utf-8");
-
-        HttpResponse response = request.send();
-
-        IotHubExceptionManager.httpResponseVerification(response);
+        bulkRegistryOperation(body.toJson(), url, connectionString);
     }
 
     // This call mimics what should be a registry manager API for removing devices in bulk. Can be removed once we add support in our
@@ -744,9 +722,20 @@ public class Tools
         ExportImportDevicesParser body = new ExportImportDevicesParser();
         body.setExportImportDevices(parsers);
 
+        bulkRegistryOperation(body.toJson(), url, connectionString);
+    }
+
+    private static void bulkRegistryOperation(String jsonPayload, URL url, String connectionString) throws IOException, IotHubException {
+        if (jsonPayload == null)
+        {
+            throw new IllegalArgumentException("devices cannot be null");
+        }
+
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
 
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes());
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, jsonPayload.getBytes());
         request.setReadTimeoutMillis(IntegrationTest.HTTP_READ_TIMEOUT);
         request.setHeaderField("authorization", sasTokenString);
         request.setHeaderField("Accept", "application/json");
