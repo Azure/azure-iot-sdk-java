@@ -159,7 +159,7 @@ public class ServiceClientSample
      {
         List<CompletableFuture<Void>> futureList = new ArrayList<>();
         Map<String, String> propertiesToSend = new HashMap<>();
-        String commandMessage = "Cloud to Device Message: "; 
+        String commandMessage = "Cloud to device message: ";
         
         System.out.println("sendMultipleCommandsAndReadFromTheFeedbackReceiver: Send count is : " + MAX_COMMANDS_TO_SEND);
 
@@ -194,11 +194,11 @@ public class ServiceClientSample
             {
                 if (e.getCause() instanceof  IotHubDeviceMaximumQueueDepthExceededException)
                 {
-                    System.out.println("Maximum queue depth reached");
+                    System.out.println("Maximum queue depth reached.");
                 }
                 else
                 {
-                    System.out.println("Exception : " + e.getMessage());
+                    System.out.println("Exception: " + e.getMessage());
                 }
             }
         }
@@ -215,8 +215,8 @@ public class ServiceClientSample
             
             for (int i=0; i < feedbackBatch.getRecords().size(); i++)
             {
-                System.out.println(" Messsage id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
-                System.out.println(" Device id : " + feedbackBatch.getRecords().get(i).getDeviceId());
+                System.out.println(" Message Id : " + feedbackBatch.getRecords().get(i).getOriginalMessageId());
+                System.out.println(" Device Id : " + feedbackBatch.getRecords().get(i).getDeviceId());
                 System.out.println(" Status description : " + feedbackBatch.getRecords().get(i).getDescription());
             }
         }
