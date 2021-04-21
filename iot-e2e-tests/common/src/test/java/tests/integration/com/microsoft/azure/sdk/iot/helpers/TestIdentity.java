@@ -12,6 +12,9 @@ import com.microsoft.azure.sdk.iot.service.Device;
  */
 public abstract class TestIdentity
 {
+    // Some tests rely on the provided test identity having no pre-existing desired properties or reported properties.
+    public boolean twinUpdated;
+
     public abstract String getDeviceId();
 
     public abstract Device getDevice();

@@ -12,6 +12,7 @@ def CUSTOM_ALLOCATION_WEBHOOK_URL = project.hasProperty('CUSTOM_ALLOCATION_POLIC
 def FAR_AWAY_IOTHUB_CONNECTION_STRING = project.hasProperty('FAR_AWAY_IOTHUB_CONNECTION_STRING') ? '"'+project.property('FAR_AWAY_IOTHUB_CONNECTION_STRING')+'"': '""'
 def IS_BASIC_TIER_HUB = project.hasProperty('IS_BASIC_TIER_HUB') ? '"'+project.property('IS_BASIC_TIER_HUB')+'"' : '"false"'
 def IS_PULL_REQUEST = project.hasProperty('IS_PULL_REQUEST') ? '"'+project.property('IS_PULL_REQUEST')+'"' : '"false"'
+def RECYCLE_TEST_IDENTITIES = project.hasProperty('RECYCLE_TEST_IDENTITIES') ? '"'+project.property('RECYCLE_TEST_IDENTITIES')+'"' : '"false"'
 
 def STRING='String'
 //***********************************************************************************************//
@@ -42,6 +43,7 @@ android {
             buildConfigField STRING, 'FAR_AWAY_IOTHUB_CONNECTION_STRING', FAR_AWAY_IOTHUB_CONNECTION_STRING
             buildConfigField STRING, 'IS_BASIC_TIER_HUB', IS_BASIC_TIER_HUB
             buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
+            buildConfigField STRING, 'RECYCLE_TEST_IDENTITIES', RECYCLE_TEST_IDENTITIES
         }
     }
     buildTypes {

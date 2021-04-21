@@ -134,11 +134,11 @@ public class ReceiveMessagesCommon extends IntegrationTest
         {
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType);
+                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType);
+                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
             }
 
             if ((this.protocol == AMQPS || this.protocol == AMQPS_WS) && this.authenticationType == SAS)
