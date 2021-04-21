@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.TestCase;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -50,6 +51,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.iothub.TransportClie
  * Class needs to be extended in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
 @IotHubTest
+@Slf4j
 @RunWith(Parameterized.class)
 public class TransportClientTests extends IntegrationTest
 {
@@ -189,7 +191,22 @@ public class TransportClientTests extends IntegrationTest
 
         public void dispose()
         {
-            Tools.disposeTestIdentities(Arrays.asList(testDeviceIdentities), iotHubConnectionString);
+            if (this.transportClient != null)
+            {
+                try
+                {
+                    this.transportClient.closeNow();
+                }
+                catch (IOException e)
+                {
+                    log.error("Failed to close the transport client");
+                }
+            }
+
+            if (testDeviceIdentities != null)
+            {
+                Tools.disposeTestIdentities(Arrays.asList(testDeviceIdentities), iotHubConnectionString);
+            }
         }
     }
 

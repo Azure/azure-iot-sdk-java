@@ -182,7 +182,6 @@ public class ServiceClientTests extends IntegrationTest
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
         serviceClient.open();
 
-
         Message message;
         if (withPayload)
         {

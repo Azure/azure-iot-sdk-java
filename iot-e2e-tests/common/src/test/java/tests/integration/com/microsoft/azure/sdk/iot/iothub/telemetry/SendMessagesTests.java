@@ -139,10 +139,9 @@ public class SendMessagesTests extends SendMessagesCommon
             deviceIds.add(deviceListAmqps[i].getDeviceId());
         }
 
-        List<Thread> threads = new ArrayList<>(deviceListAmqps.length);
         CountDownLatch cdl = new CountDownLatch(deviceListAmqps.length);
 
-        for(Device deviceAmqps: deviceListAmqps)
+        for (Device deviceAmqps: deviceListAmqps)
         {
             Thread thread = new Thread(
                     new testDevice(
@@ -155,7 +154,6 @@ public class SendMessagesTests extends SendMessagesCommon
                             cdl,
                             succeed));
             thread.start();
-            threads.add(thread);
         }
 
         cdl.await(1, TimeUnit.MINUTES);

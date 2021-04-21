@@ -170,8 +170,8 @@ public class TokenRenewalTests extends IntegrationTest
         sendMessageFromEachClient(clients);
 
         closeClients(clients);
-        amqpMultiplexingClient.open();
-        amqpWsMultiplexingClient.open();
+        amqpMultiplexingClient.close();
+        amqpWsMultiplexingClient.close();
 
         Tools.disposeTestIdentities(testIdentities, iotHubConnectionString);
 

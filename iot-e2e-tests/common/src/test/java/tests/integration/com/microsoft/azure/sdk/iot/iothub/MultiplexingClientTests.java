@@ -181,6 +181,18 @@ public class MultiplexingClientTests extends IntegrationTest
 
         public void dispose()
         {
+            if (this.multiplexingClient != null)
+            {
+                try
+                {
+                    this.multiplexingClient.close();
+                }
+                catch (MultiplexingClientException e)
+                {
+                    log.error("Failed to close multiplexing client", e);
+                }
+            }
+
             if (this.testDevicesArrayIdentity != null)
             {
                 Tools.disposeTestIdentities(this.testDevicesArrayIdentity, iotHubConnectionString);
