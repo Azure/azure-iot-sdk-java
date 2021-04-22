@@ -9,10 +9,8 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
@@ -24,7 +22,6 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -34,6 +31,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceEmulator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
@@ -58,9 +57,9 @@ import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationD
 @RunWith(Parameterized.class)
 public class DeviceMethodTests extends DeviceMethodCommon
 {
-    public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
+    public DeviceMethodTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
@@ -154,9 +153,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
             // Create one methodServiceClient per thread since each method service client only allows one method invoke
             // at a time. This limitation exists because the invokeMethod method is synchronized with itself
             DeviceMethod methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
-                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(),"Thread" + i, cdl);
+                runnableInvoke = new RunnableInvoke(methodServiceClient, testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(),"Thread" + i, cdl);
             }
             else
             {
@@ -188,9 +187,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_LOOPBACK, null, null, PAYLOAD_STRING);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, null, null, PAYLOAD_STRING);
         }
         else
         {
@@ -217,9 +216,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
         }
         else
         {
@@ -245,9 +244,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
         }
         else
         {
@@ -273,9 +272,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
         }
         else
         {
@@ -300,9 +299,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_UNKNOWN, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_UNKNOWN, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
         }
         else
         {
@@ -328,9 +327,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         try
         {
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
             }
             else
             {
@@ -345,9 +344,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, "100");
         }
         else
         {
@@ -373,9 +372,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "100");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, null, CONNECTION_TIMEOUT, "100");
         }
         else
         {
@@ -401,9 +400,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         // Act
         MethodResult result;
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, null, "100");
+            result = testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, RESPONSE_TIMEOUT, null, "100");
         }
         else
         {
@@ -430,9 +429,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
         boolean expectedExceptionCaught = false;
         try
         {
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_DELAY_IN_MILLISECONDS, (long)5, CONNECTION_TIMEOUT, "7000");
             }
             else
             {
@@ -456,7 +455,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         boolean expectedExceptionCaught = false;
         try
         {
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
                 testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "someModuleThatDoesNotExistOnADeviceThatDoesExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, PAYLOAD_STRING);
             }
@@ -485,15 +484,15 @@ public class DeviceMethodTests extends DeviceMethodCommon
         // Act
         try
         {
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
-                deviceTestManger.restartDevice(getModuleConnectionString((Module) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                deviceTestManger.restartDevice(getModuleConnectionString(((TestModuleIdentity) testInstance.identity).getModule()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
             }
             else
             {
                 testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), DeviceEmulator.METHOD_RESET, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
-                deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
+                deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString(((TestDeviceIdentity) testInstance.identity).getDevice()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
             }
 
             Assert.fail(buildExceptionMessage("Reset identity do not affect the method invoke on the service", testInstance.deviceTestManager.client));
@@ -503,13 +502,13 @@ public class DeviceMethodTests extends DeviceMethodCommon
             // Don't do anything, expected throw.
         }
 
-        if (testInstance.identity instanceof Module)
+        if (testInstance.identity instanceof TestModuleIdentity)
         {
-            deviceTestManger.restartDevice(getModuleConnectionString((Module) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
+            deviceTestManger.restartDevice(getModuleConnectionString(((TestModuleIdentity) testInstance.identity).getModule()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
         }
         else
         {
-            deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString((Device) testInstance.identity), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
+            deviceTestManger.restartDevice(testInstance.registryManager.getDeviceConnectionString(testInstance.identity.getDevice()), testInstance.protocol, testInstance.publicKeyCert, testInstance.privateKey);
         }
     }
 
@@ -530,9 +529,9 @@ public class DeviceMethodTests extends DeviceMethodCommon
             //force the device offline
             testInstance.deviceTestManager.client.closeNow();
 
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
-                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
+                testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
             }
             else
             {
@@ -562,7 +561,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
         try
         {
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
                 testInstance.methodServiceClient.invoke(testInstance.identity.getDeviceId(), "ThisModuleDoesNotExist", DeviceEmulator.METHOD_LOOPBACK, RESPONSE_TIMEOUT, CONNECTION_TIMEOUT, null);
             }
@@ -576,7 +575,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         catch (IotHubNotFoundException actualException)
         {
             // Don't do anything, expected throw.
-            if (testInstance.identity instanceof Module)
+            if (testInstance.identity instanceof TestModuleIdentity)
             {
                 Assert.assertEquals(404010, actualException.getErrorCode());
                 Assert.assertEquals(ErrorCodeDescription.ModuleNotFound, actualException.getErrorCodeDescription());

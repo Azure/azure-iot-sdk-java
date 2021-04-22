@@ -59,6 +59,9 @@ public abstract class IntegrationTest
     @Rule
     public ThrottleResistantTestRule throttleResistantTestRule = new ThrottleResistantTestRule();
 
+    @Rule
+    public MultiplexingClientTestRule multiplexingClientTestRule = new MultiplexingClientTestRule();
+
     int E2E_TEST_TIMEOUT_MILLISECONDS = 5 * 60 * 1000;
 
     // Each test must finish in under 5 minutes. Only the token renewal test should last longer,
@@ -74,10 +77,15 @@ public abstract class IntegrationTest
     public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
     public static boolean runDigitalTwinTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_DIGITAL_TESTS", "true"));
 
+    // Determines if the tear down for a given test should delete the device identity, or recycle it so that another test can use it
+    public static boolean recycleIdentities = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RECYCLE_TEST_IDENTITIES", "false"));
+
     // Infinite read timeout for all http operations
     public static int HTTP_READ_TIMEOUT = 0;
 
     // Amqp specific timeout values for waiting on authentication/device sessions to open
     public static int AMQP_AUTHENTICATION_SESSION_TIMEOUT_SECONDS = 4 * 60;
     public static int AMQP_DEVICE_SESSION_TIMEOUT_SECONDS = 4 * 60;
+
+    public static X509CertificateGenerator x509CertificateGenerator = new X509CertificateGenerator();
 }

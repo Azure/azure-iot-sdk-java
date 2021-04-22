@@ -28,9 +28,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /*
@@ -703,7 +701,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                new MqttMessaging((MqttAsyncClient) any, anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttMessaging(anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 times = 1;
             }
         };
@@ -1165,11 +1163,11 @@ public class MqttIotHubConnectionTest
             {
                 new MqttAsyncClient(anyString, anyString, (MemoryPersistence) any);
                 result = mockedMqttConnection;
-                new MqttMessaging(mockedMqttConnection, anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttMessaging(anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceMessaging;
-                new MqttDeviceTwin(mockedMqttConnection, anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttDeviceTwin(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceTwin;
-                new MqttDeviceMethod(mockedMqttConnection, anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttDeviceMethod(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceMethod;
                 mockDeviceMessaging.start();
                 result = null;

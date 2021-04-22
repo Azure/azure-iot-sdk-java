@@ -55,22 +55,21 @@ public class HubTierConnectionTests extends IntegrationTest
 
     protected static RegistryManager registryManager;
 
-    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
+    public HubTierConnectionTests(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
     {
-        this.testInstance = new HubTierConnectionTestInstance(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
+        this.testInstance = new HubTierConnectionTestInstance(client, protocol, identity, authenticationType, useHttpProxy);
     }
 
-    @Parameterized.Parameters(name = "{1}_{3}_{7}")
+    @Parameterized.Parameters(name = "{1}_{3}_{4}")
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        String publicKeyCert = certificateGenerator.getPublicCertificate();
-        String privateKey = certificateGenerator.getPrivateKey();
-        String x509Thumbprint = certificateGenerator.getX509Thumbprint();
+        String publicKeyCert = x509CertificateGenerator.getPublicCertificate();
+        String privateKey = x509CertificateGenerator.getPrivateKey();
+        String x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         String uuid = UUID.randomUUID().toString();
@@ -88,24 +87,20 @@ public class HubTierConnectionTests extends IntegrationTest
         hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
 
-        List inputs = new ArrayList(Arrays.asList(
+        return new ArrayList(Arrays.asList(
                 new Object[][]
                         {
                                 //sas token device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, false},
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS), AMQPS, device, SAS, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, false},
 
                                 //x509 device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, sslContext), AMQPS, deviceX509, SELF_SIGNED, publicKeyCert, privateKey, x509Thumbprint, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, sslContext), AMQPS, deviceX509, SELF_SIGNED, false},
 
                                 //sas token device client, with proxy
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, publicKeyCert, privateKey, x509Thumbprint, true}
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, true}
                         }
         ));
-
-        Thread.sleep(2000);
-
-        return inputs;
     }
 
     @BeforeClass
@@ -160,15 +155,15 @@ public class HubTierConnectionTests extends IntegrationTest
         public CorrelationDetailsLoggingAssert correlationDetailsLoggingAssert;
         public boolean useHttpProxy;
 
-        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
+        public HubTierConnectionTestInstance(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
         {
             this.client = client;
             this.protocol = protocol;
             this.identity = identity;
             this.authenticationType = authenticationType;
-            this.publicKeyCert = publicKeyCert;
-            this.privateKey = privateKey;
-            this.x509Thumbprint = x509Thumbprint;
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
+            this.privateKey = x509CertificateGenerator.getPrivateKey();
+            this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             String deviceId = identity.getDeviceId();
             this.useHttpProxy = useHttpProxy;
 

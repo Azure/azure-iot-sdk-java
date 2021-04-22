@@ -121,6 +121,7 @@ jobs:
           IOTHUB_CLIENT_SECRET: $(IOTHUB-CLIENT-SECRET)
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
           MSFT_TENANT_ID: $(MSFT-TENANT-ID)
+          RECYCLE_TEST_IDENTITIES: true
         condition: always()
 
       - task: CopyFiles@2
@@ -182,6 +183,7 @@ jobs:
           IOTHUB_CLIENT_ID: $(IOTHUB-CLIENT-ID)
           MSFT_TENANT_ID: $(MSFT-TENANT-ID)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
         condition: always()
 
       - task: CopyFiles@2

@@ -72,15 +72,15 @@ public class QueryTwinTests extends DeviceTwinCommon
 {
     public static final int QUERY_TIMEOUT_MILLISECONDS = 4 * 60 * 1000; // 4 minutes
 
-    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
+    public QueryTwinTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
     }
 
     // Override the input parameters that are defined in DeviceTwinCommon since these query tests are strictly service client tests.
     // No need to parameterize these tests on device client options.
     @Parameterized.Parameters(name = "{0}_{1}_{2}")
-    public static Collection inputs() throws Exception
+    public static Collection inputs()
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
@@ -90,7 +90,7 @@ public class QueryTwinTests extends DeviceTwinCommon
                     new Object[][]
                             {
                                     //Query is only supported over http and only with sas based authentication
-                                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, null, null, null},
+                                    {HTTPS, SAS, ClientType.DEVICE_CLIENT},
                             });
     }
 
@@ -208,8 +208,6 @@ public class QueryTwinTests extends DeviceTwinCommon
                 fail("Timed out waiting for query results to match expectations");
             }
         }
-
-        removeMultipleDevices(MAX_DEVICES);
     }
 
     @Test
@@ -239,10 +237,10 @@ public class QueryTwinTests extends DeviceTwinCommon
                 desiredProperties.add(new Pair(queryPropertyEven, queryPropertyValueEven));
                 noOfEvenDevices++;
             }
-            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+            testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
 
-            testInstance.twinServiceClient.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
-            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
         executor.submit(() -> {
@@ -348,8 +346,6 @@ public class QueryTwinTests extends DeviceTwinCommon
         {
             executor.shutdownNow();
         }
-
-        removeMultipleDevices(MAX_DEVICES);
     }
 
     @Test
@@ -403,13 +399,12 @@ public class QueryTwinTests extends DeviceTwinCommon
 
                 for (Pair dp : d.getDesiredProperties())
                 {
-                    Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected desired property key, expected " + queryProperty + " but was " + dp.getKey(), internalClient), queryProperty, dp.getKey());
-                    Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected desired property value, expected " + queryPropertyValue + " but was " + dp.getValue(), internalClient), queryPropertyValue, dp.getValue());
+                    Assert.assertEquals("Unexpected desired property key, expected " + queryProperty + " but was " + dp.getKey(), queryProperty, dp.getKey());
+                    Assert.assertEquals("Unexpected desired property value, expected " + queryPropertyValue + " but was " + dp.getValue(), queryPropertyValue, dp.getValue());
                 }
             }
         }
         assertFalse(testInstance.twinServiceClient.hasNextDeviceTwin(twinQuery));
-        removeMultipleDevices(MAX_DEVICES);
     }
 
     @Test
@@ -474,9 +469,6 @@ public class QueryTwinTests extends DeviceTwinCommon
         QueryCollection twinQueryToReRun = testInstance.twinServiceClient.queryTwinCollection(sqlQuery.getQuery());
         Collection<DeviceTwinDevice> continuedDeviceTwinDeviceQuery = testInstance.twinServiceClient.next(twinQueryToReRun, options).getCollection();
 
-        // Cleanup
-        removeMultipleDevices(PAGE_SIZE + 1);
-
         // Assert
         assertEquals((long) PAGE_SIZE, queriedDeviceTwinDeviceCollection.size());
         assertEquals(1, continuedDeviceTwinDeviceQuery.size());
@@ -486,7 +478,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         ArrayList<String> expectedDeviceIds = new ArrayList<>();
         for (int deviceTwinDeviceIndex = 0; deviceTwinDeviceIndex < PAGE_SIZE + 1; deviceTwinDeviceIndex++)
         {
-            expectedDeviceIds.add(devicesUnderTest[deviceTwinDeviceIndex].sCDeviceForTwin.getDeviceId());
+            expectedDeviceIds.add(testInstance.devicesUnderTest[deviceTwinDeviceIndex].sCDeviceForTwin.getDeviceId());
         }
 
         Collection<DeviceTwinDevice> allQueriedDeviceTwinDevices = new ArrayList<>(continuedDeviceTwinDeviceQuery);
@@ -540,10 +532,10 @@ public class QueryTwinTests extends DeviceTwinCommon
                 desiredProperties.add(new Pair(queryPropertyEven, queryPropertyValueEven));
                 noOfEvenDevices++;
             }
-            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+            testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
 
-            testInstance.twinServiceClient.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
-            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
 
         // Query multiple devices having same property
@@ -628,7 +620,6 @@ public class QueryTwinTests extends DeviceTwinCommon
         {
             executor.shutdownNow();
         }
-        removeMultipleDevices(MAX_DEVICES);
     }
 
     public void setDesiredProperties(String queryProperty, String queryPropertyValue, int numberOfDevices) throws IOException, IotHubException
@@ -637,10 +628,10 @@ public class QueryTwinTests extends DeviceTwinCommon
         {
             Set<Pair> desiredProperties = new HashSet<>();
             desiredProperties.add(new Pair(queryProperty, queryPropertyValue));
-            devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
+            testInstance.devicesUnderTest[i].sCDeviceForTwin.setDesiredProperties(desiredProperties);
 
-            testInstance.twinServiceClient.updateTwin(devicesUnderTest[i].sCDeviceForTwin);
-            devicesUnderTest[i].sCDeviceForTwin.clearTwin();
+            testInstance.twinServiceClient.updateTwin(testInstance.devicesUnderTest[i].sCDeviceForTwin);
+            testInstance.devicesUnderTest[i].sCDeviceForTwin.clearTwin();
         }
     }
 }

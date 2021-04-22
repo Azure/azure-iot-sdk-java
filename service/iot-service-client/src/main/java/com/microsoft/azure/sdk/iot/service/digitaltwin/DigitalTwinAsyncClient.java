@@ -237,7 +237,7 @@ public class DigitalTwinAsyncClient {
     public <T> Observable<T> getDigitalTwin(String digitalTwinId, Class<T> clazz)
     {
         return getDigitalTwinWithResponse(digitalTwinId, clazz)
-                .map(response -> response.body());
+                .map(ServiceResponse::body);
     }
 
     /**
@@ -277,7 +277,7 @@ public class DigitalTwinAsyncClient {
     public Observable<Void> updateDigitalTwin(String digitalTwinId, List<Object> digitalTwinUpdateOperations)
     {
         return updateDigitalTwinWithResponse(digitalTwinId, digitalTwinUpdateOperations, null)
-                .map(response -> response.body());
+                .map(ServiceResponse::body);
     }
 
     /**
@@ -315,7 +315,7 @@ public class DigitalTwinAsyncClient {
      */
     public Observable<DigitalTwinCommandResponse> invokeCommand(String digitalTwinId, String commandName) throws IOException {
         return invokeCommandWithResponse(digitalTwinId, commandName, null, null)
-                .map(response -> response.body());
+                .map(ServiceResponse::body);
     }
 
     /**
@@ -329,7 +329,7 @@ public class DigitalTwinAsyncClient {
     public Observable<DigitalTwinCommandResponse> invokeCommand(String digitalTwinId, String commandName, String payload) throws IOException {
         // Retrofit does not work well with null in body
         return invokeCommandWithResponse(digitalTwinId, commandName, payload, null)
-                .map(response -> response.body());
+                .map(ServiceResponse::body);
     }
 
     /**
@@ -368,7 +368,7 @@ public class DigitalTwinAsyncClient {
      */
     public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName) throws IOException {
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, null, null)
-                .map(response -> response.body());
+                .map(ServiceResponse::body);
     }
 
     /**
@@ -382,7 +382,7 @@ public class DigitalTwinAsyncClient {
      */
     public Observable<DigitalTwinCommandResponse> invokeComponentCommand(String digitalTwinId, String componentName, String commandName, String payload) throws IOException {
         return invokeComponentCommandWithResponse(digitalTwinId, componentName, commandName, payload, null)
-                .map(response -> response.body());
+                .map(ServiceResponse::body);
     }
 
     /**

@@ -23,6 +23,9 @@ import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -34,6 +37,7 @@ import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
@@ -45,8 +49,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
@@ -79,12 +81,10 @@ public class ServiceClientTests extends IntegrationTest
     private static class ServiceClientITRunner
     {
         private final IotHubServiceClientProtocol protocol;
-        private final String deviceId;
 
         public ServiceClientITRunner(IotHubServiceClientProtocol protocol)
         {
             this.protocol = protocol;
-            this.deviceId = deviceIdPrefix.concat("-" + UUID.randomUUID().toString());
         }
     }
 
@@ -199,10 +199,10 @@ public class ServiceClientTests extends IntegrationTest
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                                 .build());
 
-        Device deviceAdded = Device.createFromId(testInstance.deviceId, null, null);
-        Tools.addDeviceWithRetry(registryManager, deviceAdded);
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, false);
+        Device device = testDeviceIdentity.getDevice();
 
-        Device deviceGetBefore = registryManager.getDevice(testInstance.deviceId);
+        Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
 
         // Create service client
         ProxyOptions proxyOptions = null;
@@ -238,8 +238,7 @@ public class ServiceClientTests extends IntegrationTest
             serviceClient = new ServiceClient(iotHubConnectionString, testInstance.protocol, serviceClientOptions);
         }
 
-        CompletableFuture<Void> futureOpen = serviceClient.openAsync();
-        futureOpen.get();
+        serviceClient.open();
 
         Message message;
         if (withPayload)
@@ -251,14 +250,12 @@ public class ServiceClientTests extends IntegrationTest
             message = new Message();
         }
 
-        CompletableFuture<Void> completableFuture = serviceClient.sendAsync(testInstance.deviceId, message);
-        completableFuture.get();
+        serviceClient.send(device.getDeviceId(), message);
 
-        Device deviceGetAfter = registryManager.getDevice(testInstance.deviceId);
-        CompletableFuture<Void> futureClose = serviceClient.closeAsync();
-        futureClose.get();
+        Device deviceGetAfter = registryManager.getDevice(device.getDeviceId());
+        serviceClient.close();
 
-        registryManager.removeDevice(testInstance.deviceId);
+        Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
 
         // Assert
         assertEquals(buildExceptionMessage("", hostName), deviceGetBefore.getDeviceId(), deviceGetAfter.getDeviceId());
@@ -403,7 +400,8 @@ public class ServiceClientTests extends IntegrationTest
         try
         {
             serviceClient.open();
-            serviceClient.send(testInstance.deviceId, new Message("some message"));
+            // don't need a real device Id since the request is sent to a fake service
+            serviceClient.send("some deviceId", new Message("some message"));
         }
         catch (IOException e)
         {

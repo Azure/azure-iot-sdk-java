@@ -11,7 +11,6 @@ import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 import java.util.HashMap;
@@ -50,13 +49,12 @@ public class MqttDeviceTwin extends Mqtt
     private static final int PATCH_VERSION_TOKEN = 5;
 
     public MqttDeviceTwin(
-        MqttAsyncClient mqttAsyncClient,
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        super(mqttAsyncClient, null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
+        super(null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
         this.subscribeTopic = RES + BACKSLASH + POUND;
     }

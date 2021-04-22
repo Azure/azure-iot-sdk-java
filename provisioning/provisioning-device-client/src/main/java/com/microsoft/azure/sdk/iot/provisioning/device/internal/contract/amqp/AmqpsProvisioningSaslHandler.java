@@ -314,6 +314,7 @@ public class AmqpsProvisioningSaslHandler implements SaslHandler
         {
             try
             {
+                //noinspection BusyWait
                 Thread.sleep(WAIT_INTERVALS);
             }
             catch (InterruptedException e)

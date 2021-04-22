@@ -144,6 +144,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <rerunFailingTestsCount>2</rerunFailingTestsCount>
                     <includes>
                         <!--By default, only test files that end in ___Test.java are recognized as tests. This statement extends that to ___Tests.java files-->
                         <include>*Tests.java</include>
@@ -184,7 +185,6 @@
                                     <!--Android testing will use this jar, but android testing doesn't want these dependencies. It will import
                                     android compatible versions of these libraries instead-->
                                     <exclude>junit:junit</exclude>
-                                    <exclude>com.microsoft.azure:azure-storage</exclude>
                                     <exclude>org.apache.commons:commons-lang3</exclude>
                                     <exclude>org.slf4j:slf4j-log4j12</exclude>
                                 </excludes>

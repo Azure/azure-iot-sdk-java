@@ -41,6 +41,7 @@ import java.nio.charset.StandardCharsets;
  * </p>
  * The client supports HTTPS 1.1 and AMQPS 1.0 transports.
  */
+@SuppressWarnings("deprecation") // A lot of references to deprecated APIs, but all of them are still in use
 @Slf4j
 public final class DeviceClient extends InternalClient implements Closeable
 {
@@ -84,7 +85,6 @@ public final class DeviceClient extends InternalClient implements Closeable
      * The number of milliseconds the transport will wait between
      * sending out messages.
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long SEND_PERIOD_MILLIS = 10L;
 
@@ -95,13 +95,10 @@ public final class DeviceClient extends InternalClient implements Closeable
      * The number of milliseconds the transport will wait between
      * polling for messages.
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_MQTT = 10L;
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
