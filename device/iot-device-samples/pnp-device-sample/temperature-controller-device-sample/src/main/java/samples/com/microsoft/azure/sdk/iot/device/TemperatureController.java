@@ -292,7 +292,7 @@ public class TemperatureController {
                 case reboot:
                     int delay = getCommandRequestValue(jsonRequest, Integer.class);
                     log.debug("Command: Received - Rebooting thermostat (resetting temperature reading to 0°C after {} seconds).", delay);
-                    Thread.sleep(delay * 1000);
+                    Thread.sleep(delay * 1000L);
 
                     temperature.put(THERMOSTAT_1, 0.0d);
                     temperature.put(THERMOSTAT_2, 0.0d);
@@ -364,7 +364,7 @@ public class TemperatureController {
      */
     private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
 
-        String propertyName = "targetTemperature";
+        final String propertyName = "targetTemperature";
 
         @SneakyThrows({IOException.class, InterruptedException.class})
         @Override

@@ -345,6 +345,8 @@ public class BaseDevice
      * @param forceUpdate - Boolean controlling if the update should be forced or not
      * @throws IllegalArgumentException if the provided argument is null
      */
+    // Supressing this warning since this method is used by public APIs in Registry Manager
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public void setForceUpdate(Boolean forceUpdate) throws IllegalArgumentException
     {
@@ -519,6 +521,5 @@ public class BaseDevice
         this.connectionStateUpdatedTime = UTC_TIME_DEFAULT;
         this.lastActivityTime = OFFSET_TIME_DEFAULT;
         this.cloudToDeviceMessageCount = 0;
-        this.setForceUpdate(false);
     }
 }

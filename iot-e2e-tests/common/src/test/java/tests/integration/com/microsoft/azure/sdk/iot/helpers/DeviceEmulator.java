@@ -11,8 +11,6 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -44,11 +42,8 @@ public class DeviceEmulator
      * Creates a new instance of the device emulator, and connect it to the IoTHub using the provided connectionString
      * and protocol.
      *
-     * @throws URISyntaxException if the DeviceClient cannot resolve the URI.
-     * @throws IOException if the DeviceClient cannot open the connection with the IoTHub.
-     * @throws InterruptedException if the thread had issue to wait for the open connection.
      */
-    DeviceEmulator(InternalClient client) throws URISyntaxException, IOException, InterruptedException
+    DeviceEmulator(InternalClient client)
     {
         this.client = client;
     }
@@ -316,13 +311,13 @@ public class DeviceEmulator
         }
     }
 
-    private String loopback(Object methodData) throws UnsupportedEncodingException
+    private String loopback(Object methodData)
     {
         String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
         return METHOD_LOOPBACK + ":" + payload;
     }
 
-    private String delayInMilliseconds(Object methodData) throws UnsupportedEncodingException, InterruptedException
+    private String delayInMilliseconds(Object methodData) throws InterruptedException
     {
         String payload = new String((byte[])methodData, StandardCharsets.UTF_8).replace("\"", "");
         long delay = Long.parseLong(payload);

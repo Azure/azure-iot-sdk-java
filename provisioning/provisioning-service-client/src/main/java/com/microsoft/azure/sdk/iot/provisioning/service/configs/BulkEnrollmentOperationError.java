@@ -30,6 +30,7 @@ import java.util.Collection;
  *
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iot-dps/deviceenrollment">Device Enrollment</a>
  */
+@SuppressWarnings("unused")
 public class BulkEnrollmentOperationError
 {
     // the registration identifier
@@ -104,7 +105,6 @@ public class BulkEnrollmentOperationError
      *     Used only by the tools that will deserialize this class.
      * </p>
      */
-    @SuppressWarnings("unused")
     BulkEnrollmentOperationError()
     {
         /* SRS_DEVICE_REGISTRATION_OPERATION_ERROR_21_007: [The BulkEnrollmentOperationResult shall provide an empty constructor to make GSON happy.] */

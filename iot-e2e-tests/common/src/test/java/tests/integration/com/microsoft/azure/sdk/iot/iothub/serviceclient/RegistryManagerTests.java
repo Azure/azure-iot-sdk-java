@@ -78,7 +78,7 @@ public class RegistryManagerTests extends IntegrationTest
             this(RegistryManagerOptions.builder().build());
         }
 
-        public RegistryManagerTestInstance(RegistryManagerOptions options) throws InterruptedException, IOException, IotHubException, URISyntaxException
+        public RegistryManagerTestInstance(RegistryManagerOptions options) throws IOException
         {
             String uuid = UUID.randomUUID().toString();
             deviceId = deviceIdPrefix + uuid;

@@ -5,17 +5,32 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.sas.BlobContainerSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import com.azure.storage.blob.specialized.BlobInputStream;
+import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.Device;
+import com.microsoft.azure.sdk.iot.service.DeviceStatus;
+import com.microsoft.azure.sdk.iot.service.ExportImportDevice;
+import com.microsoft.azure.sdk.iot.service.ImportMode;
+import com.microsoft.azure.sdk.iot.service.JobProperties;
+import com.microsoft.azure.sdk.iot.service.RegistryManager;
+import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationMechanism;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubTooManyDevicesException;
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.*;
 import mockit.Deencapsulation;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -25,12 +40,13 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.UUID;
 
 import static junit.framework.TestCase.fail;
 
@@ -49,13 +65,13 @@ public class ExportImportTests extends IntegrationTest
     protected static String storageAccountConnectionString = "";
     private static String deviceId = "java-crud-e2e-test";
 
-    private static CloudBlobContainer importContainer;
-    private static CloudBlobContainer exportContainer;
+    private static BlobContainerClient importContainer;
+    private static BlobContainerClient exportContainer;
 
     private static RegistryManager registryManager;
 
     @BeforeClass
-    public static void setUp() throws URISyntaxException, InvalidKeyException, StorageException, IOException
+    public static void setUp() throws IOException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
@@ -66,18 +82,17 @@ public class ExportImportTests extends IntegrationTest
         String uuid = UUID.randomUUID().toString();
         deviceId = deviceId.concat("-" + uuid);
 
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageAccountConnectionString);
-        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
+        BlobServiceClient blobClient = new BlobServiceClientBuilder().connectionString(storageAccountConnectionString).buildClient();
 
         // Creating the export storage container and getting its URI
         String exportContainerName = "exportcontainersample-" + uuid;
-        exportContainer = blobClient.getContainerReference(exportContainerName);
-        exportContainer.createIfNotExists();
+        exportContainer = blobClient.getBlobContainerClient(exportContainerName);
+        exportContainer.create();
 
         // Creating the import storage container and getting its URI
         String importContainerName = "importcontainersample-" + uuid;
-        importContainer = blobClient.getContainerReference(importContainerName);
-        importContainer.createIfNotExists();
+        importContainer = blobClient.getBlobContainerClient(importContainerName);
+        importContainer.create();
     }
 
     @AfterClass
@@ -98,8 +113,8 @@ public class ExportImportTests extends IntegrationTest
         runImportJob(devicesToBeDeleted, ImportMode.Delete, Optional.empty());
 
         //Cleaning up the containers
-        importContainer.deleteIfExists();
-        exportContainer.deleteIfExists();
+        importContainer.delete();
+        exportContainer.delete();
 
         if (registryManager != null)
         {
@@ -228,7 +243,12 @@ public class ExportImportTests extends IntegrationTest
             {
                 if (storageAuthenticationType.isPresent())
                 {
-                    JobProperties exportJobProperties = JobProperties.createForExportJob(containerSasUri, excludeKeys, storageAuthenticationType.get());
+                    JobProperties exportJobProperties =
+                        JobProperties.createForExportJob(
+                            containerSasUri,
+                            excludeKeys,
+                            storageAuthenticationType.get());
+
                     exportJob = registryManager.exportDevices(exportJobProperties);
                 }
                 else
@@ -266,12 +286,12 @@ public class ExportImportTests extends IntegrationTest
         }
 
         String exportedDevicesJson = "";
-        for(ListBlobItem blobItem : exportContainer.listBlobs())
+        for (BlobItem blobItem : exportContainer.listBlobs())
         {
-            if (blobItem instanceof CloudBlockBlob)
-            {
-                CloudBlockBlob retrievedBlob = (CloudBlockBlob) blobItem;
-                exportedDevicesJson = retrievedBlob.downloadText();
+            BlobInputStream stream = exportContainer.getBlobClient(blobItem.getName()).openInputStream();
+
+            try (Scanner scanner = new Scanner(stream, StandardCharsets.UTF_8.name())) {
+                exportedDevicesJson = scanner.next();
             }
         }
 
@@ -320,8 +340,8 @@ public class ExportImportTests extends IntegrationTest
         // Creating the Azure storage blob and uploading the serialized string of devices
         InputStream stream = new ByteArrayInputStream(blobToImport);
         String importBlobName = "devices.txt";
-        CloudBlockBlob importBlob = importContainer.getBlockBlobReference(importBlobName);
-        importBlob.deleteIfExists();
+        BlockBlobClient importBlob = importContainer.getBlobClient(importBlobName).getBlockBlobClient();
+        importBlob.delete();
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
@@ -376,24 +396,20 @@ public class ExportImportTests extends IntegrationTest
         }
     }
 
-    private static String getContainerSasUri(CloudBlobContainer container) throws InvalidKeyException, StorageException
+    private static String getContainerSasUri(BlobContainerClient blobContainerClient)
     {
-        //Set the expiry time and permissions for the container.
-        //In this case no start time is specified, so the shared access signature becomes valid immediately.
-        SharedAccessBlobPolicy sasConstraints = new SharedAccessBlobPolicy();
-        Date expirationDate = Date.from(Instant.now().plus(Duration.ofDays(1)));
-        sasConstraints.setSharedAccessExpiryTime(expirationDate);
-        EnumSet<SharedAccessBlobPermissions> permissions = EnumSet.of(
-                SharedAccessBlobPermissions.WRITE,
-                SharedAccessBlobPermissions.LIST,
-                SharedAccessBlobPermissions.READ,
-                SharedAccessBlobPermissions.DELETE);
-        sasConstraints.setPermissions(permissions);
+        OffsetDateTime expiryTime = OffsetDateTime.now().plusDays(1);
+        BlobContainerSasPermission permission =
+            new BlobContainerSasPermission()
+                .setReadPermission(true)
+                .setAddPermission(true)
+                .setCreatePermission(true)
+                .setDeletePermission(true)
+                .setListPermission(true);
 
-        //Generate the shared access signature on the container, setting the constraints directly on the signature.
-        String sasContainerToken = container.generateSharedAccessSignature(sasConstraints, null);
+        BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(expiryTime, permission)
+            .setStartTime(OffsetDateTime.now());
 
-        //Return the URI string for the container, including the SAS token.
-        return container.getUri() + "?" + sasContainerToken;
+        return blobContainerClient.generateSas(values);
     }
 }

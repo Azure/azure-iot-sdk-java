@@ -24,13 +24,13 @@ import org.junit.rules.Timeout;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -57,6 +57,8 @@ public class TokenRenewalTests extends IntegrationTest
 
     private static final Integer SEND_TIMEOUT_MILLISECONDS = 60000;
     private static final Integer RETRY_MILLISECONDS = 100;
+
+    private final List<TestIdentity> testIdentities = new ArrayList<>();
 
     private static final int MULTIPLEX_COUNT = 5; // number of multiplexed devices to have per multiplexed connection
 
@@ -102,7 +104,9 @@ public class TokenRenewalTests extends IntegrationTest
      * @throws Exception if the test fails in any way
      */
     @Test
-    @ContinuousIntegrationTest
+    // While this test is long enough to be considered a continuous integration test, it is the only test that truly validates
+    // that the device client's token renewal logic works. Because of that, it needs to be run at the gate.
+    //@ContinuousIntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
         List<InternalClient> clients = createClientsToTest();
@@ -166,22 +170,14 @@ public class TokenRenewalTests extends IntegrationTest
         sendMessageFromEachClient(clients);
 
         closeClients(clients);
-        amqpMultiplexingClient.open();
-        amqpWsMultiplexingClient.open();
+        amqpMultiplexingClient.close();
+        amqpWsMultiplexingClient.close();
+
+        Tools.disposeTestIdentities(testIdentities, iotHubConnectionString);
+
+        testIdentities.clear();
 
         verifyClientsConnectivityBehavedCorrectly(clients, amqpDisconnectDidNotHappenSuccesses, mqttDisconnectDidHappenSuccesses, shutdownWasGracefulSuccesses);
-
-        for (InternalClient client : clients)
-        {
-            try
-            {
-                registryManager.removeDevice(client.getConfig().getDeviceId());
-            }
-            catch (Exception e)
-            {
-                // don't care if clean up fails
-            }
-        }
     }
 
     private void closeClients(List<InternalClient> clients) throws IOException
@@ -220,15 +216,16 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, ModuleClientException, InterruptedException {
+    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, ModuleClientException, InterruptedException, GeneralSecurityException
+    {
         List<InternalClient> clients = new ArrayList<>();
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         for (IotHubClientProtocol protocol: IotHubClientProtocol.values())
         {
-            clients.add(createDeviceClient(protocol, false));
+            clients.add(createDeviceClient(protocol));
             if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
-                InternalClient client = createDeviceClient(protocol, false);
+                InternalClient client = createDeviceClient(protocol);
                 ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
                 client.setProxySettings(proxySettings);
                 clients.add(client);
@@ -253,12 +250,13 @@ public class TokenRenewalTests extends IntegrationTest
         return clients;
     }
 
-    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException {
+    private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, MultiplexingClientException, InterruptedException, GeneralSecurityException
+    {
         MultiplexingClient multiplexingClient = new MultiplexingClient(hostname, protocol);
 
         for (int i = 0; i < MULTIPLEX_COUNT; i++)
         {
-            DeviceClient deviceClientToMultiplex = (DeviceClient) createDeviceClient(protocol, true);
+            DeviceClient deviceClientToMultiplex = (DeviceClient) createDeviceClient(protocol);
             clientsToCreate.add(deviceClientToMultiplex);
         }
 
@@ -354,20 +352,16 @@ public class TokenRenewalTests extends IntegrationTest
         device = Tools.addDeviceWithRetry(registryManager, device);
         Module module = Module.createModule(deviceId, moduleId, AuthenticationType.SAS);
         module = Tools.addModuleWithRetry(registryManager, module);
-        return new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
+        ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, device, module), protocol);
+        testIdentities.add(new TestModuleIdentity(moduleClient, device, module));
+        return moduleClient;
     }
 
-    private InternalClient createDeviceClient(IotHubClientProtocol protocol, boolean isMultiplexing) throws URISyntaxException, IOException, IotHubException, InterruptedException {
-        UUID uuid = UUID.randomUUID();
-        String deviceId = "token-renewal-test-device-" + protocol + "-" + uuid.toString();
-
-        if (isMultiplexing)
-        {
-            deviceId = "multiplexing-" + deviceId;
-        }
-
-        com.microsoft.azure.sdk.iot.service.Device device = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, DeviceStatus.Enabled, null);
-        device = Tools.addDeviceWithRetry(registryManager, device);
+    private InternalClient createDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, IOException, IotHubException, GeneralSecurityException
+    {
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false);
+        com.microsoft.azure.sdk.iot.service.Device device = testDeviceIdentity.getDevice();
+        testIdentities.add(testDeviceIdentity);
         return new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), protocol);
     }
 }

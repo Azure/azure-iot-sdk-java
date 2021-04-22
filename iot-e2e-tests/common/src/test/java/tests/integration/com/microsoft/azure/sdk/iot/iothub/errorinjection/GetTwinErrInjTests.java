@@ -33,9 +33,9 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 @RunWith(Parameterized.class)
 public class GetTwinErrInjTests extends DeviceTwinCommon
 {
-    public GetTwinErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
+    public GetTwinErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
@@ -251,28 +251,28 @@ public class GetTwinErrInjTests extends DeviceTwinCommon
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage, IotHubStatusCode.OK_EMPTY);
-        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(internalClient,
+        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(testInstance.testIdentity.getClient(),
                 errorInjectionMsgAndRet,
                 RETRY_MILLISECONDS,
                 SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
 
         // Assert
-        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, internalClient);
-        for (int i = 0; i < deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, ERROR_INJECTION_WAIT_TIMEOUT_MILLISECONDS, testInstance.testIdentity.getClient());
+        for (int i = 0; i < testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList.length; i++)
         {
-            PropertyState propertyState = deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
+            PropertyState propertyState = testInstance.deviceUnderTest.dCDeviceForTwin.propertyStateList[i];
             propertyState.callBackTriggered = false;
             propertyState.propertyNewVersion = -1;
         }
 
-        if (internalClient instanceof DeviceClient)
+        if (testInstance.testIdentity.getClient() instanceof DeviceClient)
         {
-            ((DeviceClient)internalClient).getDeviceTwin();
+            ((DeviceClient)testInstance.testIdentity.getClient()).getDeviceTwin();
         }
         else
         {
-            ((ModuleClient)internalClient).getTwin();
+            ((ModuleClient)testInstance.testIdentity.getClient()).getTwin();
         }
 
         waitAndVerifyTwinStatusBecomesSuccess();

@@ -9,6 +9,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 import io.swagger.server.api.MainApiException;
 
+@SuppressWarnings("ALL")
 public class EventhubApiVerticle extends AbstractVerticle {
     final static Logger LOGGER = LoggerFactory.getLogger(EventhubApiVerticle.class); 
     
@@ -21,7 +22,7 @@ public class EventhubApiVerticle extends AbstractVerticle {
 
     public EventhubApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.EventhubApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.EventhubApiImpl");
             service = (EventhubApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("EventhubApiVerticle constructor", e);

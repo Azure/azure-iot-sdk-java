@@ -5,6 +5,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 
+@SuppressWarnings("ALL")
 public class WrapperApiImpl implements WrapperApi  {
     private final WrapperGlue _wrapperGlue= new WrapperGlue();
 

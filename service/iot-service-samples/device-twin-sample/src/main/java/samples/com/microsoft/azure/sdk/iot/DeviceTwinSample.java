@@ -47,8 +47,11 @@ public class DeviceTwinSample
             // ============================== get initial twin properties =============================
             getInitialState(twinClient, device);
 
-            // ================================ change desired property ===============================
-            changeDesiredProperties(twinClient, device);
+            // ================================ patch desired property ===============================
+            patchDesiredProperties(twinClient, device);
+
+            // ================================ replace desired property ===============================
+            replaceDesiredProperties(twinClient, device);
 
             // ============================ schedule update desired property ==========================
             scheduleUpdateDesiredProperties(twinClient, device);
@@ -82,7 +85,7 @@ public class DeviceTwinSample
         device.setTags(tags);
     }
 
-    private static void changeDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
+    private static void patchDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
     {
         Set<Pair> desiredProperties = new HashSet<>();
         desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
@@ -91,6 +94,22 @@ public class DeviceTwinSample
 
         System.out.println("Updating Device twin (new temp, hum)");
         twinClient.updateTwin(device);
+
+        System.out.println("Getting the updated Device twin");
+        twinClient.getTwin(device);
+        System.out.println(device);
+    }
+
+    private static void replaceDesiredProperties(DeviceTwin twinClient, DeviceTwinDevice device) throws IOException, IotHubException
+    {
+        Set<Pair> desiredProperties = new HashSet<>();
+        desiredProperties.add(new Pair("temp", new Random().nextInt(TEMPERATURE_RANGE)));
+        device.setDesiredProperties(desiredProperties);
+
+        // By replacing the twin rather than patching it, any desired properties that existed on the twin prior to this call
+        // that aren't present on the new set of desired properties will be deleted.
+        System.out.println("Replacing Device twin");
+        device = twinClient.replaceTwin(device);
 
         System.out.println("Getting the updated Device twin");
         twinClient.getTwin(device);

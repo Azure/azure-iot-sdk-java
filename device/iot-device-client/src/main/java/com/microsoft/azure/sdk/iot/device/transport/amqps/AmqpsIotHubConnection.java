@@ -54,6 +54,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
     private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
     private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at most that much space
+    private static final int MAX_FRAME_SIZE = 4 * 1024;
     private static final int WEB_SOCKET_PORT = 443;
 
     private static final int AMQP_PORT = 5671;
@@ -243,9 +244,20 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                     closeConnectionWithException("Timed out waiting for worker links to open", true);
                 }
             }
+            catch (TransportException e)
+            {
+                // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
+                // will create a new reactor and a new executor service
+                this.reactor.free();
+                this.executorServicesCleanup();
+                throw e;
+            }
             catch (InterruptedException e)
             {
-                this.close();
+                // clean up network resources and thread scheduler before exiting this layer. Subsequent open attempts
+                // will create a new reactor and a new executor service
+                this.reactor.free();
+                this.executorServicesCleanup();
                 TransportException interruptedTransportException = new TransportException("Interrupted while waiting for links to open for AMQP connection", e);
                 interruptedTransportException.setRetryable(true);
                 throw interruptedTransportException;
@@ -261,23 +273,30 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     public void close() throws TransportException
     {
         log.debug("Shutting down amqp layer...");
-        closeAsync();
-
         try
         {
-            log.trace("Waiting for reactor to close...");
-            closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
+            closeAsync();
+
+            try
+            {
+                log.trace("Waiting for reactor to close...");
+                closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
+            }
+            catch (InterruptedException e)
+            {
+                throw new TransportException("Interrupted while closing proton reactor", e);
+            }
+
+            log.trace("Amqp connection closed successfully");
         }
-        catch (InterruptedException e)
+        finally
         {
+            // always clean up the executor service, free the reactor and set the state as DISCONNECTED even when the close
+            // isn't successful. Failing to free the reactor in particular leaks network resources
             this.executorServicesCleanup();
-            throw new TransportException("Interrupted while closing proton reactor", e);
+            this.reactor.free();
+            this.state = IotHubConnectionStatus.DISCONNECTED;
         }
-
-        this.executorServicesCleanup();
-
-        log.trace("Amqp connection closed successfully");
-        this.state = IotHubConnectionStatus.DISCONNECTED;
     }
 
     @Override
@@ -815,16 +834,21 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         try
         {
+            ReactorOptions options = new ReactorOptions();
+
+            // If this option isn't set, proton defaults to 16 * 1024 max frame size. This used to default to 4 * 1024,
+            // and this change to 16 * 1024 broke the websocket implementation that we layer on top of proton-j.
+            // By setting this frame size back to 4 * 1024, AMQPS_WS clients can send messages with payloads up to the
+            // expected 256 * 1024 bytes. For more context, see https://github.com/Azure/azure-iot-sdk-java/issues/742
+            options.setMaxFrameSize(MAX_FRAME_SIZE);
+
             if (this.authenticationType == DeviceClientConfig.AuthType.X509_CERTIFICATE)
             {
-                ReactorOptions options = new ReactorOptions();
+                // x509 authentication does not use SASL, so disable it
                 options.setEnableSaslByDefault(false);
-                return Proton.reactor(options, this);
             }
-            else
-            {
-                return Proton.reactor(this);
-            }
+
+            return Proton.reactor(options, this);
         }
         catch (IOException e)
         {
@@ -1095,7 +1119,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private static class ReactorRunner implements Callable
+    private static class ReactorRunner implements Callable<Object>
     {
         private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final IotHubReactor iotHubReactor;
@@ -1126,6 +1150,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 transportException.setRetryable(true);
 
                 this.listener.onConnectionLost(transportException, connectionId);
+            }
+            finally
+            {
+                iotHubReactor.free();
             }
 
             return null;

@@ -167,14 +167,14 @@ public class MethodParser
             JsonElement jsonElement = jsonParser.parse(json);
             if (jsonElement instanceof JsonPrimitive || jsonElement instanceof JsonArray)
             {
-                /**
-                 *  Basic JSON String or Array
-                 *  Ex:
-                 *      "this is payload."
-                 *      1
-                 *      true
-                 *      2.0e10
-                 *      2.6
+                /*
+                   Basic JSON String or Array
+                   Ex:
+                       "this is payload."
+                       1
+                       true
+                       2.0e10
+                       2.6
                  */
                 this.operation = Operation.payload;
                 this.payload = resolveJsonElement(jsonElement);
@@ -188,26 +188,26 @@ public class MethodParser
                 {
                     if (statusTagNode == null)
                     {
-                        /**
-                         * Codes_SRS_METHODPARSER_21_010: [If the json contains any payload without `methodName` or `status` identification, the fromJson shall parse only the payload, and set the operation as `payload`]
-                         *  Ex:
-                         *  {
-                         *      "input1": "someInput",
-                         *      "input2": "anotherInput"
-                         *  }
+                        /*
+                           If the json contains any payload without `methodName` or `status` identification, the fromJson shall parse only the payload, and set the operation as `payload`.
+                           Ex:
+                           {
+                               "input1": "someInput",
+                               "input2": "anotherInput"
+                           }
                          */
                         operation = Operation.payload;
                         payload = getJsonObjectValue(jsonObject);
                     }
                     else
                     {
-                        /**
-                         * Codes_SRS_METHODPARSER_21_011: [If the json contains the `status` identification, the fromJson shall parse both status and payload, and set the operation as `response`.]
-                         *  Ex:
-                         *  {
-                         *      "status": 201,
-                         *      "payload": {"AnyValidPayload" : "" }
-                         *  }
+                        /*
+                           If the json contains the `status` identification, the fromJson shall parse both status and payload, and set the operation as `response`.
+                           Ex:
+                           {
+                               "status": 201,
+                               "payload": {"AnyValidPayload" : "" }
+                           }
                          */
                         operation = Operation.response;
                         if (statusTagNode.isJsonPrimitive())
@@ -225,19 +225,19 @@ public class MethodParser
                 {
                     if (statusTagNode == null)
                     {
-                        /**
-                         * Codes_SRS_METHODPARSER_21_009: [If the json contains the `methodName` identification, the fromJson shall parse the full method, and set the operation as `invoke`.]
-                         *  Ex:
-                         *  {
-                         *      "methodName": "reboot",
-                         *      "responseTimeoutInSeconds": 200,
-                         *      "connectTimeoutInSeconds": 5,
-                         *      "payload":
-                         *      {
-                         *          "input1": "someInput",
-                         *          "input2": "anotherInput"
-                         *      }
-                         *  }
+                        /*
+                           If the json contains the `methodName` identification, the fromJson shall parse the full method, and set the operation as `invoke`.
+                           Ex:
+                           {
+                               "methodName": "reboot",
+                               "responseTimeoutInSeconds": 200,
+                               "connectTimeoutInSeconds": 5,
+                               "payload":
+                               {
+                                   "input1": "someInput",
+                                   "input2": "anotherInput"
+                               }
+                           }
                          */
                         operation = Operation.invoke;
                         name = methodNameNode.getAsString();
@@ -329,7 +329,7 @@ public class MethodParser
     {
         if (payload == null)
         {
-            return new JsonNull();
+            return JsonNull.INSTANCE;
         }
         else if (payload instanceof JsonElement)
         {
@@ -338,7 +338,7 @@ public class MethodParser
         else if (payload instanceof Map)
         {
             JsonObject jsonObject = new JsonObject();
-            Set<Entry<String, Object>> entrySet = ((Map) payload).entrySet();
+            Set<Entry<String, Object>> entrySet = ((Map<String, Object>) payload).entrySet();
             for (Entry<String, Object> entry : entrySet)
             {
                 jsonObject.add(entry.getKey(), jsonizePayload(entry.getValue()));
@@ -387,19 +387,19 @@ public class MethodParser
         /* Codes_SRS_METHODPARSER_21_025: [If the status is null, the toJsonElement shall include `status` as `null`.] */
         if (operation == Operation.invoke)
         {
-            /**
-             *  Codes_SRS_METHODPARSER_21_026: [If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.]
-             *  Ex:
-             *  {
-             *      "methodName": "reboot",
-             *      "responseTimeoutInSeconds": 200,
-             *      "connectTimeoutInSeconds": 5,
-             *      "payload":
-             *      {
-             *          "input1": "someInput",
-             *          "input2": "anotherInput"
-             *      }
-             *  }
+            /*
+               If the method operation is `invoke`, the toJsonElement shall include the full method information in the json.
+               Ex:
+               {
+                   "methodName": "reboot",
+                   "responseTimeoutInSeconds": 200,
+                   "connectTimeoutInSeconds": 5,
+                   "payload":
+                   {
+                       "input1": "someInput",
+                       "input2": "anotherInput"
+                   }
+               }
              */
             if ((name == null) || name.isEmpty())
             {
@@ -420,12 +420,13 @@ public class MethodParser
         }
         else if (operation == Operation.response)
         {
-            /** Codes_SRS_METHODPARSER_21_027: [If the method operation is `response`, the toJsonElement shall parse both status and payload.]
-             *  Ex:
-             *  {
-             *      "status": 201,
-             *      "payload": {"AnyValidPayload" : "" }
-             *  }
+            /*
+               If the method operation is `response`, the toJsonElement shall parse both status and payload.
+               Ex:
+               {
+                   "status": 201,
+                   "payload": {"AnyValidPayload" : "" }
+               }
              */
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty(STATUS_TAG, status);
@@ -434,13 +435,13 @@ public class MethodParser
         }
         else if (operation == Operation.payload)
         {
-            /**
-             * Codes_SRS_METHODPARSER_21_028: [If the method operation is `payload`, the toJsonElement shall parse only the payload.]
-             *  Ex:
-             *  {
-             *      "input1": "someInput",
-             *      "input2": "anotherInput"
-             *  }
+            /*
+               If the method operation is `payload`, the toJsonElement shall parse only the payload.
+               Ex:
+               {
+                   "input1": "someInput",
+                   "input2": "anotherInput"
+               }
              */
             return jsonizePayload(payload);
         } else

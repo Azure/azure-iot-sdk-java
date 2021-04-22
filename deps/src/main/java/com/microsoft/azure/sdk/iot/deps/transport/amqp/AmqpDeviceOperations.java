@@ -14,9 +14,12 @@ import java.util.Map;
 
 public class AmqpDeviceOperations
 {
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected String senderLinkTag;
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected String receiverLinkTag;
 
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected Map<Symbol, Object> amqpProperties = new HashMap<>();
 
     protected Sender senderLink;
@@ -164,10 +167,5 @@ public class AmqpDeviceOperations
     protected void addAmqpLinkProperty(String key, String value)
     {
         this.amqpProperties.put(Symbol.getSymbol(key), value);
-    }
-
-    protected void clearAmqpLinkProperty()
-    {
-        this.amqpProperties.clear();
     }
 }

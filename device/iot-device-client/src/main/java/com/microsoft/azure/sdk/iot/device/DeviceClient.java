@@ -41,6 +41,7 @@ import java.nio.charset.StandardCharsets;
  * </p>
  * The client supports HTTPS 1.1 and AMQPS 1.0 transports.
  */
+@SuppressWarnings("deprecation") // A lot of references to deprecated APIs, but all of them are still in use
 @Slf4j
 public final class DeviceClient extends InternalClient implements Closeable
 {
@@ -636,14 +637,16 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param deviceTwinStatusCallback the IotHubEventCallback callback for providing the status of Device Twin operations. Cannot be {@code null}.
      * @param deviceTwinStatusCallbackContext the context to be passed to the status callback. Can be {@code null}.
      * @param genericPropertyCallBack the PropertyCallBack callback for providing any changes in desired properties. Cannot be {@code null}.
-     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.     *
+     * @param genericPropertyCallBackContext the context to be passed to the property callback. Can be {@code null}.
+     * @param <Type1> The type of the desired property key. Since the twin is a json object, the key will always be a String.
+     * @param <Type2> The type of the desired property value.
      *
      * @throws IllegalArgumentException if the callback is {@code null}
      * @throws UnsupportedOperationException if called more than once on the same device
      * @throws IOException if called when client is not opened
      */
-    public void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
-                                        PropertyCallBack genericPropertyCallBack, Object genericPropertyCallBackContext)
+    public <Type1, Type2> void startDeviceTwin(IotHubEventCallback deviceTwinStatusCallback, Object deviceTwinStatusCallbackContext,
+                                        PropertyCallBack<Type1, Type2> genericPropertyCallBack, Object genericPropertyCallBackContext)
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         this.startTwinInternal(deviceTwinStatusCallback, deviceTwinStatusCallbackContext, genericPropertyCallBack, genericPropertyCallBackContext);

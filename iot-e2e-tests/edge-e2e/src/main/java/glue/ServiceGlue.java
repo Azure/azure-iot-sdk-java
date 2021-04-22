@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
+@SuppressWarnings("ALL")
 public class ServiceGlue
 {
     HashMap<String, DeviceMethod> _map = new HashMap<>();

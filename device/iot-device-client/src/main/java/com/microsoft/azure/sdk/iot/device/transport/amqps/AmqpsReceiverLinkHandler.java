@@ -39,11 +39,10 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
     // Upon receiving a message over a receiving link, a credit should be refunded to the service so that
     // this initial credit doesn't run out.
     private final Map<Message, AmqpsMessage> receivedMessagesMap = new ConcurrentHashMap<>();
-    Map<Symbol, Object> amqpProperties;
-    String receiverLinkTag;
-    String linkCorrelationId;
+    final Map<Symbol, Object> amqpProperties;
+    final String linkCorrelationId;
     String receiverLinkAddress;
-    Receiver receiverLink;
+    final Receiver receiverLink;
     private final AmqpsLinkStateCallback amqpsLinkStateCallback;
 
     AmqpsReceiverLinkHandler(Receiver receiver, AmqpsLinkStateCallback amqpsLinkStateCallback, String linkCorrelationId)
@@ -231,7 +230,7 @@ public abstract class AmqpsReceiverLinkHandler extends BaseHandler
 
             if (properties.getContentType() != null)
             {
-                iotHubTransportMessage.setContentType(properties.getContentType().toString());
+                iotHubTransportMessage.setContentTypeFinal(properties.getContentType().toString());
             }
         }
 

@@ -93,9 +93,8 @@ public class ModuleManagerSample
         }
 
         List<Module> list = registryManager.getModulesOnDevice(SampleUtils.deviceId);
-        for (int i = 0; i < list.size(); i++)
+        for (Module module : list)
         {
-            Module module = list.get(i);
             System.out.println("Module: " + module.getId());
             System.out.println("Module primary key: " + module.getPrimaryKey());
             System.out.println("Module secondary key: " + module.getSecondaryKey());

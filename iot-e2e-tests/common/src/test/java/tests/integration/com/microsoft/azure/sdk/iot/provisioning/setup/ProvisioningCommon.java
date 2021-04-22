@@ -239,7 +239,6 @@ public class ProvisioningCommon extends IntegrationTest
 
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
-            testInstance.provisioningServiceClient = null;
             try
             {
                 //TPM security provider MUST be shutdown between tests
@@ -491,7 +490,7 @@ public class ProvisioningCommon extends IntegrationTest
         return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException
     {
         SecurityProvider securityProvider = null;
         TwinCollection tags = new TwinCollection();

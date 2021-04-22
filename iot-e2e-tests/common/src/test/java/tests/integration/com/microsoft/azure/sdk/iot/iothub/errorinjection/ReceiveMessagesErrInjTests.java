@@ -9,7 +9,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.Module;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
@@ -36,9 +35,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 {
-    public ReceiveMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
+    public ReceiveMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
@@ -194,7 +193,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message errorInjectionMessage) throws IOException, IotHubException, InterruptedException
     {
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();
-        testInstance.client.registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
+        testInstance.identity.getClient().registerConnectionStatusChangeCallback((status, statusChangeReason, throwable, callbackContext) -> connectionStatusUpdates.add(new Pair<>(status, throwable)), null);
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
 
@@ -204,18 +203,18 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         }
 
         Success messageReceived = new Success();
-        if (testInstance.client instanceof DeviceClient)
+        if (testInstance.identity.getClient() instanceof DeviceClient)
         {
-            ((DeviceClient) testInstance.client).setMessageCallback(callback, messageReceived);
+            ((DeviceClient) testInstance.identity.getClient()).setMessageCallback(callback, messageReceived);
         }
-        else if (testInstance.client instanceof ModuleClient)
+        else if (testInstance.identity.getClient() instanceof ModuleClient)
         {
-            ((ModuleClient) testInstance.client).setMessageCallback(callback, messageReceived);
+            ((ModuleClient) testInstance.identity.getClient()).setMessageCallback(callback, messageReceived);
         }
 
         try
         {
-            testInstance.client.open();
+            testInstance.identity.getClient().open();
 
             IotHubStatusCode expectedStatusCode = IotHubStatusCode.OK_EMPTY;
 
@@ -231,19 +230,19 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
                 expectedStatusCode = null;
             }
 
-            testInstance.client.sendEventAsync(errorInjectionMessage, new EventCallback(expectedStatusCode), null);
+            testInstance.identity.getClient().sendEventAsync(errorInjectionMessage, new EventCallback(expectedStatusCode), null);
 
             //wait to send the message because we want to ensure that the tcp connection drop happens beforehand and we
             // want the connection to be re-established before sending anything from service client
-            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS, testInstance.client);
+            IotHubServicesCommon.waitForStabilizedConnection(connectionStatusUpdates, ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS, testInstance.identity.getClient());
 
-            if (testInstance.client instanceof DeviceClient)
+            if (testInstance.identity.getClient() instanceof DeviceClient)
             {
                 sendMessageToDevice(testInstance.identity.getDeviceId(), testInstance.protocol.toString());
             }
-            else if (testInstance.client instanceof ModuleClient)
+            else if (testInstance.identity.getClient() instanceof ModuleClient)
             {
-                sendMessageToModule(testInstance.identity.getDeviceId(), ((Module) testInstance.identity).getId(), testInstance.protocol.toString());
+                sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), testInstance.protocol.toString());
             }
 
             waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
@@ -252,9 +251,9 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         }
         finally
         {
-            testInstance.client.closeNow();
+            testInstance.identity.getClient().closeNow();
         }
 
-        assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.client), IotHubServicesCommon.actualStatusUpdatesContainsStatus(connectionStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.identity.getClient()), IotHubServicesCommon.actualStatusUpdatesContainsStatus(connectionStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
     }
 }

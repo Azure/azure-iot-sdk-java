@@ -15,6 +15,7 @@ public enum IoTHubConnectionType
     /**
      * Multiplexing should be done with {@link com.microsoft.azure.sdk.iot.device.MultiplexingClient} which uses {@link #USE_MULTIPLEXING_CLIENT}
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     USE_TRANSPORTCLIENT,
 

@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * parameters and response for a sync method call
  **/
-@JsonInclude(JsonInclude.Include.NON_NULL) 
+@SuppressWarnings("ALL")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoundtripMethodCallBody   {
   
   private Object requestPayload = null;

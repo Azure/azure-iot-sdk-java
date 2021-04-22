@@ -165,6 +165,7 @@ public class Query
      * @throws IotHubException If HTTP response other then status ok is received.
      * @deprecated use {@link #sendQueryRequest(IotHubConnectionString, URL, HttpMethod, int, int, Proxy)} instead.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
                                    URL url,
@@ -259,6 +260,7 @@ public class Query
      * @throws IOException If any of the input parameters are not valid.
      * @throws IotHubException If HTTP response other then status ok is received.
      */
+    @SuppressWarnings("UnusedReturnValue") // Public method
     public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
                                           URL url,
                                           HttpMethod method,

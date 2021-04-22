@@ -6,6 +6,8 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
+import com.azure.storage.blob.BlobClientBuilder;
+import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
@@ -13,9 +15,10 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
@@ -25,7 +28,6 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
-import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,8 +36,12 @@ import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
@@ -72,10 +78,6 @@ public class FileUploadTests extends IntegrationTest
     private static RegistryManager registryManager;
     private static ServiceClient serviceClient;
 
-    private static String publicKeyCertificate;
-    private static String privateKeyCertificate;
-    private static String x509Thumbprint;
-
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8897;
@@ -93,11 +95,6 @@ public class FileUploadTests extends IntegrationTest
 
         serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
-
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        publicKeyCertificate = certificateGenerator.getPublicCertificate();
-        privateKeyCertificate = certificateGenerator.getPrivateKey();
-        x509Thumbprint = certificateGenerator.getX509Thumbprint();
 
         return Arrays.asList(
                 new Object[][]
@@ -127,7 +124,7 @@ public class FileUploadTests extends IntegrationTest
         private MessageState[] messageStates;
         private final boolean withProxy;
 
-        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException
+        public FileUploadTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
@@ -195,7 +192,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Before
-    public void setUpFileUploadState() throws Exception
+    public void setUpFileUploadState()
     {
         testInstance.fileUploadState = new FileUploadState[MAX_FILES_TO_UPLOAD];
         testInstance.messageStates = new MessageState[MAX_FILES_TO_UPLOAD];
@@ -246,30 +243,8 @@ public class FileUploadTests extends IntegrationTest
 
     private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException, GeneralSecurityException
     {
-        DeviceClient deviceClient;
-        if (testInstance.authenticationType == AuthenticationType.SAS)
-        {
-            String deviceId = "java-file-upload-e2e-test-".concat(UUID.randomUUID().toString());
-            Device scDevice = com.microsoft.azure.sdk.iot.service.Device.createFromId(deviceId, null, null);
-            scDevice = Tools.addDeviceWithRetry(registryManager, scDevice);
-
-            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevice), protocol);
-
-        }
-        else if (testInstance.authenticationType == AuthenticationType.SELF_SIGNED)
-        {
-            String deviceIdX509 = "java-file-upload-e2e-test-x509-".concat(UUID.randomUUID().toString());
-            Device scDevicex509 = com.microsoft.azure.sdk.iot.service.Device.createDevice(deviceIdX509, AuthenticationType.SELF_SIGNED);
-            scDevicex509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
-            scDevicex509 = Tools.addDeviceWithRetry(registryManager, scDevicex509);
-
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCertificate, privateKeyCertificate);
-            deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, scDevicex509), protocol, sslContext);
-        }
-        else
-        {
-            throw new IllegalArgumentException("Test code has not been written for this authentication type yet");
-        }
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, testInstance.authenticationType, false);
+        DeviceClient deviceClient = testDeviceIdentity.getDeviceClient();
 
         if (testInstance.withProxy)
         {
@@ -326,7 +301,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFileGranular() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException
+    public void uploadToBlobAsyncSingleFileGranular() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
     {
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
@@ -334,8 +309,13 @@ public class FileUploadTests extends IntegrationTest
         // act
         FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(testInstance.fileUploadState[0].blobName));
 
-        CloudBlockBlob blob = new CloudBlockBlob(sasUriResponse.getBlobUri());
-        blob.upload(testInstance.fileUploadState[0].fileInputStream, testInstance.fileUploadState[0].fileLength);
+        BlockBlobClient blockBlobClient =
+            new BlobClientBuilder()
+                .endpoint(sasUriResponse.getBlobUri().toString())
+                .buildClient()
+                .getBlockBlobClient();
+
+        blockBlobClient.upload(testInstance.fileUploadState[0].fileInputStream, testInstance.fileUploadState[0].fileLength);
         FileUploadCompletionNotification fileUploadCompletionNotification = new FileUploadCompletionNotification();
         fileUploadCompletionNotification.setCorrelationId(sasUriResponse.getCorrelationId());
         fileUploadCompletionNotification.setStatusCode(0);
@@ -368,7 +348,7 @@ public class FileUploadTests extends IntegrationTest
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
     @ContinuousIntegrationTest
-    public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, ExecutionException, TimeoutException, IotHubException, GeneralSecurityException
+    public void uploadToBlobAsyncMultipleFilesParallel() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
     {
         if (testInstance.withProxy)
         {

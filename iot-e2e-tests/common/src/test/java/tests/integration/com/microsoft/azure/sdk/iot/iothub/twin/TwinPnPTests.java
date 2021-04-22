@@ -48,23 +48,18 @@ public class TwinPnPTests extends IntegrationTest
 
         registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
 
-        X509CertificateGenerator certificateGenerator = new X509CertificateGenerator();
-        String publicKeyCert = certificateGenerator.getPublicCertificate();
-        String privateKey = certificateGenerator.getPrivateKey();
-        String x509Thumbprint = certificateGenerator.getX509Thumbprint();
-
         List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
                         {
                                 //sas token device client, no proxy
-                                {MQTT, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {MQTT, SAS, ClientType.DEVICE_CLIENT},
+                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
 
                                 //x509 device client, no proxy
-                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
 
                                 //sas token device client, with proxy
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
                         }
         ));
 
@@ -74,14 +69,14 @@ public class TwinPnPTests extends IntegrationTest
                 new Object[][]
                     {
                             //sas token module client, no proxy
-                            {MQTT, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
-                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                            {MQTT, SAS, ClientType.MODULE_CLIENT},
+                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
 
                             //x509 module client, no proxy
-                            {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                            {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
 
                             //sas token module client, with proxy
-                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT, publicKeyCert, privateKey, x509Thumbprint},
+                            {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
                     }
             ));
         }
@@ -91,9 +86,9 @@ public class TwinPnPTests extends IntegrationTest
 
     public TwinPnPTests.TwinPnPTestInstance testInstance;
 
-    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
+    public TwinPnPTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
     {
-        this.testInstance = new TwinPnPTestInstance(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        this.testInstance = new TwinPnPTestInstance(protocol, authenticationType, clientType);
     }
 
     public class TwinPnPTestInstance
@@ -110,14 +105,14 @@ public class TwinPnPTests extends IntegrationTest
         private final DeviceTwin twinServiceClient;
         private DeviceTwinDevice twin;
 
-        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws IOException
+        public TwinPnPTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws IOException
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.publicKeyCert = publicKeyCert;
-            this.privateKey = privateKey;
-            this.x509Thumbprint = x509Thumbprint;
+            this.publicKeyCert = x509CertificateGenerator.getPublicCertificate();
+            this.privateKey = x509CertificateGenerator.getPrivateKey();
+            this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
             this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
         }

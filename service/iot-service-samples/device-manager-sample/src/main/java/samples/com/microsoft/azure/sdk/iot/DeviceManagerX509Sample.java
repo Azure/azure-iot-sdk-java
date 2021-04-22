@@ -17,6 +17,7 @@ import java.io.IOException;
 public class DeviceManagerX509Sample
 {
     //x509 authenticated devices are either self signed or certificate authority signed. Use this boolean to choose which kind to use in this sample
+    @SuppressWarnings("CanBeFinal")
     static boolean isSelfSigned = false;
 
     /**

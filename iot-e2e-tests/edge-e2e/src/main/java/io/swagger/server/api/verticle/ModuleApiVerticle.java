@@ -11,6 +11,7 @@ import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.MainApiException;
 import io.swagger.server.api.model.RoundtripMethodCallBody;
 
+@SuppressWarnings("ALL")
 public class ModuleApiVerticle extends AbstractVerticle {
     final static Logger LOGGER = LoggerFactory.getLogger(ModuleApiVerticle.class);
 
@@ -34,7 +35,7 @@ public class ModuleApiVerticle extends AbstractVerticle {
 
     public ModuleApiVerticle() {
         try {
-            Class serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.ModuleApiImpl");
+            Class<?> serviceImplClass = getClass().getClassLoader().loadClass("io.swagger.server.api.verticle.ModuleApiImpl");
             service = (ModuleApi)serviceImplClass.newInstance();
         } catch (Exception e) {
             logUnexpectedError("ModuleApiVerticle constructor", e);

@@ -12,6 +12,7 @@ def CUSTOM_ALLOCATION_WEBHOOK_URL = project.hasProperty('CUSTOM_ALLOCATION_POLIC
 def FAR_AWAY_IOTHUB_CONNECTION_STRING = project.hasProperty('FAR_AWAY_IOTHUB_CONNECTION_STRING') ? '"'+project.property('FAR_AWAY_IOTHUB_CONNECTION_STRING')+'"': '""'
 def IS_BASIC_TIER_HUB = project.hasProperty('IS_BASIC_TIER_HUB') ? '"'+project.property('IS_BASIC_TIER_HUB')+'"' : '"false"'
 def IS_PULL_REQUEST = project.hasProperty('IS_PULL_REQUEST') ? '"'+project.property('IS_PULL_REQUEST')+'"' : '"false"'
+def RECYCLE_TEST_IDENTITIES = project.hasProperty('RECYCLE_TEST_IDENTITIES') ? '"'+project.property('RECYCLE_TEST_IDENTITIES')+'"' : '"false"'
 
 def STRING='String'
 //***********************************************************************************************//
@@ -42,15 +43,17 @@ android {
             buildConfigField STRING, 'FAR_AWAY_IOTHUB_CONNECTION_STRING', FAR_AWAY_IOTHUB_CONNECTION_STRING
             buildConfigField STRING, 'IS_BASIC_TIER_HUB', IS_BASIC_TIER_HUB
             buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
+            buildConfigField STRING, 'RECYCLE_TEST_IDENTITIES', RECYCLE_TEST_IDENTITIES
         }
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -87,8 +90,8 @@ dependencies {
     // This jar contains the dependencies of the test code. DeviceClient, for instance. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
     implementation files('../../common/target/iot-e2e-common-0.26.0-with-deps.jar')
 
-    implementation ('com.microsoft.azure.android:azure-storage-android:2.0.0@aar')
     implementation ('org.apache.commons:commons-lang3:3.6')
+    implementation ('javax.xml.stream:stax-api:1.0-2')
 
     androidTestImplementation 'com.android.support:support-annotations:27.1.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

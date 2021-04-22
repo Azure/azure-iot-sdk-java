@@ -7,9 +7,12 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Represents the retry details
  */
+@Slf4j
 public class RetryDecision
 {
     private final boolean shouldRetry;
@@ -26,6 +29,13 @@ public class RetryDecision
         // Codes_SRS_RETRYDECISION_28_001: [The constructor shall save the duration and getRetryDecision]
         this.duration = duration;
         this.shouldRetry = shouldRetry;
+
+        // When a retry policy specifies the descision we should log what the new timing was, this will help with backoff debugging
+        if (!shouldRetry){
+            log.debug("NOTE: A new instance of RetryDecision has been created with retry disabled, the client will not perform any retries.");
+        } else {
+            log.debug("NOTE: A new instance of RetryDecision has been created with retry enabled, the client will retry after {} milliseconds", duration);
+        }
     }
 
     /**

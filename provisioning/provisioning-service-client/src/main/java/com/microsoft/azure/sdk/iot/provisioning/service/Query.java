@@ -60,7 +60,7 @@ import java.util.*;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">Query Language</a>
  */
-public class Query implements Iterator
+public class Query implements Iterator<QueryResult>
 {
     private static final String CONTINUATION_TOKEN_KEY = "x-ms-continuation";
     private static final String ITEM_TYPE_KEY = "x-ms-item-type";

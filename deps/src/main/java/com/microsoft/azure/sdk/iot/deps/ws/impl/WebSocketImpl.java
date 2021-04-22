@@ -232,9 +232,8 @@ public class WebSocketImpl implements WebSocket, TransportLayer
             ByteBufferUtils.pour(_inputBuffer, _temp);
         }
 
-        private boolean sendToUnderlyingInput()
+        private void sendToUnderlyingInput()
         {
-            boolean _readComplete =  false;
             switch (_lastType)
             {
                 case WEB_SOCKET_MESSAGE_TYPE_UNKNOWN:
@@ -254,7 +253,6 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
                     _wsInputBuffer.compact();
                     _wsInputBuffer.flip();
-                    _readComplete = true;
                     break;
                 case WEB_SOCKET_MESSAGE_TYPE_CLOSE:
                     _wsInputBuffer.flip();
@@ -263,7 +261,6 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
                     _wsInputBuffer.compact();
                     _wsInputBuffer.flip();
-                    _readComplete = true;
                     break;
                 case WEB_SOCKET_MESSAGE_TYPE_PING:
                     _wsInputBuffer.flip();
@@ -272,12 +269,10 @@ public class WebSocketImpl implements WebSocket, TransportLayer
 
                     _wsInputBuffer.compact();
                     _wsInputBuffer.flip();
-                    _readComplete = true;
                     break;
             }
             _wsInputBuffer.position(_wsInputBuffer.limit());
             _wsInputBuffer.limit(_wsInputBuffer.capacity());
-            return _readComplete;
         }
 
         private void processInput() throws TransportException

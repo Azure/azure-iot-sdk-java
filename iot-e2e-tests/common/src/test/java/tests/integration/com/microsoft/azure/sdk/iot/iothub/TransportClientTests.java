@@ -11,9 +11,11 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.service.*;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.TestCase;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -48,6 +51,7 @@ import static tests.integration.com.microsoft.azure.sdk.iot.iothub.TransportClie
  * Class needs to be extended in order to run these tests as that extended class handles setting connection strings and certificate generation
  */
 @IotHubTest
+@Slf4j
 @RunWith(Parameterized.class)
 public class TransportClientTests extends IntegrationTest
 {
@@ -120,7 +124,7 @@ public class TransportClientTests extends IntegrationTest
                         });
     }
 
-    public TransportClientTests(IotHubClientProtocol protocol) throws InterruptedException, IOException, IotHubException, URISyntaxException
+    public TransportClientTests(IotHubClientProtocol protocol)
     {
         this.testInstance = new TransportClientTestInstance(protocol);
     }
@@ -131,8 +135,9 @@ public class TransportClientTests extends IntegrationTest
     {
         public IotHubClientProtocol protocol;
         public AtomicBoolean succeed;
-        public Map messageProperties;
+        public Map<String, String> messageProperties;
         public Device[] devicesList = new Device[MAX_DEVICE_MULTIPLEX];
+        public TestDeviceIdentity[] testDeviceIdentities = new TestDeviceIdentity[MAX_DEVICE_MULTIPLEX];
         public String[] clientConnectionStringArrayList = new String[MAX_DEVICE_MULTIPLEX];
         public ArrayList<InternalClient> clientArrayList;
         public TransportClient transportClient;
@@ -147,7 +152,7 @@ public class TransportClientTests extends IntegrationTest
             this.protocol = protocol;
         }
 
-        public void setup() throws InterruptedException, IotHubException, IOException, URISyntaxException
+        public void setup(boolean needCleanTwin) throws InterruptedException, IotHubException, IOException, URISyntaxException, GeneralSecurityException
         {
             fileUploadNotificationReceiver = serviceClient.getFileUploadNotificationReceiver();
             Assert.assertNotNull(fileUploadNotificationReceiver);
@@ -167,10 +172,9 @@ public class TransportClientTests extends IntegrationTest
 
             for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
             {
-                String deviceId = "java-device-client-e2e-test-multiplexing".concat(i + "-" + uuid);
-
-                devicesList[i] = Device.createFromId(deviceId, null, null);
-                Tools.addDeviceWithRetry(registryManager, devicesList[i]);
+                TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, needCleanTwin);
+                testDeviceIdentities[i] = testDeviceIdentity;
+                devicesList[i] = testDeviceIdentity.getDevice();
                 clientConnectionStringArrayList[i] = registryManager.getDeviceConnectionString(devicesList[i]);
             }
 
@@ -187,40 +191,37 @@ public class TransportClientTests extends IntegrationTest
 
         public void dispose()
         {
-            try
+            if (this.transportClient != null)
             {
-                for (int i = 0; i < MAX_DEVICE_MULTIPLEX; i++)
+                try
                 {
-                    registryManager.removeDevice(devicesList[i]);
+                    this.transportClient.closeNow();
+                }
+                catch (IOException e)
+                {
+                    log.error("Failed to close the transport client");
                 }
             }
-            catch (Exception e)
+
+            if (testDeviceIdentities != null)
             {
-                //ignore the exception, don't care if tear down wasn't successful for this test
+                Tools.disposeTestIdentities(Arrays.asList(testDeviceIdentities), iotHubConnectionString);
             }
         }
     }
 
     @AfterClass
-    public static void tearDown() throws IOException, IotHubException, InterruptedException
+    public static void tearDown() throws IOException
     {
         if (registryManager != null)
         {
             registryManager.close();
-
-            registryManager = null;
         }
 
         if (serviceClient != null)
         {
             serviceClient.close();
         }
-    }
-
-    @Before
-    public void setupTestInstance() throws InterruptedException, IotHubException, URISyntaxException, IOException
-    {
-        testInstance.setup();
     }
 
     @After
@@ -230,8 +231,9 @@ public class TransportClientTests extends IntegrationTest
     }
 
     @Test
-    public void sendMessages() throws URISyntaxException, IOException, InterruptedException
+    public void sendMessages() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
+        testInstance.setup(false);
         testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
@@ -246,6 +248,7 @@ public class TransportClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void receiveMessagesIncludingProperties() throws Exception
     {
+        testInstance.setup(false);
         testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
@@ -265,8 +268,9 @@ public class TransportClientTests extends IntegrationTest
 
     @Test
     @ContinuousIntegrationTest
-    public void sendMessagesMultithreaded() throws InterruptedException, IOException
+    public void sendMessagesMultithreaded() throws InterruptedException, IOException, IotHubException, GeneralSecurityException, URISyntaxException
     {
+        testInstance.setup(false);
         testInstance.transportClient.open();
         Thread[] threads = new Thread[testInstance.clientArrayList.size()];
 
@@ -294,6 +298,7 @@ public class TransportClientTests extends IntegrationTest
     public void uploadToBlobAsyncSingleFileAndTelemetry() throws Exception
     {
         // arrange
+        testInstance.setup(false);
         setUpFileUploadState();
 
         testInstance.transportClient.open();
@@ -349,6 +354,7 @@ public class TransportClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void invokeMethodSucceed() throws Exception
     {
+        testInstance.setup(false);
         testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
@@ -387,6 +393,7 @@ public class TransportClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void invokeMethodInvokeParallelSucceed() throws Exception
     {
+        testInstance.setup(false);
         testInstance.transportClient.open();
 
         for (int i = 0; i < testInstance.clientArrayList.size(); i++)
@@ -432,8 +439,9 @@ public class TransportClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void testTwin() throws IOException, InterruptedException, IotHubException, URISyntaxException
+    public void testTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException
     {
+        testInstance.setup(true);
         testInstance.transportClient = setUpTwin();
 
         ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
