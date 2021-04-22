@@ -24,11 +24,9 @@ import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -199,7 +197,13 @@ public class ServiceClientTests extends IntegrationTest
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                                 .build());
 
-        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.AMQPS, AuthenticationType.SAS, false);
+        TestDeviceIdentity testDeviceIdentity =
+            Tools.getTestDevice(
+                iotHubConnectionString,
+                IotHubClientProtocol.AMQPS,
+                AuthenticationType.SAS,
+                false);
+
         Device device = testDeviceIdentity.getDevice();
 
         Device deviceGetBefore = registryManager.getDevice(device.getDeviceId());
@@ -275,8 +279,14 @@ public class ServiceClientTests extends IntegrationTest
                 .httpReadTimeout(HTTP_READ_TIMEOUT)
                 .build());
 
-        Device device = Device.createFromId(testInstance.deviceId, null, null);
-        Tools.addDeviceWithRetry(registryManager, device);
+        TestDeviceIdentity testDeviceIdentity =
+            Tools.getTestDevice(
+                iotHubConnectionString,
+                IotHubClientProtocol.AMQPS,
+                AuthenticationType.SAS,
+                false);
+
+        Device device = testDeviceIdentity.getDevice();
 
         ServiceClient serviceClient;
         IotHubConnectionString iotHubConnectionStringObj =
@@ -321,6 +331,7 @@ public class ServiceClientTests extends IntegrationTest
 
         serviceClient.close();
         registryManager.close();
+        Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
     }
 
     @Test
