@@ -38,6 +38,9 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceTestManager;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestIdentity;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 
