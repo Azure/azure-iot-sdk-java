@@ -22,8 +22,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.FileUploadTests;
 @RunWith(Parameterized.class)
 public class FileUploadAndroidRunner extends FileUploadTests
 {
-    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws InterruptedException, IOException, IotHubException, URISyntaxException
-    {
+    public FileUploadAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, boolean withProxy) throws IOException {
         super(protocol, authenticationType, withProxy);
     }
 }

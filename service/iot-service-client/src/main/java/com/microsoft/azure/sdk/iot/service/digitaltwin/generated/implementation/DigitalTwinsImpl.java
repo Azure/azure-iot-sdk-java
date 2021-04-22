@@ -6,32 +6,22 @@
 
 package com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation;
 
-import retrofit2.Retrofit;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
 import com.google.common.reflect.TypeToken;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinGetDigitalTwinHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeComponentCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinUpdateDigitalTwinHeaders;
-import com.microsoft.rest.RestException;
-import com.microsoft.rest.ServiceCallback;
-import com.microsoft.rest.ServiceFuture;
-import com.microsoft.rest.ServiceResponseWithHeaders;
-import com.microsoft.rest.Validator;
+import com.microsoft.rest.*;
+import okhttp3.ResponseBody;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.http.*;
+import rx.Observable;
+import rx.functions.Func1;
+
 import java.io.IOException;
 import java.util.List;
-import okhttp3.ResponseBody;
-import retrofit2.http.Body;
-import retrofit2.http.GET;
-import retrofit2.http.Header;
-import retrofit2.http.Headers;
-import retrofit2.http.PATCH;
-import retrofit2.http.Path;
-import retrofit2.http.POST;
-import retrofit2.http.Query;
-import retrofit2.Response;
-import rx.functions.Func1;
-import rx.Observable;
 
 /**
  * An instance of this class provides access to all the operations defined
@@ -210,8 +200,7 @@ public class DigitalTwinsImpl implements DigitalTwins {
         }
         Validator.validate(digitalTwinPatch);
         final String apiVersion = "2020-09-30";
-        final String ifMatch = null;
-        return service.updateDigitalTwin(id, digitalTwinPatch, ifMatch, apiVersion)
+        return service.updateDigitalTwin(id, digitalTwinPatch, null, apiVersion)
             .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>>>() {
                 @Override
                 public Observable<ServiceResponseWithHeaders<Void, DigitalTwinUpdateDigitalTwinHeaders>> call(Response<ResponseBody> response) {
@@ -374,9 +363,7 @@ public class DigitalTwinsImpl implements DigitalTwins {
         }
         final String apiVersion = "2020-09-30";
         final Object payload = null;
-        final Integer connectTimeoutInSeconds = null;
-        final Integer responseTimeoutInSeconds = null;
-        return service.invokeRootLevelCommand(id, commandName, payload, apiVersion, connectTimeoutInSeconds, responseTimeoutInSeconds)
+        return service.invokeRootLevelCommand(id, commandName, null, apiVersion, null, null)
             .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>>>() {
                 @Override
                 public Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeRootLevelCommandHeaders>> call(Response<ResponseBody> response) {
@@ -557,10 +544,7 @@ public class DigitalTwinsImpl implements DigitalTwins {
             throw new IllegalArgumentException("Parameter commandName is required and cannot be null.");
         }
         final String apiVersion = "2020-09-30";
-        final Object payload = null;
-        final Integer connectTimeoutInSeconds = null;
-        final Integer responseTimeoutInSeconds = null;
-        return service.invokeComponentCommand(id, componentPath, commandName, payload, apiVersion, connectTimeoutInSeconds, responseTimeoutInSeconds)
+        return service.invokeComponentCommand(id, componentPath, commandName, null, apiVersion, null, null)
             .flatMap(new Func1<Response<ResponseBody>, Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>>>() {
                 @Override
                 public Observable<ServiceResponseWithHeaders<Object, DigitalTwinInvokeComponentCommandHeaders>> call(Response<ResponseBody> response) {

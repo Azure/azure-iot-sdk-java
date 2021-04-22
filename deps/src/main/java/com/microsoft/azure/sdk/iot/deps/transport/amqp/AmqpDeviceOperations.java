@@ -168,9 +168,4 @@ public class AmqpDeviceOperations
     {
         this.amqpProperties.put(Symbol.getSymbol(key), value);
     }
-
-    protected void clearAmqpLinkProperty()
-    {
-        this.amqpProperties.clear();
-    }
 }

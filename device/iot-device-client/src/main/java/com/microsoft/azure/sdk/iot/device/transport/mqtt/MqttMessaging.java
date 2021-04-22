@@ -7,7 +7,6 @@ import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageProperty;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 
 import java.io.UnsupportedEncodingException;
@@ -25,7 +24,6 @@ public class MqttMessaging extends Mqtt
     private final boolean isEdgeHub;
 
     public MqttMessaging(
-        MqttAsyncClient mqttAsyncClient,
         String deviceId,
         MqttMessageListener messageListener,
         String moduleId,
@@ -34,7 +32,7 @@ public class MqttMessaging extends Mqtt
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        super(mqttAsyncClient, messageListener, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
+        super(messageListener, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
         if (deviceId == null || deviceId.isEmpty())
         {

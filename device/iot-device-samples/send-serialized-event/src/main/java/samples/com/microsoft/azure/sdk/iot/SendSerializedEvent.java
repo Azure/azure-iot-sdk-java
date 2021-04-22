@@ -20,7 +20,7 @@ public class SendSerializedEvent
         // Data
         private static final int DEFAULT_NUMREQUESTS = 10; // m/s
 
-        public String[] rawArguments;
+        public final String[] rawArguments;
         public int numRequests;
         public boolean parsedSuccessfully;
         public String connectionString;

@@ -490,7 +490,8 @@ public class JobResultTest
                 "    \"tag\": {\n" +
                 "      \"tag1\": \"val1\"\n" +
                 "    },\n" +
-                "    \"desiredProperties\": {}\n" +
+                "    \"desiredProperties\": {},\n" +
+                "    \"parentScopes\": []\n" +
                 "  },\n" +
                 "  \"failureReason\": \"This is a valid failure reason\",\n" +
                 "  \"statusMessage\": \"This is a valid status message\",\n" +
@@ -550,7 +551,8 @@ public class JobResultTest
                         "    },\n" +
                         "    \"desiredProperties\": {\n" +
                         "      \"key1\": \"val1\"\n" +
-                        "    }\n" +
+                        "    },\n" +
+                        "    \"parentScopes\": []\n" +
                         "  },\n" +
                         "  \"failureReason\": \"This is a valid failure reason\",\n" +
                         "  \"statusMessage\": \"This is a valid status message\",\n" +

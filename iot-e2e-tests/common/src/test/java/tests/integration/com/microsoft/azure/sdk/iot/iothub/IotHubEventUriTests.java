@@ -11,8 +11,6 @@ import org.junit.Test;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
-import java.net.URISyntaxException;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -21,7 +19,7 @@ import static org.junit.Assert.assertThat;
 public class IotHubEventUriTests extends IntegrationTest
 {
     @Test
-    public void eventUriIsCorrect() throws URISyntaxException
+    public void eventUriIsCorrect()
     {
         String iotHubName = "test.iothub";
         String deviceId = "test-deviceid";

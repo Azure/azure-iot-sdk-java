@@ -251,7 +251,7 @@ public class Thermostat {
      */
     private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
 
-        String propertyName = "targetTemperature";
+        final String propertyName = "targetTemperature";
 
         @SneakyThrows({InterruptedException.class, IOException.class})
         @Override
@@ -306,7 +306,7 @@ public class Thermostat {
      * This method will returns the max, min and average temperature from the specified time to the current time.
      */
     private static class GetMaxMinReportMethodCallback implements DeviceMethodCallback {
-        String commandName = "getMaxMinReport";
+        final String commandName = "getMaxMinReport";
 
         @SneakyThrows
         @Override

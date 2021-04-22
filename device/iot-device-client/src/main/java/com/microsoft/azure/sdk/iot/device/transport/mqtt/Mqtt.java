@@ -21,8 +21,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Slf4j
 abstract public class Mqtt implements MqttCallback
@@ -81,25 +79,17 @@ abstract public class Mqtt implements MqttCallback
 
     /**
      * Constructor to instantiate mqtt broker connection.
-     * @param mqttAsyncClient the connection to use
      * @param messageListener the listener to be called back upon a message arriving
      * @param deviceId the Id of the device this connection belongs to
      */
     Mqtt(
-        MqttAsyncClient mqttAsyncClient,
         MqttMessageListener messageListener,
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, byte[]>> receivedMessages)
     {
-        if (mqttAsyncClient == null)
-        {
-            throw new IllegalArgumentException("Mqtt connection info cannot be null");
-        }
-
         this.deviceId = deviceId;
-        this.mqttAsyncClient = mqttAsyncClient;
         this.receivedMessages = receivedMessages;
         this.stateLock = new Object();
         this.receivedMessagesLock = new Object();
@@ -107,6 +97,11 @@ abstract public class Mqtt implements MqttCallback
         this.messageListener = messageListener;
         this.connectOptions = connectOptions;
         this.unacknowledgedSentMessages = unacknowledgedSentMessages;
+    }
+
+    void updatePassword(char[] newPassword)
+    {
+        this.connectOptions.setPassword(newPassword);
     }
 
     /**
@@ -156,15 +151,14 @@ abstract public class Mqtt implements MqttCallback
                 {
                     disconnectToken.waitForCompletion(DISCONNECTION_TIMEOUT);
                 }
-                log.debug("Sent MQTT DISCONNECT packet was acknowledged");
-            }
 
-            this.mqttAsyncClient.close();
+                log.debug("Sent MQTT DISCONNECT packet was acknowledged");
+                this.mqttAsyncClient.close();
+            }
         }
         catch (MqttException e)
         {
             log.warn("Exception encountered while sending MQTT DISCONNECT packet", e);
-
             throw PahoExceptionTranslator.convertToMqttException(e, "Unable to disconnect");
         }
     }
@@ -197,6 +191,7 @@ abstract public class Mqtt implements MqttCallback
 
             while (this.mqttAsyncClient.getPendingDeliveryTokens().length >= MAX_IN_FLIGHT_COUNT)
             {
+                //noinspection BusyWait
                 Thread.sleep(10);
 
                 if (!this.mqttAsyncClient.isConnected())

@@ -19,8 +19,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry.ReceiveMes
 @RunWith(Parameterized.class)
 public class ReceiveMessagesAndroidRunner extends ReceiveMessagesTests
 {
-    public ReceiveMessagesAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, String publicKeyCert, String privateKey, String x509Thumbprint) throws Exception
+    public ReceiveMessagesAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, publicKeyCert, privateKey, x509Thumbprint);
+        super(protocol, authenticationType, clientType);
     }
 }

@@ -230,6 +230,7 @@ public class RegistryManager
      * @deprecated as of release 1.13.0 this API is no longer supported and open is done implicitly by the respective APIs
      * Opens this registry manager's executor service after it has been closed.
      */
+    @SuppressWarnings("EmptyMethod") //can't remove this method without breaking users, and there is no logic that needs to be done in it.
     @Deprecated
     public void open()
     {

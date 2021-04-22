@@ -364,7 +364,7 @@ public class TemperatureController {
      */
     private static class TargetTemperatureUpdateCallback implements TwinPropertyCallBack {
 
-        String propertyName = "targetTemperature";
+        final String propertyName = "targetTemperature";
 
         @SneakyThrows({IOException.class, InterruptedException.class})
         @Override

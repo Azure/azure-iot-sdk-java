@@ -15,8 +15,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.HubTierConnectionTes
 @RunWith(Parameterized.class)
 public class HubTierConnectionAndroidRunner extends HubTierConnectionTests
 {
-    public HubTierConnectionAndroidRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, String publicKeyCert, String privateKey, String x509Thumbprint, boolean useHttpProxy)
+    public HubTierConnectionAndroidRunner(DeviceClient client, IotHubClientProtocol protocol, BaseDevice identity, AuthenticationType authenticationType, boolean useHttpProxy)
     {
-        super(client, protocol, identity, authenticationType, publicKeyCert, privateKey, x509Thumbprint, useHttpProxy);
+        super(client, protocol, identity, authenticationType, useHttpProxy);
     }
 }

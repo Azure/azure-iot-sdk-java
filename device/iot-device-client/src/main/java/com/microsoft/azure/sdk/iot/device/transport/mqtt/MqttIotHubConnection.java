@@ -100,29 +100,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             throw new TransportException("Failed to get SSLContext", e);
         }
 
-        char[] password = null;
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN)
         {
             log.trace("MQTT connection will use sas token based auth");
-            try
-            {
-                password = this.config.getSasTokenAuthentication().getSasToken();
-            }
-            catch (IOException e)
-            {
-                throw new TransportException("Failed to get sas token", e);
-            }
-
             this.webSocketQueryString = NO_CLIENT_CERT_QUERY_STRING;
         }
         else if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.X509_CERTIFICATE)
         {
             log.trace("MQTT connection will use X509 certificate based auth");
-            password = null;
         }
 
-        //URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
-        // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding
+        // URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
+        // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding.
         String userAgentString = this.config.getProductInfo().getUserAgentString();
         String clientUserAgentIdentifier;
         try
@@ -131,7 +120,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         catch (UnsupportedEncodingException e)
         {
-            throw new TransportException("Failed to get URLEncode the user agent string", e);
+            throw new TransportException("Failed to URLEncode the user agent string", e);
         }
 
         String deviceId = this.config.getDeviceId();
@@ -153,7 +142,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         }
         else
         {
-            serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + MODEL_ID + "=" + modelId;
+            try
+            {
+                // URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
+                // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding.
+                serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + MODEL_ID + "=" + URLEncoder.encode(modelId, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                throw new TransportException("Failed to URLEncode the modelId string", e);
+            }
         }
 
         String iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
@@ -180,7 +178,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
         }
 
-        MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, clientId);
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL);
         connectOptions.setCleanSession(SET_CLEAN_SESSION);
@@ -214,17 +211,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             connectOptions.setSocketFactory(sslContext.getSocketFactory());
         }
 
-        if (password != null && password.length > 0)
-        {
-            connectOptions.setPassword(password);
-        }
-
         // these variables are shared between the messaging, twin and method subclients
         Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
         Queue<Pair<String, byte[]>> receivedMessages = new ConcurrentLinkedQueue<>();
 
         this.deviceMessaging = new MqttMessaging(
-            mqttAsyncClient,
             deviceId,
             this,
             moduleId,
@@ -233,17 +224,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             unacknowledgedSentMessages,
             receivedMessages);
 
-        mqttAsyncClient.setCallback(this.deviceMessaging);
-
         this.deviceMethod = new MqttDeviceMethod(
-            mqttAsyncClient,
             deviceId,
             connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
 
         this.deviceTwin = new MqttDeviceTwin(
-            mqttAsyncClient,
             deviceId,
             connectOptions,
             unacknowledgedSentMessages,
@@ -272,6 +259,27 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
 
             log.debug("Opening MQTT connection...");
+
+            if (this.config.getSasTokenAuthentication() != null)
+            {
+                try
+                {
+                    log.trace("Setting password for MQTT connection since it is a SAS token authenticated connection");
+                    this.deviceMessaging.updatePassword(this.config.getSasTokenAuthentication().getSasToken());
+                }
+                catch (IOException e)
+                {
+                    throw new TransportException("Failed to open the MQTT connection because a SAS token could not be retrieved", e);
+                }
+            }
+
+            // MqttAsyncClient's are unusable after they have been closed. This logic creates a new client
+            // each time an open is called
+            MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, this.clientId);
+            mqttAsyncClient.setCallback(this.deviceMessaging);
+            this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
+            this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
+            this.deviceMethod.setMqttAsyncClient(mqttAsyncClient);
 
             this.deviceMessaging.start();
             this.state = IotHubConnectionStatus.CONNECTED;
@@ -303,14 +311,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             this.state = IotHubConnectionStatus.DISCONNECTED;
             log.debug("Successfully closed MQTT connection");
-
-            // MqttAsyncClient's are unusable after they have been closed. This logic creates a new client
-            // so that if this MqttIotHubConnection layer is opened again, it will have a usable mqttAsyncClient
-            MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, this.clientId);
-            this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
-            mqttAsyncClient.setCallback(this.deviceMessaging);
-            this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
-            this.deviceMethod.setMqttAsyncClient(mqttAsyncClient);
         }
     }
 
