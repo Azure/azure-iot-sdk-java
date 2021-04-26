@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ResponseMessage;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import lombok.extern.slf4j.Slf4j;
@@ -181,12 +182,14 @@ public final class FileUploadTask implements Runnable
         responseMessage = httpsTransportManager.getFileUploadSasUri(message);
         httpsTransportManager.close();
 
-        if (responseMessage.getBytes() == null || responseMessage.getBytes().length == 0)
+        String responseMessagePayload = validateServiceStatusCode(responseMessage, "Failed to get the file upload SAS URI");
+
+        if (responseMessagePayload == null || responseMessagePayload.isEmpty())
         {
             throw new IOException("Sas URI response message had no payload");
         }
 
-        return new FileUploadSasUriResponse(new String(responseMessage.getBytes(), DEFAULT_IOTHUB_MESSAGE_CHARSET));
+        return new FileUploadSasUriResponse(responseMessagePayload);
     }
 
     @SuppressWarnings("UnusedReturnValue") // Public method
@@ -199,7 +202,31 @@ public final class FileUploadTask implements Runnable
         ResponseMessage responseMessage = httpsTransportManager.sendFileUploadNotification(message);
         httpsTransportManager.close();
 
+        validateServiceStatusCode(responseMessage, "Failed to complete the file upload notification");
+
         return responseMessage.getStatus();
+    }
+
+    private String validateServiceStatusCode(ResponseMessage responseMessage, String errorMessage) throws IOException
+    {
+        String responseMessagePayload = null;
+        if (responseMessage.getBytes() != null && responseMessage.getBytes().length > 0)
+        {
+            responseMessagePayload = new String(responseMessage.getBytes(), DEFAULT_IOTHUB_MESSAGE_CHARSET);
+        }
+
+        IotHubServiceException serviceException =
+            IotHubStatusCode.getConnectionStatusException(
+                responseMessage.getStatus(),
+                responseMessagePayload);
+
+        // serviceException is only not null if the provided status code was a non-successful status code like 400, 429, 500, etc.
+        if (serviceException != null)
+        {
+            throw new IOException(errorMessage, serviceException);
+        }
+
+        return responseMessagePayload;
     }
 
     public void close()
