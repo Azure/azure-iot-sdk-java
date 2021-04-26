@@ -20,6 +20,7 @@ phases:
     displayName: CredScan
     inputs:
       debugMode: false
+      suppressionsFile: vsts/CredScanSuppressions.json
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: AutoApplicability
@@ -50,7 +51,6 @@ phases:
     displayName: PoliCheck
     inputs:
       targetType: F
-      suppressionsFile: vsts/CredScanSuppressions.json
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
     displayName: 'AntiMalware Scanner'
