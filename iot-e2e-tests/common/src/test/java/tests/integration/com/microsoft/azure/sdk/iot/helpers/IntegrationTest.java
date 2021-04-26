@@ -77,6 +77,9 @@ public abstract class IntegrationTest
     public static boolean runProvisioningTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_PROVISIONING_TESTS", "true"));
     public static boolean runDigitalTwinTests = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RUN_DIGITAL_TESTS", "true"));
 
+    // Determines if the tear down for a given test should delete the device identity, or recycle it so that another test can use it
+    public static boolean recycleIdentities = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue("RECYCLE_TEST_IDENTITIES", "false"));
+
     // Infinite read timeout for all http operations
     public static int HTTP_READ_TIMEOUT = 0;
 

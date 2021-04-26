@@ -16,6 +16,11 @@ public class ExportImportDeviceParser
     @SerializedName(ID_NAME)
     private String id;
 
+    private static final String MODULE_ID_NAME = "moduleId";
+    @Expose
+    @SerializedName(MODULE_ID_NAME)
+    private String moduleId;
+
     private static final String E_TAG_NAME = "eTag";
     @Expose
     @SerializedName(E_TAG_NAME)
@@ -104,6 +109,7 @@ public class ExportImportDeviceParser
         //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_002: [The parser shall look for the authentication Type of the serialized export import device and save it to the returned ExportImportDeviceParser instance]
         this.authentication = deviceParser.authentication;
         this.id = deviceParser.id;
+        this.moduleId = deviceParser.moduleId;
         this.importMode = deviceParser.importMode;
         this.eTag = deviceParser.eTag;
         this.statusReason = deviceParser.statusReason;
@@ -136,7 +142,6 @@ public class ExportImportDeviceParser
         return id;
     }
 
-
     /**
      * Setter for id
      * @param id the value to set id to
@@ -152,6 +157,24 @@ public class ExportImportDeviceParser
 
         //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_022: [This method shall set the value of this object's Id equal to the provided value.]
         this.id = id;
+    }
+
+    /**
+     * Gets the moduleId for this parser.
+     * @return the moduleId for this parser.
+     */
+    public final String getModuleId()
+    {
+        return moduleId;
+    }
+
+    /**
+     * Sets the module Id for this parser.
+     * @param moduleId the module Id for this parser.
+     */
+    public final void setModuleId(String moduleId)
+    {
+        this.moduleId = moduleId;
     }
 
     /**

@@ -115,6 +115,7 @@ jobs:
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
         condition: always()
 
       - task: CopyFiles@2
@@ -173,6 +174,7 @@ jobs:
           FAR_AWAY_IOTHUB_CONNECTION_STRING: $(FAR-AWAY-IOTHUB-CONNECTION-STRING)
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
         condition: always()
 
       - task: CopyFiles@2

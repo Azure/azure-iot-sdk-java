@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -133,15 +134,14 @@ public class SendMessagesTests extends SendMessagesCommon
         Collection<String> deviceIds = new ArrayList<>();
         for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
         {
-            testDeviceIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType);
+            testDeviceIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, false);
             deviceListAmqps[i] = testDeviceIdentities[i].getDevice();
             deviceIds.add(deviceListAmqps[i].getDeviceId());
         }
 
-        List<Thread> threads = new ArrayList<>(deviceListAmqps.length);
         CountDownLatch cdl = new CountDownLatch(deviceListAmqps.length);
 
-        for(Device deviceAmqps: deviceListAmqps)
+        for (Device deviceAmqps: deviceListAmqps)
         {
             Thread thread = new Thread(
                     new testDevice(
@@ -154,15 +154,11 @@ public class SendMessagesTests extends SendMessagesCommon
                             cdl,
                             succeed));
             thread.start();
-            threads.add(thread);
         }
 
         cdl.await(1, TimeUnit.MINUTES);
 
-        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
-        {
-            Tools.disposeTestIdentity(testDeviceIdentities[i], iotHubConnectionString);
-        }
+        Tools.disposeTestIdentities(Arrays.asList(testDeviceIdentities), iotHubConnectionString);
 
         if (!succeed.get())
         {

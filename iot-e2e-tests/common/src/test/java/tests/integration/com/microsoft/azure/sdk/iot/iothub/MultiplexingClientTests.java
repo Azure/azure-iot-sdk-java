@@ -153,10 +153,10 @@ public class MultiplexingClientTests extends IntegrationTest
 
         public void setup(int multiplexingDeviceSessionCount) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException, GeneralSecurityException
         {
-            setup(multiplexingDeviceSessionCount, null);
+            setup(multiplexingDeviceSessionCount, null, false);
         }
 
-        public void setup(int multiplexingDeviceSessionCount, MultiplexingClientOptions options) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException, GeneralSecurityException
+        public void setup(int multiplexingDeviceSessionCount, MultiplexingClientOptions options, boolean needCleanTwin) throws InterruptedException, IotHubException, IOException, URISyntaxException, MultiplexingClientException, GeneralSecurityException
         {
             deviceIdentityArray = new ArrayList<>(multiplexingDeviceSessionCount);
             deviceClientArray = new ArrayList<>(multiplexingDeviceSessionCount);
@@ -164,7 +164,7 @@ public class MultiplexingClientTests extends IntegrationTest
 
             for (int i = 0; i < multiplexingDeviceSessionCount; i++)
             {
-                TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, this.protocol, AuthenticationType.SAS);
+                TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, this.protocol, AuthenticationType.SAS, needCleanTwin);
                 testDevicesArrayIdentity.add(testDeviceIdentity);
                 deviceIdentityArray.add(i, testDeviceIdentity.getDevice());
             }
@@ -181,12 +181,21 @@ public class MultiplexingClientTests extends IntegrationTest
 
         public void dispose()
         {
+            if (this.multiplexingClient != null)
+            {
+                try
+                {
+                    this.multiplexingClient.close();
+                }
+                catch (MultiplexingClientException e)
+                {
+                    log.error("Failed to close multiplexing client", e);
+                }
+            }
+
             if (this.testDevicesArrayIdentity != null)
             {
-                for (TestDeviceIdentity testDeviceIdentity : this.testDevicesArrayIdentity)
-                {
-                    Tools.disposeTestIdentity(testDeviceIdentity, iotHubConnectionString);
-                }
+                Tools.disposeTestIdentities(this.testDevicesArrayIdentity, iotHubConnectionString);
             }
         }
     }
@@ -484,7 +493,7 @@ public class MultiplexingClientTests extends IntegrationTest
         ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
 
         //re-setup test instance to use proxy instead
-        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().proxySettings(proxySettings).build());
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().proxySettings(proxySettings).build(), false);
         testInstance.multiplexingClient.open();
 
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
@@ -808,7 +817,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void testTwin() throws Exception
     {
-        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         testInstance.multiplexingClient.open();
 
         DeviceTwin deviceTwinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
@@ -841,7 +850,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void twinSubscriptionNotPreservedByDeviceClientAfterUnregistration() throws Exception
     {
-        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         testInstance.multiplexingClient.open();
 
         DeviceTwin deviceTwinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
@@ -1420,7 +1429,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @Test
     public void registrationsUnwindForMqttClient() throws Exception
     {
-        Device mqttDevice = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SAS).getDevice();
+        Device mqttDevice = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SAS, false).getDevice();
         String deviceConnectionString = registryManager.getDeviceConnectionString(mqttDevice);
 
         // MQTT clients should throw UnsupportedOperationException when registered
@@ -1433,7 +1442,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         // Create a new device client that uses x509 auth, which should throw an UnsupportedOperationException
         // since x509 auth isn't supported while multiplexing
-        Device x509Device = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SELF_SIGNED).getDevice();
+        Device x509Device = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SELF_SIGNED, false).getDevice();
         String deviceConnectionString = registryManager.getDeviceConnectionString(x509Device);
         DeviceClient x509DeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol, new IotHubSSLContext().getSSLContext());
         registrationsUnwindForUnsupportedOperationExceptions(x509DeviceClient);
@@ -1442,7 +1451,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @Test
     public void registrationsUnwindForAlreadyOpenClient() throws Exception
     {
-        Device nonMultiplexedDevice = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS).getDevice();
+        Device nonMultiplexedDevice = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS, false).getDevice();
         String deviceConnectionString = registryManager.getDeviceConnectionString(nonMultiplexedDevice);
         DeviceClient nonMultiplexedDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
 
@@ -1455,7 +1464,7 @@ public class MultiplexingClientTests extends IntegrationTest
     @Test
     public void registrationsUnwindForClientOfDifferentHostName() throws Exception
     {
-        Device nonMultiplexedDevice = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS).getDevice();
+        Device nonMultiplexedDevice = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS, false).getDevice();
         String deviceConnectionString = registryManager.getDeviceConnectionString(nonMultiplexedDevice);
 
         // intentionally change the hostname of the device to simulate registering a device with a different hostname
@@ -1478,7 +1487,7 @@ public class MultiplexingClientTests extends IntegrationTest
         // protocols
         IotHubClientProtocol protocol = testInstance.protocol == IotHubClientProtocol.AMQPS ? IotHubClientProtocol.AMQPS_WS : IotHubClientProtocol.AMQPS;
 
-        Device newDevice = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS).getDevice();
+        Device newDevice = Tools.getTestDevice(iotHubConnectionString, protocol, AuthenticationType.SAS, false).getDevice();
         String deviceConnectionString = registryManager.getDeviceConnectionString(newDevice);
 
         DeviceClient differentProtocolDeviceClient = new DeviceClient(deviceConnectionString, protocol);

@@ -143,12 +143,12 @@ public class DeviceMethodCommon extends IntegrationTest
 
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType);
+                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false);
                 this.deviceTestManager = new DeviceTestManager(((TestDeviceIdentity) this.identity).getDeviceClient());
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType);
+                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType, false);
                 this.deviceTestManager = new DeviceTestManager(((TestModuleIdentity) this.identity).getModuleClient());
             }
 

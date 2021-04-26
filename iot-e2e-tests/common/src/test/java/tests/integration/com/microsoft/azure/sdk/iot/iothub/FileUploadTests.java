@@ -243,7 +243,7 @@ public class FileUploadTests extends IntegrationTest
 
     private DeviceClient setUpDeviceClient(IotHubClientProtocol protocol) throws URISyntaxException, InterruptedException, IOException, IotHubException, GeneralSecurityException
     {
-        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, testInstance.authenticationType);
+        TestDeviceIdentity testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, testInstance.authenticationType, false);
         DeviceClient deviceClient = testDeviceIdentity.getDeviceClient();
 
         if (testInstance.withProxy)

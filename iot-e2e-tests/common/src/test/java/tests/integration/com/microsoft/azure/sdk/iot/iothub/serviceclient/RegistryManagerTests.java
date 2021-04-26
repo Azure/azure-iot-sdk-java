@@ -456,24 +456,32 @@ public class RegistryManagerTests extends IntegrationTest
     @StandardTierHubOnlyTest
     @Test
     @ContinuousIntegrationTest
-    public void deviceCreationWithSecurityScope() throws IOException, InterruptedException, IotHubException, URISyntaxException
+    public void deviceCreationWithDeviceScope() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         // Arrange
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         deleteDeviceIfItExistsAlready(testInstance.registryManager, testInstance.deviceId);
 
         //-Create-//
-        Device edgeDevice = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device edgeDevice1 = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
         DeviceCapabilities capabilities = new DeviceCapabilities();
         capabilities.setIotEdge(true);
-        edgeDevice.setCapabilities(capabilities);
-        edgeDevice = Tools.addDeviceWithRetry(testInstance.registryManager, edgeDevice);
+        edgeDevice1.setCapabilities(capabilities);
+        edgeDevice1 = Tools.addDeviceWithRetry(testInstance.registryManager, edgeDevice1);
 
-        Device leafDevice = Device.createFromId(testInstance.deviceId + "-leaf", DeviceStatus.Enabled, null);
-        assertNotNull(edgeDevice.getScope());
-        leafDevice.setScope(edgeDevice.getScope());
+        Device edgeDevice2 = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        capabilities.setIotEdge(true);
+        edgeDevice2.setCapabilities(capabilities);
+        edgeDevice2.getParentScopes().add(edgeDevice1.getScope()); // set edge1 as parent
+        edgeDevice2 = Tools.addDeviceWithRetry(testInstance.registryManager, edgeDevice2);
+
+        Device leafDevice = Device.createFromId(
+                testInstance.deviceId + "-leaf",
+                DeviceStatus.Enabled,
+                null);
+        assertNotNull(edgeDevice1.getScope());
+        leafDevice.setScope(edgeDevice1.getScope());
         Tools.addDeviceWithRetry(testInstance.registryManager, leafDevice);
-
 
         //-Read-//
         Device deviceRetrieved = testInstance.registryManager.getDevice(testInstance.deviceId);
@@ -482,9 +490,36 @@ public class RegistryManagerTests extends IntegrationTest
         testInstance.registryManager.removeDevice(testInstance.deviceId);
 
         // Assert
-        assertEquals(buildExceptionMessage("Registered device id is not correct", hostName), testInstance.deviceId, edgeDevice.getDeviceId());
-        assertEquals(buildExceptionMessage("Registered device id is not correct", hostName), testInstance.deviceId, deviceRetrieved.getDeviceId());
-        assertEquals(buildExceptionMessage("Security scopes did not match", hostName), deviceRetrieved.getScope(), edgeDevice.getScope());
+        assertEquals(
+                buildExceptionMessage(
+                        "Edge parent scope did not match parent's device scope",
+                        hostName),
+                edgeDevice2.getParentScopes().indexOf(0),
+                edgeDevice1.getScope());
+        assertNotEquals(
+                buildExceptionMessage(
+                        "Child edge device scope should be it's own",
+                        hostName),
+                edgeDevice2.getScope(),
+                edgeDevice1.getScope());
+        assertEquals(
+                buildExceptionMessage(
+                    "Registered device Id is not correct",
+                    hostName),
+                testInstance.deviceId,
+                edgeDevice1.getDeviceId());
+        assertEquals(
+                buildExceptionMessage(
+                        "Device scopes did not match",
+                        hostName),
+                deviceRetrieved.getScope(),
+                edgeDevice1.getScope());
+        assertEquals(
+                buildExceptionMessage(
+                        "First parent scope did not match device scope",
+                        hostName),
+                deviceRetrieved.getParentScopes().get(0),
+                deviceRetrieved.getScope());
     }
     
     private static void deleteDeviceIfItExistsAlready(RegistryManager registryManager, String deviceId) throws IOException, InterruptedException
