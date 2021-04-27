@@ -180,6 +180,7 @@ public class Message
      * The stream content of the body.
      * @return always returns null.
      */
+    @SuppressWarnings("SameReturnValue")
     public ByteArrayOutputStream getBodyStream()
     {
         return null;

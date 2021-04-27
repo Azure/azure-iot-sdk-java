@@ -492,6 +492,7 @@ public class TwinParser
      * @param json - Json with property to change the collection.
      * @throws IllegalArgumentException This exception is thrown if the Json is not well formed.
      */
+    @SuppressWarnings("IfCanBeSwitch")
     public void updateTwin(String json) throws IllegalArgumentException
     {
         if (json == null)
@@ -826,6 +827,7 @@ public class TwinParser
         return this.manager.lastActivityTime;
     }
 
+    @SuppressWarnings("IfCanBeSwitch")
     private void validateJson(String json) throws IllegalArgumentException
     {
         Map<String, Object> map;

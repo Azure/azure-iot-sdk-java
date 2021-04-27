@@ -16,6 +16,7 @@ public final class FileUploadInProgress
 {
     private final IotHubEventCallback statusCallback;
     private final Object statusCallbackContext;
+    @SuppressWarnings("rawtypes")
     private Future task;
 
     /**
@@ -44,6 +45,7 @@ public final class FileUploadInProgress
      * @param task is the Future task.
      * @throws IllegalArgumentException if the task is null.
      */
+    @SuppressWarnings("rawtypes")
     void setTask(Future task) throws IllegalArgumentException
     {
         /* Codes_SRS_FILEUPLOADINPROGRESS_21_004: [If the `task` is null, the setTask shall throws IllegalArgumentException.] */

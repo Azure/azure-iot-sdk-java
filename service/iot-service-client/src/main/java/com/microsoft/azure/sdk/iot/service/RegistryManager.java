@@ -49,7 +49,6 @@ public class RegistryManager
      * @deprecated As of release 1.22.0, replaced by {@link #createFromConnectionString(String)}
      */
     // Suppressing warning since it is referenced by createFromConnectionString
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public RegistryManager()
     {
@@ -430,7 +429,6 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public Device updateDevice(Device device, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
     {
@@ -1205,7 +1203,6 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")   
     @Deprecated
     public Module updateModule(Module module, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
     {
@@ -1470,7 +1467,6 @@ public class RegistryManager
      * @throws IOException This exception is thrown if the IO operation failed
      * @throws IotHubException This exception is thrown if the response verification failed
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")   
     @Deprecated
     public Configuration updateConfiguration(Configuration configuration, Boolean forceUpdate) throws IOException, IotHubException, JsonSyntaxException
     {
