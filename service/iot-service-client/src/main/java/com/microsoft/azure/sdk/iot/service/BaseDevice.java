@@ -346,7 +346,6 @@ public class BaseDevice
      * @throws IllegalArgumentException if the provided argument is null
      */
     // Supressing this warning since this method is used by public APIs in Registry Manager
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public void setForceUpdate(Boolean forceUpdate) throws IllegalArgumentException
     {

@@ -189,6 +189,7 @@ public class JobsResponseParser
      * @throws IllegalArgumentException if the json is {@code null} or empty, or if any date is invalid
      * @throws JsonParseException if the json is not valid
      */
+    @SuppressWarnings("rawtypes")
     public static JobsResponseParser createFromJson(String json) throws IllegalArgumentException, JsonParseException
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();

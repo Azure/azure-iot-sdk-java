@@ -522,6 +522,7 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
+    @SuppressWarnings("deprecation")
     public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException
     {
         this.unregisterDeviceClient(deviceClient, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
@@ -554,6 +555,7 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
+    @SuppressWarnings("deprecation")
     public void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         Objects.requireNonNull(deviceClient);
@@ -584,6 +586,7 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
+    @SuppressWarnings("deprecation")
     public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException
     {
         this.unregisterDeviceClients(deviceClients, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
@@ -612,6 +615,7 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
+    @SuppressWarnings("deprecation")
     public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         Objects.requireNonNull(deviceClients);
