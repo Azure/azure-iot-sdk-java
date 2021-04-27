@@ -9,10 +9,14 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubMethod;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ResponseMessage;
+import com.microsoft.azure.sdk.iot.device.exceptions.BadFormatException;
+import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransport;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import mockit.Deencapsulation;
+import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
@@ -24,7 +28,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for file upload task class.
@@ -64,6 +68,9 @@ public class FileUploadTaskTest
 
     @Mocked
     private BlobClientBuilder mockCloudBlockBlobBuilder;
+
+    @Mocked
+    FileUploadCompletionNotification mockFileUploadNotification;
 
     private static final String VALID_BLOB_NAME = "test-device1/image.jpg";
     private static final String VALID_BLOB_NAME_URI = "test-device1%2Fimage.jpg";
@@ -764,4 +771,67 @@ public class FileUploadTaskTest
         };
     }
 
+    @Test
+    public void getFileUploadSasUriChecksHttpStatusCode() throws IOException, IllegalArgumentException
+    {
+        // arrange
+        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
+            new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
+            VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
+
+        new Expectations()
+        {
+            {
+                mockHttpsTransportManager.getFileUploadSasUri((IotHubTransportMessage) any);
+                result = mockResponseMessage;
+
+                mockResponseMessage.getStatus();
+                result = IotHubStatusCode.UNAUTHORIZED;
+            }
+        };
+
+        // act
+        try
+        {
+            fileUploadTask.getFileUploadSasUri(mockFileUploadSasUriRequest);
+            fail("Test should have thrown an IOException with a nested UnauthorizedException");
+        }
+        catch (IOException e)
+        {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause() instanceof UnauthorizedException);
+        }
+    }
+
+    @Test
+    public void sendNotificationChecksHttpStatusCode() throws IOException, IllegalArgumentException, URISyntaxException
+    {
+        // arrange
+        FileUploadTask fileUploadTask = Deencapsulation.newInstance(FileUploadTask.class,
+            new Class[] {String.class, InputStream.class, long.class, HttpsTransportManager.class, IotHubEventCallback.class, Object.class},
+            VALID_BLOB_NAME, mockInputStream, VALID_STREAM_LENGTH, mockHttpsTransportManager, mockIotHubEventCallback, VALID_CALLBACK_CONTEXT);
+
+        new Expectations()
+        {
+            {
+                mockHttpsTransportManager.sendFileUploadNotification((IotHubTransportMessage) any);
+                result = mockResponseMessage;
+
+                mockResponseMessage.getStatus();
+                result = IotHubStatusCode.BAD_FORMAT;
+            }
+        };
+
+        // act
+        try
+        {
+            fileUploadTask.sendNotification(mockFileUploadNotification);
+            fail("Test should have thrown an IOException with a nested BadFormatException");
+        }
+        catch (IOException e)
+        {
+            assertNotNull(e.getCause());
+            assertTrue(e.getCause() instanceof BadFormatException);
+        }
+    }
 }
