@@ -101,6 +101,10 @@ public class IotHubTransport implements IotHubListener
     private final ProxySettings proxySettings;
     private SSLContext sslContext;
 
+    // Used to store the CorrelationCallbackMessage for a correlationId
+    private final static Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
+    private final static Map<String, Object> correlationContext = new ConcurrentHashMap<>();
+
     /**
      * Constructor for an IotHubTransport object with default values
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
@@ -184,6 +188,16 @@ public class IotHubTransport implements IotHubListener
         {
             log.warn("onMessageSent called with null message");
             return;
+        }
+
+        if (message != null) {
+            if (message.getCorrelationId() != null && correlationCallbacks.containsKey(message.getCorrelationId())) {
+                Object context = null;
+                if (correlationContext.containsKey(message.getCorrelationId())) {
+                    context = correlationContext.get(message.getCorrelationId());
+                }
+                correlationCallbacks.get(message.getCorrelationId()).onAcknowledge(message, context);
+            }
         }
 
         log.debug("IotHub message was acknowledged. Checking if there is record of sending this message ({})", message);
@@ -526,6 +540,16 @@ public class IotHubTransport implements IotHubListener
                     //Codes_SRS_IOTHUBTRANSPORT_34_044: [This function continue to dequeue packets saved in the waiting
                     // queue and send them until connection status isn't CONNECTED or until 10 messages have been sent]
                     sendPacket(packet);
+
+                    if (packet != null && packet.getMessage() != null && packet.getMessage().getCorrelatingMessageCallback() != null) {
+                        if (packet.getMessage().getCorrelationId() != null) {
+                            Object context = null;
+                            if (correlationContext.containsKey(packet.getMessage().getCorrelationId())) {
+                                context = correlationContext.get(packet.getMessage().getCorrelationId());
+                            }
+                            correlationCallbacks.get(packet.getMessage().getCorrelationId()).onSend(message, packet, context);
+                        }
+                    }
                 }
             }
         }
@@ -859,6 +883,21 @@ public class IotHubTransport implements IotHubListener
         MessageCallback messageCallback = receivedMessage.getMessageCallback();
         Object messageCallbackContext = receivedMessage.getMessageCallbackContext();
 
+        try {
+            if (receivedMessage != null) {
+                if (receivedMessage.getCorrelationId() != null && correlationCallbacks.containsKey(receivedMessage.getCorrelationId())) {
+                    Object context = null;
+                    if (correlationContext.containsKey(receivedMessage.getCorrelationId())) {
+                        context = correlationContext.remove(receivedMessage.getCorrelationId());
+                    }
+                    correlationCallbacks.remove(receivedMessage.getCorrelationId()).onAcknowledge(receivedMessage, context);
+                }
+            }
+        } catch (java.lang.Exception e) {
+            log.error("Exception thrown while calling the onReceive callback", e);
+        }
+
+
         if (messageCallback != null)
         {
             log.debug("Executing callback for received message ({})", receivedMessage);
@@ -879,6 +918,7 @@ public class IotHubTransport implements IotHubListener
                 // this function shall add the received message back into the receivedMessagesQueue and then rethrow the exception.]
                 log.warn("Sending acknowledgement for received cloud to device message failed, adding it back to the queue ({})", receivedMessage, e);
                 this.addToReceivedMessagesQueue(receivedMessage);
+
                 throw e;
             }
         }
@@ -1611,10 +1651,17 @@ public class IotHubTransport implements IotHubListener
 
     private void addToWaitingQueue(IotHubTransportPacket packet)
     {
+        if (packet != null && packet.getMessage() != null && packet.getMessage().getCorrelatingMessageCallback() != null) {
+            if (packet.getMessage().getCorrelationId() != null) {
+                correlationCallbacks.put(packet.getMessage().getCorrelationId(), packet.getMessage().getCorrelatingMessageCallback());
+                correlationContext.put(packet.getMessage().getCorrelationId(), packet.getMessage().getCorrelatingMessageCallbackContext());
+                correlationCallbacks.get(packet.getMessage().getCorrelationId()).onQueue(packet.getMessage(), packet, correlationContext.get(packet.getMessage().getCorrelationId()));
+            }
+        }
+
         synchronized (this.sendThreadLock)
         {
             this.waitingPacketsQueue.add(packet);
-
             // Wake up IotHubSendTask so it can send this message
             this.sendThreadLock.notifyAll();
         }

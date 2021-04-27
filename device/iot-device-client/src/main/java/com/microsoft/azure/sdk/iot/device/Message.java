@@ -75,6 +75,16 @@ public class Message
      */
     private IotHubConnectionString iotHubConnectionString;
 
+    /**
+     * [Optional] Used to correlate the message across the send/receive lifecycle
+     */
+    private CorrelatingMessageCallback correlatingMessageCallback;
+
+    /**
+     * [Optional] Used to specify the sender device client for multiplexing scenarios
+     */
+    private Object correlatingMessageCallbackContext;
+
     private String connectionModuleId;
     private String inputName;
     private String outputName;
@@ -634,5 +644,21 @@ public class Message
         }
 
         return s.toString();
+    }
+
+    public void setCorrelatingMessageCallback(CorrelatingMessageCallback correlatingMessageCallback) {
+        this.correlatingMessageCallback = correlatingMessageCallback;
+    }
+
+    public CorrelatingMessageCallback getCorrelatingMessageCallback() {
+        return correlatingMessageCallback;
+    }
+
+    public void setCorrelatingMessageCallbackContext(Object correlatingMessageCallbackContext) {
+        this.correlatingMessageCallbackContext = correlatingMessageCallbackContext;
+    }
+
+    public Object getCorrelatingMessageCallbackContext() {
+        return correlatingMessageCallbackContext;
     }
 }

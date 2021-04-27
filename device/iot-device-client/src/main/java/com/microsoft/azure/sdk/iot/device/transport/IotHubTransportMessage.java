@@ -28,7 +28,6 @@ public class IotHubTransportMessage extends Message
     private DeviceOperations operationType;
     private MessageCallback messageCallback;
     private Object messageCallbackContext;
-
     /**
      * Constructor with binary data and message type
      * @param data The byte array of the message.

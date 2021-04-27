@@ -287,10 +287,15 @@ public class DeviceTwin
 
     public synchronized void updateReportedProperties(Set<Property> reportedProperties) throws IOException
     {
-        this.updateReportedProperties(reportedProperties, null);
+        this.updateReportedProperties(reportedProperties, null, null, null, new deviceTwinRequestMessageCallback(), null);
     }
 
     public synchronized void updateReportedProperties(Set<Property> reportedProperties, Integer version) throws IOException
+    {
+        this.updateReportedProperties(reportedProperties, version, null, null, new deviceTwinRequestMessageCallback(), null);
+    }
+
+    public synchronized void updateReportedProperties(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object callbackContext) throws IOException
     {
         if (reportedProperties == null)
         {
@@ -315,6 +320,8 @@ public class DeviceTwin
         }
 
         IotHubTransportMessage updateReportedPropertiesRequest = new IotHubTransportMessage(serializedReportedProperties.getBytes(), MessageType.DEVICE_TWIN);
+        updateReportedPropertiesRequest.setCorrelatingMessageCallback(correlatingMessageCallback);
+        updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(correlatingMessageCallbackContext);
         updateReportedPropertiesRequest.setConnectionDeviceId(this.config.getDeviceId());
         updateReportedPropertiesRequest.setRequestId(String.valueOf(requestId++));
 
@@ -323,8 +330,9 @@ public class DeviceTwin
             updateReportedPropertiesRequest.setVersion(Integer.toString(version));
         }
 
+
         updateReportedPropertiesRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST);
-        this.deviceIO.sendEventAsync(updateReportedPropertiesRequest, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
+        this.deviceIO.sendEventAsync(updateReportedPropertiesRequest, reportedPropertiesCallback, callbackContext, this.config.getDeviceId());
     }
 
     public void subscribeDesiredPropertiesNotification(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange)
