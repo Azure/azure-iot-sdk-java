@@ -459,6 +459,7 @@ public class RegistryManagerTests extends IntegrationTest
     public void deviceCreationWithDeviceScope() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         // Arrange
+        this.testInstance = new RegistryManagerTestInstance();
         String edge1Id = deviceIdPrefix + UUID.randomUUID().toString();
         String edge2Id = deviceIdPrefix + UUID.randomUUID().toString();
         String deviceId = this.testInstance.deviceId;
@@ -497,7 +498,7 @@ public class RegistryManagerTests extends IntegrationTest
                 buildExceptionMessage(
                         "Edge parent scope did not match parent's device scope",
                         hostName),
-                edgeDevice2.getParentScopes().indexOf(0),
+                edgeDevice2.getParentScopes().get(0),
                 edgeDevice1.getScope());
         assertNotEquals(
                 buildExceptionMessage(
