@@ -183,11 +183,15 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         boolean allLinksOpen = true;
         for (AmqpsSenderLinkHandler senderLinkHandler : senderLinkHandlers)
         {
+            // Ignored because Sender is passed in from elsewhere and we won't know the condition of the Link
+            //noinspection ConstantConditions
             allLinksOpen &= senderLinkHandler.senderLink != null && senderLinkHandler.senderLink.getRemoteState() == EndpointState.ACTIVE;
         }
 
         for (AmqpsReceiverLinkHandler receiverLinkHandler : receiverLinkHandlers)
         {
+            // Ignored because Sender is passed in from elsewhere and we won't know the condition of the Link
+            //noinspection ConstantConditions
             allLinksOpen &= receiverLinkHandler.receiverLink != null && receiverLinkHandler.receiverLink.getRemoteState() == EndpointState.ACTIVE;
         }
 

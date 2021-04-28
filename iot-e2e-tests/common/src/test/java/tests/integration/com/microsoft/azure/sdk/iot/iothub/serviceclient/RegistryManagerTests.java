@@ -548,42 +548,46 @@ public class RegistryManagerTests extends IntegrationTest
     public void deviceCreationWithDeviceScope() throws IOException, InterruptedException, IotHubException, URISyntaxException
     {
         // Arrange
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
-        deleteDeviceIfItExistsAlready(testInstance.registryManager, testInstance.deviceId);
+        this.testInstance = new RegistryManagerTestInstance();
+        String edge1Id = deviceIdPrefix + UUID.randomUUID().toString();
+        String edge2Id = deviceIdPrefix + UUID.randomUUID().toString();
+        String deviceId = this.testInstance.deviceId;
 
         //-Create-//
-        Device edgeDevice1 = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device edgeDevice1 = Device.createFromId(edge1Id, DeviceStatus.Enabled, null);
         DeviceCapabilities capabilities = new DeviceCapabilities();
         capabilities.setIotEdge(true);
         edgeDevice1.setCapabilities(capabilities);
-        edgeDevice1 = Tools.addDeviceWithRetry(testInstance.registryManager, edgeDevice1);
+        edgeDevice1 = Tools.addDeviceWithRetry(this.testInstance.registryManager, edgeDevice1);
 
-        Device edgeDevice2 = Device.createFromId(testInstance.deviceId, DeviceStatus.Enabled, null);
+        Device edgeDevice2 = Device.createFromId(edge2Id, DeviceStatus.Enabled, null);
         capabilities.setIotEdge(true);
         edgeDevice2.setCapabilities(capabilities);
         edgeDevice2.getParentScopes().add(edgeDevice1.getScope()); // set edge1 as parent
-        edgeDevice2 = Tools.addDeviceWithRetry(testInstance.registryManager, edgeDevice2);
+        edgeDevice2 = Tools.addDeviceWithRetry(this.testInstance.registryManager, edgeDevice2);
 
         Device leafDevice = Device.createFromId(
-                testInstance.deviceId + "-leaf",
+                deviceId,
                 DeviceStatus.Enabled,
                 null);
         assertNotNull(edgeDevice1.getScope());
         leafDevice.setScope(edgeDevice1.getScope());
-        Tools.addDeviceWithRetry(testInstance.registryManager, leafDevice);
+        Tools.addDeviceWithRetry(this.testInstance.registryManager, leafDevice);
 
         //-Read-//
-        Device deviceRetrieved = testInstance.registryManager.getDevice(testInstance.deviceId);
+        Device deviceRetrieved = this.testInstance.registryManager.getDevice(deviceId);
 
         //-Delete-//
-        testInstance.registryManager.removeDevice(testInstance.deviceId);
+        this.testInstance.registryManager.removeDevice(edge1Id);
+        this.testInstance.registryManager.removeDevice(edge2Id);
+        this.testInstance.registryManager.removeDevice(deviceId);
 
         // Assert
         assertEquals(
                 buildExceptionMessage(
                         "Edge parent scope did not match parent's device scope",
                         hostName),
-                edgeDevice2.getParentScopes().indexOf(0),
+                edgeDevice2.getParentScopes().get(0),
                 edgeDevice1.getScope());
         assertNotEquals(
                 buildExceptionMessage(
@@ -595,8 +599,8 @@ public class RegistryManagerTests extends IntegrationTest
                 buildExceptionMessage(
                     "Registered device Id is not correct",
                     hostName),
-                testInstance.deviceId,
-                edgeDevice1.getDeviceId());
+                deviceId,
+                leafDevice.getDeviceId());
         assertEquals(
                 buildExceptionMessage(
                         "Device scopes did not match",
@@ -605,7 +609,7 @@ public class RegistryManagerTests extends IntegrationTest
                 edgeDevice1.getScope());
         assertEquals(
                 buildExceptionMessage(
-                        "First parent scope did not match device scope",
+                        "Device's first parent scope did not match device scope",
                         hostName),
                 deviceRetrieved.getParentScopes().get(0),
                 deviceRetrieved.getScope());

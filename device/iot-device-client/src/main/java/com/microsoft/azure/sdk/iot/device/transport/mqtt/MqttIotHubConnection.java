@@ -72,7 +72,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
-    @SuppressWarnings("ConstantConditions")
     public MqttIotHubConnection(DeviceClientConfig config) throws IllegalArgumentException, TransportException
     {
         if (config == null)

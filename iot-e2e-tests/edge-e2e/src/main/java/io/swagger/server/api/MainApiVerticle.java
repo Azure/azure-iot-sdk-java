@@ -32,6 +32,7 @@ public class MainApiVerticle extends AbstractVerticle {
         router = Router.router(vertx);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         Json.mapper.registerModule(new JavaTimeModule());
@@ -52,6 +53,7 @@ public class MainApiVerticle extends AbstractVerticle {
         });
     }
 
+    @SuppressWarnings("deprecation")
     public void deployVerticles(Future<Void> startFuture) {
 
         vertx.deployVerticle("io.swagger.server.api.verticle.DeviceApiVerticle", res -> {

@@ -112,6 +112,7 @@ public class RegistrationStatusManager
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the delete operation.
      */
+    @SuppressWarnings("deprecation")
     public void delete(DeviceRegistrationState DeviceRegistrationState) throws ProvisioningServiceClientException
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_011: [The delete shall throw IllegalArgumentException if the provided DeviceRegistrationState is null.] */
@@ -152,6 +153,7 @@ public class RegistrationStatusManager
      * @throws ProvisioningServiceClientTransportException if the SDK failed to send the request to the Device Provisioning Service.
      * @throws ProvisioningServiceClientException if the Device Provisioning Service was not able to execute the bulk operation.
      */
+    @SuppressWarnings("deprecation")
     public void delete(String id, String eTag) throws ProvisioningServiceClientException
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_017: [The delete shall throw IllegalArgumentException if the provided id is null or empty.] */
@@ -192,6 +194,7 @@ public class RegistrationStatusManager
      * @return A {@link Query} iterator.
      * @throws IllegalArgumentException if the provided parameter is not correct.
      */
+    @SuppressWarnings("deprecation")
     public Query createEnrollmentGroupQuery(QuerySpecification querySpecification, String enrollmentGroupId, int pageSize)
     {
         /* SRS_REGISTRATION_STATUS_MANAGER_21_023: [The createEnrollmentGroupQuery shall throw IllegalArgumentException if the provided querySpecification is null.] */
