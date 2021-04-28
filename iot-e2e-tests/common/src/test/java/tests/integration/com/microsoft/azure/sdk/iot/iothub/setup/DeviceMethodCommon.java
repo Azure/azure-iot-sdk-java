@@ -332,12 +332,4 @@ public class DeviceMethodCommon extends IntegrationTest
         DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new DeviceMethod(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
-
-    protected static DeviceMethod buildDeviceMethodClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
-        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        return new DeviceMethod(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
-    }
 }

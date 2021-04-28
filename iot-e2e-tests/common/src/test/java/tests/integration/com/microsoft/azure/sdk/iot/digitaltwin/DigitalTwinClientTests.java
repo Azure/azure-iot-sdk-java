@@ -255,27 +255,6 @@ public class DigitalTwinClientTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void getDigitalTwinWithTokenCredential() {
-        if (protocol != MQTT)
-        {
-            // This test is for the service client, so no need to rerun it for all the different device protocols
-            return;
-        }
-
-        // arrange
-        digitalTwinClient = buildDigitalTwinClientWithTokenCredential();
-
-        // act
-        BasicDigitalTwin response = digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders =
-            digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
-
-        // assert
-        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
-        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.THERMOSTAT_MODEL_ID);
-    }
-
-    @Test
     public void digitalTwinClientTokenRenewalWithAzureSasCredential()
     {
         if (protocol != MQTT)
@@ -430,13 +409,5 @@ public class DigitalTwinClientTests extends IntegrationTest
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
         DigitalTwinClientOptions options = DigitalTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
-    }
-
-    private static DigitalTwinClient buildDigitalTwinClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(IOTHUB_CONNECTION_STRING);
-        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
-        DigitalTwinClientOptions options = DigitalTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        return new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 }

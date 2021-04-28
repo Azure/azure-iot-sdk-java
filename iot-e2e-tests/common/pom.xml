@@ -39,6 +39,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.12.2</version>
+        </dependency>
+        <dependency>
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>${iot-device-client-artifact-id}</artifactId>
             <version>${iot-device-client-version}</version>
@@ -68,11 +73,6 @@
             <artifactId>${x509-provider-artifact-id}</artifactId>
             <version>${x509-provider-version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-identity</artifactId>
-            <version>1.2.2</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.littleshoot/littleproxy -->
         <dependency>
             <groupId>org.littleshoot</groupId>
@@ -96,12 +96,6 @@
             <artifactId>lombok</artifactId>
             <version>1.18.8</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.jcip</groupId>
-            <artifactId>jcip-annotations</artifactId>
-            <version>1.0</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -151,7 +145,6 @@
                     </includes>
                     <forkCount>1</forkCount>
 
-                    <!--Tests can be run in parallel with tests within their own test class as well as in parallel with tests from other test classes-->
                     <parallel>both</parallel>
 
                     <!--Maven will spawn up as many threads as it wants/can while running tests in parallel-->

@@ -712,12 +712,4 @@ public class DeviceTwinCommon extends IntegrationTest
         DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new DeviceTwin(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
-
-    protected static DeviceTwin buildDeviceTwinClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
-        DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        return new DeviceTwin(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
-    }
 }

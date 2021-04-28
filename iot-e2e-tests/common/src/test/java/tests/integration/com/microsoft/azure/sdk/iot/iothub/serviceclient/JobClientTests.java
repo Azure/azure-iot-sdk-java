@@ -31,7 +31,6 @@ import com.microsoft.azure.sdk.iot.service.jobs.JobResult;
 import com.microsoft.azure.sdk.iot.service.jobs.JobStatus;
 import com.microsoft.azure.sdk.iot.service.jobs.JobType;
 import lombok.extern.slf4j.Slf4j;
-import net.jcip.annotations.NotThreadSafe;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -69,9 +68,9 @@ import static org.junit.Assert.*;
 /**
  * Test class containing all tests to be run on JVM and android pertaining to method and twin jobs.
  */
+@Ignore
 @Slf4j
 @IotHubTest
-@NotThreadSafe // these tests will be run in serial because of this annotation. IoT Hub has a limit on number of concurrent jobs
 public class JobClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
@@ -402,13 +401,6 @@ public class JobClientTests extends IntegrationTest
     }
 
     @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
-    public void scheduleDeviceMethodWithTokenCredentialSucceed() throws InterruptedException, IOException, IotHubException
-    {
-        // Arrange
-        scheduleDeviceMethod(buildJobClientWithTokenCredential());
-    }
-
-    @Test(timeout = TEST_TIMEOUT_MILLISECONDS)
     public void jobClientTokenRenewalWithAzureSasCredential() throws InterruptedException, IOException, IotHubException
     {
         // Arrange
@@ -709,13 +701,5 @@ public class JobClientTests extends IntegrationTest
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
         JobClientOptions options = JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
         return new JobClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
-    }
-
-    private static JobClient buildJobClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
-        JobClientOptions options = JobClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        return new JobClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 }

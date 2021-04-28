@@ -63,7 +63,6 @@ public class ServiceClientTests extends IntegrationTest
 {
     protected static String iotHubConnectionString = "";
     protected static String invalidCertificateServerConnectionString = "";
-    private static final String deviceIdPrefix = "java-service-client-e2e-test";
     private static final String content = "abcdefghijklmnopqrstuvwxyz1234567890";
     private static String hostName;
 
@@ -124,14 +123,14 @@ public class ServiceClientTests extends IntegrationTest
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetry() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, false, false, false);
+        cloudToDeviceTelemetry(false, true, false, false);
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithCustomSSLContext() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, true, false, false);
+        cloudToDeviceTelemetry(false, true, true, false);
     }
 
     @Test
@@ -144,7 +143,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, false, false, false);
+        cloudToDeviceTelemetry(true, true, false, false);
     }
 
     @Test
@@ -157,7 +156,7 @@ public class ServiceClientTests extends IntegrationTest
             return;
         }
 
-        cloudToDeviceTelemetry(true, true, true, false, false);
+        cloudToDeviceTelemetry(true, true, true, false);
     }
 
     @Test
@@ -165,28 +164,20 @@ public class ServiceClientTests extends IntegrationTest
     @ContinuousIntegrationTest
     public void cloudToDeviceTelemetryWithNoPayload() throws Exception
     {
-        cloudToDeviceTelemetry(false, false, false, false, false);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void cloudToDeviceTelemetryWithTokenCredential() throws Exception
-    {
-        cloudToDeviceTelemetry(false, true, false, true, false);
+        cloudToDeviceTelemetry(false, false, false, false);
     }
 
     @Test
     @StandardTierHubOnlyTest
     public void cloudToDeviceTelemetryWithAzureSasCredential() throws Exception
     {
-        cloudToDeviceTelemetry(false, true, false, false, true);
+        cloudToDeviceTelemetry(false, true, false, true);
     }
 
     public void cloudToDeviceTelemetry(
             boolean withProxy,
             boolean withPayload,
             boolean withCustomSSLContext,
-            boolean withTokenCredential,
             boolean withAzureSasCredential) throws Exception
     {
         // We remove and recreate the device for a clean start
@@ -229,11 +220,7 @@ public class ServiceClientTests extends IntegrationTest
                         .build();
 
         ServiceClient serviceClient;
-        if (withTokenCredential)
-        {
-            serviceClient = buildServiceClientWithTokenCredential(testInstance.protocol, serviceClientOptions);
-        }
-        else if (withAzureSasCredential)
+        if (withAzureSasCredential)
         {
             serviceClient = buildServiceClientWithAzureSasCredential(testInstance.protocol, serviceClientOptions);
         }
@@ -486,12 +473,5 @@ public class ServiceClientTests extends IntegrationTest
         IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
         AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
         return new ServiceClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, protocol, options);
-    }
-
-    private static ServiceClient buildServiceClientWithTokenCredential(IotHubServiceClientProtocol protocol, ServiceClientOptions options)
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
-        return new ServiceClient(iotHubConnectionStringObj.getHostName(), tokenCredential, protocol, options);
     }
 }

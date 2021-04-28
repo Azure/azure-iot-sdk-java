@@ -70,15 +70,6 @@ public class GetTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testGetDeviceTwinWithTokenCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
-    {
-        super.setUpNewDeviceAndModule();
-        testInstance.twinServiceClient = buildDeviceTwinClientWithTokenCredential();
-        super.testGetDeviceTwin();
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
         if (testInstance.protocol != IotHubClientProtocol.AMQPS

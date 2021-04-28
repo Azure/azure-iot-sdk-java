@@ -146,13 +146,6 @@ public class RegistryManagerTests extends IntegrationTest
     }
 
     @Test
-    public void deviceLifecycleWithTokenCredential() throws Exception
-    {
-        RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance(buildRegistryManagerWithTokenCredential());
-        deviceLifecycle(testInstance);
-    }
-
-    @Test
     public void registryManagerTokenRenewalWithAzureSasCredential() throws Exception
     {
         IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
@@ -714,11 +707,5 @@ public class RegistryManagerTests extends IntegrationTest
         return new RegistryManager(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 
-    private static RegistryManager buildRegistryManagerWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = Tools.buildTokenCredentialFromEnvironment();
-        RegistryManagerOptions options = RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-        return new RegistryManager(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
-    }
+
 }

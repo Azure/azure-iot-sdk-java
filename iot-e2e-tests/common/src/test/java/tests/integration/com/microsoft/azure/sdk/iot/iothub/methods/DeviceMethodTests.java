@@ -81,15 +81,6 @@ public class DeviceMethodTests extends DeviceMethodCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void invokeMethodSucceedWithTokenCredential() throws Exception
-    {
-        this.testInstance.methodServiceClient = buildDeviceMethodClientWithTokenCredential();
-        super.openDeviceClientAndSubscribeToMethods();
-        super.invokeMethodSucceed();
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
     public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
     {
         if (testInstance.protocol != IotHubClientProtocol.AMQPS
