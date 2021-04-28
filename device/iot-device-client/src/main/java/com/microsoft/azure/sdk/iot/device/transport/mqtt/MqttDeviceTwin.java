@@ -309,6 +309,7 @@ public class MqttDeviceTwin extends Mqtt
                             {
                                 String requestId = getRequestId(topicTokens[REQID_TOKEN]);
                                 message.setRequestId(requestId);
+                                message.setCorrelationId(requestId);
                                 if (requestMap.containsKey(requestId))
                                 {
                                     switch (requestMap.remove(requestId))

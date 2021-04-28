@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.ABANDON;
@@ -22,7 +23,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.COMPLETE;
 @Slf4j
 public class DeviceTwin
 {
-    private int requestId;
+    private String requestId;
     private DeviceIO deviceIO = null;
     private DeviceClientConfig config = null;
     private boolean isSubscribed = false;
@@ -269,7 +270,7 @@ public class DeviceTwin
         this.deviceIO = client;
         this.config = config;
         this.config.setDeviceTwinMessageCallback(new deviceTwinResponseMessageCallback(), null);
-        this.requestId = 0;
+        this.requestId = UUID.randomUUID().toString();
         this.deviceTwinStatusCallback = deviceTwinCallback;
         this.deviceTwinStatusCallbackContext = deviceTwinCallbackContext;
         this.deviceTwinGenericPropertyChangeCallbackContext = genericPropertyCallbackContext;
@@ -280,7 +281,8 @@ public class DeviceTwin
         checkSubscription();
 
         IotHubTransportMessage getTwinRequestMessage = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_TWIN);
-        getTwinRequestMessage.setRequestId(String.valueOf(requestId++));
+        getTwinRequestMessage.setRequestId(UUID.randomUUID().toString());
+        getTwinRequestMessage.setCorrelationId(getTwinRequestMessage.getRequestId());
         getTwinRequestMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_GET_REQUEST);
         this.deviceIO.sendEventAsync(getTwinRequestMessage, new deviceTwinRequestMessageCallback(), null, this.config.getDeviceId());
     }
@@ -323,7 +325,8 @@ public class DeviceTwin
         updateReportedPropertiesRequest.setCorrelatingMessageCallback(correlatingMessageCallback);
         updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(correlatingMessageCallbackContext);
         updateReportedPropertiesRequest.setConnectionDeviceId(this.config.getDeviceId());
-        updateReportedPropertiesRequest.setRequestId(String.valueOf(requestId++));
+        updateReportedPropertiesRequest.setRequestId(UUID.randomUUID().toString());
+        updateReportedPropertiesRequest.setCorrelationId(updateReportedPropertiesRequest.getRequestId());
 
         if (version != null)
         {

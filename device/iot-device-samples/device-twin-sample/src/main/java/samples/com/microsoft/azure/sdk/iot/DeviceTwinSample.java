@@ -6,6 +6,7 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
 
 import java.io.IOException;
@@ -32,39 +33,78 @@ public class DeviceTwinSample
             _message = message;
         }
         @Override
-        public void onQueue(Message message, IotHubTransportPacket packet, Object callbackContext)
+        public void onQueueRequest(Message message, IotHubTransportPacket packet, Object callbackContext)
         {
+            String messageId = message.getCorrelationId();
+
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK onQueue (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+ messageId+ "] onQueue (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (callbackContext instanceof ReportedPropertiesContext) {
-                ((ReportedPropertiesContext) callbackContext).setCorrelationId(message.getCorrelationId());
+
+                ((ReportedPropertiesContext) callbackContext).setCorrelationId(messageId);
             }
         }
 
         @Override
-        public void onSend(Message message, IotHubTransportPacket packet, Object callbackContext)
+        public void onSendRequest(Message message, IotHubTransportPacket packet, Object callbackContext)
         {
+            String messageId = message.getCorrelationId();
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK onSend (" + _message + ") CorrelationId: " + message.getCorrelationId());
-            }
-            if (callbackContext instanceof String) {
-                System.out.println("Context is a string: " + callbackContext);
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onSend (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
         }
 
         @Override
-        public void onAcknowledge(Message message, Object callbackContext)
-        {
+        public void onAcknowledgeSendRequestPacket(IotHubTransportPacket packet, Object callbackContext, Throwable e) {
+            Message message = packet.getMessage();
+            String messageId = message.getCorrelationId();
+
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK onAcknowledge (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeSendPacket (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
-            if (callbackContext instanceof String) {
-                System.out.println("Context is a string: " + callbackContext);
+            if (e != null) {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeSendPacket (" + _message + ") ERROR: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onAcknowledgeResponse(Message message, Object callbackContext, Throwable e) {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeReceieve (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+            if (e != null) {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeReceieve (" + _message + ") ERROR: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onReceiveResponse(Message message, Object callbackContext, Throwable e) {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onReceive (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+        }
+
+        @Override
+        public void onAcknowledgeUnkownMessage(Message message, Object callbackContext, Throwable e) {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledge (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+            if (e != null) {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledge (" + _message + ") ERROR: " + e.getMessage());
             }
         }
     }
@@ -105,16 +145,17 @@ public class DeviceTwinSample
         @Override
         public void execute(IotHubStatusCode status, Object context)
         {
-            System.out.println("REPORTEDPROPERTYCALLBACK Executing reported properties callback for " + _message);
             if (context instanceof ReportedPropertiesContext)
             {
                 ReportedPropertiesContext myContext = (ReportedPropertiesContext)context;
-                System.out.println("REPORTEDPROPERTYCALLBACK Found ReportedPropertiesContext with message " + myContext.getMessageOfContext());
-                System.out.println("REPORTEDPROPERTYCALLBACK Found ReportedPropertiesContext with correlationId " + myContext.getcorrelationId());
-                System.out.println("REPORTEDPROPERTYCALLBACK This context was set by ReportedPropertiesCallback " + status.name());
+                String messageId = myContext.getcorrelationId();
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Executing reported properties callback for " + _message);
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with message " + myContext.getMessageOfContext());
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with correlationId " + myContext.getcorrelationId());
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] This context was set by ReportedPropertiesCallback " + status.name());
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] IoT Hub responded to device twin reported properties with status " + status.name());
             }
-            Succeed.set((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY));
-            System.out.println("REPORTEDPROPERTYCALLBACK IoT Hub responded to device twin reported properties with status " + status.name());
+
         }
     }
 
