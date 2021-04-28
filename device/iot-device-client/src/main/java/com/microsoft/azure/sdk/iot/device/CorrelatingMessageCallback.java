@@ -31,7 +31,7 @@ public interface CorrelatingMessageCallback
     void onSendRequest(Message message, IotHubTransportPacket packet, Object callbackContext);
 
     /**
-     * Executed when the message request has been sent and IoT Hub has acknowledged the send.
+     * Executed when the message request has been sent and IoT hub has acknowledged the send.
      *
      * @param packet The message queued to the trasnport.
      * @param callbackContext The context sent with the message.
@@ -39,7 +39,7 @@ public interface CorrelatingMessageCallback
     void onAcknowledgeSendRequestPacket(IotHubTransportPacket packet, Object callbackContext, Throwable e);
 
     /**
-     * Executed when a response to the message has been sent by IoT Hub and is being acknowledged by the transport.
+     * Executed when a response to the message has been sent by IoT hub and is being acknowledged by the transport.
      *
      * @param message The message queued to the transport.
      * @param callbackContext The context sent with the message.
@@ -47,7 +47,7 @@ public interface CorrelatingMessageCallback
     void onAcknowledgeResponse(Message message, Object callbackContext, Throwable e);
 
     /**
-     * Executed when a response to the message has been sent by IoT Hub and is being receieved by the transport.
+     * Executed when a response to the message has been sent by IoT hub and is being receieved by the transport.
      *
      * @param message The message queued to the trasnport.
      * @param callbackContext The context sent with the message.
