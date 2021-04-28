@@ -240,7 +240,7 @@ public class IotHubTransport implements IotHubListener
                     {
                         context = correlationContext.get(messageId);
                     }
-                    correlationCallbacks.get(messageId).onAcknowledgeSendRequestPacket(packet, context, e);
+                    correlationCallbacks.get(messageId).onRequestAcknowledged(packet, context, e);
                 }
             } catch (Exception ex) {
                 log.warn("Exception thrown while calling the onAcknowledgeSendRequestPacket callback in onMessageSent", ex);
@@ -257,7 +257,7 @@ public class IotHubTransport implements IotHubListener
                     {
                         context = correlationContext.get(messageId);
                     }
-                        correlationCallbacks.get(messageId).onAcknowledgeUnkownMessage(message, context, e);
+                        correlationCallbacks.get(messageId).onUnknownMessageAcknowledged(message, context, e);
                 }
             } catch (Exception ex) {
                 log.warn("Exception thrown while calling the onAcknowledgeSendRequestPacket callback in onMessageSent", ex);
@@ -298,7 +298,7 @@ public class IotHubTransport implements IotHubListener
                 if (correlationContext.containsKey(messageId)) {
                     context = correlationContext.get(messageId);
                 }
-                correlationCallbacks.get(messageId).onReceiveResponse(message, context, e);
+                correlationCallbacks.get(messageId).onResponseReceived(message, context, e);
             }
         } catch (Exception ex) {
             log.warn("Exception thrown while calling the onReceiveResponse callback in onMessageReceived", ex);
@@ -585,7 +585,7 @@ public class IotHubTransport implements IotHubListener
                             if (correlationContext.containsKey(messageId)) {
                                 context = correlationContext.get(messageId);
                             }
-                            correlationCallbacks.get(messageId).onSendRequest(message, packet, context);
+                            correlationCallbacks.get(messageId).onRequestSent(message, packet, context);
                         }
                     } catch (Exception e) {
                         log.warn("Exception thrown while calling the onSendRequest callback in sendMessages", e);
@@ -947,7 +947,7 @@ public class IotHubTransport implements IotHubListener
                         {
                             context = correlationContext.remove(messageId);
                         }
-                        correlationCallbacks.remove(messageId).onAcknowledgeResponse(receivedMessage, context, null);
+                        correlationCallbacks.remove(messageId).onResponseAcknowledged(receivedMessage, context, null);
                     }
                 } catch (Exception ex) {
                     log.warn("Exception thrown while calling the onAcknowledgeResponse callback in acknowledgeReceivedMessage", ex);
@@ -970,7 +970,7 @@ public class IotHubTransport implements IotHubListener
                         {
                             context = correlationContext.remove(messageId);
                         }
-                        correlationCallbacks.remove(messageId).onAcknowledgeResponse(receivedMessage, context, e);
+                        correlationCallbacks.remove(messageId).onResponseAcknowledged(receivedMessage, context, e);
                     }
                 } catch (Exception ex) {
                     log.warn("Exception thrown while calling the onAcknowledgeResponse callback in acknowledgeReceivedMessage", ex);
@@ -1004,7 +1004,7 @@ public class IotHubTransport implements IotHubListener
                     if (correlationContext.containsKey(messageId)) {
                         context = correlationContext.get(messageId);
                     }
-                    correlationCallbacks.get(messageId).onReceiveResponse(transportMessage, context, null);
+                    correlationCallbacks.get(messageId).onResponseReceived(transportMessage, context, null);
                 }
             } catch (Exception e) {
                 log.warn("Exception thrown while calling the onReceiveResponse callback in addReceivedMessagesOverHttpToReceivedQueue", e);
@@ -1729,7 +1729,7 @@ public class IotHubTransport implements IotHubListener
                 {
                     correlationCallbacks.put(messageId, message.getCorrelatingMessageCallback());
                     correlationContext.put(messageId, message.getCorrelatingMessageCallbackContext());
-                    correlationCallbacks.get(messageId).onQueueRequest(message, packet, correlationContext.get(messageId));
+                    correlationCallbacks.get(messageId).onRequestQueued(message, packet, correlationContext.get(messageId));
                 }
             }
         } catch (Exception ex) {

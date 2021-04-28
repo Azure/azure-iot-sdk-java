@@ -347,7 +347,7 @@ public class InternalClient
      */
     public void sendReportedProperties(ReportedPropertiesParameters reportedPropertiesParameters) throws IOException, IllegalArgumentException
     {
-        this.sendReportedProperties(reportedPropertiesParameters.reportedProperties, reportedPropertiesParameters.version, reportedPropertiesParameters.correlatingMessageCallback, reportedPropertiesParameters.correlatingMessageCallbackContext, reportedPropertiesParameters.reportedPropertiesCallback, reportedPropertiesParameters.reportedPropertiesCallbackContext);
+        this.sendReportedProperties(reportedPropertiesParameters.getReportedProperties(), reportedPropertiesParameters.getVersion(), reportedPropertiesParameters.getCorrelatingMessageCallback(), reportedPropertiesParameters.getCorrelatingMessageCallbackContext(), reportedPropertiesParameters.getReportedPropertiesCallback(), reportedPropertiesParameters.getReportedPropertiesCallbackContext());
     }
 
     /**

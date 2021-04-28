@@ -33,7 +33,7 @@ public class DeviceTwinSample
             _message = message;
         }
         @Override
-        public void onQueueRequest(Message message, IotHubTransportPacket packet, Object callbackContext)
+        public void onRequestQueued(Message message, IotHubTransportPacket packet, Object callbackContext)
         {
             String messageId = message.getCorrelationId();
 
@@ -48,7 +48,7 @@ public class DeviceTwinSample
         }
 
         @Override
-        public void onSendRequest(Message message, IotHubTransportPacket packet, Object callbackContext)
+        public void onRequestSent(Message message, IotHubTransportPacket packet, Object callbackContext)
         {
             String messageId = message.getCorrelationId();
 
@@ -59,7 +59,7 @@ public class DeviceTwinSample
         }
 
         @Override
-        public void onAcknowledgeSendRequestPacket(IotHubTransportPacket packet, Object callbackContext, Throwable e) {
+        public void onRequestAcknowledged(IotHubTransportPacket packet, Object callbackContext, Throwable e) {
             Message message = packet.getMessage();
             String messageId = message.getCorrelationId();
 
@@ -73,7 +73,7 @@ public class DeviceTwinSample
         }
 
         @Override
-        public void onAcknowledgeResponse(Message message, Object callbackContext, Throwable e) {
+        public void onResponseAcknowledged(Message message, Object callbackContext, Throwable e) {
             String messageId = message.getCorrelationId();
 
             if (message != null)
@@ -86,7 +86,7 @@ public class DeviceTwinSample
         }
 
         @Override
-        public void onReceiveResponse(Message message, Object callbackContext, Throwable e) {
+        public void onResponseReceived(Message message, Object callbackContext, Throwable e) {
             String messageId = message.getCorrelationId();
 
             if (message != null)
@@ -96,7 +96,7 @@ public class DeviceTwinSample
         }
 
         @Override
-        public void onAcknowledgeUnkownMessage(Message message, Object callbackContext, Throwable e) {
+        public void onUnknownMessageAcknowledged(Message message, Object callbackContext, Throwable e) {
             String messageId = message.getCorrelationId();
 
             if (message != null)
@@ -346,13 +346,10 @@ public class DeviceTwinSample
                 }
             };
 
-            ReportedPropertiesParameters params = new ReportedPropertiesParameters();
+            ReportedPropertiesParameters params = new ReportedPropertiesParameters(reportProperties);
             ReportedPropertiesContext sharableContext = new ReportedPropertiesContext("Send All Params Reported Properties Context Message");
-            params.reportedProperties = reportProperties;
-            params.correlatingMessageCallback = new myCorrelation("SendAllParams");
-            params.reportedPropertiesCallback = new ReportedPropertiesCallback("SendAllParams");
-            params.correlatingMessageCallbackContext = sharableContext;
-            params.reportedPropertiesCallbackContext = sharableContext;
+            params.setCorrelationCallback(new myCorrelation("SendAllParams"), sharableContext);
+            params.setReportedPropertiesCallback(new ReportedPropertiesCallback("SendAllParams"), sharableContext);
 
             client.sendReportedProperties(params);
 
@@ -362,31 +359,29 @@ public class DeviceTwinSample
                 if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
                 {
                     sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=BURGLAR Reported Properties Context Message (" + i + ")");
-                    params.reportedProperties = new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }};
-                    params.correlatingMessageCallback = new myCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")");
-                    params.reportedPropertiesCallback = new ReportedPropertiesCallback("HomeSecurityCamera=BURGLAR (" + i + ")");
-                    params.correlatingMessageCallbackContext = sharableContext;
-                    params.reportedPropertiesCallbackContext = sharableContext;
+                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
+                    params.setCorrelationCallback(new myCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
+                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
+
                     client.sendReportedProperties(params);
                 }
                 else
                 {
+
                     sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=SAFELY_WORKING Reported Properties Context Message (" + i + ")");
-                    params.reportedProperties = new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }};
-                    params.correlatingMessageCallback = new myCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")");
-                    params.reportedPropertiesCallback = new ReportedPropertiesCallback("HomeSecurityCamera=SAFELY_WORKING (" + i + ")");
-                    params.correlatingMessageCallbackContext = sharableContext;
-                    params.reportedPropertiesCallbackContext = sharableContext;
+                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
+                    params.setCorrelationCallback(new myCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
+                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
+
                     client.sendReportedProperties(params);
                 }
                 if(i == MAX_EVENTS_TO_REPORT-1)
                 {
                     sharableContext = new ReportedPropertiesContext("BedroomRoomLights=null Reported Properties Context Message (" + i + ")");
-                    params.reportedProperties = new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }};
-                    params.correlatingMessageCallback = new myCorrelation("BedroomRoomLights=null (" + i + ")");
-                    params.reportedPropertiesCallback = new ReportedPropertiesCallback("BedroomRoomLights=null (" + i + ")");
-                    params.correlatingMessageCallbackContext = sharableContext;
-                    params.reportedPropertiesCallbackContext = sharableContext;
+                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
+                    params.setCorrelationCallback(new myCorrelation("BedroomRoomLights=null (" + i + ")"), sharableContext);
+                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("BedroomRoomLights=null (" + i + ")"), sharableContext);
+
                     client.sendReportedProperties(params);
                 }
                 System.out.println("Updating reported properties..");

@@ -15,28 +15,28 @@ public interface CorrelatingMessageCallback
     /**
      * Called when the message is queued to the transport.
      *
-     * @param message The message queued to the trasnport.
+     * @param message The message queued to the transport.
      * @param packet The resulting transport packet which give access to the event callback.
      * @param callbackContext The context sent with the message.
      */
-    void onQueueRequest(Message message, IotHubTransportPacket packet, Object callbackContext);
+    void onRequestQueued(Message message, IotHubTransportPacket packet, Object callbackContext);
 
     /**
      * Called when the message request is queued by the transport.
      *
-     * @param message The message queued to the trasnport.
+     * @param message The message queued to the transport.
      * @param packet The resulting transport packet which give access to the event callback.
      * @param callbackContext The context sent with the message.
      */
-    void onSendRequest(Message message, IotHubTransportPacket packet, Object callbackContext);
+    void onRequestSent(Message message, IotHubTransportPacket packet, Object callbackContext);
 
     /**
      * Called when the message request has been sent and IoT hub has acknowledged the send.
      *
-     * @param packet The message queued to the trasnport.
+     * @param packet The message queued to the transport.
      * @param callbackContext The context sent with the message.
      */
-    void onAcknowledgeSendRequestPacket(IotHubTransportPacket packet, Object callbackContext, Throwable e);
+    void onRequestAcknowledged(IotHubTransportPacket packet, Object callbackContext, Throwable e);
 
     /**
      * Called when a response to the message has been sent by IoT hub and is being acknowledged by the transport.
@@ -44,21 +44,21 @@ public interface CorrelatingMessageCallback
      * @param message The message queued to the transport.
      * @param callbackContext The context sent with the message.
      */
-    void onAcknowledgeResponse(Message message, Object callbackContext, Throwable e);
+    void onResponseAcknowledged(Message message, Object callbackContext, Throwable e);
 
     /**
      * Called when a response to the message has been sent by IoT hub and is being receieved by the transport.
      *
-     * @param message The message queued to the trasnport.
+     * @param message The message queued to the transport.
      * @param callbackContext The context sent with the message.
      */
-    void onReceiveResponse(Message message, Object callbackContext, Throwable e);
+    void onResponseReceived(Message message, Object callbackContext, Throwable e);
 
     /**
      * Called when the message has been sent and is being acknowledged by the transport; however the message type is unknown to the transport.
      *
-     * @param message The message queued to the trasnport.
+     * @param message The message queued to the transport.
      * @param callbackContext The context sent with the message.
      */
-    void onAcknowledgeUnkownMessage(Message message, Object callbackContext, Throwable e);
+    void onUnknownMessageAcknowledged(Message message, Object callbackContext, Throwable e);
 }
