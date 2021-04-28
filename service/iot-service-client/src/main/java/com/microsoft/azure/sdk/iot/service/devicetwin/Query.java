@@ -165,7 +165,6 @@ public class Query
      * @throws IotHubException If HTTP response other then status ok is received.
      * @deprecated use {@link #sendQueryRequest(IotHubConnectionString, URL, HttpMethod, int, int, Proxy)} instead.
      */
-    @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     public QueryResponse sendQueryRequest(IotHubConnectionString iotHubConnectionString,
                                    URL url,

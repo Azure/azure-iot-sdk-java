@@ -280,6 +280,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             try
             {
                 log.trace("Waiting for reactor to close...");
+                // Result is not used
+                //noinspection ResultOfMethodCallIgnored
                 closeReactorLatch.await(MAX_WAIT_TO_CLOSE_CONNECTION, TimeUnit.MILLISECONDS);
             }
             catch (InterruptedException e)

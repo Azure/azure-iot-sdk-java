@@ -71,6 +71,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job
      * @throws IotHubException if the http request failed
      */
+    @SuppressWarnings("deprecation")
     public synchronized JobResult scheduleUpdateTwin(
             String jobId,
             String queryCondition,
@@ -144,6 +145,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
+    @SuppressWarnings("deprecation")
     public synchronized JobResult scheduleDeviceMethod(
             String jobId,
             String queryCondition,
@@ -211,6 +213,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
+    @SuppressWarnings("deprecation")
     public synchronized JobResult getJob(String jobId)
             throws IllegalArgumentException, IOException, IotHubException
     {
@@ -250,6 +253,7 @@ public class JobClient
      * @throws IOException if the function cannot create a URL for the job, or the IO failed on request
      * @throws IotHubException if the http request failed
      */
+    @SuppressWarnings("deprecation")
     public synchronized JobResult cancelJob(String jobId)
             throws IllegalArgumentException, IOException, IotHubException
     {
@@ -341,6 +345,7 @@ public class JobClient
      * @throws IotHubException When IotHub fails to respond
      * @throws IOException When any of the parameters are incorrect
      */
+    @SuppressWarnings("deprecation")
     public synchronized Query queryDeviceJob(String sqlQuery, Integer pageSize) throws IotHubException, IOException
     {
         if (sqlQuery == null || sqlQuery.length() == 0)
@@ -434,6 +439,7 @@ public class JobClient
      * @throws IOException If any of the input parameters are incorrect
      * @throws IotHubException If IotHub failed to respond
      */
+    @SuppressWarnings("deprecation")
     public synchronized Query queryJobResponse(JobType jobType, JobStatus jobStatus, Integer pageSize) throws IOException, IotHubException
     {
         if (pageSize <= 0)

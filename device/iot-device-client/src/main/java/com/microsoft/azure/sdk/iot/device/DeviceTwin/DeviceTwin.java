@@ -39,6 +39,7 @@ public class DeviceTwin
     /*
         Callbacks to respond to its user on desired property changes
      */
+    @SuppressWarnings("rawtypes")
     private final PropertyCallBack deviceTwinGenericPropertyChangeCallback;
     private final TwinPropertyCallBack deviceTwinGenericTwinPropertyChangeCallback;
     private Object deviceTwinGenericPropertyChangeCallbackContext;

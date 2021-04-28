@@ -60,6 +60,7 @@ import java.util.*;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-dps/">Azure IoT Hub Device Provisioning Service</a>
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-query-language">Query Language</a>
  */
+@SuppressWarnings("deprecation")
 public class Query implements Iterator<QueryResult>
 {
     private static final String CONTINUATION_TOKEN_KEY = "x-ms-continuation";
@@ -101,6 +102,7 @@ public class Query implements Iterator<QueryResult>
      * @param pageSize the {@code int} with the maximum number of items per iteration. It cannot be negative.
      * @throws IllegalArgumentException if one of the parameters is invalid.
      */
+    @SuppressWarnings("deprecation")
     protected Query(ContractApiHttp contractApiHttp, String targetPath, QuerySpecification querySpecification, int pageSize)
     {
         /* SRS_QUERY_21_001: [The constructor shall throw IllegalArgumentException if the provided contractApiHttp is null.] */
