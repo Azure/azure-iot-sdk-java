@@ -279,8 +279,8 @@ public class IotHubTransport implements IotHubListener
             // throwable, this function shall log that exception.]
             log.error("Exception encountered while receiving messages from service", e);
         }
-
         this.addToReceivedMessagesQueue(message);
+
         try {
             String messageId = message.getCorrelationId();
 
@@ -292,7 +292,6 @@ public class IotHubTransport implements IotHubListener
         } catch (Exception ex) {
             log.warn("Exception thrown while calling the onReceiveResponse callback in onMessageReceived", ex);
         }
-
     }
 
     @Override
@@ -1714,6 +1713,7 @@ public class IotHubTransport implements IotHubListener
         synchronized (this.sendThreadLock)
         {
             this.waitingPacketsQueue.add(packet);
+
             // Wake up IotHubSendTask so it can send this message
             this.sendThreadLock.notifyAll();
         }

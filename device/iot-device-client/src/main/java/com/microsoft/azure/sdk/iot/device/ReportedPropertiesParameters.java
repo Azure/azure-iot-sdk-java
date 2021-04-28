@@ -1,6 +1,8 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
@@ -102,8 +104,6 @@ public class ReportedPropertiesParameters {
     Object getReportedPropertiesCallbackContext() {
         return _reportedPropertiesCallbackContext;
     }
-
-
 
     /**
      * The reported properties to send
