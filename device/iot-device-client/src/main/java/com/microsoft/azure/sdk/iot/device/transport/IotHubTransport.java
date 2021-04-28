@@ -102,8 +102,8 @@ public class IotHubTransport implements IotHubListener
     private SSLContext sslContext;
 
     // Used to store the CorrelationCallbackMessage for a correlationId
-    private final static Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
-    private final static Map<String, Object> correlationContext = new ConcurrentHashMap<>();
+    private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
+    private final Map<String, Object> correlationCallbackContexts = new ConcurrentHashMap<>();
 
     /**
      * Constructor for an IotHubTransport object with default values
@@ -235,11 +235,7 @@ public class IotHubTransport implements IotHubListener
                 String messageId = message.getCorrelationId();
                 if (messageId != null && correlationCallbacks.containsKey(messageId))
                 {
-                    Object context = null;
-                    if (correlationContext.containsKey(messageId))
-                    {
-                        context = correlationContext.get(messageId);
-                    }
+                    Object context = correlationCallbackContexts.get(messageId);
                     correlationCallbacks.get(messageId).onRequestAcknowledged(packet, context, e);
                 }
             } catch (Exception ex) {
@@ -252,12 +248,8 @@ public class IotHubTransport implements IotHubListener
                 String messageId = message.getCorrelationId();
                 if (messageId != null && correlationCallbacks.containsKey(messageId))
                 {
-                    Object context = null;
-                    if (correlationContext.containsKey(messageId))
-                    {
-                        context = correlationContext.get(messageId);
-                    }
-                        correlationCallbacks.get(messageId).onUnknownMessageAcknowledged(message, context, e);
+                    Object context = correlationCallbackContexts.get(messageId);
+                    correlationCallbacks.get(messageId).onUnknownMessageAcknowledged(message, context, e);
                 }
             } catch (Exception ex) {
                 log.warn("Exception thrown while calling the onAcknowledgeSendRequestPacket callback in onMessageSent", ex);
@@ -294,10 +286,7 @@ public class IotHubTransport implements IotHubListener
 
             if (messageId != null && correlationCallbacks.containsKey(messageId))
             {
-                Object context = null;
-                if (correlationContext.containsKey(messageId)) {
-                    context = correlationContext.get(messageId);
-                }
+                Object context = correlationCallbackContexts.get(messageId);
                 correlationCallbacks.get(messageId).onResponseReceived(message, context, e);
             }
         } catch (Exception ex) {
@@ -581,10 +570,7 @@ public class IotHubTransport implements IotHubListener
 
                         if (messageId != null && correlationCallbacks.containsKey(messageId))
                         {
-                            Object context = null;
-                            if (correlationContext.containsKey(messageId)) {
-                                context = correlationContext.get(messageId);
-                            }
+                            Object context = correlationCallbackContexts.get(messageId);
                             correlationCallbacks.get(messageId).onRequestSent(message, packet, context);
                         }
                     } catch (Exception e) {
@@ -942,11 +928,7 @@ public class IotHubTransport implements IotHubListener
 
                     if (messageId != null && correlationCallbacks.containsKey(messageId))
                     {
-                        Object context = null;
-                        if (correlationContext.containsKey(messageId))
-                        {
-                            context = correlationContext.remove(messageId);
-                        }
+                        Object context = correlationCallbackContexts.get(messageId);
                         correlationCallbacks.remove(messageId).onResponseAcknowledged(receivedMessage, context, null);
                     }
                 } catch (Exception ex) {
@@ -965,11 +947,7 @@ public class IotHubTransport implements IotHubListener
 
                     if (messageId != null && correlationCallbacks.containsKey(messageId))
                     {
-                        Object context = null;
-                        if (correlationContext.containsKey(messageId))
-                        {
-                            context = correlationContext.remove(messageId);
-                        }
+                        Object context = correlationCallbackContexts.get(messageId);
                         correlationCallbacks.remove(messageId).onResponseAcknowledged(receivedMessage, context, e);
                     }
                 } catch (Exception ex) {
@@ -1000,10 +978,7 @@ public class IotHubTransport implements IotHubListener
 
                 if (messageId != null && correlationCallbacks.containsKey(messageId))
                 {
-                    Object context = null;
-                    if (correlationContext.containsKey(messageId)) {
-                        context = correlationContext.get(messageId);
-                    }
+                    Object context = correlationCallbackContexts.get(messageId);
                     correlationCallbacks.get(messageId).onResponseReceived(transportMessage, context, null);
                 }
             } catch (Exception e) {
@@ -1728,8 +1703,8 @@ public class IotHubTransport implements IotHubListener
                 if (!correlationCallbacks.containsKey(messageId))
                 {
                     correlationCallbacks.put(messageId, message.getCorrelatingMessageCallback());
-                    correlationContext.put(messageId, message.getCorrelatingMessageCallbackContext());
-                    correlationCallbacks.get(messageId).onRequestQueued(message, packet, correlationContext.get(messageId));
+                    correlationCallbackContexts.put(messageId, message.getCorrelatingMessageCallbackContext());
+                    correlationCallbacks.get(messageId).onRequestQueued(message, packet, correlationCallbackContexts.get(messageId));
                 }
             }
         } catch (Exception ex) {
