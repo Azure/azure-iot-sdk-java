@@ -243,7 +243,7 @@ public class IotHubTransport implements IotHubListener
                     correlationCallbacks.get(messageId).onAcknowledgeSendRequestPacket(packet, context, e);
                 }
             } catch (Exception ex) {
-                log.warn("Exception thrown while calling the onAcknowledge callback in onMessageSent", ex);
+                log.warn("Exception thrown while calling the onAcknowledgeSendRequestPacket callback in onMessageSent", ex);
             }
         }
         else
@@ -260,7 +260,7 @@ public class IotHubTransport implements IotHubListener
                         correlationCallbacks.get(messageId).onAcknowledgeUnkownMessage(message, context, e);
                 }
             } catch (Exception ex) {
-                log.warn("Exception thrown while calling the onAcknowledge callback in onMessageSent", ex);
+                log.warn("Exception thrown while calling the onAcknowledgeSendRequestPacket callback in onMessageSent", ex);
             }
             log.warn("A message was acknowledged by IoT Hub, but this client has no record of sending it ({})", message);
         }
@@ -301,7 +301,7 @@ public class IotHubTransport implements IotHubListener
                 correlationCallbacks.get(messageId).onReceiveResponse(message, context, e);
             }
         } catch (Exception ex) {
-            log.warn("Exception thrown while calling the onSend callback", ex);
+            log.warn("Exception thrown while calling the onReceiveResponse callback in onMessageReceived", ex);
         }
 
     }
@@ -588,7 +588,7 @@ public class IotHubTransport implements IotHubListener
                             correlationCallbacks.get(messageId).onSendRequest(message, packet, context);
                         }
                     } catch (Exception e) {
-                        log.warn("Exception thrown while calling the onSend callback", e);
+                        log.warn("Exception thrown while calling the onSendRequest callback in sendMessages", e);
                     }
                 }
             }
@@ -950,7 +950,7 @@ public class IotHubTransport implements IotHubListener
                         correlationCallbacks.remove(messageId).onAcknowledgeResponse(receivedMessage, context, null);
                     }
                 } catch (Exception ex) {
-                    log.warn("Exception thrown while calling the onAcknowledge callback in acknowledgeReceivedMessage", ex);
+                    log.warn("Exception thrown while calling the onAcknowledgeResponse callback in acknowledgeReceivedMessage", ex);
                 }
             }
             catch (TransportException e)
@@ -973,7 +973,7 @@ public class IotHubTransport implements IotHubListener
                         correlationCallbacks.remove(messageId).onAcknowledgeResponse(receivedMessage, context, e);
                     }
                 } catch (Exception ex) {
-                    log.warn("Exception thrown while calling the onAcknowledge callback in acknowledgeReceivedMessage", ex);
+                    log.warn("Exception thrown while calling the onAcknowledgeResponse callback in acknowledgeReceivedMessage", ex);
                 }
                 throw e;
             }
@@ -1007,7 +1007,7 @@ public class IotHubTransport implements IotHubListener
                     correlationCallbacks.get(messageId).onReceiveResponse(transportMessage, context, null);
                 }
             } catch (Exception e) {
-                log.warn("Exception thrown while calling the onSend callback", e);
+                log.warn("Exception thrown while calling the onReceiveResponse callback in addReceivedMessagesOverHttpToReceivedQueue", e);
             }
         }
     }
@@ -1733,7 +1733,7 @@ public class IotHubTransport implements IotHubListener
                 }
             }
         } catch (Exception ex) {
-            log.warn("Exception thrown while calling the onQueue callback", ex);
+            log.warn("Exception thrown while calling the onQueueRequest callback in addToWaitingQueue", ex);
         }
 
         synchronized (this.sendThreadLock)
