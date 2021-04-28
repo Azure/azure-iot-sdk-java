@@ -10,10 +10,6 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
  */
 public interface CorrelatingMessageCallback
 {
-
-
-    IotHubClientProtocol protocol = null;
-
     /**
      * Executed when the message is queued to the transport.
      * @param message The message queued to the trasnport.
