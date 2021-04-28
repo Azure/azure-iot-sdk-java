@@ -5,6 +5,8 @@
 
 package com.microsoft.azure.sdk.iot.service.transport.amqps;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
@@ -23,8 +25,10 @@ import java.io.IOException;
 public class AmqpReceive implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;
-    private final String userName;
-    private final String sasToken;
+    private String userName;
+    private String sasToken;
+    private TokenCredential credential;
+    private AzureSasCredential sasTokenProvider;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private FeedbackBatch feedbackBatch;
@@ -38,7 +42,11 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      */
-    public AmqpReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)
+    public AmqpReceive(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
     }
@@ -51,7 +59,12 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
      */
-    public AmqpReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions)
+    public AmqpReceive(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions)
     {
         this(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, null);
     }
@@ -66,7 +79,13 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public AmqpReceive(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public AmqpReceive(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         this.hostName = hostName;
         this.userName = userName;
@@ -76,19 +95,70 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         this.sslContext = sslContext;
     }
 
+    public AmqpReceive(
+            String hostName,
+            TokenCredential credential,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        this.hostName = hostName;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
+        this.credential = credential;
+    }
+
+    public AmqpReceive(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        this.hostName = hostName;
+        this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
+        this.proxyOptions = proxyOptions;
+        this.sslContext = sslContext;
+        this.sasTokenProvider = sasTokenProvider;
+    }
+
     /**
      * Create AmqpsReceiveHandler and store it in a member variable
      */
     public void open()
     {
-        amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
-                this.hostName,
-                this.userName,
-                this.sasToken,
-                this.iotHubServiceClientProtocol,
-                this,
-                this.proxyOptions,
-                this.sslContext);
+        if (credential != null)
+        {
+            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+                    this.hostName,
+                    this.credential,
+                    this.iotHubServiceClientProtocol,
+                    this,
+                    this.proxyOptions,
+                    this.sslContext);
+        }
+        else if (sasTokenProvider != null)
+        {
+            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+                    this.hostName,
+                    this.sasTokenProvider,
+                    this.iotHubServiceClientProtocol,
+                    this,
+                    this.proxyOptions,
+                    this.sslContext);
+        }
+        else
+        {
+            amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
+                    this.hostName,
+                    this.userName,
+                    this.sasToken,
+                    this.iotHubServiceClientProtocol,
+                    this,
+                    this.proxyOptions,
+                    this.sslContext);
+        }
     }
 
     /**

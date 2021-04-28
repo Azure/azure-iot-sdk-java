@@ -130,4 +130,64 @@ public class IotHubExceptionManager
         }
         // Codes_SRS_SERVICE_SDK_JAVA_IOTHUBEXCEPTIONMANAGER_12_012: [The function shall return without exception if the response status equal or less than 300]
     }
+
+    /**
+     * Return a new exception instance that best matches the given HTTP status code and description
+     * @param responseStatus The HTTP status code (404, 500, etc.)
+     * @param description The HTTP response body
+     * @return a new exception instance that best matches the given HTTP status code
+     */
+    public static IotHubException mapException(int responseStatus, String description)
+    {
+        ErrorCodeDescription errorCodeDescription = ErrorCodeDescription.Parse(responseStatus);
+
+        if (400 == responseStatus)
+        {
+            return new IotHubBadFormatException(description, responseStatus, errorCodeDescription);
+        }
+        else if (401 == responseStatus)
+        {
+            return new IotHubUnathorizedException(description, responseStatus, errorCodeDescription);
+        }
+        else if (403 == responseStatus)
+        {
+            return new IotHubTooManyDevicesException(description, responseStatus, errorCodeDescription);
+        }
+        else if (404 == responseStatus)
+        {
+            return new IotHubNotFoundException(description, responseStatus, errorCodeDescription);
+        }
+        else if (409 == responseStatus)
+        {
+            return new IotHubConflictException(description, responseStatus, errorCodeDescription);
+        }
+        else if (412 == responseStatus)
+        {
+            return new IotHubPreconditionFailedException(description, responseStatus, errorCodeDescription);
+        }
+        else if (429 == responseStatus)
+        {
+            return new IotHubTooManyRequestsException(description, responseStatus, errorCodeDescription);
+        }
+        else if (500 == responseStatus)
+        {
+            return new IotHubInternalServerErrorException(description, responseStatus, errorCodeDescription);
+        }
+        else if (502 == responseStatus)
+        {
+            return new IotHubBadGatewayException(description, responseStatus, errorCodeDescription);
+        }
+        else if (503 == responseStatus)
+        {
+            return new IotHubServerBusyException(description, responseStatus, errorCodeDescription);
+        }
+        else if (504 == responseStatus)
+        {
+            return new IotHubGatewayTimeoutException(description, responseStatus, errorCodeDescription);
+        }
+        else
+        {
+            return new IotHubException(description, responseStatus, errorCodeDescription);
+        }
+    }
 }

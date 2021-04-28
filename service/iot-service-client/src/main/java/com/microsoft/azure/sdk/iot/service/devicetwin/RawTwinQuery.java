@@ -5,19 +5,32 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
+import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class RawTwinQuery
 {
-    private IotHubConnectionString iotHubConnectionString = null;
-    private static final long USE_DEFAULT_TIMEOUT = 0;
     private static final int DEFAULT_PAGE_SIZE = 100;
+
+    private static final Integer DEFAULT_HTTP_READ_TIMEOUT_MS = 24000; // 24 seconds
+    private static final Integer DEFAULT_HTTP_CONNECT_TIMEOUT_MS = 24000; // 24 seconds
+
+    private String hostName;
+    private TokenCredentialCache credentialCache;
+    private AzureSasCredential azureSasCredential;
+    private IotHubConnectionString iotHubConnectionString;
 
     private RawTwinQuery()
     {
@@ -29,23 +42,72 @@ public class RawTwinQuery
      *
      * @param connectionString The iot hub connection string
      * @return The instance of RawTwinQuery
-     * @throws IOException This exception is thrown if the object creation failed
+     * @throws IOException This exception is never thrown.
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #RawTwinQuery(String)} instead
+     * since it does not declare this exception even though it constructs the same RawTwinQuery.
      */
+    @Deprecated
     public static RawTwinQuery createFromConnectionString(String connectionString) throws IOException
     {
-        if (connectionString == null || connectionString.length() == 0)
-        {
+        return new RawTwinQuery(connectionString);
+    }
 
-            //Codes_SRS_RAW_QUERY_25_001: [ The constructor shall throw IllegalArgumentException if the input string is null or empty ]
+    /**
+     * Constructor to create instance from connection string
+     *
+     * @param connectionString The iot hub connection string
+     * @return The instance of RawTwinQuery
+     */
+    public RawTwinQuery(String connectionString)
+    {
+        if (Tools.isNullOrEmpty(connectionString))
+        {
             throw new IllegalArgumentException("Connection string cannot be null or empty");
         }
 
-        //Codes_SRS_RAW_QUERY_25_003: [ The constructor shall create a new RawTwinQuery instance and return it ]
-        RawTwinQuery rawTwinQuery = new RawTwinQuery();
+        this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+        this.hostName = this.iotHubConnectionString.getHostName();
+    }
 
-        //Codes_SRS_RAW_QUERY_25_001: [ The constructor shall throw IllegalArgumentException if the input string is null or empty ]
-        rawTwinQuery.iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-        return rawTwinQuery;
+    /**
+     * Constructor to create instance from connection string
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     */
+    public RawTwinQuery(String hostName, TokenCredential credential)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(credential);
+
+        this.hostName = hostName;
+        this.credentialCache = new TokenCredentialCache(credential);
+    }
+
+    /**
+     * Constructor to create instance from connection string
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed.
+     */
+    public RawTwinQuery(String hostName, AzureSasCredential azureSasCredential)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(azureSasCredential);
+
+        this.hostName = hostName;
+        this.azureSasCredential = azureSasCredential;
     }
 
     /**
@@ -61,21 +123,26 @@ public class RawTwinQuery
     {
         if (sqlQuery == null || sqlQuery.length() == 0)
         {
-            //Codes_SRS_RAW_QUERY_25_004: [ The method shall throw IllegalArgumentException if the query is null or empty.]
             throw new IllegalArgumentException("Query cannot be null or empty");
         }
 
         if (pageSize <= 0)
         {
-            //Codes_SRS_RAW_QUERY_25_005: [ The method shall throw IllegalArgumentException if the page size is zero or negative.]
             throw new IllegalArgumentException("pagesize cannot be negative or zero");
         }
 
-        //Codes_SRS_RAW_QUERY_25_007: [ The method shall create a new Query Object of Type Raw. ]
         Query rawQuery = new Query(sqlQuery, pageSize, QueryType.RAW);
-        //Codes_SRS_RAW_QUERY_25_006: [ The method shall build the URL for this operation by calling getUrlTwinQuery ]
-        //Codes_SRS_RAW_QUERY_25_008: [ The method shall send a Query Request to IotHub as HTTP Method Post on the query Object by calling sendQueryRequest.]
-        rawQuery.sendQueryRequest(iotHubConnectionString, iotHubConnectionString.getUrlTwinQuery(), HttpMethod.POST, USE_DEFAULT_TIMEOUT);
+
+        rawQuery.sendQueryRequest(
+                this.credentialCache,
+                this.azureSasCredential,
+                this.iotHubConnectionString,
+                IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                HttpMethod.POST,
+                DEFAULT_HTTP_CONNECT_TIMEOUT_MS,
+                DEFAULT_HTTP_READ_TIMEOUT_MS,
+                null);
+
         return rawQuery;
     }
 
@@ -88,7 +155,6 @@ public class RawTwinQuery
      */
     public synchronized Query query(String sqlQuery) throws IotHubException, IOException
     {
-        //Codes_SRS_RAW_QUERY_25_009: [ If the pageSize if not provided then a default pageSize of 100 is used for the query.]
         return this.query(sqlQuery, DEFAULT_PAGE_SIZE);
     }
 
@@ -104,11 +170,9 @@ public class RawTwinQuery
     {
         if (query == null)
         {
-            //Codes_SRS_RAW_QUERY_25_010: [ The method shall throw IllegalArgumentException if query is null ]
             throw new IllegalArgumentException("Query cannot be null");
         }
 
-        //Codes_SRS_RAW_QUERY_25_011: [ The method shall check if a response to query is avaliable by calling hasNext on the query object.]
         return query.hasNext();
     }
 
@@ -122,9 +186,6 @@ public class RawTwinQuery
      */
     public synchronized String next(Query query) throws IOException, IotHubException, NoSuchElementException
     {
-        //Codes_SRS_RAW_QUERY_25_015: [ The method shall check if hasNext returns true and throw NoSuchElementException otherwise ]
-        //Codes_SRS_RAW_QUERY_25_018: [ If the input query is null, then this method shall throw IllegalArgumentException ]
-
         if (query == null)
         {
             throw new IllegalArgumentException();
@@ -138,9 +199,7 @@ public class RawTwinQuery
         }
         else
         {
-            //Codes_SRS_RAW_QUERY_25_017: [ If the next element from the query response is an object other than String, then this method shall throw IOException ]
             throw new IOException("Received a response that could not be parsed");
         }
-
     }
 }

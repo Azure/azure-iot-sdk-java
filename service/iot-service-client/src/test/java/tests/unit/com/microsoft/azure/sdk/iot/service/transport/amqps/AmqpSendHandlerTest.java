@@ -102,12 +102,10 @@ public class AmqpSendHandlerTest
         // Act
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
         String _hostName = Deencapsulation.getField(amqpSendHandler, "hostName");
-        String _userName = Deencapsulation.getField(amqpSendHandler, "userName");
         String _sasToken = Deencapsulation.getField(amqpSendHandler, "sasToken");
         IotHubServiceClientProtocol _ioIotHubServiceClientProtocol = Deencapsulation.getField(amqpSendHandler, "iotHubServiceClientProtocol");
         // Assert
         assertEquals(hostName, _hostName);
-        assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(iotHubServiceClientProtocol, _ioIotHubServiceClientProtocol);
     }
@@ -143,34 +141,6 @@ public class AmqpSendHandlerTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_userName_null()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = null;
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_userName_empty()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_sasToken_null()
     {
         // Arrange
@@ -196,20 +166,6 @@ public class AmqpSendHandlerTest
         AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
     
-     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_protocol_null()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = null;
-        // Act
-        AmqpSendHandler amqpSend = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_004: [The function shall create a new Message (Proton) object]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_005: [The function shall set the “to” property on the Message object using the created device path]
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_006: [The function shall create a Binary (Proton) object from the content string]
@@ -336,7 +292,6 @@ public class AmqpSendHandlerTest
             {
                 connection = event.getConnection();
                 transport = connection.getTransport();
-                sasl.plain(anyString, anyString);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
                 sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
@@ -357,7 +312,6 @@ public class AmqpSendHandlerTest
         String hostName = "aaa";
         String userName = "bbb";
         String sasToken = "ccc";
-        String hostAddr = hostName + ":443";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS_WS;
         AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Assert
@@ -372,7 +326,6 @@ public class AmqpSendHandlerTest
                 result = webSocket;
                 webSocket.configure(anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
-                sasl.plain(anyString, anyString);
                 Proton.sslDomain();
                 result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
@@ -406,41 +359,11 @@ public class AmqpSendHandlerTest
             {
                 connection = event.getConnection();
                 connection.setHostname(hostName);
-                session = connection.session();
-                sender = session.sender(anyString);
                 connection.open();
-                session.open();
-                sender.open();
-                sender.setProperties((Map<Symbol, Object>) any);
             }
         };
         // Act
         amqpSendHandler.onConnectionInit(event);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_015: [The event handler shall create a new Target (Proton) object using the given endpoint address]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_016: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
-    @Test
-    public void onLinkInit_call_flow_ok()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String endpoint = "/messages/devicebound";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSendHandler amqpSendHandler = new AmqpSendHandler(hostName, userName, sasToken, iotHubServiceClientProtocol);
-        // Assert
-        new Expectations()
-        {
-            {
-                link = event.getLink();
-                target = new Target();
-                target.setAddress(endpoint);
-            }
-        };
-        // Act
-        amqpSendHandler.onLinkInit(event);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSENDHANDLER_12_017: [The event handler shall get the Sender (Proton) object from the link]
@@ -541,8 +464,6 @@ public class AmqpSendHandlerTest
         new Expectations()
         {
             {
-                mockedEvent.getType();
-                result = Event.Type.DELIVERY;
                 mockedEvent.getDelivery();
                 result = mockedDelivery;
                 mockedDelivery.getRemoteState();
