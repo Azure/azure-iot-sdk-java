@@ -5,11 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +35,13 @@ public class FileUploadNotificationReceiver extends Receiver
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    FileUploadNotificationReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    FileUploadNotificationReceiver(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -46,12 +55,60 @@ public class FileUploadNotificationReceiver extends Receiver
         {
             throw new IllegalArgumentException("sasToken cannot be null or empty");
         }
-        if (iotHubServiceClientProtocol  == null)
+        if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
         this.amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+    }
+
+    FileUploadNotificationReceiver(
+            String hostName,
+            TokenCredential credential,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(credential);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+
+        this.amqpFileUploadNotificationReceive =
+                new AmqpFileUploadNotificationReceive(
+                        hostName,
+                        credential,
+                        iotHubServiceClientProtocol,
+                        proxyOptions,
+                        sslContext);
+    }
+
+    FileUploadNotificationReceiver(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(sasTokenProvider);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+
+        this.amqpFileUploadNotificationReceive =
+                new AmqpFileUploadNotificationReceive(
+                        hostName,
+                        sasTokenProvider,
+                        iotHubServiceClientProtocol,
+                        proxyOptions,
+                        sslContext);
     }
 
     /**
@@ -63,7 +120,6 @@ public class FileUploadNotificationReceiver extends Receiver
     {
         log.info("Opening file upload notification receiver");
 
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_004: [** The function shall call open() on the member AmqpFileUploadNotificationReceive object **]**
         this.amqpFileUploadNotificationReceive.open();
 
         log.info("Opened file upload notification receiver");
@@ -78,7 +134,6 @@ public class FileUploadNotificationReceiver extends Receiver
     {
         log.info("Closing file upload notification receiver");
 
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_006: [** The function shall call close() on the member AmqpFileUploadNotificationReceive object **]**
         this.amqpFileUploadNotificationReceive.close();
 
         log.info("Closed file upload notification receiver");
@@ -98,7 +153,6 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     public FileUploadNotification receive() throws IOException, InterruptedException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_007: [** The function shall call receive(long timeoutMs) function with the default timeout **]**
         return receive(DEFAULT_TIMEOUT_MS);
     }
 
@@ -117,12 +171,11 @@ public class FileUploadNotificationReceiver extends Receiver
      */
     public FileUploadNotification receive(long timeoutMs) throws IOException, InterruptedException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_008: [** The function shall throw IOException if the member AmqpFileUploadNotificationReceive object has not been initialized **]**
         if (this.amqpFileUploadNotificationReceive == null)
         {
             throw new IOException("AMQP receiver is not initialized");
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_009: [** The function shall call receive() on the member AmqpFileUploadNotificationReceive object and return with the result **]**
+
         return this.amqpFileUploadNotificationReceive.receive(timeoutMs);
     }
 
@@ -134,7 +187,6 @@ public class FileUploadNotificationReceiver extends Receiver
     @Override
     public CompletableFuture<Void> openAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_010: [** The function shall create an async wrapper around the open() function call **]**
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
             try
@@ -157,7 +209,6 @@ public class FileUploadNotificationReceiver extends Receiver
     @Override
     public CompletableFuture<Void> closeAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_011: [** The function shall create an async wrapper around the close() function call **]**
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
             try
@@ -182,7 +233,6 @@ public class FileUploadNotificationReceiver extends Receiver
     @Override
     public CompletableFuture<FileUploadNotification> receiveAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_012: [** The function shall create an async wrapper around the receive() function call using the default timeout **]**
         return receiveAsync(DEFAULT_TIMEOUT_MS);
     }
 
@@ -196,7 +246,6 @@ public class FileUploadNotificationReceiver extends Receiver
     @Override
     public CompletableFuture<FileUploadNotification> receiveAsync(long timeoutMs)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FILEUPLOADNOTIFICATIONRECEIVER_25_013: [** The function shall create an async wrapper around the receive(long timeoutMs) function call **]**
         final CompletableFuture<FileUploadNotification> future = new CompletableFuture<>();
         executor.submit(() -> {
             try

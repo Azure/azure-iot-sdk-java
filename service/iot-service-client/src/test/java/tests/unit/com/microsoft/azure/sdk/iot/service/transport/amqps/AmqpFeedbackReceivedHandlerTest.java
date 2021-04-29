@@ -90,12 +90,10 @@ public class AmqpFeedbackReceivedHandlerTest
         // Act
         AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, amqpFeedbackReceivedEvent);
         final String _hostName = Deencapsulation.getField(amqpReceiveHandler, "hostName");
-        final String _userName = Deencapsulation.getField(amqpReceiveHandler, "userName");
         final String _sasToken = Deencapsulation.getField(amqpReceiveHandler, "sasToken");
         AmqpFeedbackReceivedEvent _amqpFeedbackReceivedEvent = Deencapsulation.getField(amqpReceiveHandler, "amqpFeedbackReceivedEvent");
         // Assert
         assertEquals(hostName, _hostName);
-        assertEquals(userName, _userName);
         assertEquals(sasToken, _sasToken);
         assertEquals(amqpFeedbackReceivedEvent, _amqpFeedbackReceivedEvent);
     }
@@ -156,7 +154,6 @@ public class AmqpFeedbackReceivedHandlerTest
             {
                 connection = event.getConnection();
                 transport = connection.getTransport();
-                sasl.plain(anyString, anyString);
                 sslDomain = Proton.sslDomain();
                 sslDomain.init(SslDomain.Mode.CLIENT);
                 sslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
@@ -191,7 +188,6 @@ public class AmqpFeedbackReceivedHandlerTest
                 result = webSocket;
                 webSocket.configure(anyString, anyString, 443, anyString, null, null);
                 transportInternal.addTransportLayer(webSocket);
-                sasl.plain(anyString, anyString);
                 Proton.sslDomain();
                 result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
@@ -215,7 +211,6 @@ public class AmqpFeedbackReceivedHandlerTest
         final String hostName = "aaa";
         final String userName = "bbb";
         final String sasToken = "ccc";
-        final String receiver_tag = "receiver";
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
         // Assert
@@ -224,45 +219,11 @@ public class AmqpFeedbackReceivedHandlerTest
             {
                 connection = event.getConnection();
                 connection.setHostname(hostName);
-                session = connection.session();
-                receiver = session.receiver(receiver_tag);
                 connection.open();
-                session.open();
-                receiver.open();
-                receiver.setProperties((Map<Symbol, Object>) any);
             }
         };
         // Act
         amqpReceiveHandler.onConnectionInit(event);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_015: [The event handler shall create a new Target (Proton) object using the given endpoint address]
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_12_016: [The event handler shall get the Link (Proton) object and set its target to the created Target (Proton) object]
-    @Test
-    public void onLinkInit_call_flow_and_init_ok()
-    {
-        // Arrange
-        final String hostName = "aaa";
-        final String userName = "bbb";
-        final String sasToken = "ccc";
-        final String hostAddr = hostName + ":5671";
-        final String endpoint = "/messages/servicebound/feedback";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpFeedbackReceivedHandler amqpReceiveHandler = new AmqpFeedbackReceivedHandler(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-        // Assert
-        new Expectations()
-        {
-            {
-                link = event.getLink();
-                link.getName();
-                result = RECEIVE_TAG;
-                source = new Source();
-                source.setAddress(endpoint);
-                link.setSource(source);
-            }
-        };
-        // Act
-        amqpReceiveHandler.onLinkInit(event);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFEEDBACKRECEIVEDHANDLER_34_018: [This function shall set the variable 'connectionWasOpened' to true]

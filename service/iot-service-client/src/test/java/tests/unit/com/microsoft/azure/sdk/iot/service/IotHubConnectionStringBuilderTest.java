@@ -468,10 +468,10 @@ public class IotHubConnectionStringBuilderTest
         new Expectations()
         {
             {
-                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", anyString, HOST_NAME_PROPERTY_NAME, anyString);
-                Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", anyString, SHARED_ACCESS_KEY_NAME_PROPERTY_NAME, anyString);
-                Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", anyString, SHARED_ACCESS_KEY_PROPERTY_NAME, anyString);
-                Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", anyString, SHARED_ACCESS_SIGNATURE_PROPERTY_NAME, anyString);
+                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", anyString, anyString);
+                Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", anyString, anyString);
+                Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", anyString, anyString);
+                Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", anyString, anyString);
             }
         };
         // Act
@@ -493,7 +493,7 @@ public class IotHubConnectionStringBuilderTest
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
         // Act - Assert
         
-        Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, "hostName", regex);
+        Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, regex);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_019: [The function shall throw IllegalArgumentException if the value did not match with the pattern]
@@ -530,11 +530,11 @@ public class IotHubConnectionStringBuilderTest
         new Expectations()
         {
             {
-            	Deencapsulation.invoke(iotHubConnectionString, "validateFormat", anyString, HOST_NAME_PROPERTY_NAME, anyString);
+            	Deencapsulation.invoke(iotHubConnectionString, "validateFormat", anyString, anyString);
             }
         };
         // Act
-        Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", hostName, "hostName", regex);
+        Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", hostName, regex);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_020: [The function shall validate the property value against the given regex if the value is not null or empty]
@@ -551,7 +551,7 @@ public class IotHubConnectionStringBuilderTest
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
         // Act - Assert
-        Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", "", "hostName", regex);
+        Deencapsulation.invoke(iotHubConnectionString, "validateFormatIfSpecified", "", regex);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_IOTHUBCONNECTIONSTRINGBUILDER_12_021: [The function shall validate the given hostName]
@@ -571,7 +571,7 @@ public class IotHubConnectionStringBuilderTest
         new Expectations()
         {
             {
-                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, HOST_NAME_PROPERTY_NAME, regex);
+                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, regex);
             }
         };
         // Act
@@ -602,7 +602,7 @@ public class IotHubConnectionStringBuilderTest
         new Expectations()
         {
             {
-                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, HOST_NAME_PROPERTY_NAME, regex);                
+                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, regex);
             }
         };
         // Act
@@ -633,7 +633,7 @@ public class IotHubConnectionStringBuilderTest
         new Expectations()
         {
             {
-                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, HOST_NAME_PROPERTY_NAME, regex);
+                Deencapsulation.invoke(iotHubConnectionString, "validateFormat", hostName, regex);
             }
         };
         // Act

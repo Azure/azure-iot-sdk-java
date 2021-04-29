@@ -5,8 +5,10 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryResponse;
 import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
@@ -57,6 +59,12 @@ public class QueryTest
 
     @Mocked
     IotHubServiceSasToken mockedSasToken;
+
+    @Mocked
+    TokenCredentialCache mockTokenCredentialCache;
+
+    @Mocked
+    AzureSasCredential mockAzureSasCredential;
 
     //Tests_SRS_QUERY_25_001: [The constructor shall validate query and save query, pagesize and request type]
     @Test
@@ -264,7 +272,6 @@ public class QueryTest
     {
         //arrange
         final String testToken = UUID.randomUUID().toString();
-        final int testPageSize = 10;
 
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
 
@@ -272,11 +279,10 @@ public class QueryTest
         testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT);
 
         //act
-        Deencapsulation.invoke(testQuery, "continueQuery", testToken, testPageSize);
+        Deencapsulation.invoke(testQuery, "continueQuery", testToken);
 
         //assert
         assertEquals(testToken, Deencapsulation.getField(testQuery, "requestContinuationToken"));
-        assertEquals(testPageSize, (int) Deencapsulation.getField(testQuery, "pageSize"));
     }
 
     //Tests_SRS_QUERY_25_006: [If the pagesize is zero or negative the constructor shall throw an IllegalArgumentException.]
@@ -418,7 +424,7 @@ public class QueryTest
 
         //act
         Deencapsulation.invoke(testQuery, "sendQueryRequest",  mockIotHubConnectionString, mockUrl, mockHttpMethod, (long)0);
-        Deencapsulation.invoke(testQuery, "continueQuery", testToken, newPageSize);
+        Deencapsulation.invoke(testQuery, "continueQuery", testToken);
 
         //assert
         new Verifications()
@@ -426,8 +432,6 @@ public class QueryTest
             {
                 new HttpRequest(mockUrl, mockHttpMethod, (byte[]) any);
                 times = 2;
-                mockHttpRequest.setHeaderField("x-ms-max-item-count", String.valueOf(newPageSize));
-                times = 1;
                 mockHttpRequest.setHeaderField("x-ms-continuation", testToken);
                 times = 1;
                 mockHttpRequest.setHeaderField(anyString, anyString);
@@ -586,71 +590,6 @@ public class QueryTest
         //assert
         assertNull(Deencapsulation.getField(testQuery, "responseContinuationToken"));
         assertEquals(DEFAULT_QUERY_TYPE, Deencapsulation.getField(testQuery, "responseQueryType"));
-    }
-
-    //Tests_SRS_QUERY_25_012: [If the response type is Unknown or not found then this method shall throw IOException.]
-    @Test (expected = IOException.class)
-    public void sendQueryRequestThrowsIfItemNotFound() throws IotHubException, IOException
-    {
-        //arrange
-        final Map<String, String> testHeaderResponseMap = new HashMap<>();
-
-        Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockHttpResponse.getHeaderFields();
-                result = testHeaderResponseMap;
-            }
-        };
-
-        //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
-    }
-
-    //Tests_SRS_QUERY_25_012: [If the response type is Unknown or not found then this method shall throw IOException.]
-    @Test (expected = IOException.class)
-    public void sendQueryRequestThrowsIfTypeUnknown() throws IotHubException, IOException
-    {
-        //arrange
-        final Map<String, String> testHeaderResponseMap = new HashMap<>();
-        testHeaderResponseMap.put("x-ms-item-type", QueryType.UNKNOWN.getValue());
-
-        Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockHttpResponse.getHeaderFields();
-                result = testHeaderResponseMap;
-            }
-        };
-
-        //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
-    }
-
-    //Tests_SRS_QUERY_25_011: [If the request type and response does not match then the method shall throw IOException.]
-    @Test (expected = IOException.class)
-    public void sendQueryRequestThrowsIfRequestAndResponseTypeDoesNotMatch() throws IotHubException, IOException
-    {
-        //arrange
-        final Map<String, String> testHeaderResponseMap = new HashMap<>();
-        testHeaderResponseMap.put("x-ms-item-type", QueryType.JOB_RESPONSE.getValue());
-
-        Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockHttpResponse.getHeaderFields();
-                result = testHeaderResponseMap;
-            }
-        };
-
-        //act
-        Deencapsulation.invoke(testQuery, "sendQueryRequest", mockIotHubConnectionString, mockUrl, mockHttpMethod, (long) 0);
     }
 
     //Tests_SRS_QUERY_25_019: [This method shall throw IllegalArgumentException if any of the parameters are null or empty.]

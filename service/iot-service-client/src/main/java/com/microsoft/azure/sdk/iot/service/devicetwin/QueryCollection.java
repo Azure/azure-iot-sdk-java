@@ -5,11 +5,17 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
+import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
+import com.microsoft.azure.sdk.iot.service.transport.http.HttpRequest;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
 
 import java.io.IOException;
@@ -34,12 +40,15 @@ public class QueryCollection
 
     private String responseContinuationToken;
 
-    private final IotHubConnectionString iotHubConnectionString;
     private final URL url;
     private final HttpMethod httpMethod;
 
     private final int httpConnectTimeout;
     private final int httpReadTimeout;
+
+    private IotHubConnectionString iotHubConnectionString;
+    private AzureSasCredential azureSasCredential;
+    private TokenCredentialCache credentialCache;
 
     private Proxy proxy;
 
@@ -60,32 +69,31 @@ public class QueryCollection
      * @deprecated use {@link #QueryCollection(String, int, QueryType, IotHubConnectionString, URL, HttpMethod, int, int, Proxy)} instead.
      */
     @Deprecated
-    protected QueryCollection(String query, int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long timeout)
+    protected QueryCollection(
+            String query,
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            long timeout)
     {
-        //Codes_SRS_QUERYCOLLECTION_34_037: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
-        //Codes_SRS_QUERYCOLLECTION_34_004: [If the provided QueryType is null or UNKNOWN, an IllegalArgumentException shall be thrown.]
-        //Codes_SRS_QUERYCOLLECTION_34_002: [If the provided page size is not a positive integer, an IllegalArgumentException shall be thrown.]
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
-        //Codes_SRS_QUERYCOLLECTION_34_001: [If the provided query string is invalid or does not contain both SELECT and FROM, an IllegalArgumentException shall be thrown.]
         ParserUtility.validateQuery(query);
 
-        //Codes_SRS_QUERYCOLLECTION_34_006: [This function shall save the provided query, pageSize, requestQueryType, iotHubConnectionString, url, httpMethod and timeout.]
         this.pageSize = pageSize;
         this.query = query;
         this.requestQueryType = requestQueryType;
-        this.iotHubConnectionString = iotHubConnectionString;
         this.responseContinuationToken = null;
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
         this.httpReadTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS;
         this.url = url;
         this.responseQueryType = QueryType.UNKNOWN;
-
-        //Codes_SRS_QUERYCOLLECTION_34_008: [The constructed QueryCollection shall be a sql query type.]
         this.isSqlQuery = true;
-
         this.isInitialQuery = true;
+        this.iotHubConnectionString = iotHubConnectionString;
     }
 
     /**
@@ -102,30 +110,28 @@ public class QueryCollection
      * @deprecated use {@link #QueryCollection(int, QueryType, IotHubConnectionString, URL, HttpMethod, int, int, Proxy)} instead.
      */
     @Deprecated
-    protected QueryCollection(int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, long timeout)
+    protected QueryCollection(
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            long timeout)
     {
-        //Codes_SRS_QUERYCOLLECTION_34_038: [If the provided connection string, url, or http method is null, this function shall throw an IllegalArgumentException.]
-        //Codes_SRS_QUERYCOLLECTION_34_003: [If the provided page size is not a positive integer, an IllegalArgumentException shall be thrown.]
-        //Codes_SRS_QUERYCOLLECTION_34_005: [If the provided QueryType is null or UNKNOWN, an IllegalArgumentException shall be thrown.]
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
-        //Codes_SRS_QUERYCOLLECTION_34_007: [This function shall save the provided pageSize, requestQueryType, iotHubConnectionString, url, httpMethod and timeout.]
         this.pageSize = pageSize;
         this.requestQueryType = requestQueryType;
-
         this.query = null;
         this.responseQueryType = QueryType.UNKNOWN;
         this.responseContinuationToken = null;
-        this.iotHubConnectionString = iotHubConnectionString;
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
         this.httpReadTimeout = DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS;
         this.url = url;
-
-        //Codes_SRS_QUERYCOLLECTION_34_009: [The constructed QueryCollection shall not be a sql query type.]
         this.isSqlQuery = false;
-
         this.isInitialQuery = true;
+        this.iotHubConnectionString = iotHubConnectionString;
     }
 
     /**
@@ -144,7 +150,16 @@ public class QueryCollection
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
     @SuppressWarnings("SameParameterValue") // Generic method for executing queries, "requestQueryType" and "httpMethod" can have any service-allowed value.
-    protected QueryCollection(String query, int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
+    protected QueryCollection(
+            String query,
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
@@ -153,7 +168,6 @@ public class QueryCollection
         this.pageSize = pageSize;
         this.query = query;
         this.requestQueryType = requestQueryType;
-        this.iotHubConnectionString = iotHubConnectionString;
         this.responseContinuationToken = null;
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
@@ -161,10 +175,9 @@ public class QueryCollection
         this.proxy = proxy;
         this.url = url;
         this.responseQueryType = QueryType.UNKNOWN;
-
         this.isSqlQuery = true;
-
         this.isInitialQuery = true;
+        this.iotHubConnectionString = iotHubConnectionString;
     }
 
     /**
@@ -181,26 +194,83 @@ public class QueryCollection
      * @throws IllegalArgumentException if page size is 0 or negative, or if the query type is null or unknown,
      *  or if the provided connection string is null, or if the provided url is null, or if the provided http method is null.
      */
-    protected QueryCollection(int pageSize, QueryType requestQueryType, IotHubConnectionString iotHubConnectionString, URL url, HttpMethod httpMethod, int httpConnectTimeout, int httpReadTimeout, Proxy proxy)
+    protected QueryCollection(
+            int pageSize,
+            QueryType requestQueryType,
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod httpMethod,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
     {
         this.validateQueryRequestArguments(iotHubConnectionString, url, httpMethod, pageSize, requestQueryType);
 
         this.pageSize = pageSize;
         this.requestQueryType = requestQueryType;
-
         this.query = null;
         this.responseQueryType = QueryType.UNKNOWN;
         this.responseContinuationToken = null;
-        this.iotHubConnectionString = iotHubConnectionString;
         this.httpMethod = httpMethod;
         this.httpConnectTimeout = httpConnectTimeout;
         this.httpReadTimeout = httpReadTimeout;
         this.proxy = proxy;
         this.url = url;
-
         this.isSqlQuery = false;
-
         this.isInitialQuery = true;
+        this.iotHubConnectionString = iotHubConnectionString;
+    }
+
+    QueryCollection(
+            String query,
+            int pageSize,
+            QueryType requestQueryType,
+            TokenCredentialCache credentialCache,
+            URL url,
+            HttpMethod httpMethod,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
+    {
+        this.pageSize = pageSize;
+        this.requestQueryType = requestQueryType;
+        this.query = query;
+        this.responseQueryType = QueryType.UNKNOWN;
+        this.responseContinuationToken = null;
+        this.httpMethod = httpMethod;
+        this.httpConnectTimeout = httpConnectTimeout;
+        this.httpReadTimeout = httpReadTimeout;
+        this.proxy = proxy;
+        this.url = url;
+        this.isSqlQuery = false;
+        this.isInitialQuery = true;
+        this.credentialCache = credentialCache;
+    }
+
+    QueryCollection(
+            String query,
+            int pageSize,
+            QueryType requestQueryType,
+            AzureSasCredential azureSasCredential,
+            URL url,
+            HttpMethod httpMethod,
+            int httpConnectTimeout,
+            int httpReadTimeout,
+            Proxy proxy)
+    {
+        this.pageSize = pageSize;
+        this.requestQueryType = requestQueryType;
+        this.query = query;
+        this.responseQueryType = QueryType.UNKNOWN;
+        this.responseContinuationToken = null;
+        this.httpMethod = httpMethod;
+        this.httpConnectTimeout = httpConnectTimeout;
+        this.httpReadTimeout = httpReadTimeout;
+        this.proxy = proxy;
+        this.url = url;
+        this.isSqlQuery = false;
+        this.isInitialQuery = true;
+        this.azureSasCredential = azureSasCredential;
     }
 
     /**
@@ -214,14 +284,8 @@ public class QueryCollection
      */
     private QueryCollectionResponse<String> sendQueryRequest(QueryOptions options) throws IOException, IotHubException
     {
-        //Codes_SRS_QUERYCOLLECTION_34_011: [If the provided query options is not null and contains a continuation token, it shall be put in the query headers to continue the query.]
-        //Codes_SRS_QUERYCOLLECTION_34_012: [If a continuation token is not provided from the passed in query options, but there is a continuation token saved in the latest queryCollectionResponse, that token shall be put in the query headers to continue the query.]
-        //Codes_SRS_QUERYCOLLECTION_34_013: [If the provided query options is not null, the query option's page size shall be included in the query headers.]
-        //Codes_SRS_QUERYCOLLECTION_34_014: [If the provided query options is null, this object's page size shall be included in the query headers.]
         DeviceOperations.setHeaders(buildQueryHeaders(options));
 
-        //Codes_SRS_QUERYCOLLECTION_34_015: [If this is a sql query, the payload of the query message shall be set to the json bytes representation of this object's query string.]
-        //Codes_SRS_QUERYCOLLECTION_34_016: [If this is not a sql query, the payload of the query message shall be set to empty bytes.]
         byte[] payload;
         if (isSqlQuery)
         {
@@ -233,13 +297,32 @@ public class QueryCollection
             payload = new byte[0];
         }
 
-        //Codes_SRS_QUERYCOLLECTION_34_017: [This function shall send an HTTPS request using DeviceOperations.]
-        HttpResponse httpResponse = DeviceOperations.request(this.iotHubConnectionString, this.url, this.httpMethod, payload, null, this.httpConnectTimeout, this.httpReadTimeout, this.proxy);
+        String authorizationToken;
+        if (this.credentialCache != null)
+        {
+            authorizationToken = this.credentialCache.getTokenString();
+        }
+        else if (this.azureSasCredential != null)
+        {
+            authorizationToken = this.azureSasCredential.getSignature();
+        }
+        else
+        {
+            authorizationToken = new IotHubServiceSasToken(iotHubConnectionString).toString();
+        }
 
-        //Codes_SRS_QUERYCOLLECTION_34_018: [The method shall read the continuation token (x-ms-continuation) and response type (x-ms-item-type) from the HTTP Headers and save it.]
+        HttpResponse httpResponse = DeviceOperations.request(
+                authorizationToken,
+                this.url,
+                this.httpMethod,
+                payload,
+                null,
+                this.httpConnectTimeout,
+                this.httpReadTimeout,
+                this.proxy);
+
         handleQueryResponse(httpResponse);
 
-        //Codes_SRS_QUERYCOLLECTION_34_021: [The method shall create a QueryResponse object with the contents from the response body and its continuation token and return it.]
         this.isInitialQuery = false;
         return new QueryCollectionResponse<>(
                 new String(httpResponse.getBody(), StandardCharsets.UTF_8), this.responseContinuationToken);
@@ -254,12 +337,10 @@ public class QueryCollection
     {
         if (this.isInitialQuery)
         {
-            //Codes_SRS_QUERYCOLLECTION_34_025: [If this query is the initial query, this function shall return true.]
             return true;
         }
         else
         {
-            //Codes_SRS_QUERYCOLLECTION_34_026: [If this query is not the initial query, this function shall return true if there is a continuation token and false otherwise.]
             return (this.responseContinuationToken != null);
         }
     }
@@ -272,8 +353,6 @@ public class QueryCollection
      */
     protected QueryCollectionResponse<String> next() throws IOException, IotHubException
     {
-        //Codes_SRS_QUERYCOLLECTION_34_032: [If this object has a next set to return, this function shall return it.]
-        //Codes_SRS_QUERYCOLLECTION_34_033: [If this object does not have a next set to return, this function shall return null.]
         QueryOptions options = new QueryOptions();
         options.setPageSize(this.pageSize);
         return this.next(options);
@@ -292,12 +371,10 @@ public class QueryCollection
     {
         if (this.hasNext())
         {
-            //Codes_SRS_QUERYCOLLECTION_34_034: [If this object has a next set to return using the provided query options, this function shall return it.]
             return this.sendQueryRequest(options);
         }
         else
         {
-            //Codes_SRS_QUERYCOLLECTION_34_035: [If this object does not have a next set to return, this function shall return null.]
             return null;
         }
     }
@@ -308,11 +385,15 @@ public class QueryCollection
      */
     protected Integer getPageSize()
     {
-        //Codes_SRS_QUERYCOLLECTION_34_036: [This function shall return the saved page size.]
         return this.pageSize;
     }
 
-    private void validateQueryRequestArguments(IotHubConnectionString iotHubConnectionString, URL url, HttpMethod method, int pageSize, QueryType requestQueryType)
+    private void validateQueryRequestArguments(
+            IotHubConnectionString iotHubConnectionString,
+            URL url,
+            HttpMethod method,
+            int pageSize,
+            QueryType requestQueryType)
     {
         if (iotHubConnectionString == null || url == null || method == null)
         {

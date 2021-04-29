@@ -5,6 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.service;
 
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
@@ -102,12 +103,10 @@ public class ServiceClientTest
         String policyName = "SharedAccessKey";
         String sharedAccessKey = "1234567890abcdefghijklmnopqrstvwxyz=";
         String connectionString = "HostName=" + hostName + "." + iotHubName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
         IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
         new Expectations()
         {
             {
-                iotHubServiceSasToken = new IotHubServiceSasToken(withNotNull());
                 amqpSend = new AmqpSend(anyString, anyString, anyString, iotHubServiceClientProtocol, (ProxyOptions) any, (SSLContext) any);
             }
         };
@@ -115,7 +114,6 @@ public class ServiceClientTest
         ServiceClient serviceClient = ServiceClient.createFromConnectionString(connectionString, iotHubServiceClientProtocol);
         // Assert
         assertNotEquals(hostName, Deencapsulation.getField(serviceClient, "hostName"));
-        assertEquals(iotHubConnectionString.getUserString(), Deencapsulation.getField(serviceClient, "userName"));
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SERVICECLIENT_12_008: [The function shall throw IOException if the member AMQP sender object has not been initialized]

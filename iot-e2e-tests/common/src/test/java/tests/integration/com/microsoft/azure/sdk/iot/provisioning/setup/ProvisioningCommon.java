@@ -140,26 +140,7 @@ public class ProvisioningCommon extends IntegrationTest
         }
         else if (attestationType == AttestationType.TPM)
         {
-            if (!isPullRequest)
-            {
-                //TODO TPM tests are flakey, so only run them for CI and nightly builds
-                return Arrays.asList(
-                        new Object[][]
-                                {
-                                        {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
-                                        {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                        {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType}
-
-                                        //MQTT/MQTT_WS does not support tpm attestation
-                                        //{ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
-                                        //{ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType},
-                                });
-            }
-            else
-            {
-                //no tests to run for pull request builds
-                return Collections.emptyList();
-            }
+            return Collections.emptyList(); // TPM tests are run in the ProvisioningTPMTests file so they can be run in serial
         }
         else
         {

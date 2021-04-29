@@ -5,11 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.service;
 
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,7 +41,6 @@ public class FeedbackReceiver extends Receiver
      */
     public @Deprecated FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_001: [The constructor shall throw IllegalArgumentException if any the input string is null or empty]
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
@@ -56,7 +58,6 @@ public class FeedbackReceiver extends Receiver
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
         
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
     }
 
@@ -102,28 +103,83 @@ public class FeedbackReceiver extends Receiver
      * @param sslContext the SSL context to use during the TLS handshake when opening the connection. If null, a default
      *                   SSL context will be generated. This default SSLContext trusts the IoT Hub public certificates.
      */
-    public FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, ProxyOptions proxyOptions, SSLContext sslContext)
+    public FeedbackReceiver(
+            String hostName,
+            String userName,
+            String sasToken,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
+
         if (Tools.isNullOrEmpty(userName))
         {
             throw new IllegalArgumentException("userName cannot be null or empty");
         }
+
         if (Tools.isNullOrEmpty(sasToken))
         {
             throw new IllegalArgumentException("sasToken cannot be null or empty");
         }
 
-        if (iotHubServiceClientProtocol  == null)
+        if (iotHubServiceClientProtocol == null)
         {
             throw new IllegalArgumentException("iotHubServiceClientProtocol cannot be null");
         }
 
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_003: [The constructor shall create a new instance of AmqpReceive object]
         this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+    }
+
+    FeedbackReceiver(
+            String hostName,
+            TokenCredential credential,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(credential);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+
+        this.amqpReceive =
+                new AmqpReceive(
+                        hostName,
+                        credential,
+                        iotHubServiceClientProtocol,
+                        proxyOptions,
+                        sslContext);
+    }
+
+    FeedbackReceiver(
+            String hostName,
+            AzureSasCredential sasTokenProvider,
+            IotHubServiceClientProtocol iotHubServiceClientProtocol,
+            ProxyOptions proxyOptions,
+            SSLContext sslContext)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(sasTokenProvider);
+        Objects.requireNonNull(iotHubServiceClientProtocol);
+
+        this.amqpReceive =
+                new AmqpReceive(
+                        hostName,
+                        sasTokenProvider,
+                        iotHubServiceClientProtocol,
+                        proxyOptions,
+                        sslContext);
     }
         
     /**
@@ -133,7 +189,6 @@ public class FeedbackReceiver extends Receiver
      */
     public void open() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_004: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
         if (this.amqpReceive == null)
         {
             throw new IOException("AMQP receiver is not initialized");
@@ -141,7 +196,6 @@ public class FeedbackReceiver extends Receiver
 
         log.info("Opening feedback receiver client");
 
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_005: [The function shall call open() on the member AMQPReceive object]
         this.amqpReceive.open();
 
         log.info("Opened feedback receiver client");
@@ -154,7 +208,6 @@ public class FeedbackReceiver extends Receiver
      */
     public void close() throws IOException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_006: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
         if (this.amqpReceive == null)
         {
             throw new IOException("AMQP receiver is not initialized");
@@ -162,7 +215,6 @@ public class FeedbackReceiver extends Receiver
 
         log.info("Closing feedback receiver client");
 
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_007: [The function shall call close() on the member AMQPReceive object]
         this.amqpReceive.close();
 
         log.info("Closed feedback receiver client");
@@ -180,7 +232,6 @@ public class FeedbackReceiver extends Receiver
      */
     public FeedbackBatch receive() throws IOException, InterruptedException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_008: [The function shall call receive(long timeoutMs) function with the default timeout]
         return receive(DEFAULT_TIMEOUT_MS);
     }
 
@@ -197,12 +248,11 @@ public class FeedbackReceiver extends Receiver
      */
     public FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_009: [The function shall throw IOException if the member AMQPReceive object has not been initialized]
         if (this.amqpReceive == null)
         {
             throw new IOException("AMQP receiver is not initialized");
         }
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_010: [The function shall call receive() on the member AMQPReceive object and return with the result]
+
         return this.amqpReceive.receive(timeoutMs);
     }
 
@@ -214,7 +264,6 @@ public class FeedbackReceiver extends Receiver
     @Override
     public CompletableFuture<Void> openAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_011: [The function shall create an async wrapper around the open() function call]
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
             try
@@ -237,7 +286,6 @@ public class FeedbackReceiver extends Receiver
     @Override
     public CompletableFuture<Void> closeAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_012: [The function shall create an async wrapper around the close() function call]
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
             try
@@ -260,7 +308,6 @@ public class FeedbackReceiver extends Receiver
     @Override
     public CompletableFuture<FeedbackBatch> receiveAsync()
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_013: [The function shall create an async wrapper around the receive() function call]
         return receiveAsync(DEFAULT_TIMEOUT_MS);
     }
 
@@ -272,17 +319,16 @@ public class FeedbackReceiver extends Receiver
     @Override
     public CompletableFuture<FeedbackBatch> receiveAsync(long timeoutMs)
     {
-        // Codes_SRS_SERVICE_SDK_JAVA_FEEDBACKRECEIVER_12_014: [The function shall create an async wrapper around the receive(long timeoutMs) function call]
         final CompletableFuture<FeedbackBatch> future = new CompletableFuture<>();
         executor.submit(() -> {
-        try
-        {
-            FeedbackBatch responseFeedbackBatch = receive(timeoutMs);
-            future.complete(responseFeedbackBatch);
-        } catch (IOException | InterruptedException e)
-        {
-            future.completeExceptionally(e);
-        }
+            try
+            {
+                FeedbackBatch responseFeedbackBatch = receive(timeoutMs);
+                future.complete(responseFeedbackBatch);
+            } catch (IOException | InterruptedException e)
+            {
+                future.completeExceptionally(e);
+            }
         });
         return future;
     }
