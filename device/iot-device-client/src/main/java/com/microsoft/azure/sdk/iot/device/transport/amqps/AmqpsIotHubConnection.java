@@ -99,7 +99,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final Set<DeviceClientConfig> multiplexingClientsToRegister;
     private final Set<DeviceClientConfig> multiplexingClientsToUnregister;
 
-    public AmqpsIotHubConnection(DeviceClientConfig config)
+    private final boolean isMultiplexing;
+
+    public AmqpsIotHubConnection(DeviceClientConfig config, boolean isMultiplexing)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.deviceClientConfigs = Collections.newSetFromMap(new ConcurrentHashMap<DeviceClientConfig, Boolean>());
@@ -126,6 +128,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         add(new Handshaker());
 
+        this.isMultiplexing = isMultiplexing;
+
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
     }
@@ -147,6 +151,8 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.sslContext = sslContext;
 
         add(new Handshaker());
+
+        this.isMultiplexing = true; // This constructor is only ever called when multiplexing
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
@@ -688,7 +694,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     @Override
     public void onAuthenticationFailed(String deviceId, TransportException transportException)
     {
-        if (this.deviceClientConfigs.size() > 1)
+        if (this.isMultiplexing)
         {
             if (this.savedException == null)
             {
@@ -722,7 +728,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         TransportException savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
-        if (this.deviceClientConfigs.size() > 1)
+        if (isMultiplexing)
         {
             // When multiplexing, don't kill the connection just because a session dropped.
             log.error("Amqp session closed unexpectedly. notifying the transport layer to start reconnection logic...", this.savedException);
