@@ -66,7 +66,7 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                new IotHubTransport(mockConfig, (IotHubConnectionStatusChangeCallback) any);
+                new IotHubTransport(mockConfig, (IotHubConnectionStatusChangeCallback) any, false);
                 result = mockedTransport;
             }
         };

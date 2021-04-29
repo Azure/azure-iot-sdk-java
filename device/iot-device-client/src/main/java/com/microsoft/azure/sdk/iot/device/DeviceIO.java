@@ -103,6 +103,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds)
     {
+        this(config, sendPeriodInMilliseconds, receivePeriodInMilliseconds, false);
+    }
+
+    DeviceIO(DeviceClientConfig config, long sendPeriodInMilliseconds, long receivePeriodInMilliseconds, boolean isMultiplexing)
+    {
         if (config == null)
         {
             throw new IllegalArgumentException("Config cannot be null.");
@@ -119,7 +124,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
         /* Codes_SRS_DEVICE_IO_21_006: [The constructor shall set the `state` as `DISCONNECTED`.] */
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        this.transport = new IotHubTransport(config, this);
+        this.transport = new IotHubTransport(config, this, isMultiplexing);
 
         /* Codes_SRS_DEVICE_IO_21_037: [The constructor shall initialize the `sendPeriodInMilliseconds` with default value of 10 milliseconds.] */
         this.sendPeriodInMilliseconds = sendPeriodInMilliseconds;

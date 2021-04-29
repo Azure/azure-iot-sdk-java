@@ -101,7 +101,7 @@ public class TransportClient
         if (this.deviceClientList.size() > 0)
         {
             // Codes_SRS_TRANSPORTCLIENT_12_011: [The function shall create a new DeviceIO using the first registered device client's configuration.]
-            this.deviceIO = new DeviceIO(deviceClientList.get(0).getConfig(), SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS);
+            this.deviceIO = new DeviceIO(deviceClientList.get(0).getConfig(), SEND_PERIOD_MILLIS, RECEIVE_PERIOD_MILLIS_AMQPS, true);
             deviceClientList.get(0).setDeviceIO(this.deviceIO);
 
             // Codes_SRS_TRANSPORTCLIENT_12_012: [The function shall set the created DeviceIO to all registered device client.]
