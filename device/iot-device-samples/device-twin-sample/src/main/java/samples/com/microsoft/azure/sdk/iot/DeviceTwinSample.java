@@ -6,7 +6,6 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
 
 import java.io.IOException;
@@ -26,10 +25,10 @@ public class DeviceTwinSample
 
     private static final AtomicBoolean Succeed = new AtomicBoolean(false);
 
-    protected static class myCorrelation implements CorrelatingMessageCallback {
+    protected static class ReportedPropertiesCorrelation implements CorrelatingMessageCallback {
 
         private String _message = "";
-        public myCorrelation (String message) {
+        public ReportedPropertiesCorrelation(String message) {
             _message = message;
         }
         @Override
@@ -348,7 +347,7 @@ public class DeviceTwinSample
 
             ReportedPropertiesParameters params = new ReportedPropertiesParameters(reportProperties);
             ReportedPropertiesContext sharableContext = new ReportedPropertiesContext("Send All Params Reported Properties Context Message");
-            params.setCorrelationCallback(new myCorrelation("SendAllParams"), sharableContext);
+            params.setCorrelationCallback(new ReportedPropertiesCorrelation("SendAllParams"), sharableContext);
             params.setReportedPropertiesCallback(new ReportedPropertiesCallback("SendAllParams"), sharableContext);
 
             client.sendReportedProperties(params);
@@ -360,7 +359,7 @@ public class DeviceTwinSample
                 {
                     sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=BURGLAR Reported Properties Context Message (" + i + ")");
                     params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
-                    params.setCorrelationCallback(new myCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
+                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
                     params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
 
                     client.sendReportedProperties(params);
@@ -370,7 +369,7 @@ public class DeviceTwinSample
 
                     sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=SAFELY_WORKING Reported Properties Context Message (" + i + ")");
                     params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
-                    params.setCorrelationCallback(new myCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
+                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
                     params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
 
                     client.sendReportedProperties(params);
@@ -379,7 +378,7 @@ public class DeviceTwinSample
                 {
                     sharableContext = new ReportedPropertiesContext("BedroomRoomLights=null Reported Properties Context Message (" + i + ")");
                     params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
-                    params.setCorrelationCallback(new myCorrelation("BedroomRoomLights=null (" + i + ")"), sharableContext);
+                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("BedroomRoomLights=null (" + i + ")"), sharableContext);
                     params.setReportedPropertiesCallback(new ReportedPropertiesCallback("BedroomRoomLights=null (" + i + ")"), sharableContext);
 
                     client.sendReportedProperties(params);

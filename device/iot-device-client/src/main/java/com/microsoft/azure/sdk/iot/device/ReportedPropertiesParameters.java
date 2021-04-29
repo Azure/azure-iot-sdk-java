@@ -1,8 +1,6 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Set;
 
@@ -22,7 +20,7 @@ public class ReportedPropertiesParameters {
         if (properties == null) {
             throw new IllegalArgumentException("Properties cannot be null.");
         }
-        _reportedProperties = properties;
+        reportedProperties = properties;
     }
 
     /**
@@ -38,7 +36,7 @@ public class ReportedPropertiesParameters {
         if (version == null) {
             throw new IllegalArgumentException("Version cannot be null. Please use the constructor without the version parameter.");
         }
-        _version = version;
+        this.version = version;
     }
 
     /**
@@ -57,8 +55,8 @@ public class ReportedPropertiesParameters {
      * @param correlatingMessageCallbackContext The context for the callback. Value can be {@code null}.
      */
     public void setCorrelationCallback(CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext) {
-        this._correlatingMessageCallback = correlatingMessageCallback;
-        this._correlatingMessageCallbackContext = correlatingMessageCallbackContext;
+        this.correlatingMessageCallback = correlatingMessageCallback;
+        this.correlatingMessageCallbackContext = correlatingMessageCallbackContext;
     }
 
     /**
@@ -77,56 +75,56 @@ public class ReportedPropertiesParameters {
      * @param reportedPropertiesCallbackContext The context for the callback. Value can be {@code null}.
      */
     public void setReportedPropertiesCallback(IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) {
-        this._reportedPropertiesCallback = reportedPropertiesCallback;
-        this._reportedPropertiesCallbackContext = reportedPropertiesCallbackContext;
+        this.reportedPropertiesCallback = reportedPropertiesCallback;
+        this.reportedPropertiesCallbackContext = reportedPropertiesCallbackContext;
     }
 
     Set<Property> getReportedProperties() {
-        return _reportedProperties;
+        return reportedProperties;
     }
 
     Integer getVersion() {
-        return _version;
+        return version;
     }
 
     CorrelatingMessageCallback getCorrelatingMessageCallback() {
-        return _correlatingMessageCallback;
+        return correlatingMessageCallback;
     }
 
     IotHubEventCallback getReportedPropertiesCallback() {
-        return _reportedPropertiesCallback;
+        return reportedPropertiesCallback;
     }
 
     Object getCorrelatingMessageCallbackContext() {
-        return _correlatingMessageCallbackContext;
+        return correlatingMessageCallbackContext;
     }
 
     Object getReportedPropertiesCallbackContext() {
-        return _reportedPropertiesCallbackContext;
+        return reportedPropertiesCallbackContext;
     }
 
     /**
      * The reported properties to send
      */
-    private Set<Property> _reportedProperties = null;
+    private Set<Property> reportedProperties = null;
     /**
      * The version of the properties
      */
-    private Integer _version = null;
+    private Integer version = null;
     /**
      * A correlation callback to monitor the message lifecycle
      */
-    private CorrelatingMessageCallback _correlatingMessageCallback = null;
+    private CorrelatingMessageCallback correlatingMessageCallback = null;
     /**
      * The correlation callback context
      */
-    private Object _correlatingMessageCallbackContext = null;
+    private Object correlatingMessageCallbackContext = null;
     /**
      * An event callback to get the status of the event
      */
-    private IotHubEventCallback _reportedPropertiesCallback = null;
+    private IotHubEventCallback reportedPropertiesCallback = null;
     /**
      * The event callback context
      */
-    private Object _reportedPropertiesCallbackContext = null;
+    private Object reportedPropertiesCallbackContext = null;
 }
