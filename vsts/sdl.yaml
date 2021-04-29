@@ -20,6 +20,7 @@ phases:
     displayName: CredScan
     inputs:
       debugMode: false
+      suppressionsFile: vsts/CredScanSuppressions.json
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: AutoApplicability

@@ -110,34 +110,6 @@ public class AmqpSendTest
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_userName_null()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = null;
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void constructor_checks_if_userName_empty()
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "";
-        String sasToken = "ccc";
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        // Act
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_001: [The constructor shall throw IllegalArgumentException if any of the input parameter is null or empty]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
     public void constructor_checks_if_sasToken_null()
     {
         // Arrange
@@ -176,63 +148,6 @@ public class AmqpSendTest
         IotHubServiceClientProtocol iotHubServiceClientProtocol = null;
         // Act
         AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_006: [The function shall create a binary message with the given content with deviceId only if moduleId is null]
-    @Test
-    public void send_creates_ProtonMessage(@Mocked AmqpSendHandler mockAmqpSendHandler) throws Exception
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String deviceId = "deviceId";
-        String content = "abcdefghijklmnopqrst";
-        Message message = new Message(content);
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-        amqpSend.open();
-
-        AmqpSendHandler handler = Deencapsulation.getField(amqpSend, "amqpSendHandler");
-        // Assert
-        new Expectations()
-        {
-            {
-                Deencapsulation.invoke(handler, "createProtonMessage"
-                        , deviceId, message);
-            }
-        };
-        // Act
-        amqpSend.send(deviceId, null, message);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_001: [The event handler shall create a Proton message with the given content]
-    @Test
-    public void sendToModule_creates_ProtonMessage(@Mocked AmqpSendHandler mockAmqpSendHandler) throws Exception
-    {
-        // Arrange
-        String hostName = "aaa";
-        String userName = "bbb";
-        String sasToken = "ccc";
-        String deviceId = "deviceId";
-        String moduleId = "moduleId";
-        String content = "abcdefghijklmnopqrst";
-        Message message = new Message(content);
-        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
-        AmqpSend amqpSend = new AmqpSend(hostName, userName, sasToken, iotHubServiceClientProtocol, null);
-        amqpSend.open();
-
-        AmqpSendHandler handler = Deencapsulation.getField(amqpSend, "amqpSendHandler");
-        // Assert
-        new Expectations()
-        {
-            {
-                Deencapsulation.invoke(handler, "createProtonMessage"
-                        , deviceId, moduleId, message);
-            }
-        };
-        // Act
-        amqpSend.send(deviceId, moduleId, message);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPSEND_28_005: [The event handler shall throw IOException if the send handler object is not initialized]

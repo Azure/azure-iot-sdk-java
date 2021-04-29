@@ -23,7 +23,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsCbsSessionHandler;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
-import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsMessage;
+import com.microsoft.azure.sdk.iot.deps.transport.amqp.AmqpsMessage;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsReceiverLinkHandler;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSendResult;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsSessionHandler;

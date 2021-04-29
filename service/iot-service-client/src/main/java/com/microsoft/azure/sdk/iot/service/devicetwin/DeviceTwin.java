@@ -5,9 +5,17 @@
 
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
-import com.microsoft.azure.sdk.iot.deps.twin.*;
+import com.azure.core.credential.AzureSasCredential;
+import com.azure.core.credential.TokenCredential;
+import com.azure.core.credential.TokenRequestContext;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
+import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -17,22 +25,35 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class DeviceTwin
 {
-    private IotHubConnectionString iotHubConnectionString = null;
-    private Integer requestId = 0;
+    private int requestId = 0;
     private final int DEFAULT_PAGE_SIZE = 100;
+
     private DeviceTwinClientOptions options;
+    private String hostName;
+    private TokenCredentialCache credentialCache;
+    private AzureSasCredential azureSasCredential;
+    private IotHubConnectionString iotHubConnectionString;
 
     /**
      * Static constructor to create instance from connection string.
      *
      * @param connectionString The iot hub connection string.
      * @return The instance of DeviceTwin.
-     * @throws IOException This exception is thrown if the object creation failed.
+     * @throws IOException This exception is never thrown.
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #DeviceTwin(String, DeviceTwinClientOptions)} instead
+     * since it does not declare this exception even though it constructs the same DeviceTwin.
      */
+    @Deprecated
     public static DeviceTwin createFromConnectionString(String connectionString) throws IOException
     {
         return createFromConnectionString(
@@ -49,24 +70,121 @@ public class DeviceTwin
      * @param connectionString The IoT hub connection string.
      * @param options The configurable options for each operation on this client. May not be {@code null}.
      * @return The instance of DeviceTwin.
-     * @throws IOException This exception is thrown if the object creation failed.
+     * @throws IOException This exception is never thrown.
+     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
+     * are recommended to use {@link #DeviceTwin(String, DeviceTwinClientOptions)} instead
+     * since it does not declare this exception even though it constructs the same DeviceTwin.
      */
-    public static DeviceTwin createFromConnectionString(String connectionString, DeviceTwinClientOptions options) throws IOException
+    @Deprecated
+    public static DeviceTwin createFromConnectionString(
+            String connectionString,
+            DeviceTwinClientOptions options) throws IOException
     {
-        if (connectionString == null || connectionString.length() == 0)
+        return new DeviceTwin(connectionString, options);
+    }
+
+    /**
+     * Constructor to create instance from connection string.
+     *
+     * @param connectionString The iot hub connection string.
+     * @return The instance of DeviceTwin.
+     */
+    public DeviceTwin(String connectionString)
+    {
+        this(connectionString,
+             DeviceTwinClientOptions.builder()
+                     .httpConnectTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
+                     .httpReadTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
+                     .build());
+    }
+
+    /**
+     * Constructor to create instance from connection string.
+     *
+     * @param connectionString The iot hub connection string.
+     * @param options the configurable options for each operation on this client. May not be null.
+     * @return The instance of DeviceTwin.
+     */
+    public DeviceTwin(String connectionString, DeviceTwinClientOptions options)
+    {
+        if (Tools.isNullOrEmpty(connectionString))
         {
             throw new IllegalArgumentException("connectionString cannot be null or empty.");
         }
 
-        if (options == null)
+        this.options = options;
+        this.iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(connectionString);
+        this.hostName = this.iotHubConnectionString.getHostName();
+    }
+
+    /**
+     * Create a new DeviceTwin instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     * @return the new DeviceTwin instance.
+     */
+    public DeviceTwin(String hostName, TokenCredential credential)
+    {
+        this(hostName, credential, DeviceTwinClientOptions.builder().build());
+    }
+
+    /**
+     * Create a new DeviceTwin instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     * @param options The connection options to use when connecting to the service.
+     * @return the new DeviceTwin instance.
+     */
+    public DeviceTwin(String hostName, TokenCredential credential, DeviceTwinClientOptions options)
+    {
+        Objects.requireNonNull(credential, "TokenCredential cannot be null");
+        Objects.requireNonNull(options, "options cannot be null");
+        if (Tools.isNullOrEmpty(hostName))
         {
-            throw new IllegalArgumentException("options cannot be null.");
+            throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        DeviceTwin deviceTwin = new DeviceTwin();
-        deviceTwin.iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(connectionString);
-        deviceTwin.options = options;
-        return deviceTwin;
+        this.options = options;
+        this.credentialCache = new TokenCredentialCache(credential);
+        this.hostName = hostName;
+    }
+
+    /**
+     * Create a new DeviceTwin instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @return the new DeviceTwin instance.
+     */
+    public DeviceTwin(String hostName, AzureSasCredential azureSasCredential)
+    {
+        this(hostName, azureSasCredential, DeviceTwinClientOptions.builder().build());
+    }
+
+    /**
+     * Create a new DeviceTwin instance.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param azureSasCredential The SAS token provider that will be used for authentication.
+     * @param options The connection options to use when connecting to the service.
+     * @return the new DeviceTwin instance.
+     */
+    public DeviceTwin(String hostName, AzureSasCredential azureSasCredential, DeviceTwinClientOptions options)
+    {
+        Objects.requireNonNull(azureSasCredential, "azureSasCredential cannot be null");
+        Objects.requireNonNull(options, "options cannot be null");
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        this.options = options;
+        this.azureSasCredential = azureSasCredential;
+        this.hostName = hostName;
     }
 
     /**
@@ -86,11 +204,11 @@ public class DeviceTwin
         URL url;
         if ((device.getModuleId() == null) || device.getModuleId().length() ==0)
         {
-            url = this.iotHubConnectionString.getUrlTwin(device.getDeviceId());
+            url = IotHubConnectionString.getUrlTwin(this.hostName, device.getDeviceId());
         }
         else
         {
-            url = this.iotHubConnectionString.getUrlModuleTwin(device.getDeviceId(), device.getModuleId());
+            url = IotHubConnectionString.getUrlModuleTwin(this.hostName, device.getDeviceId(), device.getModuleId());
         }
 
         getTwinOperation(url, device);
@@ -98,8 +216,18 @@ public class DeviceTwin
 
     private void getTwinOperation(URL url, DeviceTwinDevice device) throws IotHubException, IOException
     {
-        Proxy proxy = options.getProxyOptions() != null ? options.getProxyOptions().getProxy() : null;
-        HttpResponse response = DeviceOperations.request(this.iotHubConnectionString, url, HttpMethod.GET, new byte[0], String.valueOf(requestId++), options.getHttpConnectTimeout(), options.getHttpReadTimeout(), proxy);
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
+        HttpResponse response = DeviceOperations.request(
+                this.getAuthenticationToken(),
+                url,
+                HttpMethod.GET,
+                new byte[0],
+                String.valueOf(requestId++),
+                options.getHttpConnectTimeout(),
+                options.getHttpReadTimeout(),
+                proxy);
+
         String twin = new String(response.getBody(), StandardCharsets.UTF_8);
 
         TwinState twinState = TwinState.createFromTwinJson(twin);
@@ -143,21 +271,20 @@ public class DeviceTwin
         URL url;
         if ((device.getModuleId() == null) || device.getModuleId().length() == 0)
         {
-            url = this.iotHubConnectionString.getUrlTwin(device.getDeviceId());
+            url = IotHubConnectionString.getUrlTwin(this.hostName, device.getDeviceId());
         }
         else
         {
-            url = this.iotHubConnectionString.getUrlModuleTwin(device.getDeviceId(), device.getModuleId());
+            url = IotHubConnectionString.getUrlModuleTwin(this.hostName, device.getDeviceId(), device.getModuleId());
         }
 
         TwinState twinState = new TwinState(device.getTagsMap(), device.getDesiredMap(), null);
         String twinJson = twinState.toJsonElement().toString();
 
-        Proxy proxy = options.getProxyOptions() != null
-                ? options.getProxyOptions().getProxy()
-                : null;
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
         DeviceOperations.request(
-                this.iotHubConnectionString,
+                this.getAuthenticationToken(),
                 url,
                 HttpMethod.PATCH,
                 twinJson.getBytes(StandardCharsets.UTF_8),
@@ -184,7 +311,7 @@ public class DeviceTwin
     /**
      * This method replaces desired properties for the specified device. desired properties can be input
      * via device's
-     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice#setDesiredProperties(TwinCollection desiredProperties)}
+     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice#setDesiredProperties(TwinCollection)}
      * method.
      *
      * @param device The device with a valid id for which device twin is to be updated.
@@ -198,7 +325,7 @@ public class DeviceTwin
 
     /**
      * This method replaces tags for the specified device. Tags can be input via device's
-     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice#setTags(TwinCollection tag)} method.
+     * {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice#setTags(TwinCollection)} method.
      *
      * @param device The device with a valid Id for which device twin is to be updated.
      * @throws UnsupportedOperationException This exception is always thrown.
@@ -301,16 +428,19 @@ public class DeviceTwin
 
         Query deviceTwinQuery = new Query(sqlQuery, pageSize, QueryType.TWIN);
 
-        Proxy proxy = options.getProxyOptions() == null
-                ? null
-                : options.getProxyOptions().getProxy();
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
+
         deviceTwinQuery.sendQueryRequest(
-                iotHubConnectionString,
-                iotHubConnectionString.getUrlTwinQuery(),
+                this.credentialCache,
+                this.azureSasCredential,
+                this.iotHubConnectionString,
+                IotHubConnectionString.getUrlTwinQuery(this.hostName),
                 HttpMethod.POST,
                 options.getHttpConnectTimeout(),
                 options.getHttpReadTimeout(),
                 proxy);
+
         return deviceTwinQuery;
     }
 
@@ -351,19 +481,48 @@ public class DeviceTwin
      */
     public synchronized QueryCollection queryTwinCollection(String sqlQuery, Integer pageSize) throws MalformedURLException
     {
-        Proxy proxy = options.getProxyOptions() == null
-                ? null
-                : options.getProxyOptions().getProxy();
-        return new QueryCollection(
-                sqlQuery,
-                pageSize,
-                QueryType.TWIN,
-                this.iotHubConnectionString,
-                this.iotHubConnectionString.getUrlTwinQuery(),
-                HttpMethod.POST,
-                options.getHttpConnectTimeout(),
-                options.getHttpReadTimeout(),
-                proxy);
+        ProxyOptions proxyOptions = options.getProxyOptions();
+        Proxy proxy = proxyOptions != null ? proxyOptions.getProxy() : null;
+
+        if (this.credentialCache != null)
+        {
+            return new QueryCollection(
+                    sqlQuery,
+                    pageSize,
+                    QueryType.TWIN,
+                    this.credentialCache,
+                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                    HttpMethod.POST,
+                    options.getHttpConnectTimeout(),
+                    options.getHttpReadTimeout(),
+                    proxy);
+        }
+        else if (this.azureSasCredential != null)
+        {
+            return new QueryCollection(
+                    sqlQuery,
+                    pageSize,
+                    QueryType.TWIN,
+                    this.azureSasCredential,
+                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                    HttpMethod.POST,
+                    options.getHttpConnectTimeout(),
+                    options.getHttpReadTimeout(),
+                    proxy);
+        }
+        else
+        {
+            return new QueryCollection(
+                    sqlQuery,
+                    pageSize,
+                    QueryType.TWIN,
+                    this.iotHubConnectionString,
+                    IotHubConnectionString.getUrlTwinQuery(this.hostName),
+                    HttpMethod.POST,
+                    options.getHttpConnectTimeout(),
+                    options.getHttpReadTimeout(),
+                    proxy);
+        }
     }
 
     /**
@@ -445,7 +604,8 @@ public class DeviceTwin
      * @throws IOException If an {@link IotHubException} occurs when querying the service or if the results of that
      * query doesn't match expectations.
      */
-    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(
+            QueryCollection deviceTwinQueryCollection) throws IOException, IotHubException
     {
         QueryOptions options = new QueryOptions();
         options.setPageSize(deviceTwinQueryCollection.getPageSize());
@@ -470,7 +630,9 @@ public class DeviceTwin
      * @throws IOException If an {@link IotHubException} occurs when querying the service or if the results of that
      * query doesn't match expectations.
      */
-    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(QueryCollection deviceTwinQueryCollection, QueryOptions options) throws IOException, IotHubException
+    public synchronized QueryCollectionResponse<DeviceTwinDevice> next(
+            QueryCollection deviceTwinQueryCollection,
+            QueryOptions options) throws IOException, IotHubException
     {
         if (deviceTwinQueryCollection == null)
         {
@@ -491,7 +653,6 @@ public class DeviceTwin
             deviceTwinDeviceList.add(jsonToDeviceTwinDevice(jsonCollectionIterator.next()));
         }
 
-        //Codes_SRS_DEVICETWIN_34_079: [The returned QueryCollectionResponse object shall contain the continuation token needed to retrieve the next set with.]
         return new QueryCollectionResponse<>(deviceTwinDeviceList, queryResults.getContinuationToken());
     }
 
@@ -513,29 +674,41 @@ public class DeviceTwin
             Date startTimeUtc,
             long maxExecutionTimeInSeconds) throws IOException, IotHubException
     {
-        if(updateTwin == null)
+        if (updateTwin == null)
         {
             throw new IllegalArgumentException("null updateTwin");
         }
 
-        if(startTimeUtc == null)
+        if (startTimeUtc == null)
         {
             throw new IllegalArgumentException("null startTimeUtc");
         }
 
-        if(maxExecutionTimeInSeconds < 0)
+        if (maxExecutionTimeInSeconds < 0)
         {
             throw new IllegalArgumentException("negative maxExecutionTimeInSeconds");
         }
 
-        Job job = new Job(iotHubConnectionString.toString());
+        Job job;
+        if (this.credentialCache != null)
+        {
+            job = new Job(this.hostName, this.credentialCache.getTokenCredential());
+        }
+        else if (this.azureSasCredential != null)
+        {
+            job = new Job(this.hostName, this.azureSasCredential);
+        }
+        else
+        {
+            job = new Job(this.iotHubConnectionString.toString());
+        }
 
         job.scheduleUpdateTwin(queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
 
         return job;
     }
 
-    private DeviceTwinDevice jsonToDeviceTwinDevice(String json) throws IOException
+    private DeviceTwinDevice jsonToDeviceTwinDevice(String json)
     {
         TwinState twinState = TwinState.createFromTwinJson(json);
 
@@ -558,5 +731,22 @@ public class DeviceTwin
         }
 
         return deviceTwinDevice;
+    }
+
+    private String getAuthenticationToken()
+    {
+        // Three different constructor types for this class, and each type provides either a TokenCredential implementation,
+        // an AzureSasCredential instance, or just the connection string. The sas token can be retrieved from the non-null
+        // one of the three options.
+        if (this.credentialCache != null)
+        {
+            return this.credentialCache.getTokenString();
+        }
+        else if (this.azureSasCredential != null)
+        {
+            return this.azureSasCredential.getSignature();
+        }
+
+        return new IotHubServiceSasToken(iotHubConnectionString).toString();
     }
 }

@@ -8,6 +8,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.devicetwin;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.QueryRequestParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -57,6 +58,9 @@ public class QueryCollectionTest
 
     @Mocked
     DeviceOperations mockDeviceOperations;
+
+    @Mocked
+    IotHubServiceSasToken mockIotHubServiceSasToken;
 
     private static final String expectedRequestContinuationToken = "someContinuationToken";
     private static final String expectedResponseContinuationToken = "someNewContinuationToken";
@@ -204,7 +208,6 @@ public class QueryCollectionTest
         int actualPageSize = Deencapsulation.getField(queryCollection, "pageSize");
         QueryType actualQueryType = Deencapsulation.getField(queryCollection, "requestQueryType");
         boolean actualIsSqlQuery = Deencapsulation.getField(queryCollection, "isSqlQuery");
-        IotHubConnectionString actualConnectionString = Deencapsulation.getField(queryCollection, "iotHubConnectionString");
         HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
         URL actualUrl = Deencapsulation.getField(queryCollection, "url");
 
@@ -212,7 +215,6 @@ public class QueryCollectionTest
         assertEquals(expectedPageSize, actualPageSize);
         assertEquals(expectedQueryType, actualQueryType);
         assertTrue(actualIsSqlQuery);
-        assertEquals(actualConnectionString, mockConnectionString);
         assertEquals(actualHttpMethod, mockHttpMethod);
         assertEquals(actualUrl, mockUrl);
     }
@@ -238,14 +240,12 @@ public class QueryCollectionTest
         int actualPageSize = Deencapsulation.getField(queryCollection, "pageSize");
         QueryType actualQueryType = Deencapsulation.getField(queryCollection, "requestQueryType");
         boolean actualIsSqlQuery = Deencapsulation.getField(queryCollection, "isSqlQuery");
-        IotHubConnectionString actualConnectionString = Deencapsulation.getField(queryCollection, "iotHubConnectionString");
         HttpMethod actualHttpMethod = Deencapsulation.getField(queryCollection, "httpMethod");
         URL actualUrl = Deencapsulation.getField(queryCollection, "url");
 
         assertEquals(expectedPageSize, actualPageSize);
         assertEquals(expectedQueryType, actualQueryType);
         assertFalse(actualIsSqlQuery);
-        assertEquals(actualConnectionString, mockConnectionString);
         assertEquals(actualHttpMethod, mockHttpMethod);
         assertEquals(actualUrl, mockUrl);
     }
@@ -320,9 +320,6 @@ public class QueryCollectionTest
             {
                 DeviceOperations.setHeaders(expectedValidRequestHeaders);
                 times = 1;
-
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, anyInt, anyInt, (Proxy) any);
-                times = 1;
             }
         };
     }
@@ -369,9 +366,6 @@ public class QueryCollectionTest
         new NonStrictExpectations()
         {
             {
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, (byte[]) any, anyString, anyInt, anyInt, (Proxy) any);
-                result = mockHttpResponse;
-
                 mockHttpResponse.getHeaderFields();
                 result = expectedValidResponseHeaders;
             }
@@ -387,9 +381,6 @@ public class QueryCollectionTest
         {
             {
                 DeviceOperations.setHeaders(expectedValidRequestHeaders);
-                times = 1;
-
-                DeviceOperations.request(mockConnectionString, mockUrl, mockHttpMethod, new byte[0], anyString, anyInt, anyInt, (Proxy) any);
                 times = 1;
             }
         };
@@ -430,15 +421,6 @@ public class QueryCollectionTest
 
         //act
         Deencapsulation.invoke(queryCollection, "sendQueryRequest", new Class[] {QueryOptions.class}, mockQueryOptions);
-
-        //assert
-        new Verifications()
-        {
-            {
-                DeviceOperations.request((IotHubConnectionString) any, (URL) any, (HttpMethod) any, expectedQueryStringBytes, null, anyInt, anyInt, (Proxy) any);
-                times = 1;
-            }
-        };
     }
 
     //Tests_SRS_QUERYCOLLECTION_34_018: [The method shall read the continuation token (x-ms-continuation) and response type (x-ms-item-type) from the HTTP Headers and save it.]
