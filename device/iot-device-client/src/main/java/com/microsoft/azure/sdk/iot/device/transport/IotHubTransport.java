@@ -100,6 +100,7 @@ public class IotHubTransport implements IotHubListener
     private final String hostName;
     private final ProxySettings proxySettings;
     private SSLContext sslContext;
+    private final boolean isMultiplexing;
 
     /**
      * Constructor for an IotHubTransport object with default values
@@ -121,6 +122,7 @@ public class IotHubTransport implements IotHubListener
         this.deviceConnectionStates.put(defaultConfig.getDeviceId(), IotHubConnectionStatus.DISCONNECTED);
         this.proxySettings = defaultConfig.getProxySettings();
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
+        this.isMultiplexing = false;
 
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
     }
@@ -134,6 +136,7 @@ public class IotHubTransport implements IotHubListener
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.deviceClientConfigs = new ConcurrentHashMap<>();
+        this.isMultiplexing = true;
     }
 
     public Object getSendThreadLock()
@@ -963,7 +966,7 @@ public class IotHubTransport implements IotHubListener
                     break;
                 case AMQPS:
                 case AMQPS_WS:
-                    if (this.getDefaultConfig() == null)
+                    if (this.isMultiplexing)
                     {
                         // The default config is only null when someone creates a multiplexing client and opens it before
                         // registering any devices to it
@@ -972,19 +975,15 @@ public class IotHubTransport implements IotHubListener
                                 this.protocol == IotHubClientProtocol.AMQPS_WS,
                                 this.sslContext,
                                 this.proxySettings);
-                    }
-                    else
-                    {
-                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig());
-                    }
 
-                    // If multiplexing, register all devices in the amqp connection that are registered here at this point
-                    if (this.deviceClientConfigs.size() > 1)
-                    {
                         for (DeviceClientConfig config : this.deviceClientConfigs.values())
                         {
                             ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
                         }
+                    }
+                    else
+                    {
+                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig(), false);
                     }
 
                     break;
