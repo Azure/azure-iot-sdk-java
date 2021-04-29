@@ -326,6 +326,10 @@ public class DeviceTwin
         updateReportedPropertiesRequest.setCorrelatingMessageCallback(correlatingMessageCallback);
         updateReportedPropertiesRequest.setCorrelatingMessageCallbackContext(correlatingMessageCallbackContext);
         updateReportedPropertiesRequest.setConnectionDeviceId(this.config.getDeviceId());
+
+        // MQTT does not have the concept of correlationId for request/response handling but it does have a requestId
+        // To handle this we are setting the correlationId to the requestId to better handle correlation
+        // whether we use MQTT or AMQP.
         updateReportedPropertiesRequest.setRequestId(UUID.randomUUID().toString());
         updateReportedPropertiesRequest.setCorrelationId(updateReportedPropertiesRequest.getRequestId());
 
