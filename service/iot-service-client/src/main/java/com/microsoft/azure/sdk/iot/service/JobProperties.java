@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.service;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.JobPropertiesParser;
+import com.microsoft.azure.sdk.iot.deps.serializer.ManagedIdentity;
 import com.microsoft.azure.sdk.iot.deps.serializer.StorageAuthenticationType;
 
 import java.util.Date;
@@ -206,6 +207,22 @@ public class JobProperties
         this.excludeKeysInExport = excludeKeysInExport;
     }
 
+    /**
+     * @return The managed identity used to access the storage account for import and export jobs.
+     * For more information, see TODO
+     */
+    public ManagedIdentity getIdentity() {
+        return identity;
+    }
+
+    /**
+     * @param identity The managed identity used to access the storage account for import and export jobs.
+     * For more information, see TODOe
+     */
+    public void setIdentity(ManagedIdentity identity) {
+        this.identity = identity;
+    }
+
     public enum JobStatus
     {
         UNKNOWN,
@@ -237,6 +254,7 @@ public class JobProperties
     private boolean excludeKeysInExport;
     private String failureReason;
     private StorageAuthenticationType storageAuthenticationType;
+    private ManagedIdentity identity;
 
     /**
      * Constructs a new JobProperties object using a JobPropertiesParser object
@@ -254,6 +272,7 @@ public class JobProperties
         this.jobId = parser.getJobIdFinal();
         this.progress = parser.getProgress();
         this.startTimeUtc = parser.getStartTimeUtc();
+        this.identity = parser.getIdentity();
 
         if (parser.getStatus() != null)
         {
@@ -283,6 +302,7 @@ public class JobProperties
         jobPropertiesParser.setJobId(this.jobId);
         jobPropertiesParser.setProgress(this.progress);
         jobPropertiesParser.setStartTimeUtc(this.startTimeUtc);
+        jobPropertiesParser.setIdentity(this.identity);
         if (this.status != null)
         {
             jobPropertiesParser.setStatus(this.status.toString());
@@ -337,6 +357,32 @@ public class JobProperties
     }
 
     /**
+     * Creates an instance of JobProperties with parameters ready to start an Import job
+     *
+     * @param inputBlobContainerUri URI to a blob container that contains registry data to sync.
+     *                              Including a SAS token is dependent on the StorageAuthenticationType
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
+     * @param identity the managed identity used to access the storage account for import jobs.
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForImportJob(
+            String inputBlobContainerUri,
+            String outputBlobContainerUri,
+            StorageAuthenticationType storageAuthenticationType,
+            ManagedIdentity identity)
+    {
+        JobProperties importJobProperties = new JobProperties();
+        importJobProperties.setType(JobProperties.JobType.IMPORT);
+        importJobProperties.setInputBlobContainerUri(inputBlobContainerUri);
+        importJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        importJobProperties.setStorageAuthenticationType(storageAuthenticationType);
+        importJobProperties.setIdentity(identity);
+        return importJobProperties;
+    }
+
+    /**
      * Creates an instance of JobProperties with parameters ready to start an Export job
      *
      * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
@@ -371,6 +417,31 @@ public class JobProperties
         exportJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
         exportJobProperties.setExcludeKeysInExport(excludeKeysInExport);
         exportJobProperties.setStorageAuthenticationType(storageAuthenticationType);
+        return exportJobProperties;
+    }
+
+    /**
+     * Creates an instance of JobProperties with parameters ready to start an Export job
+     *
+     * @param outputBlobContainerUri URI to a blob container. This is used to output the status of the job and the results.
+     *                               Including a SAS token is dependent on the StorageAuthenticationType
+     * @param excludeKeysInExport Indicates if authorization keys are included in export output
+     * @param storageAuthenticationType Specifies authentication type being used for connecting to storage account
+     * @param identity the managed identity used to access the storage account for export jobs.
+     * @return An instance of JobProperties
+     */
+    public static JobProperties createForExportJob(
+            String outputBlobContainerUri,
+            Boolean excludeKeysInExport,
+            StorageAuthenticationType storageAuthenticationType,
+            ManagedIdentity identity)
+    {
+        JobProperties exportJobProperties = new JobProperties();
+        exportJobProperties.setType(JobProperties.JobType.EXPORT);
+        exportJobProperties.setOutputBlobContainerUri(outputBlobContainerUri);
+        exportJobProperties.setExcludeKeysInExport(excludeKeysInExport);
+        exportJobProperties.setStorageAuthenticationType(storageAuthenticationType);
+        exportJobProperties.setIdentity(identity);
         return exportJobProperties;
     }
 }
