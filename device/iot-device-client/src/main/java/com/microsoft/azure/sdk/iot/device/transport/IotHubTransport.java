@@ -280,6 +280,7 @@ public class IotHubTransport implements IotHubListener
             //Codes_SRS_IOTHUBTRANSPORT_34_009: [If this function is called with a non-null message and a null
             // exception, this function shall add that message to the receivedMessagesQueue.]
             log.info("Message was received from IotHub ({})", message);
+            this.addToReceivedMessagesQueue(message);
         }
         else
         {
@@ -287,7 +288,6 @@ public class IotHubTransport implements IotHubListener
             // throwable, this function shall log that exception.]
             log.error("Exception encountered while receiving messages from service", e);
         }
-        this.addToReceivedMessagesQueue(message);
 
         try
         {

@@ -38,7 +38,7 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+ messageId+ "] onQueue (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+ messageId+ "] onRequestQueued (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (callbackContext instanceof ReportedPropertiesContext) {
 
@@ -53,7 +53,7 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onSend (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestSent (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
         }
 
@@ -64,10 +64,10 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeSendPacket (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeSendPacket (" + _message + ") ERROR: " + e.getMessage());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") ERROR: " + e.getMessage());
             }
         }
 
@@ -77,10 +77,10 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeReceieve (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledgeReceieve (" + _message + ") ERROR: " + e.getMessage());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") ERROR: " + e.getMessage());
             }
         }
 
@@ -90,7 +90,7 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onReceive (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseReceived (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
         }
 
@@ -100,10 +100,10 @@ public class DeviceTwinSample
 
             if (message != null)
             {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledge (" + _message + ") CorrelationId: " + message.getCorrelationId());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
             }
             if (e != null) {
-                System.out.println("CORRELATIONCALLBACK["+messageId+"] onAcknowledge (" + _message + ") ERROR: " + e.getMessage());
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") ERROR: " + e.getMessage());
             }
         }
     }

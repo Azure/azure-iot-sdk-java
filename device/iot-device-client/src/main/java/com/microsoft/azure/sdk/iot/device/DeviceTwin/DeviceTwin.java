@@ -23,7 +23,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubMessageResult.COMPLETE;
 @Slf4j
 public class DeviceTwin
 {
-    private String requestId;
     private DeviceIO deviceIO = null;
     private DeviceClientConfig config = null;
     private boolean isSubscribed = false;
@@ -271,7 +270,6 @@ public class DeviceTwin
         this.deviceIO = client;
         this.config = config;
         this.config.setDeviceTwinMessageCallback(new deviceTwinResponseMessageCallback(), null);
-        this.requestId = UUID.randomUUID().toString();
         this.deviceTwinStatusCallback = deviceTwinCallback;
         this.deviceTwinStatusCallbackContext = deviceTwinCallbackContext;
         this.deviceTwinGenericPropertyChangeCallbackContext = genericPropertyCallbackContext;
