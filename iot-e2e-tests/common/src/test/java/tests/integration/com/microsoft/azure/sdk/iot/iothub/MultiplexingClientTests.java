@@ -1078,6 +1078,8 @@ public class MultiplexingClientTests extends IntegrationTest
     public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
@@ -1120,6 +1122,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
+
+        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
 
         testInstance.multiplexingClient.close();
 

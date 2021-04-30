@@ -100,6 +100,7 @@ public class IotHubTransport implements IotHubListener
     private final String hostName;
     private final ProxySettings proxySettings;
     private SSLContext sslContext;
+    private final boolean isMultiplexing;
 
     // Used to store the CorrelationCallbackMessage for a correlationId
     private final Map<String, CorrelatingMessageCallback> correlationCallbacks = new ConcurrentHashMap<>();
@@ -112,7 +113,7 @@ public class IotHubTransport implements IotHubListener
      *
      * @throws IllegalArgumentException if defaultConfig is null
      */
-    public IotHubTransport(DeviceClientConfig defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback) throws IllegalArgumentException
+    public IotHubTransport(DeviceClientConfig defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback, boolean isMultiplexing) throws IllegalArgumentException
     {
         if (defaultConfig == null)
         {
@@ -127,6 +128,7 @@ public class IotHubTransport implements IotHubListener
         this.deviceConnectionStates.put(defaultConfig.getDeviceId(), IotHubConnectionStatus.DISCONNECTED);
         this.proxySettings = defaultConfig.getProxySettings();
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
+        this.isMultiplexing = isMultiplexing;
 
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
     }
@@ -140,6 +142,7 @@ public class IotHubTransport implements IotHubListener
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.deviceClientConfigs = new ConcurrentHashMap<>();
+        this.isMultiplexing = true;
     }
 
     public Object getSendThreadLock()
@@ -1078,7 +1081,7 @@ public class IotHubTransport implements IotHubListener
                     break;
                 case AMQPS:
                 case AMQPS_WS:
-                    if (this.getDefaultConfig() == null)
+                    if (this.isMultiplexing)
                     {
                         // The default config is only null when someone creates a multiplexing client and opens it before
                         // registering any devices to it
@@ -1087,19 +1090,15 @@ public class IotHubTransport implements IotHubListener
                                 this.protocol == IotHubClientProtocol.AMQPS_WS,
                                 this.sslContext,
                                 this.proxySettings);
-                    }
-                    else
-                    {
-                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig());
-                    }
 
-                    // If multiplexing, register all devices in the amqp connection that are registered here at this point
-                    if (this.deviceClientConfigs.size() > 1)
-                    {
                         for (DeviceClientConfig config : this.deviceClientConfigs.values())
                         {
                             ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
                         }
+                    }
+                    else
+                    {
+                        this.iotHubTransportConnection = new AmqpsIotHubConnection(this.getDefaultConfig(), false);
                     }
 
                     break;
