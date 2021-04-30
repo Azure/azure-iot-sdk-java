@@ -6,6 +6,7 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportPacket;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,13 +25,136 @@ public class DeviceTwinSample
 
     private static final AtomicBoolean Succeed = new AtomicBoolean(false);
 
+    protected static class ReportedPropertiesCorrelation implements CorrelatingMessageCallback {
+
+        private String _message = "";
+        public ReportedPropertiesCorrelation(String message) {
+            _message = message;
+        }
+        @Override
+        public void onRequestQueued(Message message, IotHubTransportPacket packet, Object callbackContext)
+        {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+ messageId+ "] onRequestQueued (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+            if (callbackContext instanceof ReportedPropertiesContext) {
+
+                ((ReportedPropertiesContext) callbackContext).setCorrelationId(messageId);
+            }
+        }
+
+        @Override
+        public void onRequestSent(Message message, IotHubTransportPacket packet, Object callbackContext)
+        {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestSent (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+        }
+
+        @Override
+        public void onRequestAcknowledged(IotHubTransportPacket packet, Object callbackContext, Throwable e) {
+            Message message = packet.getMessage();
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+            if (e != null) {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onRequestAcknowledged (" + _message + ") ERROR: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onResponseAcknowledged(Message message, Object callbackContext, Throwable e) {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+            if (e != null) {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseAcknowledged (" + _message + ") ERROR: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public void onResponseReceived(Message message, Object callbackContext, Throwable e) {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onResponseReceived (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+        }
+
+        @Override
+        public void onUnknownMessageAcknowledged(Message message, Object callbackContext, Throwable e) {
+            String messageId = message.getCorrelationId();
+
+            if (message != null)
+            {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") CorrelationId: " + message.getCorrelationId());
+            }
+            if (e != null) {
+                System.out.println("CORRELATIONCALLBACK["+messageId+"] onUnknownMessageAcknowledged (" + _message + ") ERROR: " + e.getMessage());
+            }
+        }
+    }
+
+
     protected static class DeviceTwinStatusCallBack implements IotHubEventCallback
     {
         @Override
         public void execute(IotHubStatusCode status, Object context)
         {
+            if (context == null) {
+                System.out.println("DEVICETWINCALLBACK context null");
+            }
             Succeed.set((status == IotHubStatusCode.OK) || (status == IotHubStatusCode.OK_EMPTY));
-            System.out.println("IoT Hub responded to device twin operation with status " + status.name());
+            System.out.println("DEVICETWINCALLBACK IoT Hub responded to device twin operation with status " + status.name());
+        }
+    }
+
+    protected static class ReportedPropertiesContext
+    {
+        private boolean calledFromEvent = false;
+        private String _correlationId = "";
+        private String _message = "";
+
+        public ReportedPropertiesContext(String message) { this._message = message;}
+        public void setCorrelationId(String message) { _correlationId = message; }
+        public String getcorrelationId() { return _correlationId; }
+        public String getMessageOfContext() { return _message; }
+    }
+
+    protected static class ReportedPropertiesCallback implements IotHubEventCallback
+    {
+        private String _message = "";
+        public ReportedPropertiesCallback(String message) {
+            this._message = message;
+        }
+
+        @Override
+        public void execute(IotHubStatusCode status, Object context)
+        {
+            if (context instanceof ReportedPropertiesContext)
+            {
+                ReportedPropertiesContext myContext = (ReportedPropertiesContext)context;
+                String messageId = myContext.getcorrelationId();
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Executing reported properties callback for " + _message);
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with message " + myContext.getMessageOfContext());
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] Found ReportedPropertiesContext with correlationId " + myContext.getcorrelationId());
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] This context was set by ReportedPropertiesCallback " + status.name());
+                System.out.println("REPORTEDPROPERTYCALLBACK["+messageId+"] IoT Hub responded to device twin reported properties with status " + status.name());
+            }
+
         }
     }
 
@@ -220,22 +344,44 @@ public class DeviceTwinSample
                     add(new Property("BedroomRoomLights", LIGHTS.OFF));
                 }
             };
-            client.sendReportedProperties(reportProperties);
+
+            ReportedPropertiesParameters params = new ReportedPropertiesParameters(reportProperties);
+            ReportedPropertiesContext sharableContext = new ReportedPropertiesContext("Send All Params Reported Properties Context Message");
+            params.setCorrelationCallback(new ReportedPropertiesCorrelation("SendAllParams"), sharableContext);
+            params.setReportedPropertiesCallback(new ReportedPropertiesCallback("SendAllParams"), sharableContext);
+
+            client.sendReportedProperties(params);
 
             for(int i = 0; i < MAX_EVENTS_TO_REPORT; i++)
             {
 
                 if (Math.random() % MAX_EVENTS_TO_REPORT == 3)
                 {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
+                    sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=BURGLAR Reported Properties Context Message (" + i + ")");
+                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.DETECTED_BURGLAR)); }});
+                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
+                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=BURGLAR (" + i + ")"), sharableContext);
+
+                    client.sendReportedProperties(params);
                 }
                 else
                 {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
+
+                    sharableContext = new ReportedPropertiesContext("HomeSecurityCamera=SAFELY_WORKING Reported Properties Context Message (" + i + ")");
+                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("HomeSecurityCamera", CAMERA.SAFELY_WORKING)); }});
+                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
+                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("HomeSecurityCamera=SAFELY_WORKING (" + i + ")"), sharableContext);
+
+                    client.sendReportedProperties(params);
                 }
                 if(i == MAX_EVENTS_TO_REPORT-1)
                 {
-                    client.sendReportedProperties(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
+                    sharableContext = new ReportedPropertiesContext("BedroomRoomLights=null Reported Properties Context Message (" + i + ")");
+                    params = new ReportedPropertiesParameters(new HashSet<Property>() {{ add(new Property("BedroomRoomLights", null)); }});
+                    params.setCorrelationCallback(new ReportedPropertiesCorrelation("BedroomRoomLights=null (" + i + ")"), sharableContext);
+                    params.setReportedPropertiesCallback(new ReportedPropertiesCallback("BedroomRoomLights=null (" + i + ")"), sharableContext);
+
+                    client.sendReportedProperties(params);
                 }
                 System.out.println("Updating reported properties..");
             }
