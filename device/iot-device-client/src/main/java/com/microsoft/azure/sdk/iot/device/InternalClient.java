@@ -322,24 +322,7 @@ public class InternalClient
      */
     public void sendReportedProperties(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
     {
-        verifyRegisteredIfMultiplexing();
-
-        if (this.twin == null)
-        {
-            throw new IOException("Start twin before using it");
-        }
-
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        if (reportedProperties == null || reportedProperties.isEmpty())
-        {
-            throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
-        }
-
-        this.twin.updateReportedProperties(reportedProperties);
+        this.sendReportedProperties(reportedProperties, null, null, null, null, null);
     }
 
     /**
@@ -349,33 +332,43 @@ public class InternalClient
      * @param version the Reported property version. Cannot be negative.
      *
      * @throws IOException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty.
+     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negative
      */
     public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
+        this.sendReportedProperties(reportedProperties, version, null, null, null, null);
+    }
+
+    /**
+     * Sends reported properties
+     * @param reportedPropertiesParameters Container for the reported properties parameters
+     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalArgumentException if reportedProperties is null or empty or if version specified in {#reportedPropertiesParameters} is negative
+     */
+    public void sendReportedProperties(ReportedPropertiesParameters reportedPropertiesParameters) throws IOException, IllegalArgumentException
+    {
+        this.sendReportedProperties(reportedPropertiesParameters.getReportedProperties(), reportedPropertiesParameters.getVersion(), reportedPropertiesParameters.getCorrelatingMessageCallback(), reportedPropertiesParameters.getCorrelatingMessageCallbackContext(), reportedPropertiesParameters.getReportedPropertiesCallback(), reportedPropertiesParameters.getReportedPropertiesCallbackContext());
+    }
+
+    /**
+     * Sends reported properties
+     *
+     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
+     * @param version the Reported property version. Cannot be negative.
+     * @param reportedPropertiesCallback the Reported property callback to be set for this message. If set to {@code null} it will fall back to {@link #sendReportedProperties(Set, int)}.
+     * @param reportedPropertiesCallbackContext the Reported property callback context to be set for this message.
+     * @param correlatingMessageCallback the correlation callback for this message.
+     * @param correlatingMessageCallbackContext the correlation callback context for this message.
+     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalArgumentException if reportedProperties is null or empty or if version is negatve
+     */
+    public void sendReportedProperties(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
+    {
         verifyRegisteredIfMultiplexing();
 
-        if (this.twin == null)
-        {
-            throw new IOException("Start twin before using it");
-        }
+        verifyReportedProperties(reportedProperties);
 
-        if (!this.deviceIO.isOpen())
-        {
-            throw new IOException("Open the client connection before using it.");
-        }
-
-        if (reportedProperties == null || reportedProperties.isEmpty())
-        {
-            throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
-        }
-
-        if (version < 0)
-        {
-            throw new IllegalArgumentException("Version cannot be null.");
-        }
-
-        this.twin.updateReportedProperties(reportedProperties, version);
+        this.twin.updateReportedProperties(reportedProperties, version, correlatingMessageCallback, correlatingMessageCallbackContext, reportedPropertiesCallback, reportedPropertiesCallbackContext);
     }
 
     /**
@@ -1147,4 +1140,27 @@ public class InternalClient
     {
         return this.isMultiplexed;
     }
+
+    private void verifyReportedProperties(Set<Property> reportedProperties) throws IOException {
+        if (this.twin == null) {
+            throw new IOException("Start twin before using it");
+        }
+
+        if (!this.deviceIO.isOpen()) {
+            throw new IOException("Open the client connection before using it.");
+        }
+
+        if (reportedProperties == null || reportedProperties.isEmpty()) {
+            throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
+        }
+    }
+
+    private void verifyReportedPropertiesAndVersion(Set<Property> reportedProperties, Integer version) throws IOException {
+        verifyReportedProperties(reportedProperties);
+
+        if (version != null && version < 0) {
+            throw new IllegalArgumentException("Version cannot be negative.");
+        }
+    }
+
 }
