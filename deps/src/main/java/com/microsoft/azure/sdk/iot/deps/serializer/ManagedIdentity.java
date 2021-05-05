@@ -9,7 +9,6 @@ import lombok.Setter;
 public class ManagedIdentity {
     /**
      * The managed identity used to access the storage account for IoT hub import and export jobs.
-     * For more information, see TODO
      */
     @Setter
     @Getter

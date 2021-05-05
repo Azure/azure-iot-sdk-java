@@ -209,7 +209,6 @@ public class JobProperties
 
     /**
      * @return The managed identity used to access the storage account for import and export jobs.
-     * For more information, see TODO
      */
     public ManagedIdentity getIdentity() {
         return identity;
@@ -217,7 +216,6 @@ public class JobProperties
 
     /**
      * @param identity The managed identity used to access the storage account for import and export jobs.
-     * For more information, see TODOe
      */
     public void setIdentity(ManagedIdentity identity) {
         this.identity = identity;

@@ -15,7 +15,6 @@ import java.io.IOException;
 /* A sample to illustrate how to perform import and export jobs using managed identity to access the storage account.
     This sample will copy all the devices in the source hub to the destination hub.
     For this sample to succeed, the managed identity should be configured to access the storage account used for import and export.
-    For more information on configuration, see TODO <see href=""/>.
     For more information on managed identities, see <see href="https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview"/>
  */
 public class DeviceManagerImportExportWithIdentitySample {
@@ -50,10 +49,11 @@ public class DeviceManagerImportExportWithIdentitySample {
         ManagedIdentity identity = new ManagedIdentity();
         identity.setUserAssignedIdentity(userDefinedManagedIdentityResourceId);
 
-        JobProperties jobProperties = new JobProperties();
-        jobProperties.setOutputBlobContainerUri(blobContainerUri);
-        jobProperties.setStorageAuthenticationType(StorageAuthenticationType.IDENTITY);
-        jobProperties.setIdentity(identity);
+        JobProperties jobProperties = JobProperties.createForExportJob(
+                blobContainerUri,
+                false,
+                StorageAuthenticationType.IDENTITY,
+                identity);
 
         JobProperties exportJob = registryManager.exportDevices(jobProperties);
 
@@ -85,11 +85,11 @@ public class DeviceManagerImportExportWithIdentitySample {
         ManagedIdentity identity = new ManagedIdentity();
         identity.setUserAssignedIdentity(userDefinedManagedIdentityResourceId);
 
-        JobProperties jobProperties = new JobProperties();
-        jobProperties.setOutputBlobContainerUri(blobContainerUri);
-        jobProperties.setInputBlobContainerUri(blobContainerUri);
-        jobProperties.setStorageAuthenticationType(StorageAuthenticationType.IDENTITY);
-        jobProperties.setIdentity(identity);
+        JobProperties jobProperties = JobProperties.createForImportJob(
+                blobContainerUri,
+                blobContainerUri,
+                StorageAuthenticationType.IDENTITY,
+                identity);
 
         JobProperties exportJob = registryManager.importDevices(jobProperties);
 
