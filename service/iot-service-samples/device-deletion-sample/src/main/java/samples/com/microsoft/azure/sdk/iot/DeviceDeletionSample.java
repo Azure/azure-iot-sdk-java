@@ -114,24 +114,24 @@ public class DeviceDeletionSample
                 e.printStackTrace();
             }
 
-            final Query twinQuery;
-            try
-            {
-                twinQuery = deviceTwin.queryTwin(sqlQuery.getQuery(), 100);
-            }
-            catch (IotHubException e)
-            {
-                e.printStackTrace();
-                return;
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                return;
-            }
-
             while (true)
             {
+                final Query twinQuery;
+                try
+                {
+                    twinQuery = deviceTwin.queryTwin(sqlQuery.getQuery(), 100);
+                }
+                catch (IotHubException e)
+                {
+                    e.printStackTrace();
+                    return;
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                    return;
+                }
+
                 try
                 {
                     while (deviceTwin.hasNextDeviceTwin(twinQuery))
@@ -159,6 +159,7 @@ public class DeviceDeletionSample
                     try
                     {
                         removeDevices(deviceIdsToRemove, iotConnString);
+                        System.out.println("Successfully deleted a batch of devices");
                     }
                     catch (Exception e)
                     {
