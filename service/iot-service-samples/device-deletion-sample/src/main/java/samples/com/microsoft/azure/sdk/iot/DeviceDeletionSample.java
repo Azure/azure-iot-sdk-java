@@ -152,7 +152,7 @@ public class DeviceDeletionSample
 
                     if (deviceIdsToRemove.size() == 0)
                     {
-                        System.out.print("No more devices to delete");
+                        System.out.println("No more devices to delete");
                         return;
                     }
 
@@ -164,7 +164,7 @@ public class DeviceDeletionSample
                     catch (Exception e)
                     {
                         e.printStackTrace();
-                        System.out.print("Failed to bulk delete, moving on to next set of devices");
+                        System.out.println("Failed to bulk delete, moving on to next set of devices");
                     }
 
                     deviceIdsToRemove.clear();
