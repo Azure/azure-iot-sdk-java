@@ -50,10 +50,11 @@ public class DeviceManagerImportExportWithIdentitySample {
         ManagedIdentity identity = new ManagedIdentity();
         identity.setUserAssignedIdentity(userDefinedManagedIdentityResourceId);
 
-        JobProperties jobProperties = new JobProperties();
-        jobProperties.setOutputBlobContainerUri(blobContainerUri);
-        jobProperties.setStorageAuthenticationType(StorageAuthenticationType.IDENTITY);
-        jobProperties.setIdentity(identity);
+        JobProperties jobProperties = JobProperties.createForExportJob(
+                blobContainerUri,
+                false,
+                StorageAuthenticationType.IDENTITY,
+                identity);
 
         JobProperties exportJob = registryManager.exportDevices(jobProperties);
 
@@ -85,11 +86,11 @@ public class DeviceManagerImportExportWithIdentitySample {
         ManagedIdentity identity = new ManagedIdentity();
         identity.setUserAssignedIdentity(userDefinedManagedIdentityResourceId);
 
-        JobProperties jobProperties = new JobProperties();
-        jobProperties.setOutputBlobContainerUri(blobContainerUri);
-        jobProperties.setInputBlobContainerUri(blobContainerUri);
-        jobProperties.setStorageAuthenticationType(StorageAuthenticationType.IDENTITY);
-        jobProperties.setIdentity(identity);
+        JobProperties jobProperties = JobProperties.createForImportJob(
+                blobContainerUri,
+                blobContainerUri,
+                StorageAuthenticationType.IDENTITY,
+                identity);
 
         JobProperties exportJob = registryManager.importDevices(jobProperties);
 
