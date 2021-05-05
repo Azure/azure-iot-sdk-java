@@ -35,6 +35,8 @@ public class DeviceDeletionSample
 {
     private static final int SLEEP_INTERVAL_MILLISECONDS = 15 * 1000;
 
+    private static boolean ranSuccessfully = true;
+
     /**
      * A simple sample for deleting all devices from an iothub
      */
@@ -76,6 +78,11 @@ public class DeviceDeletionSample
         {
             dpsCleanupRunnable.join();
         }
+
+        if (!ranSuccessfully)
+        {
+            System.exit(-1);
+        }
     }
 
     public static class HubCleanupRunnable implements Runnable {
@@ -97,6 +104,7 @@ public class DeviceDeletionSample
             catch (IOException e)
             {
                 e.printStackTrace();
+                ranSuccessfully = false;
                 System.out.println("Could not create registry manager from the provided connection string, exiting iot hub cleanup thread");
                 return;
             }
@@ -124,11 +132,13 @@ public class DeviceDeletionSample
                 catch (IotHubException e)
                 {
                     e.printStackTrace();
+                    ranSuccessfully = false;
                     return;
                 }
                 catch (IOException e)
                 {
                     e.printStackTrace();
+                    ranSuccessfully = false;
                     return;
                 }
 
@@ -172,6 +182,7 @@ public class DeviceDeletionSample
                 catch (Exception e)
                 {
                     e.printStackTrace();
+                    ranSuccessfully = false;
                     System.out.println("Could not collect the full list of device ids to delete, exiting iot hub cleanup thread");
                     return;
                 }
