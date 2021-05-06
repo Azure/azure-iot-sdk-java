@@ -80,7 +80,6 @@ public class ServiceClient
      * Create ServiceClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
-     * @return The created ServiceClient object
      */
     public ServiceClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
@@ -92,7 +91,6 @@ public class ServiceClient
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
      * @param options The connection options to use when connecting to the service.
-     * @return The created ServiceClient object
      */
     public ServiceClient(
             String connectionString,

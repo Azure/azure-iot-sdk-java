@@ -87,7 +87,6 @@ public class DeviceTwin
      * Constructor to create instance from connection string.
      *
      * @param connectionString The iot hub connection string.
-     * @return The instance of DeviceTwin.
      */
     public DeviceTwin(String connectionString)
     {
@@ -103,7 +102,6 @@ public class DeviceTwin
      *
      * @param connectionString The iot hub connection string.
      * @param options the configurable options for each operation on this client. May not be null.
-     * @return The instance of DeviceTwin.
      */
     public DeviceTwin(String connectionString, DeviceTwinClientOptions options)
     {
