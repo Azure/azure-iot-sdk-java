@@ -252,16 +252,22 @@ public class MultiplexingClientTests extends IntegrationTest
     @Test
     public void connectionStatusCallbackExecutedWithNoDevices() throws Exception
     {
+        // Even with no devices registered to a multiplexed connection, the connection status callback should execute
+        // when the multiplexed connection opens and closes.
         testInstance.setup(0);
         ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
         testInstance.multiplexingClient.registerConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
         testInstance.multiplexingClient.open();
 
-        assertTrue(connectionStatusChangeTracker.isOpen);
+        assertTrue(
+            "Connection status callback never executed with CONNECTED status after opening multiplexing client with no devices registered",
+            connectionStatusChangeTracker.isOpen);
 
         testInstance.multiplexingClient.close();
-        assertFalse(connectionStatusChangeTracker.isOpen);
-        assertTrue(connectionStatusChangeTracker.clientClosedGracefully);
+
+        assertTrue(
+            "Connection status callback never executed with DISCONNECTED status and CLIENT_CLOSED reason.",
+            connectionStatusChangeTracker.clientClosedGracefully);
     }
 
     // MultiplexingClient should be able to open an AMQP connection to IoTHub with no device sessions, and should
