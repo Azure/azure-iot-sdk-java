@@ -87,7 +87,6 @@ public class DeviceTwin
      * Constructor to create instance from connection string.
      *
      * @param connectionString The iot hub connection string.
-     * @return The instance of DeviceTwin.
      */
     public DeviceTwin(String connectionString)
     {
@@ -103,7 +102,6 @@ public class DeviceTwin
      *
      * @param connectionString The iot hub connection string.
      * @param options the configurable options for each operation on this client. May not be null.
-     * @return The instance of DeviceTwin.
      */
     public DeviceTwin(String connectionString, DeviceTwinClientOptions options)
     {
@@ -123,7 +121,6 @@ public class DeviceTwin
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @return the new DeviceTwin instance.
      */
     public DeviceTwin(String hostName, TokenCredential credential)
     {
@@ -137,7 +134,6 @@ public class DeviceTwin
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param options The connection options to use when connecting to the service.
-     * @return the new DeviceTwin instance.
      */
     public DeviceTwin(String hostName, TokenCredential credential, DeviceTwinClientOptions options)
     {
@@ -158,7 +154,6 @@ public class DeviceTwin
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @return the new DeviceTwin instance.
      */
     public DeviceTwin(String hostName, AzureSasCredential azureSasCredential)
     {
@@ -171,7 +166,6 @@ public class DeviceTwin
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param options The connection options to use when connecting to the service.
-     * @return the new DeviceTwin instance.
      */
     public DeviceTwin(String hostName, AzureSasCredential azureSasCredential, DeviceTwinClientOptions options)
     {

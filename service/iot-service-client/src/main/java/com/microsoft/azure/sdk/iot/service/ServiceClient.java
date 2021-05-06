@@ -80,7 +80,6 @@ public class ServiceClient
      * Create ServiceClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
-     * @return The created ServiceClient object
      */
     public ServiceClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
@@ -92,7 +91,6 @@ public class ServiceClient
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
      * @param options The connection options to use when connecting to the service.
-     * @return The created ServiceClient object
      */
     public ServiceClient(
             String connectionString,
@@ -134,7 +132,6 @@ public class ServiceClient
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
-     * @return The created {@link ServiceClient} instance.
      */
     public ServiceClient(
             String hostName,
@@ -156,7 +153,6 @@ public class ServiceClient
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      * @param options The connection options to use when connecting to the service.
-     * @return The created {@link ServiceClient} instance.
      */
     public ServiceClient(
             String hostName,
@@ -201,7 +197,6 @@ public class ServiceClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
-     * @return The created {@link ServiceClient} instance.
      */
     public ServiceClient(
             String hostName,
@@ -221,7 +216,6 @@ public class ServiceClient
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param iotHubServiceClientProtocol The protocol to open the connection with.
      * @param options The connection options to use when connecting to the service.
-     * @return The created {@link ServiceClient} instance.
      */
     public ServiceClient(
             String hostName,

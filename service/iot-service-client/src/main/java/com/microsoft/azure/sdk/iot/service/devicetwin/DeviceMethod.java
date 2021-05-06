@@ -91,7 +91,6 @@ public class DeviceMethod
      * Create a DeviceMethod instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
-     * @return an instance of the DeviceMethod.
      */
     public DeviceMethod(String connectionString)
     {
@@ -107,7 +106,6 @@ public class DeviceMethod
      *
      * @param connectionString is the IoTHub connection string.
      * @param options the configurable options for each operation on this client. May not be null.
-     * @return an instance of the DeviceMethod.
      */
     public DeviceMethod(String connectionString, DeviceMethodClientOptions options)
     {
@@ -128,7 +126,6 @@ public class DeviceMethod
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      * this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @return the new DeviceMethod instance.
      */
     public DeviceMethod(String hostName, TokenCredential credential)
     {
@@ -142,7 +139,6 @@ public class DeviceMethod
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      * this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param options The connection options to use when connecting to the service.
-     * @return the new DeviceMethod instance.
      */
     public DeviceMethod(String hostName, TokenCredential credential, DeviceMethodClientOptions options)
     {
@@ -163,7 +159,6 @@ public class DeviceMethod
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @return the new DeviceMethod instance.
      */
     public DeviceMethod(String hostName, AzureSasCredential azureSasCredential)
     {
@@ -176,7 +171,6 @@ public class DeviceMethod
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param options The connection options to use when connecting to the service.
-     * @return the new DeviceMethod instance.
      */
     public DeviceMethod(String hostName, AzureSasCredential azureSasCredential, DeviceMethodClientOptions options)
     {
