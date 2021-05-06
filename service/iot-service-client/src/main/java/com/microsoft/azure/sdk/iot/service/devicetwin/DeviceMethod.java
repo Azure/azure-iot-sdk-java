@@ -91,7 +91,6 @@ public class DeviceMethod
      * Create a DeviceMethod instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
-     * @return an instance of the DeviceMethod.
      */
     public DeviceMethod(String connectionString)
     {
@@ -107,7 +106,6 @@ public class DeviceMethod
      *
      * @param connectionString is the IoTHub connection string.
      * @param options the configurable options for each operation on this client. May not be null.
-     * @return an instance of the DeviceMethod.
      */
     public DeviceMethod(String connectionString, DeviceMethodClientOptions options)
     {

@@ -65,7 +65,6 @@ public class JobClient
      * Constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
-     * @return The instance of JobClient
      */
     public JobClient(String connectionString)
     {
@@ -80,7 +79,6 @@ public class JobClient
      *
      * @param connectionString The iot hub connection string
      * @param options The connection options to use when connecting to the service.
-     * @return The instance of JobClient
      */
     public JobClient(String connectionString, JobClientOptions options)
     {
@@ -101,7 +99,6 @@ public class JobClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      * this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @return The new JobClient instance.
      */
     public JobClient(String hostName, TokenCredential credential)
     {
@@ -118,7 +115,6 @@ public class JobClient
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      * this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param options The connection options to use when connecting to the service.
-     * @return The new JobClient instance.
      */
     public JobClient(String hostName, TokenCredential credential, JobClientOptions options)
     {
@@ -140,7 +136,6 @@ public class JobClient
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @return The new JobClient instance.
      */
     public JobClient(String hostName, AzureSasCredential azureSasCredential)
     {
@@ -156,7 +151,6 @@ public class JobClient
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param options The connection options to use when connecting to the service.
-     * @return The new JobClient instance.
      */
     public JobClient(String hostName, AzureSasCredential azureSasCredential, JobClientOptions options)
     {

@@ -78,6 +78,7 @@ public class AmqpSend
      * @param sasToken The SAS token string
      * @param iotHubServiceClientProtocol protocol to use
      * @param proxyOptions the proxy options to tunnel through, if a proxy should be used.
+     * @param sslContext the custom SSL context to open the connection with.
      */
     public AmqpSend(
             String hostName,

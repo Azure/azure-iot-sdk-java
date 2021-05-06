@@ -29,7 +29,6 @@ public class DigitalTwinClient {
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoT Hub connection string
-     * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String connectionString) {
         this(connectionString,
@@ -43,7 +42,6 @@ public class DigitalTwinClient {
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoT Hub connection string
      * @param options The optional settings for this client. May not be null.
-     * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String connectionString, DigitalTwinClientOptions options) {
         digitalTwinAsyncClient = new DigitalTwinAsyncClient(connectionString, options);
@@ -55,7 +53,6 @@ public class DigitalTwinClient {
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
-     * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String hostName, TokenCredential credential) {
         this(hostName,
@@ -73,7 +70,6 @@ public class DigitalTwinClient {
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed.
      * @param options The optional settings for this client. May not be null.
-     * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String hostName, TokenCredential credential, DigitalTwinClientOptions options) {
         digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, credential, options);
@@ -84,7 +80,6 @@ public class DigitalTwinClient {
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String hostName, AzureSasCredential azureSasCredential) {
         this(hostName,
@@ -101,7 +96,6 @@ public class DigitalTwinClient {
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param options The optional settings for this client. May not be null.
-     * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String hostName, AzureSasCredential azureSasCredential, DigitalTwinClientOptions options) {
         digitalTwinAsyncClient = new DigitalTwinAsyncClient(hostName, azureSasCredential, options);
@@ -110,7 +104,6 @@ public class DigitalTwinClient {
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoT Hub connection string
-     * @return The instantiated DigitalTwinClient.
      */
     public static DigitalTwinClient createFromConnectionString(String connectionString)
     {
