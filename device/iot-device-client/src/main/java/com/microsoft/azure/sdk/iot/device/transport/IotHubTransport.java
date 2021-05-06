@@ -1238,7 +1238,7 @@ public class IotHubTransport implements IotHubListener
             reconnectionAttempts++;
 
             RetryPolicy retryPolicy;
-            if (this.deviceClientConfigs.size() != 1)
+            if (isMultiplexing)
             {
                 retryPolicy = multiplexingRetryPolicy;
             }
@@ -1560,7 +1560,7 @@ public class IotHubTransport implements IotHubListener
             log.debug("Invoking connection status callbacks with new status details");
             invokeConnectionStateCallback(newConnectionStatus, reason);
 
-            if (deviceClientConfigs.size() < 2 || newConnectionStatus != IotHubConnectionStatus.CONNECTED)
+            if (!isMultiplexing || newConnectionStatus != IotHubConnectionStatus.CONNECTED)
             {
                 // When multiplexing, a different method will notify each device-specific callback when that device is online,
                 // but in cases when the tcp connection is lost and everything is disconnected retrying or disconnected, this is where the
@@ -1574,7 +1574,7 @@ public class IotHubTransport implements IotHubListener
             }
 
             // If multiplexing, fire the multiplexing state callback as long as it was set.
-            if (deviceClientConfigs.size() > 1 && this.multiplexingStateCallback != null)
+            if (isMultiplexing && this.multiplexingStateCallback != null)
             {
                 this.multiplexingStateCallback.execute(newConnectionStatus, reason, throwable, this.multiplexingStateCallbackContext);
             }
