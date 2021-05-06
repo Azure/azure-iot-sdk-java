@@ -80,7 +80,6 @@ public class DigitalTwinClient {
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @return The instantiated DigitalTwinClient.
      */
     public DigitalTwinClient(String hostName, AzureSasCredential azureSasCredential) {
         this(hostName,
@@ -105,6 +104,7 @@ public class DigitalTwinClient {
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
      * @param connectionString The IoT Hub connection string
+     * @return The instantiated DigitalTwinClient.
      */
     public static DigitalTwinClient createFromConnectionString(String connectionString)
     {
