@@ -249,6 +249,21 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
+    @Test
+    public void connectionStatusCallbackExecutedWithNoDevices() throws Exception
+    {
+        testInstance.setup(0);
+        ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
+        testInstance.multiplexingClient.open();
+
+        assertTrue(connectionStatusChangeTracker.isOpen);
+
+        testInstance.multiplexingClient.close();
+        assertFalse(connectionStatusChangeTracker.isOpen);
+        assertTrue(connectionStatusChangeTracker.clientClosedGracefully);
+    }
+
     // MultiplexingClient should be able to open an AMQP connection to IoTHub with no device sessions, and should
     // allow for device sessions to be added and used later.
     @Test
