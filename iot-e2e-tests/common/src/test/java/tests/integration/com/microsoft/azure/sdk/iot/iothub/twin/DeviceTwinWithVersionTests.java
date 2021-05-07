@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
@@ -27,6 +28,7 @@ import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.DeviceConnectionString;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
@@ -188,6 +190,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     {
         public IotHubClientProtocol protocol;
         private com.microsoft.azure.sdk.iot.service.Device deviceForRegistryManager;
+        public TestDeviceIdentity testDeviceIdentity;
 
         private final DeviceTwin twinServiceClient;
         private DeviceTwinWithVersionTestDevice deviceTwinWithVersionTestDevice;
@@ -214,12 +217,10 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     public void createDevice() throws Exception
     {
         testInstance.deviceTwinWithVersionTestDevice = new DeviceTwinWithVersionTestDevice();
-        testInstance.deviceTwinWithVersionTestDevice.deviceId = "java-twin-version-e2e-test-".concat(UUID.randomUUID().toString());
         testInstance.deviceTwinWithVersionTestDevice.receivedProperties = new HashSet<>();
 
-        testInstance.deviceForRegistryManager = com.microsoft.azure.sdk.iot.service.Device.createFromId(testInstance.deviceTwinWithVersionTestDevice.deviceId, null, null);
-        testInstance.deviceForRegistryManager = Tools.addDeviceWithRetry(testInstance.registryManager, testInstance.deviceForRegistryManager);
-
+        testInstance.testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS, true);
+        testInstance.deviceForRegistryManager = testInstance.testDeviceIdentity.getDevice();
     }
 
     @After
@@ -231,13 +232,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
             testInstance.deviceTwinWithVersionTestDevice.deviceClient = null;
         }
 
-        if (testInstance != null && testInstance.deviceTwinWithVersionTestDevice != null)
-        {
-            testInstance.deviceTwinWithVersionTestDevice.expectedProperties = null;
-            testInstance.deviceTwinWithVersionTestDevice.reportedPropertyVersion = null;
-            testInstance.deviceTwinWithVersionTestDevice.receivedProperties = null;
-            testInstance.deviceTwinWithVersionTestDevice.deviceTwinStatus = STATUS.UNKNOWN;
-        }
+        Tools.disposeTestIdentity(testInstance.testDeviceIdentity, iotHubConnectionString);
     }
 
     @Test
