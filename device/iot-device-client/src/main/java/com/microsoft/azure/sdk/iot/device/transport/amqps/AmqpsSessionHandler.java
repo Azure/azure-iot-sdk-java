@@ -50,6 +50,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     private boolean methodsReceiverLinkOpened;
     private boolean sessionOpenedRemotely;
     private boolean sessionHandlerClosedBeforeRemoteSessionOpened;
+    private boolean isClosing;
 
     AmqpsSessionHandler(final DeviceClientConfig deviceClientConfig, AmqpsSessionStateCallback amqpsSessionStateCallback)
     {
@@ -82,6 +83,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
         this.methodsReceiverLinkOpened = false;
         this.sessionOpenedRemotely = false;
         this.sessionHandlerClosedBeforeRemoteSessionOpened = false;
+        this.isClosing = false;
     }
 
     public void closeSession()
@@ -101,6 +103,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
 
                 // This is a difficult scenario to reproduce, but it typically happens during retry logic if the client gives
                 // up on a retry attempt prior to the service opening the session remotely.
+                this.isClosing = true;
                 this.session.close();
             }
             else
@@ -153,7 +156,7 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
     public void onSessionRemoteClose(Event e)
     {
         Session session = e.getSession();
-        if (session.getLocalState() == EndpointState.ACTIVE)
+        if (session.getLocalState() == EndpointState.ACTIVE || !isClosing)
         {
             //Service initiated this session close
             this.session.close();
