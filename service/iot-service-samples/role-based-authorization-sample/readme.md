@@ -9,6 +9,8 @@ please see [this overview][rbac-overview].
 From the SDK side, users are required to implement the [TokenCredential][token-credential] interface so that the client 
 code can use role-based access tokens to authenticate with the service.
 
+From the service side, you can read [this document][rbac-ms-doc] for additional details.
+
 ## TokenCredential implementations
 
 While users can create their own implementations of the TokenCredential interface, the Azure Identity SDK has several 
@@ -30,3 +32,4 @@ ClientSecretCredential instance and using it when constructing multiple service 
 [default-azure-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/identity/azure-identity/src/main/java/com/azure/identity/DefaultAzureCredential.java
 [client-secret-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/identity/azure-identity/src/main/java/com/azure/identity/ClientSecretCredential.java
 [interactive-browser-credential]: https://github.com/Azure/azure-sdk-for-java/blob/master/sdk/identity/azure-identity/src/main/java/com/azure/identity/InteractiveBrowserCredential.java
+[rbac-ms-doc]: https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-dev-guide-azure-ad-rbac
