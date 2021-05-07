@@ -658,7 +658,7 @@ public class DeviceTwinCommon extends IntegrationTest
         this.testInstance.testIdentity.getClient().registerConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
     }
 
-    protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    protected void testGetDeviceTwin() throws IOException, InterruptedException, IotHubException
     {
         // arrange
         Map<Property, com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair<TwinPropertyCallBack, Object>> desiredPropertiesCB = new HashMap<>();
