@@ -39,6 +39,12 @@ public class InternalClient
     static final String SET_HTTPS_CONNECT_TIMEOUT = "SetHttpsConnectTimeout";
     static final String SET_HTTPS_READ_TIMEOUT = "SetHttpsReadTimeout";
 
+    private static final String TWIN_OVER_HTTP_ERROR_MESSAGE =
+        "Twin operations are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
+
+    private static final String METHODS_OVER_HTTP_ERROR_MESSAGE =
+        "Direct methods are only supported over MQTT, MQTT_WS, AMQPS, and AMQPS_WS";
+
     DeviceClientConfig config;
     DeviceIO deviceIO;
 
@@ -268,6 +274,7 @@ public class InternalClient
     public void subscribeToDesiredProperties(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
@@ -295,6 +302,7 @@ public class InternalClient
     public void subscribeToTwinDesiredProperties(Map<Property, Pair<TwinPropertyCallBack, Object>> onDesiredPropertyChange) throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
@@ -365,6 +373,7 @@ public class InternalClient
     public void sendReportedProperties(Set<Property> reportedProperties, Integer version, CorrelatingMessageCallback correlatingMessageCallback, Object correlatingMessageCallbackContext, IotHubEventCallback reportedPropertiesCallback, Object reportedPropertiesCallbackContext) throws IOException, IllegalArgumentException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         verifyReportedProperties(reportedProperties);
 
@@ -621,6 +630,7 @@ public class InternalClient
 
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -681,6 +691,7 @@ public class InternalClient
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -725,6 +736,7 @@ public class InternalClient
             throws IOException, IllegalArgumentException, UnsupportedOperationException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -762,6 +774,7 @@ public class InternalClient
     void getTwinInternal() throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
         if (this.twin == null)
         {
@@ -819,6 +832,7 @@ public class InternalClient
             throws IOException
     {
         verifyRegisteredIfMultiplexing();
+        verifyMethodsAreSupported();
 
         if (!this.deviceIO.isOpen())
         {
@@ -1155,12 +1169,19 @@ public class InternalClient
         }
     }
 
-    private void verifyReportedPropertiesAndVersion(Set<Property> reportedProperties, Integer version) throws IOException {
-        verifyReportedProperties(reportedProperties);
-
-        if (version != null && version < 0) {
-            throw new IllegalArgumentException("Version cannot be negative.");
+    private void verifyTwinOperationsAreSupported()
+    {
+        if (this.config.getProtocol() == HTTPS)
+        {
+            throw new UnsupportedOperationException(TWIN_OVER_HTTP_ERROR_MESSAGE);
         }
     }
 
+    private void verifyMethodsAreSupported()
+    {
+        if (this.config.getProtocol() == HTTPS)
+        {
+            throw new UnsupportedOperationException(METHODS_OVER_HTTP_ERROR_MESSAGE);
+        }
+    }
 }
