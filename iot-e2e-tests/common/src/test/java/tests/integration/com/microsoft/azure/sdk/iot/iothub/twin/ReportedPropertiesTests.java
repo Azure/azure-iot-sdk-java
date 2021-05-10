@@ -68,41 +68,6 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void testSendReportedPropertiesMultiThreaded() throws IOException, IotHubException, InterruptedException
-    {
-        // arrange
-        ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
-
-        // act
-        // send max_prop RP one at a time in parallel
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
-        {
-            executor.submit(() -> {
-                try
-                {
-                    Set<Property> newReportedProperties = testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(1);
-                    testInstance.testIdentity.getClient().sendReportedProperties(newReportedProperties);
-                }
-                catch (IOException e)
-                {
-                    fail(e.getMessage());
-                }
-                Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected OK but twin status was " + testInstance.deviceUnderTest.deviceTwinStatus, testInstance.testIdentity.getClient()), OK, testInstance.deviceUnderTest.deviceTwinStatus);
-            });
-        }
-        executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
-        {
-            executor.shutdownNow();
-        }
-
-        // verify if they are received by SC
-        readReportedPropertiesAndVerify(testInstance.deviceUnderTest, PROPERTY_VALUE, MAX_PROPERTIES_TO_TEST);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
     public void testSendReportedPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
@@ -144,52 +109,7 @@ public class ReportedPropertiesTests extends DeviceTwinCommon
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void testUpdateReportedPropertiesMultiThreaded() throws IOException, InterruptedException, IotHubException
-    {
-        // arrange
-        ExecutorService executor = Executors.newFixedThreadPool(MAX_PROPERTIES_TO_TEST);
-
-        // send max_prop RP all at once
-        testInstance.deviceUnderTest.dCDeviceForTwin.createNewReportedProperties(MAX_PROPERTIES_TO_TEST);
-        testInstance.testIdentity.getClient().sendReportedProperties(testInstance.deviceUnderTest.dCDeviceForTwin.getReportedProp());
-        Thread.sleep(REPORTED_PROPERTIES_PROPAGATION_DELAY_MILLISECONDS);
-
-        // act
-        // Update RP
-        for (int i = 0; i < MAX_PROPERTIES_TO_TEST; i++)
-        {
-            final int index = i;
-            executor.submit(() -> {
-                try
-                {
-                    Set<Property> updatedProperties = testInstance.deviceUnderTest.dCDeviceForTwin.updateExistingReportedProperty(index);
-                    testInstance.testIdentity.getClient().sendReportedProperties(updatedProperties);
-                    waitAndVerifyTwinStatusBecomesSuccess();
-                }
-                catch (IOException | InterruptedException e)
-                {
-                    fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Unexpected exception occurred during sending reported properties: " + Tools.getStackTraceFromThrowable(e), testInstance.testIdentity.getClient()));
-                }
-            });
-        }
-        Thread.sleep(DELAY_BETWEEN_OPERATIONS);
-        executor.shutdown();
-        if (!executor.awaitTermination(MULTITHREADED_WAIT_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS))
-        {
-            executor.shutdownNow();
-        }
-
-        // assert
-        Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessage("Expected OK but twin status was " + testInstance.deviceUnderTest.deviceTwinStatus, testInstance.testIdentity.getClient()), OK, testInstance.deviceUnderTest.deviceTwinStatus);
-
-        // verify if they are received by SC
-        readReportedPropertiesAndVerify(testInstance.deviceUnderTest, PROPERTY_VALUE_UPDATE, MAX_PROPERTIES_TO_TEST);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    @ContinuousIntegrationTest
-    public void testUpdateReportedPropertiesSequential() throws IOException, InterruptedException, IotHubException
+    public void testUpdateReportedPropertiesSequentially() throws IOException, InterruptedException, IotHubException
     {
         // arrange
         // send max_prop RP all at once

@@ -935,7 +935,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet);
+                mockedDeviceTwin.updateReportedProperties(mockSet, null, null, null, null, null);
                 times = 1;
             }
         };
@@ -968,7 +968,7 @@ public class InternalClientTest
         new Verifications()
         {
             {
-                mockedDeviceTwin.updateReportedProperties(mockSet, 10);
+                mockedDeviceTwin.updateReportedProperties(mockSet, 10, null, null, null, null);
                 times = 1;
             }
         };

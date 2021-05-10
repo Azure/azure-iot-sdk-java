@@ -308,7 +308,11 @@ public class MqttDeviceTwin extends Mqtt
                             if (topicTokens.length > REQID_TOKEN)
                             {
                                 String requestId = getRequestId(topicTokens[REQID_TOKEN]);
+                                // MQTT does not have the concept of correlationId for request/response handling but it does have a requestId
+                                // To handle this we are setting the correlationId to the requestId to better handle correlation
+                                // whether we use MQTT or AMQP.
                                 message.setRequestId(requestId);
+                                message.setCorrelationId(requestId);
                                 if (requestMap.containsKey(requestId))
                                 {
                                     switch (requestMap.remove(requestId))

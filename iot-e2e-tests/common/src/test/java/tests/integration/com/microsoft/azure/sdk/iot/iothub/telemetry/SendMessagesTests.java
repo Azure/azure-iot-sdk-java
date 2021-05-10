@@ -120,54 +120,6 @@ public class SendMessagesTests extends SendMessagesCommon
 
     @Test
     @ContinuousIntegrationTest
-    public void sendMessagesOverAmqpsMultithreaded() throws InterruptedException, IOException, IotHubException, GeneralSecurityException, URISyntaxException
-    {
-        if (!(testInstance.protocol == AMQPS && testInstance.authenticationType == SAS && testInstance.clientType.equals(ClientType.DEVICE_CLIENT)))
-        {
-            //this test only applicable for AMQPS with SAS auth using device client
-            return;
-        }
-
-        AtomicBoolean succeed = new AtomicBoolean();
-        Device[] deviceListAmqps = new Device[MAX_DEVICE_PARALLEL];
-        TestDeviceIdentity[] testDeviceIdentities = new TestDeviceIdentity[MAX_DEVICE_PARALLEL];
-        Collection<String> deviceIds = new ArrayList<>();
-        for (int i = 0; i < MAX_DEVICE_PARALLEL; i++)
-        {
-            testDeviceIdentities[i] = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, false);
-            deviceListAmqps[i] = testDeviceIdentities[i].getDevice();
-            deviceIds.add(deviceListAmqps[i].getDeviceId());
-        }
-
-        CountDownLatch cdl = new CountDownLatch(deviceListAmqps.length);
-
-        for (Device deviceAmqps: deviceListAmqps)
-        {
-            Thread thread = new Thread(
-                    new testDevice(
-                            deviceAmqps,
-                            AMQPS,
-                            NUM_CONNECTIONS_PER_DEVICE,
-                            NUM_MESSAGES_PER_CONNECTION,
-                            NUM_KEYS_PER_MESSAGE,
-                            SEND_TIMEOUT_MILLISECONDS,
-                            cdl,
-                            succeed));
-            thread.start();
-        }
-
-        cdl.await(1, TimeUnit.MINUTES);
-
-        Tools.disposeTestIdentities(Arrays.asList(testDeviceIdentities), iotHubConnectionString);
-
-        if (!succeed.get())
-        {
-            fail(CorrelationDetailsLoggingAssert.buildExceptionMessage("Sending message over AMQP protocol in parallel failed", deviceIds, "amqp", hostName, new ArrayList<>()));
-        }
-    }
-
-    @Test
-    @ContinuousIntegrationTest
     public void tokenExpiredAfterOpenButBeforeSendHttp() throws Exception
     {
         final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;

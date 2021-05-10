@@ -57,7 +57,6 @@ public class RawTwinQuery
      * Constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
-     * @return The instance of RawTwinQuery
      */
     public RawTwinQuery(String connectionString)
     {

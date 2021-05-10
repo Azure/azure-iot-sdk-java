@@ -545,6 +545,7 @@ public class DeviceTwinDevice
 
     /**
      * Getter for a model Id.
+     *
      * @return The DTDL model Id of the device.
      * The value will be {@code null} for a non-PnP device.
      * The value will be {@code null} for a PnP device until the device connects and registers with a model Id.
@@ -563,13 +564,19 @@ public class DeviceTwinDevice
     }
 
     /**
+     * The scope of the device. Auto-generated and immutable for edge devices and modifiable in leaf devices to create child/parent relationship.
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships"/>.</p>
+     *
      * @return The scope of the device. Auto-generated and immutable for edge devices and modifiable in leaf devices to
      * create child/parent relationship.
      */
     public String getDeviceScope() { return this.deviceScope; }
 
     /**
-     * @return The scopes of the upper level edge devices if applicable. Only available for edge devices.
+     * The scopes of the upper level edge devices if applicable. Only available for edge devices.
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships"/>.</p>
+     *
+     * @return The parent scopes edge and leaf devices, if applicable.
      */
     public List<String> getParentScopes() { return this.parentScopes; }
 }

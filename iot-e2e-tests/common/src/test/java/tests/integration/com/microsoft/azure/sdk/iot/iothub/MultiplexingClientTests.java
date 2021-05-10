@@ -249,6 +249,27 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
+    @Test
+    public void connectionStatusCallbackExecutedWithNoDevices() throws Exception
+    {
+        // Even with no devices registered to a multiplexed connection, the connection status callback should execute
+        // when the multiplexed connection opens and closes.
+        testInstance.setup(0);
+        ConnectionStatusChangeTracker connectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(connectionStatusChangeTracker, null);
+        testInstance.multiplexingClient.open();
+
+        assertTrue(
+            "Connection status callback never executed with CONNECTED status after opening multiplexing client with no devices registered",
+            connectionStatusChangeTracker.isOpen);
+
+        testInstance.multiplexingClient.close();
+
+        assertTrue(
+            "Connection status callback never executed with DISCONNECTED status and CLIENT_CLOSED reason.",
+            connectionStatusChangeTracker.clientClosedGracefully);
+    }
+
     // MultiplexingClient should be able to open an AMQP connection to IoTHub with no device sessions, and should
     // allow for device sessions to be added and used later.
     @Test
@@ -1078,6 +1099,8 @@ public class MultiplexingClientTests extends IntegrationTest
     public void multiplexedConnectionRecoversFromDeviceSessionDropsSequential() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
+        testInstance.multiplexingClient.registerConnectionStatusChangeCallback(multiplexedConnectionStatusChangeTracker, null);
         ConnectionStatusChangeTracker[] connectionStatusChangeTrackers = new ConnectionStatusChangeTracker[DEVICE_MULTIPLEX_COUNT];
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
@@ -1120,6 +1143,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
         // double check that the recovery of any particular device did not cause a device earlier in the array to lose connection
         testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
+
+        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
 
         testInstance.multiplexingClient.close();
 

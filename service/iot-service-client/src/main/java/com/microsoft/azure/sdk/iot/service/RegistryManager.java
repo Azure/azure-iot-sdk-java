@@ -115,7 +115,6 @@ public class RegistryManager
      * Constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string
-     * @return The instance of RegistryManager
      */
     public RegistryManager(String connectionString)
     {
@@ -131,7 +130,6 @@ public class RegistryManager
      *
      * @param connectionString The iot hub connection string
      * @param options The connection options to use when connecting to the service.
-     * @return The instance of RegistryManager
      */
     public RegistryManager(String connectionString, RegistryManagerOptions options)
     {
@@ -159,7 +157,6 @@ public class RegistryManager
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @return The instance of RegistryManager
      */
     public RegistryManager(String hostName, TokenCredential credential)
     {
@@ -173,7 +170,6 @@ public class RegistryManager
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param options The connection options to use when connecting to the service.
-     * @return The instance of RegistryManager
      */
     public RegistryManager(String hostName, TokenCredential credential, RegistryManagerOptions options)
     {
@@ -195,7 +191,6 @@ public class RegistryManager
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
-     * @return The instance of RegistryManager
      */
     public RegistryManager(String hostName, AzureSasCredential azureSasCredential)
     {
@@ -208,7 +203,6 @@ public class RegistryManager
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      * @param options The connection options to use when connecting to the service.
-     * @return The instance of RegistryManager
      */
     public RegistryManager(String hostName, AzureSasCredential azureSasCredential, RegistryManagerOptions options)
     {
