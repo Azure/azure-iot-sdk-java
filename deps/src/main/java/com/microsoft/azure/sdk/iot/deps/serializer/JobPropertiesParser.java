@@ -71,6 +71,11 @@ public class JobPropertiesParser
     @SerializedName(STORAGE_AUTHENTICATION_TYPE)
     private StorageAuthenticationType storageAuthenticationType;
 
+    private static final String IDENTITY = "identity";
+    @Expose
+    @SerializedName(IDENTITY)
+    private ManagedIdentity identity;
+
     /**
      * Empty constructor: Used only to keep GSON happy.
      */
@@ -119,6 +124,7 @@ public class JobPropertiesParser
         this.outputBlobContainerUri = parser.outputBlobContainerUri;
         this.failureReason = parser.failureReason;
         this.storageAuthenticationType = parser.storageAuthenticationType;
+        this.identity  = parser.identity;
 
         if (parser.endTimeUtcString != null)
         {
@@ -314,6 +320,15 @@ public class JobPropertiesParser
     }
 
     /**
+     * Getter for identity
+     *
+     * @return The managed identity used to access the storage account for import and export jobs.
+     */
+    public ManagedIdentity getIdentity() {
+        return identity;
+    }
+
+    /**
      * Setter for StartTimeUtc
      *
      * @param startTimeUtc the value to set StartTimeUtc to
@@ -428,5 +443,15 @@ public class JobPropertiesParser
     {
         //Codes_SRS_JOB_PROPERTIES_PARSER_34_029: [This method shall set the value of this object's failureReason equal to the provided value.]
         this.failureReason = failureReason;
+    }
+
+    /**
+     * Setter for identity
+     *
+     * @param identity the managed identity used to access the storage account for import and export jobs.
+     */
+    public void setIdentity(ManagedIdentity identity)
+    {
+        this.identity = identity;
     }
 }
