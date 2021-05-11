@@ -192,7 +192,7 @@ public class Device extends BaseDevice
      * <p>For edge devices, this is auto-generated and immutable.</p>
      * <p>For leaf devices, set this to create child/parent relationship. The value to set a parent edge device can be
      * retrieved from calling the parent edge device's {@link #getScope()} method.</p>
-     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships"/>.</p>
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
      *
      * @param scope The device scope to set.
      */
@@ -210,7 +210,7 @@ public class Device extends BaseDevice
      * <p>For leaf devices, this could be set to the same value as {@link #getScope()} or left for the service to copy
      * over.</p>
      * <p>For now, this list can only have 1 element in the collection.</p>
-     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships"/>.</p>
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
      *
      * @return The parent scopes for this device.
      */
