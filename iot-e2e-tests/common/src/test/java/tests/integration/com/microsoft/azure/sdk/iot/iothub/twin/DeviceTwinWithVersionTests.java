@@ -221,6 +221,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
         testInstance.testDeviceIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, AuthenticationType.SAS, true);
         testInstance.deviceForRegistryManager = testInstance.testDeviceIdentity.getDevice();
+        testInstance.deviceTwinWithVersionTestDevice.deviceId = testInstance.testDeviceIdentity.getDeviceId();
     }
 
     @After
