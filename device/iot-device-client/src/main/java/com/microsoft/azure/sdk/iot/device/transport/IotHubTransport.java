@@ -1161,7 +1161,6 @@ public class IotHubTransport implements IotHubListener
         while (this.deviceConnectionStates.get(deviceId) == IotHubConnectionStatus.DISCONNECTED_RETRYING
                 && !hasReconnectOperationTimedOut)
         {
-            log.trace("Attempting to reconnect device session: attempt {}", reconnectionAttempts);
             reconnectionAttempts++;
 
             RetryPolicy retryPolicy = this.getConfig(deviceId).getRetryPolicy();
@@ -1170,6 +1169,8 @@ public class IotHubTransport implements IotHubListener
             {
                 break;
             }
+
+            log.trace("Attempting to reconnect device session: attempt {}", reconnectionAttempts);
 
             // This call triggers some async amqp logic, so all this function can do is wait for a bit and check the connection
             // status for this device before retrying.
@@ -1183,30 +1184,20 @@ public class IotHubTransport implements IotHubListener
 
         // reconnection may have failed, so check last retry decision, check for timeout, and check if last exception
         // was terminal
-        try
+        if (retryDecision != null && !retryDecision.shouldRetry())
         {
-            if (retryDecision != null && !retryDecision.shouldRetry())
-            {
-                log.debug("Reconnection was abandoned due to the retry policy");
-                this.close(IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException);
-            }
-            else if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
-            {
-                log.debug("Reconnection was abandoned due to the operation timeout");
-                this.close(
-                        IotHubConnectionStatusChangeReason.RETRY_EXPIRED,
-                        new DeviceOperationTimeoutException("Device operation for reconnection timed out"));
-            }
-            else if (transportException != null && !transportException.isRetryable())
-            {
-                log.error("Reconnection was abandoned due to encountering a non-retryable exception", transportException);
-                this.close(this.exceptionToStatusChangeReason(transportException), transportException);
-            }
+            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceId);
+            log.debug("Reconnection for device {} was abandoned due to the retry policy", deviceId);
         }
-        catch (DeviceClientException ex)
+        else if (this.hasOperationTimedOut(reconnectionStartTimeMillis))
         {
-            log.error("Encountered an exception while closing the client object, client instance should no longer be used as the state is unknown", ex);
-            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.COMMUNICATION_ERROR, transportException, deviceId);
+            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceId);
+            log.debug("Reconnection for device {} was abandoned due to the operation timeout", deviceId);
+        }
+        else if (transportException != null && !transportException.isRetryable())
+        {
+            this.updateStatus(IotHubConnectionStatus.DISCONNECTED, this.exceptionToStatusChangeReason(transportException), transportException, deviceId);
+            log.error("Reconnection for device {} was abandoned due to encountering a non-retryable exception", deviceId, transportException);
         }
     }
 
@@ -1630,7 +1621,11 @@ public class IotHubTransport implements IotHubListener
     {
         for (String registeredDeviceId : this.connectionStatusChangeCallbacks.keySet())
         {
-            this.connectionStatusChangeCallbacks.get(registeredDeviceId).execute(status, reason, e, this.connectionStatusChangeCallbackContexts.get(registeredDeviceId));
+            if (this.deviceConnectionStates.get(registeredDeviceId) != status)
+            {
+                // only execute the callback if the state of the device is changing.
+                this.connectionStatusChangeCallbacks.get(registeredDeviceId).execute(status, reason, e, this.connectionStatusChangeCallbackContexts.get(registeredDeviceId));
+            }
         }
     }
 

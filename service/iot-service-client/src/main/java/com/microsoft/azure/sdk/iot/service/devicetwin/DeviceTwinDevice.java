@@ -565,7 +565,7 @@ public class DeviceTwinDevice
 
     /**
      * The scope of the device. Auto-generated and immutable for edge devices and modifiable in leaf devices to create child/parent relationship.
-     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships"/>.</p>
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
      *
      * @return The scope of the device. Auto-generated and immutable for edge devices and modifiable in leaf devices to
      * create child/parent relationship.
@@ -574,7 +574,7 @@ public class DeviceTwinDevice
 
     /**
      * The scopes of the upper level edge devices if applicable. Only available for edge devices.
-     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships"/>.</p>
+     * <p>For more information, see <a href="https://docs.microsoft.com/azure/iot-edge/iot-edge-as-gateway?view=iotedge-2020-11#parent-and-child-relationships">this document</a>.</p>
      *
      * @return The parent scopes edge and leaf devices, if applicable.
      */

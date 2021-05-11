@@ -1080,7 +1080,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private void closeAsync()
     {
-        log.trace("OpenAsync called for amqp connection");
+        log.trace("CloseAsync called for amqp connection");
 
         // This may be called before a connection or reactor have been established, so need to check the state
         if (this.connection == null && this.reactor == null) {
