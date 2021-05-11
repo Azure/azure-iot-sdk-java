@@ -88,7 +88,7 @@ import static junit.framework.TestCase.*;
 @RunWith(Parameterized.class)
 public class MultiplexingClientTests extends IntegrationTest
 {
-    private static final int DEVICE_MULTIPLEX_COUNT = 10;
+    private static final int DEVICE_MULTIPLEX_COUNT = 3;
 
     private static final int MESSAGE_SEND_TIMEOUT_MILLIS = 60 * 1000;
     private static final int FAULT_INJECTION_RECOVERY_TIMEOUT_MILLIS = 2 * 60 * 1000;
@@ -472,33 +472,6 @@ public class MultiplexingClientTests extends IntegrationTest
         log.debug("Open time: " + (finishOpenTime - startOpenTime) / 1000.0);
         log.debug("Send time: " + (finishSendTime - startSendTime) / 1000.0);
         log.debug("Close time: " + (finishCloseTime - startCloseTime) / 1000.0);
-    }
-
-    @ContinuousIntegrationTest
-    @Test
-    public void sendMessagesMaxDevicesAllowedRegisterAfterOpen() throws Exception
-    {
-        // Right now, AMQP connections can do up to 1000 devices which is consistent with the IoTHub advertised limit
-        // But AMQPS_WS is limited to ~500 for some reason. Still needs investigation.
-        if (testInstance.protocol == IotHubClientProtocol.AMQPS)
-        {
-            testInstance.setup(MultiplexingClient.MAX_MULTIPLEX_DEVICE_COUNT_AMQPS);
-        }
-        else
-        {
-            testInstance.setup(MultiplexingClient.MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS);
-        }
-
-        // unregister all but the 0th device so that they can all be registered after opening the connection
-        testInstance.multiplexingClient.unregisterDeviceClients(testInstance.deviceClientArray.subList(1, testInstance.deviceClientArray.size()));
-
-        testInstance.multiplexingClient.open();
-
-        testInstance.multiplexingClient.registerDeviceClients(testInstance.deviceClientArray);
-
-        testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray);
-
-        testInstance.multiplexingClient.close();
     }
 
     @Test
