@@ -105,6 +105,13 @@ public class AmqpsSessionHandler extends BaseHandler implements AmqpsLinkStateCa
                 // up on a retry attempt prior to the service opening the session remotely.
                 this.isClosing = true;
                 this.session.close();
+
+                if (session.getLocalState() == EndpointState.CLOSED)
+                {
+                    // Since session was never opened, there will be no callback for onSessionRemoteClose, so now is
+                    // the appropriate time to notify the connection layer that this session has finished closing.
+                    this.amqpsSessionStateCallback.onSessionClosedAsExpected(this.getDeviceId());
+                }
             }
             else
             {

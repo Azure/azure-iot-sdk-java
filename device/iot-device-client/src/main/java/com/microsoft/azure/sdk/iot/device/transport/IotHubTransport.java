@@ -1163,7 +1163,15 @@ public class IotHubTransport implements IotHubListener
         {
             reconnectionAttempts++;
 
-            RetryPolicy retryPolicy = this.getConfig(deviceId).getRetryPolicy();
+            DeviceClientConfig config = this.getConfig(deviceId);
+
+            if (config == null)
+            {
+                log.debug("Reconnection for device {} was abandoned because it was unregistered while reconnecting", deviceId);
+                return;
+            }
+
+            RetryPolicy retryPolicy = config.getRetryPolicy();
             retryDecision = retryPolicy.getRetryDecision(reconnectionAttempts, transportException);
             if (!retryDecision.shouldRetry())
             {
@@ -1296,21 +1304,24 @@ public class IotHubTransport implements IotHubListener
     // Still need to check the device connection status before you can report the device to be re-connected.
     private void singleDeviceReconnectAttemptAsync(String deviceId)
     {
-        DeviceClientConfig config = getConfig(deviceId);
+        DeviceClientConfig config = this.getConfig(deviceId);
+
+        if (config == null)
+        {
+            log.debug("Reconnection for device {} was abandoned because it was unregistered while reconnecting", deviceId);
+            return;
+        }
+
         ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(config);
         ((AmqpsIotHubConnection) this.iotHubTransportConnection).registerMultiplexedDevice(config);
     }
 
     private DeviceClientConfig getConfig(String deviceId)
     {
-        DeviceClientConfig config = this.deviceClientConfigs.get(deviceId);
-
-        if (config != null)
-        {
-            return config;
-        }
-
-        throw new IllegalStateException(String.format("Device client config does not exist for device %s", deviceId));
+        // if the map doesn't contain this deviceId as a key, then it is because the device was unregistered from
+        // the multiplexed connection. Methods that call this method should assume that the return value from this
+        // function may be null, and handle that case accordingly.
+        return this.deviceClientConfigs.get(deviceId);
     }
 
     /**
@@ -1383,9 +1394,17 @@ public class IotHubTransport implements IotHubListener
         packet.incrementRetryAttempt();
         if (!this.hasOperationTimedOut(packet.getStartTimeMillis()))
         {
+            String deviceId = packet.getDeviceId();
             if (transportException.isRetryable())
             {
-                RetryDecision retryDecision = this.getConfig(packet.getDeviceId()).getRetryPolicy().getRetryDecision(packet.getCurrentRetryAttempt(), transportException);
+                DeviceClientConfig config = this.getConfig(deviceId);
+                if (config == null)
+                {
+                    log.debug("Abandoning handling the message exception since the device it was associated with has been unregistered.");
+                    return;
+                }
+
+                RetryDecision retryDecision = config.getRetryPolicy().getRetryDecision(packet.getCurrentRetryAttempt(), transportException);
                 if (retryDecision.shouldRetry())
                 {
                     //Codes_SRS_IOTHUBTRANSPORT_34_063: [If the provided transportException is retryable, the packet has not
@@ -1691,7 +1710,14 @@ public class IotHubTransport implements IotHubListener
             return false;
         }
 
-        return (System.currentTimeMillis() - startTime) > this.getConfig(deviceId).getOperationTimeout();
+        DeviceClientConfig config = this.getConfig(deviceId);
+        if (config == null)
+        {
+            log.debug("Operation has not timed out since the device it was associated with has been unregistered already.");
+            return false;
+        }
+
+        return (System.currentTimeMillis() - startTime) > config.getOperationTimeout();
     }
 
     /**
