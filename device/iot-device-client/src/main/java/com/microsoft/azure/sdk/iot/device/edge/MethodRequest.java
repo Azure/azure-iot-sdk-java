@@ -13,7 +13,7 @@ import com.google.gson.annotations.SerializedName;
  * Json parser for a method request. Used to invoke methods on other devices/modules
  */
 // This suppression below is addressing warnings of fields used for serialization.
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class MethodRequest
 {
     private static final String METHOD_NAME_KEY_NAME = "methodName";
