@@ -328,7 +328,7 @@ public class WebSocketUpgrade
 
             for (Map.Entry<String, String> entry : _additionalHeaders.entrySet())
             {
-                builder.append(entry.getKey()).append(":").append(entry.getValue()).append(", ");
+                builder.append(entry.getKey()).append(_colon).append(entry.getValue()).append(", ");
             }
 
             int lastIndex = builder.lastIndexOf(", ");
