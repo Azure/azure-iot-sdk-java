@@ -36,11 +36,6 @@ public class Message
     private String messageId;
 
     /**
-     * Destination of the message
-     */
-    private String to;
-
-    /**
      * Expiry time in milliseconds. Optional
      */
     private long expiryTime;
@@ -54,11 +49,6 @@ public class Message
      * [Required in feedback messages] Used to specify the entity creating the message.
      */
     private String userId;
-
-    /**
-     * [Optional] Used when batching on HTTP Default: false.
-     */
-    private Boolean httpBatchSerializeAsString;
 
     /**
      * [Stamped on servicebound messages by IoT Hub] The authenticated id used to send this message.
@@ -89,6 +79,7 @@ public class Message
     private String inputName;
     private String outputName;
 
+    @SuppressWarnings("unused") // This is not set anywhere but is used in a method
     private String deliveryAcknowledgement;
 
     /**
@@ -108,11 +99,6 @@ public class Message
     private String contentEncoding;
 
     private Date creationTimeUTC;
-
-    /**
-     * Stream that will provide the bytes for the body of the
-     */
-    private ByteArrayInputStream bodyStream;
 
     /**
      * Security Client flag
