@@ -43,6 +43,7 @@ public class ProvisioningTask implements Callable<Object>
     private final Object dpsRegistrationCallbackContext;
 
     private final Authorization authorization;
+    @SuppressWarnings("unused") // Used in a number of methods to report state, may be used for expansion
     private ProvisioningDeviceClientStatus dpsStatus = null;
 
     private final ExecutorService executor;
