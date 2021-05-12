@@ -153,16 +153,6 @@ public class RequestData
     }
 
     /**
-     * Setter for SSL context.
-     * @param sslContext sslContext value. Can be {@code null};
-     */
-    void setSslContext(SSLContext sslContext)
-    {
-        //SRS_RequestData_25_011: [ This method shall set sslContext. ]
-        this.sslContext = sslContext;
-    }
-
-    /**
      * Getter for SasToken.
      * @return SasToken value.
      */
