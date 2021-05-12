@@ -336,6 +336,9 @@ public class InternalClient
      */
     public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
+        if (version < 0) {
+            throw new IllegalArgumentException("Version cannot be negative.");
+        }
         this.sendReportedProperties(reportedProperties, version, null, null, null, null);
     }
 
@@ -1154,13 +1157,4 @@ public class InternalClient
             throw new IllegalArgumentException("Reported properties set cannot be null or empty.");
         }
     }
-
-    private void verifyReportedPropertiesAndVersion(Set<Property> reportedProperties, Integer version) throws IOException {
-        verifyReportedProperties(reportedProperties);
-
-        if (version != null && version < 0) {
-            throw new IllegalArgumentException("Version cannot be negative.");
-        }
-    }
-
 }
