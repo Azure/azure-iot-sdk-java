@@ -36,6 +36,12 @@ public class Message
     private String messageId;
 
     /**
+     * Destination of the message
+     */
+    @SuppressWarnings("unused") // Used in getter, leaving for future expansion
+    private String to;
+
+    /**
      * Expiry time in milliseconds. Optional
      */
     private long expiryTime;
