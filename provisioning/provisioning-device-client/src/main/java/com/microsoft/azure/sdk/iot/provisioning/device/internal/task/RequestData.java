@@ -146,10 +146,21 @@ public class RequestData
      * Getter for SSL Context
      * @return SSL context
      */
+    @SuppressWarnings("unused") // Public member
     public SSLContext getSslContext()
     {
         //SRS_RequestData_25_010: [ This method shall retrieve sslContext. ]
         return sslContext;
+    }
+
+    /**
+     * Setter for SSL context.
+     * @param sslContext sslContext value. Can be {@code null};
+     */
+    void setSslContext(SSLContext sslContext)
+    {
+        //SRS_RequestData_25_011: [ This method shall set sslContext. ]
+        this.sslContext = sslContext;
     }
 
     /**
