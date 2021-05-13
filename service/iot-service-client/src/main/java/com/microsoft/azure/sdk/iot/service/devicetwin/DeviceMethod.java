@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * DeviceMethod enables service client to directly invoke methods on various devices from service client.
+ * Use the DeviceMethod client to directly invoke methods on devices and modules in IoT hub.
  */
 public class DeviceMethod
 {

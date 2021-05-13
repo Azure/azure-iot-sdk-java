@@ -32,6 +32,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * Use the DeviceTwin class to manage the device twins in IoT hubs.
+ */
 public class DeviceTwin
 {
     private int requestId = 0;

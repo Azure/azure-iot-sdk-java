@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * JobClient enables service client to schedule and cancel jobs for a group of devices using the IoTHub.
+ * Use the JobClient to schedule and cancel jobs for a group of devices using IoT hub.
  */
 public class JobClient
 {
