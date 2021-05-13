@@ -19,7 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Extend the ServiceClient class and provide AMPQ specific implementation.
+ * Use the ServiceClient to send and monitor messages to devices in IoT hubs.
+ * It can also be used to know when files have been uploaded by devices.
  */
 @Slf4j
 public class ServiceClient
