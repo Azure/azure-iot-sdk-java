@@ -575,9 +575,8 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param request The request details for getting the SAS URI, including the destination blob name.
      * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
      * @throws IOException If this HTTPS request fails to send.
-     * @throws URISyntaxException If the returned sas uri cannot be constructed correctly
      */
-    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException, URISyntaxException
+    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException
     {
         if (this.fileUploadTask == null)
         {

@@ -105,10 +105,8 @@ public class IotHubCertificateManager
     /**
      * Getter for the collection of Certificates used to Communicate with IotHub
      * @return A collection of Certificates
-     * @throws CertificateException As per https://docs.oracle.com/javase/7/docs/api/java/security/cert/CertificateException.html
-     * @throws IOException If a valid certificate could not be defined.
      */
-    Collection<? extends Certificate> getCertificateCollection() throws CertificateException, IOException
+    Collection<? extends Certificate> getCertificateCollection()
     {
         //Codes_SRS_IOTHUBCERTIFICATEMANAGER_34_003: [**This function shall return the saved certificates.**]**
         return this.certificates;

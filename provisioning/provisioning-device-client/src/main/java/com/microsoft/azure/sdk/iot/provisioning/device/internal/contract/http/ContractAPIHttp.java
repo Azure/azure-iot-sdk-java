@@ -54,13 +54,13 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
     private static final Integer ACCEPTABLE_NONCE_HTTP_STATUS = 401;
 
     @Override
-    public void open(RequestData requestData) throws ProvisioningDeviceConnectionException
+    public void open(RequestData requestData)
     {
         // dummy call for Http
     }
 
     @Override
-    public void close() throws ProvisioningDeviceConnectionException
+    public void close()
     {
         // dummy call for Http
     }

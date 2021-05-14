@@ -210,9 +210,8 @@ public class Message
      * Important: If a string is passed, the HttpBatch.SerializeAsString is set to true,
      * and the internal byte representation is serialized as UTF-8,
      * with HttpBatch.Encoding set to UTF-8.
-     * @throws UnsupportedEncodingException This exception is thrown if unsupported encoding used
      */
-    public Message(String string) throws UnsupportedEncodingException
+    public Message(String string)
     {
         this();
         this.body = string.getBytes(StandardCharsets.UTF_8);

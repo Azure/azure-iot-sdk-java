@@ -175,9 +175,8 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      * @param timeoutMs The timeout in milliseconds to wait for the feedback
      * @return The received feedback batch
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
-    public synchronized FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
+    public synchronized FeedbackBatch receive(long timeoutMs) throws IOException
     {
         feedbackBatch = null;
         if  (amqpReceiveHandler != null)

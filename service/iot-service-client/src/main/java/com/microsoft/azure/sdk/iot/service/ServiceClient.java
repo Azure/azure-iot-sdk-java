@@ -62,7 +62,6 @@ public class ServiceClient
      * @param connectionString The connection string for the IotHub
      * @param options The connection options to use when connecting to the service.
      * @return The created ServiceClient object
-     * @throws IOException This exception is thrown if the object creation failed
      * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
      * are recommended to use {@link #ServiceClient(String, IotHubServiceClientProtocol, ServiceClientOptions)} instead
      * since it does not declare this exception even though it constructs the same ServiceClient.
@@ -72,7 +71,6 @@ public class ServiceClient
             String connectionString,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ServiceClientOptions options)
-            throws IOException
     {
         return new ServiceClient(connectionString, iotHubServiceClientProtocol, options);
     }

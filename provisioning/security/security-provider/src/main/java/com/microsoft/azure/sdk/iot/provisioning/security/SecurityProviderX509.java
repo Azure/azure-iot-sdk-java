@@ -27,7 +27,7 @@ public abstract class SecurityProviderX509 extends SecurityProvider
     abstract public Collection<X509Certificate> getIntermediateCertificatesChain();
 
     @Override
-    public String getRegistrationId() throws SecurityProviderException
+    public String getRegistrationId()
     {
         //SRS_SecurityClientX509_25_001: [ This method shall retrieve the commonName of the client certificate and return as registration Id. ]
         return this.getClientCertificateCommonName();
@@ -41,7 +41,7 @@ public abstract class SecurityProviderX509 extends SecurityProvider
             //SRS_SecurityClientX509_25_002: [ This method shall generate the SSL context. ]
             return this.generateSSLContext(this.getClientCertificate(), this.getClientPrivateKey(), this.getIntermediateCertificatesChain());
         }
-        catch (NoSuchProviderException | UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | IOException | CertificateException e)
+        catch (UnrecoverableKeyException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | IOException | CertificateException e)
         {
             //SRS_SecurityClientX509_25_003: [ This method shall throw SecurityProviderException chained with the exception thrown from underlying API calls to SSL library. ]
             throw new SecurityProviderException(e);
@@ -84,7 +84,7 @@ public abstract class SecurityProviderX509 extends SecurityProvider
         throw new SecurityProviderException("Could not retrieve X509 Key Manager");
     }
 
-    private SSLContext generateSSLContext(X509Certificate leafCertificate, Key leafPrivateKey, Collection<X509Certificate> signerCertificates) throws NoSuchProviderException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException, SecurityProviderException
+    private SSLContext generateSSLContext(X509Certificate leafCertificate, Key leafPrivateKey, Collection<X509Certificate> signerCertificates) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, CertificateException, SecurityProviderException
     {
         if (leafCertificate == null || leafPrivateKey == null || signerCertificates == null)
         {

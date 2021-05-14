@@ -73,7 +73,6 @@ public class DeviceTwin
      * @param connectionString The IoT hub connection string.
      * @param options The configurable options for each operation on this client. May not be {@code null}.
      * @return The instance of DeviceTwin.
-     * @throws IOException This exception is never thrown.
      * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
      * are recommended to use {@link #DeviceTwin(String, DeviceTwinClientOptions)} instead
      * since it does not declare this exception even though it constructs the same DeviceTwin.
@@ -81,7 +80,7 @@ public class DeviceTwin
     @Deprecated
     public static DeviceTwin createFromConnectionString(
             String connectionString,
-            DeviceTwinClientOptions options) throws IOException
+            DeviceTwinClientOptions options)
     {
         return new DeviceTwin(connectionString, options);
     }

@@ -48,7 +48,6 @@ public class JobClient
      *
      * @param connectionString The iot hub connection string
      * @return The instance of JobClient
-     * @throws IOException This exception is never thrown.
      * @throws IllegalArgumentException if the provided connectionString is {@code null} or empty
      * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
      * are recommended to use {@link #JobClient(String)} instead
@@ -56,7 +55,7 @@ public class JobClient
      */
     @Deprecated
     public static JobClient createFromConnectionString(String connectionString)
-        throws IOException, IllegalArgumentException
+        throws IllegalArgumentException
     {
         return new JobClient(connectionString);
     }

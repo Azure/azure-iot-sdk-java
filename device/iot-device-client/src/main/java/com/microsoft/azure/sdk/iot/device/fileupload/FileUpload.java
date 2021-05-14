@@ -79,12 +79,11 @@ public final class FileUpload
      *              inputStream is {@code null} or not available,
      *              streamLength is negative,
      *              statusCallback is {@code null}
-     * @throws IOException if an I/O error occurs in the inputStream.
      */
     public synchronized void uploadToBlobAsync(
             String blobName, InputStream inputStream, long streamLength,
             IotHubEventCallback statusCallback, Object statusCallbackContext)
-            throws IllegalArgumentException, IOException
+            throws IllegalArgumentException
     {
         if((blobName == null) || blobName.isEmpty())
         {

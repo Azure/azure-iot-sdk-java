@@ -156,9 +156,9 @@ public class ProxiedSSLSocket extends SSLSocket
 
     private interface ProxiedSSLSocketNonDelegatedFunctions
     {
-        void connect(SocketAddress socketAddress, int timeout) throws IOException;
-        void connect(SocketAddress socketAddress) throws IOException;
-        void close() throws IOException;
+        void connect(SocketAddress socketAddress, int timeout);
+        void connect(SocketAddress socketAddress);
+        void close();
     }
 
     @RequiredArgsConstructor

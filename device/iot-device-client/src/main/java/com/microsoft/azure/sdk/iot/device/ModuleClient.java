@@ -71,13 +71,12 @@ public class ModuleClient extends InternalClient
      *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
      *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
      * @param protocol The protocol to use when communicating with the module
-     * @throws ModuleClientException if an exception is encountered when parsing the connection string
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
      * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
         //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
@@ -99,13 +98,12 @@ public class ModuleClient extends InternalClient
      *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
      * @param protocol The protocol to use when communicating with the module
      * @param clientOptions The options that allow configuration of the module client instance during initialization
-     * @throws ModuleClientException if an exception is encountered when parsing the connection string
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
      * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorVerifications(protocol, this.config);
@@ -132,7 +130,6 @@ public class ModuleClient extends InternalClient
      * @param privateKey The PEM formatted string for the private key or the system path to the file containing the PEM.
      * @param isPrivateKeyPath 'false' if the privateKey argument is a path to the PEM, and 'true' if it is the PEM string itself,
      * @throws URISyntaxException If the connString cannot be parsed
-     * @throws ModuleClientException if any other exception occurs while building the module client
      * @throws URISyntaxException if the hostname in the connection string is not a valid URI
      * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, ClientOptions)} and provide
      * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
@@ -142,7 +139,7 @@ public class ModuleClient extends InternalClient
      * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      */
     @Deprecated
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws ModuleClientException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
 
@@ -170,7 +167,7 @@ public class ModuleClient extends InternalClient
      * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
      */
     @Deprecated
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol, SSLContext sslContext) throws ModuleClientException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, SSLContext sslContext) throws URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, sslContext, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
         commonConstructorVerifications(protocol, this.getConfig());

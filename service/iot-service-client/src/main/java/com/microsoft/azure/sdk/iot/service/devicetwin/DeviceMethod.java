@@ -64,7 +64,6 @@ public class DeviceMethod
      * @param connectionString is the IoTHub connection string.
      * @param options the configurable options for each operation on this client. May not be null.
      * @return an instance of the DeviceMethod.
-     * @throws IOException This exception is never thrown.
      * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
      * are recommended to use {@link #DeviceMethod(String, DeviceMethodClientOptions)} instead
      * since it does not declare this exception even though it constructs the same DeviceMethod.
@@ -72,7 +71,7 @@ public class DeviceMethod
     @Deprecated
     public static DeviceMethod createFromConnectionString(
         String connectionString,
-        DeviceMethodClientOptions options) throws IOException
+        DeviceMethodClientOptions options)
     {
         if (connectionString == null || connectionString.length() == 0)
         {

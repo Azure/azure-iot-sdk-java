@@ -86,7 +86,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
             // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_006: [If the gatewayHostname is present, this function shall construct the sas token using the gateway hostname instead of the hostname.]
             return new IotHubSasToken(host, deviceId, null, sharedAccessToken, moduleId, expiresOn);
         }
-        catch (UnsupportedEncodingException | URISyntaxException | HsmException e)
+        catch (UnsupportedEncodingException | HsmException e)
         {
             throw new IOException(e);
         }
