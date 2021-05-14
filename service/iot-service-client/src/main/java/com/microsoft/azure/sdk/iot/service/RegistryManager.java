@@ -38,7 +38,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Use the RegistryManager class to manage the identity registry in IoT Hubs.
+ * Use the RegistryManager client to manage the identity registry in IoT hubs.
+ * To access twins, use the {@link com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwin} client.
  */
 public class RegistryManager
 {
