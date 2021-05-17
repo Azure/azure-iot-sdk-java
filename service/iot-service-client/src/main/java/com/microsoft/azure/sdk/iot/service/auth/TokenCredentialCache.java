@@ -13,8 +13,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * This class generates AAD authentication tokens from a TokenCredential but caches previous tokens when they aren't near
- * expiry.
+ * This class generates AAD authentication tokens from a TokenCredential but caches previous tokens when they aren't
+ * near expiry.
  */
 @Slf4j
 public class TokenCredentialCache
@@ -34,7 +34,8 @@ public class TokenCredentialCache
 
     /**
      * Construct a new TokenCredentialCache instance. This cache can only be used to generate authentication tokens
-     * for public cloud IoT Hubs and some private cloud IoT Hubs. For Fairfax IoT Hubs, use {@link #TokenCredentialCache(TokenCredential, String)}.
+     * for public cloud IoT Hubs and some private cloud IoT Hubs. For Fairfax IoT Hubs, use
+     * {@link #TokenCredentialCache(TokenCredential, String)}.
      * @param tokenCredential The tokenCredential instance that this cache will use to generate new tokens.
      */
     @SuppressWarnings("unused") // Unused by our codebase, but removing it would be a breaking change
@@ -69,7 +70,8 @@ public class TokenCredentialCache
         if (this.accessToken == null || isAccessTokenCloseToExpiry(this.accessToken))
         {
             log.trace("Generating new access token.");
-            this.accessToken = tokenCredential.getToken(new TokenRequestContext().addScopes(this.authenticationScopes)).block();
+            TokenRequestContext context = new TokenRequestContext().addScopes(this.authenticationScopes);
+            this.accessToken = tokenCredential.getToken(context).block();
         }
 
         return this.accessToken;
