@@ -86,7 +86,7 @@ public class RawTwinQuery
         Objects.requireNonNull(credential);
 
         this.hostName = hostName;
-        this.credentialCache = new TokenCredentialCache(credential);
+        this.credentialCache = new TokenCredentialCache(credential, hostName);
     }
 
     /**

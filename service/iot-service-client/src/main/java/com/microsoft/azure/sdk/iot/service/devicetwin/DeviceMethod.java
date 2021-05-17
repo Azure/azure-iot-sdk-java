@@ -150,7 +150,7 @@ public class DeviceMethod
         }
 
         this.options = options;
-        this.credentialCache = new TokenCredentialCache(credential);
+        this.credentialCache = new TokenCredentialCache(credential, hostName);
         this.hostName = hostName;
     }
 

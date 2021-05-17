@@ -7,6 +7,7 @@ import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
@@ -23,8 +24,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import static com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache.IOTHUB_PUBLIC_SCOPE;
 
 /**
  * Every token based authentication over AMQP requires a CBS session with a sender and receiver link. This
@@ -113,7 +112,11 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
 
         if (credential != null)
         {
-            TokenRequestContext context = new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE);
+            TokenRequestContext context = new TokenRequestContext();
+            String hostName = this.senderLink.getSession().getConnection().getHostname();
+            String[] authenticationScopes = TokenCredentialCache.getAuthenticationScopes(hostName);
+            context.addScopes(authenticationScopes);
+
             this.currentAccessToken = credential.getToken(context).block();
             applicationProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
             applicationProperties.put(PUT_TOKEN_TYPE, BEARER);
