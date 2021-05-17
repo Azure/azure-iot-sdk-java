@@ -103,7 +103,7 @@ public class TokenCredentialCache
     {
         if (isFairfaxHub(hostname))
         {
-            log.debug("Fairfax IoT Hub detected based on hostname, supplying Fairfax specific authentication scopes.");
+            log.debug("Fairfax IoT Hub detected based on hostname. Supplying Fairfax specific authentication scopes.");
             return IOTHUB_FAIRFAX_SCOPES;
         }
 
