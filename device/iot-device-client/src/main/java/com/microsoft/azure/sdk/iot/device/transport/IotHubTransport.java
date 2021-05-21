@@ -1159,7 +1159,8 @@ public class IotHubTransport implements IotHubListener
         RetryDecision retryDecision = null;
 
         while (this.deviceConnectionStates.get(deviceId) == IotHubConnectionStatus.DISCONNECTED_RETRYING
-                && !hasReconnectOperationTimedOut)
+                && !hasReconnectOperationTimedOut
+                && transportException.isRetryable())
         {
             reconnectionAttempts++;
 
