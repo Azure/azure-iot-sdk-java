@@ -62,7 +62,7 @@ public class TwinMetadata
     public static final String LAST_UPDATED_BY = "$lastUpdatedBy";
     private String lastUpdatedBy;
 
-    // the entity last updated by digest in the TwinCollection
+    // the entity last updated by digest in the TwinCollection which represents service internal version for the applied configuration.
     public static final String LAST_UPDATED_BY_DIGEST = "$lastUpdatedByDigest";
     private String lastUpdatedByDigest;
 
