@@ -69,8 +69,8 @@ import java.util.Map;
  *     user can get both the value and the metadata. For instance, in the above TwinCollection,
  *     {@link #get(Object)} for <b>Color</b> will return <b>White</b> and the {@link #getTwinMetadataFinal(String)}
  *     for <b>Color</b> will return the Object TwinMetadata that contain {@link TwinMetadata#getLastUpdated()}
- *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b>, {@link TwinMetadata#getLastUpdatedBy()} ()}
- *     that will returns the {@code String}, {@link TwinMetadata#getLastUpdatedByDigest()} ()}
+ *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b>, {@link TwinMetadata#getLastUpdatedBy()}
+ *     that will returns the {@code String}, {@link TwinMetadata#getLastUpdatedByDigest()}
  *     that will returns the {@code String}, and {@link TwinMetadata#getLastUpdatedVersion()}
  *     that will returns the {@code Integer} <b>4</b>.
  *

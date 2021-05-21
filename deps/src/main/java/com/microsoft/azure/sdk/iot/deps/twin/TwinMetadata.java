@@ -197,7 +197,7 @@ public class TwinMetadata
                 lastUpdatedByDigest = (String)entry.getValue();
             }
         }
-        // TODO: additional checks
+
         if((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
         {
             return new TwinMetadata(lastUpdated, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest);
