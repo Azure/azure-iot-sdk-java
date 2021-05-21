@@ -89,7 +89,7 @@ public class TwinMetadata
             this.lastUpdatedBy = lastUpdatedBy;
         }
 
-        if(!Tools.isNullOrEmpty(lastUpdatedBy))
+        if(!Tools.isNullOrEmpty(lastUpdatedByDigest))
         {
             this.lastUpdatedByDigest = lastUpdatedByDigest;
         }
@@ -196,6 +196,7 @@ public class TwinMetadata
                 lastUpdatedByDigest = (String)entry.getValue();
             }
         }
+        // TODO: additional checks
         if((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
         {
             return new TwinMetadata(lastUpdated, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest);

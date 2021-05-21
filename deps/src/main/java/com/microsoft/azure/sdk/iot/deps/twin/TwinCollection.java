@@ -66,10 +66,12 @@ import java.util.Map;
  * </pre>
  *
  * <p> This class exposes the Twin collection with or without metadata as a Map here
- *     user can gat both the value and the metadata. For instance, in the above TwinCollection,
+ *     user can get both the value and the metadata. For instance, in the above TwinCollection,
  *     {@link #get(Object)} for <b>Color</b> will return <b>White</b> and the {@link #getTwinMetadataFinal(String)}
  *     for <b>Color</b> will return the Object TwinMetadata that contain {@link TwinMetadata#getLastUpdated()}
- *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b> and {@link TwinMetadata#getLastUpdatedVersion()}
+ *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b>, {@link TwinMetadata#getLastUpdatedBy()} ()}
+ *     that will returns the {@code String}, {@link TwinMetadata#getLastUpdatedByDigest()} ()}
+ *     that will returns the {@code String}, and {@link TwinMetadata#getLastUpdatedVersion()}
  *     that will returns the {@code Integer} <b>4</b>.
  *
  * <p> For the nested TwinCollection, you can do the same, for instance, the following code will return the
@@ -487,6 +489,14 @@ public class TwinCollection extends HashMap<String, Object>
         {
             jsonMetadata.addProperty(TwinMetadata.LAST_UPDATE_TAG, ParserUtility.dateTimeUtcToString(this.twinMetadata.getLastUpdated()));
             jsonMetadata.addProperty(TwinMetadata.LAST_UPDATE_VERSION_TAG, this.twinMetadata.getLastUpdatedVersion());
+            if(this.twinMetadata.getLastUpdatedBy() != null)
+            {
+                jsonMetadata.addProperty(TwinMetadata.LAST_UPDATED_BY, this.twinMetadata.getLastUpdatedBy());
+            }
+            if(this.twinMetadata.getLastUpdatedByDigest() != null)
+            {
+                jsonMetadata.addProperty(TwinMetadata.LAST_UPDATED_BY_DIGEST, this.twinMetadata.getLastUpdatedByDigest());
+            }
         }
 
         for(Map.Entry<String, TwinMetadata> entry: this.metadataMap.entrySet())

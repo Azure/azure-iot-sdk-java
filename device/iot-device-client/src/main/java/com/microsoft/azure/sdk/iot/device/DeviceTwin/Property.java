@@ -12,6 +12,8 @@ public class Property
     private boolean isReported = false;
     private Date lastUpdated;
     private Integer lastUpdatedVersion;
+    private String lastUpdatedBy;
+    private String lastUpdatedByDigest;
 
     public Property(String key, Object value)
     {
@@ -40,6 +42,21 @@ public class Property
         this.isReported = isReported;
         this.lastUpdated = lastUpdated;
         this.lastUpdatedVersion = lastUpdatedVersion;
+    }
+
+    protected Property(String key, Object value, Integer version, boolean isReported, Date lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest)
+    {
+        this(key, value);
+
+        /*
+         **Codes_SRS_Property_21_007: [**The constructor shall store the provided version and metadata.**]**
+         */
+        this.version = version;
+        this.isReported = isReported;
+        this.lastUpdated = lastUpdated;
+        this.lastUpdatedVersion = lastUpdatedVersion;
+        this.lastUpdatedBy = lastUpdatedBy;
+        this.lastUpdatedByDigest = lastUpdatedByDigest;
     }
 
     public String getKey()
