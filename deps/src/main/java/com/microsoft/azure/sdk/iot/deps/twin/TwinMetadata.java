@@ -8,7 +8,6 @@ import com.google.gson.JsonObject;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 
-import javax.swing.*;
 import java.util.Date;
 import java.util.Map;
 
@@ -30,6 +29,8 @@ import java.util.Map;
  *      "MaxSpeed":{
  *          "$lastUpdated":"2017-09-21T02:07:44.238Z",
  *          "$lastUpdatedVersion":3,
+ *          "$lastUpdatedBy": "newconfig",
+ *          "$lastUpdatedByDigest": "637570574076206429",
  *          "Value":{
  *              "$lastUpdated":"2017-09-21T02:07:44.238Z",
  *              "$lastUpdatedVersion":5
@@ -84,12 +85,12 @@ public class TwinMetadata
             this.lastUpdated = ParserUtility.getDateTimeUtc(lastUpdated);
         }
 
-        if(!Tools.isNullOrEmpty(lastUpdatedBy))
+        if(lastUpdatedBy != null)
         {
             this.lastUpdatedBy = lastUpdatedBy;
         }
 
-        if(!Tools.isNullOrEmpty(lastUpdatedByDigest))
+        if(lastUpdatedByDigest != null)
         {
             this.lastUpdatedByDigest = lastUpdatedByDigest;
         }
