@@ -385,6 +385,8 @@ public class TwinCollection extends HashMap<String, Object>
     {
         String lastUpdated = null;
         Integer lastUpdatedVersion = null;
+        String lastUpdatedBy = null;
+        String lastUpdatedByDigest = null;
         for (Map.Entry<? extends String, Object> entry: metadata.entrySet())
         {
             String key = entry.getKey();
@@ -395,6 +397,14 @@ public class TwinCollection extends HashMap<String, Object>
             else if ((key.equals(TwinMetadata.LAST_UPDATE_VERSION_TAG))&& (entry.getValue() instanceof Number))
             {
                 lastUpdatedVersion = ((Number)entry.getValue()).intValue();
+            }
+            else if (key.equals(TwinMetadata.LAST_UPDATED_BY))
+            {
+                lastUpdatedBy = (String)entry.getValue();
+            }
+            else if (key.equals(TwinMetadata.LAST_UPDATED_BY_DIGEST))
+            {
+                lastUpdatedByDigest = (String)entry.getValue();
             }
             else
             {
@@ -419,7 +429,7 @@ public class TwinCollection extends HashMap<String, Object>
 
         if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
         {
-            twinCollection.twinMetadata = new TwinMetadata(lastUpdated, lastUpdatedVersion);
+            twinCollection.twinMetadata = new TwinMetadata(lastUpdated, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest);
         }
     }
 
