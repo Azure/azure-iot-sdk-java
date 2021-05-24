@@ -29,6 +29,8 @@ import java.util.Map;
  *      "MaxSpeed":{
  *          "$lastUpdated":"2017-09-21T02:07:44.238Z",
  *          "$lastUpdatedVersion":3,
+ *          "$lastUpdatedBy": "newconfig",
+ *          "$lastUpdatedByDigest": "637570574076206429",
  *          "Value":{
  *              "$lastUpdated":"2017-09-21T02:07:44.238Z",
  *              "$lastUpdatedVersion":5
@@ -57,6 +59,14 @@ public class TwinMetadata
     public static final String LAST_UPDATE_VERSION_TAG = "$lastUpdatedVersion";
     private final Integer lastUpdatedVersion;
 
+    // the entity last updated by in the TwinCollection. Value is a configuration applied on the Twin.
+    public static final String LAST_UPDATED_BY = "$lastUpdatedBy";
+    private String lastUpdatedBy;
+
+    // the entity last updated by digest in the TwinCollection which represents service internal version for the applied configuration.
+    public static final String LAST_UPDATED_BY_DIGEST = "$lastUpdatedByDigest";
+    private String lastUpdatedByDigest;
+
     /**
      * CONSTRUCTOR
      *
@@ -66,13 +76,23 @@ public class TwinMetadata
      * @param lastUpdatedVersion the {@code Integer} with the version of the last update on the entity. It can be {@code null}.
      * @throws IllegalArgumentException If no valid parameter was provide and the class will be empty, or if the DateTime is invalid.
      */
-    TwinMetadata(String lastUpdated, Integer lastUpdatedVersion)
+    TwinMetadata(String lastUpdated, Integer lastUpdatedVersion, String lastUpdatedBy, String lastUpdatedByDigest)
     {
         if(!Tools.isNullOrEmpty(lastUpdated))
         {
             /* SRS_TWIN_METADATA_21_001: [The constructor shall parse the provided `lastUpdated` String to the Date and store it as the TwinMetadata lastUpdated.] */
             /* SRS_TWIN_METADATA_21_002: [The constructor shall throw IllegalArgumentException if it cannot convert the provided `lastUpdated` String to Date.] */
             this.lastUpdated = ParserUtility.getDateTimeUtc(lastUpdated);
+        }
+
+        if(lastUpdatedBy != null)
+        {
+            this.lastUpdatedBy = lastUpdatedBy;
+        }
+
+        if(lastUpdatedByDigest != null)
+        {
+            this.lastUpdatedByDigest = lastUpdatedByDigest;
         }
 
         /* SRS_TWIN_METADATA_21_003: [The constructor shall store the provided lastUpdatedVersion as is.] */
@@ -103,6 +123,8 @@ public class TwinMetadata
         /* SRS_TWIN_METADATA_21_011: [The constructor shall copy the content of the provided metadata.] */
         this.lastUpdated = metadata.getLastUpdated();
         this.lastUpdatedVersion = metadata.getLastUpdatedVersion();
+        this.lastUpdatedBy = metadata.getLastUpdatedBy();
+        this.lastUpdatedByDigest = metadata.getLastUpdatedByDigest();
     }
 
     /**
@@ -149,6 +171,8 @@ public class TwinMetadata
 
         String lastUpdated = null;
         Integer lastUpdatedVersion = null;
+        String lastUpdatedBy = null;
+        String lastUpdatedByDigest = null;
         for(Map.Entry<? extends String, Object> entry: ((Map<? extends String, Object>)metadata).entrySet())
         {
             String key = entry.getKey();
@@ -164,12 +188,41 @@ public class TwinMetadata
                 }
                 lastUpdatedVersion = ((Number)entry.getValue()).intValue();
             }
+            else if (key.equals(TwinMetadata.LAST_UPDATED_BY))
+            {
+                lastUpdatedBy = entry.getValue().toString();
+            }
+            else if (key.equals(TwinMetadata.LAST_UPDATED_BY_DIGEST))
+            {
+                lastUpdatedByDigest = entry.getValue().toString();
+            }
         }
+
         if((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
         {
-            return new TwinMetadata(lastUpdated, lastUpdatedVersion);
+            return new TwinMetadata(lastUpdated, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest);
         }
         return null;
+    }
+
+    /**
+     * Getter for the LastUpdatedBy.
+     *
+     * @return the {@code String} representing the configuration LastUpdatedBy.
+     */
+    public String getLastUpdatedBy()
+    {
+        return this.lastUpdatedBy;
+    }
+
+    /**
+     * Getter for the lastUpdatedByDigest.
+     *
+     * @return the {@code String} with the stored lastUpdatedByDigest.
+     */
+    public String getLastUpdatedByDigest()
+    {
+        return this.lastUpdatedByDigest;
     }
 
     /**
@@ -222,6 +275,14 @@ public class TwinMetadata
         if(this.lastUpdatedVersion != null)
         {
             jsonObject.addProperty(LAST_UPDATE_VERSION_TAG, this.lastUpdatedVersion);
+        }
+        if(this.lastUpdatedBy != null)
+        {
+            jsonObject.addProperty(LAST_UPDATED_BY, this.lastUpdatedBy);
+        }
+        if(this.lastUpdatedByDigest != null)
+        {
+            jsonObject.addProperty(LAST_UPDATED_BY_DIGEST, this.lastUpdatedByDigest);
         }
         return jsonObject;
     }
