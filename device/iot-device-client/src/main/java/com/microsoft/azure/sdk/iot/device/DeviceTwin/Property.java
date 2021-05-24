@@ -108,6 +108,16 @@ public class Property
         return this.lastUpdatedVersion;
     }
 
+    public String getLastUpdatedBy()
+    {
+        return this.lastUpdatedBy;
+    }
+
+    public String getLastUpdatedByDigest()
+    {
+        return this.lastUpdatedByDigest;
+    }
+
     /**
      * Creates a pretty print JSON with the content of this class and subclasses.
      *

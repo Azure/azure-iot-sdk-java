@@ -211,7 +211,7 @@ public class TwinCollection extends HashMap<String, Object> {
      * {@code Number}, {@code String}, {@code Object}, or up to 5 levels of
      * sub-TwinCollection, but it cannot be types defined by the user or arrays.
      *
-     * @param key   the {@code String} that represent the key of the new entry. It cannot be {#code null} or empty.
+     * @param key   the {@code String} that represents the key of the new entry. It cannot be {@code null} or empty.
      * @param value the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
      * @return The {@code Object} that correspond to the last value of this key. It will be {@code null} if there is no previous value.
      * @deprecated as of Deps version 0.7.1, please use {@link #putFinal(String, Object)}
@@ -245,7 +245,7 @@ public class TwinCollection extends HashMap<String, Object> {
      * {@code Number}, {@code String}, {@code Object}, or up to 5 levels of
      * sub-TwinCollection, but it cannot be types defined by the user or arrays.
      *
-     * @param key   the {@code String} that represent the key of the new entry. It cannot be {#code null} or empty.
+     * @param key   the {@code String} that represents the key of the new entry. It cannot be {@code null} or empty.
      * @param value the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
      * @return The {@code Object} that correspond to the last value of this key. It will be {@code null} if there is no previous value.
      */
