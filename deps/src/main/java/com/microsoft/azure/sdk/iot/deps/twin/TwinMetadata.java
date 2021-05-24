@@ -190,11 +190,11 @@ public class TwinMetadata
             }
             else if (key.equals(TwinMetadata.LAST_UPDATED_BY))
             {
-                lastUpdatedBy = (String)entry.getValue();
+                lastUpdatedBy = entry.getValue().toString();
             }
             else if (key.equals(TwinMetadata.LAST_UPDATED_BY_DIGEST))
             {
-                lastUpdatedByDigest = (String)entry.getValue();
+                lastUpdatedByDigest = entry.getValue().toString();
             }
         }
 

@@ -69,10 +69,10 @@ import java.util.Map;
  *     user can get both the value and the metadata. For instance, in the above TwinCollection,
  *     {@link #get(Object)} for <b>Color</b> will return <b>White</b> and the {@link #getTwinMetadataFinal(String)}
  *     for <b>Color</b> will return the Object TwinMetadata that contain {@link TwinMetadata#getLastUpdated()}
- *     that will returns the {@code Date} <b>2017-09-21T02:07:44.238Z</b>, {@link TwinMetadata#getLastUpdatedBy()}
- *     that will returns the {@code String}, {@link TwinMetadata#getLastUpdatedByDigest()}
- *     that will returns the {@code String}, and {@link TwinMetadata#getLastUpdatedVersion()}
- *     that will returns the {@code Integer} <b>4</b>.
+ *     that will returns the {@code Date} for example <b>2017-09-21T02:07:44.238Z</b>, {@link TwinMetadata#getLastUpdatedBy()}
+ *     that will return the {@code String} for example <b>testConfig</b>, {@link TwinMetadata#getLastUpdatedByDigest()}
+ *     that will return the {@code String} for example <b>637570515479675333</b>, and {@link TwinMetadata#getLastUpdatedVersion()}
+ *     that will return the {@code Integer} for example <b>4</b>.
  *
  * <p> For the nested TwinCollection, you can do the same, for instance, the following code will return the
  *     value and metadata of the <b>NewValue</b> nested in <b>MaxSpeed</b>:
@@ -413,7 +413,8 @@ public class TwinCollection extends HashMap<String, Object>
                 Object valueInCollection = twinCollection.get(key);
                 if(valueInCollection == null)
                 {
-                    throw new IllegalArgumentException("Twin metadata is inconsistent");
+                    // If the property (key) exists in metadata but not in twinCollection metadata is inconsistent.
+                    throw new IllegalArgumentException("Twin metadata is inconsistent for property: " + key);
                 }
 
                 TwinMetadata twinMetadata = TwinMetadata.tryExtractFromMap(entry.getValue());
