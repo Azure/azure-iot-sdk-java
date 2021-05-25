@@ -185,6 +185,30 @@ public class PropertyTest
         assertEquals(expectedLastUpdate, testProp.getLastUpdated());
     }
 
+    @Test
+    public void constructorWithMetadataSetsAllMetadata()
+    {
+        //arrange
+        final Date expectedLastUpdate = new Date();
+        final Integer expectedLastUpdatedVersion = 123;
+        final String expectedLastUpdatedBy = "testConfig";
+        final String expectedLastUpdatedByDigest = "12345";
+
+        //act
+        Property testProp = Deencapsulation.newInstance(Property.class,
+                new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class, String.class, String.class},
+                "TestProp", 1, 5, true, expectedLastUpdate, expectedLastUpdatedVersion, expectedLastUpdatedBy, expectedLastUpdatedByDigest);
+
+        //assert
+        assertNotNull(testProp);
+        assertEquals((int)testProp.getVersion(), 5);
+        assertTrue(testProp.getIsReported());
+        assertEquals(expectedLastUpdatedVersion, testProp.getLastUpdatedVersion());
+        assertEquals(expectedLastUpdate, testProp.getLastUpdated());
+        assertEquals(expectedLastUpdatedBy, testProp.getLastUpdatedBy());
+        assertEquals(expectedLastUpdatedByDigest, testProp.getLastUpdatedByDigest());
+    }
+
     /* Tests_SRS_Property_21_011: [The toString shall return a String with the information in this class in a pretty print JSON.] */
     @Test
     public void toStringSucceed()
