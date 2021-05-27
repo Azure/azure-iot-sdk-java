@@ -126,15 +126,6 @@ public class ServiceClient
                         options.getSslContext());
     }
 
-    /**
-     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
-     * of authentication tokens used in the underlying connection.
-     *
-     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
-     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
-     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param iotHubServiceClientProtocol The protocol to open the connection with.
-     */
     public ServiceClient(
             String hostName,
             TokenCredential credential,
@@ -146,21 +137,30 @@ public class ServiceClient
              ServiceClientOptions.builder().build());
     }
 
-    /**
-     * Create a {@link ServiceClient} instance with a custom {@link TokenCredential} to allow for finer grain control
-     * of authentication tokens used in the underlying connection.
-     *
-     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
-     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
-     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
-     * @param iotHubServiceClientProtocol The protocol to open the connection with.
-     * @param options The connection options to use when connecting to the service.
-     */
     public ServiceClient(
             String hostName,
             TokenCredential credential,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ServiceClientOptions options)
+    {
+        this(hostName, credential, iotHubServiceClientProtocol, options, ServiceClientTokenCredentialOptions.builder().build());
+    }
+
+    public ServiceClient(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ServiceClientTokenCredentialOptions tokenCredentialOptions)
+    {
+        this(hostName, credential, iotHubServiceClientProtocol, ServiceClientOptions.builder().build(), tokenCredentialOptions);
+    }
+
+    public ServiceClient(
+        String hostName,
+        TokenCredential credential,
+        IotHubServiceClientProtocol iotHubServiceClientProtocol,
+        ServiceClientOptions options,
+        ServiceClientTokenCredentialOptions tokenCredentialOptions)
     {
         Objects.requireNonNull(credential);
 
@@ -174,7 +174,7 @@ public class ServiceClient
             throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
         }
 
-        this.credentialCache = new TokenCredentialCache(credential, options.getTokenCredentialAuthenticationScopes());
+        this.credentialCache = new TokenCredentialCache(credential, tokenCredentialOptions.getTokenCredentialAuthenticationScopes());
         this.hostName = hostName;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
@@ -185,7 +185,7 @@ public class ServiceClient
         }
 
         TokenCredentialCache tokenCredentialCache
-            = new TokenCredentialCache(credential, options.getTokenCredentialAuthenticationScopes());
+            = new TokenCredentialCache(credential, tokenCredentialOptions.getTokenCredentialAuthenticationScopes());
 
         this.amqpMessageSender =
                 new AmqpSend(

@@ -25,9 +25,4 @@ public class ServiceClientOptions
      */
     @Getter
     private final SSLContext sslContext;
-
-    
-    @Getter
-    @Builder.Default
-    private final AuthenticationScope tokenCredentialAuthenticationScopes = AuthenticationScope.DEFAULT;
 }
