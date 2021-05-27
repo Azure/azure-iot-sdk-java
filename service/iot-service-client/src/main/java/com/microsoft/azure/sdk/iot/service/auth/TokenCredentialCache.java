@@ -32,27 +32,35 @@ public class TokenCredentialCache
     /**
      * Construct a new TokenCredentialCache instance. This cache can only be used to generate authentication tokens
      * for public cloud IoT Hubs and some private cloud IoT Hubs. For Fairfax IoT Hubs, use
-     * {@link #TokenCredentialCache(TokenCredential, String[])}.
+     * {@link #TokenCredentialCache(TokenCredential, AuthenticationScope)}.
      * @param tokenCredential The tokenCredential instance that this cache will use to generate new tokens.
      */
     @SuppressWarnings("unused") // Unused by our codebase, but removing it would be a breaking change
     public TokenCredentialCache(TokenCredential tokenCredential)
     {
-        this(tokenCredential, IOTHUB_PUBLIC_SCOPES);
+        this(tokenCredential, AuthenticationScope.DEFAULT);
     }
 
     /**
      * Construct a new TokenCredentialCache instance.
      * @param tokenCredential The tokenCredential instance that this cache will use to generate new tokens.
-     * @param authenticationScopes The authentication scopes to be used when generating authentication tokens.
+     * @param authenticationScope The authentication scopes to be used when generating authentication tokens.
      */
-    public TokenCredentialCache(TokenCredential tokenCredential, String[] authenticationScopes)
+    public TokenCredentialCache(TokenCredential tokenCredential, AuthenticationScope authenticationScope)
     {
         Objects.requireNonNull(tokenCredential, "tokenCredential cannot be null");
-        Objects.requireNonNull(authenticationScopes, "authenticationScopes cannot be null");
+        Objects.requireNonNull(authenticationScope, "authenticationScope cannot be null");
 
         this.tokenCredential = tokenCredential;
-        this.authenticationScopes = authenticationScopes;
+
+        if (authenticationScope == AuthenticationScope.FAIRFAX)
+        {
+            this.authenticationScopes = IOTHUB_FAIRFAX_SCOPES;
+        }
+        else
+        {
+            this.authenticationScopes = IOTHUB_PUBLIC_SCOPES;
+        }
     }
 
     /**

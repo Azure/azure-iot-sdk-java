@@ -11,6 +11,7 @@ import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationScope;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -90,7 +91,7 @@ public class RawTwinQuery
     }
 
     //TODO documentation
-    public RawTwinQuery(String hostName, TokenCredential credential, String[] authorizationScopes)
+    public RawTwinQuery(String hostName, TokenCredential credential, AuthenticationScope authenticationScope)
     {
         if (Tools.isNullOrEmpty(hostName))
         {
@@ -100,7 +101,7 @@ public class RawTwinQuery
         Objects.requireNonNull(credential);
 
         this.hostName = hostName;
-        this.credentialCache = new TokenCredentialCache(credential, authorizationScopes);
+        this.credentialCache = new TokenCredentialCache(credential, authenticationScope);
     }
 
     /**
