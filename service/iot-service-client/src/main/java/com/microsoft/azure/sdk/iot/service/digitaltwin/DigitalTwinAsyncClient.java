@@ -53,7 +53,7 @@ import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
 public class DigitalTwinAsyncClient {
     private final DigitalTwinsImpl _protocolLayer;
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final String HTTPS_SCHEME= "https://";
+    private static final String HTTPS_SCHEME = "https://";
 
     /**
      * Creates an implementation instance of {@link DigitalTwins} that is used to invoke the Digital Twin features
@@ -125,8 +125,10 @@ public class DigitalTwinAsyncClient {
         Objects.requireNonNull(options);
         final SimpleModule stringModule = new SimpleModule("String Serializer");
         stringModule.addSerializer(new DigitalTwinStringSerializer(String.class, objectMapper));
-        TokenCredentialCache tokenCredentialCache = new TokenCredentialCache(credential);
-        BearerTokenProvider bearerTokenProvider = () -> tokenCredentialCache.getTokenString();
+        TokenCredentialCache tokenCredentialCache =
+            new TokenCredentialCache(credential, options.getTokenCredentialAuthenticationScopes());
+
+        BearerTokenProvider bearerTokenProvider = tokenCredentialCache::getTokenString;
 
         JacksonAdapter adapter = new JacksonAdapter();
         adapter.serializer().registerModule(stringModule);

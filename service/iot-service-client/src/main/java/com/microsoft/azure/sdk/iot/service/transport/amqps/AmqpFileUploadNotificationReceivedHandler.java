@@ -9,6 +9,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -69,13 +70,13 @@ public class AmqpFileUploadNotificationReceivedHandler extends AmqpConnectionHan
 
     AmqpFileUploadNotificationReceivedHandler(
             String hostName,
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             AmqpFeedbackReceivedEvent amqpFeedbackReceivedEvent,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, credential, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, credentialCache, iotHubServiceClientProtocol, proxyOptions, sslContext);
         this.amqpFeedbackReceivedEvent = amqpFeedbackReceivedEvent;
     }
 

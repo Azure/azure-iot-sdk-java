@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.service;
 
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -37,4 +38,8 @@ public class RegistryManagerOptions
     @Getter
     @Builder.Default
     private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final String[] tokenCredentialAuthenticationScopes = TokenCredentialCache.IOTHUB_PUBLIC_SCOPES;
 }

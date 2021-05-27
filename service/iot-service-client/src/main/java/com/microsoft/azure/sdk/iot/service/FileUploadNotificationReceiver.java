@@ -7,6 +7,7 @@ package com.microsoft.azure.sdk.iot.service;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,7 +66,7 @@ public class FileUploadNotificationReceiver extends Receiver
 
     FileUploadNotificationReceiver(
             String hostName,
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -75,13 +76,13 @@ public class FileUploadNotificationReceiver extends Receiver
             throw new IllegalArgumentException("hostName cannot be null or empty");
         }
 
-        Objects.requireNonNull(credential);
+        Objects.requireNonNull(credentialCache);
         Objects.requireNonNull(iotHubServiceClientProtocol);
 
         this.amqpFileUploadNotificationReceive =
                 new AmqpFileUploadNotificationReceive(
                         hostName,
-                        credential,
+                        credentialCache,
                         iotHubServiceClientProtocol,
                         proxyOptions,
                         sslContext);

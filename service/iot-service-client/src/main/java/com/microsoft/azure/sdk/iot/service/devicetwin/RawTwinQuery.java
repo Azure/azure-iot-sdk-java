@@ -89,6 +89,20 @@ public class RawTwinQuery
         this.credentialCache = new TokenCredentialCache(credential);
     }
 
+    //TODO documentation
+    public RawTwinQuery(String hostName, TokenCredential credential, String[] authorizationScopes)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(credential);
+
+        this.hostName = hostName;
+        this.credentialCache = new TokenCredentialCache(credential, authorizationScopes);
+    }
+
     /**
      * Constructor to create instance from connection string
      *

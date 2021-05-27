@@ -127,7 +127,7 @@ public class JobClient
         }
 
         this.hostName = hostName;
-        this.credentialCache = new TokenCredentialCache(credential);
+        this.credentialCache = new TokenCredentialCache(credential, options.getTokenCredentialAuthenticationScopes());
         this.options = options;
     }
 

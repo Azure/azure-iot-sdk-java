@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.service;
 
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,11 +18,15 @@ public class ServiceClientOptions
     @Getter
     private final ProxyOptions proxyOptions;
 
-
     /**
      * The SSL context to use when opening the AMQPS/AMQPS_WS connections. If not set, this library will generate the default
      * SSL context that trusts the IoT Hub public certificates.
      */
     @Getter
     private final SSLContext sslContext;
+
+    
+    @Getter
+    @Builder.Default
+    private final String[] tokenCredentialAuthenticationScopes = TokenCredentialCache.IOTHUB_PUBLIC_SCOPES;
 }

@@ -1,6 +1,7 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -38,4 +39,8 @@ public class DeviceMethodClientOptions
     @Getter
     @Builder.Default
     private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
+
+    @Getter
+    @Builder.Default
+    private final String[] tokenCredentialAuthenticationScopes = TokenCredentialCache.IOTHUB_PUBLIC_SCOPES;
 }

@@ -170,7 +170,7 @@ public class RegistryManager
 
         this.executor = Executors.newFixedThreadPool(EXECUTOR_THREAD_POOL_SIZE);
         this.options = options;
-        this.credentialCache = new TokenCredentialCache(credential);
+        this.credentialCache = new TokenCredentialCache(credential, options.getTokenCredentialAuthenticationScopes());
         this.hostName = hostName;
     }
 

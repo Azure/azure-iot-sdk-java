@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -27,7 +28,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private final String hostName;
     private String userName;
     private String sasToken;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AzureSasCredential sasTokenProvider;
     private AmqpFileUploadNotificationReceivedHandler amqpReceiveHandler;
     private FileUploadNotification fileUploadNotification;
@@ -97,7 +98,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
 
     public AmqpFileUploadNotificationReceive(
             String hostName,
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -106,7 +107,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
-        this.credential = credential;
+        this.credentialCache = credentialCache;
     }
 
     public AmqpFileUploadNotificationReceive(
@@ -131,11 +132,11 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     {
         if (amqpReceiveHandler == null)
         {
-            if (this.credential != null)
+            if (this.credentialCache != null)
             {
                 amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
                         this.hostName,
-                        this.credential,
+                        this.credentialCache,
                         this.iotHubServiceClientProtocol,
                         this,
                         this.proxyOptions,

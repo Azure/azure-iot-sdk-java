@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.service.FeedbackBatch;
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -27,7 +28,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     private final String hostName;
     private String userName;
     private String sasToken;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AzureSasCredential sasTokenProvider;
     private AmqpFeedbackReceivedHandler amqpReceiveHandler;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -97,7 +98,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
 
     public AmqpReceive(
             String hostName,
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -106,7 +107,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
-        this.credential = credential;
+        this.credentialCache = credentialCache;
     }
 
     public AmqpReceive(
@@ -128,11 +129,11 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      */
     public void open()
     {
-        if (credential != null)
+        if (credentialCache != null)
         {
             amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
                     this.hostName,
-                    this.credential,
+                    this.credentialCache,
                     this.iotHubServiceClientProtocol,
                     this,
                     this.proxyOptions,
