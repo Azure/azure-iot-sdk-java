@@ -151,6 +151,14 @@ public class RegistryManagerTest
     final String jobPropertiesJson = "{\"jobId\":\"some_guid\",\"type\":\"export\",\"progress\"" +
             ":0,\"outputBlobContainerUri\":\"https://myurl.com\",\"excludeKeysInExport\":true}";
 
+    @Test
+    public void testOptionsDefaults()
+    {
+        RegistryManagerOptions options = RegistryManagerOptions.builder().build();
+        assertEquals((int) Deencapsulation.getField(RegistryManagerOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
+        assertEquals((int) Deencapsulation.getField(RegistryManagerOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+    }
+
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
     // Assert
     @Test (expected = IllegalArgumentException.class)
