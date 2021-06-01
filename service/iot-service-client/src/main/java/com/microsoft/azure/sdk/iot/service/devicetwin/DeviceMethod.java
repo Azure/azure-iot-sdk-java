@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
@@ -50,12 +49,7 @@ public class DeviceMethod
     @Deprecated
     public static DeviceMethod createFromConnectionString(String connectionString) throws IOException
     {
-        return createFromConnectionString(
-            connectionString,
-            DeviceMethodClientOptions.builder()
-                .httpConnectTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .httpReadTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .build());
+        return createFromConnectionString(connectionString, DeviceMethodClientOptions.builder().build());
     }
 
     /**
@@ -94,11 +88,7 @@ public class DeviceMethod
      */
     public DeviceMethod(String connectionString)
     {
-        this(connectionString,
-            DeviceMethodClientOptions.builder()
-                .httpConnectTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .httpReadTimeout(DeviceMethodClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .build());
+        this(connectionString, DeviceMethodClientOptions.builder().build());
     }
 
     /**

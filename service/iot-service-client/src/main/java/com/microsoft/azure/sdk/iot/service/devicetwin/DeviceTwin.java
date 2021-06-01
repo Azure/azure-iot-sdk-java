@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinState;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -59,12 +58,7 @@ public class DeviceTwin
     @Deprecated
     public static DeviceTwin createFromConnectionString(String connectionString) throws IOException
     {
-        return createFromConnectionString(
-                connectionString,
-                DeviceTwinClientOptions.builder()
-                    .httpConnectTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                    .httpReadTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                    .build());
+        return createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().build());
     }
 
     /**
@@ -93,11 +87,7 @@ public class DeviceTwin
      */
     public DeviceTwin(String connectionString)
     {
-        this(connectionString,
-             DeviceTwinClientOptions.builder()
-                     .httpConnectTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                     .httpReadTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                     .build());
+        this(connectionString, DeviceTwinClientOptions.builder().build());
     }
 
     /**

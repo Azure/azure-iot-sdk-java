@@ -26,6 +26,7 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubBadFormatException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException;
 import lombok.extern.slf4j.Slf4j;
+import mockit.Deencapsulation;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -136,6 +137,14 @@ public class RegistryManagerTests extends IntegrationTest
     {
         RegistryManagerTestInstance testInstance = new RegistryManagerTestInstance();
         deviceLifecycle(testInstance);
+    }
+
+    @Test
+    public void testOptionsDefaults()
+    {
+        RegistryManagerOptions options = RegistryManagerOptions.builder().build();
+        assertEquals((int) Deencapsulation.getField(RegistryManagerOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
+        assertEquals((int) Deencapsulation.getField(RegistryManagerOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
     }
 
     @Test
