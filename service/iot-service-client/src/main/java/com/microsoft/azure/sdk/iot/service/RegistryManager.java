@@ -7,7 +7,6 @@ package com.microsoft.azure.sdk.iot.service;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.azure.sdk.iot.deps.serializer.ConfigurationParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.DeviceParser;
@@ -63,10 +62,7 @@ public class RegistryManager
     {
         // This constructor was previously a default constructor that users could use because there was no other constructor declared.
         // However, we still prefer users use the createFromConnectionString method to build their clients.
-        options = RegistryManagerOptions.builder()
-                .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .build();
+        options = RegistryManagerOptions.builder().build();
 
         // we don't use hostname in this constructor, so assign it an empty value to satisfy the field being marked final
         hostName = "";
@@ -85,12 +81,7 @@ public class RegistryManager
     @Deprecated
     public static RegistryManager createFromConnectionString(String connectionString) throws IOException
     {
-        RegistryManagerOptions options = RegistryManagerOptions.builder()
-                .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .build();
-
-        return createFromConnectionString(connectionString, options);
+        return createFromConnectionString(connectionString, RegistryManagerOptions.builder().build());
     }
 
     /**
@@ -119,11 +110,7 @@ public class RegistryManager
      */
     public RegistryManager(String connectionString)
     {
-        this(connectionString,
-                RegistryManagerOptions.builder()
-                        .httpConnectTimeout(RegistryManagerOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                        .httpReadTimeout(RegistryManagerOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                        .build());
+        this(connectionString, RegistryManagerOptions.builder().build());
     }
 
     /**
