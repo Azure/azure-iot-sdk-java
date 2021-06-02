@@ -8,18 +8,21 @@ import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Job;
 import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
-import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,8 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for Device Method
@@ -179,6 +181,13 @@ public class DeviceMethodTest
             };
 
 
+    @Test
+    public void testOptionsDefaults()
+    {
+        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().build();
+        assertEquals((int) Deencapsulation.getField(DeviceMethodClientOptions.class, "DEFAULT_HTTP_READ_TIMEOUT_MS"), options.getHttpReadTimeout());
+        assertEquals((int) Deencapsulation.getField(DeviceMethodClientOptions.class, "DEFAULT_HTTP_CONNECT_TIMEOUT_MS"), options.getHttpConnectTimeout());
+    }
 
     /* Tests_SRS_DEVICEMETHOD_21_002: [The constructor shall create an IotHubConnectionStringBuilder object from the given connection string.] */
     /* Tests_SRS_DEVICEMETHOD_21_003: [The constructor shall create a new DeviceMethod instance and return it.] */

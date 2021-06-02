@@ -7,7 +7,6 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.serviceclient;
 
 
 import com.azure.core.credential.AzureSasCredential;
-import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.service.Configuration;
 import com.microsoft.azure.sdk.iot.service.ConfigurationContent;
@@ -28,7 +27,6 @@ import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnathorizedException
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
