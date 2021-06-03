@@ -20,7 +20,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationScopes;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubAuthenticationScopes;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
@@ -29,7 +29,6 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinClientOptions;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.devicetwin.SqlQuery;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClient;
 import com.microsoft.azure.sdk.iot.service.jobs.JobClientOptions;
@@ -81,7 +80,7 @@ public class RoleBasedAuthenticationSample
         // private clouds outside of Azure Stack deployments.
         RegistryManagerOptions fairfaxHubOptions = RegistryManagerOptions
             .builder()
-            .tokenCredentialAuthenticationScopes(AuthenticationScopes.IOTHUB_FAIRFAX_AUTHENTICATION_SCOPES)
+            .tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.FAIRFAX_AUTHENTICATION_SCOPES)
             .build();
     }
 

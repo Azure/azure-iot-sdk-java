@@ -1,7 +1,7 @@
 package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationScopes;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubAuthenticationScopes;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -46,9 +46,9 @@ public class DeviceTwinClientOptions
      * access credentials rather than symmetric key based credentials. This value defaults to the authentication scopes
      * that are used for all public cloud deployments and all private cloud deployments other than those in the
      * Fairfax cloud. For Fairfax cloud users, this value must be set to
-     * {@link AuthenticationScopes#IOTHUB_FAIRFAX_AUTHENTICATION_SCOPES}.
+     * {@link IotHubAuthenticationScopes#FAIRFAX_AUTHENTICATION_SCOPES}.
      */
     @Getter
     @Builder.Default
-    private final String[] tokenCredentialAuthenticationScopes = AuthenticationScopes.IOTHUB_DEFAULT_AUTHENTICATION_SCOPES;
+    private final String[] tokenCredentialAuthenticationScopes = IotHubAuthenticationScopes.DEFAULT_AUTHENTICATION_SCOPES;
 }

@@ -12,7 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationScopes.IOTHUB_DEFAULT_AUTHENTICATION_SCOPES;
+import static com.microsoft.azure.sdk.iot.service.auth.IotHubAuthenticationScopes.DEFAULT_AUTHENTICATION_SCOPES;
 
 /**
  * This class generates AAD authentication tokens from a TokenCredential but caches previous tokens when they aren't
@@ -37,7 +37,9 @@ public class TokenCredentialCache
     @SuppressWarnings("unused") // Unused by our codebase, but removing it would be a breaking change
     public TokenCredentialCache(TokenCredential tokenCredential)
     {
-        this(tokenCredential, IOTHUB_DEFAULT_AUTHENTICATION_SCOPES);
+        this(tokenCredential, DEFAULT_AUTHENTICATION_SCOPES);
+
+        new IotHubAuthenticationScopes();
     }
 
     /**

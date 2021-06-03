@@ -7,11 +7,10 @@ package com.microsoft.azure.sdk.iot.service.devicetwin;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.Tools;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.IotHubAuthenticationScopes;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
@@ -96,7 +95,7 @@ public class RawTwinQuery
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
      *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
      * @param authenticationScopes The Azure Active Directory authentication scopes to use when constructing
-     * authentication tokens to authenticate against IoT Hub with. See {@link com.microsoft.azure.sdk.iot.service.auth.AuthenticationScopes}
+     * authentication tokens to authenticate against IoT Hub with. See {@link IotHubAuthenticationScopes}
      * for more details.
      */
     public RawTwinQuery(String hostName, TokenCredential credential, String[] authenticationScopes)
