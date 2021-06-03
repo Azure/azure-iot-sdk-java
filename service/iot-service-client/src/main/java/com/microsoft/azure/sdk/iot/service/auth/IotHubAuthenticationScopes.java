@@ -20,8 +20,8 @@ public class IotHubAuthenticationScopes
     /**
      * The default authentication scopes for IoT Hub. This value is the default value for all service client options, and
      * is the correct value to use for all users of public cloud deployed IoT Hubs and for all users of private cloud
-     * deployed IoT Hubs other than those in the Fairfax cloud. For users of IoT Hubs deployed in the Fairfax cloud, the
-     * {@link #FAIRFAX_AUTHENTICATION_SCOPES} should be used instead of this.
+     * deployed IoT Hubs other than those in the Azure Government cloud. For users of IoT Hubs deployed in the Azure Government cloud, the
+     * {@link #GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES} should be used instead of this.
      */
     public static final String[] DEFAULT_AUTHENTICATION_SCOPES = new String[]{"https://iothubs.azure.net/.default"};
 
@@ -29,5 +29,5 @@ public class IotHubAuthenticationScopes
      * The authentication scopes for IoT Hubs deployed in the Fairfax private cloud. Users must provide this value when
      * constructing the client's options when using role-based access credentials.
      */
-    public static final String[] FAIRFAX_AUTHENTICATION_SCOPES = new String[]{"https://iothubs.azure.us/.default"};
+    public static final String[] GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES = new String[]{"https://iothubs.azure.us/.default"};
 }

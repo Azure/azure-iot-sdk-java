@@ -80,7 +80,7 @@ public class RoleBasedAuthenticationSample
         // private clouds outside of Azure Stack deployments.
         RegistryManagerOptions fairfaxHubOptions = RegistryManagerOptions
             .builder()
-            .tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.FAIRFAX_AUTHENTICATION_SCOPES)
+            .tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES)
             .build();
     }
 

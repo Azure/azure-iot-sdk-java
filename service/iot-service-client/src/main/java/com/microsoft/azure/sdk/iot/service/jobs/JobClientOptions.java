@@ -48,8 +48,8 @@ public class JobClientOptions
      * authenticating with IoT Hub. This value is only used by the client if the client is configured to use role-based
      * access credentials rather than symmetric key-based credentials. This value defaults to the authentication scopes
      * that are used for all public cloud deployments and all private cloud deployments other than those in the
-     * Fairfax cloud. For Fairfax cloud users, this value must be set to
-     * {@link IotHubAuthenticationScopes#FAIRFAX_AUTHENTICATION_SCOPES}.
+     * Azure Government cloud. For Azure Government cloud users, this value must be set to
+     * {@link IotHubAuthenticationScopes#GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES}.
      */
     @Getter
     @Builder.Default
