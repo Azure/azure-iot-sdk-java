@@ -69,7 +69,7 @@ public class RawTwinQuery
     }
 
     /**
-     * Construct a raw twin query client that uses role based access tokens for authentication.
+     * Construct a raw twin query client that uses role-based access tokens for authentication.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
@@ -89,7 +89,7 @@ public class RawTwinQuery
     }
 
     /**
-     * Construct a raw twin query client that uses role based access tokens for authentication.
+     * Construct a raw twin query client that uses role-based access tokens for authentication.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to

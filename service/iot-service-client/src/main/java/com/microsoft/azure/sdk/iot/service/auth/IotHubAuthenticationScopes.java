@@ -27,7 +27,7 @@ public class IotHubAuthenticationScopes
 
     /**
      * The authentication scopes for IoT Hubs deployed in the Fairfax private cloud. Users must provide this value when
-     * constructing the client's options when using role based access credentials.
+     * constructing the client's options when using role-based access credentials.
      */
     public static final String[] FAIRFAX_AUTHENTICATION_SCOPES = new String[]{"https://iothubs.azure.us/.default"};
 }

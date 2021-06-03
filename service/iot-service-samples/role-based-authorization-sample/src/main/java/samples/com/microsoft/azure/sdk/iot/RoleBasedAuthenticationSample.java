@@ -39,8 +39,8 @@ import java.util.UUID;
 
 /**
  * This sample demonstrates how to use the constructors in the various service clients that take an instance of
- * {@link TokenCredential} in order to authenticate with role based access credentials. For additional details
- * about the service side configurations required to use role based authentication on your IoT Hub, see
+ * {@link TokenCredential} in order to authenticate with role-based access credentials. For additional details
+ * about the service side configurations required to use role-based authentication on your IoT Hub, see
  * <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-dev-guide-azure-ad-rbac">this link</a>
  */
 public class RoleBasedAuthenticationSample
