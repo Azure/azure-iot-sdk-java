@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.service;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSend;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class ServiceClient
     private String userName;
     private String sasToken;
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AzureSasCredential sasTokenProvider;
 
     private final ServiceClientOptions options;
@@ -173,7 +174,7 @@ public class ServiceClient
             throw new IllegalArgumentException("ServiceClientOptions cannot be null for this constructor");
         }
 
-        this.credential = credential;
+        this.credentialCache = new TokenCredentialCache(credential, options.getTokenCredentialAuthenticationScopes());
         this.hostName = hostName;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.options = options;
@@ -183,10 +184,13 @@ public class ServiceClient
             throw new UnsupportedOperationException("Proxies are only supported over AMQPS_WS");
         }
 
+        TokenCredentialCache tokenCredentialCache
+            = new TokenCredentialCache(credential, options.getTokenCredentialAuthenticationScopes());
+
         this.amqpMessageSender =
                 new AmqpSend(
                         hostName,
-                        credential,
+                        tokenCredentialCache,
                         this.iotHubServiceClientProtocol,
                         options.getProxyOptions(),
                         options.getSslContext());
@@ -445,11 +449,11 @@ public class ServiceClient
      */
      public FeedbackReceiver getFeedbackReceiver()
      {
-         if (this.credential != null)
+         if (this.credentialCache != null)
          {
              return new FeedbackReceiver(
                      this.hostName,
-                     this.credential,
+                     this.credentialCache,
                      this.iotHubServiceClientProtocol,
                      this.options.getProxyOptions(),
                      this.options.getSslContext());
@@ -480,11 +484,11 @@ public class ServiceClient
      */
     public FileUploadNotificationReceiver getFileUploadNotificationReceiver()
     {
-        if (this.credential != null)
+        if (this.credentialCache != null)
         {
             return new FileUploadNotificationReceiver(
                     this.hostName,
-                    this.credential,
+                    this.credentialCache,
                     this.iotHubServiceClientProtocol,
                     this.options.getProxyOptions(),
                     this.options.getSslContext());

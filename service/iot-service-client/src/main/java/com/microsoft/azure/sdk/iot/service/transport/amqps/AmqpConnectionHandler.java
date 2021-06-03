@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.deps.ws.impl.WebSocketImpl;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
@@ -49,7 +50,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     protected final String hostName;
     protected String userName;
     protected String sasToken;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AzureSasCredential sasTokenProvider;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
     protected ProxyOptions proxyOptions;
@@ -107,7 +108,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
 
     protected AmqpConnectionHandler(
             String hostName,
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -118,10 +119,10 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         }
 
         Objects.requireNonNull(iotHubServiceClientProtocol);
-        Objects.requireNonNull(credential);
+        Objects.requireNonNull(credentialCache);
 
         this.hostName = hostName;
-        this.credential = credential;
+        this.credentialCache = credentialCache;
 
         commonConstructorSetup(iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
@@ -237,9 +238,9 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
         // session where authentication will take place.
         Session cbsSession = event.getConnection().session();
 
-        if (this.credential != null)
+        if (this.credentialCache != null)
         {
-            new CbsSessionHandler(cbsSession, this, this.credential);
+            new CbsSessionHandler(cbsSession, this, this.credentialCache);
         }
         else if (this.sasTokenProvider != null)
         {

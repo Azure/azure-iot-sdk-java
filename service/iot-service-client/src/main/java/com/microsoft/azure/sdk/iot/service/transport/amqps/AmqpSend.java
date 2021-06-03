@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.Message;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +31,7 @@ public class AmqpSend
     protected final String hostName;
     protected String userName;
     protected String sasToken;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AzureSasCredential sasTokenProvider;
     protected AmqpSendHandler amqpSendHandler;
     protected IotHubServiceClientProtocol iotHubServiceClientProtocol;
@@ -112,7 +113,7 @@ public class AmqpSend
 
     public AmqpSend(
             String hostName,
-            TokenCredential credential,
+            TokenCredentialCache credentialCache,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
@@ -123,10 +124,10 @@ public class AmqpSend
         }
 
         Objects.requireNonNull(iotHubServiceClientProtocol);
-        Objects.requireNonNull(credential);
+        Objects.requireNonNull(credentialCache);
 
         this.hostName = hostName;
-        this.credential = credential;
+        this.credentialCache = credentialCache;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
         this.sslContext = sslContext;
@@ -182,12 +183,12 @@ public class AmqpSend
     {
         synchronized(this)
         {
-            if (this.credential != null)
+            if (this.credentialCache != null)
             {
                 amqpSendHandler =
                         new AmqpSendHandler(
                                 this.hostName,
-                                this.credential,
+                                this.credentialCache,
                                 this.iotHubServiceClientProtocol,
                                 this.proxyOptions,
                                 this.sslContext);

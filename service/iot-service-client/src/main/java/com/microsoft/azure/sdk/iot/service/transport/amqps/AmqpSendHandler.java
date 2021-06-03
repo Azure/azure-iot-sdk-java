@@ -9,6 +9,7 @@ import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.ProxyOptions;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.TransportUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -108,12 +109,12 @@ public class AmqpSendHandler extends AmqpConnectionHandler
 
     AmqpSendHandler(
             String hostName,
-            TokenCredential tokenProvider,
+            TokenCredentialCache credentialCache,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, tokenProvider, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, credentialCache, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
     AmqpSendHandler(

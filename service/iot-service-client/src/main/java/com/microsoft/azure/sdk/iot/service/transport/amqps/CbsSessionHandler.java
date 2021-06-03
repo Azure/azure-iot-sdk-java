@@ -7,6 +7,7 @@ import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.transport.amqp.ErrorLoggingBaseHandlerWithCleanup;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubExceptionManager;
 import lombok.extern.slf4j.Slf4j;
@@ -32,16 +33,16 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
     private CbsSenderLinkHandler cbsSenderLinkHandler;
     private CbsReceiverLinkHandler cbsReceiverLinkHandler;
     private CbsSessionStateCallback cbsSessionStateCallback;
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private String sasToken;
     private AzureSasCredential sasTokenProvider;
     private boolean senderLinkOpened = false;
     private boolean receiverLinkOpened = false;
 
-    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredential credential)
+    CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, TokenCredentialCache credentialCache)
     {
         this(session, cbsSessionStateCallback);
-        this.credential = credential;
+        this.credentialCache = credentialCache;
     }
 
     CbsSessionHandler(Session session, CbsSessionStateCallback cbsSessionStateCallback, AzureSasCredential sasTokenProvider)
@@ -73,9 +74,9 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
 
         Sender cbsSender = this.session.sender(CbsSenderLinkHandler.getCbsTag());
 
-        if (this.credential != null)
+        if (this.credentialCache != null)
         {
-            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.credential);
+            this.cbsSenderLinkHandler = new CbsSenderLinkHandler(cbsSender, this, this.credentialCache);
         }
         else if (this.sasTokenProvider != null)
         {
@@ -194,7 +195,7 @@ public class CbsSessionHandler extends ErrorLoggingBaseHandlerWithCleanup implem
         // as the delivery tag is not -1 (proton's failure case) then it is safe to ignore
 
         // Connection only proactively renews when a token provider is present
-        if (this.credential != null || this.sasTokenProvider != null)
+        if (this.credentialCache != null || this.sasTokenProvider != null)
         {
             // Each execution of onTimerTask is responsible for scheduling the next occurrence based on how long the previous token is valid for
             OffsetDateTime currentOffsetDateTime = OffsetDateTime.now();

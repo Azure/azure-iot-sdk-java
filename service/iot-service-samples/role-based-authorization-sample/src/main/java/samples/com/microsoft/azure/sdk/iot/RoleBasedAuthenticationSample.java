@@ -20,6 +20,7 @@ import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.ServiceClient;
 import com.microsoft.azure.sdk.iot.service.ServiceClientOptions;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationScopes;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethodClientOptions;
@@ -74,6 +75,14 @@ public class RoleBasedAuthenticationSample
         runJobClientSample(iotHubHostName, credential);
 
         runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
+
+        // For users of IoT Hubs deployed in the Fairfax private cloud, your service client's options must specify these
+        // authentication scopes. The default authentication scopes are valid for all other deployments in public or
+        // private clouds outside of Azure Stack deployments.
+        RegistryManagerOptions fairfaxHubOptions = RegistryManagerOptions
+            .builder()
+            .tokenCredentialAuthenticationScopes(AuthenticationScopes.IOTHUB_FAIRFAX_AUTHENTICATION_SCOPES)
+            .build();
     }
 
     private static String runRegistryManagerSample(String iotHubHostName, TokenCredential credential)

@@ -7,6 +7,7 @@ import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
+import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.AmqpValue;
@@ -23,8 +24,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import static com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache.IOTHUB_PUBLIC_SCOPE;
 
 /**
  * Every token based authentication over AMQP requires a CBS session with a sender and receiver link. This
@@ -47,7 +46,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
     private static final String PUT_TOKEN_OPERATION = "operation";
     private static final String PUT_TOKEN_OPERATION_VALUE = "put-token";
 
-    private TokenCredential credential;
+    private TokenCredentialCache credentialCache;
     private AccessToken currentAccessToken;
     private String sasToken;
     private AzureSasCredential sasTokenProvider;
@@ -56,13 +55,13 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
     private static final String SAS_TOKEN = "servicebus.windows.net:sastoken";
     private static final String EXPIRY_KEY = "se=";
 
-    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, TokenCredential credential)
+    CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, TokenCredentialCache credentialCache)
     {
         super(sender, UUID.randomUUID().toString(), linkStateCallback);
 
         this.senderLinkTag = SENDER_LINK_TAG_PREFIX;
         this.senderLinkAddress = SENDER_LINK_ENDPOINT_PATH;
-        this.credential = credential;
+        this.credentialCache = credentialCache;
     }
 
     CbsSenderLinkHandler(Sender sender, LinkStateCallback linkStateCallback, AzureSasCredential sasTokenProvider)
@@ -111,10 +110,12 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
         Map<String, Object> applicationProperties = new HashMap<>();
         applicationProperties.put(PUT_TOKEN_OPERATION, PUT_TOKEN_OPERATION_VALUE);
 
-        if (credential != null)
+        if (credentialCache != null)
         {
-            TokenRequestContext context = new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE);
-            this.currentAccessToken = credential.getToken(context).block();
+            TokenRequestContext context = credentialCache.getTokenRequestContext();
+
+            // Forgoes the potentially cached token credential. Gets a new token every time
+            this.currentAccessToken = credentialCache.getTokenCredential().getToken(context).block();
             applicationProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
             applicationProperties.put(PUT_TOKEN_TYPE, BEARER);
             Section section = new AmqpValue("Bearer " + this.currentAccessToken.getToken());
@@ -136,9 +137,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
             outgoingMessage.setBody(section);
         }
 
-
         applicationProperties.put(PUT_TOKEN_AUDIENCE, this.senderLink.getSession().getConnection().getHostname());
-
         outgoingMessage.setApplicationProperties(new ApplicationProperties(applicationProperties));
 
         return this.sendMessageAndGetDeliveryTag(outgoingMessage);

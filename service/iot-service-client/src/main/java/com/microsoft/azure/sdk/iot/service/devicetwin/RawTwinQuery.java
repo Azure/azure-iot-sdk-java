@@ -70,7 +70,7 @@ public class RawTwinQuery
     }
 
     /**
-     * Constructor to create instance from connection string
+     * Construct a raw twin query client that uses role based access tokens for authentication.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
@@ -90,7 +90,30 @@ public class RawTwinQuery
     }
 
     /**
-     * Constructor to create instance from connection string
+     * Construct a raw twin query client that uses role based access tokens for authentication.
+     *
+     * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
+     * @param credential The custom {@link TokenCredential} that will provide authentication tokens to
+     *                                    this library when they are needed. The provided tokens must be Json Web Tokens.
+     * @param authenticationScopes The Azure Active Directory authentication scopes to use when constructing
+     * authentication tokens to authenticate against IoT Hub with. See {@link com.microsoft.azure.sdk.iot.service.auth.AuthenticationScopes}
+     * for more details.
+     */
+    public RawTwinQuery(String hostName, TokenCredential credential, String[] authenticationScopes)
+    {
+        if (Tools.isNullOrEmpty(hostName))
+        {
+            throw new IllegalArgumentException("hostName cannot be null or empty");
+        }
+
+        Objects.requireNonNull(credential);
+
+        this.hostName = hostName;
+        this.credentialCache = new TokenCredentialCache(credential, authenticationScopes);
+    }
+
+    /**
+     * Constructor to create instance from an {@link AzureSasCredential} instance.
      *
      * @param hostName The hostname of your IoT Hub instance (For instance, "your-iot-hub.azure-devices.net")
      * @param azureSasCredential The custom {@link TokenCredential} that will provide authentication tokens to
