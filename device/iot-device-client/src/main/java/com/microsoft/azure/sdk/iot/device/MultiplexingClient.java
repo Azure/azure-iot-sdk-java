@@ -12,9 +12,11 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A client for creating multiplexed connections to IoT Hub. A multiplexed connection allows for multiple device clients
@@ -498,13 +500,35 @@ public class MultiplexingClient
                 log.info("Registering device {} to multiplexing client", configBeingRegistered.getDeviceId());
             }
 
-            this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+            Set<String> deviceIdsThatFailedToRegister = new HashSet<>();
+            MultiplexingClientDeviceRegistrationAuthenticationException registrationAuthenticationException = null;
+            try
+            {
+                this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+            }
+            catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+            {
+                // If registration failed, 1 or more clients should not be considered registered in this layer's state.
+                // Save the exception so it can be rethrown once the local state has been updated to match the actual state
+                // of the multiplexed connection.
+                deviceIdsThatFailedToRegister = e.getRegistrationExceptions().keySet();
+                registrationAuthenticationException = e;
+            }
 
-            for (DeviceClient successfullyRegisteredClient : deviceClients)
+            for (DeviceClient clientsThatAttemptedToRegister : deviceClients)
             {
                 // Only update the local state map once the register call has succeeded
-                String registeredDeviceId = successfullyRegisteredClient.getConfig().getDeviceId();
-                this.multiplexedDeviceClients.put(registeredDeviceId, successfullyRegisteredClient);
+                String deviceIdThatAttemptedToRegister = clientsThatAttemptedToRegister.getConfig().getDeviceId();
+
+                if (!deviceIdsThatFailedToRegister.contains(deviceIdThatAttemptedToRegister))
+                {
+                    this.multiplexedDeviceClients.put(deviceIdThatAttemptedToRegister, clientsThatAttemptedToRegister);
+                }
+            }
+
+            if (registrationAuthenticationException != null)
+            {
+                throw registrationAuthenticationException;
             }
         }
     }
