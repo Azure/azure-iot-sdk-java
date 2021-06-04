@@ -1675,6 +1675,12 @@ public class MultiplexingClientTests extends IntegrationTest
             assertFalse("Device failed to be registered, but the multiplexing client still reports it as registered",
                 testInstance.multiplexingClient.isDeviceRegistered(deviceToDisable.getDeviceId()));
 
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertTrue("One device failed to be registered, but the other devices should still have been registered.",
+                    testInstance.multiplexingClient.isDeviceRegistered(testInstance.deviceClientArray.get(i).getConfig().getDeviceId()));
+            }
+
             // Verify that the other devices on the multiplexed connection were unaffected
             for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
             {
