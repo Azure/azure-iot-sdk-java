@@ -1517,35 +1517,43 @@ public class MultiplexingClientTests extends IntegrationTest
         deviceToDisable.setStatus(DeviceStatus.Disabled);
         registryManager.updateDevice(deviceToDisable);
 
-        // verify that the disabled device loses its device session
-        long startTime = System.currentTimeMillis();
-        while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
+        try
         {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+            // verify that the disabled device loses its device session
+            long startTime = System.currentTimeMillis();
+            while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
             {
-                fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+                {
+                    fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                }
             }
+
+            assertFalse(connectionStatusChangeTrackers[0].isOpen);
+
+            // Verify that the other devices on the multiplexed connection were unaffected
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
+                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            }
+
+            // Verify that the multiplexed connection itself was unaffected
+            assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+            assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
+
+            // Verify that the other devices can still send telemetry
+            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
+
+            testInstance.multiplexingClient.close();
         }
-
-        assertFalse(connectionStatusChangeTrackers[0].isOpen);
-
-        // Verify that the other devices on the multiplexed connection were unaffected
-        for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+        finally
         {
-            assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
-            assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            deviceToDisable.setStatus(DeviceStatus.Enabled); // re enable the device in case it gets recycled
+            registryManager.updateDevice(deviceToDisable);
         }
-
-        // Verify that the multiplexed connection itself was unaffected
-        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
-        assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
-
-        // Verify that the other devices can still send telemetry
-        testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
-
-        testInstance.multiplexingClient.close();
     }
 
     // If you register a disabled device to a multiplexed connection that hasn't opened yet, the open call should succeed
@@ -1574,34 +1582,42 @@ public class MultiplexingClientTests extends IntegrationTest
         deviceToDisable.setStatus(DeviceStatus.Disabled);
         registryManager.updateDevice(deviceToDisable);
 
-        testInstance.multiplexingClient.open();
-
-        // verify that the disabled device eventually loses its device session
-        long startTime = System.currentTimeMillis();
-        while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
+        try
         {
-            Thread.sleep(200);
+            testInstance.multiplexingClient.open();
 
-            if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+            // verify that the disabled device eventually loses its device session
+            long startTime = System.currentTimeMillis();
+            while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
             {
-                fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+                {
+                    fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                }
             }
-        }
 
-        // Verify that the other devices on the multiplexed connection were unaffected
-        for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            // Verify that the other devices on the multiplexed connection were unaffected
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            }
+
+            // Verify that the multiplexed connection itself was unaffected
+            assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+            assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
+
+            // Verify that the other devices can still send telemetry
+            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
+
+            testInstance.multiplexingClient.close();
+        }
+        finally
         {
-            assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            deviceToDisable.setStatus(DeviceStatus.Enabled); // re enable the device in case it gets recycled
+            registryManager.updateDevice(deviceToDisable);
         }
-
-        // Verify that the multiplexed connection itself was unaffected
-        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
-        assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
-
-        // Verify that the other devices can still send telemetry
-        testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
-
-        testInstance.multiplexingClient.close();
     }
 
     // If you register a disabled device to an active multiplexed connection, the other devices on the connection
@@ -1634,42 +1650,50 @@ public class MultiplexingClientTests extends IntegrationTest
 
         try
         {
-            testInstance.multiplexingClient.registerDeviceClient(testInstance.deviceClientArray.get(0));
-            fail("Registering a disabled device to an active multiplexing connection should have thrown an exception");
-        }
-        catch (MultiplexingClientDeviceRegistrationAuthenticationException ex)
-        {
-            assertTrue(ex.getRegistrationExceptions().containsKey(deviceToDisable.getDeviceId()));
-        }
-
-        // verify that the disabled device eventually loses its device session
-        long startTime = System.currentTimeMillis();
-        while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
-        {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+            try
             {
-                fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                testInstance.multiplexingClient.registerDeviceClient(testInstance.deviceClientArray.get(0));
+                fail("Registering a disabled device to an active multiplexing connection should have thrown an exception");
             }
+            catch (MultiplexingClientDeviceRegistrationAuthenticationException ex)
+            {
+                assertTrue(ex.getRegistrationExceptions().containsKey(deviceToDisable.getDeviceId()));
+            }
+
+            // verify that the disabled device eventually loses its device session
+            long startTime = System.currentTimeMillis();
+            while (!connectionStatusChangeTrackers[0].wentDisconnectedRetrying)
+            {
+                Thread.sleep(200);
+
+                if (System.currentTimeMillis() - startTime > FAULT_INJECTION_TIMEOUT_MILLIS)
+                {
+                    fail("Timed out waiting for the disabled device's client to report DISCONNECTED_RETRYING");
+                }
+            }
+
+
+            // Verify that the other devices on the multiplexed connection were unaffected
+            for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+            {
+                assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
+                assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            }
+
+            // Verify that the multiplexed connection itself was unaffected
+            assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
+            assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
+
+            // Verify that the other devices can still send telemetry
+            testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
+
+            testInstance.multiplexingClient.close();
         }
-
-
-        // Verify that the other devices on the multiplexed connection were unaffected
-        for (int i = 1; i < DEVICE_MULTIPLEX_COUNT; i++)
+        finally
         {
-            assertFalse(connectionStatusChangeTrackers[i].wentDisconnectedRetrying);
-            assertTrue(connectionStatusChangeTrackers[i].isOpen);
+            deviceToDisable.setStatus(DeviceStatus.Enabled); // re enable the device in case it gets recycled
+            registryManager.updateDevice(deviceToDisable);
         }
-
-        // Verify that the multiplexed connection itself was unaffected
-        assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
-        assertTrue(multiplexedConnectionStatusChangeTracker.isOpen);
-
-        // Verify that the other devices can still send telemetry
-        testSendingMessagesFromMultiplexedClients(testInstance.deviceClientArray.subList(1, DEVICE_MULTIPLEX_COUNT));
-
-        testInstance.multiplexingClient.close();
     }
 
     public void registrationsUnwindForUnsupportedOperationExceptions(DeviceClient unsupportedDeviceClient) throws Exception
