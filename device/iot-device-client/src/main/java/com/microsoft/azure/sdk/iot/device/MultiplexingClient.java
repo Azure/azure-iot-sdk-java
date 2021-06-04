@@ -432,8 +432,10 @@ public class MultiplexingClient
         {
             List<DeviceClientConfig> deviceClientConfigsToRegister = new ArrayList<>();
 
+            Map<String, DeviceClient> devicesToRegisterMap = new HashMap<>();
             for (DeviceClient deviceClientToRegister : deviceClients)
             {
+                devicesToRegisterMap.put(deviceClientToRegister.getConfig().getDeviceId(), deviceClientToRegister);
                 DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
 
                 // Overwrite the sslContext of the new client to match the multiplexing client
@@ -500,35 +502,30 @@ public class MultiplexingClient
                 log.info("Registering device {} to multiplexing client", configBeingRegistered.getDeviceId());
             }
 
-            Set<String> deviceIdsThatFailedToRegister = new HashSet<>();
-            MultiplexingClientDeviceRegistrationAuthenticationException registrationAuthenticationException = null;
             try
             {
                 this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+
+                // Only update the local state map once the register call has succeeded
+                this.multiplexedDeviceClients.putAll(devicesToRegisterMap);
             }
             catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
             {
                 // If registration failed, 1 or more clients should not be considered registered in this layer's state.
                 // Save the exception so it can be rethrown once the local state has been updated to match the actual state
                 // of the multiplexed connection.
-                deviceIdsThatFailedToRegister = e.getRegistrationExceptions().keySet();
-                registrationAuthenticationException = e;
-            }
-
-            for (DeviceClient clientsThatAttemptedToRegister : deviceClients)
-            {
-                // Only update the local state map once the register call has succeeded
-                String deviceIdThatAttemptedToRegister = clientsThatAttemptedToRegister.getConfig().getDeviceId();
-
-                if (!deviceIdsThatFailedToRegister.contains(deviceIdThatAttemptedToRegister))
+                for (DeviceClient clientsThatAttemptedToRegister : deviceClients)
                 {
-                    this.multiplexedDeviceClients.put(deviceIdThatAttemptedToRegister, clientsThatAttemptedToRegister);
-                }
-            }
+                    // Only update the local state map once the register call has succeeded
+                    String deviceIdThatAttemptedToRegister = clientsThatAttemptedToRegister.getConfig().getDeviceId();
 
-            if (registrationAuthenticationException != null)
-            {
-                throw registrationAuthenticationException;
+                    if (!e.getRegistrationExceptions().keySet().contains(deviceIdThatAttemptedToRegister))
+                    {
+                        this.multiplexedDeviceClients.put(deviceIdThatAttemptedToRegister, clientsThatAttemptedToRegister);
+                    }
+                }
+
+                throw e;
             }
         }
     }
