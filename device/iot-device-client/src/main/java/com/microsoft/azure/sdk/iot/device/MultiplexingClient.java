@@ -136,7 +136,8 @@ public class MultiplexingClient
      * <p>
      * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
      * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
-     * Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
+     * Any devices not found in the map of registration exceptions provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()} have registered successfully.
      * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
      */
     public void open() throws MultiplexingClientException
@@ -248,8 +249,10 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If the device failed to register. Details for
+     * this failure can be found nested within the map given by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. If this exception is
+     * thrown, the device was not registered, and therefore it does not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClient The device client to associate with this multiplexing client.
@@ -298,8 +301,10 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If the device failed to register. Details for
+     * this failure can be found nested within the map given by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. If this exception is
+     * thrown, the device was not registered, and therefore it does not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClient The device client to associate with this multiplexing client.
@@ -349,8 +354,12 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception. Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register.
+     * Details for each failure can be found in the map provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. Any devices not
+     * found in the map of registration exceptions provided by this exception have registered successfully. Any devices
+     * that are found in the map of registration exceptions provided by this exception were not registered, and therefore
+     * do not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClients The device clients to associate with this multiplexing client.
@@ -397,8 +406,12 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception. Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register.
+     * Details for each failure can be found in the map provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. Any devices not
+     * found in the map of registration exceptions provided by this exception have registered successfully. Any devices
+     * that are found in the map of registration exceptions provided by this exception were not registered, and therefore
+     * do not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClients The device clients to associate with this multiplexing client.

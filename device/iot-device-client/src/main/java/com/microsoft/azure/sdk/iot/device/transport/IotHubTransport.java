@@ -776,6 +776,10 @@ public class IotHubTransport implements IotHubListener
                     }
 
                     registrationException.addRegistrationException(deviceId, deviceRegistrationException);
+
+                    // Since the registration failed, need to remove the device from the list of multiplexed devices
+                    DeviceClientConfig configThatFailedToRegister = this.deviceClientConfigs.remove(deviceId);
+                    ((AmqpsIotHubConnection) this.iotHubTransportConnection).unregisterMultiplexedDevice(configThatFailedToRegister);
                 }
             }
 
