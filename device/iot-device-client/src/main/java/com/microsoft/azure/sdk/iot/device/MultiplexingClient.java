@@ -12,9 +12,11 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A client for creating multiplexed connections to IoT Hub. A multiplexed connection allows for multiple device clients
@@ -136,7 +138,8 @@ public class MultiplexingClient
      * <p>
      * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
      * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
-     * Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
+     * Any devices not found in the map of registration exceptions provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()} have registered successfully.
      * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
      */
     public void open() throws MultiplexingClientException
@@ -248,8 +251,10 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If the device failed to register. Details for
+     * this failure can be found nested within the map given by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. If this exception is
+     * thrown, the device was not registered, and therefore it does not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClient The device client to associate with this multiplexing client.
@@ -298,8 +303,10 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If the device failed to register. Details for
+     * this failure can be found nested within the map given by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. If this exception is
+     * thrown, the device was not registered, and therefore it does not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClient The device client to associate with this multiplexing client.
@@ -349,8 +356,12 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception. Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register.
+     * Details for each failure can be found in the map provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. Any devices not
+     * found in the map of registration exceptions provided by this exception have registered successfully. Any devices
+     * that are found in the map of registration exceptions provided by this exception were not registered, and therefore
+     * do not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClients The device clients to associate with this multiplexing client.
@@ -397,8 +408,12 @@ public class MultiplexingClient
      * <p>
      * @throws InterruptedException If the thread gets interrupted while waiting for the registration to succeed. This
      * will never be thrown if the multiplexing client is not open yet.
-     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register. Details for each failure can be found
-     * in this exception. Any devices not found in the map of registration exceptions provided by this exception have registered successfully.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or more devices failed to register.
+     * Details for each failure can be found in the map provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()}. Any devices not
+     * found in the map of registration exceptions provided by this exception have registered successfully. Any devices
+     * that are found in the map of registration exceptions provided by this exception were not registered, and therefore
+     * do not need to be unregistered.
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If this operation takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      * @param deviceClients The device clients to associate with this multiplexing client.
@@ -417,8 +432,10 @@ public class MultiplexingClient
         {
             List<DeviceClientConfig> deviceClientConfigsToRegister = new ArrayList<>();
 
+            Map<String, DeviceClient> devicesToRegisterMap = new HashMap<>();
             for (DeviceClient deviceClientToRegister : deviceClients)
             {
+                devicesToRegisterMap.put(deviceClientToRegister.getConfig().getDeviceId(), deviceClientToRegister);
                 DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
 
                 // Overwrite the sslContext of the new client to match the multiplexing client
@@ -485,13 +502,30 @@ public class MultiplexingClient
                 log.info("Registering device {} to multiplexing client", configBeingRegistered.getDeviceId());
             }
 
-            this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
-
-            for (DeviceClient successfullyRegisteredClient : deviceClients)
+            try
             {
+                this.deviceIO.registerMultiplexedDeviceClient(deviceClientConfigsToRegister, timeoutMilliseconds);
+
                 // Only update the local state map once the register call has succeeded
-                String registeredDeviceId = successfullyRegisteredClient.getConfig().getDeviceId();
-                this.multiplexedDeviceClients.put(registeredDeviceId, successfullyRegisteredClient);
+                this.multiplexedDeviceClients.putAll(devicesToRegisterMap);
+            }
+            catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+            {
+                // If registration failed, 1 or more clients should not be considered registered in this layer's state.
+                // Save the exception so it can be rethrown once the local state has been updated to match the actual state
+                // of the multiplexed connection.
+                for (DeviceClient clientsThatAttemptedToRegister : deviceClients)
+                {
+                    // Only update the local state map once the register call has succeeded
+                    String deviceIdThatAttemptedToRegister = clientsThatAttemptedToRegister.getConfig().getDeviceId();
+
+                    if (!e.getRegistrationExceptions().keySet().contains(deviceIdThatAttemptedToRegister))
+                    {
+                        this.multiplexedDeviceClients.put(deviceIdThatAttemptedToRegister, clientsThatAttemptedToRegister);
+                    }
+                }
+
+                throw e;
             }
         }
     }
