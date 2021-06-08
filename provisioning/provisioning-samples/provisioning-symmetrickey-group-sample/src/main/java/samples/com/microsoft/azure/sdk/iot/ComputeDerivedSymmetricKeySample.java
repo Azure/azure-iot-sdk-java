@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
  * particular device, so this code is deliberately separate from the {@link ProvisioningSymmetricKeyEnrollmentGroupSample}
  * in this same directory. Users are advised to run this code to generate the derived symmetric key once, and to save
  * the derived key to the device. Users are not advised to derive the device symmetric key from the enrollment group
- * level key within each device as that is insecure.
+ * level key within each device as that is unsecure.
  */
 public class ComputeDerivedSymmetricKeySample
 {
