@@ -20,7 +20,7 @@ public class IotHubAuthenticationScopes
     /**
      * The default authentication scopes for IoT Hub. This value is the default value for all service client options, and
      * is the correct value to use for all users of public cloud deployed IoT Hubs and for all users of private cloud
-     * deployed IoT Hubs other than those in the Azure Government cloud. For users of IoT Hubs deployed in the Azure Government cloud, the
+     * deployed IoT Hubs other than those in the Azure USA Government cloud. For users of IoT Hubs deployed in the Azure USA Government cloud, the
      * {@link #GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES} should be used instead of this.
      */
     public static final String[] DEFAULT_AUTHENTICATION_SCOPES = new String[]{"https://iothubs.azure.net/.default"};

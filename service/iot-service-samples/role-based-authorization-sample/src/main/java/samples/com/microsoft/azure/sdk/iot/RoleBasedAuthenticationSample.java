@@ -6,6 +6,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.identity.AzureAuthorityHosts;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.microsoft.azure.sdk.iot.deps.serializer.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -60,6 +61,9 @@ public class RoleBasedAuthenticationSample
                 .tenantId(parsedArguments.getTenantId())
                 .clientId(parsedArguments.getClientId())
                 .clientSecret(parsedArguments.getClientSecret())
+                //.authorityHost(AzureAuthorityHosts.AZURE_GOVERNMENT) // Uncomment this line if your IoT Hub is deployed in the Azure USA Government cloud
+                //.authorityHost(AzureAuthorityHosts.AZURE_GERMANY) // Uncomment this line if your IoT Hub is deployed in the Azure Germany cloud
+                //.authorityHost(AzureAuthorityHosts.AZURE_CHINA) // Uncomment this line if your IoT Hub is deployed in the Azure China cloud
                 .build();
 
         // "my-azure-iot-hub.azure-devices.net" for example
@@ -74,21 +78,17 @@ public class RoleBasedAuthenticationSample
         runJobClientSample(iotHubHostName, credential);
 
         runDeviceMethodClientSample(iotHubHostName, credential, newDeviceId);
-
-        // For users of IoT Hubs deployed in the Fairfax private cloud, your service client's options must specify these
-        // authentication scopes. The default authentication scopes are valid for all other deployments in public or
-        // private clouds outside of Azure Stack deployments.
-        RegistryManagerOptions fairfaxHubOptions = RegistryManagerOptions
-            .builder()
-            .tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES)
-            .build();
     }
 
     private static String runRegistryManagerSample(String iotHubHostName, TokenCredential credential)
     {
         // RegistryManager has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        RegistryManagerOptions options = RegistryManagerOptions.builder().build();
+        RegistryManagerOptions options =
+            RegistryManagerOptions
+                .builder()
+                //.tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES) // Uncomment this line if your IoT Hub is deployed in the Azure USA Government Cloud.
+                .build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
@@ -117,7 +117,11 @@ public class RoleBasedAuthenticationSample
     {
         // DeviceTwin has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().build();
+        DeviceTwinClientOptions options =
+            DeviceTwinClientOptions
+                .builder()
+                //.tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES) // Uncomment this line if your IoT Hub is deployed in the Azure USA Government Cloud.
+                .build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
@@ -146,7 +150,11 @@ public class RoleBasedAuthenticationSample
     {
         // ServiceClient has some configurable options for setting a custom SSLContext, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        ServiceClientOptions options = ServiceClientOptions.builder().build();
+        ServiceClientOptions options =
+            ServiceClientOptions
+                .builder()
+                //.tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES) // Uncomment this line if your IoT Hub is deployed in the Azure USA Government Cloud.
+                .build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
@@ -236,7 +244,11 @@ public class RoleBasedAuthenticationSample
     {
         // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        JobClientOptions options = JobClientOptions.builder().build();
+        JobClientOptions options =
+            JobClientOptions
+                .builder()
+                //.tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES) // Uncomment this line if your IoT Hub is deployed in the Azure USA Government Cloud.
+                .build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.

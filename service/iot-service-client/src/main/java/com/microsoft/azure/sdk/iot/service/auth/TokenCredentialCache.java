@@ -38,8 +38,6 @@ public class TokenCredentialCache
     public TokenCredentialCache(TokenCredential tokenCredential)
     {
         this(tokenCredential, DEFAULT_AUTHENTICATION_SCOPES);
-
-        new IotHubAuthenticationScopes();
     }
 
     /**
