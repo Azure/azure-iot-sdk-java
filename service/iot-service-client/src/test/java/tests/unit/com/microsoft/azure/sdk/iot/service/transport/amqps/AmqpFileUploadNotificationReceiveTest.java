@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadNotificationParser;
 import com.microsoft.azure.sdk.iot.service.FileUploadNotification;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceive;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFileUploadNotificationReceivedHandler;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.Verifications;
@@ -24,6 +25,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /** Unit tests for AmqpFileUploadNotificationReceive */
 @RunWith(JMockit.class)
@@ -70,6 +72,28 @@ public class AmqpFileUploadNotificationReceiveTest
         AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
         // Act
         amqpFileUploadNotificationReceive.receive(timeoutMs);
+    }
+
+    @Test
+    public void receiveCreatesNewHandlerEachCall(@Mocked AmqpFileUploadNotificationReceivedHandler mockHandler) throws IOException, InterruptedException
+    {
+        // Arrange
+        final String hostName = "aaa";
+        final String userName = "bbb";
+        final String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        int timeoutMs = 1;
+        AmqpFileUploadNotificationReceive amqpFileUploadNotificationReceive = new AmqpFileUploadNotificationReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
+
+        // Act
+        amqpFileUploadNotificationReceive.open();
+        amqpFileUploadNotificationReceive.receive(timeoutMs);
+        AmqpFileUploadNotificationReceivedHandler handler = Deencapsulation.getField(amqpFileUploadNotificationReceive, "amqpReceiveHandler");
+
+        amqpFileUploadNotificationReceive.receive(timeoutMs);
+        AmqpFileUploadNotificationReceivedHandler handler2 = Deencapsulation.getField(amqpFileUploadNotificationReceive, "amqpReceiveHandler");
+
+        assertNotEquals(handler, handler2);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_AMQPFILEUPLOADNOTIFICATIONRECEIVE_25_010: [The function shall parse the received Json string to FeedbackBath object]
