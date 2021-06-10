@@ -284,7 +284,11 @@ public class RoleBasedAuthenticationSample
     {
         // JobClient has some configurable options for HTTP read and connect timeouts, as well as for setting proxies.
         // For this sample, the default options will be used though.
-        DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().build();
+        DeviceMethodClientOptions options =
+            DeviceMethodClientOptions
+                .builder()
+                //.tokenCredentialAuthenticationScopes(IotHubAuthenticationScopes.GOVERNMENT_CLOUD_AUTHENTICATION_SCOPES) // Uncomment this line if your IoT Hub is deployed in the Azure USA Government Cloud.
+                .build();
 
         // This constructor takes in your implementation of TokenCredential which allows you to use RBAC authentication
         // rather than symmetric key based authentication that comes with constructors that take connection strings.
