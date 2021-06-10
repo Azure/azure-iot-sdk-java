@@ -93,6 +93,7 @@ public class AmqpFileUploadNotificationReceiveTest
         amqpFileUploadNotificationReceive.receive(timeoutMs);
         AmqpFileUploadNotificationReceivedHandler handler2 = Deencapsulation.getField(amqpFileUploadNotificationReceive, "amqpReceiveHandler");
 
+        // Assert
         assertNotEquals(handler, handler2);
     }
 

@@ -114,6 +114,7 @@ public class AmqpReceiveTest
         amqpReceive.receive(timeoutMs);
         AmqpFeedbackReceivedHandler handler2 = Deencapsulation.getField(amqpReceive, "amqpReceiveHandler");
 
+        // Assert
         assertNotEquals(handler, handler2);
     }
 }
