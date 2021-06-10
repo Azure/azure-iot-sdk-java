@@ -34,6 +34,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
     private final IotHubServiceClientProtocol iotHubServiceClientProtocol;
     private final ProxyOptions proxyOptions;
     private final SSLContext sslContext;
+    private boolean isOpen = false;
 
     /**
      * Constructor to set up connection parameters
@@ -129,39 +130,44 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      */
     public synchronized void open() throws IOException
     {
-        if (amqpReceiveHandler == null)
+        // This is a no-op at this point since all the actual amqp handler instantiation lives in the receive() call
+        // instead. We have a check in the receive call that throws if this method isn't called first though, so we do
+        // have to set this flag
+        isOpen = true;
+    }
+
+    private void initializeHandler()
+    {
+        if (this.credential != null)
         {
-            if (this.credential != null)
-            {
-                amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
-                        this.hostName,
-                        this.credential,
-                        this.iotHubServiceClientProtocol,
-                        this,
-                        this.proxyOptions,
-                        this.sslContext);
-            }
-            else if (this.sasTokenProvider != null)
-            {
-                amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
-                        this.hostName,
-                        this.sasTokenProvider,
-                        this.iotHubServiceClientProtocol,
-                        this,
-                        this.proxyOptions,
-                        this.sslContext);
-            }
-            else
-            {
-                amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
-                        this.hostName,
-                        this.userName,
-                        this.sasToken,
-                        this.iotHubServiceClientProtocol,
-                        this,
-                        this.proxyOptions,
-                        this.sslContext);
-            }
+            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+                this.hostName,
+                this.credential,
+                this.iotHubServiceClientProtocol,
+                this,
+                this.proxyOptions,
+                this.sslContext);
+        }
+        else if (this.sasTokenProvider != null)
+        {
+            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+                this.hostName,
+                this.sasTokenProvider,
+                this.iotHubServiceClientProtocol,
+                this,
+                this.proxyOptions,
+                this.sslContext);
+        }
+        else
+        {
+            amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
+                this.hostName,
+                this.userName,
+                this.sasToken,
+                this.iotHubServiceClientProtocol,
+                this,
+                this.proxyOptions,
+                this.sslContext);
         }
     }
 
@@ -170,8 +176,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      */
     public synchronized void close()
     {
-        amqpReceiveHandler = null;
-        fileUploadNotification = null;
+        isOpen = false;
     }
 
     /**
@@ -184,8 +189,11 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      */
     public synchronized FileUploadNotification receive(long timeoutMs) throws IOException, InterruptedException
     {
-        if  (amqpReceiveHandler != null)
+        if  (isOpen)
         {
+            // instantiating the amqp handler each receive call because each receive call opens a new AMQP connection
+            initializeHandler();
+
             log.info("Receiving on file upload notification receiver for up to {} milliseconds", timeoutMs);
 
             new ReactorRunner(amqpReceiveHandler, "AmqpFileUploadNotificationReceiver").run(timeoutMs);
