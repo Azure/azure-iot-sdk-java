@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.service.jobs;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.credential.TokenRequestContext;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.MethodParser;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
@@ -16,7 +15,11 @@ import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.Tools;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.auth.TokenCredentialCache;
-import com.microsoft.azure.sdk.iot.service.devicetwin.*;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceOperations;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
+import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
+import com.microsoft.azure.sdk.iot.service.devicetwin.QueryType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpMethod;
 import com.microsoft.azure.sdk.iot.service.transport.http.HttpResponse;
@@ -26,7 +29,10 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Date;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Use the JobClient to schedule and cancel jobs for a group of devices using IoT hub.
@@ -68,10 +74,7 @@ public class JobClient
      */
     public JobClient(String connectionString)
     {
-        this(connectionString, JobClientOptions.builder()
-            .httpConnectTimeout(JobClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-            .httpReadTimeout(JobClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-            .build());
+        this(connectionString, JobClientOptions.builder().build());
     }
 
     /**
@@ -102,10 +105,7 @@ public class JobClient
      */
     public JobClient(String hostName, TokenCredential credential)
     {
-        this(hostName, credential, JobClientOptions.builder()
-                .httpConnectTimeout(JobClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .httpReadTimeout(JobClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .build());
+        this(hostName, credential, JobClientOptions.builder().build());
     }
 
     /**
@@ -139,10 +139,7 @@ public class JobClient
      */
     public JobClient(String hostName, AzureSasCredential azureSasCredential)
     {
-        this(hostName, azureSasCredential, JobClientOptions.builder()
-                .httpConnectTimeout(JobClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .httpReadTimeout(JobClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .build());
+        this(hostName, azureSasCredential, JobClientOptions.builder().build());
     }
 
     /**

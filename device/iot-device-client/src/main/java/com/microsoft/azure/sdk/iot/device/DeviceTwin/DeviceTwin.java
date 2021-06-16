@@ -147,7 +147,7 @@ public class DeviceTwin
 
                 for (String propertyKey : desiredPropertyMap.keySet())
                 {
-                    Property property = this.getProperty(desiredPropertyMap, propertyKey, false);
+                    Property property = this.getDesiredProperty(desiredPropertyMap, propertyKey);
 
                     if (!reportPropertyCallback(property))
                     {
@@ -173,7 +173,7 @@ public class DeviceTwin
             {
                 for (String propertyKey : reportedPropertyMap.keySet())
                 {
-                    Property property = this.getProperty(reportedPropertyMap, propertyKey, true);
+                    Property property = this.getReportedProperty(reportedPropertyMap, propertyKey);
                     if (deviceTwinGenericTwinPropertyChangeCallback != null)
                     {
                         deviceTwinGenericTwinPropertyChangeCallback.TwinPropertyCallBack(property, deviceTwinGenericPropertyChangeCallbackContext);
@@ -183,7 +183,33 @@ public class DeviceTwin
         }
     }
 
-    private Property getProperty(TwinCollection twinCollection, String key, boolean isReported)
+    private Property getDesiredProperty(TwinCollection twinCollection, String key)
+    {
+        Object value = twinCollection.get(key);
+        Integer propertyVersion = twinCollection.getVersionFinal();
+        TwinMetadata metadata = twinCollection.getTwinMetadataFinal(key);
+        Date lastUpdated = null;
+        Integer lastUpdatedVersion = null;
+        String lastUpdatedBy = null;
+        String lastUpdatedByDigest = null;
+        if (metadata != null)
+        {
+            lastUpdated = metadata.getLastUpdated();
+            lastUpdatedVersion = metadata.getLastUpdatedVersion();
+            lastUpdatedBy = metadata.getLastUpdatedBy();
+            lastUpdatedByDigest = metadata.getLastUpdatedByDigest();
+        }
+        return new Property(
+                key, value,
+                propertyVersion,
+                false,
+                lastUpdated,
+                lastUpdatedVersion,
+                lastUpdatedBy,
+                lastUpdatedByDigest);
+    }
+
+    private Property getReportedProperty(TwinCollection twinCollection, String key)
     {
         Object value = twinCollection.get(key);
         Integer propertyVersion = twinCollection.getVersionFinal();
@@ -198,7 +224,7 @@ public class DeviceTwin
         return new Property(
                 key, value,
                 propertyVersion,
-                isReported,
+                true,
                 lastUpdated,
                 lastUpdatedVersion);
     }

@@ -728,6 +728,18 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         TransportException savedException = AmqpsExceptionTranslator.convertFromAmqpException(errorCondition);
 
+        if (this.isMultiplexing)
+        {
+            // If a device is registered to an active multiplexed connection, and the session closes locally before opening,
+            // need to notify upper layer that the register call failed, and that it shouldn't wait for it to report having opened.
+            this.listener.onMultiplexedDeviceSessionRegistrationFailed(this.connectionId, deviceId, savedException);
+        }
+
+        // If the session closes during an open call, need to decrement this latch so that the open call doesn't wait
+        // for this session to open. The above call to onMultiplexedDeviceSessionRegistrationFailed will report
+        // the relevant exception.
+        this.deviceSessionsOpenedLatches.get(deviceId).countDown();
+
         if (isMultiplexing)
         {
             // When multiplexing, don't kill the connection just because a session dropped.

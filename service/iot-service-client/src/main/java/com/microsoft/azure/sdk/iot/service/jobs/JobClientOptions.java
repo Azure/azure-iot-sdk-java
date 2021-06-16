@@ -29,14 +29,16 @@ public class JobClientOptions
      * By default, this value is {@link #DEFAULT_HTTP_READ_TIMEOUT_MS}. Must be a non-negative value.
      */
     @Getter
-    private final int httpReadTimeout;
+    @Builder.Default
+    private final int httpReadTimeout = DEFAULT_HTTP_READ_TIMEOUT_MS;
 
     /**
      * The http connect timeout value, in milliseconds, to be used when connecting to the service. If the timeout expires
      * before the connection can be established, a java.net.SocketTimeoutException is thrown.
-     * A timeout of zero is interpreted as an infinite timeout.
-     * By default, this value is {@link #DEFAULT_HTTP_CONNECT_TIMEOUT_MS}. Must be a non-negative value.
+     * A timeout of zero is interpreted as an infinite timeout. Must be a non-negative value.
+     * By default, this value is {@link #DEFAULT_HTTP_CONNECT_TIMEOUT_MS}.
      */
     @Getter
-    private final int httpConnectTimeout;
+    @Builder.Default
+    private final int httpConnectTimeout = DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
 }

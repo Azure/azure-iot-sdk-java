@@ -7,6 +7,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.service.transport.amqps;
 
 import com.microsoft.azure.sdk.iot.service.FeedbackBatchMessage;
 import com.microsoft.azure.sdk.iot.service.IotHubServiceClientProtocol;
+import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpFeedbackReceivedHandler;
 import com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpReceive;
 import mockit.Deencapsulation;
 import mockit.Expectations;
@@ -23,6 +24,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /** Unit tests for AmqpReceive */
 @RunWith(JMockit.class)
@@ -91,5 +93,28 @@ public class AmqpReceiveTest
         };
         // Act
         amqpReceive.onFeedbackReceived(jsonData);
+    }
+
+    @Test
+    public void receiveCreatesNewHandlerEachCall(@Mocked AmqpFeedbackReceivedHandler mockHandler) throws IOException, InterruptedException
+    {
+        // Arrange
+        final String hostName = "aaa";
+        final String userName = "bbb";
+        final String sasToken = "ccc";
+        IotHubServiceClientProtocol iotHubServiceClientProtocol = IotHubServiceClientProtocol.AMQPS;
+        int timeoutMs = 1;
+        AmqpReceive amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
+
+        // Act
+        amqpReceive.open();
+        amqpReceive.receive(timeoutMs);
+        AmqpFeedbackReceivedHandler handler = Deencapsulation.getField(amqpReceive, "amqpReceiveHandler");
+
+        amqpReceive.receive(timeoutMs);
+        AmqpFeedbackReceivedHandler handler2 = Deencapsulation.getField(amqpReceive, "amqpReceiveHandler");
+
+        // Assert
+        assertNotEquals(handler, handler2);
     }
 }

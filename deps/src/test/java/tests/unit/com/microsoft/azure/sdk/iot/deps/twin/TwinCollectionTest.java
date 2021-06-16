@@ -82,7 +82,9 @@ public class TwinCollectionTest
         "          \"$lastUpdatedVersion\":3,\n" +
         "          \"Value\":{  \n" +
         "            \"$lastUpdated\":\"2017-11-21T02:07:44.238Z\",\n" +
-        "            \"$lastUpdatedVersion\":4\n" +
+        "            \"$lastUpdatedVersion\":4,\n" +
+        "            \"$lastUpdatedBy\":\"testConfig\",\n" +
+        "            \"$lastUpdatedByDigest\":\"637570515479675333\"\n" +
         "          },\n" +
         "          \"NewValue\":{  \n" +
         "            \"$lastUpdated\":\"2017-09-21T02:07:44.238Z\",\n" +
@@ -605,6 +607,8 @@ public class TwinCollectionTest
         assertEquals(500.0, innerMaxSpeed.get("Value"));
         Helpers.assertDateWithError(innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdated(), "2017-11-21T02:07:44.238Z");
         assertEquals(4L, (long)innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdatedVersion());
+        assertEquals("637570515479675333", innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdatedByDigest());
+        assertEquals("testConfig", innerMaxSpeed.getTwinMetadataFinal("Value").getLastUpdatedBy());
     }
 
     @Test
