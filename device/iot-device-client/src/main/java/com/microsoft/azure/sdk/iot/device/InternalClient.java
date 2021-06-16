@@ -890,6 +890,7 @@ public class InternalClient
     {
         if (value != null)
         {
+            log.info("Setting path to trusted certificate");
             this.config.getAuthenticationProvider().setPathToIotHubTrustedCert((String) value);
         }
     }
@@ -905,6 +906,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting HTTPS connect timeout to {} milliseconds", value);
                 this.config.setHttpsConnectTimeout((int) value);
             }
             else
@@ -925,6 +927,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting HTTPS read timeout to {} milliseconds", value);
                 this.config.setHttpsReadTimeout((int) value);
             }
             else
@@ -949,6 +952,7 @@ public class InternalClient
                 try
                 {
                     verifyRegisteredIfMultiplexing();
+                    log.info("Setting send period to {} milliseconds", value);
                     this.deviceIO.setSendPeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
@@ -973,6 +977,7 @@ public class InternalClient
                 try
                 {
                     verifyRegisteredIfMultiplexing();
+                    log.info("Setting receive period to {} milliseconds", value);
                     this.deviceIO.setReceivePeriodInMilliseconds((long) value);
                 }
                 catch (IOException e)
@@ -1010,6 +1015,7 @@ public class InternalClient
                 throw new IllegalArgumentException("value is not long = " + value);
             }
 
+            log.info("Setting generated SAS token lifespans to {} seconds", validTimeInSeconds);
             this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
 
             if (this.deviceIO != null)
@@ -1055,6 +1061,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting generated AMQP authentication session timeout to {} seconds", value);
                 this.config.setAmqpOpenAuthenticationSessionTimeout((int) value);
             }
             else
@@ -1075,6 +1082,7 @@ public class InternalClient
 
             if (value instanceof Integer)
             {
+                log.info("Setting generated AMQP device session timeout to {} seconds", value);
                 this.config.setAmqpOpenDeviceSessionsTimeout((int) value);
             }
             else
