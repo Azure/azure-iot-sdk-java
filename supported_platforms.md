@@ -15,8 +15,8 @@ those versions.
 ## Windows 10
 
 Nightly test platform details:
-Apache Maven 3.8.1 (05c21c65bdfed0f71a2f2ada8b84da59348c4c5d)
-Java version: 1.8.0_292, vendor: AdoptOpenJDK, runtime: C:\hostedtoolcache\windows\Java_Adopt_jdk\8.0.292-10\x64\jre
+Apache Maven 3.8.1
+Java version: 1.8.0_292, vendor: AdoptOpenJDK
 Default locale: en_US, platform encoding: Cp1252
 OS name: "windows server 2016", version: "10.0", arch: "amd64", family: "windows"
 
@@ -25,8 +25,8 @@ Note that, while we only directly test on Windows 10, we do support other Window
 ## Ubuntu 1604
 
 Nightly test platform details:
-Apache Maven 3.8.1 (05c21c65bdfed0f71a2f2ada8b84da59348c4c5d)
-Java version: 1.8.0_292, vendor: AdoptOpenJDK, runtime: /usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/jre
+Apache Maven 3.8.1
+Java version: 1.8.0_292, vendor: AdoptOpenJDK
 Default locale: en_US, platform encoding: UTF-8
 OS name: "linux", version: "4.15.0-1113-azure", arch: "amd64", family: "unix"
 
