@@ -7,8 +7,8 @@ While this SDK contains several different packages, each package supports the sa
 
 ## Supported JDK versions
 
-Currently, this SDK supports JDK versions 8 and 11. This SDK may work with other versions, but there are no guarantees 
-that they will always work for those versions nor are there guarantees that we will fix bugs that are only present on
+Currently, this SDK supports JDK versions 8 and 11. This SDK _may_ work with other versions, but there are no guarantees 
+that they will _always_ work for those versions nor are there guarantees that we will fix bugs that are only present on
 those versions.
 
 
