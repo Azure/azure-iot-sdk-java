@@ -36,7 +36,7 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 * On Android: our Java device SDK can be used on Android:
    * [Device SDK][device-android]
 
-For more details on what platforms this SDK supports, see [this document](./supported_platforms.md)
+For more details on what platforms this SDK supports, see [this document](./supported_platforms.md).
 
 ## API reference
 * [Azure IoT Hub device SDK][java-api-reference-device]

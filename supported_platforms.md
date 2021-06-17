@@ -44,16 +44,16 @@ The android emulator image used for nightly tests is "system-images;android-28;g
 
 The gradle version used in nightly tests is 3.6.3
 
-The build.gradle file that outlines more specifics can be found [here](./iot-e2e-tests/android/app/build.gradle)
+The build.gradle file that outlines more specifics can be found [here](./iot-e2e-tests/android/app/build.gradle).
 
 ### Older Android API versions
 
-Older API versions have known issues that we don't plan to fix. For additional details on that, see [this issue](https://github.com/Azure/azure-iot-sdk-java/issues/747)
+Older API versions have known issues that we don't plan to fix. For additional details on that, see [this issue](https://github.com/Azure/azure-iot-sdk-java/issues/747).
 
 
 ## Miscellaneous support notes
 
 - This library has known compatibility issues with JDK 7 and below, and those JDK versions are not supported.
-- This library does not officially support being run on MacOS
+- This library does not officially support being run on MacOS.
 - This library does not officially support minification via [Proguard](http://android-doc.github.io/tools/help/proguard.html).
 - This library does not officially support being used in [Kotlin](https://kotlinlang.org) applications.
