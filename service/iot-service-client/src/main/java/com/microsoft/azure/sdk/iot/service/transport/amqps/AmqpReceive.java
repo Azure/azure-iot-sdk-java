@@ -34,6 +34,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     private FeedbackBatch feedbackBatch;
     private final ProxyOptions proxyOptions;
     private final SSLContext sslContext;
+    private boolean isOpen = false;
 
     /**
      * Constructor to set up connection parameters
@@ -128,36 +129,44 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      */
     public void open()
     {
+        // This is a no-op at this point since all the actual amqp handler instantiation lives in the receive() call
+        // instead. We have a check in the receive call that throws if this method isn't called first though, so we do
+        // have to set this flag
+        isOpen = true;
+    }
+
+    private void initializeHandler()
+    {
         if (credential != null)
         {
             amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
-                    this.hostName,
-                    this.credential,
-                    this.iotHubServiceClientProtocol,
-                    this,
-                    this.proxyOptions,
-                    this.sslContext);
+                this.hostName,
+                this.credential,
+                this.iotHubServiceClientProtocol,
+                this,
+                this.proxyOptions,
+                this.sslContext);
         }
         else if (sasTokenProvider != null)
         {
             amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
-                    this.hostName,
-                    this.sasTokenProvider,
-                    this.iotHubServiceClientProtocol,
-                    this,
-                    this.proxyOptions,
-                    this.sslContext);
+                this.hostName,
+                this.sasTokenProvider,
+                this.iotHubServiceClientProtocol,
+                this,
+                this.proxyOptions,
+                this.sslContext);
         }
         else
         {
             amqpReceiveHandler = new AmqpFeedbackReceivedHandler(
-                    this.hostName,
-                    this.userName,
-                    this.sasToken,
-                    this.iotHubServiceClientProtocol,
-                    this,
-                    this.proxyOptions,
-                    this.sslContext);
+                this.hostName,
+                this.userName,
+                this.sasToken,
+                this.iotHubServiceClientProtocol,
+                this,
+                this.proxyOptions,
+                this.sslContext);
         }
     }
 
@@ -166,7 +175,7 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
      */
     public void close()
     {
-        amqpReceiveHandler = null;
+        isOpen = false;
     }
 
     /**
@@ -180,11 +189,13 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     public synchronized FeedbackBatch receive(long timeoutMs) throws IOException, InterruptedException
     {
         feedbackBatch = null;
-        if  (amqpReceiveHandler != null)
+        if  (isOpen)
         {
+            // instantiating the amqp handler each receive call because each receive call opens a new AMQP connection
+            initializeHandler();
+
             log.info("Receiving on feedback receiver for up to {} milliseconds", timeoutMs);
 
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [The function shall wait for specified timeout to check for any feedback message]
             new ReactorRunner(this.amqpReceiveHandler, "AmqpFeedbackReceiver").run(timeoutMs);
 
             log.trace("Feedback receiver reactor finished running, verifying that the connection opened correctly");
@@ -193,7 +204,6 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
         }
         else
         {
-            // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_008: [The function shall throw IOException if the send handler object is not initialized]
             throw new IOException("receive handler is not initialized. call open before receive");
         }
         return feedbackBatch;
@@ -209,7 +219,6 @@ public class AmqpReceive implements AmqpFeedbackReceivedEvent
     {
         log.info("Feedback message received: {}", feedbackJson);
 
-        // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_010: [The function shall parse the received Json string to FeedbackBath object]
         feedbackBatch = FeedbackBatchMessage.parse(feedbackJson);
     }
 }

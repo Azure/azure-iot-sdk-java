@@ -159,7 +159,7 @@ public class SecurityProviderTpmTest
         {
             {
                 mockedKeyStore.setCertificateEntry(anyString, (Certificate) any);
-                times = 3;
+                times = 4;
                 mockedSslContext.init((KeyManager[]) any, (TrustManager[]) any, (SecureRandom) any);
                 times = 1;
             }

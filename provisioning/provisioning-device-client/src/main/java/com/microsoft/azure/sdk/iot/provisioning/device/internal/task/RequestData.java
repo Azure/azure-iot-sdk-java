@@ -146,6 +146,7 @@ public class RequestData
      * Getter for SSL Context
      * @return SSL context
      */
+    @SuppressWarnings("unused") // Public member
     public SSLContext getSslContext()
     {
         //SRS_RequestData_25_010: [ This method shall retrieve sslContext. ]

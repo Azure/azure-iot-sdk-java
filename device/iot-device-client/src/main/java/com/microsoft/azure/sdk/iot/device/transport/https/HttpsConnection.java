@@ -444,6 +444,7 @@ public class HttpsConnection
      * Get the body being used in the http connection
      * @return the body being used in the http connection
      */
+    @SuppressWarnings("unused") // This is the only way to get the body from this class, will be needed if extended
     byte[] getBody()
     {
         //Codes_SRS_HTTPSCONNECTION_34_031: [The function shall return the saved body.]

@@ -30,6 +30,7 @@ public abstract class ReceiverLinkHandler extends BaseHandler
     // Upon receiving a message over a receiving link, a credit should be refunded to the service so that
     // this initial credit doesn't run out.
     Map<Symbol, Object> amqpProperties;
+    @SuppressWarnings("unused") // Used in sub classes for future expansion.
     String receiverLinkTag;
     String linkCorrelationId;
     String receiverLinkAddress;

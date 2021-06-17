@@ -18,15 +18,21 @@ import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceCon
 import com.microsoft.azure.sdk.iot.service.digitaltwin.authentication.ServiceConnectionStringParser;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinUpdateHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.DigitalTwinsImpl;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.implementation.IotHubGatewayServiceAPIsImpl;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.DigitalTwins;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.generated.models.DigitalTwinInvokeRootLevelCommandHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinCommandResponse;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandHeaders;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinInvokeCommandRequestOptions;
+import com.microsoft.azure.sdk.iot.service.digitaltwin.models.DigitalTwinUpdateRequestOptions;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.DeserializationHelpers;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.DigitalTwinStringSerializer;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.rest.*;
+import com.microsoft.rest.RestClient;
+import com.microsoft.rest.ServiceResponse;
+import com.microsoft.rest.ServiceResponseBuilder;
+import com.microsoft.rest.ServiceResponseWithHeaders;
 import com.microsoft.rest.serializer.JacksonAdapter;
 import rx.Observable;
 import rx.schedulers.Schedulers;
@@ -37,8 +43,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS;
-import static com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS;
 import static com.microsoft.azure.sdk.iot.service.digitaltwin.helpers.Tools.*;
 
 /**
@@ -57,11 +61,7 @@ public class DigitalTwinAsyncClient {
      * @param connectionString The IoTHub connection string
      */
     public DigitalTwinAsyncClient(String connectionString) {
-        this(connectionString,
-            DigitalTwinClientOptions.builder()
-                .httpReadTimeout(DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .httpConnectTimeout(DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .build());
+        this(connectionString, DigitalTwinClientOptions.builder().build());
     }
 
     /**
@@ -110,12 +110,7 @@ public class DigitalTwinAsyncClient {
      * this library when they are needed.
      */
     public DigitalTwinAsyncClient(String hostName, TokenCredential credential) {
-        this(hostName,
-            credential,
-            DigitalTwinClientOptions.builder()
-                .httpReadTimeout(DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .httpConnectTimeout(DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .build());
+        this(hostName, credential, DigitalTwinClientOptions.builder().build());
     }
 
     /**
@@ -165,12 +160,7 @@ public class DigitalTwinAsyncClient {
      * @param azureSasCredential The SAS token provider that will be used for authentication.
      */
     public DigitalTwinAsyncClient(String hostName, AzureSasCredential azureSasCredential) {
-        this(hostName,
-            azureSasCredential,
-            DigitalTwinClientOptions.builder()
-                .httpReadTimeout(DEFAULT_HTTP_READ_TIMEOUT_MS)
-                .httpConnectTimeout(DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                .build());
+        this(hostName, azureSasCredential, DigitalTwinClientOptions.builder().build());
     }
 
     /**

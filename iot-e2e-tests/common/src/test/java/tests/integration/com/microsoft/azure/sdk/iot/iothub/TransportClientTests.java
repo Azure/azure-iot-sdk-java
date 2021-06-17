@@ -73,7 +73,7 @@ public class TransportClientTests extends IntegrationTest
     private static final long MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_PER_CALL_MILLISECONDS = 1000; // 1 second
     private static final long MAXIMUM_TIME_FOR_IOTHUB_PROPAGATION_BETWEEN_DEVICE_SERVICE_CLIENTS_MILLISECONDS = MAXIMUM_TIME_TO_WAIT_FOR_IOTHUB_TWIN_OPERATION_MILLISECONDS * 10; // 2 sec
     private static final long REGISTRY_MANAGER_DEVICE_CREATION_DELAY_MILLISECONDS = 3 * 1000;
-    private static final long METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 15 * 1000; // 15 seconds
+    private static final long METHOD_SUBSCRIBE_TIMEOUT_MILLISECONDS = 60 * 1000; // 60 seconds
 
     protected static String iotHubConnectionString = "";
 

@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Representation of a single Jobs statistics collection with a Json deserializer.
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class JobsStatisticsParser
 {
     // Number of devices in the job

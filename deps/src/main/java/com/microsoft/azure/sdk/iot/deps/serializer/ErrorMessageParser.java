@@ -11,6 +11,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class ErrorMessageParser
 {
+    @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
     static class ErrorMessage
     {
         @SerializedName("Message")

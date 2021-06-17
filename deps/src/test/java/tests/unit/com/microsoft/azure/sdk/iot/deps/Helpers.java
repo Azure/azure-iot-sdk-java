@@ -201,6 +201,8 @@ public class Helpers
                 {
                     assertEquals(expectedTwinMetadata.getLastUpdated(), actualTwinMetadata.getLastUpdated());
                     assertEquals(expectedTwinMetadata.getLastUpdatedVersion(), actualTwinMetadata.getLastUpdatedVersion());
+                    assertEquals(expectedTwinMetadata.getLastUpdatedBy(), actualTwinMetadata.getLastUpdatedBy());
+                    assertEquals(expectedTwinMetadata.getLastUpdatedByDigest(), actualTwinMetadata.getLastUpdatedByDigest());
                 }
             }
 
@@ -218,6 +220,8 @@ public class Helpers
                     }
                     else
                     {
+                        assertEquals(expectedKeyTwinMetadata.getLastUpdated(), actualKeyTwinMetadata.getLastUpdated());
+                        assertEquals(expectedKeyTwinMetadata.getLastUpdatedVersion(), actualKeyTwinMetadata.getLastUpdatedVersion());
                         assertEquals(expectedKeyTwinMetadata.getLastUpdated(), actualKeyTwinMetadata.getLastUpdated());
                         assertEquals(expectedKeyTwinMetadata.getLastUpdatedVersion(), actualKeyTwinMetadata.getLastUpdatedVersion());
                     }

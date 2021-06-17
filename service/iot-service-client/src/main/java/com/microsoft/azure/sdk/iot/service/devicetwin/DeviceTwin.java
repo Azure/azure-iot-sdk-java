@@ -58,12 +58,7 @@ public class DeviceTwin
     @Deprecated
     public static DeviceTwin createFromConnectionString(String connectionString) throws IOException
     {
-        return createFromConnectionString(
-                connectionString,
-                DeviceTwinClientOptions.builder()
-                    .httpConnectTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                    .httpReadTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                    .build());
+        return createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().build());
     }
 
     /**
@@ -92,11 +87,7 @@ public class DeviceTwin
      */
     public DeviceTwin(String connectionString)
     {
-        this(connectionString,
-             DeviceTwinClientOptions.builder()
-                     .httpConnectTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_CONNECT_TIMEOUT_MS)
-                     .httpReadTimeout(DeviceTwinClientOptions.DEFAULT_HTTP_READ_TIMEOUT_MS)
-                     .build());
+        this(connectionString, DeviceTwinClientOptions.builder().build());
     }
 
     /**

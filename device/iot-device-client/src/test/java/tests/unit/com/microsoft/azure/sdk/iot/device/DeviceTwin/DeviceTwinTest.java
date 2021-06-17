@@ -1026,8 +1026,8 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
-                        prop1, val2, version, false, null, null);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class, String.class, String.class},
+                        prop1, val2, version, false, null, null, null, null);
                 result = mockedProperty;
                 times = 1;
             }
@@ -1125,8 +1125,8 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
-                        desiredProp1, desiredValue2, desiredVersion,false, null, null);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class, String.class, String.class},
+                        desiredProp1, desiredValue2, desiredVersion,false, null, null, null, null);
                 times = 1;
                 Deencapsulation.newInstance(
                         Property.class,
@@ -1155,6 +1155,8 @@ public class DeviceTwinTest
         final String lastUpdated = "2016-06-01T21:22:43.123Z";
         final Date lastUpdatedDate = new Date(1464816163123L);
         final Integer lastUpdatedVersion = 5;
+        final String lastUpdatedBy = "testConfig";
+        final String lastUpdatedByDigest = "12345";
 
         final String json =
                 "{\n" +
@@ -1164,7 +1166,9 @@ public class DeviceTwinTest
                         "\"$metadata\":{\n" +
                             "\"" + desiredProp1 + "\":{\n" +
                                 "\"$lastUpdated\":\"" + lastUpdated + "\",\n" +
-                                "\"$lastUpdatedVersion\":" + lastUpdatedVersion + "\n" +
+                                "\"$lastUpdatedVersion\":" + lastUpdatedVersion + ",\n" +
+                                "\"$lastUpdatedBy\":\"" + lastUpdatedBy + "\",\n" +
+                                "\"$lastUpdatedByDigest\":\"" + lastUpdatedByDigest + "\"\n" +
                             "}\n" +
                         "}\n" +
                     "},\n" +
@@ -1206,8 +1210,8 @@ public class DeviceTwinTest
             {
                 Deencapsulation.newInstance(
                         Property.class,
-                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class},
-                        desiredProp1, desiredValue2, desiredVersion, false, (Date) any, lastUpdatedVersion);
+                        new Class[]{String.class, Object.class, Integer.class, boolean.class, Date.class, Integer.class, String.class, String.class},
+                        desiredProp1, desiredValue2, desiredVersion, false, (Date) any, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest);
                 times = 1;
                 Deencapsulation.newInstance(
                         Property.class,
