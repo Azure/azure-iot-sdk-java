@@ -28,6 +28,7 @@ public class HttpProxySocketFactory extends SSLSocketFactory
         return new ProxiedSSLSocket(delegate, proxySocket, proxySettings.getUsername(), proxySettings.getPassword());
     }
 
+    @SuppressWarnings("unused") // Seems as if it's used in the Lombok delegate
     private interface SSLSocketFactoryNonDelegatedFunctions
     {
         Socket createSocket();

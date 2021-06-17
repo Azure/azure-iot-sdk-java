@@ -100,6 +100,7 @@ import java.util.Map;
  * @see <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins">Understand and use device twins in IoT Hub</a>
  * @see <a href="https://docs.microsoft.com/en-us/rest/api/iothub/devicetwinapi">Device Twin Api</a>
  */
+@SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
 public class TwinState extends RegisterManager
 {
     // the twin tags

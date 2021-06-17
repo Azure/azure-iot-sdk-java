@@ -48,6 +48,7 @@ public class RegisterTask implements Callable<RegistrationOperationStatusParser>
     private final SecurityProvider securityProvider;
     private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
 
+    @SuppressWarnings("unused") // Called in factory
     private static class ResponseCallbackImpl implements ResponseCallback
     {
         @Override

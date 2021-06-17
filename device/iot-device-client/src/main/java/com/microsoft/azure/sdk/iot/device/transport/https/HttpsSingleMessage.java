@@ -30,6 +30,7 @@ public final class HttpsSingleMessage implements HttpsMessage
     protected static final String CONTENT_TYPE_KEY = HTTPS_SYSTEM_PROPERTY_PREFIX + "contenttype";
 
     private byte[] body;
+    @SuppressWarnings("unused") // This is never set but there might be a case we need it in the future.
     private boolean base64Encoded;
     private MessageProperty[] properties;
     private Map<String, String> systemProperties;

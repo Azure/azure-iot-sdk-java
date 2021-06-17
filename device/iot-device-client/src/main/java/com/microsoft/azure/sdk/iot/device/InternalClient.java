@@ -344,6 +344,9 @@ public class InternalClient
      */
     public void sendReportedProperties(Set<Property> reportedProperties, int version) throws IOException, IllegalArgumentException
     {
+        if (version < 0) {
+            throw new IllegalArgumentException("Version cannot be negative.");
+        }
         this.sendReportedProperties(reportedProperties, version, null, null, null, null);
     }
 

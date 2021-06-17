@@ -27,6 +27,7 @@ public abstract class SenderLinkHandler extends BaseHandler
 {
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
     Map<Symbol, Object> amqpProperties;
+    @SuppressWarnings("unused") // protected member may be used for expansion
     String senderLinkTag;
     String linkCorrelationId;
     String senderLinkAddress;

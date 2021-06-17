@@ -154,6 +154,7 @@ public class ProxiedSSLSocket extends SSLSocket
         log.trace("HTTP proxy responded to connect request with status {}, so the proxy connect was successful", connectResponseStatusCode);
     }
 
+    @SuppressWarnings("unused") // Interface should not change
     private interface ProxiedSSLSocketNonDelegatedFunctions
     {
         void connect(SocketAddress socketAddress, int timeout) throws IOException;

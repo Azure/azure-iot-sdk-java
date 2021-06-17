@@ -57,6 +57,7 @@ public class RegistryStatistics
      * Converts this into a RegistryStatisticsParser object that can be used for serialization and deserialization
      * @return the created RegistryStatisticsParser object
      */
+    @SuppressWarnings("unused") // A number of private members are unused but may be filled in or used by serialization
     RegistryStatisticsParser toRegistryStatisticsParser()
     {
         //Codes_SRS_SERVICE_SDK_JAVA_REGISTRY_STATISTICS_34_002: [This method shall convert this into a RegistryStatisticsParser object and return it.]
