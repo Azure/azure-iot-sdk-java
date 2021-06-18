@@ -9,21 +9,7 @@ package com.microsoft.azure.sdk.iot.provisioning.security.hsm;
 
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringReader;
 import java.security.Key;
-import java.security.Security;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -33,9 +19,9 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
     private static final String CN = "CN=";
     private static final String COMMA = ",";
     private static final String EQUALS = "=";
-    private final String commonNameLeaf;
-    private final X509Certificate leafCertificatePublic;
-    private final Key leafPrivateKey;
+    private final String commonNameLeaf = ""; // TODO temporary values for final field
+    private final X509Certificate leafCertificatePublic = null; // TODO temporary values for final field
+    private final Key leafPrivateKey = null; // TODO temporary values for final field
     private final Collection<X509Certificate> signerCertificates;
 
     private final String leafCertificatePublicPem;
@@ -45,6 +31,7 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
      */
     public SecurityProviderX509Cert(String leafPublicPem, String leafPrivateKey, Collection<String> signerCertificates) throws SecurityProviderException
     {
+        //TODO this constructor will need to change if we want to avoid parsing certificates
         if (leafPublicPem == null || leafPublicPem.isEmpty())
         {
             throw new IllegalArgumentException("leaf public certificate cannot be null or empty");
@@ -58,20 +45,6 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         this.leafCertificatePublicPem = leafPublicPem;
         this.signerCertificatesPem = signerCertificates;
         this.signerCertificates = new LinkedList<>();
-        try
-        {
-            this.leafCertificatePublic = SecurityProviderX509Cert.parsePublicKeyCertificate(leafCertificatePublicPem);
-            this.leafPrivateKey = SecurityProviderX509Cert.parsePrivateKey(leafPrivateKey);
-            for (String cert : signerCertificates)
-            {
-                this.signerCertificates.add(SecurityProviderX509Cert.parsePublicKeyCertificate(cert));
-            }
-            this.commonNameLeaf = this.getCommonName(this.leafCertificatePublic);
-        }
-        catch (CertificateException e)
-        {
-            throw new SecurityProviderException(e);
-        }
     }
 
     private String getCommonName(X509Certificate certificate) throws SecurityProviderException
@@ -167,57 +140,5 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         }
 
         throw new UnsupportedOperationException("This method is not supported, use other means to validate certificate");
-    }
-
-    private static Key parsePrivateKey(String privateKeyString) throws CertificateException
-    {
-        try
-        {
-            // Codes_SRS_SecurityClientDiceEmulator_34_001: [This function shall return a Private Key instance created by the provided PEM formatted privateKeyString.]
-            Security.addProvider(new BouncyCastleProvider());
-            PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
-            Object possiblePrivateKey = privateKeyParser.readObject();
-            return SecurityProviderX509Cert.getPrivateKey(possiblePrivateKey);
-        }
-        catch (Exception e)
-        {
-            // Codes_SRS_SecurityClientDiceEmulator_34_002: [If any exception is encountered while attempting to create the private key instance, this function shall throw a CertificateException.]
-            throw new CertificateException(e);
-        }
-    }
-
-    private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException
-    {
-        try
-        {
-            // Codes_SRS_SecurityClientDiceEmulator_34_003: [This function shall return an X509Certificate instance created by the provided PEM formatted publicKeyCertificateString.]
-            Security.addProvider(new BouncyCastleProvider());
-            PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
-            PemObject possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject();
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
-        }
-        catch (Exception e)
-        {
-            // Codes_SRS_SecurityClientDiceEmulator_34_004: [If any exception is encountered while attempting to create the public key certificate instance, this function shall throw a CertificateException.]
-            throw new CertificateException(e);
-        }
-    }
-
-    private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
-    {
-        if (possiblePrivateKey instanceof  PEMKeyPair)
-        {
-            return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) possiblePrivateKey)
-                .getPrivate();
-        }
-        else if (possiblePrivateKey instanceof PrivateKeyInfo)
-        {
-            return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
-        }
-        else
-        {
-            throw new IOException("Unable to parse private key, type unknown");
-        }
     }
 }

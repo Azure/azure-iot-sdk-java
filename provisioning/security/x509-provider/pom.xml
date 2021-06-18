@@ -44,16 +44,6 @@
             <artifactId>${security-provider-artifact-id}</artifactId>
             <version>${security-provider-version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcmail-jdk15on</artifactId>
-            <version>1.69</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.69</version>
-        </dependency>
         <!--Test dependencies-->
         <dependency>
             <groupId>org.jmockit</groupId>
