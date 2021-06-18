@@ -40,9 +40,7 @@ Note that, while we only directly test on Ubuntu 1604, we do generally support o
 
 This SDK supports Android API versions 24, 25, 26, 27, and 28.
 
-The android emulator image used for nightly tests is "system-images;android-28;google_apis;x86_64"
-
-The gradle version used in nightly tests is 3.6.3
+The gradle version used in nightly tests is 3.6.3 and the API version used in nightly tests is 28.
 
 The build.gradle file that outlines more specifics can be found [here](./iot-e2e-tests/android/app/build.gradle).
 
