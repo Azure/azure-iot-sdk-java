@@ -162,7 +162,7 @@ public class Message
         initialize();
 
         this.body = body.getBytes(DEFAULT_IOTHUB_MESSAGE_CHARSET);
-        this.setContentTypeFinal(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
+        this.setContentType(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
     }
 
     
@@ -289,7 +289,7 @@ public class Message
      * Verifies whether the message is expired or not
      * @return true if the message is expired, false otherwise
      */
-    public boolean isExpired()
+    public final boolean isExpired()
     {
         boolean messageExpired;
 
@@ -320,7 +320,7 @@ public class Message
      * Getter for the messageId property
      * @return The property value
      */
-    public String getMessageId()
+    public final String getMessageId()
     {
         // Codes_SRS_MESSAGE_34_043: [The function shall return the message's message Id.]
         return messageId;
@@ -330,13 +330,13 @@ public class Message
      * Setter for the messageId property
      * @param messageId The string containing the property value
      */
-    public void setMessageId(String messageId)
+    public final void setMessageId(String messageId)
     {
         // Codes_SRS_MESSAGE_34_044: [The function shall set the message's message ID to the provided value.]
         this.messageId = messageId;
     }
 
-    public void setUserId(String userId)
+    public final void setUserId(String userId)
     {
         // Codes_SRS_MESSAGE_34_050: [The function shall set the message's user ID to the provided value.]
         this.userId = userId;
@@ -346,7 +346,7 @@ public class Message
      * Getter for the correlationId property
      * @return The property value
      */
-    public String getCorrelationId()
+    public final String getCorrelationId()
     {
         // Codes_SRS_MESSAGE_34_045: [The function shall return the message's correlation ID.]
         if (correlationId == null)
@@ -361,7 +361,7 @@ public class Message
      * Setter for the correlationId property
      * @param correlationId The string containing the property value
      */
-    public void setCorrelationId(String correlationId)
+    public final void setCorrelationId(String correlationId)
     {
         // Codes_SRS_MESSAGE_34_046: [The function shall set the message's correlation ID to the provided value.]
         this.correlationId = correlationId;
@@ -371,7 +371,7 @@ public class Message
      * Setter for the expiryTime property. This setter uses relative time, not absolute time.
      * @param timeOut The time out for the message, in milliseconds, from the current time.
      */
-    public void setExpiryTime(long timeOut)
+    public final void setExpiryTime(long timeOut)
     {
         // Codes_SRS_MESSAGE_34_047: [The function shall set the message's expiry time.]
         long currentTime = System.currentTimeMillis();
@@ -383,7 +383,7 @@ public class Message
      * Setter for the expiryTime property using absolute time
      * @param absoluteTimeout The time out for the message, in milliseconds.
      */
-    public void setAbsoluteExpiryTime(long absoluteTimeout)
+    public final void setAbsoluteExpiryTime(long absoluteTimeout)
     {
         // Codes_SRS_MESSAGE_34_038: [If the provided absolute expiry time is negative, an IllegalArgumentException shall be thrown.]
         if (absoluteTimeout < 0)
@@ -399,19 +399,20 @@ public class Message
      * Getter for the Message type
      * @return the Message type value
      */
-    public MessageType getMessageType()
+    public final MessageType getMessageType()
     {
         // Codes_SRS_MESSAGE_34_049: [The function shall return the message's message type.]
         return this.messageType;
     }
 
-    public void setConnectionDeviceId(String connectionDeviceId)
+    //TODO can we remove these now?
+    public final void setConnectionDeviceId(String connectionDeviceId)
     {
         // Codes_SRS_MESSAGE_34_051: [The function shall set the message's connection device id to the provided value.]
         this.connectionDeviceId = connectionDeviceId;
     }
 
-    public void setConnectionModuleId(String connectionModuleId)
+    public final void setConnectionModuleId(String connectionModuleId)
     {
         // Codes_SRS_MESSAGE_34_052: [The function shall set the message's connection module id to the provided value.]
         this.connectionModuleId = connectionModuleId;
@@ -421,7 +422,7 @@ public class Message
      * Set the output channel name to send to. Used in routing for module communications
      * @param outputName the output channel name to send to
      */
-    public void setOutputName(String outputName)
+    public final void setOutputName(String outputName)
     {
         // Codes_SRS_MESSAGE_34_053: [The function shall set the message's output name to the provided value.]
         this.outputName = outputName;
@@ -431,7 +432,7 @@ public class Message
      * Set the input name of the message, used in routing for module communications
      * @param inputName the input channel the message was received from
      */
-    public void setInputName(String inputName)
+    public final void setInputName(String inputName)
     {
         // Codes_SRS_MESSAGE_34_058: [The function shall set the message's input name to the provided value.]
         this.inputName = inputName;
@@ -441,7 +442,7 @@ public class Message
      * Setter for the Message type
      * @param type The enum containing the Message type value
      */
-    public void setMessageType(MessageType type)
+    public final void setMessageType(MessageType type)
     {
         // Codes_SRS_MESSAGE_34_048: [The function shall set the message's message type.]
         this.messageType = type;
@@ -451,31 +452,31 @@ public class Message
      * Getter for the To system property
      * @return the To value
      */
-    public String getTo()
+    public final String getTo()
     {
         // Codes_SRS_MESSAGE_34_041: [The function shall return the message's To value.]
         return this.to;
     }
 
-    public String getConnectionDeviceId()
+    public final String getConnectionDeviceId()
     {
         // Codes_SRS_MESSAGE_34_054: [The function shall return the message's connection device id value.]
         return connectionDeviceId;
     }
 
-    public String getConnectionModuleId()
+    public final String getConnectionModuleId()
     {
         // Codes_SRS_MESSAGE_34_055: [The function shall return the message's connection module id value.]
         return connectionModuleId;
     }
 
-    public String getInputName()
+    public final String getInputName()
     {
         // Codes_SRS_MESSAGE_34_056: [The function shall return the message's input name value.]
         return inputName;
     }
 
-    public String getOutputName()
+    public final String getOutputName()
     {
         // Codes_SRS_MESSAGE_34_057: [The function shall return the message's output name value.]
         return outputName;
@@ -485,7 +486,7 @@ public class Message
      * Getter for the delivery acknowledgement system property
      * @return the delivery acknowledgement value
      */
-    public String getDeliveryAcknowledgement()
+    public final String getDeliveryAcknowledgement()
     {
         // Codes_SRS_MESSAGE_34_039: [The function shall return the message's DeliveryAcknowledgement.]
         return this.deliveryAcknowledgement;
@@ -495,7 +496,7 @@ public class Message
      * Getter for the User ID system property
      * @return the User ID value
      */
-    public String getUserId ()
+    public final String getUserId ()
     {
         // Codes_SRS_MESSAGE_34_037: [The function shall return the message's user ID.]
         return this.userId;
@@ -505,7 +506,7 @@ public class Message
      * Getter for the iotHubConnectionString property
      * @return the iotHubConnectionString value
      */
-    public IotHubConnectionString getIotHubConnectionString()
+    public final IotHubConnectionString getIotHubConnectionString()
     {
         // Codes_SRS_MESSAGE_12_001: [The function shall return the message's iotHubConnectionString object.]
         return iotHubConnectionString;
@@ -515,7 +516,7 @@ public class Message
      * Setter for the iotHubConnectionString type
      * @param iotHubConnectionString The iotHubConnectionString value to set
      */
-    public void setIotHubConnectionString(IotHubConnectionString iotHubConnectionString)
+    public final void setIotHubConnectionString(IotHubConnectionString iotHubConnectionString)
     {
         // Codes_SRS_MESSAGE_12_002: [The function shall set the message's iotHubConnectionString object to the provided value.]
         this.iotHubConnectionString = iotHubConnectionString;
@@ -525,7 +526,7 @@ public class Message
      * Return the message's content type. This value is null by default
      * @return the message's content type
      */
-    public String getContentType()
+    public final String getContentType()
     {
         // Codes_SRS_MESSAGE_34_059: [The function shall return the message's content type.]
         return this.contentType;
@@ -534,24 +535,10 @@ public class Message
     /**
      * Set the content type of this message. Used in message routing.
      *
-     * @deprecated as of device-client version 1.14.1, please use {@link #setContentTypeFinal(String)}
-     *
      *  @param contentType the content type of the message. May be null if you don't want to specify a content type.
      */
-    @Deprecated
-    public void setContentType(String contentType)
+    public final void setContentType(String contentType)
     {
-        // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
-        this.contentType = contentType;
-    }
-
-    /**
-     * Set the content type of this message. Used in message routing.
-     * @param contentType the content type of the message. May be null if you don't want to specify a content type.
-     */
-    public final void setContentTypeFinal(String contentType)
-    {
-        // Codes_SRS_MESSAGE_34_060: [The function shall save the provided content type.]
         this.contentType = contentType;
     }
 
@@ -559,7 +546,7 @@ public class Message
      * Returns this message's content encoding. This value is null by default
      * @return the message's content encoding.
      */
-    public String getContentEncoding()
+    public final String getContentEncoding()
     {
         // Codes_SRS_MESSAGE_34_061: [The function shall return the message's content encoding.]
         return this.contentEncoding;
@@ -569,13 +556,13 @@ public class Message
      * Set the content encoding of this message. Used in message routing.
      * @param contentEncoding the content encoding of the message. May be null if you don't want to specify a content encoding.
      */
-    public void setContentEncoding(String contentEncoding)
+    public final void setContentEncoding(String contentEncoding)
     {
         // Codes_SRS_MESSAGE_34_062: [The function shall save the provided content encoding.]
         this.contentEncoding = contentEncoding;
     }
 
-    public Date getCreationTimeUTC()
+    public final Date getCreationTimeUTC()
     {
         // Codes_SRS_MESSAGE_34_063: [The function shall return the saved creationTimeUTC.]
         return this.creationTimeUTC;

@@ -7,8 +7,25 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.*;
+import com.microsoft.azure.sdk.iot.device.BatchMessage;
+import com.microsoft.azure.sdk.iot.device.CorrelatingMessageCallback;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.MessageCallback;
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationAuthenticationException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpConnectionThrottledException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
@@ -18,8 +35,17 @@ import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthor
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -56,10 +82,6 @@ public class IotHubTransport implements IotHubListener
 
     // Messages whose callbacks that are waiting to be invoked.
     private final Queue<IotHubTransportPacket> callbackPacketsQueue = new ConcurrentLinkedQueue<>();
-
-    // Connection Status callback information (deprecated)
-    private IotHubConnectionStateCallback stateCallback;
-    private Object stateCallbackContext;
 
     // Connection Status change callback information
     private final Map<String, IotHubConnectionStatusChangeCallback> connectionStatusChangeCallbacks = new ConcurrentHashMap<>();
@@ -426,9 +448,9 @@ public class IotHubTransport implements IotHubListener
      * @param cause the cause of why this connection is closing, to be reported over connection status change callback
      * @param reason the reason to close this connection, to be reported over connection status change callback
      *
-     * @throws DeviceClientException if an error occurs in closing the transport.
+     * @throws TransportException if an error occurs in closing the transport.
      */
-    public void close(IotHubConnectionStatusChangeReason reason, Throwable cause) throws DeviceClientException
+    public void close(IotHubConnectionStatusChangeReason reason, Throwable cause) throws TransportException
     {
         if (reason == null)
         {
@@ -629,9 +651,9 @@ public class IotHubTransport implements IotHubListener
      * </p>
      * If no message callback is set, the function will do nothing.
      *
-     * @throws DeviceClientException if the server could not be reached.
+     * @throws TransportException if the server could not be reached.
      */
-    public void handleMessage() throws DeviceClientException
+    public void handleMessage() throws TransportException
     {
         if (this.connectionStatus == IotHubConnectionStatus.CONNECTED)
         {
@@ -662,24 +684,6 @@ public class IotHubTransport implements IotHubListener
         {
             return this.waitingPacketsQueue.isEmpty() && this.inProgressPackets.size() == 0 && this.callbackPacketsQueue.isEmpty();
         }
-    }
-
-    /**
-     * Registers a callback to be executed whenever the connection to the IoT Hub is lost or established.
-     *
-     * @param callback the callback to be called.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
-     */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
-    {
-        if (callback == null)
-        {
-            throw new IllegalArgumentException("Callback cannot be null");
-        }
-
-        this.stateCallback = callback;
-        this.stateCallbackContext = callbackContext;
     }
 
     /**
@@ -1202,7 +1206,7 @@ public class IotHubTransport implements IotHubListener
                 this.close(this.exceptionToStatusChangeReason(transportException), transportException);
             }
         }
-        catch (DeviceClientException ex)
+        catch (TransportException ex)
         {
             log.error("Encountered an exception while closing the client object, client instance should no longer be used as the state is unknown", ex);
             this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.COMMUNICATION_ERROR, transportException);
@@ -1455,7 +1459,6 @@ public class IotHubTransport implements IotHubListener
 
             //invoke connection status callbacks
             log.debug("Invoking connection status callbacks with new status details");
-            invokeConnectionStateCallback(newConnectionStatus, reason);
 
             if (!isMultiplexing || newConnectionStatus != IotHubConnectionStatus.CONNECTED)
             {
@@ -1498,27 +1501,7 @@ public class IotHubTransport implements IotHubListener
                 this.deviceConnectionStates.put(deviceId, newConnectionStatus);
 
                 log.debug("Invoking connection status callbacks with new status details");
-                invokeConnectionStateCallback(newConnectionStatus, reason);
                 invokeConnectionStatusChangeCallback(newConnectionStatus, reason, throwable, deviceId);
-            }
-        }
-    }
-
-    private void invokeConnectionStateCallback(IotHubConnectionStatus status, IotHubConnectionStatusChangeReason reason)
-    {
-        if (this.stateCallback != null)
-        {
-            if (status == IotHubConnectionStatus.CONNECTED)
-            {
-                this.stateCallback.execute(IotHubConnectionState.CONNECTION_SUCCESS, this.stateCallbackContext);
-            }
-            else if (reason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
-            {
-                this.stateCallback.execute(IotHubConnectionState.SAS_TOKEN_EXPIRED, this.stateCallbackContext);
-            }
-            else if (status == IotHubConnectionStatus.DISCONNECTED)
-            {
-                this.stateCallback.execute(IotHubConnectionState.CONNECTION_DROP, this.stateCallbackContext);
             }
         }
     }

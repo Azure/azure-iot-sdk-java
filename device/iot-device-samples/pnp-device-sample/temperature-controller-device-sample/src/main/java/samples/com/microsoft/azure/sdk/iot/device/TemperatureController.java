@@ -7,9 +7,11 @@ import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +106,8 @@ public class TemperatureController {
         }
     }
 
-    public static void main(String[] args) throws IOException, URISyntaxException, ProvisioningDeviceClientException, InterruptedException {
+    public static void main(String[] args) throws IOException, URISyntaxException, ProvisioningDeviceClientException, InterruptedException, SecurityProviderException, DeviceClientException
+    {
 
         // This sample follows the following workflow:
         // -> Initialize device client instance.
@@ -212,7 +215,8 @@ public class TemperatureController {
                 && (deviceSymmetricKey == null || deviceSymmetricKey.isEmpty()));
     }
 
-    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
+    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException, SecurityProviderException, DeviceClientException
+    {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
         ProvisioningStatus provisioningStatus = new ProvisioningStatus();
@@ -258,7 +262,8 @@ public class TemperatureController {
      * Initialize the device client instance over Mqtt protocol, setting the ModelId into ClientOptions.
      * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
      */
-    private static void initializeDeviceClient() throws URISyntaxException, IOException {
+    private static void initializeDeviceClient() throws URISyntaxException, IOException, DeviceClientException
+    {
         ClientOptions options = new ClientOptions();
         options.setModelId(MODEL_ID);
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);

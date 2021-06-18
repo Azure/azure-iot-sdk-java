@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class SendEventWithProxy
      * args[6] = (optional) proxy password
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

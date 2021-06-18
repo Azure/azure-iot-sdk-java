@@ -14,6 +14,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
@@ -118,7 +119,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, IotHubException {
+    public void setUp() throws URISyntaxException, IOException, IotHubException, DeviceClientException {
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open();
         digitalTwinClient =

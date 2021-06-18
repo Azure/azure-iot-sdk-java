@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -32,7 +33,7 @@ public class FileUploadSimpleSample
      * args[1] = File to upload
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws DeviceClientException, URISyntaxException
     {
         String connString;
         String fullFileName;

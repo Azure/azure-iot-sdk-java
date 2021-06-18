@@ -4,6 +4,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -190,7 +191,7 @@ public class HubTierConnectionTests extends IntegrationTest
 
     @Test
     @BasicTierHubOnlyTest
-    public void enableMethodFailedWithBasicTier() throws IOException, InterruptedException
+    public void enableMethodFailedWithBasicTier() throws IOException, InterruptedException, DeviceClientException
     {
         //arrange
         List<Pair<IotHubConnectionStatus, Throwable>> connectionStatusUpdates = new ArrayList<>();

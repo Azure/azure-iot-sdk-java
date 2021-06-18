@@ -73,6 +73,11 @@
             <artifactId>${x509-provider-artifact-id}</artifactId>
             <version>${x509-provider-version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-storage-blob</artifactId>
+            <version>12.8.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.littleshoot/littleproxy -->
         <dependency>
             <groupId>org.littleshoot</groupId>

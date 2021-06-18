@@ -5,6 +5,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -73,7 +74,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     }
 
     @Before
-    public void setUp() throws URISyntaxException, IOException, IotHubException {
+    public void setUp() throws URISyntaxException, IOException, IotHubException, DeviceClientException {
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open();
         digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);

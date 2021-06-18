@@ -8,6 +8,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup;
 import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -400,7 +401,7 @@ public class ProvisioningCommon extends IntegrationTest
                     iothubsToFinishAt.contains(actualReprovisionedHub));
     }
 
-    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws IOException, URISyntaxException
+    private void assertProvisionedDeviceWorks(String iothubUri, String deviceId) throws DeviceClientException, URISyntaxException, SecurityProviderException
     {
         for (IotHubClientProtocol iotHubClientProtocol: IotHubClientProtocol.values())
         {

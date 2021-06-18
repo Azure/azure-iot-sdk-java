@@ -36,7 +36,6 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
     private static final String expectedDeviceKey = "deviceKey";
     private static final String expectedSasToken = "sasToken";
     private static final long expectedExpiryTime = 3601;
-    private static final long expectedBufferPercent = 20;
 
     @Mocked IotHubSasToken mockSasToken;
     @Mocked IotHubSSLContext mockIotHubSSLContext;

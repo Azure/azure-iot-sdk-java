@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -117,13 +118,10 @@ public class ProvisioningX509Sample
                     System.out.println("Sending message from device to IoT Hub...");
                     deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new IotHubEventCallbackImpl(), null);
                 }
-                catch (IOException e)
+                catch (DeviceClientException e)
                 {
                     System.out.println("Device client threw an exception: " + e.getMessage());
-                    if (deviceClient != null)
-                    {
-                        deviceClient.closeNow();
-                    }
+                    deviceClient.closeNow();
                 }
             }
         }

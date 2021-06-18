@@ -149,7 +149,7 @@ public class MultiplexingClient
             log.info("Opening multiplexing client");
             try
             {
-                this.deviceIO.openWithoutWrappingException();
+                this.deviceIO.open();
             }
             catch (TransportException e)
             {
@@ -196,9 +196,9 @@ public class MultiplexingClient
                     deviceClient.closeFileUpload();
                 }
 
-                this.deviceIO.closeWithoutWrappingException();
+                this.deviceIO.close();
             }
-            catch (TransportException | IOException e)
+            catch (TransportException e)
             {
                 throw new MultiplexingClientException("Failed to close the multiplexing client", e);
             }
@@ -442,7 +442,8 @@ public class MultiplexingClient
                 // settings if it was set. If it wasn't set, defer to the default client to set this ssl context
                 if (this.sslContext != null)
                 {
-                    configToAdd.getAuthenticationProvider().setSSLContext(this.sslContext);
+                    //configToAdd.getAuthenticationProvider().setSSLContext(this.sslContext);
+                    //TODO why are we even doing this? The mux client should have its own SSLContext. It shouldn't save it in the device client at all
                 }
 
                 // Overwrite the proxy settings of the new client to match the multiplexing client settings
@@ -546,7 +547,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
      * after this device is re-registered.
@@ -578,7 +579,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
      * after this device is re-registered.
@@ -610,7 +611,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
      * after these devices are re-registered.
@@ -638,7 +639,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
      * after these devices are re-registered.

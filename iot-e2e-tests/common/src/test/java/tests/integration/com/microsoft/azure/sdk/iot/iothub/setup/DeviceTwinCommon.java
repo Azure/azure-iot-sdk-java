@@ -19,6 +19,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -286,12 +287,12 @@ public class DeviceTwinCommon extends IntegrationTest
     }
 
     @SuppressWarnings("SameParameterValue") // Since this is a helper method "numberOfDevices" can be passed any value.
-    protected void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    protected void addMultipleDevices(int numberOfDevices) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         addMultipleDevices(numberOfDevices, true);
     }
 
-    protected void addMultipleDevices(int numberOfDevices, boolean openDeviceClients) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    protected void addMultipleDevices(int numberOfDevices, boolean openDeviceClients) throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         testInstance.devicesUnderTest = new DeviceState[numberOfDevices];
         testInstance.testIdentities = new TestIdentity[numberOfDevices];
@@ -316,7 +317,7 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    protected void setUpTwin(DeviceState deviceState, boolean openDeviceClient, InternalClient client) throws IOException, IotHubException, InterruptedException
+    protected void setUpTwin(DeviceState deviceState, boolean openDeviceClient, InternalClient client) throws IOException, IotHubException, InterruptedException, DeviceClientException
     {
         // set up twin on DeviceClient
         deviceState.dCDeviceForTwin = new DeviceExtension();
@@ -394,12 +395,12 @@ public class DeviceTwinCommon extends IntegrationTest
         }
     }
 
-    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException, DeviceClientException
     {
         setUpNewDeviceAndModule(true);
     }
 
-    public void setUpNewDeviceAndModule(boolean openDeviceClient) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
+    public void setUpNewDeviceAndModule(boolean openDeviceClient) throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException, DeviceClientException
     {
         testInstance.deviceUnderTest = new DeviceState();
 
@@ -430,7 +431,7 @@ public class DeviceTwinCommon extends IntegrationTest
                     testInstance.testIdentity.getClient().closeNow();
                 }
             }
-            catch (IOException e)
+            catch (DeviceClientException e)
             {
                 log.error("Failed to close test identity for device {}", testInstance.testIdentity.getDeviceId(), e);
             }
@@ -448,7 +449,7 @@ public class DeviceTwinCommon extends IntegrationTest
                             testIdentity.getClient().closeNow();
                         }
                     }
-                    catch (IOException e)
+                    catch (DeviceClientException e)
                     {
                         log.error("Failed to close test identity for device {}", testIdentity.getDeviceId(), e);
                     }

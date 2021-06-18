@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.service.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
@@ -161,7 +162,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
                 this.serviceClient.close();
             }
-            catch (IOException e)
+            catch (IOException | DeviceClientException e)
             {
                 log.error("Failed to close clients during cleanup", e);
             }

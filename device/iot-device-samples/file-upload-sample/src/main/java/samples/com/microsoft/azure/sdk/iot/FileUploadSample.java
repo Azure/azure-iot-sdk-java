@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,7 +38,7 @@ public class FileUploadSample
      * args[1] = File or directory to upload
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+            throws DeviceClientException, URISyntaxException
     {
         String connString;
         String fullFileName;
@@ -93,7 +94,8 @@ public class FileUploadSample
         client.closeNow();
     }
 
-    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException {
+    private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException, DeviceClientException
+    {
         File file = new File(fullFileName);
         if(file.isDirectory())
         {
@@ -105,7 +107,8 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException {
+    private static void uploadFileOrDirectoryRecursive(DeviceClient client, String baseDirectory, String relativePath) throws IOException, URISyntaxException, DeviceClientException
+    {
         String[] fileNameList;
 
         File file = new File(baseDirectory, relativePath);
@@ -127,7 +130,8 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, URISyntaxException {
+    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, DeviceClientException
+    {
         File file = new File(baseDirectory, relativeFileName);
 
         try

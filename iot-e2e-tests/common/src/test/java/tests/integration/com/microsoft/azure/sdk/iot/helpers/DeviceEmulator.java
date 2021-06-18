@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Device;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -48,16 +49,16 @@ public class DeviceEmulator
         this.client = client;
     }
 
-    void open() throws IOException
+    void open() throws DeviceClientException
     {
         this.client.open();
     }
 
     /**
      * Ends the DeviceClient connection and destroy the thread.
-     * @throws IOException if the DeviceClient cannot close the connection with the IoTHub.
+     * @throws DeviceClientException if the DeviceClient cannot close the connection with the IoTHub.
      */
-    void tearDown() throws IOException
+    void tearDown() throws DeviceClientException
     {
         if (this.client != null)
         {

@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -180,7 +181,7 @@ public class TokenRenewalTests extends IntegrationTest
         verifyClientsConnectivityBehavedCorrectly(clients, amqpDisconnectDidNotHappenSuccesses, mqttDisconnectDidHappenSuccesses, shutdownWasGracefulSuccesses);
     }
 
-    private void closeClients(List<InternalClient> clients) throws IOException
+    private void closeClients(List<InternalClient> clients) throws DeviceClientException
     {
         for (InternalClient client : clients)
         {
@@ -274,14 +275,15 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private void openEachClient(List<InternalClient> clients) throws IOException
+    private void openEachClient(List<InternalClient> clients) throws DeviceClientException
     {
         for (InternalClient client : clients)
         {
             try
             {
                 client.open();
-            } catch (UnsupportedOperationException ex)
+            }
+            catch (UnsupportedOperationException ex)
             {
                 //client was a multiplexing client which was already opened, safe to ignore
             }

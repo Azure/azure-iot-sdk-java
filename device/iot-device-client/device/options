@@ -1,0 +1,24 @@
+-classpath
+'C:/Users/Tim/.m2/repository/com/github/jnr/jnr-x86asm/1.0.2/jnr-x86asm-1.0.2.jar;C:/Users/Tim/source/IoT/Java/azure-iot-sdk-java/provisioning/security/security-provider/target/security-provider-1.5.0.jar;C:/Users/Tim/.m2/repository/com/github/jnr/jffi/1.2.19/jffi-1.2.19.jar;C:/Users/Tim/.m2/repository/org/ow2/asm/asm-commons/7.1/asm-commons-7.1.jar;C:/Users/Tim/.m2/repository/com/github/jnr/jnr-enxio/0.21/jnr-enxio-0.21.jar;C:/Users/Tim/.m2/repository/com/github/jnr/jnr-posix/3.0.50/jnr-posix-3.0.50.jar;C:/Users/Tim/.m2/repository/com/microsoft/azure/qpid-proton-j-extensions/1.2.3/qpid-proton-j-extensions-1.2.3.jar;C:/Users/Tim/.m2/repository/org/apache/commons/commons-lang3/3.11/commons-lang3-3.11.jar;C:/Users/Tim/source/IoT/Java/azure-iot-sdk-java/deps/target/iot-deps-0.14.0.jar;C:/Users/Tim/.m2/repository/org/ow2/asm/asm/7.1/asm-7.1.jar;C:/Users/Tim/.m2/repository/commons-codec/commons-codec/1.14/commons-codec-1.14.jar;C:/Users/Tim/.m2/repository/com/github/jnr/jnr-ffi/2.1.10/jnr-ffi-2.1.10.jar;C:/Users/Tim/.m2/repository/org/ow2/asm/asm-analysis/7.1/asm-analysis-7.1.jar;C:/Users/Tim/.m2/repository/org/ow2/asm/asm-tree/7.1/asm-tree-7.1.jar;C:/Users/Tim/.m2/repository/com/github/jnr/jnr-a64asm/1.0.0/jnr-a64asm-1.0.0.jar;C:/Users/Tim/.m2/repository/com/google/code/gson/gson/2.8.0/gson-2.8.0.jar;C:/Users/Tim/.m2/repository/com/github/jnr/jnr-unixsocket/0.23/jnr-unixsocket-0.23.jar;C:/Users/Tim/.m2/repository/org/projectlombok/lombok/1.18.8/lombok-1.18.8.jar;C:/Users/Tim/.m2/repository/org/ow2/asm/asm-util/7.1/asm-util-7.1.jar;C:/Users/Tim/.m2/repository/com/github/jnr/jnr-constants/0.9.12/jnr-constants-0.9.12.jar;C:/Users/Tim/.m2/repository/org/apache/qpid/proton-j/0.30.0/proton-j-0.30.0.jar;C:/Users/Tim/.m2/repository/org/eclipse/paho/org.eclipse.paho.client.mqttv3/1.2.2/org.eclipse.paho.client.mqttv3-1.2.2.jar;C:/Users/Tim/.m2/repository/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'C:/Users/Tim/source/IoT/Java/azure-iot-sdk-java/device/iot-device-client/src/main/java;C:/Users/Tim/source/IoT/Java/azure-iot-sdk-java/device/iot-device-client/target/generated-sources/annotations'
+-author
+-bottom
+'Copyright &#169; 2021. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'C:/Users/Tim/source/IoT/Java/azure-iot-sdk-java/device/iot-device-client/device'
+-docencoding
+'UTF-8'
+-doctitle
+'IoT Hub Java Device Client 1.31.0 API'
+-linkoffline
+'https://docs.oracle.com/javase/7/docs/api' 'C:/Users/Tim/source/IoT/Java/azure-iot-sdk-java/device/iot-device-client/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'IoT Hub Java Device Client 1.31.0 API'

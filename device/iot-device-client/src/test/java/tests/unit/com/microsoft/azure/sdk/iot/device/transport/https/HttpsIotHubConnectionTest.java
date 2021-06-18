@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.net.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.https.*;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -246,7 +247,7 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_25_040: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void sendEventSetsIotHubSSLContext(@Mocked final IotHubEventUri mockUri,
-                                              @Mocked final SSLContext mockContext) throws IOException, TransportException
+                                              @Mocked final SSLContext mockContext) throws IOException, TransportException, SecurityProviderException
     {
         new NonStrictExpectations()
         {
@@ -688,7 +689,7 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_21_046: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void sendHttpsMessageSetsIotHubSSLContext(@Mocked final IotHubUri mockUri,
-                                              @Mocked final SSLContext mockContext) throws IOException, TransportException
+                                              @Mocked final SSLContext mockContext) throws IOException, TransportException, SecurityProviderException
     {
         final String uriPath = "/files";
         final HttpsMethod httpsMethod = HttpsMethod.POST;
@@ -1079,7 +1080,7 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_25_041: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void receiveMessageSetsIotHubSSLContext(@Mocked final IotHubMessageUri mockUri,
-                                                   @Mocked final SSLContext mockContext) throws IOException, TransportException
+                                                   @Mocked final SSLContext mockContext) throws IOException, TransportException, SecurityProviderException
     {
         new NonStrictExpectations()
         {
@@ -1730,7 +1731,7 @@ public class HttpsIotHubConnectionTest
     //Tests_SRS_HTTPSIOTHUBCONNECTION_25_042: [The function shall set the IotHub SSL context by calling setSSLContext on the request.]
     @Test
     public void sendMessageResultSetsIotHubSSLContext(@Mocked final IotHubRejectUri mockUri,
-                                                      @Mocked final SSLContext mockedContext, final @Mocked IotHubStatusCode mockStatusCode) throws IOException, TransportException
+                                                      @Mocked final SSLContext mockedContext, final @Mocked IotHubStatusCode mockStatusCode) throws IOException, TransportException, SecurityProviderException
     {
         final String eTag = "test-etag";
         final int readTimeoutMillis = 23;
@@ -1897,7 +1898,7 @@ public class HttpsIotHubConnectionTest
 
     //Tests_SRS_HTTPSIOTHUBCONNECTION_34_059: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
     @Test
-    public void sendEventPullsSSLContextFromAppropriateConfigAuthObject() throws IOException, TransportException
+    public void sendEventPullsSSLContextFromAppropriateConfigAuthObject() throws IOException, TransportException, SecurityProviderException
     {
         //arrange
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
@@ -1925,7 +1926,7 @@ public class HttpsIotHubConnectionTest
 
     //Tests_SRS_HTTPSIOTHUBCONNECTION_34_060: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
     @Test
-    public void sendHttpsMessagePullsSSLContextFromAppropriateConfigAuthObject() throws IOException, TransportException
+    public void sendHttpsMessagePullsSSLContextFromAppropriateConfigAuthObject() throws IOException, TransportException, SecurityProviderException
     {
         //arrange
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
@@ -1954,7 +1955,7 @@ public class HttpsIotHubConnectionTest
 
     //Tests_SRS_HTTPSIOTHUBCONNECTION_34_061: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
     @Test
-    public void receiveMessagePullsSSLContextFromAppropriateConfigAuthObject() throws IOException, TransportException
+    public void receiveMessagePullsSSLContextFromAppropriateConfigAuthObject() throws IOException, TransportException, SecurityProviderException
     {
         //arrange
         HttpsIotHubConnection conn = new HttpsIotHubConnection(mockConfig);
@@ -1981,7 +1982,7 @@ public class HttpsIotHubConnectionTest
 
     //Tests_SRS_HTTPSIOTHUBCONNECTION_34_062: [If this config is using x509 authentication, this function shall retrieve its sslcontext from its x509 Authentication object.]
     @Test
-    public void sendMessageResultPullsSSLContextFromAppropriateConfigAuthObject(final @Mocked IotHubStatusCode mockStatusCode) throws IOException, TransportException
+    public void sendMessageResultPullsSSLContextFromAppropriateConfigAuthObject(final @Mocked IotHubStatusCode mockStatusCode) throws IOException, TransportException, SecurityProviderException
     {
         //arrange
         final String eTag = "test-etag";

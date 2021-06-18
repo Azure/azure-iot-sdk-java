@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import io.swagger.server.api.model.Certificate;
 import io.swagger.server.api.model.ConnectResponse;
@@ -113,7 +114,7 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        } catch (ModuleClientException | IOException e)
+        } catch (DeviceClientException | ModuleClientException e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -161,7 +162,7 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        } catch (ModuleClientException | URISyntaxException | IOException e)
+        } catch (ModuleClientException | URISyntaxException | DeviceClientException e)
         {
             handler.handle(Future.failedFuture(e));
         }
@@ -206,7 +207,7 @@ public class ModuleGlue
             {
                 client.closeNow();
                 this._map.remove(connectionId);
-            } catch (IOException e)
+            } catch (DeviceClientException e)
             {
                 // ignore it, but keep it as an open connection so we can close it again later.
                 System.out.printf("Exception on close: %s%n", e.toString());

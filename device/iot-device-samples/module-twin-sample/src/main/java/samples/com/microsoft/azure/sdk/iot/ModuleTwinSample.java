@@ -5,6 +5,7 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
@@ -123,7 +124,7 @@ public class ModuleTwinSample
      * @param args 
      * args[0] = IoT Hub connection string
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

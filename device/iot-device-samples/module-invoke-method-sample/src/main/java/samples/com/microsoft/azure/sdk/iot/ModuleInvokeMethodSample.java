@@ -6,6 +6,7 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 import com.microsoft.azure.sdk.iot.device.edge.MethodResult;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class ModuleInvokeMethodSample
      * args[4] = the device id of the device to invoke the method on
      * args[5] = (optional) the module id to invoke the method on
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

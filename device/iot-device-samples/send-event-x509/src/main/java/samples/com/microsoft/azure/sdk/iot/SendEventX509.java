@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class SendEventX509
      * args[1] = number of requests to send
      * args[2] = IoT Hub protocol to use, optional and defaults to MQTT
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException
+    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException, DeviceClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -163,7 +164,7 @@ public class SendEventX509
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);

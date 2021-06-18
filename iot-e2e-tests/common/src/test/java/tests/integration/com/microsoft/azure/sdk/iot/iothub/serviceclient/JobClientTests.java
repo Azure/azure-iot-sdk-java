@@ -11,6 +11,7 @@ import com.azure.core.credential.TokenCredential;
 import com.microsoft.azure.sdk.iot.deps.serializer.JobsResponseParser;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
@@ -100,7 +101,7 @@ public class JobClientTests extends IntegrationTest
     private static final long MAX_EXECUTION_TIME_IN_SECONDS = 15;
 
     @BeforeClass
-    public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException
+    public static void setUp() throws IOException, IotHubException, InterruptedException, URISyntaxException, DeviceClientException
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));

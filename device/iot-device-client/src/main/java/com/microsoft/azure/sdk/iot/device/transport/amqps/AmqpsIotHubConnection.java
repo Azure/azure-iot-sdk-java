@@ -10,12 +10,13 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingDeviceUnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -381,9 +382,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
             else
             {
-                // This should only be hit when a user creates a multiplexing client and doesn't specify an SSLContext
-                // that they want to use
-                sslContext = new IotHubSSLContext().getSSLContext();
+                throw new IllegalStateException("No SSLContext set");
             }
 
             if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
@@ -398,7 +397,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             domain.init(SslDomain.Mode.CLIENT);
             transport.ssl(domain);
         }
-        catch (IOException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
+        catch (SecurityProviderException e)
         {
             this.savedException = new TransportException(e);
             log.error("Encountered an exception while setting ssl domain for the amqp connection", this.savedException);

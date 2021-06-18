@@ -112,46 +112,6 @@ public class ModuleClient extends InternalClient
     }
 
     /**
-     * Create a module client instance that uses x509 authentication.
-     *
-     * <p>Note! Communication from a module to another EdgeHub using x509 authentication is not currently supported and
-     * the service will always return "UNAUTHORIZED"</p>
-     *
-     * <p>Communication from a module directly to the IotHub does support x509 authentication, though.</p>
-     * @param connectionString The connection string for the edge module to connect to. Must be in format
-     *                         HostName=xxxx;deviceId=xxxx;SharedAccessKey=
-     *                         xxxx;moduleId=xxxx;
-     *
-     *                         or
-     *
-     *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
-     *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
-     * @param protocol The protocol to communicate with
-     * @param publicKeyCertificate The PEM formatted string for the public key certificate or the system path to the file containing the PEM.
-     * @param isCertificatePath 'false' if the publicKeyCertificate argument is a path to the PEM, and 'true' if it is the PEM string itself,
-     * @param privateKey The PEM formatted string for the private key or the system path to the file containing the PEM.
-     * @param isPrivateKeyPath 'false' if the privateKey argument is a path to the PEM, and 'true' if it is the PEM string itself,
-     * @throws URISyntaxException If the connString cannot be parsed
-     * @throws ModuleClientException if any other exception occurs while building the module client
-     * @throws URISyntaxException if the hostname in the connection string is not a valid URI
-     * @deprecated For x509 authentication, use {@link #ModuleClient(String, IotHubClientProtocol, ClientOptions)} and provide
-     * an SSLContext instance in the {@link ClientOptions} instance. For a sample on how to build this SSLContext,
-     * see <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/src/main/java/samples/com/microsoft/azure/sdk/iot/SendEventX509.java">this code</a> which references
-     * a helper class for building SSLContext objects for x509 authentication as well as for SAS based authentication.
-     * When not using this deprecated constructor, you can safely exclude the Bouncycastle dependencies that this library declares.
-     * See <a href="https://github.com/Azure/azure-iot-sdk-java/blob/master/device/iot-device-samples/send-event-x509/pom.xml">this pom.xml</a> for an example of how to do this.
-     */
-    @Deprecated
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath) throws ModuleClientException, URISyntaxException
-    {
-        super(new IotHubConnectionString(connectionString), protocol, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
-
-        //Codes_SRS_MODULECLIENT_34_008: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
-        //Codes_SRS_MODULECLIENT_34_009: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
-        commonConstructorVerifications(protocol, this.getConfig());
-    }
-
-    /**
      * Create a module client instance that uses the provided SSLContext for SSL negotiation.
      *
      * @param connectionString The connection string for the edge module to connect to. May be an x509 connection string
@@ -276,7 +236,9 @@ public class ModuleClient extends InternalClient
                 log.debug("Configuring module client to use the configured alternative trusted certificate");
                 //Codes_SRS_MODULECLIENT_34_031: [If an alternative default trusted cert is saved in the environment
                 // variables, this function shall set that trusted cert in the created module client.]
-                moduleClient.setOption_SetCertificatePath(alternativeDefaultTrustedCert);
+                //moduleClient.setOption_SetCertificatePath(alternativeDefaultTrustedCert);
+
+                //TODO this requires a rework as well
             }
 
             return moduleClient;
@@ -356,7 +318,8 @@ public class ModuleClient extends InternalClient
                     //Codes_SRS_MODULECLIENT_34_032: [This function shall retrieve the trust bundle from the hsm and set them in the module client.]
                     TrustBundleProvider trustBundleProvider = new HttpsHsmTrustBundleProvider();
                     String trustCertificates = trustBundleProvider.getTrustBundleCerts(edgedUri, DEFAULT_API_VERSION);
-                    moduleClient.setTrustedCertificates(trustCertificates);
+                    //moduleClient.setTrustedCertificates(trustCertificates);
+                    //TODO requires a rework
                 }
 
                 return moduleClient;

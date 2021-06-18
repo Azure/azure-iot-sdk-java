@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
@@ -53,7 +54,7 @@ public class GetTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testGetDeviceTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testGetDeviceTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         super.testGetDeviceTwin();
@@ -61,7 +62,7 @@ public class GetTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testGetDeviceTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testGetDeviceTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         testInstance.twinServiceClient = buildDeviceTwinClientWithAzureSasCredential();
@@ -121,7 +122,7 @@ public class GetTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testGetDeviceTwinWithProxy() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testGetDeviceTwinWithProxy() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.clientType != ClientType.DEVICE_CLIENT)
         {

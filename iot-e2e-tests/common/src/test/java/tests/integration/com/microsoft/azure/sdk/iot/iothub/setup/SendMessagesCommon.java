@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import com.microsoft.azure.sdk.iot.device.SasTokenProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
@@ -296,7 +297,7 @@ public class SendMessagesCommon extends IntegrationTest
                     this.identity.getClient().closeNow();
                 }
             }
-            catch (IOException e)
+            catch (DeviceClientException e)
             {
                 log.error("Failed to close client during tear down", e);
             }
@@ -358,7 +359,7 @@ public class SendMessagesCommon extends IntegrationTest
             messageString = "Java client " + deviceAmqps.getDeviceId() + " test e2e message over AMQP protocol";
         }
 
-        public void openConnection() throws IOException, URISyntaxException
+        public void openConnection() throws DeviceClientException, URISyntaxException
         {
             client = new DeviceClient(connString, protocol);
             client.open();
@@ -403,7 +404,7 @@ public class SendMessagesCommon extends IntegrationTest
             }
         }
 
-        public void closeConnection() throws IOException
+        public void closeConnection() throws DeviceClientException
         {
             client.closeNow();
         }

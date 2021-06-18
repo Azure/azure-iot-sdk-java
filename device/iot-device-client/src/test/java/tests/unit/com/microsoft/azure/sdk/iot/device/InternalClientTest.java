@@ -9,7 +9,9 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
+import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadClient;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -53,7 +55,7 @@ public class InternalClientTest
     DeviceIO mockDeviceIO;
 
     @Mocked
-    FileUpload mockFileUpload;
+    FileUploadClient mockFileUpload;
 
     @Mocked
     IotHubSasTokenAuthenticationProvider mockIotHubSasTokenAuthenticationProvider;
@@ -319,7 +321,7 @@ public class InternalClientTest
     /* Tests_SRS_INTERNALCLIENT_21_042: [The closeNow shall closeNow the deviceIO connection.] */
     /* Tests_SRS_INTERNALCLIENT_21_043: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
     @Test
-    public void closeClosesTransportSuccess() throws IOException, URISyntaxException
+    public void closeClosesTransportSuccess() throws IOException, URISyntaxException, TransportException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -353,7 +355,7 @@ public class InternalClientTest
     /* Tests_SRS_INTERNALCLIENT_21_042: [The closeNow shall closeNow the deviceIO connection.] */
     /* Tests_SRS_INTERNALCLIENT_21_043: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
     @Test
-    public void closeWaitAndClosesTransportSuccess() throws IOException, URISyntaxException
+    public void closeWaitAndClosesTransportSuccess() throws IOException, URISyntaxException, TransportException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -384,7 +386,7 @@ public class InternalClientTest
 
     /* Tests_SRS_INTERNALCLIENT_21_008: [The closeNow shall closeNow the deviceIO connection.] */
     @Test
-    public void closeNowClosesTransportSuccess() throws IOException, URISyntaxException
+    public void closeNowClosesTransportSuccess() throws IOException, URISyntaxException, TransportException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -406,7 +408,7 @@ public class InternalClientTest
 
     /* Tests_SRS_INTERNALCLIENT_21_009: [If the closing a connection via deviceIO is not successful, the closeNow shall throw IOException.] */
     @Test
-    public void closeNowBadCloseTransportThrows() throws IOException, URISyntaxException
+    public void closeNowBadCloseTransportThrows() throws IOException, URISyntaxException, TransportException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -1537,7 +1539,7 @@ public class InternalClientTest
     @Test
     public void subscribeToDPSucceedsEvenWhenUserCBIsNull(@Mocked final DeviceTwin mockedDeviceTwin,
                                                           @Mocked final IotHubEventCallback mockedStatusCB,
-                                                          @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException
+                                                          @Mocked final PropertyCallBack mockedPropertyCB) throws IOException, URISyntaxException, DeviceClientException
     {
         //arrange
         final Device mockDevice = new Device()
@@ -1802,7 +1804,7 @@ public class InternalClientTest
     // Tests_SRS_INTERNALCLIENT_02_015: [If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
     public void setOptionWithNullOptionNameThrows()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -1829,7 +1831,7 @@ public class InternalClientTest
     // Tests_SRS_INTERNALCLIENT_02_015: [If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.]
     @Test (expected = IllegalArgumentException.class)
     public void setOptionWithUnknownOptionNameThrows()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -1855,7 +1857,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_02_017: [Available only for HTTP.]
     @Test
     public void setOptionSetReceiveIntervalWithAMQPsucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -1888,7 +1890,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_02_018: [Value needs to have type long].
     @Test (expected = IllegalArgumentException.class)
     public void setOptionMinimumPollingIntervalWithStringInsteadOfLongFails()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -1912,7 +1914,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_02_005: [Setting the option can only be done before open call.]
     @Test (expected = IllegalStateException.class)
     public void setOptionMinimumPollingIntervalAfterOpenFails()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -1938,7 +1940,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_02_016: ["SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.]
     @Test
     public void setOptionMinimumPollingIntervalSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -1971,7 +1973,7 @@ public class InternalClientTest
     // Tests_SRS_INTERNALCLIENT_21_040: ["SetSendInterval" - time in milliseconds between 2 consecutive message sends.]
     @Test
     public void setOptionSendIntervalSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2003,7 +2005,7 @@ public class InternalClientTest
 
     @Test (expected = IllegalArgumentException.class)
     public void setOptionSendIntervalWithStringInsteadOfLongFails()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2026,7 +2028,7 @@ public class InternalClientTest
 
     @Test (expected = IllegalArgumentException.class)
     public void setOptionValueNullThrows()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2048,7 +2050,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_25_022: [**"SetSASTokenExpiryTime" should have value type long.]
     @Test (expected = IllegalArgumentException.class)
     public void setOptionSASTokenExpiryTimeWithStringInsteadOfLongFails()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2074,7 +2076,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_25_021: ["SetSASTokenExpiryTime" - time in seconds after which SAS Token expires.]
     @Test
     public void setOptionSASTokenExpiryTimeHTTPSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2111,7 +2113,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_25_024: ["SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time.]
     @Test
     public void setOptionSASTokenExpiryTimeAfterClientOpenHTTPSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations()
@@ -2153,7 +2155,7 @@ public class InternalClientTest
     }
 
     @Test
-    public void setOptionSetConnectTimeoutSucceeds()
+    public void setOptionSetConnectTimeoutSucceeds() throws DeviceClientException
     {
         // arrange
         new Expectations()
@@ -2183,7 +2185,7 @@ public class InternalClientTest
     }
 
     @Test
-    public void setOptionSetReadTimeoutSucceeds()
+    public void setOptionSetReadTimeoutSucceeds() throws DeviceClientException
     {
         // arrange
         new Expectations()
@@ -2219,7 +2221,7 @@ public class InternalClientTest
     */
     @Test
     public void setOptionSASTokenExpiryTimeAfterClientOpenTransportWithSasTokenSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations()
@@ -2261,7 +2263,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_25_021: ["SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
     @Test
     public void setOptionSASTokenExpiryTimeAMQPSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations()
@@ -2300,7 +2302,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_25_024: ["SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time.]
     @Test
     public void setOptionSASTokenExpiryTimeAfterClientOpenAMQPSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations()
@@ -2344,7 +2346,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_25_021: [**"SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
     @Test
     public void setOptionSASTokenExpiryTimeMQTTSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations() {
@@ -2383,7 +2385,7 @@ public class InternalClientTest
     //Tests_SRS_INTERNALCLIENT_25_024: ["SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time.]
     @Test
     public void setOptionSASTokenExpiryTimeAfterClientOpenMQTTSucceeds()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations()
@@ -2427,7 +2429,7 @@ public class InternalClientTest
     // Tests_SRS_INTERNALCLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
     @Test (expected = IOError.class)
     public void setOptionClientSASTokenExpiryTimeAfterClientOpenAMQPThrowsDeviceIOClose()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations()
@@ -2461,7 +2463,7 @@ public class InternalClientTest
     // Tests_SRS_INTERNALCLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
     @Test (expected = IOError.class)
     public void setOptionClientSASTokenExpiryTimeAfterClientOpenAMQPThrowsTransportDeviceIOOpen()
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         // arrange
         new NonStrictExpectations()
@@ -2494,7 +2496,7 @@ public class InternalClientTest
 
     //Tests_SRS_INTERNALCLIENT_34_065: [""SetSASTokenExpiryTime" if this option is called when not using sas token authentication, an IllegalStateException shall be thrown.*]
     @Test (expected = IllegalStateException.class)
-    public void setOptionSASTokenExpiryTimeWhenNotUsingSasTokenAuthThrows() throws URISyntaxException, IOException
+    public void setOptionSASTokenExpiryTimeWhenNotUsingSasTokenAuthThrows() throws URISyntaxException, IOException, DeviceClientException
     {
         // arrange
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -2519,157 +2521,6 @@ public class InternalClientTest
 
         // act
         client.setOption("SetSASTokenExpiryTime", 25L);
-    }
-
-    // Tests_SRS_INTERNALCLIENT_12_029: [*SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.]
-    @Test
-    public void setOptionSetCertificatePathX509Success()
-            throws IOException, URISyntaxException
-    {
-        // arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = false;
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.AMQPS_WS;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.X509_CERTIFICATE;
-            }
-        };
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
-
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-        Deencapsulation.setField(client, "config", mockConfig);
-        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
-        final String value = "certificatePath";
-
-        // act
-        client.setOption("SetCertificatePath", value);
-
-        new Verifications()
-        {
-            {
-                mockConfig.getAuthenticationProvider();
-                times = 1;
-                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_INTERNALCLIENT_12_029: [*SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.]
-    @Test
-    public void setOptionSetCertificatePathSASSuccess()
-            throws IOException, URISyntaxException
-    {
-        // arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = false;
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.AMQPS_WS;
-            }
-        };
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
-
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-        Deencapsulation.setField(client, "config", mockConfig);
-        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
-        final String value = "certificatePath";
-
-        // act
-        client.setOption("SetCertificatePath", value);
-
-        new Verifications()
-        {
-            {
-                mockConfig.getAuthenticationProvider();
-                times = 1;
-                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
-                times = 1;
-            }
-        };
-    }
-
-    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
-    // protocol is not HTTPS, this function shall save the certificate path in config.]
-    @Test
-    public void setCertificatePathWorksForMqtt()
-    {
-        setCertificatePath(IotHubClientProtocol.MQTT);
-    }
-
-    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
-    // protocol is not HTTPS, this function shall save the certificate path in config.]
-    @Test
-    public void setCertificatePathWorksForMqttWs()
-    {
-        setCertificatePath(IotHubClientProtocol.MQTT_WS);
-    }
-
-    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
-    // protocol is not HTTPS, this function shall save the certificate path in config.]
-    @Test
-    public void setCertificatePathWorksForAmqps()
-    {
-        setCertificatePath(IotHubClientProtocol.AMQPS);
-    }
-
-    // Tests_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
-    // protocol is not HTTPS, this function shall save the certificate path in config.]
-    @Test
-    public void setCertificatePathWorksForAmqpsWs()
-    {
-        setCertificatePath(IotHubClientProtocol.AMQPS_WS);
-    }
-
-    // Tests_SRS_DEVICECLIENT_34_047: [If the option is SET_CERTIFICATE_PATH, and the saved
-    // protocol is HTTPS, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void setCertificatePathFailsForHttps()
-    {
-        setCertificatePath(IotHubClientProtocol.HTTPS);
-    }
-
-    private void setCertificatePath(final IotHubClientProtocol protocol)
-    {
-        //arrange
-        final String expectedCertificatePath = "some certificate path";
-
-        new Expectations()
-        {
-            {
-                new DeviceClientConfig(mockIotHubConnectionString, (ClientOptions) null);
-                result = mockConfig;
-
-                Deencapsulation.newInstance(DeviceIO.class, mockConfig, SEND_PERIOD, RECEIVE_PERIOD);
-                result = mockDeviceIO;
-
-                mockDeviceIO.getProtocol();
-                result = protocol;
-            }
-        };
-        InternalClient client = Deencapsulation.newInstance(InternalClient.class, new Class[] {IotHubConnectionString.class, IotHubClientProtocol.class, long.class, long.class, ClientOptions.class}, mockIotHubConnectionString, protocol, SEND_PERIOD, RECEIVE_PERIOD, null);
-
-        // act
-        client.setOption("SetCertificatePath", expectedCertificatePath);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(expectedCertificatePath);
-                times = 1;
-            }
-        };
     }
 
     @Test (expected = IllegalStateException.class)

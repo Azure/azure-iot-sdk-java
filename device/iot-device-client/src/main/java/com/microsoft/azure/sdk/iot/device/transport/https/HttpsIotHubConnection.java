@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.device.net.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportConnection;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -504,9 +505,9 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         {
             return this.config.getAuthenticationProvider().getSSLContext();
         }
-        catch (IOException e)
+        catch (SecurityProviderException e)
         {
-            throw new TransportException(e);
+            throw new TransportException("Failed to get the SSLContext", e);
         }
     }
 

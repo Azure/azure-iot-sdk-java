@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -138,7 +139,7 @@ public class HandleMessages
      * args[0] = IoT Hub connection string
      * args[1] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
-    public static void main(String[] args) throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException, DeviceClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");

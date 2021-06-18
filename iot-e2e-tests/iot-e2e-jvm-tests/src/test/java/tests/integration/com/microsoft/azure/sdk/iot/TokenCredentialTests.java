@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.Device;
 import com.microsoft.azure.sdk.iot.service.DeviceStatus;
@@ -101,7 +102,7 @@ public class TokenCredentialTests
     }
 
     @Test
-    public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException
+    public void getDigitalTwinWithTokenCredential() throws IOException, IotHubException, URISyntaxException, DeviceClientException
     {
         Assume.assumeFalse(isBasicTierHub); // only run tests for standard tier hubs
 

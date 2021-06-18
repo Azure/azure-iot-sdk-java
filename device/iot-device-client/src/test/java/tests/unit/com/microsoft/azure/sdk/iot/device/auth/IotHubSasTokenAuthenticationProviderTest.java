@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Test;
 
@@ -62,17 +63,7 @@ public class IotHubSasTokenAuthenticationProviderTest
         }
 
         @Override
-        public void setPathToIotHubTrustedCert(String pathToCertificate)
-        {
-        }
-
-        @Override
-        public void setIotHubTrustedCert(String certificate)
-        {
-        }
-
-        @Override
-        public SSLContext getSSLContext() throws IOException
+        public SSLContext getSSLContext() throws SecurityProviderException
         {
             return null;
         }

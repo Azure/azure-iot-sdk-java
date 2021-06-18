@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceTwinDevice;
@@ -35,9 +36,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -59,7 +57,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testSubscribeToDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         subscribeToDesiredPropertiesAndVerify(
@@ -71,7 +69,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testReplaceTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testReplaceTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         // arrange
         if (testInstance.protocol != IotHubClientProtocol.AMQPS || testInstance.authenticationType != AuthenticationType.SAS)
@@ -147,7 +145,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testSubscribeToDesiredArrayProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testSubscribeToDesiredArrayProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         subscribeToDesiredPropertiesAndVerify(
@@ -160,7 +158,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void testSubscribeToDesiredArrayPropertiesWithVersion() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testSubscribeToDesiredArrayPropertiesWithVersion() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         testSubscribeToDesiredPropertiesWithVersionFlow(
@@ -171,7 +169,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testSubscribeToDesiredPropertiesWithVersion() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         testSubscribeToDesiredPropertiesWithVersionFlow(
@@ -215,7 +213,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException
+    public void testSubscribeToDesiredPropertiesSequentially() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, ModuleClientException, URISyntaxException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         testSubscribeToDesiredPropertiesSequentiallyFlow(PROPERTY_VALUE, PROPERTY_VALUE_UPDATE, PROPERTY_VALUE_UPDATE);
@@ -258,7 +256,7 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testUpdateDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testUpdateDesiredProperties() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
         addMultipleDevices(MAX_DEVICES);

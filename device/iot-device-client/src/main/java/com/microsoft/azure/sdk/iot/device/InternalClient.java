@@ -7,9 +7,11 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -30,8 +32,6 @@ public class InternalClient
     // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
     static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
-    static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
-	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
     static final String SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = "SetAmqpOpenAuthenticationSessionTimeout";
     static final String SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = "SetAmqpOpenDeviceSessionsTimeout";
@@ -58,7 +58,6 @@ public class InternalClient
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
     {
-        /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
         commonConstructorVerification(iotHubConnectionString, protocol);
 
         this.config = new DeviceClientConfig(iotHubConnectionString, clientOptions);
@@ -70,23 +69,10 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
+    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis)
     {
         this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
         this.config.setProtocol(protocol);
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-    }
-
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException
-    {
-        // Codes_SRS_INTERNALCLIENT_34_078: [If the connection string or protocol is null, this function shall throw an IllegalArgumentException.]
-        commonConstructorVerification(iotHubConnectionString, protocol);
-
-        // Codes_SRS_INTERNALCLIENT_34_079: [This function shall save a new config using the provided connection string, and x509 certificate information.]
-        this.config = new DeviceClientConfig(iotHubConnectionString, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath);
-        this.config.setProtocol(protocol);
-
-        // Codes_SRS_INTERNALCLIENT_34_080: [This function shall save a new DeviceIO instance using the created config and the provided send/receive periods.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -99,43 +85,36 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
     }
 
-    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions) throws URISyntaxException, IOException
+    InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions) throws URISyntaxException, SecurityProviderException
     {
         if (protocol == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_072: [If the provided protocol is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("The transport protocol cannot be null");
         }
 
         if (securityProvider == null)
         {
-            //Codes_SRS_INTERNALCLIENT_34_073: [If the provided securityProvider is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("securityProvider cannot be null");
         }
 
         if (uri == null || uri.isEmpty())
         {
-            //Codes_SRS_INTERNALCLIENT_34_074: [If the provided uri is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("URI cannot be null or empty");
         }
 
         if (deviceId == null || deviceId.isEmpty())
         {
-            //Codes_SRS_INTERNALCLIENT_34_075: [If the provided deviceId is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("deviceId cannot be null or empty");
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_065: [The provided uri and device id will be used to create an iotHubConnectionString that will be saved in config.]
         IotHubConnectionString connectionString = new IotHubConnectionString(uri, deviceId, null, null);
 
-        //Codes_SRS_INTERNALCLIENT_34_066: [The provided security provider will be saved in config.]
         this.config = new DeviceClientConfig(connectionString, securityProvider);
         this.config.setProtocol(protocol);
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -161,18 +140,10 @@ public class InternalClient
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
-    //unused
-    InternalClient()
-    {
-        // Codes_SRS_INTERNALCLIENT_12_028: [The constructor shall shall set the config, deviceIO and tranportClient to null.]
-        this.config = null;
-        this.deviceIO = null;
-    }
-
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")
-    public void open() throws IOException
+    public void open() throws DeviceClientException
     {
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
@@ -182,7 +153,7 @@ public class InternalClient
         this.deviceIO.open();
     }
 
-    public void close() throws IOException
+    public void close() throws DeviceClientException
     {
         //noinspection StatementWithEmptyBody
         while (!this.deviceIO.isEmpty())
@@ -193,7 +164,7 @@ public class InternalClient
         this.deviceIO.close();
     }
 
-    public void closeNow() throws IOException
+    public void closeNow() throws DeviceClientException
     {
         this.deviceIO.close();
     }
@@ -467,11 +438,6 @@ public class InternalClient
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
-     *	    - <b>SetCertificatePath</b> - this option is applicable only
-     *	      when the transport configured with this client is AMQP. This
-     *	      option specifies the path to the certificate used to verify peer.
-     *	      The value is expected to be of type {@code String}.
-     *
      *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
      *         AMQP/MQTT. This option specifies the interval in seconds after which
      *         SASToken expires. If the transport is already open then setting this
@@ -506,7 +472,8 @@ public class InternalClient
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")
-    public void setOption(String optionName, Object value)
+    //TODO move this to client options
+    public void setOption(String optionName, Object value) throws DeviceClientException
     {
         if (optionName == null)
         {
@@ -541,43 +508,6 @@ public class InternalClient
                 case SET_SEND_INTERVAL:
                 {
                     setOption_SetSendInterval(value);
-                    break;
-                }
-                case SET_CERTIFICATE_PATH:
-                {
-                    if ((this.deviceIO != null) && (this.deviceIO.isOpen()))
-                    {
-                        throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
-                    }
-                    else
-                    {
-                        if (this.deviceIO.getProtocol() != HTTPS)
-                        {
-                            // Codes_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
-                            // protocol is not HTTPS, this function shall save the certificate path in config.]
-                            setOption_SetCertificatePath(value);
-                        }
-                        else
-                        {
-                            // Codes_SRS_DEVICECLIENT_34_047: [If the option is SET_CERTIFICATE_PATH, and the saved
-                            // protocol is HTTPS, this function shall throw an IllegalArgumentException.]
-                            throw new IllegalArgumentException("option SetCertificatePath cannot be invoked when using HTTPS protocol");
-                        }
-                    }
-
-                    break;
-                }
-                case SET_CERTIFICATE_AUTHORITY:
-                {
-                    if ((this.deviceIO != null) && (this.deviceIO.isOpen()))
-                    {
-                        throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
-                    }
-                    else
-                    {
-                        setTrustedCertificates((String)value);
-                    }
-
                     break;
                 }
                 case SET_SAS_TOKEN_EXPIRY_TIME:
@@ -886,15 +816,6 @@ public class InternalClient
         }
     }
 
-    void setOption_SetCertificatePath(Object value)
-    {
-        if (value != null)
-        {
-            log.info("Setting path to trusted certificate");
-            this.config.getAuthenticationProvider().setPathToIotHubTrustedCert((String) value);
-        }
-    }
-
     void setOption_SetHttpsConnectTimeout(Object value)
     {
         if (value != null)
@@ -937,28 +858,16 @@ public class InternalClient
         }
     }
 
-    void setTrustedCertificates(String certificates)
-    {
-        this.config.getAuthenticationProvider().setIotHubTrustedCert(certificates);
-    }
-
-    void setOption_SetSendInterval(Object value)
+    void setOption_SetSendInterval(Object value) throws DeviceClientException
     {
         if (value != null)
         {
             // Codes_SRS_DEVICECLIENT_21_041: ["SetSendInterval" needs to have value type long.]
             if (value instanceof Long)
             {
-                try
-                {
-                    verifyRegisteredIfMultiplexing();
-                    log.info("Setting send period to {} milliseconds", value);
-                    this.deviceIO.setSendPeriodInMilliseconds((long) value);
-                }
-                catch (IOException e)
-                {
-                    throw new IOError(e);
-                }
+                verifyRegisteredIfMultiplexing();
+                log.info("Setting send period to {} milliseconds", value);
+                this.deviceIO.setSendPeriodInMilliseconds((long) value);
             }
             else
             {
@@ -967,23 +876,16 @@ public class InternalClient
         }
     }
 
-    void setOption_SetMinimumPollingInterval(Object value)
+    void setOption_SetMinimumPollingInterval(Object value) throws DeviceClientException
     {
         if (value != null)
         {
             // Codes_SRS_DEVICECLIENT_02_018: ["SetMinimumPollingInterval" needs to have type long].
             if (value instanceof Long)
             {
-                try
-                {
-                    verifyRegisteredIfMultiplexing();
-                    log.info("Setting receive period to {} milliseconds", value);
-                    this.deviceIO.setReceivePeriodInMilliseconds((long) value);
-                }
-                catch (IOException e)
-                {
-                    throw new IOError(e);
-                }
+                verifyRegisteredIfMultiplexing();
+                log.info("Setting receive period to {} milliseconds", value);
+                this.deviceIO.setReceivePeriodInMilliseconds((long) value);
             }
             else
             {
@@ -1017,31 +919,6 @@ public class InternalClient
 
             log.info("Setting generated SAS token lifespans to {} seconds", validTimeInSeconds);
             this.config.getSasTokenAuthentication().setTokenValidSecs(validTimeInSeconds);
-
-            if (this.deviceIO != null)
-            {
-                if (this.deviceIO.isOpen())
-                {
-                    try
-                    {
-                        /* Codes_SRS_DEVICECLIENT_25_024: [**"SetSASTokenExpiryTime" shall restart the transport
-                         *                                  1. If the device currently uses device key and
-                         *                                  2. If transport is already open
-                         *                                 after updating expiry time
-                         */
-                        if (this.config.getSasTokenAuthentication().canRefreshToken())
-                        {
-                            this.deviceIO.close();
-                            this.deviceIO.open();
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
-                        throw new IOError(e);
-                    }
-                }
-            }
         }
     }
 

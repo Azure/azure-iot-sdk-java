@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -94,7 +95,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         {
             sslContext = this.config.getAuthenticationProvider().getSSLContext();
         }
-        catch (IOException e)
+        catch (SecurityProviderException e)
         {
             throw new TransportException("Failed to get SSLContext", e);
         }

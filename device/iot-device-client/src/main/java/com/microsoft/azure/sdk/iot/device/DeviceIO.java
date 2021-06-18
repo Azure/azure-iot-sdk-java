@@ -33,7 +33,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT_WS;
  *        |  +---------------------------------------------------------------------------------------------+
  *        |  | Services                                                                                    |
  *        |  |  +-----------+    +------------+    +--------------+                        +------------+  |
- *        |  |  | Telemetry |    | DeviceTwin |    | DeviceMethod |                        | FileUpload |  |
+ *        |  |  | Telemetry |    | DeviceTwin |    | DeviceMethod |                        | FileUploadClient |  |
  *        |  |  +-----------+    +------------+    +--------------+                        +---------+--+  |
  *        |  +---------------------------------------------------------------------------------------|-----+
  *        |                                    |                                                     |
@@ -147,9 +147,9 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
      *
-     * @throws IOException if a connection to an IoT Hub cannot be established.
+     * @throws TransportException if a connection to an IoT Hub cannot be established.
      */
-    void open() throws IOException
+    void open() throws TransportException
     {
         synchronized (this.stateLock)
         {
@@ -158,38 +158,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
                 return;
             }
 
-            try
-            {
-                this.transport.open();
-            }
-            catch (DeviceClientException e)
-            {
-                throw new IOException("Could not open the connection", e);
-            }
-        }
-    }
-
-    // Functionally the same as "open()", but without wrapping any thrown TransportException into an IOException
-    void openWithoutWrappingException() throws TransportException
-    {
-        try
-        {
-            open();
-        }
-        catch (IOException e)
-        {
-            // We did this silly thing in the DeviceClient to work around the fact that we can't throw TransportExceptions
-            // directly in methods like deviceClient.open() because the open API existed before the TransportException did.
-            // To get around it, we just nested the meaningful exception into an IOException. The multiplexing client doesn't
-            // have to do the same thing though, so this code un-nests the exception when possible.
-            Throwable cause = e.getCause();
-            if (cause instanceof TransportException)
-            {
-                throw (TransportException) cause;
-            }
-
-            // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
-            throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
+            this.transport.open();
         }
     }
 
@@ -243,9 +212,9 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * IoT Hub. After {@code close()} is called, the IoT Hub client is no longer
      *  usable. If the client is already closed, the function shall do nothing.
      *
-     * @throws IOException if the connection to an IoT Hub cannot be closed.
+     * @throws TransportException if the connection to an IoT Hub cannot be closed.
      */
-    public void close() throws IOException
+    public void close() throws TransportException
     {
         synchronized (this.stateLock)
         {
@@ -269,37 +238,14 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
             {
                 this.transport.close(IotHubConnectionStatusChangeReason.CLIENT_CLOSE, null);
             }
-            catch (DeviceClientException e)
+            catch (TransportException e)
             {
                 this.state = IotHubConnectionStatus.DISCONNECTED;
-                throw new IOException(e);
+                throw e;
             }
 
             /* Codes_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
             this.state = IotHubConnectionStatus.DISCONNECTED;
-        }
-    }
-
-    // Functionally the same as "close()", but without wrapping any thrown TransportException into an IOException
-    public void closeWithoutWrappingException() throws TransportException
-    {
-        try
-        {
-            close();
-        }
-        catch (IOException e)
-        {
-            // We did this silly thing in the DeviceClient to work around the fact that we can't throw TransportExceptions
-            // directly in methods like deviceClient.close() because the close API existed before the TransportException did.
-            // To get around it, we just nested the meaningful exception into an IOException. The multiplexing client doesn't
-            // have to do the same thing though, so this code un-nests the exception when possible.
-            if (e.getCause() != null && e.getCause() instanceof TransportException)
-            {
-                throw (TransportException) e.getCause();
-            }
-
-            // should never happen. Open only throws IOExceptions with an inner exception of type TransportException
-            throw new IllegalStateException("Encountered a wrapped IOException with no inner transport exception", e);
         }
     }
 
@@ -360,10 +306,10 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * Setter for the receive period in milliseconds.
      *
      * @param newIntervalInMilliseconds is the new interval in milliseconds.
-     * @throws IOException if the task schedule exist but there is no receive task function to call.
+     * @throws DeviceClientException if the task schedule exist but there is no receive task function to call.
      * @throws IllegalArgumentException if the provided interval is invalid (zero or negative).
      */
-    public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException
+    public void setReceivePeriodInMilliseconds(long newIntervalInMilliseconds) throws DeviceClientException
     {
         /* Codes_SRS_DEVICE_IO_21_030: [If the the provided interval is zero or negative, the setReceivePeriodInMilliseconds shall throw IllegalArgumentException.] */
         if(newIntervalInMilliseconds <= 0L)
@@ -380,7 +326,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
             /* Codes_SRS_DEVICE_IO_21_029: [If the `receiveTask` is null, the setReceivePeriodInMilliseconds shall throw IOException.] */
             if (this.receiveTask == null)
             {
-                throw new IOException("transport receive task not set");
+                throw new DeviceClientException("transport receive task not set");
             }
 
             this.receiveTaskScheduler.scheduleAtFixedRate(this.receiveTask, 0,
@@ -403,10 +349,10 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      * Setter for the send period in milliseconds.
      *
      * @param newIntervalInMilliseconds is the new interval in milliseconds.
-     * @throws IOException if the task schedule exist but there is no send task function to call.
+     * @throws DeviceClientException if the task schedule exist but there is no send task function to call.
      * @throws IllegalArgumentException if the provided interval is invalid (zero or negative).
      */
-    public void setSendPeriodInMilliseconds(long newIntervalInMilliseconds) throws IOException
+    public void setSendPeriodInMilliseconds(long newIntervalInMilliseconds) throws DeviceClientException
     {
         /* Codes_SRS_DEVICE_IO_21_036: [If the the provided interval is zero or negative, the setSendPeriodInMilliseconds shall throw IllegalArgumentException.] */
         if(newIntervalInMilliseconds <= 0L)
@@ -423,7 +369,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
             /* Codes_SRS_DEVICE_IO_21_035: [If the `sendTask` is null, the setSendPeriodInMilliseconds shall throw IOException.] */
             if (this.sendTask == null)
             {
-                throw new IOException("transport send task not set");
+                throw new DeviceClientException("transport send task not set");
             }
 
             this.sendTaskScheduler.scheduleAtFixedRate(this.sendTask, 0,
@@ -462,18 +408,6 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     {
         /* Codes_SRS_DEVICE_IO_21_039: [The isEmpty shall return the transport queue state, true if the queue is empty, false if there is pending messages in the queue.] */
         return this.transport.isEmpty();
-    }
-
-    /**
-     * Registers a callback with the configured transport to be executed whenever the connection to the device is lost or established.
-     *
-     * @param callback the callback to be called.
-     * @param callbackContext a context to be passed to the callback. Can be
-     * {@code null} if no callback is provided.
-     */
-    public void registerConnectionStateCallback(IotHubConnectionStateCallback callback, Object callbackContext)
-    {
-        this.transport.registerConnectionStateCallback(callback, callbackContext);
     }
 
     void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback statusChangeCallback, Object callbackContext, String deviceId)

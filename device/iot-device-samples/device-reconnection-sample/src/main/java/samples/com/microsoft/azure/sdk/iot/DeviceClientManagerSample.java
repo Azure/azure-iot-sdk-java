@@ -6,6 +6,7 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -29,7 +30,8 @@ public class DeviceClientManagerSample {
      * Sends a number of messages to an IoT. Default protocol is to use AMQP transport.
      */
     public static void main(String[] args)
-            throws URISyntaxException, IOException {
+            throws URISyntaxException, DeviceClientException
+    {
         log.debug("Starting the sample...");
         log.debug("Using communication protocol: {}", protocol.name());
 

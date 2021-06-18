@@ -7,9 +7,11 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -91,7 +93,8 @@ public class Thermostat {
         }
     }
 
-    public static void main(String[] args) throws URISyntaxException, IOException, ProvisioningDeviceClientException, InterruptedException {
+    public static void main(String[] args) throws URISyntaxException, IOException, ProvisioningDeviceClientException, InterruptedException, SecurityProviderException, DeviceClientException
+    {
 
         // This sample follows the following workflow:
         // -> Initialize device client instance.
@@ -169,7 +172,8 @@ public class Thermostat {
         }).start();
     }
 
-    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException {
+    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException, SecurityProviderException, DeviceClientException
+    {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
         ProvisioningStatus provisioningStatus = new ProvisioningStatus();
@@ -228,7 +232,8 @@ public class Thermostat {
      * Initialize the device client instance over Mqtt protocol, setting the ModelId into ClientOptions.
      * This method also sets a connection status change callback, that will get triggered any time the device's connection status changes.
      */
-    private static void initializeDeviceClient() throws URISyntaxException, IOException {
+    private static void initializeDeviceClient() throws URISyntaxException, IOException, DeviceClientException
+    {
         ClientOptions options = new ClientOptions();
         options.setModelId(MODEL_ID);
         deviceClient = new DeviceClient(deviceConnectionString, protocol, options);
@@ -413,7 +418,7 @@ public class Thermostat {
 
         Message message = new Message(telemetryPayload);
         message.setContentEncoding(StandardCharsets.UTF_8.name());
-        message.setContentTypeFinal("application/json");
+        message.setContentType("application/json");
 
         deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, temperature, message.getMessageId());

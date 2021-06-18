@@ -18,6 +18,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-storage-blob</artifactId>
+            <version>12.8.0</version>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>

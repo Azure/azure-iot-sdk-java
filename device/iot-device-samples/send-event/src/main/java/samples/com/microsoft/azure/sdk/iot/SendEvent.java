@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class SendEvent
      * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, DeviceClientException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -199,7 +200,7 @@ public class SendEvent
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);

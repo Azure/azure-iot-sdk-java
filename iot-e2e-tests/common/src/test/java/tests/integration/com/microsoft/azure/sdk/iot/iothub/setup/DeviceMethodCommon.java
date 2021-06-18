@@ -13,6 +13,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.service.BaseDevice;
 import com.microsoft.azure.sdk.iot.service.Device;
@@ -190,7 +191,7 @@ public class DeviceMethodCommon extends IntegrationTest
                     this.deviceTestManager.tearDown();
                 }
             }
-            catch (IOException e)
+            catch (DeviceClientException e)
             {
                 log.error("Failed to close clients during cleanup", e);
             }

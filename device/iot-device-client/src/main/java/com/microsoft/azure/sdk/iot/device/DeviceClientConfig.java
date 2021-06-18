@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
+import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -235,15 +236,14 @@ public final class DeviceClientConfig
      * Constructor for a device client config that retrieves the authentication method from a security provider instance
      * @param connectionString The connection string for the iot hub to connect with
      * @param securityProvider The security provider instance to be used for authentication of this device
-     * @throws IOException if the provided security provider throws an exception while authenticating
+     * @throws SecurityProviderException if the provided security provider throws an exception while authenticating
      */
-    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws IOException
+    DeviceClientConfig(IotHubConnectionString connectionString, SecurityProvider securityProvider) throws SecurityProviderException
     {
         commonConstructorSetup(connectionString);
 
         if (securityProvider == null)
         {
-            //Codes_SRS_DEVICECLIENTCONFIG_34_080: [If the provided connectionString or security provider is null, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("security provider cannot be null");
         }
 

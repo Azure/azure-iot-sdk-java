@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.twin;
 
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.devicetwin.Pair;
@@ -43,14 +44,14 @@ public class TwinTagsTests extends DeviceTwinCommon
 
     @Before
     @SuppressWarnings("EmptyMethod")
-    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException
+    public void setUpNewDeviceAndModule() throws IOException, IotHubException, URISyntaxException, InterruptedException, ModuleClientException, GeneralSecurityException, DeviceClientException
     {
         super.setUpNewDeviceAndModule();
     }
 
     @Test
     @StandardTierHubOnlyTest
-    public void testGetTwinUpdates() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testGetTwinUpdates() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -114,7 +115,7 @@ public class TwinTagsTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testAddTagUpdates() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testAddTagUpdates() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         addMultipleDevices(MAX_DEVICES);
 
@@ -145,7 +146,7 @@ public class TwinTagsTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testUpdateTagUpdates() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testUpdateTagUpdates() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         addMultipleDevices(MAX_DEVICES);
 

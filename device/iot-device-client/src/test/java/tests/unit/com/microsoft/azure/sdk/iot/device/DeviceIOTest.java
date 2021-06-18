@@ -653,26 +653,6 @@ public class DeviceIOTest
         assertFalse(isOpen);
     }
 
-    /* Tests_SRS_DEVICE_IO_99_001: [The registerConnectionStateCallback shall register the callback with the transport.] */
-    @Test
-    public void registerConnectionStateCallbackSuccess(@Mocked final IotHubConnectionStateCallback mockedStateCB)
-    {
-        //arrange
-        final Object deviceIO = newDeviceIO();
-
-        //act
-        Deencapsulation.invoke(deviceIO, "registerConnectionStateCallback", mockedStateCB, Object.class);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockedTransport.registerConnectionStateCallback(mockedStateCB, null);
-                times = 1;
-            }
-        };
-    }
-
     //Tests_SRS_DEVICE_IO_34_020: [This function shall register the callback with the transport.]
     @Test
     public void registerConnectionStatusChangeCallbackSuccess(@Mocked final IotHubConnectionStatusChangeCallback mockedStateCB)

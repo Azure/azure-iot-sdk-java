@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.service.RegistryManager;
 import com.microsoft.azure.sdk.iot.service.RegistryManagerOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
@@ -206,7 +207,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
         }
     }
 
-    private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException
+    private void createDevice(IotHubClientProtocol protocol) throws IOException, URISyntaxException, DeviceClientException
     {
         testInstance.deviceTwinWithVersionTestDevice.deviceClient = new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, testInstance.deviceForRegistryManager), protocol);
         testInstance.deviceTwinWithVersionTestDevice.deviceClient.open();
@@ -238,7 +239,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void testSendReportedPropertiesWithoutVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    public void testSendReportedPropertiesWithoutVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException, DeviceClientException
     {
         // arrange
         createDevice(testInstance.protocol);
@@ -283,7 +284,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
 
     @Test
     @StandardTierHubOnlyTest
-    public void testUpdateReportedPropertiesWithVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    public void testUpdateReportedPropertiesWithVersionSucceed() throws IOException, InterruptedException, URISyntaxException, IotHubException, DeviceClientException
     {
         // arrange
         createDevice(testInstance.protocol);
@@ -372,7 +373,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void testUpdateReportedPropertiesWithLowerVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    public void testUpdateReportedPropertiesWithLowerVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException, DeviceClientException
     {
         // arrange
         createDevice(testInstance.protocol);
@@ -459,7 +460,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void testUpdateReportedPropertiesWithHigherVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException
+    public void testUpdateReportedPropertiesWithHigherVersionFailed() throws IOException, InterruptedException, URISyntaxException, IotHubException, DeviceClientException
     {
         // arrange
         createDevice(testInstance.protocol);

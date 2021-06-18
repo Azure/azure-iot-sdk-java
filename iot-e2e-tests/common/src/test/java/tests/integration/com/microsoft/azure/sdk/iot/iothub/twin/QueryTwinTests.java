@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.microsoft.azure.sdk.iot.deps.twin.TwinConnectionState;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.ModuleClientException;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.IotHubConnectionStringBuilder;
@@ -96,7 +97,7 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testRawQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testRawQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
         testRawQueryTwin();
@@ -104,7 +105,7 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testRawQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testRawQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         IotHubConnectionString iotHubConnectionStringObj =
                 IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
@@ -118,7 +119,7 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void rawQueryTokenRenewalWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void rawQueryTokenRenewalWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         IotHubConnectionString iotHubConnectionStringObj =
             IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
@@ -153,7 +154,7 @@ public class QueryTwinTests extends DeviceTwinCommon
         testRawQueryTwin();
     }
 
-    public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testRawQueryTwin() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         addMultipleDevices(MAX_DEVICES, false);
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().serializeNulls().create();
@@ -212,7 +213,7 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testQueryTwinWithConnectionString() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString);
         testQueryTwin();
@@ -220,13 +221,13 @@ public class QueryTwinTests extends DeviceTwinCommon
 
     @Test
     @StandardTierHubOnlyTest
-    public void testQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testQueryTwinWithAzureSasCredential() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         testInstance.twinServiceClient = buildDeviceTwinClientWithAzureSasCredential();
         testQueryTwin();
     }
 
-    public void testQueryTwin() throws InterruptedException, ModuleClientException, IOException, GeneralSecurityException, IotHubException, URISyntaxException
+    public void testQueryTwin() throws InterruptedException, ModuleClientException, IOException, GeneralSecurityException, IotHubException, URISyntaxException, DeviceClientException
     {
         addMultipleDevices(MAX_DEVICES, false);
 
@@ -264,7 +265,7 @@ public class QueryTwinTests extends DeviceTwinCommon
     @Test
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
-    public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException
+    public void testQueryTwinWithContinuationToken() throws IOException, InterruptedException, IotHubException, GeneralSecurityException, URISyntaxException, ModuleClientException, DeviceClientException
     {
         addMultipleDevices(PAGE_SIZE + 1, false);
 

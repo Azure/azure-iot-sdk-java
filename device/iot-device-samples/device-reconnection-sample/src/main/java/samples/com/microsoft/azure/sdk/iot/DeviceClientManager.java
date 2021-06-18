@@ -4,6 +4,7 @@ import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
 import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceOperationTimeoutException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -52,7 +53,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    public void open() throws IOException {
+    public void open() throws DeviceClientException {
         synchronized (lock) {
             if(connectionStatus == ConnectionStatus.DISCONNECTED) {
                 connectionStatus = ConnectionStatus.CONNECTING;
@@ -63,7 +64,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         doConnect();
     }
 
-    private void doConnect() throws IOException {
+    private void doConnect() throws DeviceClientException {
         // Device client does not have retry on the initial open() call. Will need to be re-opened by the calling application
         while (connectionStatus == ConnectionStatus.CONNECTING) {
             synchronized (lock) {
@@ -102,7 +103,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                 log.debug("Closing the device client instance...");
                 client.closeNow();
             }
-            catch (IOException e) {
+            catch (DeviceClientException e) {
                 log.error("Exception thrown while closing DeviceClient instance: ", e);
             } finally {
                 connectionStatus = ConnectionStatus.DISCONNECTED;
@@ -154,7 +155,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                         }
                         try {
                             doConnect();
-                        } catch (IOException e) {
+                        } catch (DeviceClientException e) {
                             log.error("Exception thrown while opening DeviceClient instance: ", e);
                         }
                     }
