@@ -115,7 +115,6 @@ public class RawTwinQuery
      * @throws IotHubException If IotHub did not respond successfully to the query
      * @throws IOException If any of the input parameters are incorrect
      */
-    @SuppressWarnings("deprecation")
     public synchronized Query query(String sqlQuery, Integer pageSize) throws IotHubException, IOException
     {
         if (sqlQuery == null || sqlQuery.length() == 0)

@@ -49,7 +49,7 @@ public class RegistryManager
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;
 
-    private RegistryManagerOptions options;
+    private final RegistryManagerOptions options;
 
     /**
      * Previously was the java default constructor, should not be used.

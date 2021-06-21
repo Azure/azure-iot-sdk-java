@@ -30,8 +30,8 @@ public class DeviceMethod
 {
     private Integer requestId = 0;
 
-    private DeviceMethodClientOptions options;
-    private String hostName;
+    private final DeviceMethodClientOptions options;
+    private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;

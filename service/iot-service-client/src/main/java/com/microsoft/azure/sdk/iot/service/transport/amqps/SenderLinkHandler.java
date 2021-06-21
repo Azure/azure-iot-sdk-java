@@ -26,12 +26,12 @@ import java.util.Map;
 public abstract class SenderLinkHandler extends BaseHandler
 {
     private static final String API_VERSION_KEY = "com.microsoft:api-version";
-    Map<Symbol, Object> amqpProperties;
+    final Map<Symbol, Object> amqpProperties;
     @SuppressWarnings("unused") // protected member may be used for expansion
     String senderLinkTag;
-    String linkCorrelationId;
+    final String linkCorrelationId;
     String senderLinkAddress;
-    Sender senderLink;
+    final Sender senderLink;
     private long nextTag = 0;
 
     protected final LinkStateCallback linkStateCallback;

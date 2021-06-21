@@ -106,11 +106,7 @@ public class DeviceOperations
         request.setHeaderField(USER_AGENT, TransportUtils.javaServiceClientIdentifier + TransportUtils.serviceVersion);
         request.setHeaderField(ACCEPT, ACCEPT_VALUE);
         request.setHeaderField(CONTENT_TYPE, ACCEPT_VALUE + "; " + ACCEPT_CHARSET);
-
-        if (payload != null)
-        {
-            request.setHeaderField(CONTENT_LENGTH, String.valueOf(payload.length));
-        }
+        request.setHeaderField(CONTENT_LENGTH, String.valueOf(payload.length));
 
         if (headers != null)
         {

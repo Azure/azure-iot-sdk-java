@@ -39,8 +39,8 @@ public class DeviceTwin
     private int requestId = 0;
     private final int DEFAULT_PAGE_SIZE = 100;
 
-    private DeviceTwinClientOptions options;
-    private String hostName;
+    private final DeviceTwinClientOptions options;
+    private final String hostName;
     private TokenCredentialCache credentialCache;
     private AzureSasCredential azureSasCredential;
     private IotHubConnectionString iotHubConnectionString;

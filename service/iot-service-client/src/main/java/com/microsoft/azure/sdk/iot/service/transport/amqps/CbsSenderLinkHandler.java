@@ -115,6 +115,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
         {
             TokenRequestContext context = new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE);
             this.currentAccessToken = credential.getToken(context).block();
+            //noinspection ConstantConditions
             applicationProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
             applicationProperties.put(PUT_TOKEN_TYPE, BEARER);
             Section section = new AmqpValue("Bearer " + this.currentAccessToken.getToken());
@@ -169,7 +170,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
 
                 try
                 {
-                    expiryTimeSeconds = Integer.valueOf(expiryTimeValue);
+                    expiryTimeSeconds = Integer.parseInt(expiryTimeValue);
                 }
                 catch (NumberFormatException e)
                 {

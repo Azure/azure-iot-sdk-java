@@ -127,7 +127,7 @@ public class TwinState extends RegisterManager
 
     private static final String PARENT_SCOPES = "parentScopes";
     @SerializedName(PARENT_SCOPES)
-    private List<String> parentScopes = new ArrayList();
+    private final List<String> parentScopes = new ArrayList<>();
 
     /**
      * CONSTRUCTOR

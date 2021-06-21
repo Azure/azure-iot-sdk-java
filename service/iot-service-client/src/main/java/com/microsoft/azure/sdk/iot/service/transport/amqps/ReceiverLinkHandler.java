@@ -29,12 +29,12 @@ public abstract class ReceiverLinkHandler extends BaseHandler
     // can send messages over that link to the client. Each "link credit" corresponds to 1 service to client message.
     // Upon receiving a message over a receiving link, a credit should be refunded to the service so that
     // this initial credit doesn't run out.
-    Map<Symbol, Object> amqpProperties;
+    final Map<Symbol, Object> amqpProperties;
     @SuppressWarnings("unused") // Used in sub classes for future expansion.
     String receiverLinkTag;
-    String linkCorrelationId;
+    final String linkCorrelationId;
     String receiverLinkAddress;
-    Receiver receiverLink;
+    final Receiver receiverLink;
 
     private final LinkStateCallback linkStateCallback;
 
