@@ -14,6 +14,8 @@ those versions.
 
 ## Windows 10
 
+Note that, while we only directly test on Windows 10, we do support other Windows versions as well.
+
 Nightly test platform details:
 Apache Maven 3.8.1
 Java version: 1.8.0_292, vendor: AdoptOpenJDK
@@ -22,9 +24,9 @@ Default locale: en_US, platform encoding: Cp1252
 
 OS name: "windows server 2016", version: "10.0", arch: "amd64", family: "windows"
 
-Note that, while we only directly test on Windows 10, we do support other Windows versions as well.
-
 ## Ubuntu 1604
+
+Note that, while we only directly test on Ubuntu 1604, we do generally support other popular linux distributions. 
 
 Nightly test platform details:
 Apache Maven 3.8.1
@@ -33,8 +35,6 @@ Java version: 1.8.0_292, vendor: AdoptOpenJDK
 Default locale: en_US, platform encoding: UTF-8
 
 OS name: "linux", version: "4.15.0-1113-azure", arch: "amd64", family: "unix"
-
-Note that, while we only directly test on Ubuntu 1604, we do generally support other popular linux distributions. 
 
 ## Android
 
