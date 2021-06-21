@@ -9,8 +9,8 @@ Due to security considerations, build logs are not publicly available.
 | Preview                  | [![Build Status](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_apis/build/status/java/pull_request_validation/Java%20Canary?branchName=preview)](https://azure-iot-sdks.visualstudio.com/azure-iot-sdks/_build/latest?definitionId=245&branchName=preview)|
 
 This repository contains the following:
-* **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub (supports Java 7+)
-* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT (supports Java 8+)
+* **Azure IoT Hub device SDK for Java**: connect client devices to Azure IoT Hub
+* **Azure IoT Hub service SDK for Java**: enables developing back-end applications for Azure IoT
 * **Azure IoT Device Provisioning device SDK for Java**: provision devices to Azure IoT Hub using Azure IoT Device Provisioning
 * **Azure IoT Device Provisioning service SDK for Java**: manage your Provisioning service instance from a back-end Java application
 
@@ -33,8 +33,10 @@ Devices and data sources in an IoT solution can range from a simple network-conn
    * **Working with the SDKs code**: if you are working with the SDKs code to modify it or contribute changes, then you can clone the repository and build the libraries:
       * [Build Device SDK from code][device-code]
       * [Build Service SDK from code][service-code]
-* On Android: our Java device SDK can be used on Android using the API version 17 and higher:
+* On Android: our Java device SDK can be used on Android:
    * [Device SDK][device-android]
+
+For more details on what platforms this SDK supports, see [this document](./supported_platforms.md).
 
 ## API reference
 * [Azure IoT Hub device SDK][java-api-reference-device]
