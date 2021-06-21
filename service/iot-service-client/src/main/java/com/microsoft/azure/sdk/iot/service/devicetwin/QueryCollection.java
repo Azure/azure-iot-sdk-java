@@ -343,19 +343,6 @@ public class QueryCollection
     }
 
     /**
-     * Returns the next QueryCollectionResponse object. The query shall continue with the same page size and use the internally saved continuation token.
-     * @return The next QueryCollectionResponse object or null if there is not a next QueryCollectionResponse object.
-     * @throws IOException If an IOException occurs when calling the Service API, or if the results of that call are unexpected.
-     * @throws IotHubException If an IotHubException occurs when calling the Service API.
-     */
-    protected QueryCollectionResponse<String> next() throws IOException, IotHubException
-    {
-        QueryOptions options = new QueryOptions();
-        options.setPageSize(this.pageSize);
-        return this.next(options);
-    }
-
-    /**
      * Returns the next QueryCollectionResponse object. If the provided query options have a continuation token, the
      * query shall continue from that token. The query shall use the page size set in the query options.
      *
