@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.device.auth;
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 
 import javax.net.ssl.SSLContext;
@@ -44,14 +45,35 @@ public abstract class IotHubAuthenticationProvider
         this.gatewayHostname = gatewayHostname;
         this.deviceId = deviceId;
         this.moduleId = moduleId;
-        this.iotHubSSLContext = new IotHubSSLContext();
+
+        try
+        {
+            this.iotHubSSLContext = new IotHubSSLContext();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            throw new IllegalStateException("Default SSL algorithm not found in JRE. Please check your JRE setup.", e);
+        }
     }
 
     public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
     {
-        this(hostname, gatewayHostname, deviceId, moduleId);
-
         Objects.requireNonNull(sslContext);
+
+        if (hostname == null || hostname.isEmpty())
+        {
+            throw new IllegalArgumentException("hostname cannot be null");
+        }
+
+        if (deviceId == null || deviceId.isEmpty())
+        {
+            throw new IllegalArgumentException("deviceId cannot be null");
+        }
+
+        this.hostname = hostname;
+        this.gatewayHostname = gatewayHostname;
+        this.deviceId = deviceId;
+        this.moduleId = moduleId;
 
         this.iotHubSSLContext = new IotHubSSLContext(sslContext);
     }

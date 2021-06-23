@@ -649,31 +649,6 @@ public class DeviceClientConfigTest
         assertEquals(expectedAuthType, actualAuthType);
     }
 
-    //Tests_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithNullConnStringThrows() throws IOException
-    {
-        //act
-        new DeviceClientConfig(null, "", false, "", false);
-    }
-
-    //Tests_SRS_DEVICECLIENTCONFIG_34_069: [If the provided connection string is null or does not use x509 auth, and IllegalArgumentException shall be thrown.]
-    @Test (expected = IllegalArgumentException.class)
-    public void constructorWithWrongAuthTypeConnStringThrows() throws IOException
-    {
-        //arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockIotHubConnectionString.isUsingX509();
-                result = false;
-            }
-        };
-
-        //act
-        new DeviceClientConfig(mockIotHubConnectionString, "", false, "", false);
-    }
-
     @Test
     public void constructorWithSSLContextBuildsX509SoftwareAuthenticationProvider(@Mocked final SSLContext mockSSLContext)
     {

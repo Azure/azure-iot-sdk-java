@@ -5,14 +5,15 @@ package com.microsoft.azure.sdk.iot.deps.auth;
 
 
 import javax.net.ssl.SSLContext;
+import java.security.NoSuchAlgorithmException;
 
 public class IotHubSSLContext
 {
     SSLContext sslContext;
 
-    public IotHubSSLContext()
+    public IotHubSSLContext() throws NoSuchAlgorithmException
     {
-        //TODO read certs from device
+        this.sslContext = SSLContext.getDefault();
     }
 
     public IotHubSSLContext(SSLContext sslContext)

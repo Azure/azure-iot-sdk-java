@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,7 +122,8 @@ public final class DeviceClientConfig
         configSasAuth(iotHubConnectionString);
     }
 
-    private void configSasAuth(IotHubConnectionString iotHubConnectionString) {
+    private void configSasAuth(IotHubConnectionString iotHubConnectionString)
+    {
         commonConstructorSetup(iotHubConnectionString);
         assertConnectionStringIsNotX509(iotHubConnectionString);
 
@@ -159,31 +161,6 @@ public final class DeviceClientConfig
         this.productInfo = new ProductInfo();
 
         log.debug("Device configured to use SAS token provided authentication provider");
-    }
-
-    /**
-     * Constructor for device configs that use x509 authentication
-     *
-     * @param iotHubConnectionString The connection string for the device. (format: "HostName=...;deviceId=...;x509=true")
-     * @param publicKeyCertificate The PEM encoded public key certificate or the path to the PEM encoded public key certificate file
-     * @param isPathForPublic If the provided publicKeyCertificate is a path to the actual public key certificate
-     * @param privateKey The PEM encoded private key or the path to the PEM encoded private key file
-     * @param isPathForPrivate If the provided privateKey is a path to the actual private key
-     */
-    public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, String publicKeyCertificate, boolean isPathForPublic, String privateKey, boolean isPathForPrivate)
-    {
-        commonConstructorSetup(iotHubConnectionString);
-        assertConnectionStringIsX509(iotHubConnectionString);
-
-        //Codes_SRS_DEVICECLIENTCONFIG_34_069: [This function shall generate a new SSLContext and set this to using X509 authentication.]
-        this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
-                iotHubConnectionString.getHostName(),
-                iotHubConnectionString.getGatewayHostName(),
-                iotHubConnectionString.getDeviceId(),
-                iotHubConnectionString.getModuleId(),
-                publicKeyCertificate, isPathForPublic, privateKey, isPathForPrivate);
-
-        log.debug("Device configured to use software based x509 authentication provider");
     }
 
     public DeviceClientConfig(IotHubConnectionString iotHubConnectionString, ClientOptions clientOptions)
