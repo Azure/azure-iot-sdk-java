@@ -115,7 +115,13 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
         {
             TokenRequestContext context = new TokenRequestContext().addScopes(IOTHUB_PUBLIC_SCOPE);
             this.currentAccessToken = credential.getToken(context).block();
-            //noinspection ConstantConditions
+
+            if (this.currentAccessToken == null)
+            {
+                log.error("The AccessToken supplied by the TokenCrednetial for the CbsSenderLinkHandler was null.");
+                return -1;
+            }
+
             applicationProperties.put(PUT_TOKEN_EXPIRY, Date.from(this.currentAccessToken.getExpiresAt().toInstant()));
             applicationProperties.put(PUT_TOKEN_TYPE, BEARER);
             Section section = new AmqpValue("Bearer " + this.currentAccessToken.getToken());
