@@ -10,6 +10,7 @@ Following is a definition of a minimum set of rulers that defines the Java SDK c
 - [Naming Conventions](#Naming-Conventions)
 - [JavaDoc Guidelines](#JavaDoc-Guidelines)
 - [Commit Guidelines](#Commit-Guidelines)
+- [Warnings Guidelines](#Warnings-Guidelines)
 
 # Programming Guidelines
 * Switch statements
@@ -60,7 +61,7 @@ We have included an editor config to allow sharing of the code styles. This shou
     6. after semi colon
     7. after typecast
 
-* Braces should always fall on the new line after class declaration, method declarion, if(), else, else if(), for, while, do, switch, try-with-resources, try, catch, finally.
+* Braces should always fall on the new line after class declaration, method declaration, if(), else, else if(), for, while, do, switch, try-with-resources, try, catch, finally.
 
 * Code must always start on new line after `{`
 
@@ -129,7 +130,7 @@ Eg :
      * @param param1 description for param1.
      * @param param2 description for param2. Can be {@code null}.
      *
-     * @return descrption for return value
+     * @return description for return value
      *
      * @throws Exception1 reason for throwing exception.
      * @throws Exception2 reason for throwing exception.
@@ -286,7 +287,7 @@ If the commit reverts a previous commit, it should begin with revert:, followed 
 
 **Rebase and Squash**
 
-* Its manadatory to squash all your commits per scope (i.e package). It is also important to rebase your commits on master.
+* Its mandatory to squash all your commits per scope (i.e package). It is also important to rebase your commits on master.
 * Optionally you can split your commits on the basis of the package you are providing code to.
 
 **Type**
@@ -353,7 +354,7 @@ Good commit messages look like below:
 
     Github issue (fix#123)
 * feat(iot-service): Add continuation token to Query
-* docs: Update readme to reflect provisiong client
+* docs: Update readme to reflect provisioning client
 
 Bad commit messages look like below:
 
@@ -368,3 +369,16 @@ References for commit guidelines
 * https://udacity.github.io/git-styleguide/
 * https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-guidelines
 * https://github.com/googlesamples/android-architecture/issues/300
+
+# Warnings Guidelines 
+To help find bugs early on in the process we will be using [IntelliJ code inspections](https://www.jetbrains.com/help/idea/code-inspection.html) in combination with a limiting [Scope](https://www.jetbrains.com/help/idea/settings-scopes.html) as a first line of defense. In order to run these inspections you must use the included `Project Default` inspections profile as well as the `OnlySDK` scope to target the correct set of files.
+
+The inspection profile should be automatically added to your settings. Navigate to `File` > `Settings` > `Editor` > `Inspections` and look for `Project Default` in the drop down. As well the `OnlySDK` scope can be found by navigating to `File` > `Settings` > `Appearance & Behavior` > `Scopes`.
+
+## To run the inspections
+
+1. Navigate to Analyze > Inspect Code
+2. In the `Specify Inspection Scope` window
+  a. Select `OnlySDK` from the `Custom Scope` drop down
+  b. Select `Project Default` from the `Inspection profile` section
+3. Click OK
