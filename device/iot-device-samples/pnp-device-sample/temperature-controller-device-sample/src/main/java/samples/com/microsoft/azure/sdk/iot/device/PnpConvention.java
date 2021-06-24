@@ -34,10 +34,8 @@ public class PnpConvention {
      * @return A plug and play compatible telemetry message, which can be sent to IoT Hub.
      */
     public static Message createIotHubMessageUtf8(@NonNull String telemetryName, @NonNull Object telemetryValue) {
-        return createIotHubMessageUtf8(new HashMap<String, Object>()
-        {{
-            put(telemetryName, telemetryValue);
-        }}, null);
+        Map<String, Object> payload = singletonMap(telemetryName, telemetryValue);
+        return createIotHubMessageUtf8(payload, null);
     }
 
     /**
@@ -49,11 +47,7 @@ public class PnpConvention {
      */
     public static Message createIotHubMessageUtf8(@NonNull String telemetryName, @NonNull Object telemetryValue, String componentName) {
         Map<String, Object> payload = singletonMap(telemetryName, telemetryValue);
-
-        return createIotHubMessageUtf8(new HashMap<String, Object>()
-        {{
-            put(telemetryName, telemetryValue);
-        }}, componentName);
+        return createIotHubMessageUtf8(payload, componentName);
     }
 
     /**
@@ -63,7 +57,7 @@ public class PnpConvention {
      * @param componentName (optional) The name of the component in which the telemetry is defined. Can be null for telemetry defined under the root interface.
      * @return A plug and play compatible telemetry message, which can be sent to IoT Hub.
      */
-    public static Message createIotHubMessageUtf8(@NonNull HashMap<String, Object> telemetryPairs, String componentName) {
+    public static Message createIotHubMessageUtf8(@NonNull Map<String, Object> telemetryPairs, String componentName) {
         Message message = new Message(gson.toJson(telemetryPairs));
         message.setContentEncoding(ENCODING_UTF_8);
         message.setContentTypeFinal(CONTENT_APPLICATION_JSON);
