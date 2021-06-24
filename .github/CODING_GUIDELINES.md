@@ -44,6 +44,9 @@ Following is a definition of a minimum set of rulers that defines the Java SDK c
 
 * Class and member modifiers, when present, appear in the order recommended by the Java Language Specification.
 
+# Import Code Styles
+In order to make the code styles consistent for all developers you can use the code style located in the [.idea/codeStyles](https://github.com/Azure/azure-iot-sdk-java/tree/master/.idea/codeStyles) folder. This should show up as an option 
+
 # Space and Braces
 * Tabs should be replaced by 4 spaces
 
