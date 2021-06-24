@@ -284,7 +284,12 @@ public class IotHubTransport implements IotHubListener
                     Object context = correlationCallbackContexts.get(messageId);
                     correlationCallbacks.get(messageId).onResponseReceived(message, context, e);
                 }
+                else
+                {
+                    log.warn("A message was received with a null correlation id.");
+                }
             }
+
         }
         catch (Exception ex)
         {
