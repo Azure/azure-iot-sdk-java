@@ -73,11 +73,27 @@ public class TwinMetadata
         return updated;
     }
 
+    protected synchronized void update(int lastUpdatedVersion)
+    {
+        update();
+        this.lastUpdatedVersion = lastUpdatedVersion;
+    }
+
     protected synchronized void update()
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
         dateFormat.setTimeZone(TimeZone.getTimeZone(TIMEZONE));
         lastUpdated = dateFormat.format(new Date());
+    }
+
+    protected synchronized Integer getLastUpdateVersion()
+    {
+        return this.lastUpdatedVersion;
+    }
+
+    protected synchronized String getLastUpdate()
+    {
+        return this.lastUpdated;
     }
 
     protected JsonElement toJsonElement()

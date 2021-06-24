@@ -103,7 +103,7 @@ public class AmqpSendHandler extends AmqpConnectionHandler
             ProxyOptions proxyOptions,
             SSLContext sslContext)
     {
-        super(hostName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
+        super(hostName, userName, sasToken, iotHubServiceClientProtocol, proxyOptions, sslContext);
     }
 
     AmqpSendHandler(

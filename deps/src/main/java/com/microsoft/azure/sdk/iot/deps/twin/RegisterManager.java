@@ -12,7 +12,6 @@ import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
  *
  * This class is part of the Twin. It contains the Device identity management.
  */
-@SuppressWarnings({"unused", "CanBeFinal"}) // Suppressing these as the class is inherited by TwinState and there may be future usage
 public class RegisterManager
 {
     /**
@@ -60,6 +59,7 @@ public class RegisterManager
     private static final String VERSION_TAG = "version";
     @Expose
     @SerializedName(VERSION_TAG)
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected Integer version = null;
 
     /**
@@ -96,6 +96,7 @@ public class RegisterManager
     private static final String CONNECTION_STATE_TAG = "connectionState";
     @Expose
     @SerializedName(CONNECTION_STATE_TAG)
+    @SuppressWarnings("CanBeFinal") // Can be inherited and changed somewhere else besides the constructor
     protected TwinConnectionState connectionState = null;
 
     /**
@@ -242,6 +243,7 @@ public class RegisterManager
      *     Used only by the tools that will deserialize this class.
      * </p>
      */
+    @SuppressWarnings("unused")
     RegisterManager()
     {
         /* Codes_SRS_REGISTER_MANAGER_21_007: [The RegisterManager shall provide an empty constructor to make GSON happy.] */

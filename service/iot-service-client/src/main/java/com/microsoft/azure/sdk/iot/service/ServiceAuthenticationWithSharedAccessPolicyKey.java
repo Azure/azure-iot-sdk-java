@@ -63,6 +63,15 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
     }
 
     /**
+     * Setter for policy name
+     * @param policyName The string value to set
+     */
+    protected void setPolicyName(String policyName)
+    {
+        this.policyName = policyName;
+    }
+
+    /**
      * Getter for policy key
      * @return The policy key string
      */
@@ -71,4 +80,12 @@ public class ServiceAuthenticationWithSharedAccessPolicyKey extends Authenticati
         return this.key;
     }
 
+    /**
+     * Setter for policy key
+     * @param key The string value to set
+     */
+    protected void setKey(String key)
+    {
+        this.key = key;
+    }
 }

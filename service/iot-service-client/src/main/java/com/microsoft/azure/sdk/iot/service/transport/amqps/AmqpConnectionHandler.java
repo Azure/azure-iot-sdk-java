@@ -47,6 +47,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
     private boolean linkOpenedRemotely;
 
     protected final String hostName;
+    protected String userName;
     protected String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
@@ -58,6 +59,7 @@ public abstract class AmqpConnectionHandler extends ErrorLoggingBaseHandlerWithC
 
     protected AmqpConnectionHandler(
             String hostName,
+            String userName,
             String sasToken,
             IotHubServiceClientProtocol iotHubServiceClientProtocol,
             ProxyOptions proxyOptions,

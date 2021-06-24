@@ -130,6 +130,12 @@ public class TwinTags
         return this.tags;
     }
 
+    protected String toJson()
+    {
+        Gson gson = new GsonBuilder().create();
+        return gson.toJson(tags);
+    }
+
     protected JsonElement toJsonElement()
     {
         Gson gson = new GsonBuilder().create();

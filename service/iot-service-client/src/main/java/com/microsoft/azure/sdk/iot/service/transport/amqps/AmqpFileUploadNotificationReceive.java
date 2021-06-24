@@ -25,6 +25,7 @@ import java.io.IOException;
 public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEvent
 {
     private final String hostName;
+    private String userName;
     private String sasToken;
     private TokenCredential credential;
     private AzureSasCredential sasTokenProvider;
@@ -88,6 +89,7 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
             SSLContext sslContext)
     {
         this.hostName = hostName;
+        this.userName = userName;
         this.sasToken = sasToken;
         this.iotHubServiceClientProtocol = iotHubServiceClientProtocol;
         this.proxyOptions = proxyOptions;
@@ -160,7 +162,8 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
         {
             amqpReceiveHandler = new AmqpFileUploadNotificationReceivedHandler(
                 this.hostName,
-                    this.sasToken,
+                this.userName,
+                this.sasToken,
                 this.iotHubServiceClientProtocol,
                 this,
                 this.proxyOptions,

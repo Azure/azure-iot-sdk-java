@@ -106,6 +106,8 @@ public final class DeviceClient extends InternalClient implements Closeable
     @Deprecated
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
+    protected long RECEIVE_PERIOD_MILLIS;
+
     private IoTHubConnectionType ioTHubConnectionType = IoTHubConnectionType.UNKNOWN;
 
     private TransportClient transportClient;
