@@ -17,7 +17,7 @@ public class RequestData
     private final String registrationId;
     private String operationId;
 
-    private final SSLContext sslContext;
+    private SSLContext sslContext;
     private String sasToken;
     private boolean isX509;
     private String jsonPayload;
@@ -151,6 +151,17 @@ public class RequestData
     {
         //SRS_RequestData_25_010: [ This method shall retrieve sslContext. ]
         return sslContext;
+    }
+
+    /**
+     * Setter for SSL context.
+     * @param sslContext sslContext value. Can be {@code null};
+     */
+    @SuppressWarnings("unused") // Called by reflection in test
+    void setSslContext(SSLContext sslContext)
+    {
+        //SRS_RequestData_25_011: [ This method shall set sslContext. ]
+        this.sslContext = sslContext;
     }
 
     /**
