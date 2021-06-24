@@ -348,6 +348,7 @@ public class QueryCollection
      * @throws IOException If an IOException occurs when calling the Service API, or if the results of that call are unexpected.
      * @throws IotHubException If an IotHubException occurs when calling the Service API.
      */
+    @SuppressWarnings("unused") // Used by reflection in tests
     protected QueryCollectionResponse<String> next() throws IOException, IotHubException
     {
         QueryOptions options = new QueryOptions();

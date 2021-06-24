@@ -184,25 +184,6 @@ public class TwinProperty
         return this.version;
     }
 
-    protected TwinMetadata getMetadata(String key)
-    {
-        TwinMetadata twinMetadata;
-
-        synchronized (lock)
-        {
-            if (property.containsKey(key))
-            {
-                twinMetadata = property.get(key).metadata;
-            }
-            else
-            {
-                twinMetadata = null;
-            }
-        }
-
-        return twinMetadata;
-    }
-
     protected Map<String, Object> getPropertyMap()
     {
         /* Codes_SRS_TWINPARSER_21_050: [The getDesiredPropertyMap shall return a map with all desired property key value pairs.] */
@@ -231,29 +212,6 @@ public class TwinProperty
     protected int size()
     {
         return this.property.size();
-    }
-
-    protected Object get(String key)
-    {
-        Object result;
-
-        synchronized (lock)
-        {
-            if (property.containsKey(key))
-            {
-                result = property.get(key).value;
-            }
-            else
-            {
-                result = null;
-            }
-        }
-        return result;
-    }
-
-    protected String toJson()
-    {
-        return toJsonElement().toString();
     }
 
     protected JsonElement toJsonElement()

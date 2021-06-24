@@ -12,11 +12,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A client for creating multiplexed connections to IoT Hub. A multiplexed connection allows for multiple device clients
@@ -519,7 +517,7 @@ public class MultiplexingClient
                     // Only update the local state map once the register call has succeeded
                     String deviceIdThatAttemptedToRegister = clientsThatAttemptedToRegister.getConfig().getDeviceId();
 
-                    if (!e.getRegistrationExceptions().keySet().contains(deviceIdThatAttemptedToRegister))
+                    if (!e.getRegistrationExceptions().containsKey(deviceIdThatAttemptedToRegister))
                     {
                         this.multiplexedDeviceClients.put(deviceIdThatAttemptedToRegister, clientsThatAttemptedToRegister);
                     }
