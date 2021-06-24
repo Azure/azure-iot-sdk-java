@@ -10,7 +10,7 @@ Following is a definition of a minimum set of rulers that defines the Java SDK c
 - [Naming Conventions](#Naming-Conventions)
 - [JavaDoc Guidelines](#JavaDoc-Guidelines)
 - [Commit Guidelines](#Commit-Guidelines)
-- [Warnings Guidelines](#Warnings-Guidelines)
+- [Review Warnings](#Review-Warnings)
 
 # Programming Guidelines
 * Switch statements
@@ -370,7 +370,7 @@ References for commit guidelines
 * https://github.com/angular/angular/blob/master/CONTRIBUTING.md#-commit-message-guidelines
 * https://github.com/googlesamples/android-architecture/issues/300
 
-# Warnings Guidelines 
+# Review Warnings
 To help find bugs early on in the process we will be using [IntelliJ code inspections](https://www.jetbrains.com/help/idea/code-inspection.html) in combination with a limiting [Scope](https://www.jetbrains.com/help/idea/settings-scopes.html) as a first line of defense. In order to run these inspections you must use the included `Project Default` inspections profile as well as the `OnlySDK` scope to target the correct set of files.
 
 The inspection profile should be automatically added to your settings. Navigate to `File` > `Settings` > `Editor` > `Inspections` and look for `Project Default` in the drop down. As well the `OnlySDK` scope can be found by navigating to `File` > `Settings` > `Appearance & Behavior` > `Scopes`.
