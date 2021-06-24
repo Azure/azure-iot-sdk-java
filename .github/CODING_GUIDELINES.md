@@ -3,6 +3,7 @@
 Following is a definition of a minimum set of rulers that defines the Java SDK coding style.
 
 - [Programming Guidelines](#Programming-Guidelines)
+- [.editorconfig](#.editorconfig)
 - [Space and Braces](#Space-and-Braces)
 - [Annotations](#Annotations)
 - [Comment Style](#Comment-Style)
