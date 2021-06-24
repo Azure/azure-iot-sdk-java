@@ -289,7 +289,6 @@ public class IotHubTransport implements IotHubListener
                     log.warn("A message was received with a null correlation id.");
                 }
             }
-
         }
         catch (Exception ex)
         {
