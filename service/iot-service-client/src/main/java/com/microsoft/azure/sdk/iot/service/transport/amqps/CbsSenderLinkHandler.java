@@ -118,7 +118,7 @@ public final class CbsSenderLinkHandler extends SenderLinkHandler
 
             if (this.currentAccessToken == null)
             {
-                log.error("The AccessToken supplied by the TokenCrednetial for the CbsSenderLinkHandler was null.");
+                log.error("The AccessToken supplied by the TokenCredential for the CbsSenderLinkHandler was null.");
                 return -1;
             }
 
