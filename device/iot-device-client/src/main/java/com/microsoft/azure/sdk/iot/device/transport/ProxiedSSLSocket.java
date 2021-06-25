@@ -199,6 +199,8 @@ public class ProxiedSSLSocket extends SSLSocket
                 mostRecentFourCharacters.offer(i);
             }
 
+            // Suppressed inspection because the suggestion is only valid for Java10+
+            //noinspection StringOperationCanBeSimplified
             String httpHeaderLine = new String(httpLineOutputStream.toByteArray(), byteEncoding);
             httpLineOutputStream.close();
             alreadyRead = true;

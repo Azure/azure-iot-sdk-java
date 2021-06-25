@@ -157,6 +157,7 @@ public class AmqpSend
     /**
      * Create AmqpsSendHandler and store it in a member variable
      */
+    @SuppressWarnings("EmptyMethod")
     public void open()
     {
     }
@@ -164,6 +165,7 @@ public class AmqpSend
     /**
      * Invalidate AmqpsSendHandler member variable
      */
+    @SuppressWarnings("EmptyMethod")
     public void close()
     {
     }

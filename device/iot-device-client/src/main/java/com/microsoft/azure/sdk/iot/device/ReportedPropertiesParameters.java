@@ -106,7 +106,7 @@ public class ReportedPropertiesParameters {
     /**
      * The reported properties to send
      */
-    private Set<Property> reportedProperties = null;
+    private final Set<Property> reportedProperties;
     /**
      * The version of the properties
      */
