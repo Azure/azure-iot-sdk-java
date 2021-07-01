@@ -206,7 +206,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             {
                 this.openAsync();
 
-                log.trace("Waiting for authentication links to open...");
+                if (this.authenticationType == DeviceClientConfig.AuthType.SAS_TOKEN)
+                {
+                    // x509 authenticated connections don't open authentication links since the SSL handshake does all the authentication
+                    log.trace("Waiting for authentication links to open...");
+                }
+
                 Iterator<DeviceClientConfig> configsIterator = this.deviceClientConfigs.iterator();
                 DeviceClientConfig defaultConfig = configsIterator.hasNext() ? configsIterator.next() : null;
                 int timeoutSeconds = DeviceClientConfig.DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
