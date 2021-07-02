@@ -30,6 +30,7 @@
         <module>module-method-sample</module>
         <module>file-upload-sample</module>
         <module>send-event-x509</module>
+        <module>send-event-x509-ecc</module>
         <module>send-receive-x509-sample</module>
         <module>transportclient-sample</module>
         <module>multiplexing-sample</module>
