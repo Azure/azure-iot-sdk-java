@@ -13,7 +13,6 @@ import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import lombok.var;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOError;
@@ -58,6 +57,9 @@ public class InternalClient
 
     private DeviceTwin twin;
     private DeviceMethod method;
+
+    @Getter
+    private PayloadConvention PayloadConvention = DefaultPayloadConvention.Instance;
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
     {
@@ -1212,9 +1214,12 @@ public class InternalClient
         }
     }
 
-    @Getter
-    public PayloadConvention PayloadConvention = DefaultPayloadConvention.Instance;
 
+
+    /**
+     *
+     * @param telemetryMessage
+     */
     public void sendTelemetryAsync(TelemetryMessage telemetryMessage)
     {
         if (telemetryMessage == null)
@@ -1232,6 +1237,11 @@ public class InternalClient
         sendEventAsync(telemetryMessage, null, null);
     }
 
+    /**
+     *
+     * @param callback
+     * @param userContext
+     */
     public void subcribeToCommands(DeviceMethodCallback callback, Object userContext)
     {
         /*// Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
@@ -1261,10 +1271,16 @@ public class InternalClient
         return SetMethodDefaultHandlerAsync(methodDefaultCallback, userContext);*/
     }
 
+    /**
+     *
+     * @return
+     */
     public ClientProperties getClientPropertiesAsync()
     {
         try
         {
+            twin.getDeviceTwin();
+
             //return getPropertiesAsync(PayloadConvention, cancellationToken).ConfigureAwait(false);
         }
         catch (Throwable ex)
@@ -1274,6 +1290,12 @@ public class InternalClient
         return null;
     }
 
+    /**
+     *
+     * @param clientProperties
+     * @return
+     * @throws IOException
+     */
     public ClientPropertiesUpdateResponse updateClientPropertiesAsync(ClientPropertyCollection clientProperties) throws IOException
     {
         if (clientProperties == null)
@@ -1293,10 +1315,16 @@ public class InternalClient
                 response[0].Version = 0;
             }
         };
-        sendReportedProperties(clientProperties.getSetOfProperty(), responseCallback);
+        sendReportedProperties(clientProperties.getCollectionAsSetOfProperty(), responseCallback);
         return response[0];
     }
 
+    /**
+     *
+     * @param desiredPropertyUpdateCallback
+     * @param userContext
+     * @throws IOException
+     */
     public void subscribeToWritablePropertiesEventAsync(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredPropertyUpdateCallback, Object userContext) throws IOException
     {
         // Subscribe to DesiredPropertyUpdateCallback internally and use the callback received internally to invoke the user supplied Property callback.

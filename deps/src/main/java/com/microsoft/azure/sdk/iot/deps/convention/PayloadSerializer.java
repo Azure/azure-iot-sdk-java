@@ -28,7 +28,7 @@ public abstract class PayloadSerializer
     /// </summary>
     /// <param name="objectToSerialize">Object to serialize.</param>
     /// <returns>A serialized string of the object.</returns>
-    public abstract String SerializeToString(Object objectToSerialize);
+    public abstract String serializeToString(Object objectToSerialize);
 
     /// <summary>
     /// Convert the serialized string to an object.
@@ -36,7 +36,7 @@ public abstract class PayloadSerializer
     /// <typeparam name="T">The type you want to return.</typeparam>
     /// <param name="stringToDeserialize">String to deserialize.</param>
     /// <returns>A fully deserialized type.</returns>
-    public abstract <T> T DeserializeToType(String stringToDeserialize);
+    public abstract <T> T deserializeToType(String stringToDeserialize);
 
     /// <summary>
     /// Converts the object using the serializer.
@@ -47,7 +47,7 @@ public abstract class PayloadSerializer
     /// <typeparam name="T">The type to convert to.</typeparam>
     /// <param name="objectToConvert">The object to convert.</param>
     /// <returns>A converted object</returns>
-    public abstract <T> T ConvertFromObject(Object objectToConvert);
+    public abstract <T> T convertFromObject(Object objectToConvert);
 
     /// <summary>
     /// Gets a nested property from the serialized data.
@@ -61,7 +61,7 @@ public abstract class PayloadSerializer
     /// <param name="propertyName">The name of the property to be retrieved.</param>
     /// <returns>True if the nested object contains an element with the specified key; otherwise, it returns false.</returns>
     /// <param name="outValue"></param>
-    public abstract <T> boolean TryGetNestedObjectValue(Object nestedObject, String propertyName, T outValue);
+    public abstract <T> T getNestedObjectValue(Object nestedObject, String propertyName);
 
     /// <summary>
     /// Creates the correct <see cref="IWritablePropertyResponse"/> to be used with this serializer.
@@ -71,7 +71,7 @@ public abstract class PayloadSerializer
     /// <param name="version">The version the property is responding to.</param>
     /// <param name="description">An optional description of the writable property response.</param>
     /// <returns>The writable property response to be used with this serializer.</returns>
-    public abstract IWritablePropertyResponse CreateWritablePropertyResponse(Object value, int statusCode, long version);
+    public abstract IWritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version);
 
     /// <summary>
     /// Creates the correct <see cref="IWritablePropertyResponse"/> to be used with this serializer.
@@ -81,5 +81,5 @@ public abstract class PayloadSerializer
     /// <param name="version">The version the property is responding to.</param>
     /// <param name="description">An optional description of the writable property response.</param>
     /// <returns>The writable property response to be used with this serializer.</returns>
-    public abstract IWritablePropertyResponse CreateWritablePropertyResponse(Object value, int statusCode, long version, String description);
+    public abstract IWritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version, String description);
 }

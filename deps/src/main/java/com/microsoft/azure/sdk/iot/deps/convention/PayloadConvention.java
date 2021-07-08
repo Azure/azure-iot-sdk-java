@@ -34,7 +34,7 @@ public abstract class PayloadConvention
     /// <returns>The correctly encoded object for this convention.</returns>
     public byte[] GetObjectBytes(Object objectToSendWithConvention)
     {
-        String serializedString = PayloadSerializer.SerializeToString(objectToSendWithConvention);
+        String serializedString = PayloadSerializer.serializeToString(objectToSendWithConvention);
         return PayloadEncoder.EncodeStringToByteArray(serializedString);
     }
 }

@@ -23,41 +23,41 @@ public class GsonPayloadSerializer extends PayloadSerializer
 
     /// <inheritdoc/>
     @Override
-    public String SerializeToString(Object objectToSerialize)
+    public String serializeToString(Object objectToSerialize)
     {
         return "";
     }
 
     /// <inheritdoc/>
     @Override
-    public <T> T DeserializeToType(String stringToDeserialize)
+    public <T> T deserializeToType(String stringToDeserialize)
     {
         return (T) (new Object());
     }
 
     /// <inheritdoc/>
     @Override
-    public <T> T ConvertFromObject(Object objectToConvert)
+    public <T> T convertFromObject(Object objectToConvert)
     {
         return (T) (new Object());
     }
 
     /// <inheritdoc/>
     @Override
-    public <T> boolean TryGetNestedObjectValue(Object nestedObject, String propertyName, T outValue)
+    public <T> T getNestedObjectValue(Object nestedObject, String propertyName)
     {
-        return true;
+        return (T) (new Object());
     }
 
     /// <inheritdoc/>
-    public IWritablePropertyResponse CreateWritablePropertyResponse(Object value, int statusCode, long version, String description)
+    public IWritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version, String description)
     {
         return new GsonWritablePropertyResponse(value, statusCode, version, description);
     }
 
     /// <inheritdoc/>
-    public IWritablePropertyResponse CreateWritablePropertyResponse(Object value, int statusCode, long version)
+    public IWritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version)
     {
-        return CreateWritablePropertyResponse(value, statusCode, version, null);
+        return createWritablePropertyResponse(value, statusCode, version, null);
     }
 }
