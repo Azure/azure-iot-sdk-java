@@ -5,12 +5,15 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import lombok.var;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOError;
@@ -318,6 +321,19 @@ public class InternalClient
 
         //Codes_SRS_INTERNALCLIENT_34_085: [This method shall subscribe to desired properties by calling subscribeDesiredPropertiesNotification on the twin object.]
         this.twin.subscribeDesiredPropertiesTwinPropertyNotification(onDesiredPropertyChange);
+    }
+
+    /**
+     * Sends reported properties
+     *
+     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
+     *
+     * @throws IOException if called when client is not opened or called before starting twin.
+     * @throws IllegalArgumentException if reportedProperties is null or empty.
+     */
+    void sendReportedProperties(Set<Property> reportedProperties, IotHubEventCallback callback) throws IOException, IllegalArgumentException
+    {
+        this.sendReportedProperties(reportedProperties, null, null, null, callback, null);
     }
 
     /**
@@ -1194,5 +1210,95 @@ public class InternalClient
         {
             throw new UnsupportedOperationException(METHODS_OVER_HTTP_ERROR_MESSAGE);
         }
+    }
+
+    @Getter
+    public PayloadConvention PayloadConvention = DefaultPayloadConvention.Instance;
+
+    public void sendTelemetryAsync(TelemetryMessage telemetryMessage)
+    {
+        if (telemetryMessage == null)
+        {
+            // throw new ArgumentNullException(nameof(telemetryMessage));
+        }
+
+        if (telemetryMessage.Telemetry != null)
+        {
+            telemetryMessage.Telemetry.Convention = PayloadConvention;
+            telemetryMessage.setContentEncoding(PayloadConvention.PayloadEncoder.ContentEncoding.displayName());
+            telemetryMessage.setContentTypeFinal(PayloadConvention.PayloadSerializer.ContentType);
+        }
+
+        sendEventAsync(telemetryMessage, null, null);
+    }
+
+    public void subcribeToCommands(DeviceMethodCallback callback, Object userContext)
+    {
+        /*// Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
+        var methodDefaultCallback = new MethodCallback(async (methodRequest, userContext) =>
+                {
+                        CommandRequest commandRequest;
+        if (methodRequest.Name != null
+                && methodRequest.Name.Contains(ConventionBasedConstants.ComponentLevelCommandSeparator))
+        {
+            string[] split = methodRequest.Name.Split(ConventionBasedConstants.ComponentLevelCommandSeparator);
+            string componentName = split[0];
+            string commandName = split[1];
+            commandRequest = new CommandRequest(PayloadConvention, commandName, componentName, methodRequest.Data);
+        }
+        else
+        {
+            commandRequest = new CommandRequest(payloadConvention: PayloadConvention, commandName: methodRequest.Name, data: methodRequest.Data);
+        }
+
+        CommandResponse commandResponse = await callback.Invoke(commandRequest, userContext).ConfigureAwait(false);
+        commandResponse.PayloadConvention = PayloadConvention;
+        return commandResponse.ResultAsBytes != null
+                ? new MethodResponse(commandResponse.ResultAsBytes, commandResponse.Status)
+                : new MethodResponse(commandResponse.Status);
+            });
+
+        return SetMethodDefaultHandlerAsync(methodDefaultCallback, userContext);*/
+    }
+
+    public ClientProperties getClientPropertiesAsync()
+    {
+        try
+        {
+            //return getPropertiesAsync(PayloadConvention, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Throwable ex)
+        {
+            throw ex;
+        }
+        return null;
+    }
+
+    public ClientPropertiesUpdateResponse updateClientPropertiesAsync(ClientPropertyCollection clientProperties) throws IOException
+    {
+        if (clientProperties == null)
+        {
+            //throw new ArgumentNullException(nameof(clientProperties));
+        }
+
+        clientProperties.Convention = PayloadConvention;
+        final ClientPropertiesUpdateResponse[] response = {null};
+        IotHubEventCallback responseCallback = new IotHubEventCallback()
+        {
+            @Override
+            public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+            {
+                response[0] = new ClientPropertiesUpdateResponse();
+                response[0].RequestId = "";
+                response[0].Version = 0;
+            }
+        };
+        sendReportedProperties(clientProperties.getSetOfProperty(), responseCallback);
+        return response[0];
+    }
+
+    public void subscribeToWritablePropertiesEventAsync(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredPropertyUpdateCallback, Object userContext) throws IOException
+    {
+        // Subscribe to DesiredPropertyUpdateCallback internally and use the callback received internally to invoke the user supplied Property callback.
     }
 }
