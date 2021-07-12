@@ -333,19 +333,6 @@ public class InternalClient
      * @throws IOException if called when client is not opened or called before starting twin.
      * @throws IllegalArgumentException if reportedProperties is null or empty.
      */
-    void sendReportedProperties(Set<Property> reportedProperties, IotHubEventCallback callback) throws IOException, IllegalArgumentException
-    {
-        this.sendReportedProperties(reportedProperties, null, null, null, callback, null);
-    }
-
-    /**
-     * Sends reported properties
-     *
-     * @param reportedProperties the Set for desired properties and their corresponding callback and context. Cannot be {@code null}.
-     *
-     * @throws IOException if called when client is not opened or called before starting twin.
-     * @throws IllegalArgumentException if reportedProperties is null or empty.
-     */
     public void sendReportedProperties(Set<Property> reportedProperties) throws IOException, IllegalArgumentException
     {
         this.sendReportedProperties(reportedProperties, null, null, null, null, null);
@@ -1214,27 +1201,25 @@ public class InternalClient
         }
     }
 
-
-
     /**
      *
      * @param telemetryMessage
      */
-    public void sendTelemetryAsync(TelemetryMessage telemetryMessage)
+    public void sendTelemetryAsync(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object context)
     {
         if (telemetryMessage == null)
         {
-            // throw new ArgumentNullException(nameof(telemetryMessage));
+            throw new IllegalArgumentException("telemetryMessage property cannot be null");
         }
 
         if (telemetryMessage.Telemetry != null)
         {
             telemetryMessage.Telemetry.Convention = PayloadConvention;
-            telemetryMessage.setContentEncoding(PayloadConvention.PayloadEncoder.ContentEncoding.displayName());
+            telemetryMessage.setContentEncoding(PayloadConvention.PayloadEncoder.ContentEncoding.name());
             telemetryMessage.setContentTypeFinal(PayloadConvention.PayloadSerializer.ContentType);
         }
 
-        sendEventAsync(telemetryMessage, null, null);
+        sendEventAsync(telemetryMessage, callback, context);
     }
 
     /**
@@ -1242,10 +1227,11 @@ public class InternalClient
      * @param callback
      * @param userContext
      */
-    public void subcribeToCommands(DeviceMethodCallback callback, Object userContext)
+    public void subscribeToCommands(DeviceMethodCallback callback, Object userContext)
     {
-        /*// Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
-        var methodDefaultCallback = new MethodCallback(async (methodRequest, userContext) =>
+        // Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
+
+        /*var methodDefaultCallback = new MethodCallback(async (methodRequest, userContext) =>
                 {
                         CommandRequest commandRequest;
         if (methodRequest.Name != null
@@ -1277,16 +1263,18 @@ public class InternalClient
      */
     public ClientProperties getClientPropertiesAsync()
     {
+        // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
+        // this map gets populated with a number of callbacks.
         try
         {
             twin.getDeviceTwin();
-
             //return getPropertiesAsync(PayloadConvention, cancellationToken).ConfigureAwait(false);
         }
         catch (Throwable ex)
         {
             throw ex;
         }
+
         return null;
     }
 
@@ -1296,27 +1284,17 @@ public class InternalClient
      * @return
      * @throws IOException
      */
-    public ClientPropertiesUpdateResponse updateClientPropertiesAsync(ClientPropertyCollection clientProperties) throws IOException
+    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object context) throws IOException
     {
         if (clientProperties == null)
         {
-            //throw new ArgumentNullException(nameof(clientProperties));
+            throw new IllegalArgumentException("clientProperties property cannot be null");
         }
 
         clientProperties.Convention = PayloadConvention;
-        final ClientPropertiesUpdateResponse[] response = {null};
-        IotHubEventCallback responseCallback = new IotHubEventCallback()
-        {
-            @Override
-            public void execute(IotHubStatusCode responseStatus, Object callbackContext)
-            {
-                response[0] = new ClientPropertiesUpdateResponse();
-                response[0].RequestId = "";
-                response[0].Version = 0;
-            }
-        };
-        sendReportedProperties(clientProperties.getCollectionAsSetOfProperty(), responseCallback);
-        return response[0];
+
+        sendReportedProperties(clientProperties.getCollectionAsSetOfProperty(), null, null, null, callback, context);
+
     }
 
     /**

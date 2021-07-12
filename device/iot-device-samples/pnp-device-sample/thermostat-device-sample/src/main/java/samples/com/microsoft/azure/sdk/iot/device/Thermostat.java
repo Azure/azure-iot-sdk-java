@@ -5,6 +5,7 @@ package samples.com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
@@ -140,13 +141,23 @@ public class Thermostat {
         }
 
         log.debug("Start twin and set handler to receive \"targetTemperature\" updates.");
-        deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, new TargetTemperatureUpdateCallback(), null);
+        Device dataCollector = new Device() {
+            // Print details when a property value changes
+            @Override
+            public void PropertyCall(String propertyKey, Object propertyValue, Object context) {
+                System.out.println(propertyKey + " changed to " + propertyValue);
+            }
+        };
+
+        deviceClient.startDeviceTwin(new TwinIotHubEventCallback(), null, dataCollector, null);
+
         Map<Property, Pair<TwinPropertyCallBack, Object>> desiredPropertyUpdateCallback =
                 Collections.singletonMap(
                         new Property("targetTemperature", null),
                         new Pair<>(new TargetTemperatureUpdateCallback(), null));
         deviceClient.subscribeToTwinDesiredProperties(desiredPropertyUpdateCallback);
 
+        deviceClient.getDeviceTwin();
         log.debug("Set handler to receive \"getMaxMinReport\" command.");
         String methodName = "getMaxMinReport";
         deviceClient.subscribeToDeviceMethod(new GetMaxMinReportMethodCallback(), methodName, new MethodIotHubEventCallback(), methodName);
@@ -257,13 +268,17 @@ public class Thermostat {
         @Override
         public void TwinPropertyCallBack(Property property, Object context) {
             if (property.getKey().equalsIgnoreCase(propertyName)) {
+
+                ClientPropertyCollection collection = new ClientPropertyCollection();
+
                 double targetTemperature = ((Number)property.getValue()).doubleValue();
                 log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);
 
-                EmbeddedPropertyUpdate pendingUpdate = new EmbeddedPropertyUpdate(targetTemperature, StatusCode.IN_PROGRESS.value, property.getVersion(), null);
-                Property reportedPropertyPending = new Property(propertyName, pendingUpdate);
+                GsonWritablePropertyResponse pendingUpdate = new GsonWritablePropertyResponse(targetTemperature, StatusCode.IN_PROGRESS.value, property.getVersion(), null);
+                collection.putFinal(propertyName, pendingUpdate);
+
                 try {
-                    deviceClient.sendReportedProperties(Collections.singleton(reportedPropertyPending));
+                    deviceClient.updateClientPropertiesAsync(collection, null, null);
                 } catch (IOException e) {
                     throw new RuntimeException("IOException when sending reported property update: ", e);
                 }
@@ -276,9 +291,10 @@ public class Thermostat {
                     Thread.sleep(5 * 1000);
                 }
 
-                EmbeddedPropertyUpdate completedUpdate = new EmbeddedPropertyUpdate(temperature, StatusCode.COMPLETED.value, property.getVersion(), "Successfully updated target temperature");
-                Property reportedPropertyCompleted = new Property(propertyName, completedUpdate);
-                deviceClient.sendReportedProperties(Collections.singleton(reportedPropertyCompleted));
+                GsonWritablePropertyResponse updated = (GsonWritablePropertyResponse)collection.get(propertyName);
+                updated.AckCode = StatusCode.COMPLETED.value;
+
+                deviceClient.updateClientPropertiesAsync(collection, null, null);
                 log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature, StatusCode.COMPLETED);
             } else {
                 log.debug("Property: Received an unrecognized property update from service.");
@@ -409,22 +425,21 @@ public class Thermostat {
 
     private static void sendTemperatureTelemetry() {
         String telemetryName = "temperature";
-        String telemetryPayload = String.format("{\"%s\": %f}", telemetryName, temperature);
 
-        Message message = new Message(telemetryPayload);
-        message.setContentEncoding(StandardCharsets.UTF_8.name());
-        message.setContentTypeFinal("application/json");
+        TelemetryMessage message = new TelemetryMessage();
+        message.getTelemetry().putFinal(telemetryName, temperature);
+        deviceClient.sendTelemetryAsync(message, new MessageIotHubEventCallback(), null);
 
-        deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, temperature, message.getMessageId());
         temperatureReadings.put(new Date(), temperature);
     }
 
     private static void updateMaxTemperatureSinceLastReboot() throws IOException {
         String propertyName = "maxTempSinceLastReboot";
-        Property reportedProperty = new Property(propertyName, maxTemperature);
 
-        deviceClient.sendReportedProperties(Collections.singleton(reportedProperty));
+        ClientPropertyCollection collection = new ClientPropertyCollection();
+        collection.putFinal(propertyName, maxTemperature);
+        deviceClient.updateClientPropertiesAsync(collection, null, null);
         log.debug("Property: Update - {\"{}\": {}°C} is {}.", propertyName, maxTemperature, StatusCode.COMPLETED);
     }
 

@@ -10,7 +10,7 @@ public interface IWritablePropertyResponse
     /// </summary>
     @Getter
     @Setter
-    public Object Value = null;
+    Object Value = null;
 
     /// <summary>
     /// The acknowledgment code, usually an HTTP Status Code e.g. 200, 400.
