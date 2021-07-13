@@ -138,31 +138,25 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                     @Override
                     public void run() {
                         log.debug("Attempting reconnect for device client...");
-                        boolean connected = false;
-                        while (!connected) {
-                            synchronized (lock) {
-                                if (connectionStatus == ConnectionStatus.CONNECTED) {
-                                    try {
-                                        client.closeNow();
-                                    } catch (Exception e) {
-                                        log.warn("DeviceClient closeNow failed.", e);
-                                    } finally {
-                                        connectionStatus = ConnectionStatus.CONNECTING;
-                                    }
-                                } else {
-                                    log.debug("DeviceClient is currently connecting, or already connected; skipping...");
-                                    return;
+                        synchronized (lock) {
+                            if (connectionStatus == ConnectionStatus.CONNECTED) {
+                                try {
+                                    client.closeNow();
+                                } catch (Exception e) {
+                                    log.warn("DeviceClient closeNow failed.", e);
+                                } finally {
+                                    connectionStatus = ConnectionStatus.CONNECTING;
                                 }
-                            }
-
-                            try {
-                                doConnect();
-                                connected = true; // since doConnect() returned without throwing, the connection is open.
-                            } catch (IOException e) {
-                                log.error("Exception thrown while opening DeviceClient instance: ", e);
+                            } else {
+                                log.debug("DeviceClient is currently connecting, or already connected; skipping...");
+                                return;
                             }
                         }
-
+                        try {
+                            doConnect();
+                        } catch (IOException e) {
+                            log.error("Exception thrown while opening DeviceClient instance: ", e);
+                        }
                     }
                 }).start();
             } else {
