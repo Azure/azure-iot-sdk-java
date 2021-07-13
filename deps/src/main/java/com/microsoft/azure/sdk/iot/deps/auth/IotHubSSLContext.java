@@ -280,7 +280,8 @@ public class IotHubSSLContext
 
     private char[] generateTemporaryPassword()
     {
-        return UUID.randomUUID().toString().toCharArray();
+        // removing all dash characters so that the password is alphanumeric
+        return UUID.randomUUID().toString().replace("-", "").toCharArray();
     }
 
     private static Key parsePrivateKey(String privateKeyString) throws CertificateException

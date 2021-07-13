@@ -136,7 +136,8 @@ public class SSLContextBuilder
 
     private static char[] generateTemporaryPassword()
     {
-        return UUID.randomUUID().toString().toCharArray();
+        // removing all dash characters so that the password is alphanumeric
+        return UUID.randomUUID().toString().replace("-", "").toCharArray();
     }
 
     private static TrustManagerFactory generateTrustManagerFactory(KeyStore trustKeyStore)
