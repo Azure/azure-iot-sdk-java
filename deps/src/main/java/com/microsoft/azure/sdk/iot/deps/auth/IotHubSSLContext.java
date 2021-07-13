@@ -280,16 +280,7 @@ public class IotHubSSLContext
 
     private char[] generateTemporaryPassword()
     {
-        byte[] randomBytes = new byte[256];
-        char[] randomChars = new char[256];
-        new SecureRandom().nextBytes(randomBytes);
-
-        for (int i = 0; i < 256; i++)
-        {
-            randomChars[i] = (char) randomBytes[i];
-        }
-
-        return randomChars;
+        return UUID.randomUUID().toString().toCharArray();
     }
 
     private static Key parsePrivateKey(String privateKeyString) throws CertificateException
