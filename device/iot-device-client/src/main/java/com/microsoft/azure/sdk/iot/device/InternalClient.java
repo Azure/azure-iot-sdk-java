@@ -135,7 +135,7 @@ public class InternalClient
             this.config.modelId = clientOptions.getModelId();
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -220,7 +220,7 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends an event message to the IoT Hub.
+     * Asynchronously sends an event message to the IoT hub.
      *
      * @param message the message to be sent.
      * @param callback the callback to be invoked when a response is received.
@@ -244,7 +244,7 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends a batch of messages to the IoT Hub
+     * Asynchronously sends a batch of messages to the IoT hub
      * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
      * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
      * Maximum payload size for HTTPS is 255KB
@@ -278,7 +278,7 @@ public class InternalClient
      *
      * This client will receive a callback each time a desired property is updated. That callback will either contain
      * the full desired properties set, or only the updated desired property depending on how the desired property was changed.
-     * IoT Hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * IoT hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
      * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
