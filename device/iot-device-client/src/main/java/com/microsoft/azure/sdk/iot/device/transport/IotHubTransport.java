@@ -427,15 +427,7 @@ public class IotHubTransport implements IotHubListener
             // this loop either ends in throwing an exception when retry expires, or by a break statement upon a successful openConnection() call
             while (true)
             {
-                RetryPolicy retryPolicy;
-                if (isMultiplexing)
-                {
-                    retryPolicy = multiplexingRetryPolicy;
-                }
-                else
-                {
-                    retryPolicy = this.getDefaultConfig().getRetryPolicy();
-                }
+                RetryPolicy retryPolicy = isMultiplexing ?  multiplexingRetryPolicy : this.getDefaultConfig().getRetryPolicy();
 
                 try
                 {
@@ -444,7 +436,7 @@ public class IotHubTransport implements IotHubListener
                 }
                 catch (TransportException transportException)
                 {
-                    log.debug("Encountered an exception while opening the client. Consulting configured the retry policy to see if another attempt should be made.", transportException);
+                    log.debug("Encountered an exception while opening the client. Checking the configured retry policy to see if another attempt should be made.", transportException);
                     RetryDecision retryDecision = retryPolicy.getRetryDecision(connectionAttempt, transportException);
                     if (!retryDecision.shouldRetry())
                     {
@@ -460,6 +452,7 @@ public class IotHubTransport implements IotHubListener
 
                     try
                     {
+                        log.trace("The configured retry policy allows for another attempt. Sleeping for {} milliseconds before the next attempt", retryDecision.getDuration());
                         Thread.sleep(retryDecision.getDuration());
                     }
                     catch (InterruptedException e)
