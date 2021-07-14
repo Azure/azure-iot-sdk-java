@@ -173,7 +173,7 @@ public class InternalClient
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
      *
-     * @throws IOException if a connection to an IoT Hub cannot be established.
+     * @throws IOException if a connection to an IoT hub cannot be established.
      */
     public void open() throws IOException
     {
