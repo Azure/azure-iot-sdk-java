@@ -413,6 +413,17 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void open() throws IOException
     {
+        this.open(false);
+    }
+
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT Hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @throws IOException if a connection to an IoT Hub cannot be established.
+     */
+    public void open(boolean withRetry) throws IOException
+    {
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
         {
             throw new UnsupportedOperationException(MULTIPLEXING_OPEN_ERROR_MESSAGE);
@@ -434,7 +445,7 @@ public final class DeviceClient extends InternalClient implements Closeable
         else
         {
             // Codes_SRS_DEVICECLIENT_21_006: [The open shall invoke super.open().]
-            super.open();
+            super.open(withRetry);
         }
 
         log.info("Device client opened successfully");
@@ -974,7 +985,7 @@ public final class DeviceClient extends InternalClient implements Closeable
                             else
                             {
                                 this.getDeviceIO().close();
-                                this.getDeviceIO().open();
+                                this.getDeviceIO().open(false);
                             }
                         }
                     }

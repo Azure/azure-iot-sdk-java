@@ -58,6 +58,14 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
+    public void openClientWithRetry() throws Exception
+    {
+        this.testInstance.setup();
+        this.testInstance.identity.getClient().open(true);
+        this.testInstance.identity.getClient().closeNow();
+    }
+
+    @Test
     public void sendMessagesWithCustomSasTokenProvider() throws Exception
     {
         if (testInstance.authenticationType != SAS)

@@ -142,12 +142,31 @@ public class MultiplexingClient
      */
     public void open() throws MultiplexingClientException
     {
+        this.open(false);
+    }
+
+    /**
+     * Opens this multiplexing client. This may be done before or after registering any number of device clients.
+     * <p>
+     * This call behaves synchronously, so if it returns without throwing, then all registered device clients were
+     * successfully opened.
+     * <p>
+     * If this client is already open, then this method will do nothing.
+     * <p>
+     * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
+     * Any devices not found in the map of registration exceptions provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()} have registered successfully.
+     * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
+     */
+    public void open(boolean withRetry) throws MultiplexingClientException
+    {
         synchronized (this.operationLock)
         {
             log.info("Opening multiplexing client");
             try
             {
-                this.deviceIO.openWithoutWrappingException();
+                this.deviceIO.openWithoutWrappingException(withRetry);
             }
             catch (TransportException e)
             {

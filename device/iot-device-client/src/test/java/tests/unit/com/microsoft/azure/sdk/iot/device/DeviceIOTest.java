@@ -86,7 +86,7 @@ public class DeviceIOTest
             final Executors executors,
             final ScheduledExecutorService scheduledExecutorService) throws IOException
     {
-        Deencapsulation.invoke(deviceIO, "open");
+        Deencapsulation.invoke(deviceIO, "open", false);
     }
 
     /* Tests_SRS_DEVICE_IO_21_001: [The constructor shall store the provided protocol and config information.] */
@@ -164,13 +164,13 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIO();
 
         // act
-        Deencapsulation.invoke(deviceIO, "open");
+        Deencapsulation.invoke(deviceIO, "open", false);
 
         // assert
         new Verifications()
         {
             {
-                mockedTransport.open();
+                mockedTransport.open(false);
             }
         };
     }
@@ -185,14 +185,14 @@ public class DeviceIOTest
         new NonStrictExpectations()
         {
             {
-                mockedTransport.open();
+                mockedTransport.open(false);
                 result = new DeviceClientException();
                 times = 1;
             }
         };
 
         // act
-        Deencapsulation.invoke(deviceIO, "open");
+        Deencapsulation.invoke(deviceIO, "open", false);
 
         // assert
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
@@ -537,7 +537,7 @@ public class DeviceIOTest
         final Object deviceIO = newDeviceIO();
         Deencapsulation.invoke(deviceIO, "setSendPeriodInMilliseconds",  lastInterval);
 
-        Deencapsulation.invoke(deviceIO, "open");
+        Deencapsulation.invoke(deviceIO, "open", false);
         assertEquals(lastInterval, Deencapsulation.getField(deviceIO, "sendPeriodInMilliseconds"));
 
         // act

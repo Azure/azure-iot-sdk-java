@@ -129,7 +129,7 @@ public class TransportClient
             // Codes_SRS_TRANSPORTCLIENT_12_013: [The function shall open the transport in multiplexing mode.]
             //this.deviceIO.multiplexOpen(deviceClientList);
             // if client is added just open to get rid of multiplex open.
-            this.deviceIO.open();
+            this.deviceIO.open(false);
         }
 
         this.transportClientState = TransportClientState.OPENED;

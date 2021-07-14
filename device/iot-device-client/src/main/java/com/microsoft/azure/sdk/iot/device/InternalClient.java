@@ -169,17 +169,22 @@ public class InternalClient
         this.deviceIO = null;
     }
 
+    public void open() throws IOException
+    {
+        this.open(false);
+    }
+
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")
-    public void open() throws IOException
+    public void open(boolean withRetry) throws IOException
     {
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
             throw new SecurityException("Your SasToken is expired");
         }
 
-        this.deviceIO.open();
+        this.deviceIO.open(withRetry);
     }
 
     public void close() throws IOException
@@ -1032,7 +1037,7 @@ public class InternalClient
                         if (this.config.getSasTokenAuthentication().canRefreshToken())
                         {
                             this.deviceIO.close();
-                            this.deviceIO.open();
+                            this.deviceIO.open(false);
                         }
                     }
                     catch (IOException e)
