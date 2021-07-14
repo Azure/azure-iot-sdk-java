@@ -390,6 +390,9 @@ public class IotHubTransport implements IotHubListener
      * If reconnection is occurring when this is called, this function shall block and wait for the reconnection
      * to finish before trying to open the connection
      *
+     * @param withRetry if true, this open call will apply the current retry policy to allow for the open call to be
+     * retried if it fails.
+     *
      * @throws TransportException if a communication channel cannot be established.
      */
     public void open(boolean withRetry) throws TransportException

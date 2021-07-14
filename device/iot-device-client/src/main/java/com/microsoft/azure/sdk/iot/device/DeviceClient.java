@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -419,6 +420,10 @@ public final class DeviceClient extends InternalClient implements Closeable
     /**
      * Starts asynchronously sending and receiving messages from an IoT Hub. If
      * the client is already open, the function shall do nothing.
+     *
+     * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
+     * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
+     * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
      *
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */

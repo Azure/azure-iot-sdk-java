@@ -169,11 +169,27 @@ public class InternalClient
         this.deviceIO = null;
     }
 
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT Hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @throws IOException if a connection to an IoT Hub cannot be established.
+     */
     public void open() throws IOException
     {
         this.open(false);
     }
 
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT Hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
+     * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
+     * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
+     *
+     * @throws IOException if a connection to an IoT Hub cannot be established.
+     */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")

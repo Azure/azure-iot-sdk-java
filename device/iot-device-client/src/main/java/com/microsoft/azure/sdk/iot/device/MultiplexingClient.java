@@ -153,6 +153,9 @@ public class MultiplexingClient
      * <p>
      * If this client is already open, then this method will do nothing.
      * <p>
+     * @param withRetry if true, this open call will apply the current retry policy to allow for the open call to be
+     * retried if it fails.
+     *
      * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
      * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
      * Any devices not found in the map of registration exceptions provided by
