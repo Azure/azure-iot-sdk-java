@@ -425,7 +425,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
      * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
      *
-     * @throws IOException if a connection to an IoT Hub cannot be established.
+     * @throws IOException if a connection to an IoT hub cannot be established.
      */
     public void open(boolean withRetry) throws IOException
     {
