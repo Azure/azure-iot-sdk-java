@@ -181,7 +181,7 @@ public class InternalClient
     }
 
     /**
-     * Starts asynchronously sending and receiving messages from an IoT Hub. If
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
      * the client is already open, the function shall do nothing.
      *
      * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
