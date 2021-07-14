@@ -188,7 +188,7 @@ public class InternalClient
      * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
      * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
      *
-     * @throws IOException if a connection to an IoT Hub cannot be established.
+     * @throws IOException if a connection to an IoT hub cannot be established.
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
