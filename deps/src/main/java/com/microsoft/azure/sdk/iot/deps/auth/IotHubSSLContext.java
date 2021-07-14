@@ -278,7 +278,7 @@ public class IotHubSSLContext
         return trustManagerFactory;
     }
 
-    private char[] generateTemporaryPassword()
+    private static char[] generateTemporaryPassword()
     {
         char[] randomChars = new char[256];
         SecureRandom secureRandom = new SecureRandom();
