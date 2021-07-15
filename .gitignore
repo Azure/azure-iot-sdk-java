@@ -205,7 +205,6 @@ service/java/target
 service/java/iot.service.sdk.java.iml
 java/device/doc/api_reference
 java/service/doc/api_reference
-.idea
 *.class
 target
 *.iml
@@ -240,3 +239,13 @@ apidocs
 *.js
 *.css
 package-list
+
+
+# =========================
+# Codestyles, Inspection Profiles, Scopes
+# =========================
+
+!/.idea
+/.idea/*
+!/.idea/inspectionProfiles
+!/.idea/scopes

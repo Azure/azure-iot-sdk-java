@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="OnlySDK" pattern="!file:*sample*/&amp;&amp;!file:*src/*test*/&amp;&amp;!file:*src/*Test*/&amp;&amp;file:*.java&amp;&amp;!file[dice-provider-emulator]:src/main/java/com/microsoft/azure/sdk/iot/provisioning/security/hsm/SecurityProviderDiceEmulator.java&amp;&amp;!file[dice-provider]:src/main/java/com/microsoft/azure/sdk/iot/provisioning/security/hsm/SecurityProviderDice.java&amp;&amp;!file[tpm-provider-emulator]:src/main/java/com/microsoft/azure/sdk/iot/provisioning/security/hsm/SecurityProviderTPMEmulator.java" />
+</component>
