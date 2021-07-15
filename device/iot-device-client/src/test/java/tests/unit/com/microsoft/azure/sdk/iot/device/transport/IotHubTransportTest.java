@@ -6,6 +6,7 @@ package tests.unit.com.microsoft.azure.sdk.iot.device.transport;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.DeviceClientException;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubServiceException;
+import com.microsoft.azure.sdk.iot.device.exceptions.ProtocolException;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
@@ -516,7 +517,7 @@ public class IotHubTransportTest
         configs.add(mockedConfig);
 
         //act
-        transport.open();
+        transport.open(false);
     }
 
 
@@ -546,7 +547,7 @@ public class IotHubTransportTest
         configs.add(mockedConfig);
 
         //act
-        transport.open();
+        transport.open(false);
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_019: [This function shall open the invoke the method openConnection.]
@@ -582,7 +583,7 @@ public class IotHubTransportTest
         };
 
         //act
-        transport.open();
+        transport.open(false);
 
         //assert
         assertTrue(verifier.toString().equalsIgnoreCase("Success"));
@@ -615,7 +616,7 @@ public class IotHubTransportTest
         configs.add(mockedConfig);
 
         //act
-        transport.open();
+        transport.open(false);
     }
 
 
@@ -3457,5 +3458,107 @@ public class IotHubTransportTest
                 times = 1;
             }
         };
+    }
+
+    @Test
+    public void openWithRetryThrowsIfOperationTimesOut()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedConfig.getDeviceId();
+                result = "someDeviceId";
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, (TransportException) any);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.getDuration();
+                result = 0;
+
+                mockedRetryDecision.shouldRetry();
+                result = true;
+            }
+        };
+
+        IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
+
+        new MockUp<IotHubTransport>()
+        {
+            @Mock void openConnection() throws TransportException
+            {
+                throw new ProtocolException("mock exception");
+            }
+
+            @Mock boolean hasOperationTimedOut(long time)
+            {
+                return true;
+            }
+        };
+
+        //act
+        try
+        {
+            transport.open(true);
+            fail("open call should have thrown an exception");
+        }
+        catch (TransportException transportException)
+        {
+            assertFalse(transportException instanceof ProtocolException);
+        }
+    }
+
+    @Test
+    public void openWithRetryThrowsIfRetryExpires()
+    {
+        //arrange
+        new NonStrictExpectations()
+        {
+            {
+                mockedConfig.getDeviceId();
+                result = "someDeviceId";
+
+                mockedConfig.getRetryPolicy();
+                result = mockedRetryPolicy;
+
+                mockedRetryPolicy.getRetryDecision(anyInt, (TransportException) any);
+                result = mockedRetryDecision;
+
+                mockedRetryDecision.getDuration();
+                result = 0;
+
+                mockedRetryDecision.shouldRetry();
+                result = false;
+            }
+        };
+
+        IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
+
+        new MockUp<IotHubTransport>()
+        {
+            @Mock void openConnection() throws TransportException
+            {
+                throw new ProtocolException("mock exception");
+            }
+
+            @Mock boolean hasOperationTimedOut(long time)
+            {
+                return false;
+            }
+        };
+
+        //act
+        try
+        {
+            transport.open(true);
+            fail("open call should have thrown an exception");
+        }
+        catch (TransportException transportException)
+        {
+            assertFalse(transportException instanceof ProtocolException);
+        }
     }
 }

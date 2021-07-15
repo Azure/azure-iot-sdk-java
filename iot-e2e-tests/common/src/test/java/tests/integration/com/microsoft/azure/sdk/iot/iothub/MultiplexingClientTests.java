@@ -240,6 +240,22 @@ public class MultiplexingClientTests extends IntegrationTest
     }
 
     @Test
+    public void openClientWithRetry() throws Exception
+    {
+        testInstance.setup(DEVICE_MULTIPLEX_COUNT);
+        testInstance.multiplexingClient.open(true);
+        testInstance.multiplexingClient.close();
+    }
+
+    @Test
+    public void openClientWithRetryWithoutRegisteredDevices() throws Exception
+    {
+        testInstance.setup(0);
+        testInstance.multiplexingClient.open(true);
+        testInstance.multiplexingClient.close();
+    }
+
+    @Test
     public void sendMessages() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
