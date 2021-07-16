@@ -18,8 +18,8 @@ upcoming change.
 See [this document](./upcoming_certificate_changes_readme.md) for a more in depth explanation of how to prepare your 
 devices for this certificate migration
 
-**Users who don't follow these instructions will begin experiencing unrecoverable, consistent connection failures from 
-their devices starting June 2022.**
+:exclamation:**Users who don't follow these instructions will begin experiencing unrecoverable, consistent connection failures from 
+their devices starting June 2022.**:exclamation:
 
 If you have any questions, comments, or concerns about this upcoming change, please let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions).
 

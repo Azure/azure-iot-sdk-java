@@ -30,7 +30,7 @@ continue to connect to the service once this transition starts:
 This team plans on only bringing critical security fixes to the 1.X.X releases once we've published the 2.X.X releases, so
 users are strongly urged to upgrade to the 2.X.X releases once they are published.
 
-**Users who don't upgrade to the packages in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
-or to the upcoming 2.X.X packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**
+:exclamation:**Users who don't upgrade to the packages in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
+or to the upcoming 2.X.X packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**:exclamation:
 
 If you have any questions, comments, or concerns about this upcoming change, please let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions).
