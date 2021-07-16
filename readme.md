@@ -1,6 +1,6 @@
 # Microsoft Azure IoT SDKs for Java
 
-## Upcoming Changes Notice
+## Critical Upcoming Change Notice
 
 All Azure IoT SDK users are advised to be aware of upcoming certificate changes for IoT hub and Device Provisioning Service 
 that will impact the SDK's ability to connect. In October 2022, both services will migrate away from the current 
@@ -13,10 +13,8 @@ For a more in depth explanation as to why the service is doing this, please see
 [this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
 
 Users of this Java IoT SDK in particular will need to follow slightly different instructions in order to handle this 
-upcoming change. 
-
-See [this document](./upcoming_certificate_changes_readme.md) for a more in depth explanation of how to prepare your 
-devices for this certificate migration
+upcoming change. See [this document](./upcoming_certificate_changes_readme.md) for a more in depth explanation of how 
+to prepare your devices for this certificate migration.
 
 **Users who don't follow these instructions will begin experiencing unrecoverable, consistent connection failures from 
 their devices starting June 2022.**

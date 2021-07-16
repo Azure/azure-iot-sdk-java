@@ -1,7 +1,5 @@
 # IoT hub and Device Provisioning Service Certificate Migration
 
-## Upcoming Changes Notice
-
 All Azure IoT SDK users are advised to be aware of upcoming certificate changes for IoT hub and Device Provisioning Service 
 that will impact the SDK's ability to connect. In October 2022, both services will migrate away from the current 
 [Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
@@ -12,8 +10,9 @@ certificates installed on your device in order to prevent connectivity issues.
 For a more in depth explanation as to why the service is doing this, please see
 [this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
 
-Users of this Java IoT SDK in particular will need to follow slightly different instructions in order to handle this 
-upcoming change. Because this SDK currently reads its trusted certificates from source code rather than reading them from
+## Java SDK Migration Steps
+
+Because this SDK currently reads its trusted certificates from source code rather than reading them from
 your physical device's certificate store, simply installing the DigiCert Global G2 CA root to your device's certificate 
 store isn't sufficient to handle this transition. There are two ways to ensure that your device using this SDK can 
 continue to connect to the service once this transition starts:
@@ -27,8 +26,8 @@ continue to connect to the service once this transition starts:
   root certificates. Because of that, users who use this approach will need to install both the Baltimore public certificate 
   and the DigiCert public certificate on their device so that the SDK will continue to trust the service as expected. 
   
-This team plans on only bringing critical security fixes to the 1.X.X releases once we've published the 2.X.X releases, so
-users are strongly urged to upgrade to the 2.X.X releases once they are published.
+This team plans on only bringing critical security fixes to the 1.X.X releases once we've published the 2.X.X releases, 
+so users are strongly recommended to upgrade to the 2.X.X releases once they are published.
 
 **Users who don't upgrade to the packages in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
 or to the upcoming 2.X.X packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**
