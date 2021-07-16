@@ -1,6 +1,6 @@
 # Microsoft Azure IoT SDKs for Java
 
-## Upcoming Changes Notice
+:exclamation: Important Upcoming Changes Notice :exclamation:
 
 All Azure IoT SDK users are advised to be aware of upcoming certificate changes for IoT hub and Device Provisioning Service 
 that will impact the SDK's ability to connect. In October 2022, both services will migrate away from the current 
