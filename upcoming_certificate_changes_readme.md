@@ -26,7 +26,9 @@ continue to connect to the service once this transition starts:
   root certificates. Because of that, users who use this approach will need to install both the Baltimore public certificate 
   and the DigiCert public certificate on their device so that the SDK will continue to trust the service as expected. 
   
-This team plans on only bringing critical security fixes to the 1.X.X releases once we've published the 2.X.X releases, 
+  
+This team will continue to support the 1.X.X [Long Term Support releases](https://github.com/Azure/azure-iot-sdk-java#long-term-support)
+as we have in the past with important bug fixes, but newer features will only be added to the new 2.X.X versions, 
 so users are strongly recommended to upgrade to the 2.X.X releases once they are published.
 
 **Users who don't upgrade to the packages in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
