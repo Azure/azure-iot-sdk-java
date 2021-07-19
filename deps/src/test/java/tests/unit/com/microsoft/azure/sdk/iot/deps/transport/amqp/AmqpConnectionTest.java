@@ -150,7 +150,7 @@ public class AmqpConnectionTest
     }
 
     @Test (expected = Exception.class)
-    public void OpenThrowExceptionReactor() throws IOException, InterruptedException
+    public void OpenThrowExceptionReactorFinal() throws IOException, InterruptedException
     {
         AmqpsConnection amqpsConnection = new AmqpsConnection(TEST_HOST_NAME, mockedProvisionOperations, null, null,  false);
 

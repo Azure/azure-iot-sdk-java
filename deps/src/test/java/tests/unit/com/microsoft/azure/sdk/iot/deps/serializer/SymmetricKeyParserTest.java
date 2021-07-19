@@ -44,8 +44,8 @@ public class SymmetricKeyParserTest
         SymmetricKeyParser parser = new SymmetricKeyParser(json);
 
         //assert
-        assertEquals(TEST_KEY1, parser.getPrimaryKeyFinal());
-        assertEquals(TEST_KEY2, parser.getSecondaryKeyFinal());
+        assertEquals(TEST_KEY1, parser.getPrimaryKey());
+        assertEquals(TEST_KEY2, parser.getSecondaryKey());
     }
 
     //Tests_SRS_SymmetricKeyParser_34_007: [The parser shall return a json representation of the provided SymmetricKeyParser.]
@@ -78,8 +78,8 @@ public class SymmetricKeyParserTest
         parser.setSecondaryKey(TEST_KEY1);
 
         //assert
-        assertEquals(TEST_KEY2, parser.getPrimaryKeyFinal());
-        assertEquals(TEST_KEY1, parser.getSecondaryKeyFinal());
+        assertEquals(TEST_KEY2, parser.getPrimaryKey());
+        assertEquals(TEST_KEY1, parser.getSecondaryKey());
     }
 
     //Tests_SRS_SymmetricKeyParser_34_002: [If the provided primaryKey value is null, an IllegalArgumentException shall be thrown.]

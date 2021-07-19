@@ -27,9 +27,9 @@ public class TwinPropertiesTest
     private final static TwinCollection PROPERTIES = new TwinCollection()
     {
         {
-            putFinal("prop1", "val1");
-            putFinal("prop2", "val2");
-            putFinal("prop3", "val3");
+            put("prop1", "val1");
+            put("prop2", "val2");
+            put("prop3", "val3");
         }
     };
     private final static String JSON_ONLY_DESIRED_PROPERTIES =

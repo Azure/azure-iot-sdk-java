@@ -189,10 +189,10 @@ public class Helpers
                 assertEquals(message, expected.size(), actual.size());
             }
 
-            assertEquals(expected.getVersionFinal(), actual.getVersionFinal());
+            assertEquals(expected.getVersion(), actual.getVersion());
             {
-                TwinMetadata expectedTwinMetadata = expected.getTwinMetadataFinal();
-                TwinMetadata actualTwinMetadata = actual.getTwinMetadataFinal();
+                TwinMetadata expectedTwinMetadata = expected.getTwinMetadata();
+                TwinMetadata actualTwinMetadata = actual.getTwinMetadata();
                 if (expectedTwinMetadata == null)
                 {
                     assertNull((message == null ? "Expected null TwinMetadata, received " + actualTwinMetadata : message), actualTwinMetadata);
@@ -212,8 +212,8 @@ public class Helpers
                 Object actualValue = actual.get(key);
                 Object expectedValue = expected.get(key);
                 {
-                    TwinMetadata expectedKeyTwinMetadata = expected.getTwinMetadataFinal(key);
-                    TwinMetadata actualKeyTwinMetadata = actual.getTwinMetadataFinal(key);
+                    TwinMetadata expectedKeyTwinMetadata = expected.getTwinMetadata(key);
+                    TwinMetadata actualKeyTwinMetadata = actual.getTwinMetadata(key);
                     if (expectedKeyTwinMetadata == null)
                     {
                         assertNull((message == null ? "Expected null TwinMetadata, received " + actualKeyTwinMetadata : message), actualKeyTwinMetadata);
