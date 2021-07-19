@@ -2,14 +2,14 @@
 
 ## Critical Upcoming Change Notice
 
-All Azure IoT SDK users are advised to be aware of upcoming certificate changes for IoT hub and Device Provisioning Service 
+All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT hub and Device Provisioning Service 
 that will impact the SDK's ability to connect. In October 2022, both services will migrate from the current 
 [Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
 [DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a 
 transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
 installed in their certificate store in order to prevent connectivity issues. 
 
-For a more in depth explanation as to why the service is doing this, please see
+For a more in depth explanation as to why the IoT services are doing this, please see
 [this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
 
 Users of this Java IoT SDK in particular will need to follow slightly different instructions in order to handle this 
