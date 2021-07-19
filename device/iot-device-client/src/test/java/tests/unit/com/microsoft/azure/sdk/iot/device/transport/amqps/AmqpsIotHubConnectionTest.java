@@ -478,7 +478,7 @@ public class AmqpsIotHubConnectionTest {
 
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
     @Test
-    public void openTriggersProtonReactorFinal(@Mocked final Reactor mockedReactor) throws TransportException, InterruptedException
+    public void openTriggersProtonReactor(@Mocked final Reactor mockedReactor) throws TransportException, InterruptedException
     {
         //arrange
         baseExpectations();
@@ -580,7 +580,7 @@ public class AmqpsIotHubConnectionTest {
     // Tests_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall closeNow the AmqpsIotHubConnection and the AMQP connection.]
     // Tests_SRS_AMQPSIOTHUBCONNECTION_34_014: [If this object's proton reactor is not null, this function shall stop the Proton reactor.]
     @Test
-    public void closeClosesAllProtonVariablesAndStopsProtonReactorFinal() throws TransportException
+    public void closeClosesAllProtonVariablesAndStopsProtonReactor() throws TransportException
     {
         baseExpectations();
 
