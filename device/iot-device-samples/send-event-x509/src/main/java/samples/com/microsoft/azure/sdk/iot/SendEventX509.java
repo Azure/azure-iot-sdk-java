@@ -163,7 +163,7 @@ public class SendEventX509
             try
             {
                 Message msg = new Message(msgStr);
-                msg.setContentTypeFinal("application/json");
+                msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);

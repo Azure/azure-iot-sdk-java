@@ -199,28 +199,6 @@ public class ModuleClientTest
     }
 
     @Test
-    public void constructorWithSSLContextSuccess(@Mocked final SSLContext mockedSSLContext) throws URISyntaxException, ModuleClientException {
-        // arrange
-        final String connString =
-                "HostName=iothub.device.com;deviceId=testdevice;ModuleId=testmodule;x509=true";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
-
-        new Expectations()
-        {
-            {
-                new IotHubConnectionString(connString);
-                result = mockedIotHubConnectionString;
-
-                mockedDeviceClientConfig.getModuleId();
-                result = "some module id";
-            }
-        };
-
-        // act
-        final ModuleClient client = new ModuleClient(connString, protocol, mockedSSLContext);
-    }
-
-    @Test
     public void constructorWithModelIdSuccess(@Mocked final ClientOptions mockedClientOptions) throws URISyntaxException, ModuleClientException {
         // arrange
         final String connString =
@@ -330,56 +308,6 @@ public class ModuleClientTest
                 times = 1;
             }
         };
-    }
-
-    //Tests_SRS_MODULECLIENT_34_008: [If the provided protocol is not MQTT, AMQPS, MQTT_WS, or AMQPS_WS, this function shall throw an UnsupportedOperationException.]
-    @Test (expected = UnsupportedOperationException.class)
-    public void x509ConstructorThrowsForHTTP() throws URISyntaxException, ModuleClientException
-    {
-        //arrange
-        final String connectionString = "connectionString";
-
-        new NonStrictExpectations()
-        {
-            {
-                new IotHubConnectionString(connectionString);
-                result = mockedIotHubConnectionString;
-
-                mockedIotHubConnectionString.getModuleId();
-                result = "someModuleId";
-
-                mockedIotHubConnectionString.isUsingX509();
-                result = true;
-            }
-        };
-
-        //act
-        new ModuleClient(connectionString, IotHubClientProtocol.HTTPS, "public cert", false, "private key", false);
-    }
-
-    //Tests_SRS_MODULECLIENT_34_009: [If the provided connection string does not contain a module id, this function shall throw an IllegalArgumentException.]
-    @Test (expected = IllegalArgumentException.class)
-    public void x509ConstructorThrowsForConnectionStringWithoutModuleId() throws URISyntaxException, ModuleClientException
-    {
-        //arrange
-        final String connectionString = "connectionString";
-
-        new NonStrictExpectations()
-        {
-            {
-                new IotHubConnectionString(connectionString);
-                result = mockedIotHubConnectionString;
-
-                mockedIotHubConnectionString.getModuleId();
-                result = null;
-
-                mockedIotHubConnectionString.isUsingX509();
-                result = true;
-            }
-        };
-
-        //act
-        new ModuleClient(connectionString, IotHubClientProtocol.AMQPS, "public cert", false, "private key", false);
     }
 
     //Tests_SRS_MODULECLIENT_34_010: [If the provided callback is null and the provided context is not null, this function shall throw an IllegalArgumentException.]
