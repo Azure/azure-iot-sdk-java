@@ -31,7 +31,6 @@
         <module>file-upload-sample</module>
         <module>send-event-x509</module>
         <module>send-receive-x509-sample</module>
-        <module>transportclient-sample</module>
         <module>multiplexing-sample</module>
         <module>module-invoke-method-sample</module>
         <module>send-event-with-proxy</module>

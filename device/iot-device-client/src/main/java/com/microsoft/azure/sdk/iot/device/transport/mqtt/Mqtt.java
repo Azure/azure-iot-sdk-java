@@ -512,7 +512,7 @@ abstract public class Mqtt implements MqttCallback
                         message.setContentEncoding(value);
                         break;
                     case CONTENT_TYPE:
-                        message.setContentTypeFinal(value);
+                        message.setContentType(value);
                         break;
                     default:
                         message.setProperty(key, value);

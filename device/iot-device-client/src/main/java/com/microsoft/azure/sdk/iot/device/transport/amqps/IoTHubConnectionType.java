@@ -13,13 +13,6 @@ public enum IoTHubConnectionType
     SINGLE_CLIENT,
 
     /**
-     * Multiplexing should be done with {@link com.microsoft.azure.sdk.iot.device.MultiplexingClient} which uses {@link #USE_MULTIPLEXING_CLIENT}
-     */
-    @SuppressWarnings("DeprecatedIsStillUsed")
-    @Deprecated
-    USE_TRANSPORTCLIENT,
-
-    /**
      * The connection type is a multiplexed connection using {@link com.microsoft.azure.sdk.iot.device.MultiplexingClient}
      */
     USE_MULTIPLEXING_CLIENT

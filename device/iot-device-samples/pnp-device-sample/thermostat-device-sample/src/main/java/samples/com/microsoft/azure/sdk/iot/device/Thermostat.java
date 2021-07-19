@@ -413,7 +413,7 @@ public class Thermostat {
 
         Message message = new Message(telemetryPayload);
         message.setContentEncoding(StandardCharsets.UTF_8.name());
-        message.setContentTypeFinal("application/json");
+        message.setContentType("application/json");
 
         deviceClient.sendEventAsync(message, new MessageIotHubEventCallback(), message);
         log.debug("Telemetry: Sent - {\"{}\": {}°C} with message Id {}.", telemetryName, temperature, message.getMessageId());
