@@ -20,7 +20,8 @@ continue to connect to the service once this transition starts:
 - Upgrade your SDK package versions to be, at minimum, those defined in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
   - The packages in this release and all later releases will have both the Baltimore and the DigiCert CA roots saved in 
   the SDK, so they can connect now and will still be able to connect once this transition starts.
-- Upgrade your SDK package versions to the still-in-development 2.X.X packages that are discussed [here](https://github.com/Azure/azure-iot-sdk-java/discussions/1267).
+- Upgrade your SDK package versions to the still-in-development 2.X.X packages that are discussed [here](https://github.com/Azure/azure-iot-sdk-java/discussions/1267) 
+once they include a long term support release.
   - The packages in this planned release will no longer store any certificates in source code, and instead will read the 
   trusted certificates from your device's certificate store. With this change, the SDK will become decoupled from the service's 
   root certificates. Because of that, users who use this approach will need to install both the Baltimore public certificate 
@@ -29,7 +30,7 @@ continue to connect to the service once this transition starts:
   
 This team will continue to support the 1.X.X [Long Term Support releases](https://github.com/Azure/azure-iot-sdk-java#long-term-support)
 as we have in the past with important bug fixes, but newer features will only be added to the new 2.X.X versions, 
-so users are strongly recommended to upgrade to the 2.X.X releases once they are published.
+so users are strongly recommended to upgrade to the 2.X.X releases once they have a published long term support release.
 
 **Users who don't upgrade to the packages in [this release](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021)
 or to the upcoming 2.X.X packages will begin experiencing unrecoverable, consistent connection failures from their devices starting June 2022.**
