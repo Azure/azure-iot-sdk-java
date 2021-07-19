@@ -149,7 +149,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
      *
      * @throws IOException if a connection to an IoT Hub cannot be established.
      */
-    void open() throws IOException
+    void open(boolean withRetry) throws IOException
     {
         synchronized (this.stateLock)
         {
@@ -160,7 +160,7 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
             try
             {
-                this.transport.open();
+                this.transport.open(withRetry);
             }
             catch (DeviceClientException e)
             {
@@ -170,11 +170,11 @@ public final class DeviceIO implements IotHubConnectionStatusChangeCallback
     }
 
     // Functionally the same as "open()", but without wrapping any thrown TransportException into an IOException
-    void openWithoutWrappingException() throws TransportException
+    void openWithoutWrappingException(boolean withRetry) throws TransportException
     {
         try
         {
-            open();
+            open(withRetry);
         }
         catch (IOException e)
         {

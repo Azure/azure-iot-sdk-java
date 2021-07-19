@@ -96,8 +96,8 @@ public class X509ThumbprintParserTest
         parser.setSecondaryThumbprint(SAMPLE_THUMBPRINT2);
 
         //assert
-        assertEquals(SAMPLE_THUMBPRINT1, parser.getPrimaryThumbprintFinal());
-        assertEquals(SAMPLE_THUMBPRINT2, parser.getSecondaryThumbprintFinal());
+        assertEquals(SAMPLE_THUMBPRINT1, parser.getPrimaryThumbprint());
+        assertEquals(SAMPLE_THUMBPRINT2, parser.getSecondaryThumbprint());
     }
 
     //Tests_SRS_X509ThumbprintParser_34_010: [If the provided json is null or empty or cannot be parsed into an X509Thumbprint object, an IllegalArgumentException shall be thrown.]

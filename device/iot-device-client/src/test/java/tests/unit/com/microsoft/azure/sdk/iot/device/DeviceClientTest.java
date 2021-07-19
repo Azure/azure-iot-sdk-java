@@ -3,15 +3,28 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.DeviceClientConfig;
+import com.microsoft.azure.sdk.iot.device.DeviceIO;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
+import com.microsoft.azure.sdk.iot.device.InternalClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeCallback;
+import com.microsoft.azure.sdk.iot.device.IotHubConnectionString;
+import com.microsoft.azure.sdk.iot.device.IotHubEventCallback;
+import com.microsoft.azure.sdk.iot.device.ProductInfo;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Expectations;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import mockit.Verifications;
 import org.junit.Test;
 
 import java.io.IOError;
@@ -234,7 +247,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                Deencapsulation.invoke(mockedInternalClient, "open");
+                Deencapsulation.invoke(mockedInternalClient, "open", false);
                 times = 1;
             }
         };
@@ -632,7 +645,7 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -679,7 +692,7 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -761,7 +774,7 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -844,7 +857,7 @@ public class DeviceClientTest
                 times = 1;
                 mockConfig.getSasTokenAuthentication().setTokenValidSecs(value);
                 times = 1;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 times = 2;
             }
         };
@@ -941,7 +954,7 @@ public class DeviceClientTest
                 result = true;
                 mockConfig.getAuthenticationType();
                 result = DeviceClientConfig.AuthType.SAS_TOKEN;
-                Deencapsulation.invoke(mockDeviceIO, "open");
+                Deencapsulation.invoke(mockDeviceIO, "open", false);
                 result =  new IOException();
             }
         };

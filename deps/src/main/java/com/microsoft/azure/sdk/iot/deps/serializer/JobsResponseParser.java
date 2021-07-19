@@ -481,28 +481,6 @@ public class JobsResponseParser
      *
      * @return the json of update twin. It is {@code null} if type
      * is not scheduleUpdateTwin
-     * @deprecated As of release 0.4.0, replaced by {@link #getUpdateTwinState()}
-     */
-    @Deprecated
-    public TwinParser getUpdateTwin()
-    {
-        TwinParser twinParser = new TwinParser();
-        try
-        {
-            twinParser.updateTwin(this.updateTwin.getDesiredProperty(), this.updateTwin.getReportedProperty(), this.updateTwin.getTags());
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException(e);
-        }
-        return twinParser;
-    }
-
-    /**
-     * Getter for update twin json
-     *
-     * @return the json of update twin. It is {@code null} if type
-     * is not scheduleUpdateTwin
      */
     public TwinState getUpdateTwinState()
     {

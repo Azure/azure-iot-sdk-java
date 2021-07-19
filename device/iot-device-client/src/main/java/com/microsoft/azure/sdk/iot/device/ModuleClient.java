@@ -116,7 +116,7 @@ public class ModuleClient extends InternalClient
      * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
      * the SDK no longer controls that when this constructor is used.
      *
-     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param hostName The host name of the IoT hub that this client will connect to.
      * @param deviceId The Id of the device containing the module that the connection will identify as.
      * @param moduleId The Id of the module that the connection will identify as.
      * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
@@ -132,7 +132,7 @@ public class ModuleClient extends InternalClient
      * this client such as setting the SAS token expiry time will throw {@link UnsupportedOperationException} since
      * the SDK no longer controls that when this constructor is used.
      *
-     * @param hostName The host name of the IoT Hub that this client will connect to.
+     * @param hostName The host name of the IoT hub that this client will connect to.
      * @param deviceId The Id of the device containing the module that the connection will identify as.
      * @param moduleId The Id of the module that the connection will identify as.
      * @param sasTokenProvider The provider of all SAS tokens that are used during authentication.
@@ -424,7 +424,7 @@ public class ModuleClient extends InternalClient
      * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
      * will cause this module client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -457,7 +457,7 @@ public class ModuleClient extends InternalClient
      * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
      * will cause this module client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -488,7 +488,7 @@ public class ModuleClient extends InternalClient
      * Starts the module twin. This module client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this module client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this module client to receive the full desired properties set, and the PATCH
      * will cause this module client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will

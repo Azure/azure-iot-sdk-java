@@ -82,7 +82,7 @@ public class IotHubTransport implements IotHubListener
     final private Object multiplexingDeviceStateLock = new Object();
 
     // Keys are deviceIds. Helps with getting configs based on deviceIds
-    private final Map<String, DeviceClientConfig> deviceClientConfigs;
+    private final Map<String, DeviceClientConfig> deviceClientConfigs = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService taskScheduler;
 
@@ -120,8 +120,6 @@ public class IotHubTransport implements IotHubListener
             throw new IllegalArgumentException("Config cannot be null");
         }
 
-        this.deviceClientConfigs = new ConcurrentHashMap<>();
-
         this.protocol = defaultConfig.getProtocol();
         this.hostName = defaultConfig.getIotHubHostname();
         this.deviceClientConfigs.put(defaultConfig.getDeviceId(), defaultConfig);
@@ -141,7 +139,6 @@ public class IotHubTransport implements IotHubListener
         this.proxySettings = proxySettings;
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
-        this.deviceClientConfigs = new ConcurrentHashMap<>();
         this.isMultiplexing = true;
     }
 
@@ -393,9 +390,12 @@ public class IotHubTransport implements IotHubListener
      * If reconnection is occurring when this is called, this function shall block and wait for the reconnection
      * to finish before trying to open the connection
      *
+     * @param withRetry if true, this open call will apply the current retry policy to allow for the open call to be
+     * retried if it fails.
+     *
      * @throws TransportException if a communication channel cannot be established.
      */
-    public void open() throws TransportException
+    public void open(boolean withRetry) throws TransportException
     {
         if (this.connectionStatus == IotHubConnectionStatus.CONNECTED)
         {
@@ -419,7 +419,53 @@ public class IotHubTransport implements IotHubListener
 
         this.taskScheduler = Executors.newScheduledThreadPool(1);
 
-        openConnection();
+        if (withRetry)
+        {
+            int connectionAttempt = 0;
+            long startTime = System.currentTimeMillis();
+
+            // this loop either ends in throwing an exception when retry expires, or by a break statement upon a successful openConnection() call
+            while (true)
+            {
+                RetryPolicy retryPolicy = isMultiplexing ?  multiplexingRetryPolicy : this.getDefaultConfig().getRetryPolicy();
+
+                try
+                {
+                    openConnection();
+                    break; // openConnection() only returns without throwing if the connection attempt was successful
+                }
+                catch (TransportException transportException)
+                {
+                    log.debug("Encountered an exception while opening the client. Checking the configured retry policy to see if another attempt should be made.", transportException);
+                    RetryDecision retryDecision = retryPolicy.getRetryDecision(connectionAttempt, transportException);
+                    if (!retryDecision.shouldRetry())
+                    {
+                        throw new TransportException("Retry expired while attempting to open the connection", transportException);
+                    }
+
+                    connectionAttempt++;
+
+                    if (hasOperationTimedOut(startTime))
+                    {
+                        throw new TransportException("Open operation timed out. The nested exception is the most recent exception thrown while attempting to open the connection", transportException);
+                    }
+
+                    try
+                    {
+                        log.trace("The configured retry policy allows for another attempt. Sleeping for {} milliseconds before the next attempt", retryDecision.getDuration());
+                        Thread.sleep(retryDecision.getDuration());
+                    }
+                    catch (InterruptedException e)
+                    {
+                        throw new TransportException("InterruptedException thrown while sleeping between connection attempts", e);
+                    }
+                }
+            }
+        }
+        else
+        {
+            openConnection();
+        }
 
         log.debug("Client connection opened successfully");
     }

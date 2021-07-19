@@ -135,7 +135,7 @@ public class InternalClient
             this.config.modelId = clientOptions.getModelId();
         }
 
-        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT Hub transport for the protocol specified, creating a instance of the deviceIO.]
+        //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -169,17 +169,38 @@ public class InternalClient
         this.deviceIO = null;
     }
 
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
+    public void open() throws IOException
+    {
+        this.open(false);
+    }
+
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
+     * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
+     * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance
     @SuppressWarnings("ConstantConditions")
-    public void open() throws IOException
+    public void open(boolean withRetry) throws IOException
     {
         if (this.config.getAuthenticationType() == DeviceClientConfig.AuthType.SAS_TOKEN && this.config.getSasTokenAuthentication().isAuthenticationProviderRenewalNecessary())
         {
             throw new SecurityException("Your SasToken is expired");
         }
 
-        this.deviceIO.open();
+        this.deviceIO.open(withRetry);
     }
 
     public void close() throws IOException
@@ -199,7 +220,7 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends an event message to the IoT Hub.
+     * Asynchronously sends an event message to the IoT hub.
      *
      * @param message the message to be sent.
      * @param callback the callback to be invoked when a response is received.
@@ -223,7 +244,7 @@ public class InternalClient
     }
 
     /**
-     * Asynchronously sends a batch of messages to the IoT Hub
+     * Asynchronously sends a batch of messages to the IoT hub
      * HTTPS messages will be sent in a single batch and MQTT and AMQP messages will be sent individually.
      * In case of HTTPS, This API call is an all-or-nothing single HTTPS message and the callback will be triggered only once.
      * Maximum payload size for HTTPS is 255KB
@@ -257,7 +278,7 @@ public class InternalClient
      *
      * This client will receive a callback each time a desired property is updated. That callback will either contain
      * the full desired properties set, or only the updated desired property depending on how the desired property was changed.
-     * IoT Hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
+     * IoT hub supports a PUT and a PATCH on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
      * have its version incremented from a PATCH call. The java service client library uses the PATCH call when updated desired properties,
@@ -1032,7 +1053,7 @@ public class InternalClient
                         if (this.config.getSasTokenAuthentication().canRefreshToken())
                         {
                             this.deviceIO.close();
-                            this.deviceIO.open();
+                            this.deviceIO.open(false);
                         }
                     }
                     catch (IOException e)

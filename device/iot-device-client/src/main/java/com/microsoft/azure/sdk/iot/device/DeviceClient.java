@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
+import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -239,24 +240,39 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void open() throws IOException
     {
+        this.open(false);
+    }
+
+    /**
+     * Starts asynchronously sending and receiving messages from an IoT hub. If
+     * the client is already open, the function shall do nothing.
+     *
+     * @param withRetry if true, this open call will apply the retry policy to allow for the open call to be retried if
+     * it fails. Both the operation timeout set in {@link #setOperationTimeout(long)} and the retry policy set in
+     * {{@link #setRetryPolicy(RetryPolicy)}} will be respected while retrying to open the connection.
+     *
+     * @throws IOException if a connection to an IoT hub cannot be established.
+     */
+    public void open(boolean withRetry) throws IOException
+    {
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
         {
             throw new UnsupportedOperationException(MULTIPLEXING_OPEN_ERROR_MESSAGE);
         }
 
-        super.open();
+        super.open(withRetry);
 
         log.info("Device client opened successfully");
     }
 
     /**
-     * Completes all current outstanding requests and closes the IoT Hub client.
+     * Completes all current outstanding requests and closes the IoT hub client.
      * Must be called to terminate the background thread that is sending data to
-     * IoT Hub. After {@code closeNow()} is called, the IoT Hub client is no longer
+     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
      * usable. If the client is already closed, the function shall do nothing.
      * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
      *
-     * @throws IOException if the connection to an IoT Hub cannot be closed.
+     * @throws IOException if the connection to an IoT hub cannot be closed.
      */
     @Deprecated
     public void close() throws IOException
@@ -274,15 +290,15 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Closes the IoT Hub client by releasing any resources held by client. When
+     * Closes the IoT hub client by releasing any resources held by client. When
      * closeNow is called all the messages that were in transit or pending to be
      * sent will be informed to the user in the callbacks and any existing
      * connection to IotHub will be closed.
      * Must be called to terminate the background thread that is sending data to
-     * IoT Hub. After {@code closeNow()} is called, the IoT Hub client is no longer
+     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
      * usable. If the client is already closed, the function shall do nothing.
      *
-     * @throws IOException if the connection to an IoT Hub cannot be closed.
+     * @throws IOException if the connection to an IoT hub cannot be closed.
      */
     public void closeNow() throws IOException
     {
@@ -300,6 +316,55 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Asynchronously upload a stream to the IoT hub.
+     *
+     * NOTE: IotHub does not currently support CA signed devices using file upload. Please use SAS based authentication or
+     * self signed certificates.
+     *
+     * @param destinationBlobName is a string with the name of the file in the storage.
+     * @param inputStream is a InputStream with the stream to upload in the blob.
+     * @param streamLength is a long with the number of bytes in the stream to upload.
+     * @param callback the callback to be invoked when a file is uploaded.
+     * @param callbackContext a context to be passed to the callback. Can be {@code null}.
+     *
+     * @throws IllegalArgumentException if the provided blob name, or the file path is {@code null},
+     *          empty or not valid, or if the callback is {@code null}.
+     * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
+     * @deprecated Use {@link #getFileUploadSasUri(FileUploadSasUriRequest)} to get the SAS URI, use the azure storage SDK to upload a file
+     * to that SAS URI, and then use {@link #completeFileUpload(FileUploadCompletionNotification)} to notify Iot Hub that
+     * your file upload has completed, successfully or otherwise. This method does all three of these tasks for you, but has limited configuration options.
+     */
+    @Deprecated
+    public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
+                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException
+    {
+        if (callback == null)
+        {
+            throw new IllegalArgumentException("Callback is null");
+        }
+
+        if (inputStream == null)
+        {
+            throw new IllegalArgumentException("The input stream cannot be null.");
+        }
+
+        if (streamLength < 0)
+        {
+            throw new IllegalArgumentException("Invalid stream size.");
+        }
+
+        if (this.fileUpload == null)
+        {
+            this.fileUpload = new FileUpload(this.config);
+        }
+
+        this.fileUpload.uploadToBlobAsync(destinationBlobName, inputStream, streamLength, callback, callbackContext);
+    }
+
+    /**
+>>>>>>> 4e9f93a0c6538695df27e2c8e5eb7914bcf18bdf
      * Get a file upload SAS URI which the Azure Storage SDK can use to upload a file to blob for this device. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#initialize-a-file-upload">this documentation</a> for more details.
      * @param request The request details for getting the SAS URI, including the destination blob name.
      * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
@@ -317,9 +382,24 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Notify IoT Hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
+     * Notify IoT hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
      * @param notification The notification details, including if the file upload succeeded.
      * @throws IOException If this HTTPS request fails to send.
+<<<<<<< HEAD
+=======
+     * @deprecated This function is not actually async, so use {@link #completeFileUpload(FileUploadCompletionNotification)} to avoid confusion
+     */
+    @Deprecated
+    public void completeFileUploadAsync(FileUploadCompletionNotification notification) throws IOException
+    {
+        this.completeFileUpload(notification);
+    }
+
+    /**
+     * Notify IoT hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
+     * @param notification The notification details, including if the file upload succeeded.
+     * @throws IOException If this HTTPS request fails to send.
+>>>>>>> 4e9f93a0c6538695df27e2c8e5eb7914bcf18bdf
      */
     public void completeFileUpload(FileUploadCompletionNotification notification) throws IOException
     {
@@ -344,7 +424,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -377,7 +457,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -408,7 +488,7 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Starts the device twin. This device client will receive a callback with the current state of the full twin, including
      * reported properties and desired properties. After that callback is received, this device client will receive a callback
      * each time a desired property is updated. That callback will either contain the full desired properties set, or
-     * only the updated desired property depending on how the desired property was changed. IoT Hub supports a PUT and a PATCH
+     * only the updated desired property depending on how the desired property was changed. IoT hub supports a PUT and a PATCH
      * on the twin. The PUT will cause this device client to receive the full desired properties set, and the PATCH
      * will cause this device client to only receive the updated desired properties. Similarly, the version
      * of each desired property will be incremented from a PUT call, and only the actually updated desired property will
@@ -618,7 +698,7 @@ public final class DeviceClient extends InternalClient implements Closeable
                         if (this.getConfig().getSasTokenAuthentication().canRefreshToken())
                         {
                             this.getDeviceIO().close();
-                            this.getDeviceIO().open();
+                            this.getDeviceIO().open(false);
                         }
                     }
                     catch (IOException e)
