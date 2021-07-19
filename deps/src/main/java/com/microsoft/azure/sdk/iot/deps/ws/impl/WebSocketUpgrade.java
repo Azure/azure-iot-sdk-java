@@ -31,24 +31,11 @@ public class WebSocketUpgrade
 
     public WebSocketUpgrade(String hostName, String webSocketPath, int webSocketPort, String webSocketProtocol, Map<String, String> additionalHeaders)
     {
-        setHostFinal(hostName);
-        setPathFinal(webSocketPath);
-        setPortFinal(webSocketPort);
-        setProtocolFinal(webSocketProtocol);
-        setAdditionalHeadersFinal(additionalHeaders);
-    }
-
-    /**
-     * Set host value in host header
-     *
-     * @deprecated as of Deps version 0.7.1, please use {@link #setHostFinal(String)}
-     *
-     * @param host The host header field value.
-     */
-    @Deprecated
-    public void setHost(String host)
-    {
-        this._host = host;
+        setHost(hostName);
+        setPath(webSocketPath);
+        setPort(webSocketPort);
+        setProtocol(webSocketProtocol);
+        setAdditionalHeaders(additionalHeaders);
     }
 
     /**
@@ -56,7 +43,7 @@ public class WebSocketUpgrade
      *
      * @param host The host header field value.
      */
-    public final void setHostFinal(String host)
+    public final void setHost(String host)
     {
         this._host = host;
     }
@@ -64,27 +51,9 @@ public class WebSocketUpgrade
     /**
      * Set port value in host header
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #setPortFinal(int)}
-     *
      * @param port The port header field value.
      */
-    @Deprecated
-    public void setPort(int port)
-    {
-        this._port = "";
-
-        if (port != 0)
-        {
-            this._port = String.valueOf(port);
-        }
-    }
-
-    /**
-     * Set port value in host header
-     *
-     * @param port The port header field value.
-     */
-    public final void setPortFinal(int port)
+    public final void setPort(int port)
     {
         this._port = "";
 
@@ -97,30 +66,9 @@ public class WebSocketUpgrade
     /**
      * Set path value in handshake
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #setPathFinal(String)}
-     *
      * @param path The path field value.
      */
-    @Deprecated
-    public void setPath(String path)
-    {
-        this._path = path;
-
-        if (!this._path.isEmpty())
-        {
-            if (this._path.charAt(0) != this._slash)
-            {
-                this._path = this._slash + this._path;
-            }
-        }
-    }
-
-    /**
-     * Set path value in handshake
-     *
-     * @param path The path field value.
-     */
-    public final void setPathFinal(String path)
+    public final void setPath(String path)
     {
         this._path = path;
 
@@ -136,22 +84,9 @@ public class WebSocketUpgrade
     /**
      * Set protocol value in protocol header
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #setProtocolFinal(String)}
-     *
      * @param protocol The protocol header field value.
      */
-    @Deprecated
-    public void setProtocol(String protocol)
-    {
-        this._protocol = protocol;
-    }
-
-    /**
-     * Set protocol value in protocol header
-     *
-     * @param protocol The protocol header field value.
-     */
-    public final void setProtocolFinal(String protocol)
+    public final void setProtocol(String protocol)
     {
         this._protocol = protocol;
     }
@@ -159,22 +94,9 @@ public class WebSocketUpgrade
     /**
      * Add field-value pairs to HTTP header
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #setAdditionalHeadersFinal(Map)}
-     *
      * @param additionalHeaders The Map containing the additional headers.
      */
-    @Deprecated
-    public void setAdditionalHeaders(Map<String, String> additionalHeaders)
-    {
-        _additionalHeaders = additionalHeaders;
-    }
-
-    /**
-     * Add field-value pairs to HTTP header
-     *
-     * @param additionalHeaders The Map containing the additional headers.
-     */
-    public final void setAdditionalHeadersFinal(Map<String, String> additionalHeaders)
+    public final void setAdditionalHeaders(Map<String, String> additionalHeaders)
     {
         _additionalHeaders = additionalHeaders;
     }

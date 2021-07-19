@@ -94,13 +94,13 @@ public class ExportImportDeviceParser
             throw new IllegalArgumentException("The provided json could not be parsed");
         }
 
-        if (deviceParser.getIdFinal() == null)
+        if (deviceParser.getId() == null)
         {
             //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_008: [If the provided json is missing the id field, or its value is empty, an IllegalArgumentException shall be thrown]
             throw new IllegalArgumentException("The id field must be present in the provided json");
         }
 
-        if (deviceParser.getAuthenticationFinal() == null)
+        if (deviceParser.getAuthentication() == null)
         {
             //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_009: [If the provided json is missing the authentication field, or its value is empty, an IllegalArgumentException shall be thrown.]
             throw new IllegalArgumentException("The authentication field must be present in the provided json");
@@ -120,23 +120,9 @@ public class ExportImportDeviceParser
     /**
      * Getter for id
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #getIdFinal()}
-     *
      * @return The value of id
      */
-    @Deprecated
-    public String getId()
-    {
-        //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_013: [This method shall return the value of this object's Id.]
-        return id;
-    }
-
-    /**
-     * Getter for id
-     *
-     * @return The value of id
-     */
-    public final String getIdFinal()
+    public final String getId()
     {
         //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_013: [This method shall return the value of this object's Id.]
         return id;
@@ -268,23 +254,9 @@ public class ExportImportDeviceParser
     /**
      * Getter for authentication
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #getAuthenticationFinal()}
-     *
      * @return The value of authentication
      */
-    @Deprecated
-    public AuthenticationParser getAuthentication()
-    {
-        //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_012: [This method shall return the value of this object's AuthenticationParser.]
-        return authentication;
-    }
-
-    /**
-     * Getter for authentication
-     *
-     * @return The value of authentication
-     */
-    public final AuthenticationParser getAuthenticationFinal()
+    public final AuthenticationParser getAuthentication()
     {
         //Codes_SRS_EXPORTIMPORTDEVICE_PARSER_34_012: [This method shall return the value of this object's AuthenticationParser.]
         return authentication;
