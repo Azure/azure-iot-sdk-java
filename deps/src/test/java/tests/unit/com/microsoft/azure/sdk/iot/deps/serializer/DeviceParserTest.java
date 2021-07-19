@@ -79,8 +79,8 @@ public class DeviceParserTest
         DeviceParser parser = new DeviceParser(json);
 
         //assert
-        assertEquals(expectedPrimaryThumbprint, parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprintFinal());
-        assertEquals(expectedSecondaryThumbprint, parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprintFinal());
+        assertEquals(expectedPrimaryThumbprint, parser.getAuthenticationParser().getThumbprint().getPrimaryThumbprint());
+        assertEquals(expectedSecondaryThumbprint, parser.getAuthenticationParser().getThumbprint().getSecondaryThumbprint());
         assertNull(parser.getAuthenticationParser().getSymmetricKey());
         assertEquals(AuthenticationTypeParser.SELF_SIGNED, parser.getAuthenticationParser().getType());
     }
@@ -122,8 +122,8 @@ public class DeviceParserTest
         DeviceParser parser = new DeviceParser(json);
 
         //assert
-        assertEquals(expectedPrimaryKey, parser.getAuthenticationParser().getSymmetricKey().getPrimaryKeyFinal());
-        assertEquals(expectedSecondaryKey, parser.getAuthenticationParser().getSymmetricKey().getSecondaryKeyFinal());
+        assertEquals(expectedPrimaryKey, parser.getAuthenticationParser().getSymmetricKey().getPrimaryKey());
+        assertEquals(expectedSecondaryKey, parser.getAuthenticationParser().getSymmetricKey().getSecondaryKey());
         assertNull(parser.getAuthenticationParser().getThumbprint());
         assertEquals(AuthenticationTypeParser.SAS, parser.getAuthenticationParser().getType());
     }

@@ -62,8 +62,8 @@ public class X509ThumbprintParser
             throw new IllegalArgumentException("The provided json could not be parsed");
         }
 
-        this.primaryThumbprint = parser.getPrimaryThumbprintFinal();
-        this.secondaryThumbprint = parser.getSecondaryThumbprintFinal();
+        this.primaryThumbprint = parser.getPrimaryThumbprint();
+        this.secondaryThumbprint = parser.getSecondaryThumbprint();
     }
 
     /**
@@ -79,23 +79,9 @@ public class X509ThumbprintParser
     /**
      * Getter for PrimaryThumbprint
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #getPrimaryThumbprintFinal()}
-     *
      * @return The value of PrimaryThumbprint
      */
-    @Deprecated
-    public String getPrimaryThumbprint()
-    {
-        //Codes_SRS_X509ThumbprintParser_34_001: [This method shall return the value of primaryThumbprint.]
-        return primaryThumbprint;
-    }
-
-    /**
-     * Getter for PrimaryThumbprint
-     *
-     * @return The value of PrimaryThumbprint
-     */
-    public final String getPrimaryThumbprintFinal()
+    public final String getPrimaryThumbprint()
     {
         //Codes_SRS_X509ThumbprintParser_34_001: [This method shall return the value of primaryThumbprint.]
         return primaryThumbprint;
@@ -122,23 +108,9 @@ public class X509ThumbprintParser
     /**
      * Getter for SecondaryThumbprint
      *
-     * @deprecated as of Deps version 0.7.1, please use {@link #getSecondaryThumbprintFinal()}
-     *
      * @return The value of SecondaryThumbprint
      */
-    @Deprecated
-    public String getSecondaryThumbprint()
-    {
-        //Codes_SRS_X509ThumbprintParser_34_004: [This method shall return the value of secondaryThumbprint.]
-        return secondaryThumbprint;
-    }
-
-    /**
-     * Getter for SecondaryThumbprint
-     *
-     * @return The value of SecondaryThumbprint
-     */
-    public final String getSecondaryThumbprintFinal()
+    public final String getSecondaryThumbprint()
     {
         //Codes_SRS_X509ThumbprintParser_34_004: [This method shall return the value of secondaryThumbprint.]
         return secondaryThumbprint;
