@@ -316,55 +316,6 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-<<<<<<< HEAD
-=======
-     * Asynchronously upload a stream to the IoT hub.
-     *
-     * NOTE: IotHub does not currently support CA signed devices using file upload. Please use SAS based authentication or
-     * self signed certificates.
-     *
-     * @param destinationBlobName is a string with the name of the file in the storage.
-     * @param inputStream is a InputStream with the stream to upload in the blob.
-     * @param streamLength is a long with the number of bytes in the stream to upload.
-     * @param callback the callback to be invoked when a file is uploaded.
-     * @param callbackContext a context to be passed to the callback. Can be {@code null}.
-     *
-     * @throws IllegalArgumentException if the provided blob name, or the file path is {@code null},
-     *          empty or not valid, or if the callback is {@code null}.
-     * @throws IOException if the client cannot create a instance of the FileUpload or the transport.
-     * @deprecated Use {@link #getFileUploadSasUri(FileUploadSasUriRequest)} to get the SAS URI, use the azure storage SDK to upload a file
-     * to that SAS URI, and then use {@link #completeFileUpload(FileUploadCompletionNotification)} to notify Iot Hub that
-     * your file upload has completed, successfully or otherwise. This method does all three of these tasks for you, but has limited configuration options.
-     */
-    @Deprecated
-    public void uploadToBlobAsync(String destinationBlobName, InputStream inputStream, long streamLength,
-                                  IotHubEventCallback callback, Object callbackContext) throws IllegalArgumentException, IOException
-    {
-        if (callback == null)
-        {
-            throw new IllegalArgumentException("Callback is null");
-        }
-
-        if (inputStream == null)
-        {
-            throw new IllegalArgumentException("The input stream cannot be null.");
-        }
-
-        if (streamLength < 0)
-        {
-            throw new IllegalArgumentException("Invalid stream size.");
-        }
-
-        if (this.fileUpload == null)
-        {
-            this.fileUpload = new FileUpload(this.config);
-        }
-
-        this.fileUpload.uploadToBlobAsync(destinationBlobName, inputStream, streamLength, callback, callbackContext);
-    }
-
-    /**
->>>>>>> 4e9f93a0c6538695df27e2c8e5eb7914bcf18bdf
      * Get a file upload SAS URI which the Azure Storage SDK can use to upload a file to blob for this device. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#initialize-a-file-upload">this documentation</a> for more details.
      * @param request The request details for getting the SAS URI, including the destination blob name.
      * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
@@ -385,21 +336,6 @@ public final class DeviceClient extends InternalClient implements Closeable
      * Notify IoT hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
      * @param notification The notification details, including if the file upload succeeded.
      * @throws IOException If this HTTPS request fails to send.
-<<<<<<< HEAD
-=======
-     * @deprecated This function is not actually async, so use {@link #completeFileUpload(FileUploadCompletionNotification)} to avoid confusion
-     */
-    @Deprecated
-    public void completeFileUploadAsync(FileUploadCompletionNotification notification) throws IOException
-    {
-        this.completeFileUpload(notification);
-    }
-
-    /**
-     * Notify IoT hub that a file upload has been completed, successfully or otherwise. See <a href="https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-file-upload#notify-iot-hub-of-a-completed-file-upload">this documentation</a> for more details.
-     * @param notification The notification details, including if the file upload succeeded.
-     * @throws IOException If this HTTPS request fails to send.
->>>>>>> 4e9f93a0c6538695df27e2c8e5eb7914bcf18bdf
      */
     public void completeFileUpload(FileUploadCompletionNotification notification) throws IOException
     {
