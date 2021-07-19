@@ -186,8 +186,8 @@ public class DeviceTwin
     private Property getDesiredProperty(TwinCollection twinCollection, String key)
     {
         Object value = twinCollection.get(key);
-        Integer propertyVersion = twinCollection.getVersionFinal();
-        TwinMetadata metadata = twinCollection.getTwinMetadataFinal(key);
+        Integer propertyVersion = twinCollection.getVersion();
+        TwinMetadata metadata = twinCollection.getTwinMetadata(key);
         Date lastUpdated = null;
         Integer lastUpdatedVersion = null;
         String lastUpdatedBy = null;
@@ -212,8 +212,8 @@ public class DeviceTwin
     private Property getReportedProperty(TwinCollection twinCollection, String key)
     {
         Object value = twinCollection.get(key);
-        Integer propertyVersion = twinCollection.getVersionFinal();
-        TwinMetadata metadata = twinCollection.getTwinMetadataFinal(key);
+        Integer propertyVersion = twinCollection.getVersion();
+        TwinMetadata metadata = twinCollection.getTwinMetadata(key);
         Date lastUpdated = null;
         Integer lastUpdatedVersion = null;
         if (metadata != null)
@@ -337,7 +337,7 @@ public class DeviceTwin
                 throw new IOException("Duplicate keys found in reported properties: " + p.getKey());
             }
 
-            reportedPropertiesMap.putFinal(p.getKey(), p.getValue());
+            reportedPropertiesMap.put(p.getKey(), p.getValue());
         }
         String serializedReportedProperties = reportedPropertiesMap.toJsonElement().toString();
 
