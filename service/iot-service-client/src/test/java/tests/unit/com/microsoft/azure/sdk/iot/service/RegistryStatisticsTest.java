@@ -71,7 +71,7 @@ public class RegistryStatisticsTest
     {
         //arrange
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         // act
         RegistryStatistics statistics = registryManager.getStatistics();
@@ -82,7 +82,7 @@ public class RegistryStatisticsTest
     {
         //arrange
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         RegistryStatistics statistics = registryManager.getStatistics();
 
         //act

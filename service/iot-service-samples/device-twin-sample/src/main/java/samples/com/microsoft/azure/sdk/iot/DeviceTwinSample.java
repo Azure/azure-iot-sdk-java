@@ -37,7 +37,7 @@ public class DeviceTwinSample
     {
         System.out.println("Starting sample...");
         System.out.println("Creating the Device Twin");
-        DeviceTwin twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+        DeviceTwin twinClient = new DeviceTwin(iotHubConnectionString);
 
         DeviceTwinDevice device = new DeviceTwinDevice(deviceId);
 

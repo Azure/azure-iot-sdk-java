@@ -80,7 +80,7 @@ public class JobClientSample
     private static JobClient createJobClient() throws IOException
     {
         System.out.println("Create JobClient from the connectionString...");
-        JobClient jobClient = JobClient.createFromConnectionString(iotHubConnectionString);
+        JobClient jobClient = new JobClient(iotHubConnectionString);
         System.out.println("JobClient created with success");
         System.out.println();
         return  jobClient;

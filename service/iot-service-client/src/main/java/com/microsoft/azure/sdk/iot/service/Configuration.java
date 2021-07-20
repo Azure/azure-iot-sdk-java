@@ -280,22 +280,6 @@ public class Configuration
     }
 
     /**
-     * Setter for force update boolean
-     * @deprecated  This method currently only validates forceUpdate parameter
-     *
-     * @param forceUpdate - Boolean controlling if the update should be forced or not
-     * @throws IllegalArgumentException if the provided argument is null
-     */
-    @Deprecated
-    public void setForceUpdate(Boolean forceUpdate) throws IllegalArgumentException
-    {
-        if (forceUpdate == null)
-        {
-            throw new IllegalArgumentException("forceUpdate cannot be null");
-        }
-    }
-
-    /**
      * Converts this into a ConfigurationParser object. To serialize a Configuration object, it must first be converted
      * to a ConfigurationParser object.
      *

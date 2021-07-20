@@ -39,8 +39,8 @@ public class TemperatureController {
     }
 
     private static void InitializeServiceClient() throws IOException {
-        twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
-        methodClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+        twinClient = new DeviceTwin(iotHubConnectionString);
+        methodClient = new DeviceMethod(iotHubConnectionString);
     }
 
     private static void GetAndUpdateTwin() throws IOException, IotHubException {

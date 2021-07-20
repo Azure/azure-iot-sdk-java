@@ -447,7 +447,7 @@ public class DeviceTwinDeviceTest
         new NonStrictExpectations()
         {
             {
-                mockedTwinCollection.getVersionFinal();
+                mockedTwinCollection.getVersion();
                 result = 5;
             }
         };
@@ -510,7 +510,7 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
 
         TwinCollection repMap = new TwinCollection();
-        repMap.putFinal("testRep", "repObject");
+        repMap.put("testRep", "repObject");
         Deencapsulation.setField(testDevice, "reportedProperties", repMap);
 
         //act
@@ -568,7 +568,7 @@ public class DeviceTwinDeviceTest
         new NonStrictExpectations()
         {
             {
-                mockedTwinCollection.getVersionFinal();
+                mockedTwinCollection.getVersion();
                 result = null;
             }
         };
@@ -593,7 +593,7 @@ public class DeviceTwinDeviceTest
         new NonStrictExpectations()
         {
             {
-                mockedTwinCollection.getVersionFinal();
+                mockedTwinCollection.getVersion();
                 result = 5;
             }
         };
@@ -729,7 +729,7 @@ public class DeviceTwinDeviceTest
         new NonStrictExpectations()
         {
             {
-                mockedTwinCollection.getVersionFinal();
+                mockedTwinCollection.getVersion();
                 result = 5;
             }
         };
@@ -747,7 +747,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testRepProp = new TwinCollection();
-        testRepProp.putFinal("testRep", "repObject");
+        testRepProp.put("testRep", "repObject");
 
         //act
         Deencapsulation.invoke(testDevice, "setReportedProperties", testRepProp);
@@ -808,7 +808,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testTags = new TwinCollection();
-        testTags.putFinal("testTag", "tagObject");
+        testTags.put("testTag", "tagObject");
         Deencapsulation.invoke(testDevice, "setTags", testTags);
 
         //act
@@ -833,7 +833,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testTags = new TwinCollection();
-        testTags.putFinal("testTag", "tagObject");
+        testTags.put("testTag", "tagObject");
 
         //act
         Deencapsulation.invoke(testDevice, "setTags", testTags);
@@ -855,7 +855,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testTags = new TwinCollection();
-        testTags.putFinal("testTag", "tagObject");
+        testTags.put("testTag", "tagObject");
         Deencapsulation.invoke(testDevice, "setTags", testTags);
 
         //act
@@ -877,7 +877,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testRep = new TwinCollection();
-        testRep.putFinal("testRep", "repObject");
+        testRep.put("testRep", "repObject");
         Deencapsulation.invoke(testDevice, "setReportedProperties", testRep);
 
         //act
@@ -902,7 +902,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testRep = new TwinCollection();
-        testRep.putFinal("testRep", "repObject");
+        testRep.put("testRep", "repObject");
 
         //act
         Deencapsulation.invoke(testDevice, "setReportedProperties", testRep);
@@ -991,7 +991,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testRep = new TwinCollection();
-        testRep.putFinal("testRep", "repObject");
+        testRep.put("testRep", "repObject");
         Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
 
         //act
@@ -1016,7 +1016,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testRep = new TwinCollection();
-        testRep.putFinal("testRep", "repObject");
+        testRep.put("testRep", "repObject");
 
         //act
         Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
@@ -1039,7 +1039,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testRep = new TwinCollection();
-        testRep.putFinal("testRep", "repObject");
+        testRep.put("testRep", "repObject");
         Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
 
         //act
@@ -1059,7 +1059,7 @@ public class DeviceTwinDeviceTest
         //arrange
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
         TwinCollection testRep = new TwinCollection();
-        testRep.putFinal("testKey", "testObject");
+        testRep.put("testKey", "testObject");
         Deencapsulation.invoke(testDevice, "setDesiredProperties", testRep);
         Deencapsulation.invoke(testDevice, "setTags", testRep);
 
@@ -1243,8 +1243,8 @@ public class DeviceTwinDeviceTest
         DeviceTwinDevice testDevice = new DeviceTwinDevice("testDevice");
 
         TwinCollection testRepProp = new TwinCollection();
-        testRepProp.putFinal("testRep1", "repObject1");
-        testRepProp.putFinal("testRep2", "repObject2");
+        testRepProp.put("testRep1", "repObject1");
+        testRepProp.put("testRep2", "repObject2");
 
         Deencapsulation.invoke(testDevice, "setReportedProperties", testRepProp);
 

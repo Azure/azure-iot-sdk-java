@@ -32,38 +32,6 @@ public class FeedbackReceiver extends Receiver
     /**
      * Constructor to verify initialization parameters
      * Create instance of AmqpReceive
-     * @deprecated As of release 1.1.15, replaced by {@link #FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol)}
-     * @param hostName The iot hub host name
-     * @param userName The iot hub user name
-     * @param sasToken The iot hub SAS token for the given device
-     * @param iotHubServiceClientProtocol The iot hub protocol name
-     * @param deviceId The device id (not used)
-     */
-    public @Deprecated FeedbackReceiver(String hostName, String userName, String sasToken, IotHubServiceClientProtocol iotHubServiceClientProtocol, String deviceId)
-    {
-        if (Tools.isNullOrEmpty(hostName))
-        {
-            throw new IllegalArgumentException("hostName cannot be null or empty");
-        }
-        if (Tools.isNullOrEmpty(userName))
-        {
-            throw new IllegalArgumentException("userName cannot be null or empty");
-        }
-        if (Tools.isNullOrEmpty(sasToken))
-        {
-            throw new IllegalArgumentException("sasToken cannot be null or empty");
-        }
-        if (Tools.isNullOrEmpty(deviceId))
-        {
-            throw new IllegalArgumentException("deviceId cannot be null or empty");
-        }
-        
-        this.amqpReceive = new AmqpReceive(hostName, userName, sasToken, iotHubServiceClientProtocol);
-    }
-
-    /**
-     * Constructor to verify initialization parameters
-     * Create instance of AmqpReceive
      *
      * @param hostName The iot hub host name
      * @param userName The iot hub user name

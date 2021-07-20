@@ -46,41 +46,6 @@ public class DeviceTwin
     private IotHubConnectionString iotHubConnectionString;
 
     /**
-     * Static constructor to create instance from connection string.
-     *
-     * @param connectionString The iot hub connection string.
-     * @return The instance of DeviceTwin.
-     * @throws IOException This exception is never thrown.
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #DeviceTwin(String, DeviceTwinClientOptions)} instead
-     * since it does not declare this exception even though it constructs the same DeviceTwin.
-     */
-    @Deprecated
-    public static DeviceTwin createFromConnectionString(String connectionString) throws IOException
-    {
-        return createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().build());
-    }
-
-    /**
-     * Static constructor to create instance from connection string.
-     *
-     * @param connectionString The IoT hub connection string.
-     * @param options The configurable options for each operation on this client. May not be {@code null}.
-     * @return The instance of DeviceTwin.
-     * @throws IOException This exception is never thrown.
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #DeviceTwin(String, DeviceTwinClientOptions)} instead
-     * since it does not declare this exception even though it constructs the same DeviceTwin.
-     */
-    @Deprecated
-    public static DeviceTwin createFromConnectionString(
-            String connectionString,
-            DeviceTwinClientOptions options) throws IOException
-    {
-        return new DeviceTwin(connectionString, options);
-    }
-
-    /**
      * Constructor to create instance from connection string.
      *
      * @param connectionString The iot hub connection string.
@@ -279,20 +244,6 @@ public class DeviceTwin
                 options.getHttpConnectTimeout(),
                 options.getHttpReadTimeout(),
                 proxy);
-    }
-
-    /**
-     * This method updates desired properties for the specified device.
-     *
-     * @param device The device with a valid id for which desired properties is to be updated.
-     * @throws UnsupportedOperationException This exception is always thrown.
-     * @deprecated Use {@link #updateTwin(DeviceTwinDevice device)} to update desired properties.
-     */
-    @Deprecated
-    public void updateDesiredProperties(DeviceTwinDevice device) throws UnsupportedOperationException
-    {
-        // Currently this is not supported by service - Please use Update twin to update desired properties
-        throw new UnsupportedOperationException();
     }
 
     /**

@@ -45,7 +45,7 @@ public class BaseDeviceTest
         device.setSymmetricKey(expectedSymmetricKey);
         assertEquals(expectedSymmetricKey, device.getSymmetricKey());
 
-        device.setThumbprintFinal(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
+        device.setThumbprint(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
         assertEquals(expectedPrimaryThumbprint, device.getPrimaryThumbprint());
         assertEquals(expectedSecondaryThumbprint, device.getSecondaryThumbprint());
 

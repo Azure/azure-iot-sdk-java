@@ -93,7 +93,7 @@ public class ServiceClientSample
     protected static void openServiceClient() throws Exception
     {
         System.out.println("Creating ServiceClient...");
-        serviceClient = ServiceClient.createFromConnectionString(connectionString, protocol);
+        serviceClient = new ServiceClient(connectionString, protocol);
 
         CompletableFuture<Void> future = serviceClient.openAsync();
         future.get();
@@ -166,7 +166,7 @@ public class ServiceClientSample
         for (int i = 0; i < MAX_COMMANDS_TO_SEND; i++)
         {
             Message messageToSend = new Message(commandMessage + i);
-            messageToSend.setDeliveryAcknowledgementFinal(DeliveryAcknowledgement.Full);
+            messageToSend.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
 
             // Setting standard properties
             messageToSend.setMessageId(java.util.UUID.randomUUID().toString());

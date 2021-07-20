@@ -18,7 +18,7 @@ public class JobProperties
 {
     public JobProperties()
     {
-        this.setJobIdFinal("");
+        this.setJobId("");
     }
 
     /**
@@ -46,23 +46,7 @@ public class JobProperties
      * @param jobId the job id
      * @throws IllegalArgumentException if the provided jobId is null
      */
-    @Deprecated
-    public void setJobId(String jobId) throws IllegalArgumentException
-    {
-        //Codes_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_004: [If the provided jobId is null, an IllegalArgumentException shall be thrown.]
-        if (jobId == null)
-        {
-            throw new IllegalArgumentException("jobId cannot be null");
-        }
-
-        this.jobId = jobId;
-    }
-
-    /**
-     * @param jobId the job id
-     * @throws IllegalArgumentException if the provided jobId is null
-     */
-    public final void setJobIdFinal(String jobId) throws IllegalArgumentException
+    public final void setJobId(String jobId) throws IllegalArgumentException
     {
         //Codes_SRS_SERVICE_SDK_JAVA_JOB_PROPERTIES_34_004: [If the provided jobId is null, an IllegalArgumentException shall be thrown.]
         if (jobId == null)
@@ -267,7 +251,7 @@ public class JobProperties
         this.failureReason = parser.getFailureReason();
         this.outputBlobContainerUri = parser.getOutputBlobContainerUri();
         this.storageAuthenticationType = parser.getStorageAuthenticationType();
-        this.jobId = parser.getJobIdFinal();
+        this.jobId = parser.getJobId();
         this.progress = parser.getProgress();
         this.startTimeUtc = parser.getStartTimeUtc();
         this.identity = parser.getIdentity();
