@@ -35,7 +35,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ExportDevices() throws IOException, IotHubException, InterruptedException {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(sourceHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(sourceHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not
@@ -71,7 +71,7 @@ public class DeviceManagerImportExportWithIdentitySample {
     }
 
     public static void ImportDevices() throws IOException, IotHubException, InterruptedException {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(destinationHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(destinationHubConnectionString);
 
         // If StorageAuthenticationType is set to IdentityBased and userAssignedIdentity property is
         // not null, the jobs will use user defined managed identity. If the IoT hub is not

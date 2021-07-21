@@ -354,18 +354,6 @@ public class JobResult
 
     /**
      * Outcome for the device method job
-     * @deprecated As of release 1.7.23, replaced by {@link #getOutcomeResult()}
-     * @return outcome for device method job
-     */
-    @Deprecated
-    public String getOutcome()
-    {
-        //Codes_SRS_JOBRESULT_25_021: [The getOutcomeResult shall return the stored outcome.]
-        return outcome;
-    }
-
-    /**
-     * Outcome for the device method job
      * @return outcome for device method job
      */
     public MethodResult getOutcomeResult()

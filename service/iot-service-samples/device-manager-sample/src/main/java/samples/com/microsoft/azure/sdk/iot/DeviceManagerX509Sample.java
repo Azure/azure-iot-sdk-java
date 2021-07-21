@@ -54,7 +54,7 @@ public class DeviceManagerX509Sample
 
     private static void AddDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         Device device;
 
@@ -88,7 +88,7 @@ public class DeviceManagerX509Sample
 
     private static void GetDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         Device returnDevice;
         try
@@ -114,7 +114,7 @@ public class DeviceManagerX509Sample
 
     private static void UpdateDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         Device device;
         if (isSelfSigned)
@@ -150,7 +150,7 @@ public class DeviceManagerX509Sample
 
     private static void RemoveDevice() throws Exception
     {
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
         try
         {

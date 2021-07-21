@@ -106,7 +106,7 @@ public class JobClientTest
         final String connectionString = "testString";
 
         //act
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //assert
         assertNotNull(testJobClient);
@@ -128,7 +128,7 @@ public class JobClientTest
         final String connectionString = null;
 
         //act
-        JobClient.createFromConnectionString(connectionString);
+        new JobClient(connectionString);
     }
 
     /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
@@ -139,7 +139,7 @@ public class JobClientTest
         final String connectionString = "";
 
         //act
-        JobClient.createFromConnectionString(connectionString);
+        new JobClient(connectionString);
     }
 
     /* Tests_SRS_JOBCLIENT_21_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty.] */
@@ -158,7 +158,7 @@ public class JobClientTest
         };
 
         //act
-        JobClient.createFromConnectionString(connectionString);
+        new JobClient(connectionString);
     }
 
     /* Tests_SRS_JOBCLIENT_21_004: [The scheduleUpdateTwin shall create a json String that represent the twin job using the JobsParser class.] */
@@ -220,7 +220,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -284,7 +284,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -352,7 +352,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -372,7 +372,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -397,7 +397,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -461,7 +461,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -486,7 +486,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -511,7 +511,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -536,7 +536,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -605,7 +605,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -678,7 +678,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -749,7 +749,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -813,7 +813,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleUpdateTwin(jobId, queryCondition, updateTwin, startTimeUtc, maxExecutionTimeInSeconds);
@@ -837,7 +837,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -863,7 +863,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -911,7 +911,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -938,7 +938,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -964,7 +964,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -998,7 +998,7 @@ public class JobClientTest
 
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1024,7 +1024,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1050,7 +1050,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1102,7 +1102,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1148,7 +1148,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1203,7 +1203,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1256,7 +1256,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1302,7 +1302,7 @@ public class JobClientTest
             }
         };
 
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         JobResult jobResult = testJobClient.scheduleDeviceMethod(jobId, queryCondition, methodName, null, null, payload, startTimeUtc, maxExecutionTimeInSeconds);
@@ -1322,7 +1322,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1343,7 +1343,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1374,7 +1374,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1411,7 +1411,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1457,7 +1457,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1503,7 +1503,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1527,7 +1527,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1548,7 +1548,7 @@ public class JobClientTest
         JobClient testJobClient = null;
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1579,7 +1579,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1616,7 +1616,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1662,7 +1662,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1706,7 +1706,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1743,7 +1743,7 @@ public class JobClientTest
         };
         try
         {
-            testJobClient = JobClient.createFromConnectionString(connectionString);
+            testJobClient = new JobClient(connectionString);
         }
         catch (IllegalArgumentException e)
         {
@@ -1764,7 +1764,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new Expectations()
         {
@@ -1793,7 +1793,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob(null);
@@ -1804,7 +1804,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob("");
@@ -1816,7 +1816,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob(VALID_SQL_QUERY, -1);
@@ -1827,7 +1827,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryDeviceJob(VALID_SQL_QUERY, 0);
@@ -1838,7 +1838,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1863,7 +1863,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new Expectations()
         {
@@ -1891,7 +1891,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new Expectations()
         {
@@ -1920,7 +1920,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT, -1);
@@ -1931,7 +1931,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         //act
         testJobClient.queryJobResponse(JOB_TYPE_DEFAULT, JOB_STATUS_DEFAULT, 0);
@@ -1943,7 +1943,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1978,7 +1978,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1999,7 +1999,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2024,7 +2024,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         final String expectedString = "testJsonAsNext";
 
@@ -2065,7 +2065,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2086,7 +2086,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2109,7 +2109,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2135,7 +2135,7 @@ public class JobClientTest
     {
         //arrange
         final String connectionString = "testString";
-        JobClient testJobClient = JobClient.createFromConnectionString(connectionString);
+        JobClient testJobClient = new JobClient(connectionString);
 
         new NonStrictExpectations()
         {

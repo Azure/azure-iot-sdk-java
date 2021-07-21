@@ -41,46 +41,6 @@ public class ServiceClient
      * Create ServiceClient from the specified connection string
      * @param iotHubServiceClientProtocol  protocol to use
      * @param connectionString The connection string for the IotHub
-     * @return The created ServiceClient object
-     * @throws IOException This exception is thrown if the object creation failed
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #ServiceClient(String, IotHubServiceClientProtocol)} instead
-     * since it does not declare this exception even though it constructs the same ServiceClient.
-     */
-    @Deprecated
-    public static ServiceClient createFromConnectionString(
-            String connectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol)
-            throws IOException
-    {
-        return createFromConnectionString(connectionString, iotHubServiceClientProtocol, ServiceClientOptions.builder().build());
-    }
-
-    /**
-     * Create ServiceClient from the specified connection string
-     * @param iotHubServiceClientProtocol  protocol to use
-     * @param connectionString The connection string for the IotHub
-     * @param options The connection options to use when connecting to the service.
-     * @return The created ServiceClient object
-     * @throws IOException This exception is thrown if the object creation failed
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #ServiceClient(String, IotHubServiceClientProtocol, ServiceClientOptions)} instead
-     * since it does not declare this exception even though it constructs the same ServiceClient.
-     */
-    @Deprecated
-    public static ServiceClient createFromConnectionString(
-            String connectionString,
-            IotHubServiceClientProtocol iotHubServiceClientProtocol,
-            ServiceClientOptions options)
-            throws IOException
-    {
-        return new ServiceClient(connectionString, iotHubServiceClientProtocol, options);
-    }
-
-    /**
-     * Create ServiceClient from the specified connection string
-     * @param iotHubServiceClientProtocol  protocol to use
-     * @param connectionString The connection string for the IotHub
      */
     public ServiceClient(String connectionString, IotHubServiceClientProtocol iotHubServiceClientProtocol)
     {
@@ -422,22 +382,6 @@ public class ServiceClient
         return future;
     }
 
-    /**
-     * Get FeedbackReceiver object.This API has been deprecated. Use new API without deviceId as an input parameter.
-     * @deprecated As of release 1.1.15, replaced by {@link #getFeedbackReceiver()}
-     * @param deviceId The device identifier for the target device
-     * @return The instance of the FeedbackReceiver
-     */
-    @Deprecated public FeedbackReceiver getFeedbackReceiver(String deviceId)
-    {
-        if (options.getProxyOptions() != null)
-        {
-            throw new UnsupportedOperationException("This deprecated API does not support proxies. Use the non-deprecated version of this API for proxy enabled feedback receiving");
-        }
-
-        return new FeedbackReceiver(hostName, userName, sasToken, iotHubServiceClientProtocol, deviceId);
-    }
-    
     /**
      * Instantiate a new FeedbackReceiver object.
      *

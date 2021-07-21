@@ -152,7 +152,7 @@ public class DeviceTwinTest
 
         //act
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //assert
         assertNotNull(testTwin);
@@ -168,7 +168,7 @@ public class DeviceTwinTest
         final String connectionString = null;
 
         //act
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
     }
 
@@ -179,7 +179,7 @@ public class DeviceTwinTest
         final String connectionString = "";
 
         //act
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
     }
 
@@ -204,7 +204,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         TwinCollection testMap = new TwinCollection();
         String expectedConnectionState = TwinConnectionState.CONNECTED.toString();
         new NonStrictExpectations()
@@ -271,7 +271,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         TwinCollection testMap = new TwinCollection();
         new NonStrictExpectations()
         {
@@ -336,7 +336,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.getTwin(null);
@@ -350,7 +350,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -371,7 +371,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -393,7 +393,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -426,7 +426,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -459,7 +459,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -492,7 +492,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -513,7 +513,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.replaceDesiredProperties(mockedDevice);
@@ -525,7 +525,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.replaceTags(mockedDevice);
@@ -560,9 +560,9 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.putFinal("TestKey", "TestValue");
+        testMap.put("TestKey", "TestValue");
         new NonStrictExpectations()
         {
             {
@@ -605,7 +605,7 @@ public class DeviceTwinTest
     public void updateTwinThrowsIfDeviceIsNull(@Mocked DeviceTwinDevice mockedDevice) throws Exception
     { //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.updateTwin(null);
@@ -616,7 +616,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -634,7 +634,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         new NonStrictExpectations()
         {
             {
@@ -655,7 +655,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         TwinCollection testMap = new TwinCollection();
         new NonStrictExpectations()
         {
@@ -680,9 +680,9 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.putFinal("TestKey", "TestValue");
+        testMap.put("TestKey", "TestValue");
         new Expectations()
         {
             {
@@ -725,9 +725,9 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.putFinal("TestKey", "TestValue");
+        testMap.put("TestKey", "TestValue");
         new NonStrictExpectations()
         {
             {
@@ -769,9 +769,9 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
         TwinCollection testMap = new TwinCollection();
-        testMap.putFinal("TestKey", "TestValue");
+        testMap.put("TestKey", "TestValue");
         new NonStrictExpectations()
         {
             {
@@ -806,7 +806,7 @@ public class DeviceTwinTest
         final int connectTimeout = 1234;
         final int readTimeout = 5678;
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
+        DeviceTwin testTwin = new DeviceTwin(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
 
 
         new Expectations()
@@ -827,7 +827,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.queryTwin(null);
@@ -838,7 +838,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.queryTwin("");
@@ -850,7 +850,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.queryTwin(VALID_SQL_QUERY, -1);
@@ -861,7 +861,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.queryTwin(VALID_SQL_QUERY, 0);
@@ -877,7 +877,7 @@ public class DeviceTwinTest
         final int connectTimeout = 1234;
         final int readTimeout = 5678;
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
+        DeviceTwin testTwin = new DeviceTwin(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
 
         new NonStrictExpectations()
         {
@@ -902,7 +902,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -924,7 +924,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -953,15 +953,15 @@ public class DeviceTwinTest
         final int connectTimeout = 1234;
         final int readTimeout = 5678;
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
+        DeviceTwin testTwin = new DeviceTwin(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
         final String expectedString = "testJsonAsNext";
         final String modelId = "testModelId";
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tagsKey", "tagsValue");
+        tags.put("tagsKey", "tagsValue");
         TwinCollection rp = new TwinCollection();
-        rp.putFinal("rpKey", "rpValue");
+        rp.put("rpKey", "rpValue");
         TwinCollection dp = new TwinCollection();
-        dp.putFinal("dpKey", "dpValue");
+        dp.put("dpKey", "dpValue");
 
         new Expectations()
         {
@@ -1021,15 +1021,15 @@ public class DeviceTwinTest
         final int readTimeout = 5678;
         final String connectionString = "someConnectionString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
+        DeviceTwin testTwin = new DeviceTwin(connectionString, DeviceTwinClientOptions.builder().httpConnectTimeout(connectTimeout).httpReadTimeout(readTimeout).build());
         final String expectedString = "testJsonAsNext";
         final String moduleId = "testModuleId";
         TwinCollection tags = new TwinCollection();
-        tags.putFinal("tagsKey", "tagsValue");
+        tags.put("tagsKey", "tagsValue");
         TwinCollection rp = new TwinCollection();
-        rp.putFinal("rpKey", "rpValue");
+        rp.put("rpKey", "rpValue");
         TwinCollection dp = new TwinCollection();
-        dp.putFinal("dpKey", "dpValue");
+        dp.put("dpKey", "dpValue");
 
         new Expectations()
         {
@@ -1083,7 +1083,7 @@ public class DeviceTwinTest
     {
         //arrange
         final String connectionString = "testString";
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1105,7 +1105,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1130,7 +1130,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1155,7 +1155,7 @@ public class DeviceTwinTest
         //arrange
         final String connectionString = "testString";
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1195,7 +1195,7 @@ public class DeviceTwinTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.scheduleUpdateTwin(queryCondition, null, now, maxExecutionTimeInSeconds);
@@ -1209,7 +1209,7 @@ public class DeviceTwinTest
         final String connectionString = "testString";
         final String queryCondition = "validQueryCondition";
         final long maxExecutionTimeInSeconds = 100;
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, null, maxExecutionTimeInSeconds);
@@ -1224,7 +1224,7 @@ public class DeviceTwinTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = -100;
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         //act
         testTwin.scheduleUpdateTwin(queryCondition, mockedDevice, now, maxExecutionTimeInSeconds);
@@ -1241,7 +1241,7 @@ public class DeviceTwinTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1271,7 +1271,7 @@ public class DeviceTwinTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1297,7 +1297,7 @@ public class DeviceTwinTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations(connectionString);
-        DeviceTwin testTwin = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin testTwin = new DeviceTwin(connectionString);
 
         new NonStrictExpectations()
         {

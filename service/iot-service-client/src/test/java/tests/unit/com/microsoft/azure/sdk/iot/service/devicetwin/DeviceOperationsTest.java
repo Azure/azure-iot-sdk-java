@@ -62,26 +62,8 @@ public class DeviceOperationsTest
     @Before
     public void setUp() throws Exception
     {
-        IOT_HUB_CONNECTION_STRING = IotHubConnectionStringBuilder.createConnectionString(STANDARD_CONNECTIONSTRING);
+        IOT_HUB_CONNECTION_STRING = IotHubConnectionStringBuilder.createIotHubConnectionString(STANDARD_CONNECTIONSTRING);
         STANDARD_SASTOKEN_STRING = (new IotHubServiceSasToken(IOT_HUB_CONNECTION_STRING)).toString();
-    }
-
-    /* Tests_SRS_DEVICE_OPERATIONS_21_001: [The request shall throw IllegalArgumentException if the provided `iotHubConnectionString` is null.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void requestNullConnectionStringFailed() throws Exception
-    {
-        //arrange
-
-        //act
-        HttpResponse response = DeviceOperations.request(
-                null,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
-
-        //assert
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_002: [The request shall throw IllegalArgumentException if the provided `url` is null.] */
@@ -89,16 +71,18 @@ public class DeviceOperationsTest
     public void requestNullUrlFailed() throws Exception
     {
         //arrange
-        final IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createConnectionString(STANDARD_CONNECTIONSTRING);
+        final IotHubConnectionString iotHubConnectionString = IotHubConnectionStringBuilder.createIotHubConnectionString(STANDARD_CONNECTIONSTRING);
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                null,
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            null,
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
 
         //assert
     }
@@ -111,12 +95,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                null,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            null,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
 
         //assert
     }
@@ -129,12 +115,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                null,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            null,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
 
         //assert
     }
@@ -148,12 +136,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                null,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            null,
+            0,
+            0,
+            null);
 
         //assert
         new Verifications()
@@ -173,12 +163,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                Integer.MAX_VALUE);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            Integer.MAX_VALUE,
+            0,
+            null);
 
         //assert
     }
@@ -192,12 +184,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                "",
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            "",
+            0,
+            0,
+            null);
 
         //assert
         new Verifications()
@@ -225,12 +219,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_008: [The request shall create a new HttpRequest with the provided `url`, http `method`, and `payload`.] */
@@ -255,12 +251,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                DEFAULT_HTTP_TIMEOUT_MS);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            DEFAULT_HTTP_TIMEOUT_MS,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_009: [The request shall add to the HTTP header the sum of timeout and default timeout in milliseconds.] */
@@ -283,12 +281,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_010: [The request shall add to the HTTP header an `authorization` key with the SASToken.] */
@@ -313,12 +313,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_012: [The request shall add to the HTTP header a `User-Agent` key with the client Id and service version.] */
@@ -347,12 +349,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_013: [The request shall add to the HTTP header a `Accept` key with `application/json`.] */
@@ -383,12 +387,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_014: [The request shall add to the HTTP header a `Content-Type` key with `application/json; charset=utf-8`.] */
@@ -421,12 +427,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_015: [The request shall send the created request and get the response.] */
@@ -461,12 +469,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_016: [If the resulted HttpResponseStatus represents fail, the request shall throw proper Exception by calling httpResponseVerification.] */
@@ -509,12 +519,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
     }
 
     /* Tests_SRS_DEVICE_OPERATIONS_21_017: [If the resulted status represents success, the request shall return the http response.] */
@@ -556,12 +568,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
 
         //assert
         assertEquals(response, sendResponse);
@@ -627,12 +641,14 @@ public class DeviceOperationsTest
 
         //act
         HttpResponse response = DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                timeoutInMs);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            timeoutInMs,
+            0,
+            null);
 
         //assert
         assertEquals(response, sendResponse);
@@ -665,12 +681,14 @@ public class DeviceOperationsTest
         //act
         DeviceOperations.setHeaders(headers);
         DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
 
         assertNull(Deencapsulation.getField(DeviceOperations.class, "headers"));
 
@@ -695,20 +713,25 @@ public class DeviceOperationsTest
         //act
         DeviceOperations.setHeaders(headers);
         DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
 
         DeviceOperations.request(
-                IOT_HUB_CONNECTION_STRING,
-                new URL(STANDARD_URL),
-                HttpMethod.POST,
-                STANDARD_PAYLOAD,
-                STANDARD_REQUEST_ID,
-                0);
+            IOT_HUB_CONNECTION_STRING,
+            new URL(STANDARD_URL),
+            HttpMethod.POST,
+            STANDARD_PAYLOAD,
+            STANDARD_REQUEST_ID,
+            0,
+            0,
+            null);
+
         //assert
         new Verifications()
         {

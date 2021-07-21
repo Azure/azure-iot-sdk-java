@@ -50,7 +50,7 @@ public class ExportImportDeviceTest
         device.setStatusReason(expectedStatusReason);
 
         // assert
-        assertEquals(expectedAuthentication, device.getAuthenticationFinal());
+        assertEquals(expectedAuthentication, device.getAuthentication());
         assertEquals(expectedETag, device.geteTag());
         assertEquals(expectedId, device.getId());
         assertEquals(expectedImportMode, device.getImportMode());
@@ -66,9 +66,9 @@ public class ExportImportDeviceTest
         ExportImportDevice device = new ExportImportDevice();
 
         //assert
-        assertNotNull(device.getAuthenticationFinal());
-        assertNotNull(device.getAuthenticationFinal().getSymmetricKey());
-        assertEquals(AuthenticationType.SAS, device.getAuthenticationFinal().getAuthenticationType());
+        assertNotNull(device.getAuthentication());
+        assertNotNull(device.getAuthentication().getSymmetricKey());
+        assertEquals(AuthenticationType.SAS, device.getAuthentication().getAuthenticationType());
     }
 
     @Test
@@ -114,9 +114,9 @@ public class ExportImportDeviceTest
         ExportImportDeviceParser parserSAS = reflectivelyInvokeToExportImportDeviceParser(deviceSAS);
 
         // assert
-        assertEquals(AuthenticationTypeParser.CERTIFICATE_AUTHORITY, parserCA.getAuthenticationFinal().getType());
-        assertEquals(AuthenticationTypeParser.SELF_SIGNED, parserSelf.getAuthenticationFinal().getType());
-        assertEquals(AuthenticationTypeParser.SAS, parserSAS.getAuthenticationFinal().getType());
+        assertEquals(AuthenticationTypeParser.CERTIFICATE_AUTHORITY, parserCA.getAuthentication().getType());
+        assertEquals(AuthenticationTypeParser.SELF_SIGNED, parserSelf.getAuthentication().getType());
+        assertEquals(AuthenticationTypeParser.SAS, parserSAS.getAuthentication().getType());
 
         assertEquals(ImportMode.CreateOrUpdate.toString(), parserCA.getImportMode());
         assertEquals(DeviceStatus.Enabled.toString(), parserCA.getStatus());
@@ -129,21 +129,21 @@ public class ExportImportDeviceTest
         // arrange
         ExportImportDeviceParser parserCA = new ExportImportDeviceParser();
         parserCA.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserCA.getAuthenticationFinal().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
+        parserCA.getAuthentication().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
         parserCA.setStatus("Enabled");
         parserCA.setImportMode("Create");
         parserCA.setId("deviceCA");
 
         ExportImportDeviceParser parserSelf = new ExportImportDeviceParser();
         parserSelf.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserSelf.getAuthenticationFinal().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parserSelf.getAuthenticationFinal().setThumbprint(new X509ThumbprintParser(SAMPLE_THUMBPRINT, SAMPLE_THUMBPRINT));
+        parserSelf.getAuthentication().setType(AuthenticationTypeParser.SELF_SIGNED);
+        parserSelf.getAuthentication().setThumbprint(new X509ThumbprintParser(SAMPLE_THUMBPRINT, SAMPLE_THUMBPRINT));
         parserSelf.setId("deviceSelf");
 
         ExportImportDeviceParser parserSAS = new ExportImportDeviceParser();
         parserSAS.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parserSAS.getAuthenticationFinal().setType(AuthenticationTypeParser.SAS);
-        parserSAS.getAuthenticationFinal().setSymmetricKey(new SymmetricKeyParser(SAMPLE_THUMBPRINT,SAMPLE_THUMBPRINT));
+        parserSAS.getAuthentication().setType(AuthenticationTypeParser.SAS);
+        parserSAS.getAuthentication().setSymmetricKey(new SymmetricKeyParser(SAMPLE_THUMBPRINT,SAMPLE_THUMBPRINT));
         parserSAS.setId("deviceSAS");
 
         // act
@@ -152,9 +152,9 @@ public class ExportImportDeviceTest
         ExportImportDevice deviceSAS = reflectivelyInvokeExportImportDeviceParserConstructor(parserSAS);
 
         // assert
-        assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, deviceCA.getAuthenticationFinal().getAuthenticationType());
-        assertEquals(AuthenticationType.SELF_SIGNED, deviceSelf.getAuthenticationFinal().getAuthenticationType());
-        assertEquals(AuthenticationType.SAS, deviceSAS.getAuthenticationFinal().getAuthenticationType());
+        assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, deviceCA.getAuthentication().getAuthenticationType());
+        assertEquals(AuthenticationType.SELF_SIGNED, deviceSelf.getAuthentication().getAuthenticationType());
+        assertEquals(AuthenticationType.SAS, deviceSAS.getAuthentication().getAuthenticationType());
 
         assertEquals(ImportMode.Create, deviceCA.getImportMode());
         assertEquals(DeviceStatus.Enabled, deviceCA.getStatus());
@@ -171,7 +171,7 @@ public class ExportImportDeviceTest
         ExportImportDevice device = new ExportImportDevice(deviceId, AuthenticationType.CERTIFICATE_AUTHORITY);
 
         //assert
-        assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, device.getAuthenticationFinal().getAuthenticationType());
+        assertEquals(AuthenticationType.CERTIFICATE_AUTHORITY, device.getAuthentication().getAuthenticationType());
         assertEquals(deviceId, device.getId());
     }
 
@@ -182,7 +182,7 @@ public class ExportImportDeviceTest
         // arrange
         ExportImportDeviceParser parser = new ExportImportDeviceParser();
         parser.setAuthentication(Deencapsulation.newInstance(AuthenticationParser.class));
-        parser.getAuthenticationFinal().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
+        parser.getAuthentication().setType(AuthenticationTypeParser.CERTIFICATE_AUTHORITY);
         Deencapsulation.setField(parser, "Id", null);
 
         // act
@@ -250,19 +250,19 @@ public class ExportImportDeviceTest
         ExportImportDeviceParser parser = new ExportImportDeviceParser();
         parser.setId("someDevice");
         parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthenticationFinal().setType(AuthenticationTypeParser.SAS);
-        parser.getAuthenticationFinal().setSymmetricKey(new SymmetricKeyParser());
-        parser.getAuthenticationFinal().getSymmetricKey().setPrimaryKey(SAMPLE_KEY);
+        parser.getAuthentication().setType(AuthenticationTypeParser.SAS);
+        parser.getAuthentication().setSymmetricKey(new SymmetricKeyParser());
+        parser.getAuthentication().getSymmetricKey().setPrimaryKey(SAMPLE_KEY);
 
         //act
         ExportImportDevice device = reflectivelyInvokeExportImportDeviceParserConstructor(parser);
 
         //assert
-        assertNotNull(device.getAuthenticationFinal());
-        assertNotNull(device.getAuthenticationFinal().getSymmetricKey());
-        assertNotNull(device.getAuthenticationFinal().getSymmetricKey().getPrimaryKey());
-        assertNotNull(device.getAuthenticationFinal().getSymmetricKey().getSecondaryKey());
-        assertNotEquals(SAMPLE_KEY, device.getAuthenticationFinal().getSymmetricKey().getPrimaryKey());
+        assertNotNull(device.getAuthentication());
+        assertNotNull(device.getAuthentication().getSymmetricKey());
+        assertNotNull(device.getAuthentication().getSymmetricKey().getPrimaryKey());
+        assertNotNull(device.getAuthentication().getSymmetricKey().getSecondaryKey());
+        assertNotEquals(SAMPLE_KEY, device.getAuthentication().getSymmetricKey().getPrimaryKey());
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_059: [If the provided parser uses self signed authentication and is missing one or both thumbprints, two new thumbprints will be generated.]
@@ -273,18 +273,18 @@ public class ExportImportDeviceTest
         ExportImportDeviceParser parser = new ExportImportDeviceParser();
         parser.setId("someDevice");
         parser.setAuthentication(new AuthenticationParser());
-        parser.getAuthenticationFinal().setType(AuthenticationTypeParser.SELF_SIGNED);
-        parser.getAuthenticationFinal().setThumbprint(new X509ThumbprintParser());
-        parser.getAuthenticationFinal().getThumbprint().setPrimaryThumbprint(SAMPLE_THUMBPRINT);
+        parser.getAuthentication().setType(AuthenticationTypeParser.SELF_SIGNED);
+        parser.getAuthentication().setThumbprint(new X509ThumbprintParser());
+        parser.getAuthentication().getThumbprint().setPrimaryThumbprint(SAMPLE_THUMBPRINT);
 
         //act
         ExportImportDevice device = reflectivelyInvokeExportImportDeviceParserConstructor(parser);
 
         //assert
-        assertNotNull(device.getAuthenticationFinal());
-        assertNotNull(device.getAuthenticationFinal().getPrimaryThumbprint());
-        assertNotNull(device.getAuthenticationFinal().getSecondaryThumbprint());
-        assertNotEquals(SAMPLE_THUMBPRINT, device.getAuthenticationFinal().getPrimaryThumbprint());
+        assertNotNull(device.getAuthentication());
+        assertNotNull(device.getAuthentication().getPrimaryThumbprint());
+        assertNotNull(device.getAuthentication().getSecondaryThumbprint());
+        assertNotEquals(SAMPLE_THUMBPRINT, device.getAuthentication().getPrimaryThumbprint());
     }
 
     //Tests_SRS_SERVICE_SDK_JAVA_IMPORT_EXPORT_DEVICE_34_060: [If this device uses sas authentication, but does not have a primary and secondary symmetric key saved, an IllegalStateException shall be thrown.]

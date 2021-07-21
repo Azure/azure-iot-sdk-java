@@ -30,7 +30,7 @@ public class DeviceManagerExportSample
         container.createIfNotExists();
         String containerSasUri = SampleUtils.getContainerSasUri(container);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
         JobProperties exportJob = registryManager.exportDevices(containerSasUri, excludeKeys);
 
         while(true)

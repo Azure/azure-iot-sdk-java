@@ -198,7 +198,7 @@ public class DeviceMethodTest
 
         //act
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //assert
         assertNotNull(testMethod);
@@ -212,7 +212,7 @@ public class DeviceMethodTest
         final String connectionString = null;
 
         //act
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(connectionString);
+        DeviceMethod testMethod = new DeviceMethod(connectionString);
 
     }
 
@@ -224,7 +224,7 @@ public class DeviceMethodTest
         final String connectionString = "";
 
         //act
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(connectionString);
+        DeviceMethod testMethod = new DeviceMethod(connectionString);
 
     }
 
@@ -236,7 +236,7 @@ public class DeviceMethodTest
     {
         //arrange
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //act
         for (TestMethod testCase: illegalParameter)
@@ -267,7 +267,7 @@ public class DeviceMethodTest
     {
         //arrange
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //act
         for (TestMethod testCase: illegalParameterModule)
@@ -297,7 +297,7 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -328,7 +328,7 @@ public class DeviceMethodTest
             }
         };
 
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.invoke(STANDARD_DEVICEID, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP);
@@ -342,7 +342,7 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -363,7 +363,7 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -384,7 +384,7 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -408,7 +408,7 @@ public class DeviceMethodTest
             throws Exception
     {
         //arrange
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -464,7 +464,7 @@ public class DeviceMethodTest
     {
         //arrange
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
         new NonStrictExpectations()
         {
             {
@@ -509,7 +509,7 @@ public class DeviceMethodTest
         final String methodName = null;
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, methodName, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -524,7 +524,7 @@ public class DeviceMethodTest
         final String methodName = "";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, methodName, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -538,7 +538,7 @@ public class DeviceMethodTest
         final String queryCondition = "validQueryCondition";
         final Date now = null;
         final long maxExecutionTimeInSeconds = 100;
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -552,7 +552,7 @@ public class DeviceMethodTest
         final String queryCondition = "validQueryCondition";
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = -100;
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         //act
         testMethod.scheduleDeviceMethod(queryCondition, STANDARD_METHODNAME, STANDARD_TIMEOUT_SECONDS, STANDARD_TIMEOUT_SECONDS, STANDARD_PAYLOAD_MAP, now, maxExecutionTimeInSeconds);
@@ -568,7 +568,7 @@ public class DeviceMethodTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -597,7 +597,7 @@ public class DeviceMethodTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -623,7 +623,7 @@ public class DeviceMethodTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
@@ -657,7 +657,7 @@ public class DeviceMethodTest
         final Date now = new Date();
         final long maxExecutionTimeInSeconds = 100;
         constructorExpectations();
-        DeviceMethod testMethod = DeviceMethod.createFromConnectionString(STANDARD_CONNECTIONSTRING);
+        DeviceMethod testMethod = new DeviceMethod(STANDARD_CONNECTIONSTRING);
 
         new NonStrictExpectations()
         {
