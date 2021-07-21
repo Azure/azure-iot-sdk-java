@@ -167,7 +167,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Create a new individualEnrollment configurations.
      *     Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
@@ -201,7 +201,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the content of the previous individualEnrollment.
      *     IndividualEnrollment individualEnrollment =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
@@ -267,7 +267,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Create two new individualEnrollment configurations.
      *     Attestation attestation = new TpmAttestation(TPM_ENDORSEMENT_KEY);
@@ -342,7 +342,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the individualEnrollment information.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
@@ -404,7 +404,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the individualEnrollment information.
      *     IndividualEnrollment enrollmentResult =  deviceProvisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
@@ -454,7 +454,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the individualEnrollment information.
      *     deviceProvisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID);
@@ -503,7 +503,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the individualEnrollment information.
      *     deviceProvisioningServiceClient.deleteIndividualEnrollment(REGISTRATION_ID, ANY_ETAG);
@@ -612,7 +612,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Create a new enrollmentGroup configurations.
      *     Attestation attestation = X509Attestation.createFromSigningCertificates(PUBLIC_KEY_CERTIFICATE_STRING);
@@ -668,7 +668,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the individualEnrollment information.
      *     EnrollmentGroup enrollmentGroupResult =  deviceProvisioningServiceClient.getEnrollmentGroup(ENROLLMENT_GROUP_ID);
@@ -729,7 +729,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the enrollmentGroup information.
      *     EnrollmentGroup enrollmentGroupResult =  deviceProvisioningServiceClient.getEnrollmentGroup(ENROLLMENT_GROUP_ID);
@@ -778,7 +778,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the enrollmentGroup information.
      *     deviceProvisioningServiceClient.deleteEnrollmentGroup(ENROLLMENT_GROUP_ID);
@@ -826,7 +826,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the enrollmentGroup information.
      *     deviceProvisioningServiceClient.deleteEnrollmentGroup(ENROLLMENT_GROUP_ID, ANY_ETAG);
@@ -915,7 +915,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the deviceRegistrationState information.
      *     DeviceRegistrationState registrationStateResult =  deviceProvisioningServiceClient.getDeviceRegistrationState(REGISTRATION_ID);
@@ -962,7 +962,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Get the registration status information.
      *     DeviceRegistrationState registrationStateResult =  deviceProvisioningServiceClient.getDeviceRegistrationState(REGISTRATION_ID);
@@ -1009,7 +1009,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the registration status information.
      *     deviceProvisioningServiceClient.deleteDeviceRegistrationState(REGISTRATION_ID);
@@ -1055,7 +1055,7 @@ public final class ProvisioningServiceClient
      * {
      *     // Create a Device Provisioning Service Client.
      *     DeviceProvisioningServiceClient deviceProvisioningServiceClient =
-     *         Devicenew ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
+     *         new ProvisioningServiceClient(PROVISIONING_CONNECTION_STRING);
      *
      *     // Delete the deviceRegistrationState information.
      *     deviceProvisioningServiceClient.deleteDeviceRegistrationState(REGISTRATION_ID, ANY_ETAG);
