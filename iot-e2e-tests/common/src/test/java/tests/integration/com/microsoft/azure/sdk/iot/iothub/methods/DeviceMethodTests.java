@@ -330,7 +330,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
             ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
             DeviceMethodClientOptions options = DeviceMethodClientOptions.builder().proxyOptions(proxyOptions).httpReadTimeout(HTTP_READ_TIMEOUT).build();
 
-            this.testInstance.methodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString, options);
+            this.testInstance.methodServiceClient = new DeviceMethod(iotHubConnectionString, options);
 
             super.openDeviceClientAndSubscribeToMethods();
             super.invokeMethodSucceed();

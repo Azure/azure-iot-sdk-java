@@ -196,14 +196,14 @@ public class ProvisioningCommon extends IntegrationTest
             this.groupId = "";// by default, assume enrollment has no group id
             this.registrationId = "java-provisioning-test-" + this.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
             this.provisioningServiceClient =
-                    ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
+                    new ProvisioningServiceClient(provisioningServiceConnectionString);
         }
     }
 
     @Before
     public void setUp() throws Exception
     {
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
     }
@@ -416,7 +416,7 @@ public class ProvisioningCommon extends IntegrationTest
     }
 
     protected void assertProvisionedDeviceCapabilitiesAreExpected(DeviceCapabilities expectedDeviceCapabilities, String provisionedHubConnectionString) throws IOException, IotHubException, InterruptedException {
-        DeviceTwin deviceTwin = DeviceTwin.createFromConnectionString(provisionedHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        DeviceTwin deviceTwin = new DeviceTwin(provisionedHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
 
         boolean deviceFoundInCorrectHub = false;
         Query query = null;
@@ -501,7 +501,7 @@ public class ProvisioningCommon extends IntegrationTest
                 testInstance.groupId = "java-provisioning-test-group-id-" + testInstance.attestationType.toString().toLowerCase().replace("_", "-") + "-" + UUID.randomUUID().toString();
 
                 testInstance.enrollmentGroup = new EnrollmentGroup(testInstance.groupId, new SymmetricKeyAttestation(null, null));
-                testInstance.enrollmentGroup.setInitialTwinFinal(twinState);
+                testInstance.enrollmentGroup.setInitialTwin(twinState);
                 testInstance.enrollmentGroup.setAllocationPolicy(allocationPolicy);
                 testInstance.enrollmentGroup.setReprovisionPolicy(reprovisionPolicy);
                 testInstance.enrollmentGroup.setCustomAllocationDefinition(customAllocationDefinition);
@@ -561,8 +561,8 @@ public class ProvisioningCommon extends IntegrationTest
     private void createTestIndividualEnrollment(Attestation attestation, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, TwinState twinState, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
     {
         testInstance.individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
-        testInstance.individualEnrollment.setDeviceIdFinal(testInstance.provisionedDeviceId);
-        testInstance.individualEnrollment.setCapabilitiesFinal(deviceCapabilities);
+        testInstance.individualEnrollment.setDeviceId(testInstance.provisionedDeviceId);
+        testInstance.individualEnrollment.setCapabilities(deviceCapabilities);
         testInstance.individualEnrollment.setAllocationPolicy(allocationPolicy);
         testInstance.individualEnrollment.setReprovisionPolicy(reprovisionPolicy);
         testInstance.individualEnrollment.setCustomAllocationDefinition(customAllocationDefinition);

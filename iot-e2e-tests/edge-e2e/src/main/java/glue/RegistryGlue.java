@@ -27,21 +27,15 @@ public class RegistryGlue
     public void connect(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)
     {
         System.out.printf("Connect called%n");
-        try
-        {
-            DeviceTwin client = DeviceTwin.createFromConnectionString(connectionString);
+        DeviceTwin client = new DeviceTwin(connectionString);
 
-            this._clientCount++;
-            String connectionId = "registryClient_" + this._clientCount;
-            this._map.put(connectionId, client);
+        this._clientCount++;
+        String connectionId = "registryClient_" + this._clientCount;
+        this._map.put(connectionId, client);
 
-            ConnectResponse cr = new ConnectResponse();
-            cr.setConnectionId(connectionId);
-            handler.handle(Future.succeededFuture(cr));
-        } catch (IOException e)
-        {
-            handler.handle(Future.failedFuture(e));
-        }
+        ConnectResponse cr = new ConnectResponse();
+        cr.setConnectionId(connectionId);
+        handler.handle(Future.succeededFuture(cr));
     }
 
     private DeviceTwin getClient(String connectionId)
