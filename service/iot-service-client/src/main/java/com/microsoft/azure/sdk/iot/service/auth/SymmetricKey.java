@@ -58,26 +58,9 @@ public class SymmetricKey
      * Setter for primary key
      * Validates the length of the key
      *
-     * @deprecated as of service-client version 1.15.1, please use {@link #setPrimaryKeyFinal(String)}
-     *
      * @param primaryKey Primary key part of the symmetric key
      */
-    @Deprecated
-    public void setPrimaryKey(String primaryKey)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_001: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
-        validateDeviceAuthenticationKey(primaryKey);
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_002: [The function shall set the private primaryKey member to the given value if the length validation passed]
-        this.primaryKey = primaryKey;
-    }
-
-    /**
-     * Setter for primary key
-     * Validates the length of the key
-     *
-     * @param primaryKey Primary key part of the symmetric key
-     */
-    public final void setPrimaryKeyFinal(String primaryKey)
+    public final void setPrimaryKey(String primaryKey)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_001: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
         validateDeviceAuthenticationKey(primaryKey);
@@ -98,26 +81,9 @@ public class SymmetricKey
      * Setter for secondary key
      * Validates the length of the key
      *
-     * @deprecated as of service-client version 1.15.1, please use {@link #setSecondaryKeyFinal(String)}
-     *
      * @param secondaryKey Secondary key part of the symmetric key
      */
-    @Deprecated
-    public void setSecondaryKey(String secondaryKey)
-    {
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
-        validateDeviceAuthenticationKey(secondaryKey);
-        // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
-        this.secondaryKey = secondaryKey;
-    }
-
-    /**
-     * Setter for secondary key
-     * Validates the length of the key
-     *
-     * @param secondaryKey Secondary key part of the symmetric key
-     */
-    public final void setSecondaryKeyFinal(String secondaryKey)
+    public final void setSecondaryKey(String secondaryKey)
     {
         // Codes_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
         validateDeviceAuthenticationKey(secondaryKey);

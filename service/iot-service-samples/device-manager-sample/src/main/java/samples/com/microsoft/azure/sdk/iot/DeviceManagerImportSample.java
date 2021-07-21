@@ -67,7 +67,7 @@ public class DeviceManagerImportSample
         importBlob.upload(stream, blobToImport.length);
 
         // Starting the import job
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(SampleUtils.iotHubConnectionString);
+        RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
         JobProperties importJob = registryManager.importDevices(containerSasUri, containerSasUri);
 
         // Waiting for the import job to complete

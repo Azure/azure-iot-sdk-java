@@ -40,51 +40,6 @@ public class DeviceMethod
      * Create a DeviceMethod instance from the information in the connection string.
      *
      * @param connectionString is the IoTHub connection string.
-     * @return an instance of the DeviceMethod.
-     * @throws IOException This exception is never thrown.
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #DeviceMethod(String)} instead
-     * since it does not declare this exception even though it constructs the same DeviceMethod.
-     */
-    @Deprecated
-    public static DeviceMethod createFromConnectionString(String connectionString) throws IOException
-    {
-        return createFromConnectionString(connectionString, DeviceMethodClientOptions.builder().build());
-    }
-
-    /**
-     * Create a DeviceMethod instance from the information in the connection string.
-     *
-     * @param connectionString is the IoTHub connection string.
-     * @param options the configurable options for each operation on this client. May not be null.
-     * @return an instance of the DeviceMethod.
-     * @throws IOException This exception is never thrown.
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #DeviceMethod(String, DeviceMethodClientOptions)} instead
-     * since it does not declare this exception even though it constructs the same DeviceMethod.
-     */
-    @Deprecated
-    public static DeviceMethod createFromConnectionString(
-        String connectionString,
-        DeviceMethodClientOptions options) throws IOException
-    {
-        if (connectionString == null || connectionString.length() == 0)
-        {
-            throw new IllegalArgumentException("Connection string cannot be null or empty");
-        }
-
-        if (options == null)
-        {
-            throw new IllegalArgumentException("options may not be null");
-        }
-
-        return new DeviceMethod(connectionString, options);
-    }
-
-    /**
-     * Create a DeviceMethod instance from the information in the connection string.
-     *
-     * @param connectionString is the IoTHub connection string.
      */
     public DeviceMethod(String connectionString)
     {

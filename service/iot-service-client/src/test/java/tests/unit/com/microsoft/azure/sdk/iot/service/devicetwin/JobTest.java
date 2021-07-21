@@ -203,7 +203,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleUpdateTwin((String)any, queryCondition,deviceTwin, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -236,7 +236,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleUpdateTwin((String)any, queryCondition,deviceTwin, now, maxExecutionTimeInSeconds);
                 result = new IotHubException();
@@ -267,7 +267,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleUpdateTwin((String)any, queryCondition,deviceTwin, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -377,7 +377,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -411,7 +411,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = new IOException();
@@ -443,7 +443,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.scheduleDeviceMethod((String)any, queryCondition, methodName, null, null, payload, now, maxExecutionTimeInSeconds);
                 result = mockedJobResult;
@@ -471,7 +471,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.getJob((String)any);
                 result = mockedJobResult;
@@ -499,7 +499,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.getJob((String)any);
                 result = new IOException();
@@ -524,7 +524,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.cancelJob((String)any);
                 result = mockedJobResult;
@@ -552,7 +552,7 @@ public class JobTest
         new NonStrictExpectations()
         {
             {
-                JobClient.createFromConnectionString(connectionString);
+                new JobClient(connectionString);
                 result = mockedJobClient;
                 mockedJobClient.cancelJob((String)any);
                 result = new IOException();

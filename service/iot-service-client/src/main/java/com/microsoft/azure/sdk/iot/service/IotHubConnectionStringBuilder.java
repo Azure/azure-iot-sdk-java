@@ -26,21 +26,6 @@ public class IotHubConnectionStringBuilder
      *
      * @param connectionString The connection string
      * @return The IotHubConnectionString object
-     * @throws IOException This exception is never thrown. Users are advised to use {@link #createIotHubConnectionString(String, AuthenticationMethod)} instead
-     * since it's method signature does not declare any thrown exceptions.
-     * @deprecated Use {@link #createIotHubConnectionString(String)} since it does not declare any thrown exceptions
-     */
-    @Deprecated
-    public static IotHubConnectionString createConnectionString(String connectionString) throws IOException
-    {
-        return createIotHubConnectionString(connectionString);
-    }
-
-    /**
-     * Static constructor to create IotHubConnectionString from the given string
-     *
-     * @param connectionString The connection string
-     * @return The IotHubConnectionString object
      */
     public static IotHubConnectionString createIotHubConnectionString(String connectionString)
     {
@@ -52,22 +37,6 @@ public class IotHubConnectionStringBuilder
         IotHubConnectionString iotHubConnectionString = new IotHubConnectionString();
         parse(connectionString, iotHubConnectionString);
         return iotHubConnectionString;
-    }
-
-    /**
-     * Static constructor to create IotHubConnectionString from host name and authentication method
-     *
-     * @param hostName The hostName string
-     * @param authenticationMethod The AuthenticationMethod object
-     * @return The IotHubConnectionString object
-     * @throws IOException This exception is never thrown. Users are advised to use {@link #createIotHubConnectionString(String, AuthenticationMethod)} instead
-     * since it's method signature does not declare any thrown exceptions.
-     * @deprecated Use {@link #createIotHubConnectionString(String, AuthenticationMethod)} since it does not declare any thrown exceptions
-     */
-    @Deprecated
-    public static IotHubConnectionString createConnectionString(String hostName, AuthenticationMethod authenticationMethod) throws IOException
-    {
-        return createIotHubConnectionString(hostName, authenticationMethod);
     }
 
     /**

@@ -51,7 +51,7 @@ public class DeviceMethodSample
     {
         System.out.println("Starting sample...");
         System.out.println("Creating the Device Method");
-        DeviceMethod methodClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+        DeviceMethod methodClient = new DeviceMethod(iotHubConnectionString);
 
         try
         {

@@ -30,7 +30,7 @@ public class SymmetricKeyTest
         String key = "012345678901234";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_001: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
@@ -42,7 +42,7 @@ public class SymmetricKeyTest
         String key = "01234567890123456789012345678901234567890123456789012345678901234";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_002: [The function shall set the private primaryKey member to the given value if the length validation passed]
@@ -53,7 +53,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "primaryKey"));
     }
@@ -66,7 +66,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345678901234567890123456789012345678901234567890123";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setPrimaryKeyFinal(key);
+        symmetricKey.setPrimaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "primaryKey"));
     }
@@ -80,7 +80,7 @@ public class SymmetricKeyTest
         String key = "012345678901234";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
@@ -92,7 +92,7 @@ public class SymmetricKeyTest
         String key = "01234567890123456789012345678901234567890123456789012345678901234";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_SYMMETRICKEY_12_003: [The function shall throw IllegalArgumentException if the length of the key less than 16 or greater than 64]
@@ -103,7 +103,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "secondaryKey"));
     }
@@ -116,7 +116,7 @@ public class SymmetricKeyTest
         String key = "0123456789012345678901234567890123456789012345678901234567890123";
         SymmetricKey symmetricKey = new SymmetricKey();
         // Act
-        symmetricKey.setSecondaryKeyFinal(key);
+        symmetricKey.setSecondaryKey(key);
         // Assert
         assertEquals(key, Deencapsulation.getField(symmetricKey, "secondaryKey"));
     }

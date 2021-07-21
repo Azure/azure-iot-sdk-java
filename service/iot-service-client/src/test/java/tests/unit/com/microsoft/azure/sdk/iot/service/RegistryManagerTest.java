@@ -166,7 +166,7 @@ public class RegistryManagerTest
     {
         String connectionString = null;
 
-        RegistryManager.createFromConnectionString(connectionString);
+        new RegistryManager(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_001: [The constructor shall throw IllegalArgumentException if the input string is null or empty]
@@ -176,7 +176,7 @@ public class RegistryManagerTest
     {
         String connectionString = null;
 
-        RegistryManager.createFromConnectionString(connectionString);
+        new RegistryManager(connectionString);
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_002: [The constructor shall create an IotHubConnectionString object from the given connection string]
@@ -187,7 +187,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         assertNotNull(registryManager);
         assertNotNull(Deencapsulation.getField(registryManager, "executor"));
@@ -200,7 +200,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.addDevice(null);
     }
@@ -228,7 +228,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.addDevice(device);
         registryManager.close();
 
@@ -242,7 +242,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.addDeviceAsync(null);
     }
@@ -263,7 +263,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         CompletableFuture<Device> completableFuture =  registryManager.addDeviceAsync(device);
         Device returnDevice = completableFuture.get();
 
@@ -285,7 +285,7 @@ public class RegistryManagerTest
         };
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<Device> completableFuture =  registryManager.addDeviceAsync(device);
         completableFuture.get();
@@ -298,7 +298,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getDevice(null);
     }
@@ -317,7 +317,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
 
         commonVerifications(HttpMethod.GET, deviceId, returnDevice);
@@ -330,7 +330,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getDeviceAsync(null);
     }
@@ -344,7 +344,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         CompletableFuture<Device> completableFuture =  registryManager.getDeviceAsync(deviceId);
         Device returnDevice = completableFuture.get();
 
@@ -366,7 +366,7 @@ public class RegistryManagerTest
             }
         };
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<Device> completableFuture =  registryManager.getDeviceAsync(deviceId);
         completableFuture.get();
@@ -379,7 +379,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getDevices(0);
     }
@@ -398,7 +398,7 @@ public class RegistryManagerTest
 
         getDevicesExpectations(connectionString, numberOfDevices);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         ArrayList<Device> devices =  registryManager.getDevices(10);
 
         getDevicesVerifications(numberOfDevices, devices);
@@ -412,7 +412,7 @@ public class RegistryManagerTest
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getDevicesAsync(0);
     }
@@ -426,7 +426,7 @@ public class RegistryManagerTest
 
         getDevicesExpectations(connectionString, numberOfDevices);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         CompletableFuture<ArrayList<Device>> completableFuture =  registryManager.getDevicesAsync(10);
         ArrayList<Device> devices = completableFuture.get();
 
@@ -457,7 +457,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
         String returnDeviceConnectionString =  registryManager.getDeviceConnectionString(returnDevice);
 
@@ -491,7 +491,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
         String returnDeviceConnectionString =  registryManager.getDeviceConnectionString(returnDevice);
 
@@ -505,7 +505,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         registryManager.getDeviceConnectionString(null);
     }
 
@@ -533,7 +533,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
         registryManager.getDeviceConnectionString(returnDevice);
     }
@@ -562,7 +562,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
         registryManager.getDeviceConnectionString(returnDevice);
     }
@@ -591,7 +591,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
         registryManager.getDeviceConnectionString(returnDevice);
     }
@@ -620,7 +620,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
         registryManager.getDeviceConnectionString(returnDevice);
     }
@@ -639,7 +639,7 @@ public class RegistryManagerTest
             }
         };
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<ArrayList<Device>> completableFuture = registryManager.getDevicesAsync(10);
         completableFuture.get();
@@ -661,7 +661,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.updateDevice(null);
     }
@@ -683,7 +683,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.updateDevice(device);
         commonVerifications(HttpMethod.PUT, deviceId, returnDevice);
 
@@ -711,7 +711,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.updateDeviceAsync(null);
     }
@@ -733,7 +733,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         CompletableFuture<Device> completableFuture = registryManager.updateDeviceAsync(device);
         Device returnDevice = completableFuture.get();
 
@@ -761,7 +761,7 @@ public class RegistryManagerTest
             }
         };
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<Device> completableFuture = registryManager.updateDeviceAsync(device);
         completableFuture.get();
@@ -774,7 +774,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         Device device = null;
         registryManager.removeDevice(device);
@@ -787,7 +787,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         new NonStrictExpectations()
         {
@@ -809,7 +809,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         new NonStrictExpectations()
         {
@@ -849,7 +849,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         registryManager.removeDevice(device);
 
         new VerificationsInOrder()
@@ -873,7 +873,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         String deviceId = null;
         registryManager.removeDevice(deviceId);
@@ -886,7 +886,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeDevice("");
     }
@@ -905,7 +905,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         registryManager.removeDevice(deviceId);
 
         new VerificationsInOrder()
@@ -929,7 +929,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeDeviceAsync(null);
     }
@@ -941,7 +941,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeDeviceAsync("");
     }
@@ -955,7 +955,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         CompletableFuture completableFuture = registryManager.removeDeviceAsync(deviceId);
         completableFuture.get();
 
@@ -988,7 +988,7 @@ public class RegistryManagerTest
             }
         };
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture completableFuture = registryManager.removeDeviceAsync(deviceId);
     }
@@ -1007,7 +1007,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString, registryManagerOptions);
+        RegistryManager registryManager = new RegistryManager(connectionString, registryManagerOptions);
 
         new Expectations()
         {
@@ -1044,7 +1044,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<RegistryStatistics> completableFuture = registryManager.getStatisticsAsync();
         RegistryStatistics statistics = completableFuture.get();
@@ -1081,7 +1081,7 @@ public class RegistryManagerTest
             }
         };
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getStatisticsAsync();
     }
@@ -1108,7 +1108,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         JobProperties exportJobProperties =
                 JobProperties.createForExportJob("blob1", true, StorageAuthenticationType.IDENTITY);
         JobProperties jobProperties = registryManager.exportDevices(exportJobProperties);
@@ -1145,7 +1145,7 @@ public class RegistryManagerTest
         };
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         JobProperties exportJobProperties =
                 JobProperties.createForExportJob("blah", true, StorageAuthenticationType.IDENTITY);
 
@@ -1160,7 +1160,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.exportDevices(null, true);
     }
@@ -1171,7 +1171,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.exportDevices("www.someurl.com", null);
     }
@@ -1205,7 +1205,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         JobProperties jobProperties = registryManager.exportDevices("blob1", true);
 
         new VerificationsInOrder()
@@ -1243,7 +1243,7 @@ public class RegistryManagerTest
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<JobProperties> completableFuture =  registryManager.exportDevicesAsync("blah", true);
         completableFuture.get();
@@ -1255,7 +1255,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.importDevices(null, "outputblob");
     }
@@ -1266,7 +1266,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.importDevices("importblob", null);
     }
@@ -1299,7 +1299,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         JobProperties jobProperties = registryManager.importDevices("blob1", "blob2");
 
         new VerificationsInOrder()
@@ -1336,7 +1336,7 @@ public class RegistryManagerTest
         };
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<JobProperties> completableFuture =  registryManager.importDevicesAsync("importblob", "outputblob");
         completableFuture.get();
@@ -1364,7 +1364,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         JobProperties inputParameters =
                 JobProperties.createForImportJob("blob1", "blob2", StorageAuthenticationType.IDENTITY);
         JobProperties importJobProperties = registryManager.importDevices(inputParameters);
@@ -1401,7 +1401,7 @@ public class RegistryManagerTest
         };
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         JobProperties inputParameters =
                 JobProperties.createForImportJob("importblob", "outputblob", StorageAuthenticationType.IDENTITY);
 
@@ -1415,7 +1415,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getJob(null);
     }
@@ -1449,7 +1449,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         JobProperties jobProperties = registryManager.getJob(jobId);
 
         new VerificationsInOrder()
@@ -1486,7 +1486,7 @@ public class RegistryManagerTest
         };
 
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         CompletableFuture<JobProperties> completableFuture =  registryManager.getJobAsync("someJobId");
         completableFuture.get();
@@ -1500,7 +1500,7 @@ public class RegistryManagerTest
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Deencapsulation.setField(registryManager,"executor", mockExecutorService);
 
         //act
@@ -1530,7 +1530,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.addModule(null);
     }
@@ -1561,7 +1561,7 @@ public class RegistryManagerTest
 
         commonModuleExpectations(connectionString, deviceId, moduleId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Module returnModule = registryManager.addModule(module);
         registryManager.close();
 
@@ -1575,7 +1575,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getModule(null, "somemodule");
     }
@@ -1587,7 +1587,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getModule("", "somemodule");
     }
@@ -1599,7 +1599,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getModule("somedevice", null);
     }
@@ -1611,7 +1611,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getModule("somedevice","");
     }
@@ -1644,7 +1644,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, moduleId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Module returnModule = registryManager.getModule(deviceId, moduleId);
 
         commonModuleVerifications(HttpMethod.GET, deviceId, moduleId, returnModule);
@@ -1657,7 +1657,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getModulesOnDevice(null);
     }
@@ -1669,7 +1669,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getModulesOnDevice("");
     }
@@ -1688,7 +1688,7 @@ public class RegistryManagerTest
 
         getModulesExpectations(connectionString, deviceId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         List<Module> modules =  registryManager.getModulesOnDevice(deviceId);
 
         getModulesVerifications(deviceId, modules);
@@ -1702,7 +1702,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.updateModule(null);
     }
@@ -1727,7 +1727,7 @@ public class RegistryManagerTest
 
         commonModuleExpectations(connectionString, deviceId, moduleId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Module returnModule = registryManager.updateModule(module);
         commonModuleVerifications(HttpMethod.PUT, deviceId, moduleId, returnModule);
 
@@ -1746,7 +1746,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         Module module = null;
         registryManager.removeModule(module);
@@ -1780,7 +1780,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         registryManager.removeModule(module);
 
         new VerificationsInOrder()
@@ -1804,7 +1804,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeModule(null, "somemodule");
     }
@@ -1816,7 +1816,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeModule("", "somemodule");
     }
@@ -1828,7 +1828,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeModule("somedevice", null);
     }
@@ -1840,7 +1840,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeModule("somedevice", "");
     }
@@ -1852,7 +1852,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1876,7 +1876,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         new NonStrictExpectations()
         {
@@ -1908,7 +1908,7 @@ public class RegistryManagerTest
 
         commonModuleExpectations(connectionString, deviceId, moduleId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         registryManager.removeModule(deviceId, moduleId);
 
         new VerificationsInOrder()
@@ -1932,7 +1932,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.addConfiguration(null);
     }
@@ -1960,7 +1960,7 @@ public class RegistryManagerTest
 
         commonConfigExpectations(connectionString, configId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Configuration returnConfig = registryManager.addConfiguration(config);
         registryManager.close();
 
@@ -1974,7 +1974,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getConfiguration(null);
     }
@@ -1986,7 +1986,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getConfiguration("");
     }
@@ -2005,7 +2005,7 @@ public class RegistryManagerTest
 
         commonConfigExpectations(connectionString, configurationId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Configuration returnConfiguration = registryManager.getConfiguration(configurationId);
 
         commonConfigVerifications(HttpMethod.GET, configurationId, returnConfiguration);
@@ -2018,7 +2018,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.getConfigurations(0);
     }
@@ -2037,7 +2037,7 @@ public class RegistryManagerTest
 
         getConfigsExpectations(connectionString, numberOfConfigs);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         List<Configuration> configs =  registryManager.getConfigurations(10);
 
         getConfigsVerifications(numberOfConfigs, configs);
@@ -2051,7 +2051,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.updateConfiguration(null);
     }
@@ -2073,7 +2073,7 @@ public class RegistryManagerTest
 
         commonConfigExpectations(connectionString, configId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         Configuration returnConfig = registryManager.updateConfiguration(config);
         commonConfigVerifications(HttpMethod.PUT, configId, returnConfig);
 
@@ -2091,7 +2091,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         Configuration config = null;
         registryManager.removeConfiguration(config);
@@ -2104,7 +2104,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2126,7 +2126,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2148,7 +2148,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeConfiguration((String)null);
     }
@@ -2160,7 +2160,7 @@ public class RegistryManagerTest
     {
         String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
         constructorExpectations(connectionString);
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         registryManager.removeConfiguration("");
     }
@@ -2190,7 +2190,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         registryManager.removeConfiguration(config);
 
         new VerificationsInOrder()
@@ -2221,7 +2221,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, configId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
         registryManager.removeConfiguration(configId);
 
         new VerificationsInOrder()
@@ -2248,7 +2248,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, configId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         //act
         registryManager.applyConfigurationContentOnDevice("some device", null);
@@ -2269,7 +2269,7 @@ public class RegistryManagerTest
 
         commonExpectations(connectionString, configId);
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(connectionString);
+        RegistryManager registryManager = new RegistryManager(connectionString);
 
         new NonStrictExpectations()
         {
@@ -2341,7 +2341,7 @@ public class RegistryManagerTest
             }
         };
 
-        RegistryManager registryManager = RegistryManager.createFromConnectionString(mockConnectionString, mockOptions);
+        RegistryManager registryManager = new RegistryManager(mockConnectionString, mockOptions);
 
         // act
         registryManager.getDevice(mockDeviceId);

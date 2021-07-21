@@ -36,22 +36,6 @@ public class RawTwinQuery
     }
 
     /**
-     * Static constructor to create instance from connection string
-     *
-     * @param connectionString The iot hub connection string
-     * @return The instance of RawTwinQuery
-     * @throws IOException This exception is never thrown.
-     * @deprecated because this method declares a thrown IOException even though it never throws an IOException. Users
-     * are recommended to use {@link #RawTwinQuery(String)} instead
-     * since it does not declare this exception even though it constructs the same RawTwinQuery.
-     */
-    @Deprecated
-    public static RawTwinQuery createFromConnectionString(String connectionString) throws IOException
-    {
-        return new RawTwinQuery(connectionString);
-    }
-
-    /**
      * Constructor to create instance from connection string
      *
      * @param connectionString The iot hub connection string

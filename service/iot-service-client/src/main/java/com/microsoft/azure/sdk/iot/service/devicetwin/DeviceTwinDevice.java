@@ -191,7 +191,7 @@ public class DeviceTwinDevice
         {
             throw new IllegalArgumentException("tag is null");
         }
-        return this.tag.getVersionFinal();
+        return this.tag.getVersion();
     }
 
     /**
@@ -249,7 +249,7 @@ public class DeviceTwinDevice
         {
             throw new IllegalArgumentException("desiredProperties is null.");
         }
-        return this.desiredProperties.getVersionFinal();
+        return this.desiredProperties.getVersion();
     }
 
     /**
@@ -283,7 +283,7 @@ public class DeviceTwinDevice
         {
             throw new IllegalArgumentException("reportedProperties is null");
         }
-        return this.reportedProperties.getVersionFinal();
+        return this.reportedProperties.getVersion();
     }
 
     /**
@@ -536,7 +536,7 @@ public class DeviceTwinDevice
                             "Set must not contain multiple pairs with the same keys. Duplicate key: " + p.getKey());
                 }
 
-                map.putFinal(p.getKey(), p.getValue());
+                map.put(p.getKey(), p.getValue());
             }
         }
 

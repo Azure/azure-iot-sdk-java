@@ -132,7 +132,7 @@ public class Message
     public Message()
     {
         this.properties = new HashMap<>(1);
-        this.setDeliveryAcknowledgementFinal(DeliveryAcknowledgement.Full);
+        this.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
         this.correlationId = UUID.randomUUID().toString();
     }
 
@@ -199,21 +199,9 @@ public class Message
     }
 
     /**
-     * @deprecated as of service-client version 1.15.1, please use {@link #setDeliveryAcknowledgementFinal(DeliveryAcknowledgement)}
-     *
      * @param deliveryAcknowledgement the delivery acknowledgement to set
      */
-    @Deprecated
-    public void setDeliveryAcknowledgement(DeliveryAcknowledgement deliveryAcknowledgement)
-    {
-        this.deliveryAcknowledgement = deliveryAcknowledgement;
-        this.properties.put(deliveryAcknowledgementPropertyName, deliveryAcknowledgement.name().toLowerCase());
-    }
-
-    /**
-     * @param deliveryAcknowledgement the delivery acknowledgement to set
-     */
-    public final void setDeliveryAcknowledgementFinal(DeliveryAcknowledgement deliveryAcknowledgement)
+    public final void setDeliveryAcknowledgement(DeliveryAcknowledgement deliveryAcknowledgement)
     {
         this.deliveryAcknowledgement = deliveryAcknowledgement;
         this.properties.put(deliveryAcknowledgementPropertyName, deliveryAcknowledgement.name().toLowerCase());
@@ -235,6 +223,6 @@ public class Message
     public void clearCustomProperties()
     {
         this.properties.clear();
-        setDeliveryAcknowledgementFinal(this.deliveryAcknowledgement);
+        setDeliveryAcknowledgement(this.deliveryAcknowledgement);
     }
 }

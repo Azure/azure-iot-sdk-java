@@ -36,7 +36,7 @@ public class QueryTest
 {
     private static final QueryType DEFAULT_QUERY_TYPE = QueryType.TWIN;
     private static final int DEFAULT_PAGE_SIZE = 100;
-    private static final long DEFAULT_TIMEOUT = 100;
+    private static final int DEFAULT_TIMEOUT = 100;
     private static final String DEFAULT_QUERY = "select * from devices";
 
     @Mocked
@@ -244,7 +244,7 @@ public class QueryTest
         final String testToken = UUID.randomUUID().toString();
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
         setupSendQuery(testQuery, testToken);
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, null);
 
         //act
         Deencapsulation.invoke(testQuery, "continueQuery", testToken);
@@ -276,7 +276,7 @@ public class QueryTest
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
 
         setupSendQuery(testQuery, testToken);
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, null);
 
         //act
         Deencapsulation.invoke(testQuery, "continueQuery", testToken);
@@ -296,7 +296,7 @@ public class QueryTest
         Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
 
         setupSendQuery(testQuery, testToken);
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT);
+        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, mockHttpMethod, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT, null);
 
         //act
         Deencapsulation.invoke(testQuery, "continueQuery", testToken, testPageSize);
@@ -590,76 +590,6 @@ public class QueryTest
         //assert
         assertNull(Deencapsulation.getField(testQuery, "responseContinuationToken"));
         assertEquals(DEFAULT_QUERY_TYPE, Deencapsulation.getField(testQuery, "responseQueryType"));
-    }
-
-    //Tests_SRS_QUERY_25_019: [This method shall throw IllegalArgumentException if any of the parameters are null or empty.]
-    @Test (expected = IllegalArgumentException.class)
-    public void sendQueryRequestThrowsOnNullConnectionString() throws IotHubException, IOException
-    {
-        //arrange
-        final String testToken = UUID.randomUUID().toString();
-        final Map<String, String> testHeaderResponseMap = new HashMap<>();
-        testHeaderResponseMap.put("x-ms-continuation", testToken);
-        testHeaderResponseMap.put("x-ms-item-type", DEFAULT_QUERY_TYPE.getValue());
-
-        Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockHttpResponse.getHeaderFields();
-                result = testHeaderResponseMap;
-            }
-        };
-
-        //act
-        testQuery.sendQueryRequest(null, mockUrl, mockHttpMethod, (long) 0);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void sendQueryRequestThrowsOnNullURL() throws IotHubException, IOException
-    {
-        //arrange
-        final String testToken = UUID.randomUUID().toString();
-        final Map<String, String> testHeaderResponseMap = new HashMap<>();
-        testHeaderResponseMap.put("x-ms-continuation", testToken);
-        testHeaderResponseMap.put("x-ms-item-type", DEFAULT_QUERY_TYPE.getValue());
-
-        Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockHttpResponse.getHeaderFields();
-                result = testHeaderResponseMap;
-            }
-        };
-
-        //act
-        testQuery.sendQueryRequest(mockIotHubConnectionString, null, mockHttpMethod, (long) 0);
-    }
-
-    @Test (expected = IllegalArgumentException.class)
-    public void sendQueryRequestThrowsOnNullHttpMethod() throws IotHubException, IOException
-    {
-        //arrange
-        final String testToken = UUID.randomUUID().toString();
-        final Map<String, String> testHeaderResponseMap = new HashMap<>();
-        testHeaderResponseMap.put("x-ms-continuation", testToken);
-        testHeaderResponseMap.put("x-ms-item-type", DEFAULT_QUERY_TYPE.getValue());
-
-        Query testQuery = Deencapsulation.newInstance(Query.class, DEFAULT_QUERY, DEFAULT_PAGE_SIZE, DEFAULT_QUERY_TYPE);
-
-        new NonStrictExpectations()
-        {
-            {
-                mockHttpResponse.getHeaderFields();
-                result = testHeaderResponseMap;
-            }
-        };
-
-        //act
-        testQuery.sendQueryRequest(mockIotHubConnectionString, mockUrl, null, (long) 0);
     }
 
     //Tests_SRS_QUERY_25_014: [The method shall return the continuation token found in response to a query (which can be null).]

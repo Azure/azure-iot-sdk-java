@@ -41,7 +41,7 @@ public class ModuleTest
         module.setSymmetricKey(expectedSymmetricKey);
         assertEquals(expectedSymmetricKey, module.getSymmetricKey());
 
-        module.setThumbprintFinal(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
+        module.setThumbprint(expectedPrimaryThumbprint, expectedSecondaryThumbprint);
         assertEquals(expectedPrimaryThumbprint, module.getPrimaryThumbprint());
         assertEquals(expectedSecondaryThumbprint, module.getSecondaryThumbprint());
 
