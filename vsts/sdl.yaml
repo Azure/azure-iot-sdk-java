@@ -71,11 +71,11 @@ phases:
       codebase: NewOrUpdate
       tsaEnvironment: PROD
       codeBaseName: 'Azure-Iot-SDK-Java-Master'
-      notificationAlias: 'timtay@microsoft.com, prmathur@microsoft.com, jasminel@microsoft.com'
-      codeBaseAdmins: 'REDMOND\timtay;REDMOND\prmathur;REDMOND\jasminel'
+      notificationAlias: 'timtay@microsoft.com, jamdavi@microsoft.com, David.R.Williamson@microsoft.com, Basel.Rustum@microsoft.com, azabbasi@microsoft.com, Abhipsa.Misra@microsoft.com, vinagesh@microsoft.com'
+      codeBaseAdmins: 'REDMOND\timtay;REDMOND\jamdavi;REDMOND\azabbasi'
       instanceUrlForTsaV2: MSAZURE
       projectNameMSAZURE: One
-      areaPath: 'One\IoT\Platform\Clients\java'
+      areaPath: 'One\IoT-Platform-Devices-Java'
       iterationPath: 'One\IoT\Backlog'
       uploadAPIScan: false
       uploadBinSkim: false
