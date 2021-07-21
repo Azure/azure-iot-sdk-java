@@ -262,15 +262,15 @@ public class IndividualEnrollment extends Serializable
 
         if (result.deviceId != null)
         {
-            this.setDeviceIdFinal(result.deviceId);
+            this.setDeviceId(result.deviceId);
         }
         if (result.iotHubHostName != null)
         {
-            this.setIotHubHostNameFinal(result.iotHubHostName);
+            this.setIotHubHostName(result.iotHubHostName);
         }
         if (result.provisioningStatus != null)
         {
-            this.setProvisioningStatusFinal(result.provisioningStatus);
+            this.setProvisioningStatus(result.provisioningStatus);
         }
         if (result.registrationState != null)
         {
@@ -300,12 +300,12 @@ public class IndividualEnrollment extends Serializable
 
         if (result.etag != null)
         {
-            this.setEtagFinal(result.etag);
+            this.setEtag(result.etag);
         }
 
         if (result.capabilities != null)
         {
-            this.setCapabilitiesFinal(result.capabilities);
+            this.setCapabilities(result.capabilities);
         }
 
         this.setIotHubs(result.getIotHubs());
@@ -377,25 +377,10 @@ public class IndividualEnrollment extends Serializable
     /**
      * Setter for the deviceId.
      *
-     *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setDeviceIdFinal(String)}
-     *
      * @param deviceId the {@code String} with the new deviceID. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided deviceId is {@code null}, empty, or invalid.
      */
-    @Deprecated
-    public void setDeviceId(String deviceId)
-    {
-        setDeviceIdFinal(deviceId);
-    }
-
-    /**
-     * Setter for the deviceId.
-     *
-     * @param deviceId the {@code String} with the new deviceID. It cannot be {@code null}, empty, or invalid.
-     * @throws IllegalArgumentException If the provided deviceId is {@code null}, empty, or invalid.
-     */
-    public final void setDeviceIdFinal(String deviceId)
+    public final void setDeviceId(String deviceId)
     {
         this.deviceId = deviceId;
     }
@@ -501,32 +486,10 @@ public class IndividualEnrollment extends Serializable
      * A valid host name shall have, at least 2 parts separated by '.'.
      * </p>
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setIotHubHostNameFinal(String)}
-     *
      * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
      */
-    @Deprecated
-    public void setIotHubHostName(String iotHubHostName)
-    {
-        this.iotHubHostName = iotHubHostName;
-    }
-
-    /**
-     * Setter for the iotHubHostName.
-     *
-     * <p>
-     * A valid iothub host name shall follow this criteria.
-     * A case-sensitive string (up to 128 char long)
-     * of ASCII 7-bit alphanumeric chars
-     * + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     * A valid host name shall have, at least 2 parts separated by '.'.
-     * </p>
-     *
-     * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
-     * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
-     */
-    public final void setIotHubHostNameFinal(String iotHubHostName)
+    public final void setIotHubHostName(String iotHubHostName)
     {
         this.iotHubHostName = iotHubHostName;
     }
@@ -573,28 +536,11 @@ public class IndividualEnrollment extends Serializable
      * It provides a Status precondition for the provisioned device.
      * </p>
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setProvisioningStatusFinal(ProvisioningStatus)}
      *
      * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
      */
-    @Deprecated
-    public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
-    {
-        this.provisioningStatus = provisioningStatus;
-    }
-
-    /**
-     * Setter for the provisioningStatus.
-     *
-     * <p>
-     * It provides a Status precondition for the provisioned device.
-     * </p>
-     *
-     * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
-     */
-    public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
+    public final void setProvisioningStatus(ProvisioningStatus provisioningStatus)
     {
         this.provisioningStatus = provisioningStatus;
     }
@@ -670,24 +616,10 @@ public class IndividualEnrollment extends Serializable
     /**
      * Setter for the etag.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setEtagFinal(String)}
-     *
      * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
      * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
      */
-    @Deprecated
-    public void setEtag(String etag)
-    {
-        this.etag = etag;
-    }
-
-    /**
-     * Setter for the etag.
-     *
-     * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
-     * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
-     */
-    public final void setEtagFinal(String etag)
+    public final void setEtag(String etag)
     {
         this.etag = etag;
     }
@@ -698,20 +630,9 @@ public class IndividualEnrollment extends Serializable
     }
 
     /**
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setCapabilitiesFinal(DeviceCapabilities)}
-     *
      * @param capabilities the device capabilities to set
      */
-    @Deprecated
-    public void setCapabilities(DeviceCapabilities capabilities)
-    {
-        this.capabilities = capabilities;
-    }
-
-    /**
-     * @param capabilities the device capabilities to set
-     */
-    public final void setCapabilitiesFinal(DeviceCapabilities capabilities)
+    public final void setCapabilities(DeviceCapabilities capabilities)
     {
         this.capabilities = capabilities;
     }

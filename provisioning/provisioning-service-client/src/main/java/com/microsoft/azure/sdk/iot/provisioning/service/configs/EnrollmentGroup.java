@@ -266,15 +266,15 @@ public class EnrollmentGroup extends Serializable
 
         if (result.iotHubHostName != null)
         {
-            this.setIotHubHostNameFinal(result.iotHubHostName);
+            this.setIotHubHostName(result.iotHubHostName);
         }
         if (result.provisioningStatus != null)
         {
-            this.setProvisioningStatusFinal(result.provisioningStatus);
+            this.setProvisioningStatus(result.provisioningStatus);
         }
         if (result.initialTwin != null)
         {
-            this.setInitialTwinFinal(result.initialTwin);
+            this.setInitialTwin(result.initialTwin);
         }
 
         if (result.createdDateTimeUtc != null)
@@ -289,7 +289,7 @@ public class EnrollmentGroup extends Serializable
 
         if (result.etag != null)
         {
-            this.setEtagFinal(result.etag);
+            this.setEtag(result.etag);
         }
 
         this.setIotHubs(result.getIotHubs());
@@ -424,7 +424,7 @@ public class EnrollmentGroup extends Serializable
 
         if (attestation instanceof X509Attestation)
         {
-            if (((X509Attestation)attestation).getRootCertificatesFinal() == null)
+            if (((X509Attestation)attestation).getRootCertificates() == null)
             {
                 throw new IllegalArgumentException("X509 attestation for EnrollmentGroup does not contains a valid certificate.");
             }
@@ -457,27 +457,7 @@ public class EnrollmentGroup extends Serializable
      * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
      * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
      */
-    @Deprecated
-    public void setIotHubHostName(String iotHubHostName)
-    {
-        this.iotHubHostName = iotHubHostName;
-    }
-
-    /**
-     * Setter for the iotHubHostName.
-     *
-     * <p>
-     *     A valid iothub host name shall follow this criteria.
-     *         A case-sensitive string (up to 128 char long)
-     *         of ASCII 7-bit alphanumeric chars
-     *         + {'-', ':', '.', '+', '%', '_', '#', '*', '?', '!', '(', ')', ',', '=', '@', ';', '$', '''}.
-     *     A valid host name shall have, at least 2 parts separated by '.'.
-     * </p>
-     *
-     * @param iotHubHostName the {@code String} with the new iotHubHostName. It cannot be {@code null}, empty, or invalid.
-     * @throws IllegalArgumentException If the provided iotHubHostName is {@code null}, empty, or invalid.
-     */
-    public final void setIotHubHostNameFinal(String iotHubHostName)
+    public final void setIotHubHostName(String iotHubHostName)
     {
         this.iotHubHostName = iotHubHostName;
     }
@@ -502,28 +482,7 @@ public class EnrollmentGroup extends Serializable
      * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
      */
-    @Deprecated
-    public void setInitialTwin(TwinState initialTwin)
-    {
-        if (initialTwin == null)
-        {
-            throw new IllegalArgumentException("initialTwin cannot be null");
-        }
-
-        this.initialTwin = initialTwin;
-    }
-
-    /**
-     * Setter for the initialTwin.
-     *
-     * <p>
-     *     It provides a Twin precondition for the provisioned device.
-     * </p>
-     *
-     * @param initialTwin the {@code TwinState} with the new initialTwin. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided initialTwin is {@code null}.
-     */
-    public final void setInitialTwinFinal(TwinState initialTwin)
+    public final void setInitialTwin(TwinState initialTwin)
     {
         if (initialTwin == null)
         {
@@ -550,34 +509,10 @@ public class EnrollmentGroup extends Serializable
      *     It provides a Status precondition for the provisioned device.
      * </p>
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setProvisioningStatusFinal(ProvisioningStatus)}
-     *
      * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
      * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
      */
-    @Deprecated
-    public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
-    {
-        if (provisioningStatus == null)
-        {
-            throw new IllegalArgumentException("provisioningStatus cannot be null");
-        }
-
-        this.provisioningStatus = provisioningStatus;
-    }
-
-
-    /**
-     * Setter for the provisioningStatus.
-     *
-     * <p>
-     *     It provides a Status precondition for the provisioned device.
-     * </p>
-     *
-     * @param provisioningStatus the {@code ProvisioningStatus} with the new provisioningStatus. It cannot be {@code null}.
-     * @throws IllegalArgumentException If the provided provisioningStatus is {@code null}.
-     */
-    public final void setProvisioningStatusFinal(ProvisioningStatus provisioningStatus)
+    public final void setProvisioningStatus(ProvisioningStatus provisioningStatus)
     {
         if (provisioningStatus == null)
         {
@@ -656,24 +591,10 @@ public class EnrollmentGroup extends Serializable
     /**
      * Setter for the etag.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #setEtagFinal(String)}
-     *
      * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
      * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
      */
-    @Deprecated
-    public void setEtag(String etag)
-    {
-        this.etag = etag;
-    }
-
-    /**
-     * Setter for the etag.
-     *
-     * @param etag the {@code String} with the new etag. It cannot be {@code null}, empty or invalid.
-     * @throws IllegalArgumentException If the provided etag is {@code null}, empty or invalid.
-     */
-    public final void setEtagFinal(String etag)
+    public final void setEtag(String etag)
     {
         this.etag = etag;
     }
