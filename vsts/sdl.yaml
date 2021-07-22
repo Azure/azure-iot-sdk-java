@@ -75,7 +75,7 @@ phases:
       codeBaseAdmins: 'REDMOND\timtay;REDMOND\jamdavi;REDMOND\azabbasi'
       instanceUrlForTsaV2: MSAZURE
       projectNameMSAZURE: One
-      areaPath: 'One\IoT\IoT-Platform-Devices-java'
+      areaPath: 'One\IoT\Platform and Devices\Clients\java'
       iterationPath: 'One\IoT\Backlog'
       uploadAPIScan: false
       uploadBinSkim: false
