@@ -145,7 +145,7 @@ public class GetTwinTests extends DeviceTwinCommon
             ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
             DeviceTwinClientOptions options = DeviceTwinClientOptions.builder().proxyOptions(proxyOptions).build();
 
-            testInstance.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, options);
+            testInstance.twinServiceClient = new DeviceTwin(iotHubConnectionString, options);
 
             super.testGetDeviceTwin();
         }

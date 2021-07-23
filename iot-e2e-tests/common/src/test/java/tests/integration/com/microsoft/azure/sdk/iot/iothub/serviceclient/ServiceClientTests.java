@@ -182,7 +182,7 @@ public class ServiceClientTests extends IntegrationTest
     {
         // We remove and recreate the device for a clean start
         RegistryManager registryManager =
-                RegistryManager.createFromConnectionString(
+                new RegistryManager(
                         iotHubConnectionString,
                         RegistryManagerOptions.builder()
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
@@ -326,7 +326,7 @@ public class ServiceClientTests extends IntegrationTest
     public void feedbackMessageReceiverWithAzureSasCredential() throws Exception
     {
         RegistryManager registryManager =
-                RegistryManager.createFromConnectionString(
+                new RegistryManager(
                         iotHubConnectionString,
                         RegistryManagerOptions.builder()
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
@@ -359,7 +359,7 @@ public class ServiceClientTests extends IntegrationTest
     public void fileUploadNotificationReceiverWithAzureSasCredential() throws Exception
     {
         RegistryManager registryManager =
-                RegistryManager.createFromConnectionString(
+                new RegistryManager(
                         iotHubConnectionString,
                         RegistryManagerOptions.builder()
                                 .httpReadTimeout(HTTP_READ_TIMEOUT)
@@ -393,7 +393,7 @@ public class ServiceClientTests extends IntegrationTest
     {
         boolean expectedExceptionWasCaught = false;
 
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
+        ServiceClient serviceClient = new ServiceClient(invalidCertificateServerConnectionString, testInstance.protocol);
 
         try
         {
@@ -419,7 +419,7 @@ public class ServiceClientTests extends IntegrationTest
     {
         boolean expectedExceptionWasCaught = false;
 
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
+        ServiceClient serviceClient = new ServiceClient(invalidCertificateServerConnectionString, testInstance.protocol);
 
         try
         {
@@ -446,7 +446,7 @@ public class ServiceClientTests extends IntegrationTest
     {
         boolean expectedExceptionWasCaught = false;
 
-        ServiceClient serviceClient = ServiceClient.createFromConnectionString(invalidCertificateServerConnectionString, testInstance.protocol);
+        ServiceClient serviceClient = new ServiceClient(invalidCertificateServerConnectionString, testInstance.protocol);
 
         try
         {

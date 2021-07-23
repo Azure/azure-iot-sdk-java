@@ -11,6 +11,7 @@ import com.microsoft.azure.sdk.iot.deps.serializer.AuthenticationTypeParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.ExportImportDeviceParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.SymmetricKeyParser;
 import com.microsoft.azure.sdk.iot.deps.serializer.X509ThumbprintParser;
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.ModuleClient;
@@ -152,7 +153,7 @@ public class Tools
         if (registryManager == null)
         {
             RegistryManagerOptions options = RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build();
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, options);
+            registryManager = new RegistryManager(iotHubConnectionString, options);
         }
 
         return registryManager;
@@ -285,7 +286,7 @@ public class Tools
                     {
                         Device deviceToAdd = Device.createDevice("test-device-" + UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
                         String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
-                        deviceToAdd.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+                        deviceToAdd.setThumbprint(x509Thumbprint, x509Thumbprint);
                         devicesToAdd.add(deviceToAdd);
                     }
 
@@ -301,7 +302,9 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            DeviceClient client = new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, sslContext);
+            ClientOptions clientOptions = new ClientOptions();
+            clientOptions.sslContext = sslContext;
+            DeviceClient client = new DeviceClient(getRegistyManager(iotHubConnectionString).getDeviceConnectionString(testDeviceIdentity.getDevice()), protocol, clientOptions);
             testDeviceIdentity.setDeviceClient(client);
             return testDeviceIdentity;
         }
@@ -421,7 +424,7 @@ public class Tools
                         devices.add(testDeviceIdentity.device);
                         Module module = Module.createModule(testDeviceIdentity.device.getDeviceId(), "test-module-" + UUID.randomUUID(), AuthenticationType.SELF_SIGNED);
                         String x509Thumbprint = IntegrationTest.x509CertificateGenerator.getX509Thumbprint();
-                        module.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+                        module.setThumbprint(x509Thumbprint, x509Thumbprint);
                         modulesToAdd.add(module);
                     }
 
@@ -438,7 +441,9 @@ public class Tools
             }
 
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(IntegrationTest.x509CertificateGenerator.getPublicCertificate(), IntegrationTest.x509CertificateGenerator.getPrivateKey());
-            ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, testModuleIdentity.device, testModuleIdentity.module), protocol, sslContext);
+            ClientOptions clientOptions = new ClientOptions();
+            clientOptions.sslContext = sslContext;
+            ModuleClient moduleClient = new ModuleClient(DeviceConnectionString.get(iotHubConnectionString, testModuleIdentity.device, testModuleIdentity.module), protocol, clientOptions);
             testModuleIdentity.setModuleClient(moduleClient);
             return testModuleIdentity;
         }
@@ -636,7 +641,7 @@ public class Tools
             throw new IllegalArgumentException("devices cannot be null");
         }
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createIotHubConnectionString(connectionString);
         URL url = getBulkDeviceAddUrl(iotHubConnectionString);
 
         List<ExportImportDeviceParser> parsers = new ArrayList<>();
@@ -673,7 +678,7 @@ public class Tools
             throw new IllegalArgumentException("modules cannot be null");
         }
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createIotHubConnectionString(connectionString);
         URL url = getBulkDeviceAddUrl(iotHubConnectionString);
 
         List<ExportImportDeviceParser> parsers = new ArrayList<>();
@@ -714,7 +719,7 @@ public class Tools
             throw new IllegalArgumentException("devices cannot be null");
         }
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createIotHubConnectionString(connectionString);
         URL url = getBulkDeviceAddUrl(iotHubConnectionString);
 
         List<ExportImportDeviceParser> parsers = new ArrayList<>();
@@ -738,7 +743,7 @@ public class Tools
             throw new IllegalArgumentException("devices cannot be null");
         }
 
-        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createConnectionString(connectionString);
+        IotHubConnectionString iotHubConnectionString = IotHubConnectionString.createIotHubConnectionString(connectionString);
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
 

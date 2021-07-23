@@ -71,7 +71,7 @@ public class HubTierConnectionTests extends IntegrationTest
         String privateKey = x509CertificateGenerator.getPrivateKey();
         String x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
         String uuid = UUID.randomUUID().toString();
         String deviceId = "java-tier-connection-e2e-test".concat("-" + uuid);
         String deviceIdX509 = "java-tier-connection-e2e-test-X509".concat("-" + uuid);
@@ -79,13 +79,16 @@ public class HubTierConnectionTests extends IntegrationTest
         Device device = Device.createFromId(deviceId, null, null);
         Device deviceX509 = Device.createDevice(deviceIdX509, SELF_SIGNED);
 
-        deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+        deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
 
         Tools.addDeviceWithRetry(registryManager, device);
         Tools.addDeviceWithRetry(registryManager, deviceX509);
 
-        hostName = IotHubConnectionStringBuilder.createConnectionString(iotHubConnectionString).getHostName();
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(publicKeyCert, privateKey);
+
+        ClientOptions options = new ClientOptions();
+        options.sslContext = sslContext;
 
         return new ArrayList(Arrays.asList(
                 new Object[][]
@@ -95,7 +98,7 @@ public class HubTierConnectionTests extends IntegrationTest
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, false},
 
                                 //x509 device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, sslContext), AMQPS, deviceX509, SELF_SIGNED, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, options), AMQPS, deviceX509, SELF_SIGNED, false},
 
                                 //sas token device client, with proxy
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, true}
@@ -106,15 +109,7 @@ public class HubTierConnectionTests extends IntegrationTest
     @BeforeClass
     public static void classSetup()
     {
-        try
-        {
-            registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            fail("Unexpected exception encountered");
-        }
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
     }
 
     @BeforeClass

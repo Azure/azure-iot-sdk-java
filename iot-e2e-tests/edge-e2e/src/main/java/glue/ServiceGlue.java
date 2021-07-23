@@ -23,14 +23,7 @@ public class ServiceGlue
     public void connect(String connectionString, Handler<AsyncResult<ConnectResponse>> handler)
     {
         System.out.printf("connect called%n");
-        DeviceMethod client = null;
-        try
-        {
-            client = DeviceMethod.createFromConnectionString(connectionString);
-        } catch (IOException e)
-        {
-            handler.handle(Future.failedFuture(e));
-        }
+        DeviceMethod client = new DeviceMethod(connectionString);
 
         this._clientCount++;
         String connectionId = "serviceClient_" + this._clientCount;

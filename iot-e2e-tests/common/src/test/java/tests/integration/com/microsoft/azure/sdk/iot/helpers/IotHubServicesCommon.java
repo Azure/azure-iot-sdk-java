@@ -171,61 +171,6 @@ public class IotHubServicesCommon
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected connection status update to occur: " + expectedStatus, client), actualStatusUpdatesContainsStatus(actualStatusUpdates, expectedStatus));
     }
 
-    /**
-     * Send some messages that wait for callbacks to signify that the SAS token in the client config has expired.
-     *
-     * @param client the client to send the messages from
-     * @param protocol the protocol the client is using
-     * @param numberOfMessages the number of messages to send
-     * @param breathPeriod time to sleep between checks of message callback arrival
-     * @param timeoutMilliseconds time to wait for any message to have its callback fired before the test times out
-     * @param authType the authentication type used is this test
-     */
-    public static void sendMessagesExpectingSASTokenExpiration(DeviceClient client,
-                                                               String protocol,
-                                                               int numberOfMessages,
-                                                               long breathPeriod,
-                                                               long timeoutMilliseconds,
-                                                               AuthenticationType authType)
-    {
-        for (int i = 0; i < numberOfMessages; ++i)
-        {
-            try
-            {
-                Message messageToSend = new Message("Test message expecting SAS Token Expired callback for protocol: " + protocol);
-                Success messageSent = new Success();
-                Success statusUpdated = new Success();
-
-                ConnectionStatusCallback stateCallback = new ConnectionStatusCallback(IotHubConnectionState.SAS_TOKEN_EXPIRED);
-                EventCallback messageCallback = new EventCallback(IotHubStatusCode.UNAUTHORIZED);
-
-                client.registerConnectionStateCallback(stateCallback, statusUpdated);
-                client.sendEventAsync(messageToSend, messageCallback, messageSent);
-
-                long startTime = System.currentTimeMillis();
-                while(!messageSent.wasCallbackFired() || !statusUpdated.getResult())
-                {
-                    Thread.sleep(breathPeriod);
-                    if (System.currentTimeMillis() - startTime > timeoutMilliseconds)
-                    {
-                        Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed: " +
-                                "never received connection status update for SAS_TOKEN_EXPIRED " +
-                                "or never received UNAUTHORIZED message callback", client));
-                    }
-                }
-
-                if (messageSent.getCallbackStatusCode() != IotHubStatusCode.UNAUTHORIZED)
-                {
-                    Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Send messages expecting sas token expiration failed: expected UNAUTHORIZED message callback, but got " + messageSent.getCallbackStatusCode(), client));
-                }
-            }
-            catch (Exception e)
-            {
-                Assert.fail(buildExceptionMessage(protocol + ", " + authType + ": Sending message over " + protocol + " protocol failed", client));
-            }
-        }
-    }
-
     /*
      * method to send message over given DeviceClient
      */

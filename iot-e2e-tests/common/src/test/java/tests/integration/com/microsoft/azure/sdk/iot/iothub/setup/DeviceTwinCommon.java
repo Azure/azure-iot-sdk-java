@@ -388,9 +388,9 @@ public class DeviceTwinCommon extends IntegrationTest
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.clientType = clientType;
             
-            this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-            this.rawTwinQueryClient = RawTwinQuery.createFromConnectionString(iotHubConnectionString);
+            this.twinServiceClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+            this.rawTwinQueryClient = new RawTwinQuery(iotHubConnectionString);
         }
     }
 
