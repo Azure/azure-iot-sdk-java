@@ -372,67 +372,6 @@ public class RegistryManagerTest
         completableFuture.get();
     }
 
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_023: [The constructor shall throw IllegalArgumentException if the input count number is less than 1]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void getDevices_input_zero() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.getDevices(0);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_024: [The function shall get the URL for the device]
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_025: [The function shall create a new SAS token for the device]
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_026: [The function shall create a new HttpRequest for getting a device list from IotHub]
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_027: [The function shall send the created request and get the response]
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_028: [The function shall verify the response status and throw proper Exception]
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_029: [The function shall create a new ArrayList<Device> object from the response and return with it]
-    @Test
-    public void getDevices_good_case() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        int numberOfDevices = 10;
-
-        getDevicesExpectations(connectionString, numberOfDevices);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        ArrayList<Device> devices =  registryManager.getDevices(10);
-
-        getDevicesVerifications(numberOfDevices, devices);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_030: [The function shall throw IllegalArgumentException if the input count number is less than 1]
-    // Assert
-    @Test (expected = IllegalArgumentException.class)
-    public void getDevicesAsync_input_zero() throws Exception
-    {
-
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        constructorExpectations(connectionString);
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        registryManager.getDevicesAsync(0);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_031: [The function shall create an async wrapper around the getDevices() function call, handle the return value or delegate exception]
-    @Test
-    public void getDevicesAsync_future_return_ok() throws Exception
-    {
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        int numberOfDevices = 10;
-
-        getDevicesExpectations(connectionString, numberOfDevices);
-
-        RegistryManager registryManager = new RegistryManager(connectionString);
-        CompletableFuture<ArrayList<Device>> completableFuture =  registryManager.getDevicesAsync(10);
-        ArrayList<Device> devices = completableFuture.get();
-
-        getDevicesVerifications(numberOfDevices, devices);
-    }
-
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_21_085: [The function shall return a connectionString for the input device]
     @Test
     public void getDeviceConnectionString_return_ok() throws Exception
@@ -623,26 +562,6 @@ public class RegistryManagerTest
         RegistryManager registryManager = new RegistryManager(connectionString);
         Device returnDevice = registryManager.getDevice(deviceId);
         registryManager.getDeviceConnectionString(returnDevice);
-    }
-
-    // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_031: [The function shall create an async wrapper around the getDevices() function call, handle the return value or delegate exception]
-    // Assert
-    @Test (expected = Exception.class)
-    public void getDevicesAsync_future_throw() throws Exception
-    {
-        new MockUp<RegistryManager>()
-        {
-            @Mock
-            public Device getDevices(Integer maxCount) throws IOException, IotHubException
-            {
-                throw new IOException();
-            }
-        };
-        String connectionString = "HostName=aaa.bbb.ccc;SharedAccessKeyName=XXX;SharedAccessKey=YYY";
-        RegistryManager registryManager = new RegistryManager(connectionString);
-
-        CompletableFuture<ArrayList<Device>> completableFuture = registryManager.getDevicesAsync(10);
-        completableFuture.get();
     }
 
     // Tests_SRS_SERVICE_SDK_JAVA_REGISTRYMANAGER_12_032: [The function shall throw IllegalArgumentException if the input device is null]
