@@ -102,9 +102,9 @@ public class X509Attestation extends Attestation
             throw new IllegalArgumentException("x509Attestation cannot be null");
         }
 
-        X509Certificates clientCertificates = x509Attestation.getClientCertificatesFinal();
-        X509Certificates rootCertificates = x509Attestation.getRootCertificatesFinal();
-        X509CAReferences caReferences = x509Attestation.getCAReferencesFinal();
+        X509Certificates clientCertificates = x509Attestation.getClientCertificates();
+        X509Certificates rootCertificates = x509Attestation.getRootCertificates();
+        X509CAReferences caReferences = x509Attestation.getCAReferences();
 
         /* SRS_X509_ATTESTATION_21_005: [The constructor shall throw IllegalArgumentException if `clientCertificates`, `rootCertificates`, and `caReferences` are null.] */
         /* SRS_X509_ATTESTATION_21_006: [The constructor shall throw IllegalArgumentException if more than one certificate type are not null.] */
@@ -239,27 +239,9 @@ public class X509Attestation extends Attestation
     /**
      * Getter for the clientCertificates.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getClientCertificatesFinal()}
-     *
      * @return the {@link X509Certificates} with the stored clientCertificates. it can be {@code null}.
      */
-    @Deprecated
-    public X509Certificates getClientCertificates()
-    {
-        /* SRS_X509_ATTESTATION_21_016: [The getClientCertificates shall return the stored clientCertificates.] */
-        if(this.clientCertificates == null)
-        {
-            return null;
-        }
-        return new X509Certificates(this.clientCertificates);
-    }
-
-    /**
-     * Getter for the clientCertificates.
-     *
-     * @return the {@link X509Certificates} with the stored clientCertificates. it can be {@code null}.
-     */
-    public final X509Certificates getClientCertificatesFinal()
+    public final X509Certificates getClientCertificates()
     {
         /* SRS_X509_ATTESTATION_21_016: [The getClientCertificates shall return the stored clientCertificates.] */
         if(this.clientCertificates == null)
@@ -272,27 +254,9 @@ public class X509Attestation extends Attestation
     /**
      * Getter for the rootCertificates.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getRootCertificatesFinal()}
-     *
      * @return the {@link X509Certificates} with the stored rootCertificates. it can be {@code null}.
      */
-    @Deprecated
-    public X509Certificates getRootCertificates()
-    {
-        /* SRS_X509_ATTESTATION_21_017: [The getRootCertificates shall return the stored rootCertificates.] */
-        if(this.rootCertificates == null)
-        {
-            return null;
-        }
-        return new X509Certificates(this.rootCertificates);
-    }
-
-    /**
-     * Getter for the rootCertificates.
-     *
-     * @return the {@link X509Certificates} with the stored rootCertificates. it can be {@code null}.
-     */
-    public final X509Certificates getRootCertificatesFinal()
+    public final X509Certificates getRootCertificates()
     {
         /* SRS_X509_ATTESTATION_21_017: [The getRootCertificates shall return the stored rootCertificates.] */
         if(this.rootCertificates == null)
@@ -305,27 +269,9 @@ public class X509Attestation extends Attestation
     /**
      * Getter for the caReferences.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getCAReferencesFinal()}
-     *
      * @return the {@link X509CAReferences} with the stored caReferences. it can be {@code null}.
      */
-    @Deprecated
-    public X509CAReferences getCAReferences()
-    {
-        /* SRS_X509_ATTESTATION_21_024: [The getCAReferences shall return the stored caReferences.] */
-        if(this.caReferences == null)
-        {
-            return null;
-        }
-        return new X509CAReferences(this.caReferences);
-    }
-
-    /**
-     * Getter for the caReferences.
-     *
-     * @return the {@link X509CAReferences} with the stored caReferences. it can be {@code null}.
-     */
-    public final X509CAReferences getCAReferencesFinal()
+    public final X509CAReferences getCAReferences()
     {
         /* SRS_X509_ATTESTATION_21_024: [The getCAReferences shall return the stored caReferences.] */
         if(this.caReferences == null)
@@ -348,12 +294,12 @@ public class X509Attestation extends Attestation
         /* SRS_X509_ATTESTATION_21_018: [If the clientCertificates is not null, the getPrimaryX509CertificateInfo shall return the info in the primary key of the clientCertificates.] */
         if(this.clientCertificates != null)
         {
-            return this.clientCertificates.getPrimaryFinal().getInfo();
+            return this.clientCertificates.getPrimary().getInfo();
         }
         /* SRS_X509_ATTESTATION_21_019: [If the rootCertificates is not null, the getPrimaryX509CertificateInfo shall return the info in the primary key of the rootCertificates.] */
         if(this.rootCertificates != null)
         {
-            return this.rootCertificates.getPrimaryFinal().getInfo();
+            return this.rootCertificates.getPrimary().getInfo();
         }
         /* SRS_X509_ATTESTATION_21_020: [If both clientCertificates and rootCertificates are null, the getPrimaryX509CertificateInfo shall throw IllegalArgumentException.] */
         throw new IllegalArgumentException("There is no valid certificate information.");
@@ -373,12 +319,12 @@ public class X509Attestation extends Attestation
         /* SRS_X509_ATTESTATION_21_021: [If the clientCertificates is not null, and it contains secondary key, the getSecondaryX509CertificateInfo shall return the info in the secondary key of the rootCertificates.] */
         if(this.clientCertificates != null)
         {
-            secondaryCertificate = this.clientCertificates.getSecondaryFinal();
+            secondaryCertificate = this.clientCertificates.getSecondary();
         }
         /* SRS_X509_ATTESTATION_21_022: [If the rootCertificates is not null, and it contains secondary key, the getSecondaryX509CertificateInfo shall return the info in the secondary key of the rootCertificates.] */
         if(this.rootCertificates != null)
         {
-            secondaryCertificate = this.rootCertificates.getSecondaryFinal();
+            secondaryCertificate = this.rootCertificates.getSecondary();
         }
 
         if(secondaryCertificate != null)

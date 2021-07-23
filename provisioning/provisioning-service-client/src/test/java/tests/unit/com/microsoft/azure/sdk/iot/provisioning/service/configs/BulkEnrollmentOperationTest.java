@@ -73,16 +73,16 @@ public class BulkEnrollmentOperationTest
         IndividualEnrollment individualEnrollment1 = new IndividualEnrollment(
                 VALID_REGISTRATION_ID_1,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, VALID_STORAGE_ROOT_KEY));
-        individualEnrollment1.setDeviceIdFinal(VALID_DEVICE_ID);
-        individualEnrollment1.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
-        individualEnrollment1.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);
+        individualEnrollment1.setDeviceId(VALID_DEVICE_ID);
+        individualEnrollment1.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment1.setProvisioningStatus(ProvisioningStatus.ENABLED);
 
         IndividualEnrollment individualEnrollment2 = new IndividualEnrollment(
                 VALID_REGISTRATION_ID_2,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, null));
-        individualEnrollment2.setDeviceIdFinal(VALID_DEVICE_ID);
-        individualEnrollment2.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
-        individualEnrollment2.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
+        individualEnrollment2.setDeviceId(VALID_DEVICE_ID);
+        individualEnrollment2.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment2.setProvisioningStatus(ProvisioningStatus.DISABLED);
 
         return new LinkedList<IndividualEnrollment>()
         {
