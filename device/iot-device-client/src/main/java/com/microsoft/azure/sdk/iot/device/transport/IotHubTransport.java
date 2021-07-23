@@ -112,7 +112,8 @@ public class IotHubTransport implements IotHubListener
      * Constructor for an IotHubTransport object with default values
      *
      * @param defaultConfig the config used for opening connections, retrieving retry policy, and checking protocol
-     *
+     * @param deviceIOConnectionStatusChangeCallback the callback used to notify the DeviceIO layer when a connection status change has occurred.
+     * @param isMultiplexing true if the transport will be used for multiplexed connections. False otherwise.
      * @throws IllegalArgumentException if defaultConfig is null
      */
     public IotHubTransport(DeviceClientConfig defaultConfig, IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback, boolean isMultiplexing) throws IllegalArgumentException
@@ -741,6 +742,7 @@ public class IotHubTransport implements IotHubListener
      *
      * @param callback the callback to be called. Can be null if callbackContext is not null
      * @param callbackContext a context to be passed to the callback. Can be {@code null}.
+     * @param deviceId the Id of the device whose connection status changes will go to this callback.
      */
     public void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext, String deviceId)
     {

@@ -70,6 +70,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
      * object.
      *
      * @param config the client configuration.
+     * @throws TransportException if this constructor fails to build the required SSLContext.
      */
     // The warning is for how getSasTokenAuthentication() may return null, but the check that our config uses SAS_TOKEN
     // auth is sufficient at confirming that getSasTokenAuthentication() will return a non-null instance

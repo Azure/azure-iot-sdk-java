@@ -67,6 +67,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The host name of your IoT hub. For instance, "my-azure-iot-hub.azure-devices.net".
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be either
      *                 {@link IotHubClientProtocol#AMQPS} or {@link IotHubClientProtocol#AMQPS_WS}.
      */
@@ -78,6 +79,7 @@ public class MultiplexingClient
     /**
      * Instantiate a new MultiplexingClient that will establish a multiplexed connection through a proxy.
      *
+     * @param hostName The host name of your IoT hub. For instance, "my-azure-iot-hub.azure-devices.net".
      * @param protocol The transport protocol that this client will build the multiplexed connection on. Must be
      * {@link IotHubClientProtocol#AMQPS_WS} since using {@link IotHubClientProtocol#AMQPS} does not support proxies.
      * @param options The optional parameters to configure this client to use.
@@ -574,7 +576,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
      * after this device is re-registered.
@@ -584,7 +586,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClient(DeviceClient deviceClient) throws InterruptedException, MultiplexingClientException
     {
         this.unregisterDeviceClient(deviceClient, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
@@ -606,7 +607,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on this device client for twin/methods/cloud to device messages will need to be set again
      * after this device is re-registered.
@@ -617,7 +618,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClient(DeviceClient deviceClient, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         Objects.requireNonNull(deviceClient);
@@ -638,7 +638,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
      * after these devices are re-registered.
@@ -648,7 +648,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the default timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients) throws InterruptedException, MultiplexingClientException
     {
         this.unregisterDeviceClients(deviceClients, DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS);
@@ -666,7 +665,7 @@ public class MultiplexingClient
      * {@link #close()}
      * <p>
      * Once a device client is unregistered, it may be re-registered to this or any other multiplexing client. It cannot
-     * be used in non-multiplexing scenarios or used by the deprecated {@link TransportClient}.
+     * be used in non-multiplexing scenarios.
      * <p>
      * Any subscriptions set on these device clients for twin/methods/cloud to device messages will need to be set again
      * after these devices are re-registered.
@@ -677,7 +676,6 @@ public class MultiplexingClient
      * @throws com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientDeviceRegistrationTimeoutException If the unregistration takes longer than the provided timeout allows.
      * @throws MultiplexingClientException If any other Exception is thrown, it will be nested into this exception.
      */
-    @SuppressWarnings("deprecation")
     public void unregisterDeviceClients(Iterable<DeviceClient> deviceClients, long timeoutMilliseconds) throws InterruptedException, MultiplexingClientException
     {
         Objects.requireNonNull(deviceClients);
