@@ -1,5 +1,26 @@
 # Microsoft Azure IoT SDKs for Java
 
+## Critical Upcoming Change Notice
+
+All Azure IoT SDK users are advised to be aware of upcoming TLS certificate changes for Azure IoT hub and Device Provisioning Service 
+that will impact the SDK's ability to connect. In October 2022, both services will migrate from the current 
+[Baltimore CyberTrust CA Root](https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html) to the 
+[DigiCert Global G2 CA root](https://global-root-g2.chain-demos.digicert.com/info/index.html). There will be a 
+transition period beforehand where your IoT devices must have both the Baltimore and Digicert public certificates 
+installed in their certificate store in order to prevent connectivity issues. 
+
+For a more in depth explanation as to why the IoT services are doing this, please see
+[this article](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-critical-changes-are-almost-here-and-why-you/ba-p/2393169).
+
+Users of this Java IoT SDK in particular will need to follow slightly different instructions in order to handle this 
+upcoming change. See [this document](./upcoming_certificate_changes_readme.md) for a more in depth explanation of how 
+to prepare your devices for this certificate migration.
+
+**Users who don't follow these instructions will begin experiencing unrecoverable, consistent connection failures from 
+their devices starting June 2022.**
+
+If you have any questions, comments, or concerns about this upcoming change, please let us know on our [discussions page](https://github.com/Azure/azure-iot-sdk-java/discussions).
+
 ### Build status
 Due to security considerations, build logs are not publicly available.
 
