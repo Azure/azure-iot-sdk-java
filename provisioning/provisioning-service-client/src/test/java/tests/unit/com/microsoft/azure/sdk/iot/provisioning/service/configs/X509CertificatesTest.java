@@ -179,8 +179,8 @@ public class X509CertificatesTest
         X509Certificates x509Certificates = Deencapsulation.newInstance(X509Certificates.class, new Class[] {String.class, String.class},PUBLIC_CERTIFICATE_STRING, PUBLIC_CERTIFICATE_STRING);
 
         // act - assert
-        assertNotNull(x509Certificates.getPrimaryFinal());
-        assertNotNull(x509Certificates.getSecondaryFinal());
+        assertNotNull(x509Certificates.getPrimary());
+        assertNotNull(x509Certificates.getSecondary());
     }
 
     /* SRS_X509_CERTIFICATES_21_009: [The X509Certificates shall provide an empty constructor to make GSON happy.] */

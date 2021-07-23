@@ -76,7 +76,7 @@ public class X509CAReferences
     public X509CAReferences(X509CAReferences x509CAReferences)
     {
         /* SRS_X509_CAREFERENCE_21_003: [The constructor shall throw IllegalArgumentException if the provide X509CAReferences is null or if its primary certificate is null.] */
-        if((x509CAReferences == null) || (x509CAReferences.getPrimaryFinal() == null))
+        if((x509CAReferences == null) || (x509CAReferences.getPrimary() == null))
         {
             throw new IllegalArgumentException("original x509CAReferences cannot be null and its primary certificate cannot be null.");
         }
@@ -88,23 +88,9 @@ public class X509CAReferences
     /**
      * Getter for the primary.
      *
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getPrimaryFinal()}
-     *
      * @return the {@code String} with the stored primary. It cannot be {@code null}.
      */
-    @Deprecated
-    public String getPrimary()
-    {
-        /* SRS_X509_CAREFERENCE_21_005: [The getPrimary shall return the stored primary.] */
-        return this.primary;
-    }
-
-    /**
-     * Getter for the primary.
-     *
-     * @return the {@code String} with the stored primary. It cannot be {@code null}.
-     */
-    public final String getPrimaryFinal()
+    public final String getPrimary()
     {
         /* SRS_X509_CAREFERENCE_21_005: [The getPrimary shall return the stored primary.] */
         return this.primary;
@@ -112,23 +98,9 @@ public class X509CAReferences
 
     /**
      * Getter for the secondary.
-     * @deprecated as of provisioning-service-client version 1.3.3, please use {@link #getSecondaryFinal()}
-     *
      * @return the {@code String} with the stored secondary. It can be {@code null}.
      */
-    @Deprecated
-    public String getSecondary()
-    {
-        /* SRS_X509_CAREFERENCE_21_006: [The getSecondary shall return the stored secondary.] */
-        return this.secondary;
-    }
-
-    /**
-     * Getter for the secondary.
-     *
-     * @return the {@code String} with the stored secondary. It can be {@code null}.
-     */
-    public final String getSecondaryFinal()
+    public final String getSecondary()
     {
         /* SRS_X509_CAREFERENCE_21_006: [The getSecondary shall return the stored secondary.] */
         return this.secondary;

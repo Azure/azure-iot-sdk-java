@@ -100,24 +100,6 @@ public class EnrollmentGroupTest
         }
 
         @Mock
-        public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
-        {
-            mockedProvisioningStatus = provisioningStatus;
-        }
-
-        @Mock
-        public void setInitialTwin(TwinState initialTwin)
-        {
-            mockedInitialTwin = initialTwin;
-        }
-
-        @Mock
-        public void setEtag(String etag)
-        {
-            mockedEtag = etag;
-        }
-
-        @Mock
         public JsonElement toJsonElement()
         {
             Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().disableHtmlEscaping().create();
@@ -132,8 +114,8 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = new EnrollmentGroup(
                 VALID_ENROLLMENT_GROUP_ID,
                 X509Attestation.createFromRootCertificates(PUBLIC_KEY_CERTIFICATE_STRING, null));
-        enrollmentGroup.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
-        enrollmentGroup.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);
+        enrollmentGroup.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.ENABLED);
         return enrollmentGroup;
     }
 
@@ -310,7 +292,7 @@ public class EnrollmentGroupTest
         Attestation attestation = enrollmentGroup.getAttestation();
         assertTrue("attestation is not x509", (attestation instanceof X509Attestation));
         X509Attestation x509Attestation = (X509Attestation)attestation;
-        X509CertificateWithInfo primary = x509Attestation.getRootCertificatesFinal().getPrimaryFinal();
+        X509CertificateWithInfo primary = x509Attestation.getRootCertificates().getPrimary();
         assertEquals(PUBLIC_KEY_CERTIFICATE_STRING, primary.getCertificate());
         X509CertificateInfo info = primary.getInfo();
         assertEquals(VALID_ENROLLMENT_GROUP_ID, info.getSha256Thumbprint());
@@ -730,7 +712,7 @@ public class EnrollmentGroupTest
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-        enrollmentGroup.setInitialTwinFinal(new TwinState(
+        enrollmentGroup.setInitialTwin(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
                     put("tag2", "valueTag2");
@@ -781,7 +763,7 @@ public class EnrollmentGroupTest
     {
         // arrange
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
-        enrollmentGroup.setInitialTwinFinal(new TwinState(
+        enrollmentGroup.setInitialTwin(new TwinState(
                 new TwinCollection() {{
                     put("tag1", "valueTag1");
                     put("tag2", "valueTag2");
@@ -999,7 +981,7 @@ public class EnrollmentGroupTest
             {
                 Deencapsulation.invoke(mockedAttestationMechanism, "getAttestation");
                 result = mockedX509Attestation;
-                mockedX509Attestation.getRootCertificatesFinal();
+                mockedX509Attestation.getRootCertificates();
                 result = null;
             }
         };
@@ -1026,7 +1008,7 @@ public class EnrollmentGroupTest
             {
                 Deencapsulation.invoke(mockedAttestationMechanism, "getAttestation");
                 result = mockedX509Attestation;
-                mockedX509Attestation.getRootCertificatesFinal();
+                mockedX509Attestation.getRootCertificates();
                 result = mockedX509Certificates;
             }
         };
@@ -1109,7 +1091,7 @@ public class EnrollmentGroupTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Attestation.getRootCertificatesFinal();
+                mockedX509Attestation.getRootCertificates();
                 result = null;
             }
         };
@@ -1133,7 +1115,7 @@ public class EnrollmentGroupTest
         new NonStrictExpectations()
         {
             {
-                mockedX509Attestation.getRootCertificatesFinal();
+                mockedX509Attestation.getRootCertificates();
                 result = mockedX509Certificates;
             }
         };
@@ -1183,7 +1165,7 @@ public class EnrollmentGroupTest
         assertNotEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
 
         // act
-        enrollmentGroup.setIotHubHostNameFinal(newHostName);
+        enrollmentGroup.setIotHubHostName(newHostName);
 
         // assert
         assertEquals(newHostName, Deencapsulation.getField(enrollmentGroup, "iotHubHostName"));
@@ -1197,7 +1179,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        enrollmentGroup.setInitialTwinFinal(null);
+        enrollmentGroup.setInitialTwin(null);
 
         // assert
     }
@@ -1211,7 +1193,7 @@ public class EnrollmentGroupTest
         assertNotEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
 
         // act
-        enrollmentGroup.setInitialTwinFinal(mockedTwinState);
+        enrollmentGroup.setInitialTwin(mockedTwinState);
 
         // assert
         assertEquals(mockedTwinState, Deencapsulation.getField(enrollmentGroup, "initialTwin"));
@@ -1225,7 +1207,7 @@ public class EnrollmentGroupTest
         EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
 
         // act
-        enrollmentGroup.setProvisioningStatusFinal(null);
+        enrollmentGroup.setProvisioningStatus(null);
 
         // assert
     }
@@ -1239,7 +1221,7 @@ public class EnrollmentGroupTest
         assertNotEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));
 
         // act
-        enrollmentGroup.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
+        enrollmentGroup.setProvisioningStatus(ProvisioningStatus.DISABLED);
 
         // assert
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(enrollmentGroup, "provisioningStatus"));

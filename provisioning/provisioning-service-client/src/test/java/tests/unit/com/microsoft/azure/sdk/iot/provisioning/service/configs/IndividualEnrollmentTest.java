@@ -80,21 +80,9 @@ public class IndividualEnrollmentTest
         }
 
         @Mock
-        public void setProvisioningStatus(ProvisioningStatus provisioningStatus)
-        {
-            mockedProvisioningStatus = provisioningStatus;
-        }
-
-        @Mock
         public void setInitialTwin(TwinState initialTwin)
         {
             mockedInitialTwin = initialTwin;
-        }
-
-        @Mock
-        public void setEtag(String etag)
-        {
-            mockedEtag = etag;
         }
 
         @Mock
@@ -112,9 +100,9 @@ public class IndividualEnrollmentTest
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(
                 VALID_REGISTRATION_ID,
                 new TpmAttestation(VALID_ENDORSEMENT_KEY, VALID_STORAGE_ROOT_KEY));
-        individualEnrollment.setDeviceIdFinal(VALID_DEVICE_ID);
-        individualEnrollment.setIotHubHostNameFinal(VALID_IOTHUB_HOST_NAME);
-        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.ENABLED);
+        individualEnrollment.setDeviceId(VALID_DEVICE_ID);
+        individualEnrollment.setIotHubHostName(VALID_IOTHUB_HOST_NAME);
+        individualEnrollment.setProvisioningStatus(ProvisioningStatus.ENABLED);
 
         return individualEnrollment;
     }
@@ -889,7 +877,7 @@ public class IndividualEnrollmentTest
         assertNotEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
 
         // act
-        individualEnrollment.setIotHubHostNameFinal(newHostName);
+        individualEnrollment.setIotHubHostName(newHostName);
 
         // assert
         assertEquals(newHostName, Deencapsulation.getField(individualEnrollment, "iotHubHostName"));
@@ -919,7 +907,7 @@ public class IndividualEnrollmentTest
         assertNotEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
 
         // act
-        individualEnrollment.setProvisioningStatusFinal(ProvisioningStatus.DISABLED);
+        individualEnrollment.setProvisioningStatus(ProvisioningStatus.DISABLED);
 
         // assert
         assertEquals(ProvisioningStatus.DISABLED, Deencapsulation.getField(individualEnrollment, "provisioningStatus"));
