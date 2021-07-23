@@ -32,8 +32,7 @@ abstract public class Mqtt implements MqttCallback
     private static final int QOS = 1;
     private static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
 
-    // paho mqtt only supports 10 messages in flight at the same time
-    private static final int MAX_IN_FLIGHT_COUNT = 10;
+    static final int MAX_IN_FLIGHT_COUNT = 65000;
 
     private MqttAsyncClient mqttAsyncClient;
     private final MqttConnectOptions connectOptions;
