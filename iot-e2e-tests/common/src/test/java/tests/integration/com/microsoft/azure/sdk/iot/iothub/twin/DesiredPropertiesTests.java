@@ -380,8 +380,8 @@ public class DesiredPropertiesTests extends DeviceTwinCommon
         String expectedValue2 = UUID.randomUUID().toString();
 
         TwinCollection expectedDesiredProperties = new TwinCollection();
-        expectedDesiredProperties.putFinal(expectedKey1, expectedValue1);
-        expectedDesiredProperties.putFinal(expectedKey2, expectedValue2);
+        expectedDesiredProperties.put(expectedKey1, expectedValue1);
+        expectedDesiredProperties.put(expectedKey2, expectedValue2);
         TwinPropertiesCallback twinPropertiesCallback = new TwinPropertiesCallbackImpl(expectedDesiredProperties);
 
         Success desiredPropertiesCallbackState = new Success();

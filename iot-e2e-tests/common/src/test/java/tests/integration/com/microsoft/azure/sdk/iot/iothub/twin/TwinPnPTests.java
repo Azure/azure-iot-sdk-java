@@ -46,7 +46,7 @@ public class TwinPnPTests extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString);
+        registryManager = new RegistryManager(iotHubConnectionString);
 
         List inputs = new ArrayList(Arrays.asList(
                 new Object[][]
@@ -114,7 +114,7 @@ public class TwinPnPTests extends IntegrationTest
             this.privateKey = x509CertificateGenerator.getPrivateKey();
             this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
 
-            this.twinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString);
+            this.twinServiceClient = new DeviceTwin(iotHubConnectionString);
         }
 
         public void setup() throws Exception {
@@ -134,9 +134,9 @@ public class TwinPnPTests extends IntegrationTest
             Module module = Module.createFromId(deviceId, moduleId, null);
 
             Device deviceX509 = Device.createDevice(deviceX509Id, AuthenticationType.SELF_SIGNED);
-            deviceX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            deviceX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             Module moduleX509 = Module.createModule(deviceX509Id, moduleX509Id, AuthenticationType.SELF_SIGNED);
-            moduleX509.setThumbprintFinal(x509Thumbprint, x509Thumbprint);
+            moduleX509.setThumbprint(x509Thumbprint, x509Thumbprint);
             device = Tools.addDeviceWithRetry(registryManager, device);
             deviceX509 = Tools.addDeviceWithRetry(registryManager, deviceX509);
             ClientOptions clientOptions = new ClientOptions();

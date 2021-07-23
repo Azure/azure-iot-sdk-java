@@ -75,8 +75,8 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         String jsonPayload = "{\"a\":\"b\"}";
         String expectedHubToProvisionTo;
-        String farAwayIotHubHostname = IotHubConnectionString.createConnectionString(farAwayIotHubConnectionString).getHostName();
-        String iothubHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
+        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         if (farAwayIotHubHostname.length() > iothubHostName.length())
         {
@@ -232,8 +232,8 @@ public class ProvisioningTests extends ProvisioningCommon
         }
 
         List<String> possibleStartingHubHostNames = new ArrayList<>();
-        String farAwayIotHubHostname = IotHubConnectionString.createConnectionString(farAwayIotHubConnectionString).getHostName();
-        String iothubHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
+        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
         possibleStartingHubHostNames.add(farAwayIotHubHostname);
         possibleStartingHubHostNames.add(iothubHostName);
 
@@ -378,11 +378,11 @@ public class ProvisioningTests extends ProvisioningCommon
             DeviceTwin twinClient;
             if (inFarAwayHub)
             {
-                twinClient = DeviceTwin.createFromConnectionString(farAwayIotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new DeviceTwin(farAwayIotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
             else
             {
-                twinClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+                twinClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
             }
 
             DeviceTwinDevice device = new DeviceTwinDevice(testInstance.provisionedDeviceId);
@@ -411,17 +411,17 @@ public class ProvisioningTests extends ProvisioningCommon
         }
     }
 
-    private List<String> getStartingHubs() throws IOException
+    private List<String> getStartingHubs()
     {
-        String farAwayIotHubHostname = IotHubConnectionString.createConnectionString(farAwayIotHubConnectionString).getHostName();
+        String farAwayIotHubHostname = IotHubConnectionString.createIotHubConnectionString(farAwayIotHubConnectionString).getHostName();
         List<String> iotHubsToStartAt = new ArrayList<>();
         iotHubsToStartAt.add(farAwayIotHubHostname);
         return iotHubsToStartAt;
     }
 
-    private List<String> getHubsToReprovisionTo() throws IOException
+    private List<String> getHubsToReprovisionTo()
     {
-        String iothubHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        String iothubHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
         List<String> iotHubsToReprovisionTo = new ArrayList<>();
         iotHubsToReprovisionTo.add(iothubHostName);
         return iotHubsToReprovisionTo;

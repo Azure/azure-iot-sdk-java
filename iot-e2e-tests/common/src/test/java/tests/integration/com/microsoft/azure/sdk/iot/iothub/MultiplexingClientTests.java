@@ -7,6 +7,7 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
+import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodData;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Pair;
@@ -120,8 +121,8 @@ public class MultiplexingClientTests extends IntegrationTest
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        registryManager = RegistryManager.createFromConnectionString(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
-        serviceClient = ServiceClient.createFromConnectionString(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
+        registryManager = new RegistryManager(iotHubConnectionString, RegistryManagerOptions.builder().httpReadTimeout(HTTP_READ_TIMEOUT).build());
+        serviceClient = new ServiceClient(iotHubConnectionString, IotHubServiceClientProtocol.AMQPS);
         serviceClient.open();
 
         return Arrays.asList(
@@ -170,7 +171,7 @@ public class MultiplexingClientTests extends IntegrationTest
                 deviceIdentityArray.add(i, testDeviceIdentity.getDevice());
             }
 
-            IotHubConnectionString connectionString = IotHubConnectionString.createConnectionString(iotHubConnectionString);
+            IotHubConnectionString connectionString = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString);
             this.multiplexingClient = new MultiplexingClient(connectionString.getHostName(), this.protocol, options);
             for (int i = 0; i < multiplexingDeviceSessionCount; i++)
             {
@@ -669,7 +670,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         testInstance.multiplexingClient.open();
-        DeviceMethod deviceMethodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+        DeviceMethod deviceMethodServiceClient = new DeviceMethod(iotHubConnectionString);
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -691,7 +692,7 @@ public class MultiplexingClientTests extends IntegrationTest
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         testInstance.multiplexingClient.open();
-        DeviceMethod deviceMethodServiceClient = DeviceMethod.createFromConnectionString(iotHubConnectionString);
+        DeviceMethod deviceMethodServiceClient = new DeviceMethod(iotHubConnectionString);
         List<DeviceMethodCallback> deviceMethodCallbacks = new ArrayList<>();
         List<String> expectedMethodNames = new ArrayList<>();
 
@@ -831,7 +832,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         testInstance.multiplexingClient.open();
 
-        DeviceTwin deviceTwinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
+        DeviceTwin deviceTwinServiceClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
 
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -864,7 +865,7 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().build(), true);
         testInstance.multiplexingClient.open();
 
-        DeviceTwin deviceTwinServiceClient = DeviceTwin.createFromConnectionString(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
+        DeviceTwin deviceTwinServiceClient = new DeviceTwin(iotHubConnectionString, DeviceTwinClientOptions.builder().httpReadTimeout(0).build());
         String expectedPropertyKey = UUID.randomUUID().toString();
         String expectedPropertyValue = UUID.randomUUID().toString();
         List<TwinPropertyCallBackImpl> twinPropertyCallBacks = new ArrayList<>();
@@ -1459,7 +1460,9 @@ public class MultiplexingClientTests extends IntegrationTest
         // since x509 auth isn't supported while multiplexing
         Device x509Device = Tools.getTestDevice(iotHubConnectionString, IotHubClientProtocol.MQTT, AuthenticationType.SELF_SIGNED, false).getDevice();
         String deviceConnectionString = registryManager.getDeviceConnectionString(x509Device);
-        DeviceClient x509DeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol, new IotHubSSLContext().getSSLContext());
+        ClientOptions options = new ClientOptions();
+        options.sslContext = new IotHubSSLContext().getSSLContext();
+        DeviceClient x509DeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol, options);
         registrationsUnwindForUnsupportedOperationExceptions(x509DeviceClient);
     }
 
@@ -1486,7 +1489,7 @@ public class MultiplexingClientTests extends IntegrationTest
         // to a multiplexing client. It shouldn't matter that the hostname itself isn't tied to an actual IoT Hub since
         // no network requests should be made before this hostname validation.
 
-        String actualHostName = IotHubConnectionString.createConnectionString(iotHubConnectionString).getHostName();
+        String actualHostName = IotHubConnectionString.createIotHubConnectionString(iotHubConnectionString).getHostName();
         deviceConnectionString = deviceConnectionString.replace(actualHostName, "some-fake-host-name.azure-devices.net");
 
         DeviceClient deviceClientWithDifferentHostName = new DeviceClient(deviceConnectionString, testInstance.protocol);

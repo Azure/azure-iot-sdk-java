@@ -69,7 +69,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException {
-        registryManager = RegistryManager.createFromConnectionString(IOTHUB_CONNECTION_STRING);
+        registryManager = new RegistryManager(IOTHUB_CONNECTION_STRING);
     }
 
     @Before

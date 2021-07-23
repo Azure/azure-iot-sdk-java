@@ -29,7 +29,7 @@ public class ProvisioningServiceClientTests
     @Before
     public void setUp()
     {
-        provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
+        provisioningServiceClient = new ProvisioningServiceClient(provisioningServiceConnectionString);
     }
 
     @Test
@@ -64,11 +64,11 @@ public class ProvisioningServiceClientTests
         assertEquals(retrievedAttestationMechanism.getType(), AttestationMechanismType.X509);
         assertTrue(retrievedAttestationMechanism.getAttestation() instanceof X509Attestation);
         X509Attestation retrievedX509Attestation = (X509Attestation) retrievedAttestationMechanism.getAttestation();
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal());
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal());
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal().getInfo());
-        assertNotNull(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal().getInfo().getSubjectName());
-        assertTrue(retrievedX509Attestation.getClientCertificatesFinal().getPrimaryFinal().getInfo().getSubjectName().contains(registrationId));
+        assertNotNull(retrievedX509Attestation.getClientCertificates());
+        assertNotNull(retrievedX509Attestation.getClientCertificates().getPrimary());
+        assertNotNull(retrievedX509Attestation.getClientCertificates().getPrimary().getInfo());
+        assertNotNull(retrievedX509Attestation.getClientCertificates().getPrimary().getInfo().getSubjectName());
+        assertTrue(retrievedX509Attestation.getClientCertificates().getPrimary().getInfo().getSubjectName().contains(registrationId));
     }
 
     @Test

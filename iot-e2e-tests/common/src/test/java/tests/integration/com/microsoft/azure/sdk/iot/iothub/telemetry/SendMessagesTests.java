@@ -128,32 +128,6 @@ public class SendMessagesTests extends SendMessagesCommon
 
     @Test
     @ContinuousIntegrationTest
-    public void tokenExpiredAfterOpenButBeforeSendHttp() throws Exception
-    {
-        final long SECONDS_FOR_SAS_TOKEN_TO_LIVE = 3;
-        final long MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE = 5000;
-
-        if (testInstance.protocol != HTTPS || testInstance.authenticationType != SAS || testInstance.useHttpProxy)
-        {
-            //This scenario only applies to HTTP since MQTT and AMQP allow expired sas tokens for 30 minutes after open
-            // as long as token did not expire before open. X509 doesn't apply either
-            return;
-        }
-
-        this.testInstance.setup();
-
-        String soonToBeExpiredSASToken = generateSasTokenForIotDevice(hostName, testInstance.identity.getDeviceId(), ((TestDeviceIdentity)testInstance.identity).getDevice().getPrimaryKey(), SECONDS_FOR_SAS_TOKEN_TO_LIVE);
-        DeviceClient client = new DeviceClient(soonToBeExpiredSASToken, testInstance.protocol);
-        client.open();
-
-        //Force the SAS token to expire before sending messages
-        Thread.sleep(MILLISECONDS_TO_WAIT_FOR_TOKEN_TO_EXPIRE);
-        IotHubServicesCommon.sendMessagesExpectingSASTokenExpiration(client, testInstance.protocol.toString(), 1, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
-        client.closeNow();
-    }
-
-    @Test
-    @ContinuousIntegrationTest
     public void expiredMessagesAreNotSent() throws Exception
     {
         if (testInstance.useHttpProxy)
