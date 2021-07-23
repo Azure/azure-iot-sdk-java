@@ -665,4 +665,10 @@ public final class DeviceClient extends InternalClient implements Closeable
                         "Invalid client protocol specified.");
         }
     }
+
+    @SuppressWarnings("unused")
+    private DeviceClient()
+    {
+        // empty constructor for mocking purposes only
+    }
 }
