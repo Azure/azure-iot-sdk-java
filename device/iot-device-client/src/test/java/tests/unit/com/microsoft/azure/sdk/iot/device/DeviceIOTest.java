@@ -247,7 +247,7 @@ public class DeviceIOTest
         Deencapsulation.invoke(deviceIO, "close");
     }
 
-    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
     public void closeDoesNothingOnUnopenedClientSuccess()
     {
@@ -261,7 +261,7 @@ public class DeviceIOTest
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
     public void closeDoesNothingOnClosedClientSuccess()
             throws IOException
@@ -279,7 +279,7 @@ public class DeviceIOTest
         assertEquals("DISCONNECTED", Deencapsulation.getField(deviceIO, "state").toString());
     }
 
-    /* Tests_SRS_DEVICE_IO_21_021: [The closeNow shall set the `state` as `CLOSE`.] */
+    /* Tests_SRS_DEVICE_IO_21_021: [The close shall set the `state` as `CLOSE`.] */
     @Test
     public void closeChangeStateToClosedSuccess()
             throws URISyntaxException, IOException

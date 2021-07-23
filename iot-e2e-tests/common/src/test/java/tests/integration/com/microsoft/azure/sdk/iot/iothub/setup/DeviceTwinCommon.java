@@ -427,7 +427,7 @@ public class DeviceTwinCommon extends IntegrationTest
             {
                 if (testInstance.testIdentity != null && testInstance.testIdentity.getClient() != null)
                 {
-                    testInstance.testIdentity.getClient().closeNow();
+                    testInstance.testIdentity.getClient().close();
                 }
             }
             catch (IOException e)
@@ -445,7 +445,7 @@ public class DeviceTwinCommon extends IntegrationTest
                     {
                         if (testIdentity != null && testIdentity.getClient() != null)
                         {
-                            testIdentity.getClient().closeNow();
+                            testIdentity.getClient().close();
                         }
                     }
                     catch (IOException e)

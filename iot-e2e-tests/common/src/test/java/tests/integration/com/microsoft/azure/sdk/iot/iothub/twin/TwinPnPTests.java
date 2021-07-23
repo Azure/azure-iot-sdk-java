@@ -198,7 +198,7 @@ public class TwinPnPTests extends IntegrationTest
         {
             try
             {
-                this.client.closeNow();
+                this.client.close();
                 registryManager.removeDevice(this.identity.getDeviceId()); //removes all modules associated with this device, too
             }
             catch (Exception e)

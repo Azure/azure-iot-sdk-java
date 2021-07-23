@@ -30,7 +30,7 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
 
     private interface DeviceClientNonDelegatedFunction {
         void open();
-        void closeNow();
+        void close();
         void registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback callback, Object callbackContext);
     }
 
@@ -96,11 +96,11 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
         }
     }
 
-    public void closeNow() {
+    public void close() {
         synchronized (lock) {
             try {
                 log.debug("Closing the device client instance...");
-                client.closeNow();
+                client.close();
             }
             catch (IOException e) {
                 log.error("Exception thrown while closing DeviceClient instance: ", e);
@@ -141,9 +141,9 @@ public class DeviceClientManager implements IotHubConnectionStatusChangeCallback
                         synchronized (lock) {
                             if (connectionStatus == ConnectionStatus.CONNECTED) {
                                 try {
-                                    client.closeNow();
+                                    client.close();
                                 } catch (Exception e) {
-                                    log.warn("DeviceClient closeNow failed.", e);
+                                    log.warn("DeviceClient close failed.", e);
                                 } finally {
                                     connectionStatus = ConnectionStatus.CONNECTING;
                                 }

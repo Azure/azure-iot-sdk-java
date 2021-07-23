@@ -136,7 +136,7 @@ public class ProvisioningDeviceClient
     /**
      * Closes all the executors opened by the client if they have not already closed.
      */
-    public void closeNow()
+    public void close()
     {
         //SRS_ProvisioningDeviceClient_25_011: [ This method shall check if executor is terminated and if not shall shutdown the executor. ]
         if (executor != null && !executor.isTerminated())

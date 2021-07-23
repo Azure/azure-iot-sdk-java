@@ -156,7 +156,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
             {
                 if (this.identity != null && this.identity.getClient() != null)
                 {
-                    this.identity.getClient().closeNow();
+                    this.identity.getClient().close();
                 }
 
                 this.serviceClient.close();

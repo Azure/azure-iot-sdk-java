@@ -91,6 +91,6 @@ public class ReceiveMessagesTests extends ReceiveMessagesCommon
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
 
         Thread.sleep(200);
-        testInstance.identity.getClient().closeNow();
+        testInstance.identity.getClient().close();
     }
 }

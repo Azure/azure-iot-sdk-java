@@ -288,7 +288,7 @@ public class SendMessagesCommon extends IntegrationTest
             {
                 if (this.identity != null && this.identity.getClient() != null)
                 {
-                    this.identity.getClient().closeNow();
+                    this.identity.getClient().close();
                 }
             }
             catch (IOException e)
@@ -400,7 +400,7 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void closeConnection() throws IOException
         {
-            client.closeNow();
+            client.close();
         }
     }
 

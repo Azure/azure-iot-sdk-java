@@ -229,7 +229,7 @@ public class DeviceTwinWithVersionTests extends IntegrationTest
     {
         if (testInstance.deviceTwinWithVersionTestDevice.deviceClient != null)
         {
-            testInstance.deviceTwinWithVersionTestDevice.deviceClient.closeNow();
+            testInstance.deviceTwinWithVersionTestDevice.deviceClient.close();
             testInstance.deviceTwinWithVersionTestDevice.deviceClient = null;
         }
 

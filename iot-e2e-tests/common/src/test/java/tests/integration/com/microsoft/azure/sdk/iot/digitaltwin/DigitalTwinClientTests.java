@@ -132,7 +132,7 @@ public class DigitalTwinClientTests extends IntegrationTest
     @After
     public void cleanUp() {
         try {
-            deviceClient.closeNow();
+            deviceClient.close();
             registryManager.removeDevice(deviceId);
         } catch (Exception ex) {
             log.error("An exception occurred while closing/ deleting the device {}: {}", deviceId, ex);

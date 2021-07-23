@@ -210,7 +210,7 @@ public final class DeviceClient extends InternalClient implements Closeable
     {
         if (this.fileUpload != null)
         {
-            this.fileUpload.closeNow();
+            this.fileUpload.close();
         }
 
         if (this.fileUploadTask != null)
@@ -266,15 +266,17 @@ public final class DeviceClient extends InternalClient implements Closeable
     }
 
     /**
-     * Completes all current outstanding requests and closes the IoT hub client.
+     * Closes the IoT hub client by releasing any resources held by client. When
+     * called, all the messages that were in transit or pending to be
+     * sent will be informed to the user in the callbacks and any existing
+     * connection to IotHub will be closed.
      * Must be called to terminate the background thread that is sending data to
-     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
-     * usable. If the client is already closed, the function shall do nothing.
-     * @deprecated : As of release 1.1.25 this call is replaced by {@link #closeNow()}
+     * IoT hub. After {@code close()} is called, the IoT hub client is no longer
+     * usable. If the client is already closed, the function shall do nothing. This client
+     * can be used again after it is opened with {@link #open()} again.
      *
      * @throws IOException if the connection to an IoT hub cannot be closed.
      */
-    @Deprecated
     public void close() throws IOException
     {
         if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
@@ -282,34 +284,9 @@ public final class DeviceClient extends InternalClient implements Closeable
             throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
         }
 
-        //Codes_SRS_DEVICECLIENT_34_040: [If this object is not using a transport client, it shall invoke super.close().]
+        //Codes_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.close().]
         log.info("Closing device client...");
         super.close();
-
-        log.info("Device client closed successfully");
-    }
-
-    /**
-     * Closes the IoT hub client by releasing any resources held by client. When
-     * closeNow is called all the messages that were in transit or pending to be
-     * sent will be informed to the user in the callbacks and any existing
-     * connection to IotHub will be closed.
-     * Must be called to terminate the background thread that is sending data to
-     * IoT hub. After {@code closeNow()} is called, the IoT hub client is no longer
-     * usable. If the client is already closed, the function shall do nothing.
-     *
-     * @throws IOException if the connection to an IoT hub cannot be closed.
-     */
-    public void closeNow() throws IOException
-    {
-        if (this.ioTHubConnectionType == IoTHubConnectionType.USE_MULTIPLEXING_CLIENT)
-        {
-            throw new UnsupportedOperationException(MULTIPLEXING_CLOSE_ERROR_MESSAGE);
-        }
-
-        //Codes_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.closeNow().]
-        log.info("Closing device client...");
-        super.closeNow();
         this.closeFileUpload();
 
         log.info("Device client closed successfully");
@@ -639,7 +616,7 @@ public final class DeviceClient extends InternalClient implements Closeable
                     }
                     catch (IOException e)
                     {
-                        // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
+                        // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or close() throws.]
                         throw new IOError(e);
                     }
                 }

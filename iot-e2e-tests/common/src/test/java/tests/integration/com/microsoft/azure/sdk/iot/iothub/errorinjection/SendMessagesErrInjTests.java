@@ -322,6 +322,6 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 SEND_TIMEOUT_MILLISECONDS,
                 this.testInstance.protocol);
 
-        testInstance.identity.getClient().closeNow();
+        testInstance.identity.getClient().close();
     }
 }

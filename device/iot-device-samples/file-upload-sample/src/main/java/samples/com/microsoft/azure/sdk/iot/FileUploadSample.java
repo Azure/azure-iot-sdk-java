@@ -82,7 +82,7 @@ public class FileUploadSample
         {
             System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \nERROR: " +  e.getMessage());
             System.out.println("Shutting down...");
-            client.closeNow();
+            client.close();
         }
 
         System.out.println("Press any key to exit...");
@@ -90,7 +90,7 @@ public class FileUploadSample
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
         System.out.println("Shutting down...");
-        client.closeNow();
+        client.close();
     }
 
     private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException {
@@ -174,7 +174,7 @@ public class FileUploadSample
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 }

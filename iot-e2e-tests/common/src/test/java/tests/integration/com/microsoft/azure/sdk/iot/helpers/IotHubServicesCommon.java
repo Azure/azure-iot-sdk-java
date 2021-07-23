@@ -89,7 +89,7 @@ public class IotHubServicesCommon
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
@@ -124,7 +124,7 @@ public class IotHubServicesCommon
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
@@ -150,7 +150,7 @@ public class IotHubServicesCommon
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 
@@ -238,7 +238,7 @@ public class IotHubServicesCommon
                 }
             }
 
-            client.closeNow();
+            client.close();
 
             if (messageSentExpiredCallback.getCallbackStatusCode() != IotHubStatusCode.MESSAGE_EXPIRED)
             {
@@ -247,7 +247,7 @@ public class IotHubServicesCommon
         }
         catch (Exception e)
         {
-            client.closeNow();
+            client.close();
             Assert.fail(buildExceptionMessage("Sending expired message over " + protocol + " protocol failed: Exception encountered while sending message and waiting for MESSAGE_EXPIRED callback: " + e.getMessage(), client));
         }
     }
@@ -278,7 +278,7 @@ public class IotHubServicesCommon
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected but retrying.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
         Assert.assertTrue(buildExceptionMessage(protocol + ", " + authType + ": Expected notification about disconnected.", client), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED));
 
-        client.closeNow();
+        client.close();
     }
 
     public static void sendErrorInjectionMessageAndWaitForResponse(InternalClient client, MessageAndResult messageAndResult, long RETRY_MILLISECONDS, long SEND_TIMEOUT_MILLISECONDS, IotHubClientProtocol protocol)

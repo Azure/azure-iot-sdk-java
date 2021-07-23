@@ -260,7 +260,7 @@ public class FileUploadTests extends IntegrationTest
 
     private void tearDownDeviceClient(DeviceClient deviceClient) throws IOException
     {
-        deviceClient.closeNow();
+        deviceClient.close();
     }
 
     private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState, DeviceClient deviceClient) throws IOException

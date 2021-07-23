@@ -169,7 +169,7 @@ public class ProvisioningDeviceClientTest
 
     //SRS_ProvisioningDeviceClient_25_011: [ This method shall check if executor is terminated and if not shall shutdown the executor. ]
     @Test
-    public void closeNowSucceeds() throws ProvisioningDeviceClientException
+    public void closeSucceeds() throws ProvisioningDeviceClientException
     {
         //arrange
         new NonStrictExpectations()
@@ -182,7 +182,7 @@ public class ProvisioningDeviceClientTest
 
         ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(END_POINT, SCOPE_ID, TEST_PROTOCOL, mockedSecurityProvider);
         //act
-        testProvisioningDeviceClient.closeNow();
+        testProvisioningDeviceClient.close();
         //assert
         new Verifications()
         {
@@ -194,7 +194,7 @@ public class ProvisioningDeviceClientTest
     }
 
     @Test
-    public void closeNowTerminatedSucceeds() throws ProvisioningDeviceClientException
+    public void closeTerminatedSucceeds() throws ProvisioningDeviceClientException
     {
         //arrange
         new NonStrictExpectations()
@@ -207,7 +207,7 @@ public class ProvisioningDeviceClientTest
 
         ProvisioningDeviceClient testProvisioningDeviceClient = ProvisioningDeviceClient.create(END_POINT, SCOPE_ID, TEST_PROTOCOL, mockedSecurityProvider);
         //act
-        testProvisioningDeviceClient.closeNow();
+        testProvisioningDeviceClient.close();
         //assert
         new Verifications()
         {

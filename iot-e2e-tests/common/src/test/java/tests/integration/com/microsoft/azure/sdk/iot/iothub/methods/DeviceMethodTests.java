@@ -245,7 +245,7 @@ public class DeviceMethodTests extends DeviceMethodCommon
         try
         {
             //force the device offline
-            testInstance.deviceTestManager.client.closeNow();
+            testInstance.deviceTestManager.client.close();
 
             if (testInstance.identity instanceof TestModuleIdentity)
             {

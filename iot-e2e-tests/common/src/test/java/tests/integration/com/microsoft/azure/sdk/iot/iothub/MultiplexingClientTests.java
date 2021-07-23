@@ -1476,7 +1476,7 @@ public class MultiplexingClientTests extends IntegrationTest
         //By opening the client once, this client can no longer be registered to a multiplexing client
         nonMultiplexedDeviceClient.open();
         registrationsUnwindForUnsupportedOperationExceptions(nonMultiplexedDeviceClient);
-        nonMultiplexedDeviceClient.closeNow();
+        nonMultiplexedDeviceClient.close();
     }
 
     @Test

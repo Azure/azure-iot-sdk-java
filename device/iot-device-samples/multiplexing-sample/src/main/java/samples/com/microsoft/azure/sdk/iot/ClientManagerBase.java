@@ -58,10 +58,10 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
 
     public void close()
     {
-        closeNow();
+        close();
     }
 
-    public void closeNow()
+    public void close()
     {
         synchronized (lastKnownConnectionStatusLock)
         {
@@ -165,7 +165,7 @@ public abstract class ClientManagerBase implements IotHubConnectionStatusChangeC
                             }
                             catch (Exception ex)
                             {
-                                log.warn("Client " + getClientId() + " closeNow failed.", ex);
+                                log.warn("Client " + getClientId() + " close failed.", ex);
                             }
                             finally
                             {

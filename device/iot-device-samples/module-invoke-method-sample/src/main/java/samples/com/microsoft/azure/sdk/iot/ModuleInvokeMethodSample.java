@@ -105,7 +105,7 @@ public class ModuleInvokeMethodSample
         }
         finally
         {
-            client.closeNow();
+            client.close();
         }
     }
 

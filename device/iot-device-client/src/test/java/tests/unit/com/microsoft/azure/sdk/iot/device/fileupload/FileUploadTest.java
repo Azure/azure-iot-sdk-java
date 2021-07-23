@@ -287,16 +287,16 @@ public class FileUploadTest
         fileUpload.uploadToBlobAsync(blobName, mockInputStream, streamLength, null, context);
     }
 
-    /* Tests_SRS_FILEUPLOAD_21_017: [The closeNow shall shutdown the thread pool by calling `shutdownNow`.] */
+    /* Tests_SRS_FILEUPLOAD_21_017: [The close shall shutdown the thread pool by calling `shutdownNow`.] */
     @Test
-    public void closeNowSuccess() throws IOException
+    public void closeSuccess() throws IOException
     {
         // arrange
         constructorExpectations();
         FileUpload fileUpload = new FileUpload(mockConfig);
 
         // act
-        fileUpload.closeNow();
+        fileUpload.close();
 
         // assert
         new Verifications()
@@ -309,9 +309,9 @@ public class FileUploadTest
 
     }
 
-    /* Tests_SRS_FILEUPLOAD_21_018: [If there is pending file uploads, the closeNow shall cancel the upload, and call the `statusCallback` reporting ERROR.] */
+    /* Tests_SRS_FILEUPLOAD_21_018: [If there is pending file uploads, the close shall cancel the upload, and call the `statusCallback` reporting ERROR.] */
     @Test
-    public void closeNowWithPendingUploadSuccess(@Mocked final Future mockFuture) throws IOException
+    public void closeWithPendingUploadSuccess(@Mocked final Future mockFuture) throws IOException
     {
         // arrange
         final Map<String, Object> context = new HashMap<>();
@@ -337,7 +337,7 @@ public class FileUploadTest
         Deencapsulation.setField(fileUpload, "fileUploadInProgressesSet", fileUploadInProgressSet);
 
         // act
-        fileUpload.closeNow();
+        fileUpload.close();
 
         // assert
         new Verifications()

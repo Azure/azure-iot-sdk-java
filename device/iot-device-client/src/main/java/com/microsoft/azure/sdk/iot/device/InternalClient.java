@@ -205,17 +205,6 @@ public class InternalClient
 
     public void close() throws IOException
     {
-        //noinspection StatementWithEmptyBody
-        while (!this.deviceIO.isEmpty())
-        {
-            // Don't do anything until the transport layer underneath has indicated that it doesn't have any more pending messages to send.
-        }
-
-        this.deviceIO.close();
-    }
-
-    public void closeNow() throws IOException
-    {
         this.deviceIO.close();
     }
 
@@ -409,8 +398,8 @@ public class InternalClient
      * with a status and a reason why the device's status changed. When the callback is fired, the provided context will
      * be provided alongside the status and reason.
      *
-     * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
-     * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
+     * <p>Note that the thread used to deliver this callback should not be used to call open()/close() on the client
+     * that this callback belongs to. All open()/close() operations should be done on a separate thread</p>
      *
      * @param callback The callback to be fired when the connection status of the device changes. Can be null to
      *                 unset this listener as long as the provided callbackContext is also null.
@@ -1058,7 +1047,7 @@ public class InternalClient
                     }
                     catch (IOException e)
                     {
-                        // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
+                        // Codes_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or close() throws.]
                         throw new IOError(e);
                     }
                 }

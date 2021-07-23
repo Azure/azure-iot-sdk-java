@@ -710,8 +710,8 @@ public class MultiplexingClient
      * when a particular device's connection status changes, you will need to register a connection status change callback
      * on that device client instance using {@link DeviceClient#registerConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object)}.
      *
-     * <p>Note that the thread used to deliver this callback should not be used to call open()/closeNow() on the client
-     * that this callback belongs to. All open()/closeNow() operations should be done on a separate thread</p>
+     * <p>Note that the thread used to deliver this callback should not be used to call open()/close() on the client
+     * that this callback belongs to. All open()/close() operations should be done on a separate thread</p>
      *
      * @param callback The callback to be fired when the connection status of the multiplexed connection changes.
      *                 Can be null to unset this listener as long as the provided callbackContext is also null.
