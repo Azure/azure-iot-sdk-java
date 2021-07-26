@@ -1255,18 +1255,6 @@ public class InternalClient
     }
 
     /**
-     * Set the global command callback handler.
-     * @param callback The callback to be used for commands.
-     * @param callbackContext An optional user context to be sent to the callback.
-     */
-    public void subscribeToCommands(DeviceMethodCallback callback, Object callbackContext)
-    {
-        // Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
-        // TODO Implement command handler
-    }
-
-
-    /**
      * Retreieve the client properties.
      * @param callback The callback to be used for receiving client properties.
      * @param callbackContext An optional user context to be sent to the callback.
