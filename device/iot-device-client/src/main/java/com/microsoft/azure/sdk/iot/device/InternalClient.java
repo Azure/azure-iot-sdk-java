@@ -5,11 +5,14 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -56,6 +59,9 @@ public class InternalClient
     private DeviceTwin twin;
     private DeviceMethod method;
 
+    @Getter
+    private PayloadConvention PayloadConvention = config.getPayloadConvention();
+
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
     {
         /* Codes_SRS_INTERNALCLIENT_21_004: [If the connection string is null or empty, the function shall throw an IllegalArgumentException.] */
@@ -66,7 +72,6 @@ public class InternalClient
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();
         }
-
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -1215,5 +1220,102 @@ public class InternalClient
         {
             throw new UnsupportedOperationException(METHODS_OVER_HTTP_ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Sends the TelemetryMessage to IoT hub.
+     * @param telemetryMessage The user supplied telemetry message.
+     */
+    public void sendTelemetry(TelemetryMessage telemetryMessage)
+    {
+        sendTelemetry(telemetryMessage, null, null);
+    }
+
+    /**
+     * Sends the TelemetryMessage to IoT hub.
+     * @param telemetryMessage The user supplied telemetry message.
+     * @param callback the callback to be invoked when a response is received. Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be {@code null} if no callback is provided.
+     */
+    public void sendTelemetry(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object callbackContext)
+    {
+        if (telemetryMessage == null)
+        {
+            throw new IllegalArgumentException("telemetryMessage property cannot be null");
+        }
+
+        if (telemetryMessage.Telemetry != null)
+        {
+            telemetryMessage.Telemetry.Convention = PayloadConvention;
+            telemetryMessage.setContentEncoding(PayloadConvention.getPayloadEncoder().getContentEncoding().name());
+            telemetryMessage.setContentTypeFinal(PayloadConvention.getPayloadSerializer().getContentType());
+        }
+
+        sendEventAsync(telemetryMessage, callback, callbackContext);
+    }
+
+    /**
+     * Set the global command callback handler.
+     * @param callback The callback to be used for commands.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void subscribeToCommands(DeviceMethodCallback callback, Object callbackContext)
+    {
+        // Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
+        // TODO Implement command handler
+    }
+
+
+    /**
+     * Retreieve the client properties.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void getClientProperties(ClientPropertiesCallback callback, Object callbackContext)
+    {
+        // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
+        // this map gets populated with a number of callbacks.
+        try
+        {
+            twin.getClientProperties(callback, callbackContext);
+        }
+        catch (Throwable ex)
+        {
+            throw ex;
+        }
+    }
+
+    /**
+     * Update the client properties.
+     * @param clientProperties The client properties to send.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     */
+    public void updateClientProperties(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
+    {
+        if (clientProperties == null)
+        {
+            throw new IllegalArgumentException("clientProperties property cannot be null");
+        }
+
+        clientProperties.Convention = PayloadConvention;
+
+        verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
+
+        verifyReportedProperties(clientProperties.getCollectionAsSetOfProperty());
+
+        this.twin.updateClientProperties(clientProperties, null, null,null, callback, callbackContext);
+    }
+
+    /**
+     * Set the global writable properties callback handler.
+     * @param writablePropertyUpdateCallback The callback to be used for writable properties.
+     * @param callbackContext An optional user context to be sent to the callback.
+     * @throws IOException
+     */
+    public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object callbackContext) throws IOException
+    {
+        twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, callbackContext);
     }
 }
