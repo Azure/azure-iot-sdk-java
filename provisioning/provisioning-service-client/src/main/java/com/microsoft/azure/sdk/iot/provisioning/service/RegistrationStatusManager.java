@@ -104,7 +104,7 @@ public class RegistrationStatusManager
     /**
      * Delete registration status.
      *
-     * @see ProvisioningServiceClient#deleteDeviceRegistrationStatus(DeviceRegistrationState)
+     * @see ProvisioningServiceClient#deleteDeviceRegistrationState(DeviceRegistrationState)
      *
      * @param DeviceRegistrationState is a {@link DeviceRegistrationState} that describes the registration status
      *                                 that will be deleted. It cannot be {@code null}.
@@ -144,8 +144,8 @@ public class RegistrationStatusManager
     /**
      * Delete registration status.
      *
-     * @see ProvisioningServiceClient#deleteDeviceRegistrationStatus(String)
-     * @see ProvisioningServiceClient#deleteDeviceRegistrationStatus(String, String)
+     * @see ProvisioningServiceClient#deleteDeviceRegistrationState(String)
+     * @see ProvisioningServiceClient#deleteDeviceRegistrationState(String, String)
      *
      * @param id is a {@link String} with the identification of the registration status to delete. It cannot be {@code null} or empty.
      * @param eTag is a {@link String} with the eTag of the enrollment to delete. It can be {@code null} or empty (ignored).

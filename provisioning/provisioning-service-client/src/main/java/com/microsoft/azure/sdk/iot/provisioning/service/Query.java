@@ -28,7 +28,7 @@ import java.util.*;
  *     </tr>
  *     <tr>
  *         <td><b>RegistrationStatus:</b></td>
- *         <td>{@link ProvisioningServiceClient#createEnrollmentGroupRegistrationStatusQuery(QuerySpecification, String, int)}</td>
+ *         <td>{@link ProvisioningServiceClient#createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String, int)}</td>
  *     </tr>
  * </table>
  * <p> On all cases, the <b>QuerySpecification</b> contains a SQL query that must follow the
@@ -91,7 +91,7 @@ public class Query implements Iterator<QueryResult>
      *     </tr>
      *     <tr>
      *         <td><b>RegistrationStatus:</b></td>
-     *         <td>{@link ProvisioningServiceClient#createEnrollmentGroupRegistrationStatusQuery(QuerySpecification, String, int)}</td>
+     *         <td>{@link ProvisioningServiceClient#createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String, int)}</td>
      *     </tr>
      * </table>
      *
