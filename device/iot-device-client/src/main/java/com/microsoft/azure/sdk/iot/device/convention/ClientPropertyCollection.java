@@ -137,7 +137,7 @@ public class ClientPropertyCollection extends PayloadCollection
         Object objectToGet = this.get(propertyName);
         if (objectToGet != null)
         {
-            return Convention.PayloadSerializer.convertFromObject(objectToGet);
+            return Convention.getPayloadSerializer().convertFromObject(objectToGet);
         }
         return null;
     }
@@ -153,9 +153,9 @@ public class ClientPropertyCollection extends PayloadCollection
     public <T> T getComponent(String componentName)
     {
         Object objectToGet = this.get(componentName);
-        if (objectToGet != null  && Convention.PayloadSerializer.getNestedObjectValue(objectToGet, ConventionConstants.ComponentIdentifierKey) != null)
+        if (objectToGet != null  && Convention.getPayloadSerializer().getNestedObjectValue(objectToGet, ConventionConstants.COMPONENT_IDENTIFIER_KEY) != null)
         {
-            return Convention.PayloadSerializer.convertFromObject(objectToGet);
+            return Convention.getPayloadSerializer().convertFromObject(objectToGet);
         }
         return null;
     }
@@ -174,7 +174,7 @@ public class ClientPropertyCollection extends PayloadCollection
         Object objectToGet = this.getComponent(componentName);
         if (objectToGet != null)
         {
-            return Convention.PayloadSerializer.getNestedObjectValue(objectToGet, propertyName);
+            return Convention.getPayloadSerializer().getNestedObjectValue(objectToGet, propertyName);
         }
         return null;
     }
@@ -194,7 +194,7 @@ public class ClientPropertyCollection extends PayloadCollection
     public final void putComponentProperty(String componentName, String propertyName, Object propertyValue)
     {
         HashMap<String, Object> mapToAdd = new HashMap<>();
-        mapToAdd.put(ConventionConstants.ComponentIdentifierKey, ConventionConstants.ComponentIdentifierValue);
+        mapToAdd.put(ConventionConstants.COMPONENT_IDENTIFIER_KEY, ConventionConstants.COMPONENT_IDENTIFIER_VALUE);
         mapToAdd.put(propertyName, propertyValue);
         put(componentName, mapToAdd);
     }

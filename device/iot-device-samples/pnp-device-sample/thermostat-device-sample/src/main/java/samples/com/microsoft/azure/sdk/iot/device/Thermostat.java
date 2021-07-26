@@ -333,7 +333,7 @@ public class Thermostat
                             Thread.sleep(5 * 1000);
                         }
 
-                        IWritablePropertyResponse updated = (IWritablePropertyResponse) collection.get(propertyName);
+                        WritablePropertyResponse updated = (WritablePropertyResponse) collection.get(propertyName);
                         updated.setAckCode(StatusCode.COMPLETED.value);
 
                         deviceClient.updateClientProperties(collection, null, null);

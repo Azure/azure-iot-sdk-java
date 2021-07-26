@@ -1203,7 +1203,7 @@ public class InternalClient
 
     /**
      * Sends the TelemetryMessage to IoT hub.
-     * @param telemetryMessage
+     * @param telemetryMessage The user supplied telemetry message.
      */
     public void sendTelemetry(TelemetryMessage telemetryMessage)
     {
@@ -1212,9 +1212,11 @@ public class InternalClient
 
     /**
      * Sends the TelemetryMessage to IoT hub.
-     * @param telemetryMessage
+     * @param telemetryMessage The user supplied telemetry message.
+     * @param callback the callback to be invoked when a response is received. Can be {@code null}.
+     * @param callbackContext a context to be passed to the callback. Can be {@code null} if no callback is provided.
      */
-    public void sendTelemetry(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object context)
+    public void sendTelemetry(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object callbackContext)
     {
         if (telemetryMessage == null)
         {
@@ -1224,59 +1226,37 @@ public class InternalClient
         if (telemetryMessage.Telemetry != null)
         {
             telemetryMessage.Telemetry.Convention = PayloadConvention;
-            telemetryMessage.setContentEncoding(PayloadConvention.PayloadEncoder.ContentEncoding.name());
-            telemetryMessage.setContentTypeFinal(PayloadConvention.PayloadSerializer.ContentType);
+            telemetryMessage.setContentEncoding(PayloadConvention.getPayloadEncoder().getContentEncoding().name());
+            telemetryMessage.setContentTypeFinal(PayloadConvention.getPayloadSerializer().getContentType());
         }
 
-        sendEventAsync(telemetryMessage, callback, context);
+        sendEventAsync(telemetryMessage, callback, callbackContext);
     }
 
     /**
-     *
-     * @param callback
-     * @param userContext
+     * Set the global command callback handler.
+     * @param callback The callback to be used for commands.
+     * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void subscribeToCommands(DeviceMethodCallback callback, Object userContext)
+    public void subscribeToCommands(DeviceMethodCallback callback, Object callbackContext)
     {
         // Subscribe to methods default handler internally and use the callback received internally to invoke the user supplied command callback.
-
-        /*var methodDefaultCallback = new MethodCallback(async (methodRequest, userContext) =>
-                {
-                        CommandRequest commandRequest;
-        if (methodRequest.Name != null
-                && methodRequest.Name.Contains(ConventionBasedConstants.ComponentLevelCommandSeparator))
-        {
-            string[] split = methodRequest.Name.Split(ConventionBasedConstants.ComponentLevelCommandSeparator);
-            string componentName = split[0];
-            string commandName = split[1];
-            commandRequest = new CommandRequest(PayloadConvention, commandName, componentName, methodRequest.Data);
-        }
-        else
-        {
-            commandRequest = new CommandRequest(payloadConvention: PayloadConvention, commandName: methodRequest.Name, data: methodRequest.Data);
-        }
-
-        CommandResponse commandResponse = await callback.Invoke(commandRequest, userContext).ConfigureAwait(false);
-        commandResponse.PayloadConvention = PayloadConvention;
-        return commandResponse.ResultAsBytes != null
-                ? new MethodResponse(commandResponse.ResultAsBytes, commandResponse.Status)
-                : new MethodResponse(commandResponse.Status);
-            });
-
-        return SetMethodDefaultHandlerAsync(methodDefaultCallback, userContext);*/
+        // TODO Implement command handler
     }
 
+
     /**
-     *
-     * @return
+     * Retreieve the client properties.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void getClientProperties(ClientPropertiesCallback callback, Object context)
+    public void getClientProperties(ClientPropertiesCallback callback, Object callbackContext)
     {
         // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
         // this map gets populated with a number of callbacks.
         try
         {
-            twin.getClientProperties(callback, context);
+            twin.getClientProperties(callback, callbackContext);
         }
         catch (Throwable ex)
         {
@@ -1285,12 +1265,12 @@ public class InternalClient
     }
 
     /**
-     *
-     * @param clientProperties
-     * @return
-     * @throws IOException
+     * Update the client properties.
+     * @param clientProperties The client properties to send.
+     * @param callback The callback to be used for receiving client properties.
+     * @param callbackContext An optional user context to be sent to the callback.
      */
-    public void updateClientProperties(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object context) throws IOException
+    public void updateClientProperties(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object callbackContext) throws IOException
     {
         if (clientProperties == null)
         {
@@ -1304,17 +1284,17 @@ public class InternalClient
 
         verifyReportedProperties(clientProperties.getCollectionAsSetOfProperty());
 
-        this.twin.updateClientProperties(clientProperties, null, null,null, callback, context);
+        this.twin.updateClientProperties(clientProperties, null, null,null, callback, callbackContext);
     }
 
     /**
-     *
-     * @param writablePropertyUpdateCallback
-     * @param userContext
+     * Set the global writable properties callback handler.
+     * @param writablePropertyUpdateCallback The callback to be used for writable properties.
+     * @param callbackContext An optional user context to be sent to the callback.
      * @throws IOException
      */
-    public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object userContext) throws IOException
+    public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object callbackContext) throws IOException
     {
-        twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, userContext);
+        twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, callbackContext);
     }
 }

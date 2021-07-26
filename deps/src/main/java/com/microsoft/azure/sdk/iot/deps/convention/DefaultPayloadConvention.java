@@ -2,23 +2,24 @@ package com.microsoft.azure.sdk.iot.deps.convention;
 
 import lombok.Getter;
 
-/// <summary>
-/// The default implementation of the <see cref="PayloadConvention"/> class.
-/// </summary>
-/// <remarks>
-/// This class makes use of the <see cref="NewtonsoftJsonPayloadSerializer"/> serializer and the <see cref="Utf8PayloadEncoder"/>.
-/// </remarks>
+import java.lang.annotation.Inherited;
+
+/**
+ * The default implementation of the {@link PayloadConvention} class.
+ *
+ * <p>This class makes use of the {@link GsonPayloadSerializer} serializer and the {@link Utf8PayloadEncoder}.</p>
+ */
 public final class DefaultPayloadConvention extends PayloadConvention
 {
-    /// <summary>
-    /// A static instance of this class.
-    /// </summary>
+    /**
+     * A static instance of this class.
+     */
     @Getter
     public static DefaultPayloadConvention Instance = new DefaultPayloadConvention();
 
     @Getter
-    public PayloadSerializer PayloadSerializer = GsonPayloadSerializer.Instance;
+    PayloadSerializer PayloadSerializer = GsonPayloadSerializer.Instance;
 
     @Getter
-    public PayloadEncoder PayloadEncoder = Utf8PayloadEncoder.Instance;
+    PayloadEncoder PayloadEncoder = Utf8PayloadEncoder.Instance;
 }

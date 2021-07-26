@@ -8,33 +8,33 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-public final class GsonWritablePropertyResponse implements IWritablePropertyResponse
+public final class GsonWritablePropertyResponse implements WritablePropertyResponse
 {
 
-    /// <summary>
-    /// The unserialized property value.
-    /// </summary>
+    /**
+     * The unserialized property value.
+     */
     @NonNull
     @SerializedName("value")
     Object Value;
 
-    /// <summary>
-    /// The acknowledgment code, usually an HTTP Status Code e.g. 200, 400.
-    /// </summary>
+    /**
+     * The acknowledgment code, usually an HTTP Status Code e.g. 200, 400.
+     */
     @NonNull
     @SerializedName("ac")
     int AckCode;
 
-    /// <summary>
-    /// The acknowledgment version, as supplied in the property update request.
-    /// </summary>
+    /**
+     * The acknowledgment version, as supplied in the property update request.
+     */
     @NonNull
     @SerializedName("av")
     long AckVersion;
 
-    /// <summary>
-    /// The acknowledgment description, an optional, human-readable message about the result of the property update.
-    /// </summary>
+    /**
+     * The acknowledgment description, an optional, human-readable message about the result of the property update.
+     */
     @SerializedName("ad")
     String AckDescription;
 }

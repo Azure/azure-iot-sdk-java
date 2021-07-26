@@ -3,7 +3,7 @@ package com.microsoft.azure.sdk.iot.deps.convention;
 import lombok.Getter;
 import lombok.Setter;
 
-public interface IWritablePropertyResponse
+public interface WritablePropertyResponse
 {
     Object getValue();
     void setValue(Object obj);

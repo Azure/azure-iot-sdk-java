@@ -2,38 +2,38 @@ package com.microsoft.azure.sdk.iot.deps.convention;
 
 public final class ConventionConstants
 {
-    /// <summary>
-    /// Separator for a component-level command name.
-    /// </summary>
-    public static final char ComponentLevelCommandSeparator = '*';
+    /**
+     *  Separator for a component-level command name.
+     */
+    public static final char COMPONENT_LEVEL_COMMAND_SEPARATOR = '*';
 
-    /// <summary>
-    /// Marker key to indicate a component-level property.
-    /// </summary>
-    public static final String ComponentIdentifierKey = "__t";
+    /**
+     *  Marker key to indicate a component-level property.
+     */
+    public static final String COMPONENT_IDENTIFIER_KEY = "__t";
 
-    /// <summary>
-    /// Marker value to indicate a component-level property.
-    /// </summary>
-    public static final String ComponentIdentifierValue = "c";
+    /**
+     * Marker value to indicate a component-level property.
+     */
+    public static final String COMPONENT_IDENTIFIER_VALUE = "c";
 
-    /// <summary>
-    /// Represents the JSON document property name for the value of a writable property response.
-    /// </summary>
-    public static final String ValuePropertyName = "value";
+    /**
+     * Represents the JSON document property name for the value of a writable property response.
+     */
+    public static final String VALUE_PROPERTY_NAME = "value";
 
-    /// <summary>
-    /// Represents the JSON document property name for the Ack Code of a writable property response.
-    /// </summary>
-    public static final String AckCodePropertyName = "ac";
+    /**
+     * Represents the JSON document property name for the Ack Code of a writable property response.
+     */
+    public static final String ACK_CODE_PROPERTY_NAME = "ac";
 
-    /// <summary>
-    /// Represents the JSON document property name for the Ack Version of a writable property response.
-    /// </summary>
-    public static final String AckVersionPropertyName = "av";
+    /**
+     * Represents the JSON document property name for the Ack Version of a writable property response.
+     */
+    public static final String ACK_VERSION_PROPERTY_NAME = "av";
 
-    /// <summary>
-    /// Represents the JSON document property name for the Ack Description of a writable property response.
-    /// </summary>
-    public static final String AckDescriptionPropertyName = "ad";
+    /**
+     * Represents the JSON document property name for the Ack Description of a writable property response.
+     */
+    public static final String ACK_DESCRIPTION_PROPERTY_NAME = "ad";
 }

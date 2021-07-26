@@ -4,28 +4,29 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-/// This class specifies the byte encoding for the payload.
-/// </summary>
-/// <remarks>
-/// The encoder is responsible for encoding all of your objects into the correct bytes for the <see cref="PayloadConvention"/> that uses it.
-/// <para>
-/// By default we have implemented the <see cref="Utf8PayloadEncoder"/> class that uses <see cref="System.Text.Encoding.UTF8"/>
-/// to handle the encoding for the <see cref="DefaultPayloadConvention"/> class.
-/// </para>
-/// </remarks>
+/**
+ * This class specifies the byte encoding for the payload.
+ * <p>
+ *     The encoder is responsible for encoding all of your objects into the correct bytes for the <see cref="PayloadConvention"/> that uses it.
+ * </p>
+ * <p>
+ *     By default we have implemented the {@link Utf8PayloadEncoder} class that uses the {@link StandardCharsets#UTF_8} {@link Charset} to handle the encoding for the {@link DefaultPayloadConvention} class.
+ * </p>
+ */
 public abstract class PayloadEncoder
 {
-    /// <summary>
-    /// The <see cref="Encoding"/> used for the payload.
-    /// </summary>
+    /**
+     * The {@link Charset} used for the payload.
+     */
     @Getter
-    public Charset ContentEncoding;
+    Charset ContentEncoding;
 
-    /// <summary>
-    /// Outputs an encoded byte array for the specified payload string.
-    /// </summary>
-    /// <param name="contentPayload">The contents of the message payload.</param>
-    /// <returns>An encoded byte array.</returns>
-    public abstract byte[] EncodeStringToByteArray(String contentPayload);
+    /**
+     * Outputs an encoded byte array for the specified payload string.
+     * @param contentPayload The contents of the message payload.
+     * @return An encoded byte array.
+     */
+    public abstract byte[] encodeStringToByteArray(String contentPayload);
 }

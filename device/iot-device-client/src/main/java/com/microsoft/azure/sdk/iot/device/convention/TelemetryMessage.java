@@ -13,7 +13,7 @@ public class TelemetryMessage extends Message
     @Override
     public byte[] getBytes()
     {
-        if (Telemetry.Convention != null && Telemetry.Convention.PayloadSerializer != null)
+        if (Telemetry.Convention != null && Telemetry.Convention.getPayloadSerializer() != null)
         {
             return Telemetry.Convention.GetObjectBytes(Telemetry);
         }
