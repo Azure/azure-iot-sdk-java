@@ -111,7 +111,6 @@ public final class ProvisioningServiceClient
      * @see <a href="http://portal.azure.com/">Azure portal</a>
      *
      * @param connectionString the {@code String} that cares the connection string of the Device Provisioning Service.
-     * @return The {@code ProvisioningServiceClient} with the new instance of this object.
      * @throws IllegalArgumentException if the connectionString is {@code null} or empty.
      */
     public ProvisioningServiceClient(String connectionString)
