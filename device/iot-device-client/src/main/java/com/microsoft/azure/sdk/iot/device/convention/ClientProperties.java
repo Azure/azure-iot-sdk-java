@@ -6,7 +6,7 @@ import lombok.Setter;
 
 
 /**
- * Container for the
+ * Container for the properties that are writable and reported from the client
  */
 @AllArgsConstructor
 public class ClientProperties
