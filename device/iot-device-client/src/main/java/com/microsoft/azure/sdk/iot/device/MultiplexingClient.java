@@ -17,11 +17,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A client for creating multiplexed connections to IoT Hub. A multiplexed connection allows for multiple device clients
+ * A client for creating multiplexed connections to IoT hub. A multiplexed connection allows for multiple device clients
  * to communicate to the service through a single AMQPS connection.
  * <p>
  * A given AMQPS connection requires a TLS connection, so multiplexing may be worthwhile if you want to limit the number
- * of TLS connections needed to connect multiple device clients to IoT Hub.
+ * of TLS connections needed to connect multiple device clients to IoT hub.
  * <p>
  * A given multiplexing client also has a fixed amount of worker threads regardless of how many device clients are
  * being multiplexed. Comparatively, every non-multiplexed device client instance has its own set of worker
@@ -142,12 +142,34 @@ public class MultiplexingClient
      */
     public void open() throws MultiplexingClientException
     {
+        this.open(false);
+    }
+
+    /**
+     * Opens this multiplexing client. This may be done before or after registering any number of device clients.
+     * <p>
+     * This call behaves synchronously, so if it returns without throwing, then all registered device clients were
+     * successfully opened.
+     * <p>
+     * If this client is already open, then this method will do nothing.
+     * <p>
+     * @param withRetry if true, this open call will apply the current retry policy to allow for the open call to be
+     * retried if it fails.
+     *
+     * @throws MultiplexingClientException If any IO or authentication errors occur while opening the multiplexed connection.
+     * @throws MultiplexingClientDeviceRegistrationAuthenticationException If one or many of the registered devices failed to authenticate.
+     * Any devices not found in the map of registration exceptions provided by
+     * {@link MultiplexingClientDeviceRegistrationAuthenticationException#getRegistrationExceptions()} have registered successfully.
+     * Even when this is thrown, the AMQPS/AMQPS_WS connection is still open, and other clients may be registered to it.
+     */
+    public void open(boolean withRetry) throws MultiplexingClientException
+    {
         synchronized (this.operationLock)
         {
             log.info("Opening multiplexing client");
             try
             {
-                this.deviceIO.openWithoutWrappingException();
+                this.deviceIO.openWithoutWrappingException(withRetry);
             }
             catch (TransportException e)
             {
@@ -240,7 +262,7 @@ public class MultiplexingClient
      * <p>
      * The registered device client must use symmetric key based authentication.
      * <p>
-     * The registered device client must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device client must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If the provided device client is already registered to this multiplexing client, then then this method will do nothing.
      * <p>
@@ -292,7 +314,7 @@ public class MultiplexingClient
      * <p>
      * The registered device client must use symmetric key based authentication.
      * <p>
-     * The registered device client must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device client must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If the provided device client is already registered to this multiplexing client, then then this method will do nothing.
      * <p>
@@ -344,7 +366,7 @@ public class MultiplexingClient
      * <p>
      * The registered device clients must use symmetric key based authentication.
      * <p>
-     * The registered device clients must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device clients must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If any of these device clients are already registered to this multiplexing client, then then this method will
      * not do anything to that particular device client. All other provided device clients will still be registered though.
@@ -396,7 +418,7 @@ public class MultiplexingClient
      * <p>
      * The registered device clients must use symmetric key based authentication.
      * <p>
-     * The registered device clients must belong to the same IoT Hub as all previously registered device clients.
+     * The registered device clients must belong to the same IoT hub as all previously registered device clients.
      * <p>
      * If any of these device clients are already registered to this multiplexing client, then then this method will
      * not do anything to that particular device client. All other provided device clients will still be registered though.
@@ -461,7 +483,7 @@ public class MultiplexingClient
                     throw new UnsupportedOperationException(String.format("Multiplexed connections over AMQPS only support up to %d devices", MAX_MULTIPLEX_DEVICE_COUNT_AMQPS));
                 }
 
-                // Typically client side validation is duplicate work, but IoT Hub doesn't give a good error message when closing the
+                // Typically client side validation is duplicate work, but IoT hub doesn't give a good error message when closing the
                 // AMQPS_WS connection so this is the only way that users will know about this limit
                 if (this.protocol == IotHubClientProtocol.AMQPS_WS && this.multiplexedDeviceClients.size() > MAX_MULTIPLEX_DEVICE_COUNT_AMQPS_WS)
                 {

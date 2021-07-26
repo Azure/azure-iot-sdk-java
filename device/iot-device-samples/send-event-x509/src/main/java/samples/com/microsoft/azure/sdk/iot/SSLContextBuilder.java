@@ -131,13 +131,14 @@ public class SSLContextBuilder
 
     private static char[] generateTemporaryPassword()
     {
-        byte[] randomBytes = new byte[256];
         char[] randomChars = new char[256];
-        new SecureRandom().nextBytes(randomBytes);
+        SecureRandom secureRandom = new SecureRandom();
 
         for (int i = 0; i < 256; i++)
         {
-            randomChars[i] = (char) randomBytes[i];
+            // character will be between 97 and 122 on the ASCII table. This forces it to be a lower case character.
+            // that ensures that the password, as a whole, is alphanumeric
+            randomChars[i] = (char) (97 + secureRandom.nextInt(26));
         }
 
         return randomChars;
