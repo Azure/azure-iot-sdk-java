@@ -13,11 +13,6 @@ import lombok.Getter;
  */
 public abstract class PayloadSerializer
 {
-    /// <summary>
-    ///
-    /// </summary>
-    /// <remarks></remarks>
-    /// <value></value>
     /**
      * Used to specify what type of content to expect.
      * <p>
@@ -69,16 +64,7 @@ public abstract class PayloadSerializer
      */
     public abstract <T> T getNestedObjectValue(Object nestedObject, String propertyName);
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="value"></param>
-    /// <param name="statusCode"></param>
-    /// <param name="version"></param>
-    /// <param name="description">An optional description of the writable property response.</param>
-    /// <returns>The writable property response to be used with this serializer.</returns>
-
-    /**
+        /**
      * Creates the correct {@link WritablePropertyResponse} to be used with this serializer.
      * @param value The value of the property.
      * @param statusCode The status code of the write operation.
