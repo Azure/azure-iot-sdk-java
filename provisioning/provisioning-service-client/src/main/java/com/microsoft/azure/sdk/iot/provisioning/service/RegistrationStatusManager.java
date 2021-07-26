@@ -185,8 +185,8 @@ public class RegistrationStatusManager
     /**
      * Create a new registration status query for enrollmentGroup.
      *
-     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStatusQuery(QuerySpecification, String)
-     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStatusQuery(QuerySpecification, String, int)
+     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String)
+     * @see ProvisioningServiceClient#createEnrollmentGroupRegistrationStateQuery(QuerySpecification, String, int)
      *
      * @param querySpecification is a {@code String} with the SQL query specification. It cannot be {@code null}.
      * @param enrollmentGroupId is a {@code String} with the enrollmentGroupId of the enrollmentGroup to delete. It cannot be {@code null} or empty.
