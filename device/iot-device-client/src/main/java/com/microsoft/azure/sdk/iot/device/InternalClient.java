@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.device;
 import com.microsoft.azure.sdk.iot.deps.convention.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
+import com.microsoft.azure.sdk.iot.device.convention.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -59,7 +60,7 @@ public class InternalClient
     private DeviceMethod method;
 
     @Getter
-    private PayloadConvention PayloadConvention = DefaultPayloadConvention.Instance;
+    private PayloadConvention PayloadConvention = config.getPayloadConvention();
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
     {
@@ -71,7 +72,6 @@ public class InternalClient
         if (clientOptions != null) {
             this.config.modelId = clientOptions.getModelId();
         }
-
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -1202,10 +1202,19 @@ public class InternalClient
     }
 
     /**
-     *
+     * Sends the TelemetryMessage to IoT hub.
      * @param telemetryMessage
      */
-    public void sendTelemetryAsync(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object context)
+    public void sendTelemetry(TelemetryMessage telemetryMessage)
+    {
+        sendTelemetry(telemetryMessage, null, null);
+    }
+
+    /**
+     * Sends the TelemetryMessage to IoT hub.
+     * @param telemetryMessage
+     */
+    public void sendTelemetry(TelemetryMessage telemetryMessage, IotHubEventCallback callback, Object context)
     {
         if (telemetryMessage == null)
         {
@@ -1261,21 +1270,18 @@ public class InternalClient
      *
      * @return
      */
-    public ClientProperties getClientPropertiesAsync()
+    public void getClientProperties(ClientPropertiesCallback callback, Object context)
     {
         // In Java we don't return an object for the DeviceTwin, but instead we pass a Map<String, Object> in the form of a Device
         // this map gets populated with a number of callbacks.
         try
         {
-            twin.getDeviceTwin();
-            //return getPropertiesAsync(PayloadConvention, cancellationToken).ConfigureAwait(false);
+            twin.getClientProperties(callback, context);
         }
         catch (Throwable ex)
         {
             throw ex;
         }
-
-        return null;
     }
 
     /**
@@ -1284,7 +1290,7 @@ public class InternalClient
      * @return
      * @throws IOException
      */
-    public void updateClientPropertiesAsync(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object context) throws IOException
+    public void updateClientProperties(ClientPropertyCollection clientProperties, IotHubEventCallback callback, Object context) throws IOException
     {
         if (clientProperties == null)
         {
@@ -1293,18 +1299,22 @@ public class InternalClient
 
         clientProperties.Convention = PayloadConvention;
 
-        sendReportedProperties(clientProperties.getCollectionAsSetOfProperty(), null, null, null, callback, context);
+        verifyRegisteredIfMultiplexing();
+        verifyTwinOperationsAreSupported();
 
+        verifyReportedProperties(clientProperties.getCollectionAsSetOfProperty());
+
+        this.twin.updateClientProperties(clientProperties, null, null,null, callback, context);
     }
 
     /**
      *
-     * @param desiredPropertyUpdateCallback
+     * @param writablePropertyUpdateCallback
      * @param userContext
      * @throws IOException
      */
-    public void subscribeToWritablePropertiesEventAsync(Map<Property, Pair<PropertyCallBack<String, Object>, Object>> desiredPropertyUpdateCallback, Object userContext) throws IOException
+    public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object userContext) throws IOException
     {
-        // Subscribe to DesiredPropertyUpdateCallback internally and use the callback received internally to invoke the user supplied Property callback.
+        twin.subscribeToWritablePropertyRequests(writablePropertyUpdateCallback, userContext);
     }
 }

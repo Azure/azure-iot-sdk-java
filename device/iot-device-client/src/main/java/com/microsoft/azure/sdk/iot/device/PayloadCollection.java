@@ -5,8 +5,10 @@ import com.microsoft.azure.sdk.iot.deps.twin.TwinCollection;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashMap;
 
-public class PayloadCollection extends TwinCollection
+
+public class PayloadCollection extends HashMap<String, Object>
 {
     @Getter
     @Setter

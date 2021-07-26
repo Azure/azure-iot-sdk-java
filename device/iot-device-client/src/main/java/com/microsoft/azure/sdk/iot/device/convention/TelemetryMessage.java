@@ -1,5 +1,6 @@
-package com.microsoft.azure.sdk.iot.device;
+package com.microsoft.azure.sdk.iot.device.convention;
 
+import com.microsoft.azure.sdk.iot.device.Message;
 import lombok.Getter;
 import lombok.Setter;
 

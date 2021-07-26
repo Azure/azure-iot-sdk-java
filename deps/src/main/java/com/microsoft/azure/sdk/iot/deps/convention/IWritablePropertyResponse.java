@@ -5,31 +5,15 @@ import lombok.Setter;
 
 public interface IWritablePropertyResponse
 {
-    /// <summary>
-    /// The unserialized property value.
-    /// </summary>
-    @Getter
-    @Setter
-    Object Value = null;
+    Object getValue();
+    void setValue(Object obj);
 
-    /// <summary>
-    /// The acknowledgment code, usually an HTTP Status Code e.g. 200, 400.
-    /// </summary>
-    @Getter
-    @Setter
-    public int AckCode = 0;
+    int getAckCode();
+    int setAckCode(int ackCode);
 
-    /// <summary>
-    /// The acknowledgment version, as supplied in the property update request.
-    /// </summary>
-    @Getter
-    @Setter
-    public long AckVersion = 0;
+    long getAckVersion();
+    void setAckVersion(long ackVersion);
 
-    /// <summary>
-    /// The acknowledgment description, an optional, human-readable message about the result of the property update.
-    /// </summary>
-    @Getter
-    @Setter
-    public String AckDescription = null;
+    String getAckDescription();
+    void setAckDescription(String ackDescription);
 }

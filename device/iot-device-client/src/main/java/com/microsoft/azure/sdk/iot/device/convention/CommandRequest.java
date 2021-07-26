@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.device;
+package com.microsoft.azure.sdk.iot.device.convention;
 
 import com.microsoft.azure.sdk.iot.device.edge.MethodRequest;
 

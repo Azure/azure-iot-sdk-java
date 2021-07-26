@@ -9,7 +9,7 @@ import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public final class DeviceMethod
+public class DeviceMethod
 {
     private DeviceMethodCallback deviceMethodCallback;
     private Object deviceMethodCallbackContext;
