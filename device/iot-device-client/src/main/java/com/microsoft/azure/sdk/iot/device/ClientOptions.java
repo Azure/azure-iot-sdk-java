@@ -5,10 +5,7 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
 import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.net.ssl.SSLContext;
 
@@ -17,6 +14,7 @@ import javax.net.ssl.SSLContext;
  */
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public final class ClientOptions
 {
     /**

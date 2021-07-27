@@ -3,11 +3,11 @@ package com.microsoft.azure.sdk.iot.deps.convention;
 import com.google.gson.annotations.SerializedName;
 import lombok.*;
 
+@Data
 @NoArgsConstructor
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
+@Builder
 public final class GsonWritablePropertyResponse implements WritablePropertyResponse
 {
 
@@ -23,18 +23,18 @@ public final class GsonWritablePropertyResponse implements WritablePropertyRespo
      */
     @NonNull
     @SerializedName("ac")
-    int AckCode;
+    Integer ackCode;
 
     /**
      * The acknowledgment version, as supplied in the property update request.
      */
     @NonNull
     @SerializedName("av")
-    long AckVersion;
+    Long ackVersion;
 
     /**
      * The acknowledgment description, an optional, human-readable message about the result of the property update.
      */
     @SerializedName("ad")
-    String AckDescription;
+    String ackDescription;
 }

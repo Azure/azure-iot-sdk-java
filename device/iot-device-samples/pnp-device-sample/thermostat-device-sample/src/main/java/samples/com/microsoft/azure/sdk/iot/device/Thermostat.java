@@ -309,7 +309,7 @@ public class Thermostat
 
                         ClientPropertyCollection collection = new ClientPropertyCollection();
 
-                        double targetTemperature = ((Number) propertyCollection.getValue(key)).doubleValue();
+                        double targetTemperature = propertyCollection.getValue(key, double.class);
                         log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);
 
                         GsonWritablePropertyResponse pendingUpdate = new GsonWritablePropertyResponse(targetTemperature, StatusCode.IN_PROGRESS.value, propertyCollection.getVersion());

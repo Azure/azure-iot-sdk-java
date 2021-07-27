@@ -8,11 +8,11 @@ public interface WritablePropertyResponse
     Object getValue();
     void setValue(Object obj);
 
-    int getAckCode();
-    int setAckCode(int ackCode);
+    Integer getAckCode();
+    void setAckCode(Integer ackCode);
 
-    long getAckVersion();
-    void setAckVersion(long ackVersion);
+    Long getAckVersion();
+    void setAckVersion(Long ackVersion);
 
     String getAckDescription();
     void setAckDescription(String ackDescription);

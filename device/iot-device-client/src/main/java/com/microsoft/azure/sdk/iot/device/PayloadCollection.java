@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 
 /**
- * The base class for the {@link ClientPropertyCollection}.
+ * The base class for the {@code ClientPropertyCollection}.
  */
 public class PayloadCollection extends HashMap<String, Object>
 {
