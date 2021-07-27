@@ -1,5 +1,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
+import com.microsoft.azure.sdk.iot.deps.twin.DeviceCapabilities;
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
@@ -13,11 +14,13 @@ import java.util.UUID;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.ProvisioningCommon.CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME;
+import static tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.ProvisioningCommon.DPS_CONNECTION_STRING_ENV_VAR_NAME;
 
 public class ProvisioningServiceClientTests
 {
-    public static final String DPS_CONNECTION_STRING_ENV_VAR_NAME = "IOT_DPS_CONNECTION_STRING";
     public static String provisioningServiceConnectionString = "";
+    public static String customAllocationWebhookUrl = "";
 
     public ProvisioningServiceClient provisioningServiceClient = null;
 
@@ -28,6 +31,7 @@ public class ProvisioningServiceClientTests
     {
         provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
         provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
+        customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
     }
 
     @Test
@@ -85,5 +89,58 @@ public class ProvisioningServiceClientTests
         assertNotNull(retrievedSymmetricKeyAttestation.getSecondaryKey());
         assertTrue(retrievedSymmetricKeyAttestation.getPrimaryKey().length() > 0);
         assertTrue(retrievedSymmetricKeyAttestation.getSecondaryKey().length() > 0);
+    }
+
+    @Test
+    public void createdEnrollmentGroupMatchesSentEnrollmentGroup() throws ProvisioningServiceClientException
+    {
+        String groupId = testPrefix + UUID.randomUUID();
+        Attestation attestation = new SymmetricKeyAttestation("", "");
+        EnrollmentGroup enrollment = new EnrollmentGroup(groupId, attestation);
+        enrollment.setAllocationPolicy(AllocationPolicy.CUSTOM);
+        CustomAllocationDefinition customAllocationDefinition = new CustomAllocationDefinition();
+        customAllocationDefinition.setApiVersion("2018-09-01-preview");
+        customAllocationDefinition.setWebhookUrl(customAllocationWebhookUrl);
+        enrollment.setCustomAllocationDefinition(customAllocationDefinition);
+        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
+        reprovisionPolicy.setUpdateHubAssignment(true);
+        reprovisionPolicy.setMigrateDeviceData(true);
+        enrollment.setReprovisionPolicy(reprovisionPolicy);
+        DeviceCapabilities capabilities = new DeviceCapabilities();
+        capabilities.setIotEdge(true);
+        enrollment.setCapabilities(capabilities);
+        EnrollmentGroup returnedEnrollment = provisioningServiceClient.createOrUpdateEnrollmentGroup(enrollment);
+
+        assertEquals(enrollment.getEnrollmentGroupId(), returnedEnrollment.getEnrollmentGroupId());
+        assertEquals(enrollment.getReprovisionPolicy().getMigrateDeviceData(), returnedEnrollment.getReprovisionPolicy().getMigrateDeviceData());
+        assertEquals(enrollment.getReprovisionPolicy().getUpdateHubAssignment(), returnedEnrollment.getReprovisionPolicy().getUpdateHubAssignment());
+        assertEquals(enrollment.getCapabilities().isIotEdge(), returnedEnrollment.getCapabilities().isIotEdge());
+        assertEquals(enrollment.getAttestation().getClass(), returnedEnrollment.getAttestation().getClass());
+        assertEquals(enrollment.getAllocationPolicy(), returnedEnrollment.getAllocationPolicy());
+        assertEquals(enrollment.getCustomAllocationDefinition().getApiVersion(), returnedEnrollment.getCustomAllocationDefinition().getApiVersion());
+    }
+
+    @Test
+    public void createdIndividualEnrollmentMatchesSentIndividualEnrollment() throws ProvisioningServiceClientException
+    {
+        String registrationId = testPrefix + UUID.randomUUID();
+        Attestation attestation = new SymmetricKeyAttestation("", "");
+        IndividualEnrollment enrollment = new IndividualEnrollment(registrationId, attestation);
+        enrollment.setAllocationPolicy(AllocationPolicy.GEOLATENCY);
+        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
+        reprovisionPolicy.setUpdateHubAssignment(true);
+        reprovisionPolicy.setMigrateDeviceData(true);
+        enrollment.setReprovisionPolicy(reprovisionPolicy);
+        DeviceCapabilities capabilities = new DeviceCapabilities();
+        capabilities.setIotEdge(true);
+        enrollment.setCapabilities(capabilities);
+        IndividualEnrollment returnedEnrollment = provisioningServiceClient.createOrUpdateIndividualEnrollment(enrollment);
+
+        assertEquals(enrollment.getRegistrationId(), returnedEnrollment.getRegistrationId());
+        assertEquals(enrollment.getReprovisionPolicy().getMigrateDeviceData(), returnedEnrollment.getReprovisionPolicy().getMigrateDeviceData());
+        assertEquals(enrollment.getReprovisionPolicy().getUpdateHubAssignment(), returnedEnrollment.getReprovisionPolicy().getUpdateHubAssignment());
+        assertEquals(enrollment.getCapabilities().isIotEdge(), returnedEnrollment.getCapabilities().isIotEdge());
+        assertEquals(enrollment.getAttestation().getClass(), returnedEnrollment.getAttestation().getClass());
+        assertEquals(enrollment.getAllocationPolicy(), returnedEnrollment.getAllocationPolicy());
     }
 }
