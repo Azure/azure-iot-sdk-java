@@ -1,4 +1,4 @@
-package tests.unit.com.microsoft.azure.sdk.iot.device.fileupload;
+package tests.unit.com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
