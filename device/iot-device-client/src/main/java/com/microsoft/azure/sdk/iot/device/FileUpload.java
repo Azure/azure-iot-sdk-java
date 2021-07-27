@@ -55,7 +55,6 @@ public final class FileUpload
         message.setIotHubMethod(IotHubMethod.POST);
 
         ResponseMessage responseMessage = httpsTransportManager.sendFileUploadNotification(message);
-        httpsTransportManager.close();
 
         validateServiceStatusCode(responseMessage, "Failed to complete the file upload notification");
 
@@ -86,6 +85,6 @@ public final class FileUpload
 
     void close()
     {
-        this.httpsTransportManager.close();
+        httpsTransportManager.close();
     }
 }
