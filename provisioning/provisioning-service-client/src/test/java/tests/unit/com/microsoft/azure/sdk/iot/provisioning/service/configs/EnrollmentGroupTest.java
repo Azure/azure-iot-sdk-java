@@ -1462,9 +1462,10 @@ public class EnrollmentGroupTest
     {
         // arrange
         AllocationPolicy expectedAllocationPolicy = AllocationPolicy.GEOLATENCY;
+        String expectedAllocationPolicyString = "geoLatency";
         final String json = "{\n" +
                 "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
-                "  \"allocationPolicy\": \"" + expectedAllocationPolicy.toString() + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicyString + "\",\n" +
                 "  \"attestation\": {\n" +
                 "    \"type\": \"x509\",\n" +
                 "    \"x509\": {\n" +

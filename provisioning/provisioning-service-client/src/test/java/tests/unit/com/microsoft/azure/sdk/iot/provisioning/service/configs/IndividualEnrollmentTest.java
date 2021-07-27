@@ -1152,9 +1152,10 @@ public class IndividualEnrollmentTest
     {
         // arrange
         AllocationPolicy expectedAllocationPolicy = AllocationPolicy.GEOLATENCY;
+        String expectedAllocationPolicyString = "geoLatency";
         final String json = "{\n" +
                 "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
-                "  \"allocationPolicy\": \"" + expectedAllocationPolicy.toString() + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicyString + "\",\n" +
                 "  \"attestation\": {\n" +
                 "    \"type\": \"tpm\",\n" +
                 "    \"tpm\": {\n" +
