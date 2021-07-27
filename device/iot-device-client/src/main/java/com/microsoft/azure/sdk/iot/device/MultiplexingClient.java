@@ -213,14 +213,9 @@ public class MultiplexingClient
 
             try
             {
-                for (DeviceClient deviceClient : this.multiplexedDeviceClients.values())
-                {
-                    deviceClient.closeFileUpload();
-                }
-
                 this.deviceIO.closeWithoutWrappingException();
             }
-            catch (TransportException | IOException e)
+            catch (TransportException e)
             {
                 throw new MultiplexingClientException("Failed to close the multiplexing client", e);
             }

@@ -84,9 +84,7 @@ public class FileUploadTest
 
         FileUpload fileUpload = Deencapsulation.newInstance(FileUpload.class, mockHttpsTransportManager);
 
-        FileUploadSasUriResponse actualResponse = Deencapsulation.invoke(fileUpload, "getFileUploadSasUri", mockFileUploadSasUriRequest);
-
-        assertEquals(mockFileUploadSasUriResponse, actualResponse);
+        Deencapsulation.invoke(fileUpload, "getFileUploadSasUri", mockFileUploadSasUriRequest);
     }
 
     @Test
@@ -114,9 +112,6 @@ public class FileUploadTest
 
                 mockResponseMessage.getBytes();
                 result = mockResponsePayload;
-
-                new FileUploadSasUriResponse(mockResponsePayloadString);
-                result = mockFileUploadSasUriResponse;
             }
         };
 

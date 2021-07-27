@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSasTokenAuthenticationProvider;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
