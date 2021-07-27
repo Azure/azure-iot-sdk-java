@@ -8,6 +8,7 @@ package com.microsoft.azure.sdk.iot.device.auth;
 import com.microsoft.azure.sdk.iot.device.exceptions.TransportException;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -32,6 +33,22 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
     protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage)
     {
         super(hostname, gatewayHostName, deviceId, moduleId, suggestedTimeToLiveSeconds, timeBufferPercentage);
+        this.sasToken = new IotHubSasToken(hostname, deviceId, null, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
+    }
+
+    /**
+     * Constructor for IotHubSasTokenWithRefreshAuthenticationProvider
+     * @param hostname the hostname
+     * @param gatewayHostName the gateway hostname
+     * @param deviceId the device id
+     * @param moduleId the module id
+     * @param sharedAccessToken the shared access token
+     * @param suggestedTimeToLiveSeconds the time to live for generated tokens
+     * @param timeBufferPercentage the percent of a sas token's life to live before renewing
+     */
+    protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage, SSLContext sslContext)
+    {
+        super(hostname, gatewayHostName, deviceId, moduleId, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
         this.sasToken = new IotHubSasToken(hostname, deviceId, null, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
 

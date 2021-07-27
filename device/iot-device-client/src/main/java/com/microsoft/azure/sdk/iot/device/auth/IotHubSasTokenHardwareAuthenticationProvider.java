@@ -53,8 +53,6 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
 
             // Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_034: [This constructor shall retrieve and save the ssl context from the security provider.]
             this.iotHubSSLContext = new IotHubSSLContext(securityProvider.getSSLContext());
-
-            this.sslContextNeedsUpdate = false;
         }
         catch (SecurityProviderException e)
         {
@@ -81,40 +79,6 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
     {
         //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_013: [This function shall return true.]
         return true;
-    }
-
-    /**
-     * Getter for SSLContext
-     * @throws IOException if an error occurs when generating the SSLContext
-     * @return The value of SSLContext
-     */
-    @Override
-    public SSLContext getSSLContext() throws IOException
-    {
-        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_008: [This function shall return the generated IotHubSSLContext.]
-        return this.iotHubSSLContext.getSSLContext();
-    }
-
-    /**
-     * Setter for the providing trusted certificate.
-     * @param pathToCertificate path to the certificate for one way authentication.
-     */
-    @Override
-    public void setPathToIotHubTrustedCert(String pathToCertificate)
-    {
-        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_001: [This function shall throw an UnsupportedOperationException.]
-        throw new UnsupportedOperationException("Cannot change the trusted certificate when using security provider for authentication.");
-    }
-
-    /**
-     * Setter for the user trusted certificate
-     * @param certificate valid user trusted certificate string
-     */
-    @Override
-    public void setIotHubTrustedCert(String certificate)
-    {
-        //Codes_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_002: [This function shall throw an UnsupportedOperationException.]
-        throw new UnsupportedOperationException("Cannot change the trusted certificate when using security provider for authentication.");
     }
 
     /**

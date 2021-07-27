@@ -77,9 +77,6 @@ public class DeviceClientTest
     private static final long RECEIVE_PERIOD_MILLIS_AMQPS = 10L;
     private static final long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
-    private static final long SEND_PERIOD = 10;
-    private static final long RECEIVE_PERIOD = 10;
-
     @Test
     public void constructorWithClientOptionsSuccess(@Mocked final ClientOptions mockedClientOptions) throws URISyntaxException
     {
@@ -863,46 +860,6 @@ public class DeviceClientTest
         };
     }
 
-    // Tests_SRS_DEVICECLIENT_12_029: [*SetCertificatePath" shall throw if the transportClient or deviceIO already open, otherwise set the path on the config.]
-    @Test
-    public void setOptionSetCertificatePathSASSuccess()
-            throws IOException, URISyntaxException
-    {
-        // arrange
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = false;
-                mockDeviceIO.getProtocol();
-                result = IotHubClientProtocol.AMQPS_WS;
-                mockConfig.getAuthenticationType();
-                result = DeviceClientConfig.AuthType.SAS_TOKEN;
-            }
-        };
-        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;deviceId=testdevice;"
-                + "SharedAccessKey=adjkl234j52=";
-        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS_WS;
-
-        DeviceClient client = new DeviceClient(connString, protocol);
-        Deencapsulation.setField(client, "config", mockConfig);
-        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
-        final String value = "certificatePath";
-
-        // act
-        client.setOption("SetCertificatePath", value);
-
-        new Verifications()
-        {
-            {
-                mockConfig.getAuthenticationProvider();
-                times = 1;
-                mockIotHubAuthenticationProvider.setPathToIotHubTrustedCert(value);
-                times = 1;
-            }
-        };
-    }
-
     // Tests_SRS_DEVICECLIENT_12_027: [The function shall throw IOError if either the deviceIO or the tranportClient's open() or closeNow() throws.]
     @Test (expected = IOError.class)
     public void setOptionClientSASTokenExpiryTimeAfterClientOpenAMQPThrowsDeviceIOClose()
@@ -1374,45 +1331,6 @@ public class DeviceClientTest
             //assert
             assertEquals("Cannot set the open device session timeout when using protocol " + protocol, expected.getMessage());
         }
-    }
-
-    // Tests_SRS_DEVICECLIENT_34_043: ["SetCertificateAuthority" - set the certificate to verify peer.]
-    @Test
-    public void setCertificateAuthoritySucceeds()
-    {
-        //arrange
-        final String expectedCert = "some cert";
-        DeviceClient client = Deencapsulation.newInstance(DeviceClient.class);
-        Deencapsulation.setField(client, "ioTHubConnectionType", SINGLE_CLIENT);
-        Deencapsulation.setField(client, "deviceIO", mockDeviceIO);
-        Deencapsulation.setField(client, "config", mockConfig);
-
-
-        new NonStrictExpectations()
-        {
-            {
-                mockDeviceIO.isOpen();
-                result = false;
-
-                mockConfig.getProtocol();
-                result = IotHubClientProtocol.MQTT;
-
-                mockConfig.getAuthenticationProvider();
-                result = mockIotHubAuthenticationProvider;
-            }
-        };
-
-        //act
-        client.setOption("SetCertificateAuthority", expectedCert);
-
-        //assert
-        new Verifications()
-        {
-            {
-                mockIotHubAuthenticationProvider.setIotHubTrustedCert(expectedCert);
-                times = 1;
-            }
-        };
     }
 
     private void deviceClientInstanceExpectation(final IotHubClientProtocol protocol)
