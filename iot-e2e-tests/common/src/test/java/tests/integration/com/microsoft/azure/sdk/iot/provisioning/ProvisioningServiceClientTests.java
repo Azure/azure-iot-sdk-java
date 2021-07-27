@@ -19,8 +19,8 @@ import static tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.P
 
 public class ProvisioningServiceClientTests
 {
-    public static String provisioningServiceConnectionString = "";
-    public static String customAllocationWebhookUrl = "";
+    public static final String provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
+    public static final String customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
 
     public ProvisioningServiceClient provisioningServiceClient = null;
 
@@ -29,9 +29,7 @@ public class ProvisioningServiceClientTests
     @Before
     public void setUp()
     {
-        provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
         provisioningServiceClient = ProvisioningServiceClient.createFromConnectionString(provisioningServiceConnectionString);
-        customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
     }
 
     @Test
