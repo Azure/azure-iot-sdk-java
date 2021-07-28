@@ -22,7 +22,7 @@ public class GsonPayloadSerializer extends PayloadSerializer
      * The default instance of this class.
      */
     @Getter
-    static final GsonPayloadSerializer Instance = new GsonPayloadSerializer();
+    private static final GsonPayloadSerializer Instance = new GsonPayloadSerializer();
 
     @Getter
     String ContentType = ApplicationJson;

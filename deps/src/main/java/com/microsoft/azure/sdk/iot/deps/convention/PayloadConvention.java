@@ -35,11 +35,53 @@ public abstract class PayloadConvention
      *     This base class will use the {@link PayloadSerializer} and {@link PayloadEncoder} to create this byte array.
      * </p>
      * @param objectToSendWithConvention The convention-based message that is to be sent.
-     * @return The correctly encoded object for this convention.
+     * @return The correctly encoded byte array for this convention.
      */
-    public byte[] GetObjectBytes(Object objectToSendWithConvention)
+    public byte[] getObjectBytes(Object objectToSendWithConvention)
     {
         String serializedString = PayloadSerializer.serializeToString(objectToSendWithConvention);
         return PayloadEncoder.encodeStringToByteArray(serializedString);
     }
+
+    /**
+     * Uses the encoding and the serializer to return an object.
+     * <p>
+     *     This base class will use the {@link PayloadSerializer} and {@link PayloadEncoder} to create this byte array.
+     * </p>
+     * @param bytesToConvertToObject The convention-based message that is to be sent.
+     * @param objectType The class of the object you want to deserialize to.
+     * @param <T> The type to return
+     * @return The correctly decoded object for this convention.
+     */
+    public <T> T getObjectFromBytes(byte[] bytesToConvertToObject, Class<T> objectType)
+    {
+        String serializedString = PayloadEncoder.decodeByteArrayToString(bytesToConvertToObject);
+        return PayloadSerializer.deserializeToType(serializedString, objectType);
+    }
+
+    /**
+     * Creates the correct {@link WritablePropertyResponse} to be used with this serializer.
+     * @param value The value of the property.
+     * @param statusCode The status code of the write operation.
+     * @param version The version the property is responding to.
+     * @param description An optional description of the writable property response.
+     * @return The writable property response to be used with this serializer.
+     */
+    public WritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version, String description)
+    {
+        return PayloadSerializer.createWritablePropertyResponse(value, statusCode, version, description);
+    }
+
+    /**
+     * Creates the correct {@link WritablePropertyResponse} to be used with this serializer.
+     * @param value The value of the property.
+     * @param statusCode The status code of the write operation.
+     * @param version The version the property is responding to.
+     * @return The writable property response to be used with this serializer.
+     */
+    public WritablePropertyResponse createWritablePropertyResponse(Object value, int statusCode, long version)
+    {
+        return PayloadSerializer.createWritablePropertyResponse(value, statusCode, version, null);
+    }
+
 }

@@ -1,17 +1,19 @@
 package com.microsoft.azure.sdk.iot.device.convention;
 
 import com.microsoft.azure.sdk.iot.deps.convention.ConventionConstants;
-import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
+import com.microsoft.azure.sdk.iot.deps.convention.PayloadConvention;
 import com.microsoft.azure.sdk.iot.deps.convention.ReflectionUtility;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
-import com.microsoft.azure.sdk.iot.device.convention.ClientMetadata;
 import com.microsoft.azure.sdk.iot.deps.util.Tools;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.Property;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.PayloadCollection;
+import com.sun.security.ntlm.Client;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.naming.event.ObjectChangeListener;
 import java.util.*;
 
 public class ClientPropertyCollection extends PayloadCollection
@@ -20,7 +22,7 @@ public class ClientPropertyCollection extends PayloadCollection
     private static final String VERSION_TAG = "$version";
 
     @Getter
-    private Integer version;
+    private Long version;
 
     // the Twin collection metadata
     private static final String METADATA_TAG = "$metadata";
@@ -37,6 +39,24 @@ public class ClientPropertyCollection extends PayloadCollection
     public ClientPropertyCollection()
     {
         super();
+    }
+
+    /**
+     * Converts a Message to a client property collection.
+     */
+    public ClientPropertyCollection(Message clientPropertyMessage, PayloadConvention convention, boolean createWritablePropertyCollection)
+    {
+        super();
+        Convention = convention;
+        Map<String, Object> collectionToCopy = Convention.getObjectFromBytes(clientPropertyMessage.getBytes(), ClientPropertyCollection.class);
+        if (createWritablePropertyCollection)
+        {
+            putAllAsWritableStart(collectionToCopy);
+        }
+        else
+        {
+            fromMapInternal(collectionToCopy, this);
+        }
     }
 
     /**
@@ -58,88 +78,8 @@ public class ClientPropertyCollection extends PayloadCollection
     public static ClientPropertyCollection fromMap(Map<String, Object> mapToConvert)
     {
         ClientPropertyCollection clientPropertyCollection = new ClientPropertyCollection();
-        Map<? extends String, Object> metadata = null;
-
-        for (Map.Entry<? extends String, Object> entry : mapToConvert.entrySet())
-        {
-            if (entry.getKey().equals(VERSION_TAG))
-            {
-                if (!(entry.getValue() instanceof Number))
-                {
-                    throw new IllegalArgumentException("version is not a number");
-                }
-
-                clientPropertyCollection.version = ((Number) entry.getValue()).intValue();
-            }
-            else if (entry.getKey().equals(METADATA_TAG))
-            {
-                metadata = (Map<? extends String, Object>) entry.getValue();
-            }
-            else
-            {
-                clientPropertyCollection.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (metadata != null)
-        {
-            ClientPropertyCollection.addMetadata(clientPropertyCollection, metadata);
-        }
-
+        clientPropertyCollection.fromMapInternal(mapToConvert, clientPropertyCollection);
         return clientPropertyCollection;
-    }
-
-    private static void addMetadata(ClientPropertyCollection clientPropertyCollection, Map<? extends String, Object> metadata)
-    {
-        String lastUpdated = null;
-        Integer lastUpdatedVersion = null;
-        String lastUpdatedBy = null;
-        String lastUpdatedByDigest = null;
-        for (Map.Entry<? extends String, Object> entry : metadata.entrySet())
-        {
-            String key = entry.getKey();
-            if (key.equals(ClientMetadata.LAST_UPDATE_TAG))
-            {
-                lastUpdated = (String) entry.getValue();
-            }
-            else if ((key.equals(ClientMetadata.LAST_UPDATE_VERSION_TAG)) && (entry.getValue() instanceof Number))
-            {
-                lastUpdatedVersion = ((Number) entry.getValue()).intValue();
-            }
-            else if (key.equals(ClientMetadata.LAST_UPDATED_BY))
-            {
-                lastUpdatedBy = (String) entry.getValue();
-            }
-            else if (key.equals(ClientMetadata.LAST_UPDATED_BY_DIGEST))
-            {
-                lastUpdatedByDigest = (String) entry.getValue();
-            }
-            else
-            {
-                Object valueInCollection = clientPropertyCollection.get(key);
-                if (valueInCollection == null)
-                {
-                    // If the property (key) exists in metadata but not in twinCollection metadata is inconsistent.
-                    throw new IllegalArgumentException("Twin metadata is inconsistent for property: " + key);
-                }
-
-                ClientMetadata clientMetadata = ClientMetadata.tryExtractFromMap(entry.getValue());
-                if (clientMetadata != null)
-                {
-                    clientPropertyCollection.metadataMap.put(key, clientMetadata);
-                }
-
-                if (valueInCollection instanceof ClientPropertyCollection)
-                {
-                    clientPropertyCollection.addMetadata((ClientPropertyCollection) valueInCollection, (Map<? extends String, Object>) entry.getValue());
-                }
-            }
-        }
-
-        if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
-        {
-            clientPropertyCollection.setMetadata(new ClientMetadata(lastUpdated, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest));
-        }
     }
 
     /**
@@ -235,58 +175,6 @@ public class ClientPropertyCollection extends PayloadCollection
         return convertFromObject(objectToGet, typeOfT);
     }
 
-    private <T> T convertFromObject(Object objectToGet, Class<T> typeOfT)
-    {
-        // Check to see if this is the type we're looking for.
-        // Some things to note about this is we're actively not type checking EVERY single conversion.
-        // It's assumed that the client writer will know the type coming from the deserialized object.
-        // We do handle odities where a customer might ask for a boolean
-        if (typeOfT.isInstance(objectToGet))
-        {
-            return (T) objectToGet;
-        }
-        else if (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT) == ReflectionUtility.TypeToReflect.CHAR)
-        {
-            return (T)(Character)objectToGet;
-        }
-        else if (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT) == ReflectionUtility.TypeToReflect.BOOL)
-        {
-            return (T)(Boolean)objectToGet;
-        }
-        else
-        {
-            try
-            {
-                Number num = (Number)objectToGet;
-                switch (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT))
-                {
-                    case INT:
-                        return (T)(Integer)num.intValue();
-                    case BYTE:
-                        return (T)(Byte)num.byteValue();
-                    case DOUBLE:
-                        return (T)(Double)num.doubleValue();
-                    case FLOAT:
-                        return (T)(Float)num.floatValue();
-                    case LONG:
-                        return (T)(Long)num.longValue();
-                    case SHORT:
-                        return (T)(Short)num.shortValue();
-                }
-            }
-            catch (Throwable t)
-            {
-
-            }
-        }
-        // if it's not we should try to deserialize it with our convention serializer
-        if (objectToGet != null && Convention != null)
-        {
-            return Convention.getPayloadSerializer().convertFromObject(objectToGet, typeOfT);
-        }
-        return null;
-    }
-
     /**
      * Gets the property nested in the component with the specified key cast to a specific type.
      *
@@ -325,23 +213,60 @@ public class ClientPropertyCollection extends PayloadCollection
      */
     public final void putComponentProperty(String componentName, String propertyName, Object propertyValue)
     {
+        if (!propertyName.equals(ConventionConstants.COMPONENT_IDENTIFIER_KEY))
+        {
+            // Check to see if the component is a map
+            ClientPropertyCollection mapToAdd = getComponentMapFromInternalMap(componentName);
+            if (mapToAdd == null)
+            {
+                mapToAdd = new ClientPropertyCollection();
+                mapToAdd.put(ConventionConstants.COMPONENT_IDENTIFIER_KEY, ConventionConstants.COMPONENT_IDENTIFIER_VALUE);
+            }
+            mapToAdd.put(propertyName, propertyValue);
+            put(componentName, mapToAdd);
+        }
+    }
+
+    /**
+     * Add a single new entry in the ClientPropertyCollection nested under a component.
+     *
+     * <p> Override {@code HashMap.put(String, Object)}.
+     *
+     * <p> This function will add a single pair key value to the ClientPropertyCollection.
+     *
+     * @param componentName The name of the component to add data to.
+     * @param propertyValue the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
+     */
+    public final void putComponent(String componentName, Object propertyValue)
+    {
         // Check to see if the component is a map
-        Map<String, Object> mapToAdd = getComponentMapFromInternalMap(componentName);
+        ClientPropertyCollection mapToAdd = getComponentMapFromInternalMap(componentName);
         if (mapToAdd == null)
         {
-            mapToAdd = new HashMap<>();
-            mapToAdd.put(ConventionConstants.COMPONENT_IDENTIFIER_KEY, ConventionConstants.COMPONENT_IDENTIFIER_VALUE);
+            if (propertyValue instanceof Map)
+            {
+                mapToAdd = (ClientPropertyCollection) propertyValue;
+            }
+            else
+            {
+                mapToAdd = convertFromObject(propertyValue, ClientPropertyCollection.class);
+            }
         }
-        mapToAdd.put(propertyName, propertyValue);
+        mapToAdd.put(ConventionConstants.COMPONENT_IDENTIFIER_KEY, ConventionConstants.COMPONENT_IDENTIFIER_VALUE);
         put(componentName, mapToAdd);
     }
 
-    private Map<String, Object> getComponentMapFromInternalMap(String componentName)
+    private ClientPropertyCollection getComponentMapFromInternalMap(String componentName)
     {
-        Object componentCheck = this.get(componentName);
+        return getComponentMapFromMap(componentName, this);
+    }
+
+    private ClientPropertyCollection getComponentMapFromMap(String componentName, Map mapToCheck)
+    {
+        Object componentCheck = mapToCheck.get(componentName);
         if (componentCheck instanceof Map)
         {
-            Map<String, Object> componentMap = ((Map<String, Object>) componentCheck);
+            ClientPropertyCollection componentMap = (ClientPropertyCollection) componentCheck;
             String identifier = (String) componentMap.get(ConventionConstants.COMPONENT_IDENTIFIER_KEY);
             if (identifier != null && identifier.equals(ConventionConstants.COMPONENT_IDENTIFIER_VALUE))
             {
@@ -350,4 +275,188 @@ public class ClientPropertyCollection extends PayloadCollection
         }
         return null;
     }
+
+    private ClientPropertyCollection getPropertyMapFromMap(String propertyName, Map mapToCheck)
+    {
+        Object propertyCheck = mapToCheck.get(propertyName);
+        if (propertyCheck instanceof Map)
+        {
+            ClientPropertyCollection componentMap = (ClientPropertyCollection) propertyCheck;
+            return componentMap;
+        }
+        return null;
+    }
+
+    private static void addMetadata(ClientPropertyCollection clientPropertyCollection, Map<? extends String, Object> metadata)
+    {
+        String lastUpdated = null;
+        Integer lastUpdatedVersion = null;
+        String lastUpdatedBy = null;
+        String lastUpdatedByDigest = null;
+        for (Map.Entry<? extends String, Object> entry : metadata.entrySet())
+        {
+            String key = entry.getKey();
+            if (key.equals(ClientMetadata.LAST_UPDATE_TAG))
+            {
+                lastUpdated = (String) entry.getValue();
+            }
+            else if ((key.equals(ClientMetadata.LAST_UPDATE_VERSION_TAG)) && (entry.getValue() instanceof Number))
+            {
+                lastUpdatedVersion = ((Number) entry.getValue()).intValue();
+            }
+            else if (key.equals(ClientMetadata.LAST_UPDATED_BY))
+            {
+                lastUpdatedBy = (String) entry.getValue();
+            }
+            else if (key.equals(ClientMetadata.LAST_UPDATED_BY_DIGEST))
+            {
+                lastUpdatedByDigest = (String) entry.getValue();
+            }
+            else
+            {
+                Object valueInCollection = clientPropertyCollection.get(key);
+                if (valueInCollection == null)
+                {
+                    // If the property (key) exists in metadata but not in twinCollection metadata is inconsistent.
+                    throw new IllegalArgumentException("Twin metadata is inconsistent for property: " + key);
+                }
+
+                ClientMetadata clientMetadata = ClientMetadata.tryExtractFromMap(entry.getValue());
+                if (clientMetadata != null)
+                {
+                    clientPropertyCollection.metadataMap.put(key, clientMetadata);
+                }
+
+                if (valueInCollection instanceof ClientPropertyCollection)
+                {
+                    clientPropertyCollection.addMetadata((ClientPropertyCollection) valueInCollection, (Map<? extends String, Object>) entry.getValue());
+                }
+            }
+        }
+
+        if ((lastUpdatedVersion != null) || !Tools.isNullOrEmpty(lastUpdated))
+        {
+            clientPropertyCollection.setMetadata(new ClientMetadata(lastUpdated, lastUpdatedVersion, lastUpdatedBy, lastUpdatedByDigest));
+        }
+    }
+
+    private <T> T convertFromObject(Object objectToGet, Class<T> typeOfT)
+    {
+        // Check to see if this is the type we're looking for.
+        // Some things to note about this is we're actively not type checking EVERY single conversion.
+        // It's assumed that the client writer will know the type coming from the deserialized object.
+        // We do handle odities where a customer might ask for a boolean
+        if (typeOfT.isInstance(objectToGet))
+        {
+            return (T) objectToGet;
+        }
+        else if (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT) == ReflectionUtility.TypeToReflect.CHAR)
+        {
+            return (T) (Character) objectToGet;
+        }
+        else if (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT) == ReflectionUtility.TypeToReflect.BOOL)
+        {
+            return (T) (Boolean) objectToGet;
+        }
+        else if (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT) != null)
+        {
+            // If we're here the type to cast to was a numeric  primitive
+            // We will first convert to a number and then try to get the cast type.
+            // There is boxing going on in here but there's no way around it if we want to use generics
+            Number num = (Number) objectToGet;
+            switch (ReflectionUtility.INSTANCE.canCastPrimitive(typeOfT))
+            {
+                case INT:
+                    return (T) (Integer) num.intValue();
+                case BYTE:
+                    return (T) (Byte) num.byteValue();
+                case DOUBLE:
+                    return (T) (Double) num.doubleValue();
+                case FLOAT:
+                    return (T) (Float) num.floatValue();
+                case LONG:
+                    return (T) (Long) num.longValue();
+                case SHORT:
+                    return (T) (Short) num.shortValue();
+            }
+        }
+
+        // if it's not we should try to deserialize it with our convention serializer
+        if (objectToGet != null && Convention != null)
+        {
+            return Convention.getPayloadSerializer().convertFromObject(objectToGet, typeOfT);
+        }
+
+        return null;
+    }
+
+    private void putAllAsWritableStart(Map<? extends String, ?> map)
+    {
+        if ((map == null) || map.isEmpty())
+        {
+            throw new IllegalArgumentException("map to add cannot be null or empty.");
+        }
+        this.version = ((Number) map.get(VERSION_TAG)).longValue();
+
+        // Loop through the toplevel properties
+        for (Map.Entry<? extends String, ?> rootOfMap : map.entrySet())
+        {
+            // Loop over all properties ignoring the version and metadata
+            if (!rootOfMap.getKey().equals(VERSION_TAG) && !rootOfMap.getKey().equals(METADATA_TAG))
+            {
+                // Check to see if the entry is a component
+                Map<String, Object> componentMapFromMap = getComponentMapFromMap(rootOfMap.getKey(), map);
+                // If so, try to add all properties for the component
+                if (componentMapFromMap != null)
+                {
+                    for (Map.Entry<? extends String, ?> componentProperty : componentMapFromMap.entrySet())
+                    {
+                        this.putComponentProperty(rootOfMap.getKey(), componentProperty.getKey(), Convention.createWritablePropertyResponse(componentProperty.getValue(), 0, this.version));
+                    }
+                }
+                else
+                {
+                    this.put(rootOfMap.getKey(), Convention.createWritablePropertyResponse(rootOfMap.getValue(), 0, this.version));
+                }
+            }
+        }
+        Map<? extends String, Object> metadata = (Map<? extends String, Object>) map.get(METADATA_TAG);
+        if (metadata != null)
+        {
+            ClientPropertyCollection.addMetadata(this, metadata);
+        }
+
+    }
+
+    private void fromMapInternal(Map<String, Object> mapToConvert, ClientPropertyCollection clientPropertyCollection)
+    {
+        Map<? extends String, Object> metadata = null;
+
+        for (Map.Entry<? extends String, Object> entry : mapToConvert.entrySet())
+        {
+            if (entry.getKey().equals(VERSION_TAG))
+            {
+                if (!(entry.getValue() instanceof Number))
+                {
+                    throw new IllegalArgumentException("version is not a number");
+                }
+
+                clientPropertyCollection.version = ((Number) entry.getValue()).longValue();
+            }
+            else if (entry.getKey().equals(METADATA_TAG))
+            {
+                metadata = (Map<? extends String, Object>) entry.getValue();
+            }
+            else
+            {
+                clientPropertyCollection.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (metadata != null)
+        {
+            ClientPropertyCollection.addMetadata(clientPropertyCollection, metadata);
+        }
+    }
+
 }

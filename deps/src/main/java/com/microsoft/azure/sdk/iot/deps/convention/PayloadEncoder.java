@@ -29,4 +29,11 @@ public abstract class PayloadEncoder
      * @return An encoded byte array.
      */
     public abstract byte[] encodeStringToByteArray(String contentPayload);
+
+    /**
+     * Outputs an encoded byte array for the specified payload string.
+     * @param byteArray The contents of the message payload.
+     * @return An encoded byte array.
+     */
+    public abstract String decodeByteArrayToString(byte[] byteArray);
 }

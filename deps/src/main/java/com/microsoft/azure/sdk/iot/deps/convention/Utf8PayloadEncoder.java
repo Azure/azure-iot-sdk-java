@@ -17,7 +17,6 @@ public class Utf8PayloadEncoder extends PayloadEncoder
     @Getter
     private static Utf8PayloadEncoder instance = new Utf8PayloadEncoder();
 
-
     /**
      * {@inheritDoc}
      */
@@ -31,5 +30,11 @@ public class Utf8PayloadEncoder extends PayloadEncoder
     public byte[] encodeStringToByteArray(String contentPayload)
     {
         return ContentEncoding.encode(contentPayload).array();
+    }
+
+    @Override
+    public String decodeByteArrayToString(byte[] byteArray)
+    {
+        return new String(byteArray, ContentEncoding);
     }
 }

@@ -302,18 +302,19 @@ public class Thermostat
             @SneakyThrows({InterruptedException.class, IOException.class})
             public void execute(ClientPropertyCollection propertyCollection, Object context)
             {
+                // Each of these properties will be a WritablePropertyResponse we can simply copy the value over and ack each one
+                // or we can modify each property and ack the whole collection.
                 for (String key : propertyCollection.keySet())
                 {
                     if (key.equalsIgnoreCase(propertyName))
                     {
-
                         ClientPropertyCollection collection = new ClientPropertyCollection();
 
-                        double targetTemperature = propertyCollection.getValue(key, double.class);
-                        log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature);
+                        WritablePropertyResponse targetTemperature = propertyCollection.getValue(key, WritablePropertyResponse.class);
+                        log.debug("Property: Received - {\"{}\": {}°C}.", propertyName, targetTemperature.getValue());
 
-                        GsonWritablePropertyResponse pendingUpdate = new GsonWritablePropertyResponse(targetTemperature, StatusCode.IN_PROGRESS.value, propertyCollection.getVersion());
-                        collection.put(propertyName, pendingUpdate);
+                        targetTemperature.setAckCode(StatusCode.IN_PROGRESS.value);
+                        collection.put(propertyName, targetTemperature);
 
                         try
                         {
@@ -323,20 +324,26 @@ public class Thermostat
                         {
                             throw new RuntimeException("IOException when sending reported property update: ", e);
                         }
-                        log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, targetTemperature, StatusCode.IN_PROGRESS);
+                        log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, targetTemperature.getValue(), StatusCode.IN_PROGRESS);
 
                         // Update temperature in 2 steps
-                        double step = (targetTemperature - temperature) / 2;
+                        double step = ((Double)targetTemperature.getValue() - temperature) / 2;
                         for (int i = 1; i <= 2; i++)
                         {
                             temperature = BigDecimal.valueOf(temperature + step).setScale(1, RoundingMode.HALF_UP).doubleValue();
                             Thread.sleep(5 * 1000);
                         }
 
-                        WritablePropertyResponse updated = (WritablePropertyResponse) collection.get(propertyName);
-                        updated.setAckCode(StatusCode.COMPLETED.value);
+                        targetTemperature.setAckCode(StatusCode.COMPLETED.value);
+                        try
+                        {
+                            deviceClient.updateClientProperties(collection, null, null);
+                        }
+                        catch (IOException e)
+                        {
+                            throw new RuntimeException("IOException when sending reported property update: ", e);
+                        }
 
-                        deviceClient.updateClientProperties(collection, null, null);
                         log.debug("Property: Update - {\"{}\": {}°C} is {}", propertyName, temperature, StatusCode.COMPLETED);
                     }
                     else
@@ -344,7 +351,6 @@ public class Thermostat
                         log.debug("Property: Received an unrecognized property update from service.");
                     }
                 }
-
             }
         }
 

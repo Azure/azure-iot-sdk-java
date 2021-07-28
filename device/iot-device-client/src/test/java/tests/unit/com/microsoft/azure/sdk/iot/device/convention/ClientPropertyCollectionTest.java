@@ -6,6 +6,7 @@ import com.microsoft.azure.sdk.iot.deps.convention.DefaultPayloadConvention;
 import com.microsoft.azure.sdk.iot.deps.convention.GsonWritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.deps.convention.WritablePropertyResponse;
 import com.microsoft.azure.sdk.iot.deps.serializer.ParserUtility;
+import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.convention.ClientMetadata;
 import com.microsoft.azure.sdk.iot.device.convention.ClientPropertyCollection;
 import jnr.ffi.annotations.In;
@@ -65,57 +66,6 @@ public class ClientPropertyCollectionTest
             "         \"av\": 5,\n" +
             "         \"ad\": \"Longer description for the fun of it.\"\n" +
             "      },\n" +
-            "   \"$metadata\": {\n" +
-            "      \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\",\n" +
-            "         \"stringValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"integerValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"doubleValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"booleanValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"longValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"shortValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"complexValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\",\n" +
-            "            \"stringValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"integerValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"doubleValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"booleanValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            }\n" +
-            "         },\n" +
-            "         \"writableProperty\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\",\n" +
-            "            \"value\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"ac\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"ad\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"av\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            }\n" +
-            "         }\n" +
-            "   },\n" +
             "   \"$version\":" + VERSION + "\n" +
             "}";
 
@@ -140,64 +90,6 @@ public class ClientPropertyCollectionTest
             "         \"ac\": 200,\n" +
             "         \"av\": 5,\n" +
             "         \"ad\": \"Longer description for the fun of it.\"\n" +
-            "      }\n" +
-            "   },\n" +
-            "   \"$metadata\": {\n" +
-            "      \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\",\n" +
-            "      \"testableComponent\": {\n" +
-            "         \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\",\n" +
-            "         \"$lastUpdatedVersion\": 5,\n" +
-            "         \"stringValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"__t\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"integerValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"doubleValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"longValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"shortValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"booleanValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "         },\n" +
-            "         \"complexValue\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\",\n" +
-            "            \"stringValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"integerValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"doubleValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"booleanValue\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            }\n" +
-            "         },\n" +
-            "         \"writableProperty\": {\n" +
-            "            \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\",\n" +
-            "            \"value\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"ac\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"ad\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            },\n" +
-            "            \"av\": {\n" +
-            "               \"$lastUpdated\": \"" + LAST_UPDATED_TIME + "\"\n" +
-            "            }\n" +
-            "         }\n" +
             "      }\n" +
             "   },\n" +
             "   \"$version\": " + VERSION + "\n" +
@@ -477,10 +369,15 @@ public class ClientPropertyCollectionTest
     }
 
     @Test
-    public void getMetadata()
+    public void putAllAsWritableProperties_FromMessage()
     {
-        ClientPropertyCollection propCollection = generateClientPropertyCollectionFromJSON(FULL_RESPONSE);
-        propCollection.setConvention(DefaultPayloadConvention.getInstance());
-        assertEquals(ParserUtility.getDateTimeUtc(LAST_UPDATED_TIME), propCollection.getMetadata().getLastUpdated());
+        // It's redundant but now we know
+
+        Message msg = new Message(FULL_RESPONSE_WITH_COMPONENT);
+
+        // Test the constructor
+        ClientPropertyCollection propCollectionFromConstructor = new ClientPropertyCollection(msg, DefaultPayloadConvention.getInstance(), true);
+        String s = "S";
+        //assertPropCollectionWithGetForDefaultComponent(propCollectionFromPutAll);
     }
 }

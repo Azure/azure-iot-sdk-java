@@ -15,7 +15,7 @@ public class TelemetryMessage extends Message
     {
         if (Telemetry.Convention != null && Telemetry.Convention.getPayloadSerializer() != null)
         {
-            return Telemetry.Convention.GetObjectBytes(Telemetry);
+            return Telemetry.Convention.getObjectBytes(Telemetry);
         }
         return super.getBytes();
     }

@@ -134,12 +134,9 @@ public class DeviceTwin
                             OnDesiredPropertyChanged(twinState.getDesiredProperty());
                             if (writablePropertiesRequestsCallback != null)
                             {
-                                writablePropertiesRequestsCallback.execute(ClientPropertyCollection.fromMap(twinState.getDesiredProperty()), writablePropertiesRequestsContext);
+                                writablePropertiesRequestsCallback.execute(new ClientPropertyCollection(dtMessage, config.getPayloadConvention(), true), writablePropertiesRequestsContext);
                             }
-
                         }
-
-
                         break;
                     }
                     default:
