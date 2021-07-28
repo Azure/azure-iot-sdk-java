@@ -318,11 +318,24 @@ public class ModuleClient extends InternalClient
                     sslContext = new IotHubSSLContext().getSSLContext();
                 }
 
-                IotHubAuthenticationProvider iotHubAuthenticationProvider = IotHubSasTokenHsmAuthenticationProvider.create(signatureProvider, deviceId, moduleId, hostname, gatewayHostname, generationId, DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS, DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE, sslContext);
+                IotHubAuthenticationProvider iotHubAuthenticationProvider =
+                    IotHubSasTokenHsmAuthenticationProvider
+                        .create(
+                            signatureProvider,
+                            deviceId,
+                            moduleId,
+                            hostname,
+                            gatewayHostname,
+                            generationId,
+                            DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS,
+                            DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE,
+                            sslContext);
 
-                ModuleClient moduleClient = new ModuleClient(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
-
-                return moduleClient;
+                return new ModuleClient(
+                    iotHubAuthenticationProvider,
+                    protocol,
+                    SEND_PERIOD_MILLIS,
+                    getReceivePeriod(protocol));
             }
             catch (IOException | TransportException | HsmException | URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
             {

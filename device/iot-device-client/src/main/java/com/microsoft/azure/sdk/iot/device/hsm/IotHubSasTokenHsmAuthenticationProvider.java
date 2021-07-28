@@ -37,17 +37,40 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      * @throws IOException If the Hsm unit cannot be reached
      * @throws TransportException If the Hsm unit cannot be reached
      */
-    public static IotHubSasTokenHsmAuthenticationProvider create(SignatureProvider signatureProvider, String deviceId, String moduleId, String hostname, String gatewayHostname, String generationId, int suggestedTimeToLiveSeconds, int timeBufferPercentage) throws IOException, TransportException
+    public static IotHubSasTokenHsmAuthenticationProvider create(
+        SignatureProvider signatureProvider,
+        String deviceId,
+        String moduleId,
+        String hostname,
+        String gatewayHostname,
+        String generationId,
+        int suggestedTimeToLiveSeconds,
+        int timeBufferPercentage) throws IOException, TransportException
     {
         if (signatureProvider == null)
         {
-            // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_002: [If the provided signature provider is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("signatureProvider cannot be null");
         }
 
-        // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_001: [This function shall construct a sas token from the provided arguments and then return a IotHubSasTokenHsmAuthenticationProvider instance that uses that sas token.]
-        IotHubSasToken sasToken = createNewSasToken(hostname, gatewayHostname, deviceId, moduleId, generationId, signatureProvider, suggestedTimeToLiveSeconds);
-        return new IotHubSasTokenHsmAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, generationId, sasToken.getSasToken(), signatureProvider, suggestedTimeToLiveSeconds, timeBufferPercentage);
+        IotHubSasToken sasToken = createNewSasToken(
+            hostname,
+            gatewayHostname,
+            deviceId,
+            moduleId,
+            generationId,
+            signatureProvider,
+            suggestedTimeToLiveSeconds);
+
+        return new IotHubSasTokenHsmAuthenticationProvider(
+            hostname,
+            gatewayHostname,
+            deviceId,
+            moduleId,
+            generationId,
+            sasToken.getSasToken(),
+            signatureProvider,
+            suggestedTimeToLiveSeconds,
+            timeBufferPercentage);
     }
 
     /**
@@ -64,17 +87,43 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      * @throws IOException If the Hsm unit cannot be reached
      * @throws TransportException If the Hsm unit cannot be reached
      */
-    public static IotHubSasTokenHsmAuthenticationProvider create(SignatureProvider signatureProvider, String deviceId, String moduleId, String hostname, String gatewayHostname, String generationId, int suggestedTimeToLiveSeconds, int timeBufferPercentage, SSLContext sslContext) throws IOException, TransportException
+    public static IotHubSasTokenHsmAuthenticationProvider create(
+        SignatureProvider signatureProvider,
+        String deviceId,
+        String moduleId,
+        String hostname,
+        String gatewayHostname,
+        String generationId,
+        int suggestedTimeToLiveSeconds,
+        int timeBufferPercentage,
+        SSLContext sslContext) throws IOException, TransportException
     {
         if (signatureProvider == null)
         {
-            // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_002: [If the provided signature provider is null, this function shall throw an IllegalArgumentException.]
             throw new IllegalArgumentException("signatureProvider cannot be null");
         }
 
-        // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_001: [This function shall construct a sas token from the provided arguments and then return a IotHubSasTokenHsmAuthenticationProvider instance that uses that sas token.]
-        IotHubSasToken sasToken = createNewSasToken(hostname, gatewayHostname, deviceId, moduleId, generationId, signatureProvider, suggestedTimeToLiveSeconds);
-        return new IotHubSasTokenHsmAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, generationId, sasToken.getSasToken(), signatureProvider, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
+        IotHubSasToken sasToken =
+            createNewSasToken(
+                hostname,
+                gatewayHostname,
+                deviceId,
+                moduleId,
+                generationId,
+                signatureProvider,
+                suggestedTimeToLiveSeconds);
+
+        return new IotHubSasTokenHsmAuthenticationProvider(
+            hostname,
+            gatewayHostname,
+            deviceId,
+            moduleId,
+            generationId,
+            sasToken.getSasToken(),
+            signatureProvider,
+            suggestedTimeToLiveSeconds,
+            timeBufferPercentage,
+            sslContext);
     }
 
     /**
@@ -84,8 +133,14 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      */
     public void refreshSasToken() throws IOException, TransportException
     {
-        // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_005: [This function shall create a new sas token and save it locally.]
-        this.sasToken = createNewSasToken(this.hostname, this.gatewayHostname, this.deviceId, this.moduleId, this.generationId, this.signatureProvider, this.tokenValidSecs);
+        this.sasToken = createNewSasToken(
+            this.hostname,
+            this.gatewayHostname,
+            this.deviceId,
+            this.moduleId,
+            this.generationId,
+            this.signatureProvider,
+            this.tokenValidSecs);
     }
 
     /**
@@ -97,7 +152,14 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         return true;
     }
 
-    static IotHubSasToken createNewSasToken(String hostname, String gatewayHostName, String deviceId, String moduleId, String generationId, SignatureProvider signatureProvider, long suggestedTimeToLive) throws IOException, TransportException
+    static IotHubSasToken createNewSasToken(
+        String hostname,
+        String gatewayHostName,
+        String deviceId,
+        String moduleId,
+        String generationId,
+        SignatureProvider signatureProvider,
+        long suggestedTimeToLive) throws IOException, TransportException
     {
         try
         {
@@ -110,8 +172,6 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
             String host = gatewayHostName != null && !gatewayHostName.isEmpty() ? gatewayHostName : hostname;
             String sharedAccessToken = IotHubSasToken.buildSharedAccessToken(audience, signature, expiresOn);
 
-            // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_004: [If the gatewayHostname is null or empty, this function shall construct the sas token using the hostname instead of the gateway hostname.]
-            // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_006: [If the gatewayHostname is present, this function shall construct the sas token using the gateway hostname instead of the hostname.]
             return new IotHubSasToken(host, deviceId, null, sharedAccessToken, moduleId, expiresOn);
         }
         catch (UnsupportedEncodingException | URISyntaxException | HsmException e)
@@ -120,14 +180,33 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         }
     }
 
-    private IotHubSasTokenHsmAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String generationId, String sharedAccessToken, SignatureProvider signatureProvider, int suggestedTimeToLiveSeconds, int timeBufferPercentage)
+    private IotHubSasTokenHsmAuthenticationProvider(
+        String hostname,
+        String gatewayHostName,
+        String deviceId,
+        String moduleId,
+        String generationId,
+        String sharedAccessToken,
+        SignatureProvider signatureProvider,
+        int suggestedTimeToLiveSeconds,
+        int timeBufferPercentage)
     {
         super(hostname, gatewayHostName, deviceId, moduleId, sharedAccessToken, suggestedTimeToLiveSeconds, timeBufferPercentage);
         this.signatureProvider = signatureProvider;
         this.generationId = generationId;
     }
 
-    private IotHubSasTokenHsmAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String generationId, String sharedAccessToken, SignatureProvider signatureProvider, int suggestedTimeToLiveSeconds, int timeBufferPercentage, SSLContext sslContext)
+    private IotHubSasTokenHsmAuthenticationProvider(
+        String hostname,
+        String gatewayHostName,
+        String deviceId,
+        String moduleId,
+        String generationId,
+        String sharedAccessToken,
+        SignatureProvider signatureProvider,
+        int suggestedTimeToLiveSeconds,
+        int timeBufferPercentage,
+        SSLContext sslContext)
     {
         super(hostname, gatewayHostName, deviceId, moduleId, sharedAccessToken, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
         this.signatureProvider = signatureProvider;
