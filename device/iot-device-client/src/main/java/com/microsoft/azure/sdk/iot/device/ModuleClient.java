@@ -6,6 +6,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.DeviceMethodCallback;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.PropertyCallBack;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.TwinPropertiesCallback;
@@ -27,7 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Map;
 
 /**
@@ -193,7 +197,41 @@ public class ModuleClient extends InternalClient
         {
             log.debug("Creating module client with the provided connection string");
 
-            //Codes_SRS_MODULECLIENT_34_020: [If an edgehub or iothub connection string is present, this function shall create a module client instance using that connection string and the provided protocol.]
+            //Check for a different default cert to be used
+            String alternativeDefaultTrustedCert = envVariables.get(EdgeCaCertificateFileVariableName);
+            SSLContext sslContext;
+            if (alternativeDefaultTrustedCert != null && !alternativeDefaultTrustedCert.isEmpty())
+            {
+                log.debug("Configuring module client to use the configured alternative trusted certificate");
+                try
+                {
+                    sslContext = IotHubSSLContext.getSSLContextFromFile(alternativeDefaultTrustedCert);
+                }
+                catch (CertificateException | IOException | KeyStoreException | NoSuchAlgorithmException | KeyManagementException e)
+                {
+                    throw new ModuleClientException("Failed to create an SSLContext instance from the provided trusted cert file path", e);
+                }
+            }
+            else
+            {
+                sslContext = new IotHubSSLContext().getSSLContext();
+            }
+
+            if (clientOptions == null)
+            {
+                clientOptions = new ClientOptions();
+            }
+
+            // only override the SSLContext if the user didn't set it
+            if (clientOptions.sslContext == null)
+            {
+                clientOptions.sslContext = sslContext;
+            }
+            else
+            {
+                log.debug("Ignoring trusted certs saved in {} environment variable because custom SSLContext was provided in client options.", EdgeCaCertificateFileVariableName);
+            }
+
             ModuleClient moduleClient;
             try
             {
@@ -202,16 +240,6 @@ public class ModuleClient extends InternalClient
             catch (URISyntaxException e)
             {
                 throw new ModuleClientException("Could not create module client", e);
-            }
-
-            //Check for a different default cert to be used
-            String alternativeDefaultTrustedCert = envVariables.get(EdgeCaCertificateFileVariableName);
-            if (alternativeDefaultTrustedCert != null && !alternativeDefaultTrustedCert.isEmpty())
-            {
-                log.debug("Configuring module client to use the configured alternative trusted certificate");
-                //Codes_SRS_MODULECLIENT_34_031: [If an alternative default trusted cert is saved in the environment
-                // variables, this function shall set that trusted cert in the created module client.]
-                moduleClient.setOption_SetCertificatePath(alternativeDefaultTrustedCert);
             }
 
             return moduleClient;
@@ -278,25 +306,38 @@ public class ModuleClient extends InternalClient
 
             try
             {
-                //Codes_SRS_MODULECLIENT_34_017: [This function shall create an authentication provider using the created
-                // signature provider, and the environment variables for deviceid, moduleid, hostname, gatewayhostname,
-                // and the default time for tokens to live and the default sas token buffer time.]
-                IotHubAuthenticationProvider iotHubAuthenticationProvider = IotHubSasTokenHsmAuthenticationProvider.create(signatureProvider, deviceId, moduleId, hostname, gatewayHostname, generationId, DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS, DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE);
-
-                //Codes_SRS_MODULECLIENT_34_018: [This function shall return a new ModuleClient instance built from the created authentication provider and the provided protocol.]
-                ModuleClient moduleClient = new ModuleClient(iotHubAuthenticationProvider, protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol));
-
+                SSLContext sslContext;
                 if (gatewayHostname != null && !gatewayHostname.isEmpty())
                 {
-                    //Codes_SRS_MODULECLIENT_34_032: [This function shall retrieve the trust bundle from the hsm and set them in the module client.]
                     TrustBundleProvider trustBundleProvider = new HttpsHsmTrustBundleProvider();
                     String trustCertificates = trustBundleProvider.getTrustBundleCerts(edgedUri, DEFAULT_API_VERSION);
-                    moduleClient.setTrustedCertificates(trustCertificates);
+                    sslContext = IotHubSSLContext.getSSLContextFromString(trustCertificates);
+                }
+                else
+                {
+                    sslContext = new IotHubSSLContext().getSSLContext();
                 }
 
-                return moduleClient;
+                IotHubAuthenticationProvider iotHubAuthenticationProvider =
+                    IotHubSasTokenHsmAuthenticationProvider
+                        .create(
+                            signatureProvider,
+                            deviceId,
+                            moduleId,
+                            hostname,
+                            gatewayHostname,
+                            generationId,
+                            DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS,
+                            DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE,
+                            sslContext);
+
+                return new ModuleClient(
+                    iotHubAuthenticationProvider,
+                    protocol,
+                    SEND_PERIOD_MILLIS,
+                    getReceivePeriod(protocol));
             }
-            catch (IOException | TransportException | HsmException | URISyntaxException e)
+            catch (IOException | TransportException | HsmException | URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
             {
                 throw new ModuleClientException(e);
             }

@@ -64,6 +64,20 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         this.timeBufferPercentage = timeBufferPercentage;
     }
 
+    public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, long tokenValidSecs, int timeBufferPercentage, SSLContext sslContext)
+    {
+        super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
+
+        this.setTokenValidSecs(tokenValidSecs);
+
+        if (timeBufferPercentage < 1 || timeBufferPercentage > 100)
+        {
+            throw new IllegalArgumentException("Time buffer percentage must be a percentage between 1 and 100");
+        }
+
+        this.timeBufferPercentage = timeBufferPercentage;
+    }
+
     public void setTokenValidSecs(long tokenValidSecs)
     {
         if (tokenValidSecs < 1)

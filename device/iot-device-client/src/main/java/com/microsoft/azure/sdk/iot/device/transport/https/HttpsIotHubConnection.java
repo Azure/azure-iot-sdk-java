@@ -506,7 +506,7 @@ public class HttpsIotHubConnection implements IotHubTransportConnection
         }
         catch (IOException e)
         {
-            throw new TransportException(e);
+            throw new TransportException("Failed to get SSLContext", e);
         }
     }
 

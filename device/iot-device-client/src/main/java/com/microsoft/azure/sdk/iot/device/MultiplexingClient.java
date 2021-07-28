@@ -455,13 +455,6 @@ public class MultiplexingClient
                 devicesToRegisterMap.put(deviceClientToRegister.getConfig().getDeviceId(), deviceClientToRegister);
                 DeviceClientConfig configToAdd = deviceClientToRegister.getConfig();
 
-                // Overwrite the sslContext of the new client to match the multiplexing client
-                // settings if it was set. If it wasn't set, defer to the default client to set this ssl context
-                if (this.sslContext != null)
-                {
-                    configToAdd.getAuthenticationProvider().setSSLContext(this.sslContext);
-                }
-
                 // Overwrite the proxy settings of the new client to match the multiplexing client settings
                 configToAdd.setProxy(this.proxySettings);
 

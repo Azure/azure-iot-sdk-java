@@ -30,8 +30,6 @@ public class InternalClient
     // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
     static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
-    static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
-	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
     static final String SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT = "SetAmqpOpenAuthenticationSessionTimeout";
     static final String SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT = "SetAmqpOpenDeviceSessionsTimeout";
@@ -74,19 +72,6 @@ public class InternalClient
     {
         this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
         this.config.setProtocol(protocol);
-        this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
-    }
-
-    InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException
-    {
-        // Codes_SRS_INTERNALCLIENT_34_078: [If the connection string or protocol is null, this function shall throw an IllegalArgumentException.]
-        commonConstructorVerification(iotHubConnectionString, protocol);
-
-        // Codes_SRS_INTERNALCLIENT_34_079: [This function shall save a new config using the provided connection string, and x509 certificate information.]
-        this.config = new DeviceClientConfig(iotHubConnectionString, publicKeyCertificate, isCertificatePath, privateKey, isPrivateKeyPath);
-        this.config.setProtocol(protocol);
-
-        // Codes_SRS_INTERNALCLIENT_34_080: [This function shall save a new DeviceIO instance using the created config and the provided send/receive periods.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
     }
 
@@ -488,11 +473,6 @@ public class InternalClient
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
-     *	    - <b>SetCertificatePath</b> - this option is applicable only
-     *	      when the transport configured with this client is AMQP. This
-     *	      option specifies the path to the certificate used to verify peer.
-     *	      The value is expected to be of type {@code String}.
-     *
      *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
      *         AMQP/MQTT. This option specifies the interval in seconds after which
      *         SASToken expires. If the transport is already open then setting this
@@ -562,43 +542,6 @@ public class InternalClient
                 case SET_SEND_INTERVAL:
                 {
                     setOption_SetSendInterval(value);
-                    break;
-                }
-                case SET_CERTIFICATE_PATH:
-                {
-                    if ((this.deviceIO != null) && (this.deviceIO.isOpen()))
-                    {
-                        throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
-                    }
-                    else
-                    {
-                        if (this.deviceIO.getProtocol() != HTTPS)
-                        {
-                            // Codes_SRS_DEVICECLIENT_34_046: [If the option is SET_CERTIFICATE_PATH, and the saved
-                            // protocol is not HTTPS, this function shall save the certificate path in config.]
-                            setOption_SetCertificatePath(value);
-                        }
-                        else
-                        {
-                            // Codes_SRS_DEVICECLIENT_34_047: [If the option is SET_CERTIFICATE_PATH, and the saved
-                            // protocol is HTTPS, this function shall throw an IllegalArgumentException.]
-                            throw new IllegalArgumentException("option SetCertificatePath cannot be invoked when using HTTPS protocol");
-                        }
-                    }
-
-                    break;
-                }
-                case SET_CERTIFICATE_AUTHORITY:
-                {
-                    if ((this.deviceIO != null) && (this.deviceIO.isOpen()))
-                    {
-                        throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH + " only works when the transport is closed");
-                    }
-                    else
-                    {
-                        setTrustedCertificates((String)value);
-                    }
-
                     break;
                 }
                 case SET_SAS_TOKEN_EXPIRY_TIME:
@@ -907,15 +850,6 @@ public class InternalClient
         }
     }
 
-    void setOption_SetCertificatePath(Object value)
-    {
-        if (value != null)
-        {
-            log.info("Setting path to trusted certificate");
-            this.config.getAuthenticationProvider().setPathToIotHubTrustedCert((String) value);
-        }
-    }
-
     void setOption_SetHttpsConnectTimeout(Object value)
     {
         if (value != null)
@@ -956,11 +890,6 @@ public class InternalClient
                 throw new IllegalArgumentException("value is not int = " + value);
             }
         }
-    }
-
-    void setTrustedCertificates(String certificates)
-    {
-        this.config.getAuthenticationProvider().setIotHubTrustedCert(certificates);
     }
 
     void setOption_SetSendInterval(Object value)

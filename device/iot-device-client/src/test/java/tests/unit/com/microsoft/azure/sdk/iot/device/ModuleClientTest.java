@@ -5,6 +5,7 @@
 
 package tests.unit.com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.deps.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubAuthenticationProvider;
 import com.microsoft.azure.sdk.iot.device.edge.HttpsHsmTrustBundleProvider;
@@ -23,7 +24,10 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,6 +82,9 @@ public class ModuleClientTest
 
     @Mocked
     HttpsTransportManager mockedHttpsTransportManager;
+
+    @Mocked
+    IotHubSSLContext mockIotHubSSLContext;
 
     private void baseExpectations() throws URISyntaxException
     {
@@ -593,7 +600,7 @@ public class ModuleClientTest
                 new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion);
                 result = mockedHttpHsmSignatureProvider;
 
-                IotHubSasTokenHsmAuthenticationProvider.create(mockedHttpHsmSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedGenerationId, anyInt, anyInt);
+                IotHubSasTokenHsmAuthenticationProvider.create(mockedHttpHsmSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedGenerationId, anyInt, anyInt, (SSLContext) any);
                 result = mockedModuleAuthenticationWithHsm;
 
                 new HttpsHsmTrustBundleProvider();
@@ -693,7 +700,7 @@ public class ModuleClientTest
     //Tests_SRS_MODULECLIENT_34_031: [If an alternative default trusted cert is saved in the environment
     // variables, this function shall set that trusted cert in the created module client.]
     @Test
-    public void createFromEnvironmentChecksForEnvVarOfEdgeHub(final @Mocked System mockedSystem) throws ModuleClientException, URISyntaxException
+    public void createFromEnvironmentChecksForEnvVarOfEdgeHub(final @Mocked System mockedSystem) throws ModuleClientException, URISyntaxException, CertificateException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException
     {
         //arrange
         final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
@@ -728,7 +735,7 @@ public class ModuleClientTest
         new Verifications()
         {
             {
-                mockedDeviceClientConfig.getAuthenticationProvider().setPathToIotHubTrustedCert(expectedTrustedCert);
+                IotHubSSLContext.getSSLContextFromFile(expectedTrustedCert);
                 times = 1;
             }
         };
