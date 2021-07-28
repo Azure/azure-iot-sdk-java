@@ -296,6 +296,7 @@ public class EnrollmentGroup extends Serializable
         this.setAllocationPolicy(result.getAllocationPolicy());
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
+        this.setCapabilities(result.getCapabilities());
     }
 
     /**

@@ -1148,13 +1148,14 @@ public class IndividualEnrollmentTest
 
     /* SRS_INDIVIDUAL_ENROLLMENT_34_067: [This function shall set the allocation policy to the value from the json.] */
     @Test
-    public void constructorWithJsonSetsAllocationPolicy()
+    public void constructorWithJsonSetsAllocationPolicyGeoLatency()
     {
         // arrange
         AllocationPolicy expectedAllocationPolicy = AllocationPolicy.GEOLATENCY;
+        String expectedAllocationPolicyString = "geoLatency";
         final String json = "{\n" +
                 "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
-                "  \"allocationPolicy\": \"" + expectedAllocationPolicy.toString() + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicyString + "\",\n" +
                 "  \"attestation\": {\n" +
                 "    \"type\": \"tpm\",\n" +
                 "    \"tpm\": {\n" +
@@ -1176,6 +1177,100 @@ public class IndividualEnrollmentTest
         assertNotNull(individualEnrollment.getAllocationPolicy());
         assertEquals(expectedAllocationPolicy, individualEnrollment.getAllocationPolicy());
     }
+
+    @Test
+    public void constructorWithJsonSetsAllocationPolicyStatic()
+    {
+        // arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.STATIC;
+        String expectedAllocationPolicyString = "static";
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicyString + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNotNull(individualEnrollment.getAllocationPolicy());
+        assertEquals(expectedAllocationPolicy, individualEnrollment.getAllocationPolicy());
+    }
+
+    @Test
+    public void constructorWithJsonSetsAllocationPolicyCustom()
+    {
+        // arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.CUSTOM;
+        String expectedAllocationPolicyString = "custom";
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicyString + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNotNull(individualEnrollment.getAllocationPolicy());
+        assertEquals(expectedAllocationPolicy, individualEnrollment.getAllocationPolicy());
+    }
+
+    @Test
+    public void constructorWithJsonSetsAllocationPolicyHashed()
+    {
+        // arrange
+        AllocationPolicy expectedAllocationPolicy = AllocationPolicy.HASHED;
+        String expectedAllocationPolicyString = "hashed";
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"allocationPolicy\": \"" + expectedAllocationPolicyString + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"createdDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"lastUpdatedDateTimeUtc\": \"" + VALID_DATE_AS_STRING + "\",\n" +
+                "  \"etag\": \"" + VALID_ETAG + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNotNull(individualEnrollment.getAllocationPolicy());
+        assertEquals(expectedAllocationPolicy, individualEnrollment.getAllocationPolicy());
+    }
+
 
     /* SRS_INDIVIDUAL_ENROLLMENT_34_066: [This function shall set the iothubs list to the value from the json.] */
     @Test
