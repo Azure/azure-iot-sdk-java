@@ -8,7 +8,7 @@ public class TelemetryMessage extends Message
 {
     @Getter
     @Setter
-    public ClientPropertyCollection Telemetry;
+    public ClientPropertyCollection telemetry;
 
     @Override
     public byte[] getBytes()
