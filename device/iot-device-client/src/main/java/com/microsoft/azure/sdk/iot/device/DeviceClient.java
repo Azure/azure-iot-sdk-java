@@ -481,11 +481,6 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
      *	      a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
      *
-     *	    - <b>SetCertificatePath</b> - this option is applicable only
-     *	      when the transport configured with this client is AMQP. This
-     *	      option specifies the path to the certificate used to verify peer.
-     *	      The value is expected to be of type {@code String}.
-     *
      *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
      *         AMQP/MQTT. This option specifies the interval in seconds after which
      *         SASToken expires. If the transport is already open then setting this
@@ -535,42 +530,6 @@ public final class DeviceClient extends InternalClient implements Closeable
         if (this.deviceIO == null)
         {
             throw new UnsupportedOperationException("Must re-register this client to a multiplexing client before using it");
-        }
-
-        switch (optionName)
-        {
-            // Codes_SRS_DEVICECLIENT_02_016: ["SetMinimumPollingInterval" - time in milliseconds between 2 consecutive polls.]
-            case SET_MINIMUM_POLLING_INTERVAL:
-            case SET_RECEIVE_INTERVAL:
-            case SET_HTTPS_CONNECT_TIMEOUT:
-            case SET_HTTPS_READ_TIMEOUT:
-            case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
-            case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
-            case SET_MAX_MESSAGES_SENT_PER_THREAD:
-            {
-                break;
-            }
-            case SET_SEND_INTERVAL:
-            case SET_CERTIFICATE_PATH:
-            {
-                break;
-            }
-            // Codes_SRS_DEVICECLIENT_34_043: ["SetCertificateAuthority" - set the certificate to verify peer.]
-            case SET_CERTIFICATE_AUTHORITY:
-            {
-                break;
-            }
-            //Codes_SRS_DEVICECLIENT_25_021: ["SetSASTokenExpiryTime" - Time in secs to specify SAS Token Expiry time.]
-            case SET_SAS_TOKEN_EXPIRY_TIME:
-            {
-                //Codes__SRS_DEVICECLIENT_25_023: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT/AMQPS_WS/MQTT_WS.]
-                setOption_SetSASTokenExpiryTime(value);
-                return;
-            }
-            default:
-            {
-                throw new IllegalArgumentException("optionName is unknown = " + optionName);
-            }
         }
 
         super.setOption(optionName, value);

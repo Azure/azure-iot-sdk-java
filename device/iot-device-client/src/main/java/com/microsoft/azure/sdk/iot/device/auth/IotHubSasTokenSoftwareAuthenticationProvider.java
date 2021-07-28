@@ -34,7 +34,6 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
 
         this.deviceKey = deviceKey;
 
-        this.sslContextNeedsUpdate = true;
 
         //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_002: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
@@ -55,7 +54,6 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
         super(hostname, gatewayHostname, deviceId, moduleId);
 
         this.deviceKey = deviceKey;
-        this.sslContextNeedsUpdate = true;
 
         //Codes_SRS_IOTHUBSASTOKENSOFTWAREAUTHENTICATION_34_003: [This constructor shall save the provided hostname, device id, module id, deviceKey, and sharedAccessToken.]
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
