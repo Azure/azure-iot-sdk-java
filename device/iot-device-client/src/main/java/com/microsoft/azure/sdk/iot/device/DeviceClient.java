@@ -7,22 +7,16 @@ import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotificat
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
 import com.microsoft.azure.sdk.iot.device.DeviceTwin.*;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUpload;
-import com.microsoft.azure.sdk.iot.device.fileupload.FileUploadTask;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.IoTHubConnectionType;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.net.ssl.SSLContext;
 import java.io.Closeable;
 import java.io.IOError;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * <p>
@@ -55,7 +49,6 @@ public final class DeviceClient extends InternalClient implements Closeable
     private IoTHubConnectionType ioTHubConnectionType = IoTHubConnectionType.UNKNOWN;
 
     private FileUpload fileUpload;
-    private FileUploadTask fileUploadTask;
 
     private static final String MULTIPLEXING_CLOSE_ERROR_MESSAGE = "Cannot close a multiplexed client through this method. Must use multiplexingClient.unregisterDeviceClient(deviceClient)";
     private static final String MULTIPLEXING_OPEN_ERROR_MESSAGE = "Cannot open a multiplexed client through this method. Must use multiplexingClient.registerDeviceClient(deviceClient)";
@@ -206,19 +199,6 @@ public final class DeviceClient extends InternalClient implements Closeable
         commonConstructorSetup();
     }
 
-    void closeFileUpload() throws IOException
-    {
-        if (this.fileUpload != null)
-        {
-            this.fileUpload.closeNow();
-        }
-
-        if (this.fileUploadTask != null)
-        {
-            this.fileUploadTask.close();
-        }
-    }
-
     private void commonConstructorSetup()
     {
         this.ioTHubConnectionType = IoTHubConnectionType.SINGLE_CLIENT;
@@ -309,8 +289,8 @@ public final class DeviceClient extends InternalClient implements Closeable
 
         //Codes_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.closeNow().]
         log.info("Closing device client...");
+        this.fileUpload.close();
         super.closeNow();
-        this.closeFileUpload();
 
         log.info("Device client closed successfully");
     }
@@ -320,16 +300,15 @@ public final class DeviceClient extends InternalClient implements Closeable
      * @param request The request details for getting the SAS URI, including the destination blob name.
      * @return The file upload details to be used with the Azure Storage SDK in order to upload a file from this device.
      * @throws IOException If this HTTPS request fails to send.
-     * @throws URISyntaxException If the returned sas uri cannot be constructed correctly
      */
-    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException, URISyntaxException
+    public FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IOException
     {
-        if (this.fileUploadTask == null)
+        if (this.fileUpload == null)
         {
-            this.fileUploadTask = new FileUploadTask(new HttpsTransportManager(this.config));
+            this.fileUpload = new FileUpload(new HttpsTransportManager(this.config));
         }
 
-        return fileUploadTask.getFileUploadSasUri(request);
+        return this.fileUpload.getFileUploadSasUri(request);
     }
 
     /**
@@ -339,12 +318,12 @@ public final class DeviceClient extends InternalClient implements Closeable
      */
     public void completeFileUpload(FileUploadCompletionNotification notification) throws IOException
     {
-        if (this.fileUploadTask == null)
+        if (this.fileUpload == null)
         {
-            this.fileUploadTask = new FileUploadTask(new HttpsTransportManager(this.config));
+            this.fileUpload = new FileUpload(new HttpsTransportManager(this.config));
         }
 
-        fileUploadTask.sendNotification(notification);
+        this.fileUpload.sendNotification(notification);
     }
 
     /**
