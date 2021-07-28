@@ -36,7 +36,7 @@ public class DeviceTwinMessageTest
         String actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
-        DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
+        DeviceOperations operationType = Deencapsulation.getField(msg, "deviceOperationType");
 
         assertNull(actualVersion);
         assertNull(actualRequestId);
@@ -71,7 +71,7 @@ public class DeviceTwinMessageTest
         String actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
-        DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
+        DeviceOperations operationType = Deencapsulation.getField(msg, "deviceOperationType");
 
         assertEquals(actualRequestId, testRequestId);
         assertEquals(actualStatus, testStatus);

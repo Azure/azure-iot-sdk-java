@@ -15,14 +15,14 @@ public class Utf8PayloadEncoder extends PayloadEncoder
      * @return A static instance of the {@link Utf8PayloadEncoder}
      */
     @Getter
-    public static Utf8PayloadEncoder Instance = new Utf8PayloadEncoder();
+    private static Utf8PayloadEncoder instance = new Utf8PayloadEncoder();
 
 
     /**
      * {@inheritDoc}
      */
     @Getter
-    public Charset ContentEncoding = StandardCharsets.UTF_8;
+    private Charset ContentEncoding = StandardCharsets.UTF_8;
 
     /**
      * {@inheritDoc}

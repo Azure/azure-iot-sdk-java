@@ -15,11 +15,11 @@ public final class DefaultPayloadConvention extends PayloadConvention
      * A static instance of this class.
      */
     @Getter
-    public static DefaultPayloadConvention Instance = new DefaultPayloadConvention();
+    private static DefaultPayloadConvention Instance = new DefaultPayloadConvention();
 
     @Getter
     PayloadSerializer PayloadSerializer = GsonPayloadSerializer.Instance;
 
     @Getter
-    PayloadEncoder PayloadEncoder = Utf8PayloadEncoder.Instance;
+    PayloadEncoder PayloadEncoder = Utf8PayloadEncoder.getInstance();
 }

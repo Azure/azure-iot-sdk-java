@@ -40,7 +40,7 @@ public class ClientPropertyCollection extends PayloadCollection
     }
 
     /**
-     * Constructor that is used to convert a {@link Map<String, Object>} to a ClientPropertyCollection
+     * Constructor that is used to convert a {@link Map} to a ClientPropertyCollection
      *
      * @param map The map you wish to convert.
      */
@@ -50,7 +50,7 @@ public class ClientPropertyCollection extends PayloadCollection
     }
 
     /**
-     * Converts an existing {@link Map<String, Object>} to a ClientPropertyCollection
+     * Converts an existing {@link Map} to a ClientPropertyCollection
      *
      * @param mapToConvert The map you wish to convert.
      * @return A ClientPropertyCollection initialized with values from the existing Map.
@@ -208,7 +208,7 @@ public class ClientPropertyCollection extends PayloadCollection
     /**
      * Gets the entries of the ClientPropertyCollection as a set of Properties to be sent to the IoT hub service.
      *
-     * @return
+     * @return A set of properties
      */
     public Set<Property> getCollectionAsSetOfProperty()
     {
@@ -322,7 +322,6 @@ public class ClientPropertyCollection extends PayloadCollection
      * @param componentName The name of the component to get.
      * @param propertyName  the {@code String} that represents the key of the new entry. It cannot be {@code null} or empty.
      * @param propertyValue the {@code Object} that represents the value of the new entry. It cannot be user defined type or array.
-     * @return The {@code Object} that corresponds to the last value of this key. It will be {@code null} if there is no previous value.
      */
     public final void putComponentProperty(String componentName, String propertyName, Object propertyValue)
     {

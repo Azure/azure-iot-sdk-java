@@ -60,7 +60,7 @@ public class InternalClient
     private DeviceMethod method;
 
     @Getter
-    private PayloadConvention PayloadConvention = config.getPayloadConvention();
+    private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions)
     {
@@ -73,6 +73,9 @@ public class InternalClient
             this.config.modelId = clientOptions.getModelId();
         }
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        if (config.getPayloadConvention() != null) {
+            payloadConvention= config.getPayloadConvention();
+        }
     }
 
     InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis) throws IOException, TransportException
@@ -80,6 +83,9 @@ public class InternalClient
         this.config = new DeviceClientConfig(iotHubAuthenticationProvider);
         this.config.setProtocol(protocol);
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        if (config.getPayloadConvention() != null) {
+            payloadConvention= config.getPayloadConvention();
+        }
     }
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, String publicKeyCertificate, boolean isCertificatePath, String privateKey, boolean isPrivateKeyPath, long sendPeriodMillis, long receivePeriodMillis) throws URISyntaxException
@@ -93,6 +99,9 @@ public class InternalClient
 
         // Codes_SRS_INTERNALCLIENT_34_080: [This function shall save a new DeviceIO instance using the created config and the provided send/receive periods.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+        if (config.getPayloadConvention() != null) {
+            payloadConvention= config.getPayloadConvention();
+        }
     }
 
     InternalClient(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext, long sendPeriodMillis, long receivePeriod)
@@ -102,6 +111,9 @@ public class InternalClient
         this.config = new DeviceClientConfig(iotHubConnectionString, sslContext);
         this.config.setProtocol(protocol);
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriod);
+        if (config.getPayloadConvention() != null) {
+            payloadConvention= config.getPayloadConvention();
+        }
     }
 
     InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, long sendPeriodMillis, long receivePeriodMillis, ClientOptions clientOptions) throws URISyntaxException, IOException
@@ -142,6 +154,10 @@ public class InternalClient
 
         //Codes_SRS_INTERNALCLIENT_34_067: [The constructor shall initialize the IoT hub transport for the protocol specified, creating a instance of the deviceIO.]
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+
+        if (config.getPayloadConvention() != null) {
+            payloadConvention= config.getPayloadConvention();
+        }
     }
 
     InternalClient(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, IotHubClientProtocol protocol, ClientOptions clientOptions, long sendPeriodMillis, long receivePeriodMillis)
@@ -164,6 +180,10 @@ public class InternalClient
         }
 
         this.deviceIO = new DeviceIO(this.config, sendPeriodMillis, receivePeriodMillis);
+
+        if (config.getPayloadConvention() != null) {
+            payloadConvention= config.getPayloadConvention();
+        }
     }
 
     //unused
@@ -1246,9 +1266,9 @@ public class InternalClient
 
         if (telemetryMessage.Telemetry != null)
         {
-            telemetryMessage.Telemetry.Convention = PayloadConvention;
-            telemetryMessage.setContentEncoding(PayloadConvention.getPayloadEncoder().getContentEncoding().name());
-            telemetryMessage.setContentTypeFinal(PayloadConvention.getPayloadSerializer().getContentType());
+            telemetryMessage.Telemetry.Convention = payloadConvention;
+            telemetryMessage.setContentEncoding(payloadConvention.getPayloadEncoder().getContentEncoding().name());
+            telemetryMessage.setContentTypeFinal(payloadConvention.getPayloadSerializer().getContentType());
         }
 
         sendEventAsync(telemetryMessage, callback, callbackContext);
@@ -1286,7 +1306,7 @@ public class InternalClient
             throw new IllegalArgumentException("clientProperties property cannot be null");
         }
 
-        clientProperties.Convention = PayloadConvention;
+        clientProperties.Convention = payloadConvention;
 
         verifyRegisteredIfMultiplexing();
         verifyTwinOperationsAreSupported();
@@ -1300,7 +1320,7 @@ public class InternalClient
      * Set the global writable properties callback handler.
      * @param writablePropertyUpdateCallback The callback to be used for writable properties.
      * @param callbackContext An optional user context to be sent to the callback.
-     * @throws IOException
+     * @throws IOException if called when client is not opened or called before starting twin.
      */
     public void subscribeToWritablePropertiesEvent(WritablePropertiesRequestsCallback writablePropertyUpdateCallback, Object callbackContext) throws IOException
     {

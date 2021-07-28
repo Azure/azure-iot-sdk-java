@@ -132,7 +132,11 @@ public class DeviceTwin
                         if (twinState.getDesiredProperty() != null)
                         {
                             OnDesiredPropertyChanged(twinState.getDesiredProperty());
-                            writablePropertiesRequestsCallback.execute(ClientPropertyCollection.fromMap(twinState.getDesiredProperty()), writablePropertiesRequestsContext);
+                            if (writablePropertiesRequestsCallback != null)
+                            {
+                                writablePropertiesRequestsCallback.execute(ClientPropertyCollection.fromMap(twinState.getDesiredProperty()), writablePropertiesRequestsContext);
+                            }
+
                         }
 
 

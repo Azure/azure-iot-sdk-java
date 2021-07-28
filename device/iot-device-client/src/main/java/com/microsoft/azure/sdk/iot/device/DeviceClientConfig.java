@@ -64,7 +64,7 @@ public final class DeviceClientConfig
      */
     @Getter
     @Setter(AccessLevel.PROTECTED)
-    private PayloadConvention payloadConvention = DefaultPayloadConvention.Instance;
+    private PayloadConvention payloadConvention = DefaultPayloadConvention.getInstance();
 
     // Initialize all the timeout values here instead of the constructor as the constructor is not always called.
     @Getter
