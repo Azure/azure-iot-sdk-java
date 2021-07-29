@@ -144,8 +144,7 @@ public class SendBatchEvents
                                 + "The program should be called with the following args: \n"
                                 + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                                 + "2. [number of requests to send]\n"
-                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                                + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                                + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                         protocolStr);
                 return;
             }
