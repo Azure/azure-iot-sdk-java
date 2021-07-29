@@ -177,16 +177,14 @@ public class SendReceive
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 
-        String pathToCertificate = null;
-        if (args.length <= 1 || args.length >= 5)
+        if (args.length <= 1 || args.length >= 4)
         {
             System.out.format(
                     "Expected 2 or 3 arguments but received: %d.\n"
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                     args.length);
             return;
         }
@@ -239,19 +237,9 @@ public class SendReceive
                             + "The program should be called with the following args: \n"
                             + "1. [Device connection string] - String containing Hostname, Device Id & Device Key in one of the following formats: HostName=<iothub_host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>\n"
                             + "2. [number of requests to send]\n"
-                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n"
-                            + "4. (optional) path to certificate to enable one-way authentication over ssl for amqps \n",
+                            + "3. (mqtt | https | amqps | amqps_ws | mqtt_ws)\n",
                         protocolStr);
                 return;
-            }
-
-            if (args.length == 3)
-            {
-                pathToCertificate = null;
-            }
-            else
-            {
-                pathToCertificate = args[3];
             }
         }
 
@@ -259,10 +247,6 @@ public class SendReceive
         System.out.format("Using communication protocol %s.\n", protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
-        if (pathToCertificate != null)
-        {
-            client.setOption("SetCertificatePath", pathToCertificate);
-        }
 
         System.out.println("Successfully created an IoT Hub client.");
 
