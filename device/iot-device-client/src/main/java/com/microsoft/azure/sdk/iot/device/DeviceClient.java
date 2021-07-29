@@ -289,7 +289,12 @@ public final class DeviceClient extends InternalClient implements Closeable
 
         //Codes_SRS_DEVICECLIENT_34_041: [If this object is not using a transport client, it shall invoke super.closeNow().]
         log.info("Closing device client...");
-        this.fileUpload.close();
+
+        if (this.fileUpload != null)
+        {
+            this.fileUpload.close();
+        }
+        
         super.closeNow();
 
         log.info("Device client closed successfully");
