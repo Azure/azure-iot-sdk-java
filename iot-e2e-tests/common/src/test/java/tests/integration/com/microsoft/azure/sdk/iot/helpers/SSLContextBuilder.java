@@ -62,6 +62,9 @@ public class SSLContextBuilder
 
         // By leaving the TrustManager array null, the SSLContext will trust the certificates stored on your device's
         // trusted root certification authorities certificate store.
+        //
+        // This must include the Baltimore CyberTrust Root public certificate: https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html
+        // and eventually it will need to include the DigiCert Global Root G2 public certificate: https://global-root-g2.chain-demos.digicert.com/info/index.html
         sslContext.init(kmf.getKeyManagers(), null, new SecureRandom());
 
         return sslContext;
@@ -83,6 +86,9 @@ public class SSLContextBuilder
         //
         // By leaving the TrustManager array null, the SSLContext will trust the certificates stored on your device's
         // trusted root certification authorities certificate store.
+        //
+        // This must include the Baltimore CyberTrust Root public certificate: https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html
+        // and eventually it will need to include the DigiCert Global Root G2 public certificate: https://global-root-g2.chain-demos.digicert.com/info/index.html
         sslContext.init(null, null, new SecureRandom());
 
         return sslContext;
