@@ -796,6 +796,11 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
+     *	    - <b>SetMaxMessagesSentPerThread</b> - this option is applicable to all protocols.
+     *	      This option specifies how many messages a given send thread should attempt to send before exiting.
+     *	      This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
+     *	      batch size messages are sent.
+     *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
@@ -861,6 +866,7 @@ public final class DeviceClient extends InternalClient implements Closeable
             case SET_HTTPS_READ_TIMEOUT:
             case SET_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT:
             case SET_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT:
+            case SET_MAX_MESSAGES_SENT_PER_THREAD:
             {
                 break;
             }
