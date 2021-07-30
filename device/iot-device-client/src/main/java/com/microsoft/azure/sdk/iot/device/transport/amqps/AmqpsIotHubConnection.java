@@ -701,14 +701,23 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     {
         if (this.isMultiplexing)
         {
-            if (this.savedException == null)
+            if (this.state != IotHubConnectionStatus.CONNECTED)
             {
-                this.savedException = new MultiplexingDeviceUnauthorizedException("One or more multiplexed devices failed to authenticate");
-            }
+                if (this.savedException == null)
+                {
+                    this.savedException = new MultiplexingDeviceUnauthorizedException("One or more multiplexed devices failed to authenticate");
+                }
 
-            if (this.savedException instanceof MultiplexingDeviceUnauthorizedException)
+                if (this.savedException instanceof MultiplexingDeviceUnauthorizedException)
+                {
+                    ((MultiplexingDeviceUnauthorizedException)this.savedException).addRegistrationException(deviceId, transportException);
+                }
+            }
+            else
             {
-                ((MultiplexingDeviceUnauthorizedException)this.savedException).addRegistrationException(deviceId, transportException);
+                // When the muxed connection is already open, no need to save the exception to this.savedException
+                // The call to onMultiplexedDeviceSessionRegistrationFailed will propagate the exception up to the
+                // transport layer to handle accordingly.
             }
         }
         else
@@ -1036,10 +1045,12 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
 
             configsUnregisteredSuccessfully.add(configToUnregister);
+            this.deviceSessionsOpenedLatches.remove(configToUnregister.getDeviceId());
             configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         }
 
         this.multiplexingClientsToUnregister.removeAll(configsUnregisteredSuccessfully);
+        this.deviceClientConfigs.removeAll(configsUnregisteredSuccessfully);
     }
 
     private void initializeStateLatches()
