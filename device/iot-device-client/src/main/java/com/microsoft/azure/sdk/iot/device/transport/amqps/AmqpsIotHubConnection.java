@@ -718,6 +718,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 // When the muxed connection is already open, no need to save the exception to this.savedException
                 // The call to onMultiplexedDeviceSessionRegistrationFailed will propagate the exception up to the
                 // transport layer to handle accordingly.
+                log.trace("Not saving the authentication failure locally. Just notifying upper layer directly.");
             }
         }
         else
