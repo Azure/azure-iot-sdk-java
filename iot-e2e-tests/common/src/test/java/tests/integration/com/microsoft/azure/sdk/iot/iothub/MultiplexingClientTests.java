@@ -1758,7 +1758,7 @@ public class MultiplexingClientTests extends IntegrationTest
             Tools.getTestDevice(iotHubConnectionString, this.testInstance.protocol, AuthenticationType.SAS, false);
 
         String deviceConnectionString = registryManager.getDeviceConnectionString(testDeviceIdentity.getDevice());
-        String deviceNotFoundConnectionString = deviceConnectionString.replace(testDeviceIdentity.getDeviceId(), "this-is-not-a-real-device-id-" + UUID.randomUUID());
+        String deviceNotFoundConnectionString = deviceConnectionString.replace(testDeviceIdentity.getDeviceId(), testDeviceIdentity.getDeviceId().toUpperCase());
         DeviceClient validDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
         DeviceClient invalidDeviceClient = new DeviceClient(deviceNotFoundConnectionString, testInstance.protocol);
 
