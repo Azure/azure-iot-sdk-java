@@ -6,8 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
-import com.azure.storage.blob.BlobClientBuilder;
-import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadCompletionNotification;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriRequest;
 import com.microsoft.azure.sdk.iot.deps.serializer.FileUploadSasUriResponse;
@@ -23,9 +21,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 import java.io.ByteArrayInputStream;
@@ -39,13 +36,9 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK_EMPTY;
-import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 import static tests.integration.com.microsoft.azure.sdk.iot.iothub.FileUploadTests.STATUS.FAILURE;
@@ -263,29 +256,8 @@ public class FileUploadTests extends IntegrationTest
         deviceClient.closeNow();
     }
 
-    private void verifyNotification(FileUploadNotification fileUploadNotification, FileUploadState fileUploadState, DeviceClient deviceClient) throws IOException
-    {
-        assertEquals(buildExceptionMessage("File upload notification blob size not equal to expected file length", deviceClient), (long) fileUploadNotification.getBlobSizeInBytes(), fileUploadState.fileLength);
-
-        URL u = new URL(fileUploadNotification.getBlobUri());
-        try (InputStream inputStream = u.openStream())
-        {
-            byte[] testBuf = new byte[(int)fileUploadState.fileLength];
-            inputStream.read(testBuf,  0, (int)fileUploadState.fileLength);
-            int testLen = (int)fileUploadState.fileLength;
-            byte[] actualBuf = new byte[(int)fileUploadState.fileLength];
-            fileUploadState.fileInputStream.reset();
-            int actualLen = (fileUploadState.fileLength == 0) ? (int) fileUploadState.fileLength : fileUploadState.fileInputStream.read(actualBuf, 0, (int) fileUploadState.fileLength);
-            assertEquals(buildExceptionMessage("Expected length " + testLen + " but was " + actualLen, deviceClient), testLen, actualLen);
-            assertArrayEquals(buildExceptionMessage("testBuf was different from actualBuf", deviceClient), testBuf, actualBuf);
-        }
-
-        assertTrue(buildExceptionMessage("File upload notification did not contain the expected blob name", deviceClient), fileUploadNotification.getBlobName().contains(fileUploadState.blobName));
-        fileUploadState.fileUploadNotificationReceived = SUCCESS;
-    }
-
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
-    public void uploadToBlobAsyncSingleFileGranular() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
+    public void getAndCompleteSasUri() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException
     {
         // arrange
         DeviceClient deviceClient = setUpDeviceClient(testInstance.protocol);
@@ -293,17 +265,14 @@ public class FileUploadTests extends IntegrationTest
         // act
         FileUploadSasUriResponse sasUriResponse = deviceClient.getFileUploadSasUri(new FileUploadSasUriRequest(testInstance.fileUploadState[0].blobName));
 
-        BlockBlobClient blockBlobClient =
-            new BlobClientBuilder()
-                .endpoint(sasUriResponse.getBlobUri().toString())
-                .buildClient()
-                .getBlockBlobClient();
-
-        blockBlobClient.upload(testInstance.fileUploadState[0].fileInputStream, testInstance.fileUploadState[0].fileLength);
         FileUploadCompletionNotification fileUploadCompletionNotification = new FileUploadCompletionNotification();
         fileUploadCompletionNotification.setCorrelationId(sasUriResponse.getCorrelationId());
         fileUploadCompletionNotification.setStatusCode(0);
-        fileUploadCompletionNotification.setSuccess(true);
+
+        // Since we don't care to need to test the Azure Storage SDK here though, we'll forgo actually uploading the file.
+        // Because of that, this value needs to be false, otherwise hub throws 400 error since the file wasn't actually uploaded.
+        fileUploadCompletionNotification.setSuccess(false);
+
         fileUploadCompletionNotification.setStatusDescription("Succeed to upload to storage.");
 
         deviceClient.completeFileUpload(fileUploadCompletionNotification);
