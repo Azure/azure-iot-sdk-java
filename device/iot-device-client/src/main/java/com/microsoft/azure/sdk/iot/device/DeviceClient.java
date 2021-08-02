@@ -799,7 +799,8 @@ public final class DeviceClient extends InternalClient implements Closeable
      *	    - <b>SetMaxMessagesSentPerThread</b> - this option is applicable to all protocols.
      *	      This option specifies how many messages a given send thread should attempt to send before exiting.
      *	      This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
-     *	      batch size messages are sent.
+     *	      batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
+     *	      a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
      *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
