@@ -28,16 +28,30 @@ import com.microsoft.azure.sdk.iot.service.devicetwin.Query;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.Key;
+import java.security.Security;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
@@ -468,12 +482,12 @@ public class ProvisioningCommon extends IntegrationTest
         return getSecurityProviderInstance(enrollmentType, null, null, null, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException, InterruptedException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs) throws ProvisioningServiceClientException, GeneralSecurityException, IOException, SecurityProviderException
     {
         return getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, null);
     }
 
-    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException
+    public SecurityProvider getSecurityProviderInstance(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubs, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException, GeneralSecurityException, SecurityProviderException, IOException
     {
         SecurityProvider securityProvider = null;
         TwinCollection tags = new TwinCollection();
@@ -535,12 +549,16 @@ public class ProvisioningCommon extends IntegrationTest
             {
                 X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(testInstance.registrationId);
                 String leafPublicPem = certificateGenerator.getPublicCertificate();
-                String leafPrivateKey = certificateGenerator.getPrivateKey();
+                String leafPrivateKeyPem = certificateGenerator.getPrivateKey();
 
-                Collection<String> signerCertificates = new LinkedList<>();
+                Collection<X509Certificate> signerCertificates = new LinkedList<>();
                 Attestation attestation = X509Attestation.createFromClientCertificates(leafPublicPem);
                 createTestIndividualEnrollment(attestation, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubs, twinState, deviceCapabilities);
-                securityProvider = new SecurityProviderX509Cert(leafPublicPem, leafPrivateKey, signerCertificates);
+
+                X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
+                Key leafPrivateKey = parsePrivateKey(leafPrivateKeyPem);
+
+                securityProvider = new SecurityProviderX509Cert(leafPublicCert, leafPrivateKey, signerCertificates);
             }
             else if (testInstance.attestationType == AttestationType.SYMMETRIC_KEY)
             {
@@ -571,5 +589,39 @@ public class ProvisioningCommon extends IntegrationTest
         testInstance.individualEnrollment.setIotHubs(iothubs);
         testInstance.individualEnrollment.setInitialTwin(twinState);
         testInstance.individualEnrollment = testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+    }
+
+    private static Key parsePrivateKey(String privateKeyString) throws IOException
+    {
+        Security.addProvider(new BouncyCastleProvider());
+        PEMParser privateKeyParser = new PEMParser(new StringReader(privateKeyString));
+        Object possiblePrivateKey = privateKeyParser.readObject();
+        return getPrivateKey(possiblePrivateKey);
+    }
+
+    private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws CertificateException, IOException
+    {
+        Security.addProvider(new BouncyCastleProvider());
+        PemReader publicKeyCertificateReader = new PemReader(new StringReader(publicKeyCertificateString));
+        PemObject possiblePublicKeyCertificate = publicKeyCertificateReader.readPemObject();
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
+    }
+
+    private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
+    {
+        if (possiblePrivateKey instanceof PEMKeyPair)
+        {
+            return new JcaPEMKeyConverter().getKeyPair((PEMKeyPair) possiblePrivateKey)
+                .getPrivate();
+        }
+        else if (possiblePrivateKey instanceof PrivateKeyInfo)
+        {
+            return new JcaPEMKeyConverter().getPrivateKey((PrivateKeyInfo) possiblePrivateKey);
+        }
+        else
+        {
+            throw new IOException("Unable to parse private key, type unknown");
+        }
     }
 }
