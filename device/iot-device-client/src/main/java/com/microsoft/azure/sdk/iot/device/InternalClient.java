@@ -1126,17 +1126,20 @@ public class InternalClient
 
     void setOption_SetMaxMessagesSentPerThread(Object value)
     {
-        if (value != null)
+        if (value == null)
         {
-            if (value instanceof Integer)
-            {
-                log.info("Setting maximum number of messages sent per send thread {} messages", value);
-                this.deviceIO.setMaxNumberOfMessagesSentPerSendThread((int) value);
-            }
-            else
-            {
-                throw new IllegalArgumentException("value is not int = " + value);
-            }
+            throw new IllegalArgumentException("Value cannot be null");
+        }
+
+
+        if (value instanceof Integer)
+        {
+            log.info("Setting maximum number of messages sent per send thread {} messages", value);
+            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 
