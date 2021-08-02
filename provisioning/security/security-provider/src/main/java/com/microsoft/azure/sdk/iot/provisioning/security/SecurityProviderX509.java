@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public abstract class SecurityProviderX509 extends SecurityProvider
 {
-    private static final String CERT_ALIAS = "ALIAS_CERT";
+    private static final String CERT_ALIAS = "IOTHUB_SECURITY_PROVIDER_CERT_ALIAS";
 
     abstract public String getClientCertificateCommonName();
     abstract public X509Certificate getClientCertificate();
