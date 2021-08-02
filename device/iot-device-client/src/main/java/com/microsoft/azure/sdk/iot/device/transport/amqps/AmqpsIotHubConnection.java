@@ -1046,7 +1046,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
 
             configsUnregisteredSuccessfully.add(configToUnregister);
-            this.deviceSessionsOpenedLatches.remove(configToUnregister.getDeviceId());
             configToUnregister = configsToUnregisterIterator.hasNext() ? configsToUnregisterIterator.next() : null;
         }
 
