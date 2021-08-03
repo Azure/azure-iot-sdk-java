@@ -30,6 +30,7 @@ public class InternalClient
     // SET_RECEIVE_INTERVAL is used for setting the interval for handling MQTT and AMQP messages.
     static final String SET_RECEIVE_INTERVAL = "SetReceiveInterval";
     static final String SET_SEND_INTERVAL = "SetSendInterval";
+    static final String SET_MAX_MESSAGES_SENT_PER_THREAD = "SetMaxMessagesSentPerThread";
     static final String SET_CERTIFICATE_PATH = "SetCertificatePath";
 	static final String SET_CERTIFICATE_AUTHORITY = "SetCertificateAuthority";
     static final String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
@@ -488,6 +489,12 @@ public class InternalClient
      *	      in case of MQTT and AMQP protocols, this option specifies the interval in milliseconds
      *	      between spawning a thread that dequeues a message from the SDK's queue of received messages.
      *
+     *	    - <b>SetMaxMessagesSentPerThread</b> - this option is applicable to all protocols.
+     *	      This option specifies how many messages a given send thread should attempt to send before exiting.
+     *	      This option can be used in conjunction with "SetSendInterval" to control the how frequently and in what
+     *	      batch size messages are sent. By default, this client sends 10 messages per send thread, and spawns
+     *	      a send thread every 10 milliseconds. This gives a theoretical throughput of 1000 messages per second.
+     *
      *	    - <b>SetCertificatePath</b> - this option is applicable only
      *	      when the transport configured with this client is AMQP. This
      *	      option specifies the path to the certificate used to verify peer.
@@ -562,6 +569,11 @@ public class InternalClient
                 case SET_SEND_INTERVAL:
                 {
                     setOption_SetSendInterval(value);
+                    break;
+                }
+                case SET_MAX_MESSAGES_SENT_PER_THREAD:
+                {
+                    setOption_SetMaxMessagesSentPerThread(value);
                     break;
                 }
                 case SET_CERTIFICATE_PATH:
@@ -1110,6 +1122,25 @@ public class InternalClient
             {
                 throw new IllegalArgumentException("value is not int = " + value);
             }
+        }
+    }
+
+    void setOption_SetMaxMessagesSentPerThread(Object value)
+    {
+        if (value == null)
+        {
+            throw new IllegalArgumentException("Value cannot be null");
+        }
+
+
+        if (value instanceof Integer)
+        {
+            log.info("Setting maximum number of messages sent per send thread {} messages", value);
+            this.deviceIO.setMaxNumberOfMessagesSentPerSendThread((int) value);
+        }
+        else
+        {
+            throw new IllegalArgumentException("value is not int = " + value);
         }
     }
 
