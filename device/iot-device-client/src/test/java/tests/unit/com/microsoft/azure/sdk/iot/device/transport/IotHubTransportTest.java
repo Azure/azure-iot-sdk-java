@@ -1422,7 +1422,7 @@ public class IotHubTransportTest
         };
 
         final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
-        final int MAX_MESSAGES_TO_SEND_PER_THREAD = Deencapsulation.getField(transport, "MAX_MESSAGES_TO_SEND_PER_THREAD");
+        final int MAX_MESSAGES_TO_SEND_PER_THREAD = Deencapsulation.getField(transport, "DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD");
         Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
         Queue<IotHubTransportPacket> waitingPacketsQueue = new ConcurrentLinkedQueue<>();
         for (int i = 0; i < MAX_MESSAGES_TO_SEND_PER_THREAD + 1; i++)
