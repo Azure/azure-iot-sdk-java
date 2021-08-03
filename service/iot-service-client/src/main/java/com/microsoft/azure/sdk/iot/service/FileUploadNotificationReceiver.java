@@ -128,9 +128,8 @@ public class FileUploadNotificationReceiver extends Receiver
     /**
      * Close AmqpReceive object
      *
-     * @throws IOException This exception is thrown if the input AmqpReceive object is null
      */
-    public void close() throws IOException
+    public void close()
     {
         log.info("Closing file upload notification receiver");
 
@@ -211,14 +210,8 @@ public class FileUploadNotificationReceiver extends Receiver
     {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         executor.submit(() -> {
-            try
-            {
-                close();
-                future.complete(null);
-            } catch (IOException e)
-            {
-                future.completeExceptionally(e);
-            }
+            close();
+            future.complete(null);
         });
         return future;
     }

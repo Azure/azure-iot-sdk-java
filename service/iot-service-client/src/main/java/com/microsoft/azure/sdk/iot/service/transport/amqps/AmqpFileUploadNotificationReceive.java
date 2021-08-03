@@ -126,9 +126,8 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
 
     /**
      * Create AmqpsReceiveHandler and store it in a member variable
-     * @throws IOException If underlying layers throws it for any reason
      */
-    public synchronized void open() throws IOException
+    public synchronized void open()
     {
         // This is a no-op at this point since all the actual amqp handler instantiation lives in the receive() call
         // instead. We have a check in the receive call that throws if this method isn't called first though, so we do
@@ -185,9 +184,8 @@ public class AmqpFileUploadNotificationReceive implements AmqpFeedbackReceivedEv
      * @param timeoutMs The timeout in milliseconds to wait for the feedback
      * @return The received feedback batch
      * @throws IOException This exception is thrown if the input AmqpReceive object is null
-     * @throws InterruptedException This exception is thrown if the receive process has been interrupted
      */
-    public synchronized FileUploadNotification receive(long timeoutMs) throws IOException, InterruptedException
+    public synchronized FileUploadNotification receive(long timeoutMs) throws IOException
     {
         if  (isOpen)
         {

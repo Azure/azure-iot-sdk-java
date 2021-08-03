@@ -44,7 +44,7 @@ public class ModuleManagerSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void AddModule(int n) throws Exception
+    private static void AddModule(int n)
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -104,7 +104,7 @@ public class ModuleManagerSample
         registryManager.close();
     }
 
-    private static void UpdateModule() throws Exception
+    private static void UpdateModule()
     {
         String primaryKey = "[New primary key goes here]";
         String secondaryKey = "[New secondary key goes here]";
@@ -130,7 +130,7 @@ public class ModuleManagerSample
         registryManager.close();
     }
 
-    private static void RemoveModule() throws Exception
+    private static void RemoveModule()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 

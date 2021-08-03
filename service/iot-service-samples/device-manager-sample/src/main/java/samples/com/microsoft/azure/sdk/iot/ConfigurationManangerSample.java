@@ -72,7 +72,7 @@ public class ConfigurationManangerSample
         System.out.println("Shutting down sample...");
     }
 
-    private static void GetAllConfiguration() throws Exception
+    private static void GetAllConfiguration()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -92,7 +92,7 @@ public class ConfigurationManangerSample
         }
     }
 
-    private static void AddConfiguration() throws Exception
+    private static void AddConfiguration()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -120,7 +120,7 @@ public class ConfigurationManangerSample
         registryManager.close();
     }
 
-    private static Configuration GetConfiguration() throws Exception
+    private static Configuration GetConfiguration()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -140,7 +140,7 @@ public class ConfigurationManangerSample
         return returnConfig;
     }
 
-    private static void UpdateConfiguration(Configuration config) throws Exception
+    private static void UpdateConfiguration(Configuration config)
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -158,7 +158,7 @@ public class ConfigurationManangerSample
         registryManager.close();
     }
 
-    private static void RemoveConfiguration() throws Exception
+    private static void RemoveConfiguration()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 

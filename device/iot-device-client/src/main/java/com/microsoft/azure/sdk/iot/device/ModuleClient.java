@@ -75,13 +75,12 @@ public class ModuleClient extends InternalClient
      *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
      *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
      * @param protocol The protocol to use when communicating with the module
-     * @throws ModuleClientException if an exception is encountered when parsing the connection string
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
      * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
         //Codes_SRS_MODULECLIENT_34_006: [This function shall invoke the super constructor.]
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), null);
@@ -103,13 +102,12 @@ public class ModuleClient extends InternalClient
      *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
      * @param protocol The protocol to use when communicating with the module
      * @param clientOptions The options that allow configuration of the module client instance during initialization
-     * @throws ModuleClientException if an exception is encountered when parsing the connection string
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
      * @throws IllegalArgumentException if the provided connection string is null or empty, or if the provided protocol is null
      * @throws URISyntaxException if the connection string cannot be parsed for a valid hostname
      */
-    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws ModuleClientException, IllegalArgumentException, UnsupportedOperationException, URISyntaxException
+    public ModuleClient(String connectionString, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IllegalArgumentException, UnsupportedOperationException, URISyntaxException
     {
         super(new IotHubConnectionString(connectionString), protocol, SEND_PERIOD_MILLIS, getReceivePeriod(protocol), clientOptions);
         commonConstructorVerifications(protocol, this.config);

@@ -38,7 +38,8 @@ public class TemperatureController {
         InvokeMethodOnRootLevel();
     }
 
-    private static void InitializeServiceClient() throws IOException {
+    private static void InitializeServiceClient()
+    {
         twinClient = new DeviceTwin(iotHubConnectionString);
         methodClient = new DeviceMethod(iotHubConnectionString);
     }

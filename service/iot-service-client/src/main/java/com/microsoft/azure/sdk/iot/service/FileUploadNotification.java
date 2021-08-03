@@ -27,7 +27,7 @@ public class FileUploadNotification
     private final Long blobSizeInBytes;
     private final Date enqueuedTimeUtcDate;
 
-    public FileUploadNotification(String deviceId, String blobUri, String blobName, Date lastUpdatedTimeDate, Long blobSizeInBytes, Date enqueuedTimeUtcDate) throws IOException
+    public FileUploadNotification(String deviceId, String blobUri, String blobName, Date lastUpdatedTimeDate, Long blobSizeInBytes, Date enqueuedTimeUtcDate)
     {
         if (deviceId == null || blobUri == null || blobName == null || lastUpdatedTimeDate == null || blobSizeInBytes == null || enqueuedTimeUtcDate == null ||
                 deviceId.isEmpty() || blobName.isEmpty() || blobUri.isEmpty())
