@@ -1747,6 +1747,38 @@ public class MultiplexingClientTests extends IntegrationTest
         }
     }
 
+    @ContinuousIntegrationTest
+    @Test
+    public void failedRegistrationDoesNotAffectSubsequentRegistrations() throws Exception
+    {
+        testInstance.setup(0);
+        testInstance.multiplexingClient.open();
+
+        TestDeviceIdentity testDeviceIdentity =
+            Tools.getTestDevice(iotHubConnectionString, this.testInstance.protocol, AuthenticationType.SAS, false);
+
+        String deviceConnectionString = registryManager.getDeviceConnectionString(testDeviceIdentity.getDevice());
+        String deviceNotFoundConnectionString = deviceConnectionString.replace(testDeviceIdentity.getDeviceId(), testDeviceIdentity.getDeviceId().toUpperCase());
+        DeviceClient validDeviceClient = new DeviceClient(deviceConnectionString, testInstance.protocol);
+        DeviceClient invalidDeviceClient = new DeviceClient(deviceNotFoundConnectionString, testInstance.protocol);
+
+        try
+        {
+            testInstance.multiplexingClient.registerDeviceClient(invalidDeviceClient);
+            fail("Expected multiplexingClient to throw since it registered a device that did not exist.");
+        }
+        catch (MultiplexingClientDeviceRegistrationAuthenticationException e)
+        {
+            // expected throw since the deviceId in the connection string does not exist, ignore
+        }
+
+        testInstance.multiplexingClient.registerDeviceClient(validDeviceClient);
+
+        testSendingMessageFromDeviceClient(validDeviceClient);
+
+        testInstance.multiplexingClient.close();
+    }
+
     private static void assertMultiplexedDevicesClosedGracefully(ConnectionStatusChangeTracker[] connectionStatusChangeTrackers)
     {
         for (ConnectionStatusChangeTracker connectionStatusChangeTracker : connectionStatusChangeTrackers)
