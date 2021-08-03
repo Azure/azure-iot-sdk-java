@@ -32,6 +32,8 @@ abstract public class Mqtt implements MqttCallback
     private static final int QOS = 1;
     private static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
 
+    // relatively arbitrary, but only because Paho doesn't have any particular recommendations here. Just a high enough
+    // value that users who are building a gateway type solution don't find this value to be a bottleneck.
     static final int MAX_IN_FLIGHT_COUNT = 65000;
 
     private MqttAsyncClient mqttAsyncClient;
