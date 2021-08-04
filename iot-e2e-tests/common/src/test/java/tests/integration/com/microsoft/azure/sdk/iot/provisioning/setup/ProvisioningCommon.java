@@ -67,6 +67,7 @@ public class ProvisioningCommon extends IntegrationTest
         customAllocationWebhookUrl = Tools.retrieveEnvironmentVariableValue(CUSTOM_ALLOCATION_WEBHOOK_URL_VAR_NAME);
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
+        provisioningServiceGlobalEndpoint = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME, "global.azure-devices-provisioning.net");
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
     }
 
@@ -105,7 +106,8 @@ public class ProvisioningCommon extends IntegrationTest
     public static final String DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME = "PROVISIONING_CONNECTION_STRING_INVALIDCERT";
     public static String provisioningServiceWithInvalidCertConnectionString = "";
 
-    public static String provisioningServiceGlobalEndpoint = "global.azure-devices-provisioning.net";
+    public static final String DPS_GLOBAL_ENDPOINT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT";
+    public static String provisioningServiceGlobalEndpoint = "";
 
     public static final String DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME = "DPS_GLOBALDEVICEENDPOINT_INVALIDCERT";
     public static String provisioningServiceGlobalEndpointWithInvalidCert = "";
