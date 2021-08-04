@@ -161,7 +161,8 @@ public class ModuleGlue
             ConnectResponse cr = new ConnectResponse();
             cr.setConnectionId(connectionId);
             handler.handle(Future.succeededFuture(cr));
-        } catch (URISyntaxException | IOException e)
+        }
+        catch (URISyntaxException | IOException e)
         {
             handler.handle(Future.failedFuture(e));
         }
