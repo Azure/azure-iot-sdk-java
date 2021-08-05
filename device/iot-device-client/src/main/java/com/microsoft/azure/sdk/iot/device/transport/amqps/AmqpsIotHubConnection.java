@@ -964,6 +964,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             if (cachedDeviceSessionHandler.getDeviceId().equals(deviceClientConfig.getDeviceId()))
             {
                 amqpsSessionHandler = cachedDeviceSessionHandler;
+                break;
             }
         }
 
