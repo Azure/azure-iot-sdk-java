@@ -176,7 +176,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     }
 
     /**
-     * Asynchronously unregister a multiplexed device from an active multiplexed connection or synchronously unregister.
+     * Asynchronously unregister a multiplexed device from an active multiplexed connection or synchronously unregister
      * a multiplexed device from a closed multiplexed connection.
      * @param config the config of the device that should be unregistered.
      * @param willReconnect true if the device will be re-registered soon because it is reconnecting.
