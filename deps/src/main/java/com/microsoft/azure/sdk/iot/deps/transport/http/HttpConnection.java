@@ -268,9 +268,8 @@ public class HttpConnection
      *
      * @return the response headers.
      *
-     * @throws IOException This exception thrown if no response was received.
      */
-    public Map<String, List<String>> getResponseHeaders() throws IOException
+    public Map<String, List<String>> getResponseHeaders()
     {
         // Codes_SRS_HTTPCONNECTION_25_022: [The function shall return a mapping of header field names to the values associated with the header field name.]
         // Codes_SRS_HTTPCONNECTION_25_023: [The function shall throw an IOException if no response was received.]

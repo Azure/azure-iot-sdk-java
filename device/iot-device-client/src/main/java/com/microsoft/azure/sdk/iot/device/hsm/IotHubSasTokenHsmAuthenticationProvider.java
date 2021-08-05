@@ -174,7 +174,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
 
             return new IotHubSasToken(host, deviceId, null, sharedAccessToken, moduleId, expiresOn);
         }
-        catch (UnsupportedEncodingException | URISyntaxException | HsmException e)
+        catch (UnsupportedEncodingException | HsmException e)
         {
             throw new IOException(e);
         }

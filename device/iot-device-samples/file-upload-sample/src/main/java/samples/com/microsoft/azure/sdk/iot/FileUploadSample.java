@@ -127,7 +127,8 @@ public class FileUploadSample
         }
     }
 
-    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException, URISyntaxException {
+    private static void uploadFile(DeviceClient client, String baseDirectory, String relativeFileName) throws IOException
+    {
         File file = new File(baseDirectory, relativeFileName);
 
         try

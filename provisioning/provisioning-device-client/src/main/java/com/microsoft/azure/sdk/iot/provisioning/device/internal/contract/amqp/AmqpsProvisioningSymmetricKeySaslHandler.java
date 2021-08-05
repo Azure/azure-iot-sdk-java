@@ -91,7 +91,7 @@ public class AmqpsProvisioningSymmetricKeySaslHandler implements SaslHandler
      * @param saslChallenge The bytes from the Sasl challenge received from the service
      * @return the payload of the challenge response to the given challenge
      */
-    public byte[] handleChallenge(byte[] saslChallenge) throws ProvisioningDeviceClientException
+    public byte[] handleChallenge(byte[] saslChallenge)
     {
         // Codes_SRS_AMQPSPROVISIONINGSYMMETRICKEYSASLHANDLER_34_009: [This function shall return an empty byte array.]
         return new byte[0];

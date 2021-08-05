@@ -51,9 +51,8 @@ public class SqlQuery
      * @param where Where clause for Query. Can be {@code null}.
      * @param groupby GroupBy clause for query. Can be {@code null}
      * @return SqlQuery Object as specified by param
-     * @throws IOException If input parameter is invalid
      */
-    public static SqlQuery createSqlQuery(String selection, FromType fromType, String where, String groupby) throws IOException
+    public static SqlQuery createSqlQuery(String selection, FromType fromType, String where, String groupby)
     {
         if (selection == null || fromType == null)
         {

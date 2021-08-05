@@ -52,7 +52,7 @@ public class DeviceManagerX509Sample
         System.out.println("Shutting down sample...");
     }
 
-    private static void AddDevice() throws Exception
+    private static void AddDevice()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -86,7 +86,7 @@ public class DeviceManagerX509Sample
         registryManager.close();
     }
 
-    private static void GetDevice() throws Exception
+    private static void GetDevice()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -112,7 +112,7 @@ public class DeviceManagerX509Sample
         registryManager.close();
     }
 
-    private static void UpdateDevice() throws Exception
+    private static void UpdateDevice()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 
@@ -148,7 +148,7 @@ public class DeviceManagerX509Sample
         registryManager.close();
     }
 
-    private static void RemoveDevice() throws Exception
+    private static void RemoveDevice()
     {
         RegistryManager registryManager = new RegistryManager(SampleUtils.iotHubConnectionString);
 

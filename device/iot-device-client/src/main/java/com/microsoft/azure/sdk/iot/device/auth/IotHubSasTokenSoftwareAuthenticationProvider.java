@@ -115,7 +115,7 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @return The value of SasToken
      */
     @Override
-    public char[] getSasToken() throws IOException, TransportException
+    public char[] getSasToken()
     {
         if (this.deviceKey != null)
         {
