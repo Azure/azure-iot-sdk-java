@@ -1780,12 +1780,13 @@ public class MultiplexingClientTests extends IntegrationTest
         testInstance.multiplexingClient.close();
     }
 
-    // If a multiplexed device is subscribed to twin and/or methods, then loses its session due to network issues,
-    // it should still be subscribed to twin and/or methods after it finishes reconnection
+    // If a multiplexed device is subscribed to twin and/or methods and/or cloud to device messages, then loses its
+    // session due to network issues, it should still be subscribed to twin and/or methods and/or cloud to device messages
+    // after it finishes reconnection
     @StandardTierHubOnlyTest
     @ContinuousIntegrationTest
     @Test
-    public void multiplexedSessionsRecoverTwinAndMethodSubscriptionsFromDeviceSessionDrops() throws Exception
+    public void multiplexedSessionsRecoverSubscriptionsFromDeviceSessionDrops() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
         ConnectionStatusChangeTracker multiplexedConnectionStatusChangeTracker = new ConnectionStatusChangeTracker();
@@ -1828,6 +1829,16 @@ public class MultiplexingClientTests extends IntegrationTest
             startTwin(testInstance.deviceClientArray.get(i), new EventCallback(IotHubStatusCode.OK), twinPropertyCallBacks[i]);
         }
 
+        // Subscribe to cloud to device messages for all multiplexed clients
+        String[] expectedMessageCorrelationIds = new String[DEVICE_MULTIPLEX_COUNT];
+        MessageCallback[] messageCallbacks = new MessageCallback[DEVICE_MULTIPLEX_COUNT];
+        for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
+        {
+            expectedMessageCorrelationIds[i] = UUID.randomUUID().toString();
+            messageCallbacks[i] = new MessageCallback(expectedMessageCorrelationIds[i]);
+            testInstance.deviceClientArray.get(i).setMessageCallback(messageCallbacks[i], null);
+        }
+
         // For each multiplexed device, use fault injection to drop the session and see if it can recover, one device at a time
         for (int i = 0; i < DEVICE_MULTIPLEX_COUNT; i++)
         {
@@ -1863,6 +1874,8 @@ public class MultiplexingClientTests extends IntegrationTest
 
             // Testing sending reported properties
             testReportedPropertiesFlow(testInstance.deviceClientArray.get(i), deviceTwinServiceClient, expectedPropertyKeys[i], expectedPropertyValues[i]);
+
+            testReceivingCloudToDeviceMessage(testInstance.deviceIdentityArray.get(i).getDeviceId(), messageCallbacks[i], expectedMessageCorrelationIds[i]);
         }
 
         assertFalse(multiplexedConnectionStatusChangeTracker.wentDisconnectedRetrying);
